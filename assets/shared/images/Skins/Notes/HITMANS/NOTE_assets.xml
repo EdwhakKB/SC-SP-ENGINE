@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='utf-8'?>
+<TextureAtlas imagePath="NOTE_assets.png">
+<SubTexture name="arrowLEFT0000" x="616" y="182" width="164" height="168" frameX="0" frameY="0" frameWidth="158" frameHeight="158" />
+<SubTexture name="arrowDOWN0000" x="0" y="794" width="168" height="164" frameX="1" frameY="-3" frameWidth="158" frameHeight="158" />
+<SubTexture name="arrowUP0000" x="168" y="794" width="168" height="164" frameX="1" frameY="-1" frameWidth="158" frameHeight="158" />
+<SubTexture name="arrowRIGHT0000" x="616" y="350" width="164" height="168" frameX="-2" frameY="0" frameWidth="158" frameHeight="158" />
+<SubTexture name="purple0000" x="364" y="616" width="164" height="168" frameX="0" frameY="0" frameWidth="158" frameHeight="158" />
+<SubTexture name="blue0000" x="336" y="794" width="168" height="164" frameX="1" frameY="-3" frameWidth="158" frameHeight="158" />
+<SubTexture name="green0000" x="504" y="794" width="168" height="164" frameX="1" frameY="-1" frameWidth="158" frameHeight="158" />
+<SubTexture name="red0000" x="528" y="616" width="164" height="168" frameX="-2" frameY="0" frameWidth="158" frameHeight="158" />
+<SubTexture name="down press0000" x="672" y="794" width="166" height="164" frameX="0" frameY="-3" frameWidth="156" frameHeight="156" />
+<SubTexture name="down press0001" x="672" y="794" width="166" height="164" frameX="0" frameY="-3" frameWidth="156" frameHeight="156" />
+<SubTexture name="down press0002" x="957" y="472" width="153" height="151" frameX="-7" frameY="-10" frameWidth="143" frameHeight="143" />
+<SubTexture name="down press0003" x="957" y="472" width="153" height="151" frameX="-7" frameY="-10" frameWidth="143" frameHeight="143" />
+<SubTexture name="left press0000" x="794" y="0" width="163" height="166" frameX="-1" frameY="-1" frameWidth="156" frameHeight="156" />
+<SubTexture name="left press0001" x="794" y="0" width="163" height="166" frameX="-1" frameY="-1" frameWidth="156" frameHeight="156" />
+<SubTexture name="left press0002" x="957" y="166" width="151" height="153" frameX="-7" frameY="-7" frameWidth="143" frameHeight="143" />
+<SubTexture name="left press0003" x="957" y="166" width="151" height="153" frameX="-7" frameY="-7" frameWidth="143" frameHeight="143" />
+<SubTexture name="right press0000" x="957" y="0" width="164" height="166" frameX="-2" frameY="-1" frameWidth="156" frameHeight="156" />
+<SubTexture name="right press0001" x="957" y="0" width="164" height="166" frameX="-2" frameY="-1" frameWidth="156" frameHeight="156" />
+<SubTexture name="right press0002" x="957" y="319" width="150" height="153" frameX="-8" frameY="-7" frameWidth="143" frameHeight="143" />
+<SubTexture name="right press0003" x="957" y="319" width="150" height="153" frameX="-8" frameY="-7" frameWidth="143" frameHeight="143" />
+<SubTexture name="up press0000" x="838" y="794" width="166" height="164" frameX="0" frameY="-1" frameWidth="156" frameHeight="156" />
+<SubTexture name="up press0001" x="838" y="794" width="166" height="164" frameX="0" frameY="-1" frameWidth="156" frameHeight="156" />
+<SubTexture name="up press0002" x="957" y="623" width="153" height="150" frameX="-7" frameY="-8" frameWidth="143" frameHeight="143" />
+<SubTexture name="up press0003" x="957" y="623" width="153" height="150" frameX="-7" frameY="-8" frameWidth="143" frameHeight="143" />
+<SubTexture name="down confirm0000" x="0" y="0" width="210" height="210" frameX="0" frameY="-1" frameWidth="200" frameHeight="200" />
+<SubTexture name="down confirm0001" x="0" y="420" width="200" height="196" frameX="-5" frameY="-9" frameWidth="200" frameHeight="200" />
+<SubTexture name="down confirm0002" x="0" y="616" width="182" height="178" frameX="-14" frameY="-18" frameWidth="200" frameHeight="200" />
+<SubTexture name="left confirm0000" x="210" y="0" width="210" height="210" frameX="0" frameY="-1" frameWidth="200" frameHeight="200" />
+<SubTexture name="left confirm0001" x="420" y="0" width="196" height="200" frameX="-6" frameY="-6" frameWidth="200" frameHeight="200" />
+<SubTexture name="left confirm0002" x="400" y="420" width="178" height="182" frameX="-15" frameY="-15" frameWidth="200" frameHeight="200" />
+<SubTexture name="right confirm0000" x="0" y="210" width="210" height="210" frameX="0" frameY="-1" frameWidth="200" frameHeight="200" />
+<SubTexture name="right confirm0001" x="420" y="200" width="196" height="200" frameX="-8" frameY="-6" frameWidth="200" frameHeight="200" />
+<SubTexture name="right confirm0002" x="616" y="0" width="178" height="182" frameX="-18" frameY="-15" frameWidth="200" frameHeight="200" />
+<SubTexture name="up confirm0000" x="210" y="210" width="210" height="210" frameX="0" frameY="-1" frameWidth="200" frameHeight="200" />
+<SubTexture name="up confirm0001" x="200" y="420" width="200" height="196" frameX="-6" frameY="-7" frameWidth="200" frameHeight="200" />
+<SubTexture name="up confirm0002" x="182" y="616" width="182" height="178" frameX="-14" frameY="-16" frameWidth="200" frameHeight="200" />
+<SubTexture name="purple hold piece0000" x="794" y="462" width="143" height="53" frameX="0" frameY="0" frameWidth="133" frameHeight="43" />
+<SubTexture name="blue hold piece0000" x="794" y="515" width="143" height="53" frameX="0" frameY="0" frameWidth="133" frameHeight="43" />
+<SubTexture name="green hold piece0000" x="794" y="568" width="143" height="53" frameX="0" frameY="0" frameWidth="133" frameHeight="43" />
+<SubTexture name="red hold piece0000" x="794" y="621" width="143" height="53" frameX="0" frameY="0" frameWidth="133" frameHeight="43" />
+<SubTexture name="pruple end hold0000" x="794" y="166" width="143" height="74" frameX="0" frameY="0" frameWidth="133" frameHeight="64" />
+<SubTexture name="blue hold end0000" x="794" y="240" width="143" height="74" frameX="0" frameY="0" frameWidth="133" frameHeight="64" />
+<SubTexture name="green hold end0000" x="794" y="314" width="143" height="74" frameX="0" frameY="0" frameWidth="133" frameHeight="64" />
+<SubTexture name="red hold end0000" x="794" y="388" width="143" height="74" frameX="0" frameY="0" frameWidth="133" frameHeight="64" />
+</TextureAtlas>
