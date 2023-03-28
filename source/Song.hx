@@ -29,12 +29,8 @@ typedef SwagSong =
 	var arrowSkin:String;
 	var splashSkin:String;
 	var validScore:Bool;
-<<<<<<< HEAD
 
 	var notITG:Bool;
-=======
-	var notITG:Bool;
->>>>>>> ec15c6de96cc5c3604efbb59f3ad784334c67ce7
 }
 
 class Song
