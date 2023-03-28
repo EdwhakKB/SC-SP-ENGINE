@@ -13,6 +13,8 @@ class ClientPrefs {
 	public static var showFPS:Bool = true;
 	public static var flashing:Bool = true;
 	public static var globalAntialiasing:Bool = true;
+	public static var hudStyle:String = 'FNF';
+	public static var noteSkin:String = 'FNF';
 	public static var noteSplashes:Bool = true;
 	public static var lowQuality:Bool = false;
 	public static var shaders:Bool = true;
@@ -49,6 +51,7 @@ class ClientPrefs {
 		'healthgain' => 1.0,
 		'healthloss' => 1.0,
 		'instakill' => false,
+		'modchart' => true,
 		'practice' => false,
 		'botplay' => false,
 		'opponentplay' => false
@@ -84,7 +87,8 @@ class ClientPrefs {
 		'volume_down'	=> [NUMPADMINUS, MINUS],
 		
 		'debug_1'		=> [SEVEN, NONE],
-		'debug_2'		=> [EIGHT, NONE]
+		'debug_2'		=> [EIGHT, NONE],
+		'debug_3'		=> [SIX, NONE]
 	];
 	public static var defaultKeys:Map<String, Array<FlxKey>> = null;
 
@@ -104,6 +108,8 @@ class ClientPrefs {
 		FlxG.save.data.lowQuality = lowQuality;
 		FlxG.save.data.shaders = shaders;
 		FlxG.save.data.framerate = framerate;
+		FlxG.save.data.hudStyle = hudStyle;
+		FlxG.save.data.noteSkin = noteSkin;
 		//FlxG.save.data.cursing = cursing;
 		//FlxG.save.data.violence = violence;
 		FlxG.save.data.camZooms = camZooms;

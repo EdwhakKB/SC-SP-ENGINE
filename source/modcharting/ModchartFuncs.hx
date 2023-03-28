@@ -34,6 +34,7 @@ class ModchartFuncs
         #if LUA_ALLOWED
         for (funkin in PlayState.instance.luaArray)
         {
+            if (ClientPrefs.getGameplaySetting('modchart', true)){
             #if hscript
             funkin.initHaxeModule();
             #end
@@ -75,6 +76,7 @@ class ModchartFuncs
                 ease(beat, time, easeStr, argsAsString);
                 
             });
+            }
         }
         #end
         #if hscript
