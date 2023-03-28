@@ -846,3 +846,53 @@ class JumpModifier extends Modifier //custom thingy i made
         noteData.y += (beatVal*(Conductor.stepCrochet*currentValue))*renderer.getCorrectScrollSpeed()*0.45*scrollSwitch;
     }
 }
+
+//here i add  custom modifiers, why? well its to make some cool modcharts shits -Ed
+class WaveXModifier extends Modifier 
+{
+    override function setupSubValues()
+    {
+        subValues.set('speed', new ModifierSubValue(1.0));
+    }
+    override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+    {
+        noteData.x += currentValue * (FlxMath.fastCos( ((Conductor.songPosition*0.001) + ((lane%NoteMovement.keyCount)*0.2) 
+        *(10/FlxG.height)) * (subValues.get('speed').value*0.2)) * Note.swagWidth*0.5);
+    }
+    override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
+    {
+        noteMath(noteData, lane, 0, pf); //just reuse same thing
+    }
+}
+class WaveYModifier extends Modifier 
+{
+    override function setupSubValues()
+    {
+        subValues.set('speed', new ModifierSubValue(1.0));
+    }
+    override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+    {
+        noteData.y += currentValue * (FlxMath.fastCos( ((Conductor.songPosition*0.001) + ((lane%NoteMovement.keyCount)*0.2) 
+        *(10/FlxG.height)) * (subValues.get('speed').value*0.2)) * Note.swagWidth*0.5);
+    }
+    override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
+    {
+        noteMath(noteData, lane, 0, pf); //just reuse same thing
+    }
+}
+class WaveZModifier extends Modifier 
+{
+    override function setupSubValues()
+    {
+        subValues.set('speed', new ModifierSubValue(1.0));
+    }
+    override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+    {
+        noteData.z += currentValue * (FlxMath.fastCos( ((Conductor.songPosition*0.001) + ((lane%NoteMovement.keyCount)*0.2) 
+        *(10/FlxG.height)) * (subValues.get('speed').value*0.2)) * Note.swagWidth*0.5);
+    }
+    override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
+    {
+        noteMath(noteData, lane, 0, pf); //just reuse same thing
+    }
+}

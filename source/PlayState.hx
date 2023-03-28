@@ -212,6 +212,7 @@ class PlayState extends MusicBeatState
 	public var instakillOnMiss:Bool = false;
 	public var cpuControlled:Bool = false;
 	public var practiceMode:Bool = false;
+	public var notITGMod:Bool = false;
 
 	public var botplaySine:Float = 0;
 	public var botplayTxt:FlxText;
@@ -316,6 +317,7 @@ class PlayState extends MusicBeatState
 	// Debug buttons
 	private var debugKeysChart:Array<FlxKey>;
 	private var debugKeysCharacter:Array<FlxKey>;
+	private var debugKeysModchart:Array<FlxKey>;
 
 	// Less laggy controls
 	private var keysArray:Array<Dynamic>;
@@ -340,6 +342,7 @@ class PlayState extends MusicBeatState
 
 		debugKeysChart = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_1'));
 		debugKeysCharacter = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_2'));
+		debugKeysModchart = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_3'));
 		PauseSubState.songName = null; //Reset to default
 		playbackRate = ClientPrefs.getGameplaySetting('songspeed', 1);
 
@@ -1078,11 +1081,12 @@ class PlayState extends MusicBeatState
 
 		// After all characters being loaded, it makes then invisible 0.01s later so that the player won't freeze when you change characters
 		// add(strumLine);
-
-		playfieldRenderer = new PlayfieldRenderer(strumLineNotes, notes, this);
-		playfieldRenderer.cameras = [camHUD];
-		add(playfieldRenderer);
-		add(grpNoteSplashes);
+		if (SONG.notITG){
+			playfieldRenderer = new PlayfieldRenderer(strumLineNotes, notes, this);
+			playfieldRenderer.cameras = [camHUD];
+			add(playfieldRenderer);
+			add(grpNoteSplashes);
+		}
 
 		camFollow = new FlxPoint();
 		camFollowPos = new FlxObject(0, 0, 1, 1);
@@ -2999,6 +3003,11 @@ class PlayState extends MusicBeatState
 			openChartEditor();
 		}
 
+		if (FlxG.keys.anyJustPressed(debugKeysModchart) && !endingSong && !inCutscene)
+			{
+				openModchartEditor();
+			}
+
 		// FlxG.watch.addQuick('VOL', vocals.amplitudeLeft);
 		// FlxG.watch.addQuick('VOLRight', vocals.amplitudeRight);
 
@@ -3320,6 +3329,23 @@ class PlayState extends MusicBeatState
 		#end
 	}
 
+	function openModchartEditor()
+		{
+			persistentUpdate = false;
+			paused = true;
+			cancelMusicFadeTween();
+			MusicBeatState.switchState(new modcharting.ModchartEditorState());
+			chartingMode = true;
+			if (!instance.notITGMod)
+				{
+					instance.notITGMod = true;
+					// do nothing lamoo
+				}
+	
+			#if desktop
+			DiscordClient.changePresence("Modchart Editor", null, null, true);
+			#end
+		}
 	public var isDead:Bool = false; //Don't mess with this on Lua!!!
 	function doDeathCheck(?skipHealthCheck:Bool = false) {
 		if (((skipHealthCheck && instakillOnMiss) || health <= 0) && !practiceMode && !isDead)
@@ -3936,7 +3962,7 @@ class PlayState extends MusicBeatState
 					MusicBeatState.switchState(new StoryMenuState());
 
 					// if ()
-					if(!ClientPrefs.getGameplaySetting('practice', false) && !ClientPrefs.getGameplaySetting('botplay', false)) {
+					if(!ClientPrefs.getGameplaySetting('practice', false) && !ClientPrefs.getGameplaySetting('botplay', false) && !ClientPrefs.getGameplaySetting('notITGMod', true)) {
 						StoryMenuState.weekCompleted.set(WeekData.weeksList[storyWeek], true);
 
 						if (SONG.validScore)
@@ -5218,7 +5244,7 @@ class PlayState extends MusicBeatState
 
 			// Rating FC
 			ratingFC = "";
-			if (sicks > 0) ratingFC = "SFC";
+			if (sicks > 0) ratingFC = "PFC";
 			if (goods > 0) ratingFC = "GFC";
 			if (bads > 0 || shits > 0) ratingFC = "FC";
 			if (songMisses > 0 && songMisses < 10) ratingFC = "SDCB";

@@ -1,6 +1,7 @@
 package modcharting;
 
 
+import editors.ChartingState;
 import lime.utils.Assets;
 import flixel.graphics.frames.FlxFramesCollection;
 import flixel.util.FlxAxes;
@@ -71,10 +72,10 @@ import modcharting.PlayfieldRenderer.StrumNoteType;
 import modcharting.Modifier;
 import modcharting.ModchartFile;
 using StringTools;
-
+//*/&& !DISABLE_MODCHART_EDITOR/*
 class ModchartEditorEvent extends FlxSprite
 {
-    #if ((PSYCH || LEATHER) && !DISABLE_MODCHART_EDITOR)
+    #if ((PSYCH || LEATHER))
     public var data:Array<Dynamic>;
     public function new (data:Array<Dynamic>)
     {
@@ -84,7 +85,7 @@ class ModchartEditorEvent extends FlxSprite
         frames = Paths.getSparrowAtlas("ui skins/" + utilities.Options.getData("uiSkin") + "/arrows/default", 'shared');
         animation.addByPrefix('note', 'left0');
         #else
-        frames = Paths.getSparrowAtlas('NOTE_assets');
+        frames = Paths.getSparrowAtlas('Skins/Notes/'+ClientPrefs.noteSkin+'/NOTE_assets', 'shared');
         animation.addByPrefix('note', 'purple0');
         #end
         //makeGraphic(48, 48);
@@ -98,7 +99,7 @@ class ModchartEditorEvent extends FlxSprite
     public function getBeatTime():Float { return data[ModchartFile.EVENT_DATA][ModchartFile.EVENT_TIME]; }
     #end
 }
-#if ((PSYCH || LEATHER) && !DISABLE_MODCHART_EDITOR)
+#if ((PSYCH || LEATHER))
 class ModchartEditorState extends MusicBeatState
 {
     var hasUnsavedChanges:Bool = false;
@@ -206,7 +207,8 @@ class ModchartEditorState extends MusicBeatState
         MiniModifier, ShrinkModifier, BeatXModifier, BeatYModifier, BeatZModifier, 
         BounceXModifier, BounceYModifier, BounceZModifier, 
         EaseCurveModifier, EaseCurveXModifier, EaseCurveYModifier, EaseCurveZModifier, EaseCurveAngleModifier,
-        InvertSineModifier, BoostModifier, BrakeModifier, JumpModifier
+        InvertSineModifier, BoostModifier, BrakeModifier, JumpModifier, WaveXModifier, WaveYModifier,
+        WaveZModifier
     ];
     public static var easeList:Array<String> = [
         "backIn",
@@ -308,6 +310,12 @@ class ModchartEditorState extends MusicBeatState
     }
     override public function create()
     {
+        if (!PlayState.instance.notITGMod)
+            {
+                PlayState.instance.notITGMod = true;
+                // do nothing lamoo
+            }
+
         camGame = new FlxCamera();
 		camHUD = new FlxCamera();
 		camHUD.bgColor.alpha = 0;
@@ -764,6 +772,13 @@ class ModchartEditorState extends MusicBeatState
                 FlxG.mouse.visible = false;
                 FlxG.sound.music.stop();
                 if(vocals != null) vocals.stop();
+
+                if (ClientPrefs.getGameplaySetting('modchart', true))
+                    ClientPrefs.getGameplaySetting('modchart', false);
+                else
+                {
+                    // do nothing lamoo
+                }
                 
                 #if PSYCH 
                 StageData.loadDirectory(PlayState.SONG);
@@ -1168,9 +1183,9 @@ class ModchartEditorState extends MusicBeatState
     public static function createGrid(CellWidth:Int, CellHeight:Int, Width:Int, Height:Int):BitmapData
     {
         // How many cells can we fit into the width/height? (round it UP if not even, then trim back)
-        var Color1 = FlxColor.RED; //quant colors!!!
-        var Color2 = FlxColor.BLUE;
-        var Color3 = FlxColor.LIME;
+        var Color1 = FlxColor.GRAY; //quant colors!!!
+        var Color2 = FlxColor.WHITE;
+        var Color3 = FlxColor.BLACK;
         var rowColor:Int = Color1;
         var lastColor:Int = Color1;
         var grid:BitmapData = new BitmapData(Width, Height, true);
@@ -1890,6 +1905,7 @@ class ModchartEditorState extends MusicBeatState
         tab_group.add(playfieldCountStepper);
         tab_group.add(makeLabel(playfieldCountStepper, 0, -15, "Playfield Count"));
         tab_group.add(makeLabel(playfieldCountStepper, 55, 25, "Don't add too many or the game will lag!!!"));
+        tab_group.add(makeLabel(playfieldCountStepper, 220, 55, "A Playfield it's a copy of your strums that allow you make some cool visuals \nHave in mind that if you add a playfield like 'addPlayfield(x,y,z)' the order you add the number of the playfields \nEvery playfield can have their own modchart appart from normal strums if you add it  specific for the playfield \nGood Luck!", 5));
         UI_box.addGroup(tab_group);
     }
     var sliderRate:FlxUISlider;
@@ -1992,11 +2008,12 @@ class ModchartEditorState extends MusicBeatState
     {
         obj2.x = obj1.x + (obj1.width/2) - (obj2.width/2);
     }
-    function makeLabel(obj:FlxSprite, offsetX:Float, offsetY:Float, textStr:String)
+    function makeLabel(obj:FlxSprite, offsetX:Float, offsetY:Float, textStr:String, ?sizeOffset:Int)
     {
         var text = new FlxText(0, obj.y+offsetY, 0, textStr);
         centerXToObject(obj, text);
         text.x += offsetX;
+        text.size += sizeOffset;
         return text;
     }
 

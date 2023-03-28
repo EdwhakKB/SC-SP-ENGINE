@@ -41,6 +41,22 @@ class VisualsUISubState extends BaseOptionsMenu
 			true);
 		addOption(option);
 
+		var option:Option = new Option('HUD style:',
+		"What HUD you like more??.",
+		'hudStyle',
+		'string',
+		'HITMANS',
+		['Classic', 'HITMANS']);
+		addOption(option);
+
+		var option:Option = new Option('Note Skin:',
+		"What Skin You want to use??.",
+		'noteSkin',
+		'string',
+		'FNF',
+		['HITMANS', 'FNF', 'INHUMAN', 'STEPMANIA', 'DELTA', 'GROVE', 'SUSSY', 'EPIC', 'ITGOPT', 'DDR']);
+		addOption(option);
+
 		var option:Option = new Option('Hide HUD',
 			'If checked, hides most HUD elements.',
 			'hideHud',
