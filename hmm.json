@@ -80,6 +80,13 @@
       "dir": null,
       "ref": "master",
       "url": "https://github.com/nebulazorua/linc_luajit"
+    },
+    {
+      "name": "fnf-modcharting-tools",
+      "type": "git",
+      "dir": null,
+      "ref": "master",
+      "url": "https://github.com/TheZoroForce240/FNF-Modcharting-Tools"
     }
   ]
 }
