@@ -13,7 +13,7 @@ class ClientPrefs {
 	public static var showFPS:Bool = true;
 	public static var flashing:Bool = true;
 	public static var globalAntialiasing:Bool = true;
-	public static var hudStyle:String = 'FNF';
+	public static var hudStyle:String = 'PSYCH';
 	public static var noteSkin:String = 'FNF';
 	public static var noteSplashes:Bool = true;
 	public static var lowQuality:Bool = false;
@@ -222,6 +222,13 @@ class ClientPrefs {
 		}
 		if(FlxG.save.data.comboOffset != null) {
 			comboOffset = FlxG.save.data.comboOffset;
+		}
+
+		if(FlxG.save.data.noteSkin != null) {
+			noteSkin = FlxG.save.data.noteSkin;
+		}
+		if(FlxG.save.data.hudStyle != null) {
+			hudStyle = FlxG.save.data.hudStyle;
 		}
 		
 		if(FlxG.save.data.ratingOffset != null) {

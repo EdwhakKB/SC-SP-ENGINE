@@ -1599,14 +1599,14 @@ class FunkinLua {
 					PlayState.instance.boyfriendGroup.y = value;
 			}
 		});
-		Lua_helper.add_callback(lua, "cameraSetTarget", function(target:String) {
+		/*Lua_helper.add_callback(lua, "cameraSetTarget", function(target:String) {
 			var isDad:Bool = false;
 			if(target == 'dad') {
 				isDad = true;
 			}
 			PlayState.instance.moveCamera(isDad);
 			return isDad;
-		});
+		});*/
 		Lua_helper.add_callback(lua, "cameraShake", function(camera:String, intensity:Float, duration:Float) {
 			cameraFromString(camera).shake(intensity, duration);
 		});

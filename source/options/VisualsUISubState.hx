@@ -46,7 +46,7 @@ class VisualsUISubState extends BaseOptionsMenu
 		'hudStyle',
 		'string',
 		'HITMANS',
-		['Classic', 'HITMANS']);
+		['CLASSIC', 'PSYCH', 'GLOW_KADE', 'HITMANS']);
 		addOption(option);
 
 		var option:Option = new Option('Note Skin:',

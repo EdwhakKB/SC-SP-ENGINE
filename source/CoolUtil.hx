@@ -27,6 +27,11 @@ class CoolUtil
 
 	public static var difficulties:Array<String> = [];
 
+	public static function difficultyFromInt(difficulty:Int):String
+	{
+		return defaultDifficulties[difficulty];
+	}
+
 	inline public static function quantize(f:Float, snap:Float){
 		// changed so this actually works lol
 		var m:Float = Math.fround(f * snap);
