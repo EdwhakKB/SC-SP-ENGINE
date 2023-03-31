@@ -103,8 +103,8 @@ class ModchartUtil
                 xPos += (xPos + daNote.width > targetX + strum.width ? -0.1 : 0.1);
                 tempShit += (xPos + daNote.width > targetX + strum.width ? -0.1 : 0.1);
             }
-            //trace(arrayVal);
-            //trace(tempShit);
+            //Debug.logInfo(arrayVal);
+            //Debug.logInfo(tempShit);
 
             NoteMovement.leatherEngineOffsetStuff.set(arrayVal, tempShit);
         }

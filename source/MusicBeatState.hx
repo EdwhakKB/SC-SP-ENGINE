@@ -128,12 +128,12 @@ class MusicBeatState extends modcharting.ModchartMusicBeatState
 				CustomFadeTransition.finishCallback = function() {
 					FlxG.resetState();
 				};
-				//trace('resetted');
+				//Debug.logInfo('resetted');
 			} else {
 				CustomFadeTransition.finishCallback = function() {
 					FlxG.switchState(nextState);
 				};
-				//trace('changed state');
+				//Debug.logInfo('changed state');
 			}
 			return;
 		}
@@ -159,12 +159,12 @@ class MusicBeatState extends modcharting.ModchartMusicBeatState
 
 	public function beatHit():Void
 	{
-		//trace('Beat: ' + curBeat);
+		//Debug.logInfo('Beat: ' + curBeat);
 	}
 
 	public function sectionHit():Void
 	{
-		//trace('Section: ' + curSection + ', Beat: ' + curBeat + ', Step: ' + curStep);
+		//Debug.logInfo('Section: ' + curSection + ', Beat: ' + curBeat + ', Step: ' + curStep);
 	}
 
 	function getBeatsOnSection()

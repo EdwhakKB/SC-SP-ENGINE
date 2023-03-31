@@ -101,7 +101,7 @@ class Note extends FlxSprite
 	private function set_multSpeed(value:Float):Float {
 		resizeByRatio(value / multSpeed);
 		multSpeed = value;
-		//trace('fuck cock');
+		//Debug.logInfo('fuck cock');
 		return value;
 	}
 
@@ -196,7 +196,7 @@ class Note extends FlxSprite
 			}
 		}
 
-		// trace(prevNote);
+		// Debug.logInfo(prevNote);
 
 		if(prevNote!=null)
 			prevNote.nextNote = this;

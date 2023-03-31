@@ -47,18 +47,18 @@ class EditorLua {
 		LuaL.openlibs(lua);
 		Lua.init_callbacks(lua);
 
-		//trace('Lua version: ' + Lua.version());
-		//trace("LuaJIT version: " + Lua.versionJIT());
+		//Debug.logInfo('Lua version: ' + Lua.version());
+		//Debug.logInfo("LuaJIT version: " + Lua.versionJIT());
 
 		var result:Dynamic = LuaL.dofile(lua, script);
 		var resultStr:String = Lua.tostring(lua, result);
 		if(resultStr != null && result != 0) {
 			lime.app.Application.current.window.alert(resultStr, 'Error on .LUA script!');
-			trace('Error on .LUA script! ' + resultStr);
+			Debug.logInfo('Error on .LUA script! ' + resultStr);
 			lua = null;
 			return;
 		}
-		trace('Lua file loaded succesfully:' + script);
+		Debug.logInfo('Lua file loaded succesfully:' + script);
 
 		// Lua variables
 		set('Function_Stop', Function_Stop);
@@ -251,7 +251,7 @@ class EditorLua {
 		}
 
 		// YES! FINALLY IT WORKS
-		//trace('variable: ' + variable + ', ' + result);
+		//Debug.logInfo('variable: ' + variable + ', ' + result);
 		return (result == 'true');
 	}
 	#end

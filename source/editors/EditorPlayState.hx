@@ -553,7 +553,7 @@ class EditorPlayState extends MusicBeatState
 	{
 		var eventKey:FlxKey = event.keyCode;
 		var key:Int = getKeyFromEvent(eventKey);
-		//trace('Pressed: ' + eventKey);
+		//Debug.logInfo('Pressed: ' + eventKey);
 
 		if (key > -1 && (FlxG.keys.checkStatus(eventKey, JUST_PRESSED) || ClientPrefs.controllerMode))
 		{
@@ -570,7 +570,7 @@ class EditorPlayState extends MusicBeatState
 				//var notesDatas:Array<Int> = [];
 				var notesStopped:Bool = false;
 
-				//trace('test!');
+				//Debug.logInfo('test!');
 				var sortedNotesList:Array<Note> = [];
 				notes.forEachAlive(function(daNote:Note)
 				{
@@ -646,7 +646,7 @@ class EditorPlayState extends MusicBeatState
 				spr.resetAnim = 0;
 			}
 		}
-		//trace('released: ' + controlArray);
+		//Debug.logInfo('released: ' + controlArray);
 	}
 
 	private function getKeyFromEvent(key:FlxKey):Int
@@ -729,7 +729,7 @@ class EditorPlayState extends MusicBeatState
 					noteMiss();
 					--songMisses;
 					if(!note.isSustainNote) {
-						if(!note.noteSplashDisabled) {
+						if(!note.noteSplashDisabled && !PlayState.SONG.notITG) {
 							spawnNoteSplashOnNote(note);
 						}
 					}
@@ -821,7 +821,7 @@ class EditorPlayState extends MusicBeatState
 			//score = 200;
 		}
 
-		if(daRating == 'sick' && !note.noteSplashDisabled)
+		if((daRating == 'sick' && !note.noteSplashDisabled) && !PlayState.SONG.notITG)
 		{
 			spawnNoteSplashOnNote(note);
 		}
@@ -932,8 +932,8 @@ class EditorPlayState extends MusicBeatState
 			daLoop++;
 		}
 		/* 
-			trace(combo);
-			trace(seperatedScore);
+			Debug.logInfo(combo);
+			Debug.logInfo(seperatedScore);
 			*/
 
 		coolText.text = Std.string(seperatedScore);

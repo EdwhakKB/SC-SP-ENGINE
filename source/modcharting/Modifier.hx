@@ -47,7 +47,7 @@ class ModifierListMacro
 {
     macro static public function fromBaseClass():Array<Field>
     {
-      //trace(Context.getLocalClass().toString());
+      //Debug.logInfo(Context.getLocalClass().toString());
       return null;
     }
 }

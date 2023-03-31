@@ -179,7 +179,7 @@ class FreeplayState extends MusicBeatState
 
 			// scoreText.textField.htmlText = md;
 
-			trace(md);
+			Debug.logInfo(md);
 		 */
 
 		var textBG:FlxSprite = new FlxSprite(0, FlxG.height - 26).makeGraphic(FlxG.width, 26, 0xFF000000);
@@ -364,15 +364,15 @@ class FreeplayState extends MusicBeatState
 			#end
 				poop = songLowercase;
 				curDifficulty = 1;
-				trace('Couldnt find file');
+				Debug.logInfo('Couldnt find file');
 			}*/
-			trace(poop);
+			Debug.logInfo(poop);
 
 			PlayState.SONG = Song.loadFromJson(poop, songLowercase);
 			PlayState.isStoryMode = false;
 			PlayState.storyDifficulty = curDifficulty;
 
-			trace('CURRENT WEEK: ' + WeekData.getWeekFileName());
+			Debug.logInfo('CURRENT WEEK: ' + WeekData.getWeekFileName());
 			if(colorTween != null) {
 				colorTween.cancel();
 			}
@@ -517,7 +517,7 @@ class FreeplayState extends MusicBeatState
 		}
 
 		var newPos:Int = CoolUtil.difficulties.indexOf(lastDifficultyName);
-		//trace('Pos of ' + lastDifficultyName + ' is ' + newPos);
+		//Debug.logInfo('Pos of ' + lastDifficultyName + ' is ' + newPos);
 		if(newPos > -1)
 		{
 			curDifficulty = newPos;

@@ -86,6 +86,9 @@ class Main extends Sprite
 			game.width = Math.ceil(stageWidth / game.zoom);
 			game.height = Math.ceil(stageHeight / game.zoom);
 		}
+
+		// Run this first so we can see logs.
+		Debug.onInitProgram();
 	
 		ClientPrefs.loadDefaultKeys();
 		addChild(new FlxGame(game.width, game.height, game.initialState, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
@@ -117,6 +120,9 @@ class Main extends Sprite
 			});
 		}
 		#end
+
+		// Finish up loading debug tools.
+		Debug.onGameStart();
 	}
 
 	// Code was entirely made by sqirra-rng for their fnf engine named "Izzy Engine", big props to them!!!

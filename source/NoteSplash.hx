@@ -7,6 +7,7 @@ import flixel.graphics.frames.FlxAtlasFrames;
 class NoteSplash extends FlxSprite
 {
 	public var colorSwap:ColorSwap = null;
+	public var suf:String = '';
 	private var idleAnim:String;
 	private var textureLoaded:String = null;
 
@@ -16,6 +17,8 @@ class NoteSplash extends FlxSprite
 		var skin:String = 'noteSplashes';
 		if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) skin = PlayState.SONG.splashSkin;
 
+		/*if (ClientPrefs.hudStyle == 'GLOW_KADE')
+			suf = '-kade';*/
 		loadAnims(skin);
 		
 		colorSwap = new ColorSwap();
@@ -48,11 +51,12 @@ class NoteSplash extends FlxSprite
 	}
 
 	function loadAnims(skin:String) {
+		Debug.logInfo(skin);
 		frames = Paths.getSparrowAtlas(skin);
 		for (i in 1...3) {
+			animation.addByPrefix("note0-" + i, "note splash purple " + i, 24, false);
 			animation.addByPrefix("note1-" + i, "note splash blue " + i, 24, false);
 			animation.addByPrefix("note2-" + i, "note splash green " + i, 24, false);
-			animation.addByPrefix("note0-" + i, "note splash purple " + i, 24, false);
 			animation.addByPrefix("note3-" + i, "note splash red " + i, 24, false);
 		}
 	}

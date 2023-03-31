@@ -82,15 +82,15 @@ class FunkinLua {
 		LuaL.openlibs(lua);
 		Lua.init_callbacks(lua);
 
-		//trace('Lua version: ' + Lua.version());
-		//trace("LuaJIT version: " + Lua.versionJIT());
+		//Debug.logInfo('Lua version: ' + Lua.version());
+		//Debug.logInfo("LuaJIT version: " + Lua.versionJIT());
 
 		//LuaL.dostring(lua, CLENSE);
 		try{
 			var result:Dynamic = LuaL.dofile(lua, script);
 			var resultStr:String = Lua.tostring(lua, result);
 			if(resultStr != null && result != 0) {
-				trace('Error on lua script! ' + resultStr);
+				Debug.logInfo('Error on lua script! ' + resultStr);
 				#if windows
 				lime.app.Application.current.window.alert(resultStr, 'Error on lua script!');
 				#else
@@ -100,13 +100,13 @@ class FunkinLua {
 				return;
 			}
 		} catch(e:Dynamic) {
-			trace(e);
+			Debug.logInfo(e);
 			return;
 		}
 		scriptName = script;
 		initHaxeModule();
 
-		trace('lua file loaded succesfully:' + script);
+		Debug.logInfo('lua file loaded succesfully:' + script);
 
 		// Lua shit
 		set('Function_StopLua', Function_StopLua);
@@ -450,11 +450,11 @@ class FunkinLua {
 			var shader:FlxRuntimeShader = getShader(obj);
 			if(shader == null) return;
 
-			// trace('bitmapdatapath: $bitmapdataPath');
+			// Debug.logInfo('bitmapdatapath: $bitmapdataPath');
 			var value = Paths.image(bitmapdataPath);
 			if(value != null && value.bitmap != null)
 			{
-				// trace('Found bitmapdata. Width: ${value.bitmap.width} Height: ${value.bitmap.height}');
+				// Debug.logInfo('Found bitmapdata. Width: ${value.bitmap.width} Height: ${value.bitmap.height}');
 				shader.setSampler2D(prop, value.bitmap);
 			}
 			#else
@@ -1294,7 +1294,7 @@ class FunkinLua {
 					PlayState.instance.modchartTimers.remove(tag);
 				}
 				PlayState.instance.callOnLuas('onTimerCompleted', [tag, tmr.loops, tmr.loopsLeft]);
-				//trace('Timer Completed: ' + tag);
+				//Debug.logInfo('Timer Completed: ' + tag);
 			}, loops));
 		});
 		Lua_helper.add_callback(lua, "cancelTimer", function(tag:String) {
@@ -1513,7 +1513,7 @@ class FunkinLua {
 			var value1:String = arg1;
 			var value2:String = arg2;
 			PlayState.instance.triggerEventNote(name, value1, value2);
-			//trace('Triggered event: ' + name + ', ' + value1 + ', ' + value2);
+			//Debug.logInfo('Triggered event: ' + name + ', ' + value1 + ', ' + value2);
 			return true;
 		});
 
@@ -1882,7 +1882,7 @@ class FunkinLua {
 						}
 					}
 					shit.wasAdded = true;
-					//trace('added a thing: ' + tag);
+					//Debug.logInfo('added a thing: ' + tag);
 				}
 			}
 		});
@@ -2449,7 +2449,7 @@ class FunkinLua {
 				if(!shit.wasAdded) {
 					getInstance().add(shit);
 					shit.wasAdded = true;
-					//trace('added a thing: ' + tag);
+					//Debug.logInfo('added a thing: ' + tag);
 				}
 			}
 		});
@@ -2761,7 +2761,7 @@ class FunkinLua {
 	{
 		if(hscript == null)
 		{
-			trace('initializing haxe interp for: $scriptName');
+			Debug.logInfo('initializing haxe interp for: $scriptName');
 			hscript = new HScript(); //TO DO: Fix issue with 2 scripts not being able to use the same variable names
 		}
 	}
@@ -2903,7 +2903,7 @@ class FunkinLua {
 				if(found)
 				{
 					PlayState.instance.runtimeShaders.set(name, [frag, vert]);
-					//trace('Found shader $name!');
+					//Debug.logInfo('Found shader $name!');
 					return true;
 				}
 			}
@@ -3101,7 +3101,7 @@ class FunkinLua {
 				return;
 			}
 			PlayState.instance.addTextToDebug(text, color);
-			trace(text);
+			Debug.logInfo(text);
 		}
 		#end
 	}
@@ -3164,7 +3164,7 @@ class FunkinLua {
 			return result;
 		}
 		catch (e:Dynamic) {
-			trace(e);
+			Debug.logInfo(e);
 		}
 		#end
 		return Function_Continue;

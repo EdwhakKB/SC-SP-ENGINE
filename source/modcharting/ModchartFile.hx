@@ -87,7 +87,7 @@ class ModchartFile
             var filePath = Paths.json(folder + '/modchart');
             #end
             folderShit = filePath.replace("modchart.json", "customMods/");
-            //trace(filePath);
+            //Debug.logInfo(filePath);
             #if sys
             if(FileSystem.exists(filePath))
                 rawJson = File.getContent(filePath).trim();
@@ -100,12 +100,12 @@ class ModchartFile
         if (rawJson != null)
         {
             json = cast Json.parse(rawJson);
-            //trace('loaded json');
-            trace(folderShit);
+            //Debug.logInfo('loaded json');
+            Debug.logInfo(folderShit);
             #if sys
             if (FileSystem.isDirectory(folderShit))
             {
-                //trace("folder le exists");
+                //Debug.logInfo("folder le exists");
                 for (file in FileSystem.readDirectory(folderShit))
                 {
                     if(file.endsWith('.hx')) //custom mods!!!!

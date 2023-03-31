@@ -142,7 +142,7 @@ class NoteMovement
 
         //col = (col-col-col); //flip pos/negative
 
-        //trace(col);
+        //Debug.logInfo(col);
 
         return col;
     }

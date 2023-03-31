@@ -430,7 +430,7 @@ class ModchartEditorState extends MusicBeatState
         NoteMovement.getDefaultStrumPosEditor(this);
 
         //gridGap = FlxMath.remapToRange(Conductor.stepCrochet, 0, Conductor.stepCrochet, 0, gridSize); //idk why i even thought this was how i do it
-        //trace(gridGap);
+        //Debug.logInfo(gridGap);
 
         debugText = new FlxText(0, gridSize*2, 0, "", 16);
         debugText.alignment = FlxTextAlign.LEFT;
@@ -706,7 +706,7 @@ class ModchartEditorState extends MusicBeatState
                             highlightedEvent = event.data;
                             stackedHighlightedEvents.push(event.data);
                             onSelectEvent();
-                            //trace(stackedHighlightedEvents);
+                            //Debug.logInfo(stackedHighlightedEvents);
                         }   
                         if (FlxG.keys.justPressed.DELETE)
                             deleteEvent();
@@ -722,7 +722,7 @@ class ModchartEditorState extends MusicBeatState
                 if (FlxG.mouse.justPressed)
                 {
                     var timeFromMouse = ((highlight.x-grid.x)/gridSize/4)-1;
-                    //trace(timeFromMouse);
+                    //Debug.logInfo(timeFromMouse);
                     var event = addNewEvent(timeFromMouse);
                     highlightedEvent = event;
                     onSelectEvent();
@@ -802,7 +802,7 @@ class ModchartEditorState extends MusicBeatState
         }
         if (curBpmChange.bpm != Conductor.bpm)
         {
-            //trace('changed bpm to ' + curBpmChange.bpm);
+            //Debug.logInfo('changed bpm to ' + curBpmChange.bpm);
             Conductor.changeBPM(curBpmChange.bpm);
         }
 
@@ -871,8 +871,8 @@ class ModchartEditorState extends MusicBeatState
                 daEvent.active = false;
                 daEvent.visible = false;
                 eventSprites.remove(daEvent, true);
-                trace(daEvent.beatTime);
-                trace("removed event sprite "+ daEvent.beatTime);
+                Debug.logInfo(daEvent.beatTime);
+                Debug.logInfo("removed event sprite "+ daEvent.beatTime);
             }
             --i;
         }*/
@@ -884,7 +884,7 @@ class ModchartEditorState extends MusicBeatState
             {
                 var daEvent:ModchartEditorEvent = new ModchartEditorEvent(playfieldRenderer.modchart.data.events[i]);
                 eventSprites.add(daEvent);
-                //trace("added event sprite "+beat);
+                //Debug.logInfo("added event sprite "+beat);
             }
         }
     }
@@ -908,7 +908,7 @@ class ModchartEditorState extends MusicBeatState
     override public function beatHit()
     {
         updateEventSprites();
-        //trace("beat hit");
+        //Debug.logInfo("beat hit");
         super.beatHit();
     }
 
@@ -1271,7 +1271,7 @@ class ModchartEditorState extends MusicBeatState
 
             if (currentModifier != null)
             {
-                //trace(currentModifier);
+                //Debug.logInfo(currentModifier);
                 modNameInputText.text = currentModifier[MOD_NAME];
                 modClassInputText.text = currentModifier[MOD_CLASS];
                 modTypeInputText.text = currentModifier[MOD_TYPE];
@@ -1418,7 +1418,7 @@ class ModchartEditorState extends MusicBeatState
             case "ease": 
                 if (newType == 'set')
                 {
-                    trace('converting ease to set');
+                    Debug.logInfo('converting ease to set');
                     var temp:Array<Dynamic> = [newType, [
                         data[EVENT_DATA][EVENT_TIME],
                         data[EVENT_DATA][EVENT_EASEDATA],
@@ -1428,18 +1428,18 @@ class ModchartEditorState extends MusicBeatState
             case "set": 
                 if (newType == 'ease')
                 {
-                    trace('converting set to ease');
+                    Debug.logInfo('converting set to ease');
                     var temp:Array<Dynamic> = [newType, [
                         data[EVENT_DATA][EVENT_TIME],
                         1,
                         "linear",
                         data[EVENT_DATA][EVENT_SETDATA],
                     ], data[EVENT_REPEAT]];
-                    trace(temp);
+                    Debug.logInfo(temp);
                     data = temp.copy();
                 }
         } 
-        //trace(data);
+        //Debug.logInfo(data);
         return data;
     }
 
@@ -1602,14 +1602,14 @@ class ModchartEditorState extends MusicBeatState
         eventTypeDropDown = new FlxUIDropDownMenuCustom(25 + 500, 50, FlxUIDropDownMenuCustom.makeStrIdLabelArray(eventTypes, true), function(mod:String)
         {
             var et = eventTypes[Std.parseInt(mod)];
-            trace(et);
+            Debug.logInfo(et);
             var data = getCurrentEventInData();
             if (data != null)
             {
                 //if (data[EVENT_TYPE] != et)
                 data = convertModData(data, et);
                 highlightedEvent = data;
-                trace(highlightedEvent);
+                Debug.logInfo(highlightedEvent);
             }
             eventEaseInputText.alpha = 1;
             eventTimeInputText.alpha = 1;
@@ -1884,7 +1884,7 @@ class ModchartEditorState extends MusicBeatState
                 case "stackedEvent": 
                     if (highlightedEvent != null)
                     {
-                        //trace(stackedHighlightedEvents);
+                        //Debug.logInfo(stackedHighlightedEvents);
                         highlightedEvent = stackedHighlightedEvents[Std.int(stackedEventStepper.value)];
                         onSelectEvent(true);
                     }

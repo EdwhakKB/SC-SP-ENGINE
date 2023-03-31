@@ -100,7 +100,7 @@ class ModsMenuState extends MusicBeatState
 					if(!Paths.ignoreModFolders.contains(modSplit[0].toLowerCase()))
 					{
 						addToModsList([modSplit[0], (modSplit[1] == '1')]);
-						//trace(modSplit[1]);
+						//Debug.logInfo(modSplit[1]);
 					}
 				}
 			}
@@ -276,7 +276,7 @@ class ModsMenuState extends MusicBeatState
 			var path = haxe.io.Path.join([Paths.mods(), modsList[curSelected][0]]);
 			if(FileSystem.exists(path) && FileSystem.isDirectory(path))
 			{
-				trace('Trying to delete directory ' + path);
+				Debug.logInfo('Trying to delete directory ' + path);
 				try
 				{
 					FileSystem.deleteFile(path); //FUCK YOU HAXE WHY DONT YOU WORK WAAAAAAAAAAAAH
@@ -295,7 +295,7 @@ class ModsMenuState extends MusicBeatState
 				}
 				catch(e)
 				{
-					trace('Error deleting directory: ' + e);
+					Debug.logInfo('Error deleting directory: ' + e);
 				}
 			}
 		});
@@ -393,7 +393,7 @@ class ModsMenuState extends MusicBeatState
 		{
 			if(modsList[i][0] == values[0])
 			{
-				//trace(modsList[i][0], values[0]);
+				//Debug.logInfo(modsList[i][0], values[0]);
 				return;
 			}
 		}
@@ -676,7 +676,7 @@ class ModsMenuState extends MusicBeatState
 				var uncompressingFile:Bytes = new Uncompress().run(File.getBytes(rawZip));
 				if (uncompressingFile.done)
 				{
-					trace('test');
+					Debug.logInfo('test');
 					_file = null;
 					return;
 				}
@@ -684,7 +684,7 @@ class ModsMenuState extends MusicBeatState
 		}
 		_file = null;
 		canExit = true;
-		trace("File couldn't be loaded! Wtf?");
+		Debug.logInfo("File couldn't be loaded! Wtf?");
 	}
 
 	function onLoadCancel(_):Void
@@ -694,7 +694,7 @@ class ModsMenuState extends MusicBeatState
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
 		_file = null;
 		canExit = true;
-		trace("Cancelled file loading.");
+		Debug.logInfo("Cancelled file loading.");
 	}
 
 	function onLoadError(_):Void
@@ -704,7 +704,7 @@ class ModsMenuState extends MusicBeatState
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
 		_file = null;
 		canExit = true;
-		trace("Problem loading file");
+		Debug.logInfo("Problem loading file");
 	}*/
 }
 

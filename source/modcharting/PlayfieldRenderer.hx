@@ -800,7 +800,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
     public function addEvent(beat:Float, func:Array<String>->Void, args:Array<String>)
     {
         var time = getTimeFromBeat(beat);
-        //trace(time);
+        //Debug.logInfo(time);
         events.push(new ModchartEvent(time, func, args));
     }
 

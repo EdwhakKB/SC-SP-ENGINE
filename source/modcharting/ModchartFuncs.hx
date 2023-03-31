@@ -293,7 +293,7 @@ class ModchartFuncs
                 {
                     var modName = subModCheck[0];
                     var subModName = subModCheck[1];
-                    //trace(subModCheck);
+                    //Debug.logInfo(subModCheck);
                     instance.playfieldRenderer.tweenModifierSubValue(modName,subModName,value,time*Conductor.crochet*0.001,ease, beat);
                 }
                 else
