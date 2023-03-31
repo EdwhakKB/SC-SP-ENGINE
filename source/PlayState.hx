@@ -2388,6 +2388,8 @@ class PlayState extends MusicBeatState
 
 	function startSong():Void
 	{
+		//prevents crashing whening leaving pause menu
+		canPause = true;
 		startingSong = false;
 
 		previousFrameTime = FlxG.game.ticks;
@@ -2891,7 +2893,7 @@ class PlayState extends MusicBeatState
 	public var paused:Bool = false;
 	public var canReset:Bool = true;
 	var startedCountdown:Bool = false;
-	var canPause:Bool = true;
+	var canPause:Bool = false;
 	var limoSpeed:Float = 0;
 
 	override public function update(elapsed:Float)
