@@ -4860,10 +4860,7 @@ class PlayState extends MusicBeatState
 		});
 		combo = 0;
 
-		if(!glow_kadeHealthSystem)
-			health -= daNote.missHealth * healthLoss;
-		else
-			health -= 0.04 * healthLoss;
+		health -= (glow_kadeHealthSystem ? 0.04 : daNote.missHealth) * healthLoss;
 		
 		if(instakillOnMiss)
 		{
@@ -4900,10 +4897,8 @@ class PlayState extends MusicBeatState
 
 		if (!boyfriend.stunned)
 		{
-			if(!glow_kadeHealthSystem)
-				health -= 0.05 * healthLoss;
-			else
-				health -= 0.04 * healthLoss;
+			health -= (glow_kadeHealthSystem ? 0.04 : 0.05) * healthLoss;
+			
 			if(instakillOnMiss)
 			{
 				vocals.volume = 0;
