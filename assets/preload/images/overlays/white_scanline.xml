@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="white_scanline.png">
+	<!-- Created with Adobe Animate version 21.0.1.37179 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="scanline0000" x="10" y="10" width="1281" height="92" frameX="0" frameY="0" frameWidth="1300" frameHeight="927"/>
+	<SubTexture name="scanline0001" x="10" y="10" width="1281" height="92" frameX="0" frameY="-82" frameWidth="1300" frameHeight="927"/>
+	<SubTexture name="scanline0002" x="10" y="10" width="1281" height="92" frameX="0" frameY="-162" frameWidth="1300" frameHeight="927"/>
+	<SubTexture name="scanline0003" x="10" y="10" width="1281" height="92" frameX="0" frameY="-247" frameWidth="1300" frameHeight="927"/>
+	<SubTexture name="scanline0004" x="10" y="10" width="1281" height="92" frameX="0" frameY="-247" frameWidth="1300" frameHeight="927"/>
+	<SubTexture name="scanline0005" x="10" y="10" width="1281" height="92" frameX="-13" frameY="-341" frameWidth="1300" frameHeight="927"/>
+	<SubTexture name="scanline0006" x="10" y="10" width="1281" height="92" frameX="-13" frameY="-445" frameWidth="1300" frameHeight="927"/>
+	<SubTexture name="scanline0007" x="10" y="10" width="1281" height="92" frameX="-13" frameY="-540" frameWidth="1300" frameHeight="927"/>
+	<SubTexture name="scanline0008" x="10" y="10" width="1281" height="92" frameX="-13" frameY="-638" frameWidth="1300" frameHeight="927"/>
+	<SubTexture name="scanline0009" x="10" y="10" width="1281" height="92" frameX="-19" frameY="-739" frameWidth="1300" frameHeight="927"/>
+	<SubTexture name="scanline0010" x="10" y="10" width="1281" height="92" frameX="-19" frameY="-834" frameWidth="1300" frameHeight="927"/>
+</TextureAtlas>
