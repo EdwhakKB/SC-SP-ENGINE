@@ -95,11 +95,7 @@
 	],
 	"healthicon": "spooky",
 	"flip_x": false,
-	"healthbar_colors": [
-		213,
-		126,
-		0
-	],
+	"iconColor": "#D57E00",
 	"camera_position": [
 		0,
 		0

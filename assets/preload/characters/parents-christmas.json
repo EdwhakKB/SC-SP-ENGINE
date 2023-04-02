@@ -252,11 +252,7 @@
 	],
 	"healthicon": "parents",
 	"flip_x": false,
-	"healthbar_colors": [
-		196,
-		94,
-		174
-	],
+	"iconColor": "#C45EAF",
 	"camera_position": [
 		0,
 		0

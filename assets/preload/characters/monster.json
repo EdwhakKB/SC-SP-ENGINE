@@ -139,11 +139,7 @@
 	],
 	"healthicon": "monster",
 	"flip_x": false,
-	"healthbar_colors": [
-		243,
-		255,
-		110
-	],
+	"iconColor": "#F3FF6E",
 	"camera_position": [
 		0,
 		0

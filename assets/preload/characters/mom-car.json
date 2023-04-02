@@ -144,11 +144,7 @@
 	],
 	"healthicon": "mom",
 	"flip_x": false,
-	"healthbar_colors": [
-		216,
-		85,
-		142
-	],
+	"iconColor": "#D8558E",
 	"camera_position": [
 		0,
 		0

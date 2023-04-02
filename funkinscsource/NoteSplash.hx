@@ -51,7 +51,6 @@ class NoteSplash extends FlxSprite
 	}
 
 	function loadAnims(skin:String) {
-		Debug.logInfo(skin);
 		frames = Paths.getSparrowAtlas(skin);
 		for (i in 1...3) {
 			animation.addByPrefix("note0-" + i, "note splash purple " + i, 24, false);

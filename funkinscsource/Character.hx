@@ -17,6 +17,7 @@ import openfl.utils.AssetType;
 import openfl.utils.Assets;
 import haxe.Json;
 import haxe.format.JsonParser;
+import flixel.util.FlxColor;
 
 using StringTools;
 
@@ -32,7 +33,7 @@ typedef CharacterFile = {
 
 	var flip_x:Bool;
 	var no_antialiasing:Bool;
-	var healthbar_colors:Array<Int>;
+	var iconColor:String;
 }
 
 typedef AnimArray = {
@@ -76,13 +77,14 @@ class Character extends FlxSprite
 	public var jsonScale:Float = 1;
 	public var noAntialiasing:Bool = false;
 	public var originalFlipX:Bool = false;
-	public var healthColorArray:Array<Int> = [255, 0, 0];
+	public var iconColor:FlxColor;
 
 	public static var DEFAULT_CHARACTER:String = 'bf'; //In case a character is missing, it will use BF on its place
 	public function new(x:Float, y:Float, ?character:String = 'bf', ?isPlayer:Bool = false)
 	{
 		super(x, y);
 
+		iconColor = isPlayer ? 0xFF66FF33 : 0xFFFF0000;
 		#if (haxe >= "4.0.0")
 		animOffsets = new Map();
 		#else
@@ -185,8 +187,8 @@ class Character extends FlxSprite
 					noAntialiasing = true;
 				}
 
-				if(json.healthbar_colors != null && json.healthbar_colors.length > 2)
-					healthColorArray = json.healthbar_colors;
+				if(json.iconColor != null)
+					iconColor = FlxColor.fromString(json.iconColor);
 
 				antialiasing = !noAntialiasing;
 				if(!ClientPrefs.globalAntialiasing) antialiasing = false;
