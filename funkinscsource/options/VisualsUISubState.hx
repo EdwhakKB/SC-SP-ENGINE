@@ -45,7 +45,7 @@ class VisualsUISubState extends BaseOptionsMenu
 		"What HUD you like more??.",
 		'hudStyle',
 		'string',
-		'HITMANS',
+		'PSYCH',
 		['CLASSIC', 'PSYCH', 'GLOW_KADE', 'HITMANS']);
 		addOption(option);
 
@@ -53,8 +53,8 @@ class VisualsUISubState extends BaseOptionsMenu
 		"What Skin You want to use??.",
 		'noteSkin',
 		'string',
-		'FNF',
-		['HITMANS', 'FNF', 'INHUMAN', 'STEPMANIA', 'DELTA', 'GROVE', 'SUSSY', 'EPIC', 'ITGOPT', 'DDR']);
+		'NONE',
+		['NONE', 'FNF', 'HITMANS', 'INHUMAN', 'STEPMANIA', 'DELTA', 'GROVE', 'SUSSY', 'EPIC', 'ITGOPT', 'DDR']);
 		addOption(option);
 
 		var option:Option = new Option('Hide HUD',

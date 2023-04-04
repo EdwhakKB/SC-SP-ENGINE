@@ -224,7 +224,8 @@ class ChartingState extends MusicBeatState
 				speed: 1,
 				stage: 'stage',
 				validScore: false,
-				notITG: false
+				notITG: false,
+				usesHUD: true
 			};
 			addSection();
 			PlayState.SONG = _song;
@@ -400,6 +401,7 @@ class ChartingState extends MusicBeatState
 	var playSoundBf:FlxUICheckBox = null;
 	var playSoundDad:FlxUICheckBox = null;
 	var notITGModchart:FlxUICheckBox = null;
+	var usingHUD:FlxUICheckBox = null;
 	var UI_songTitle:FlxUIInputText;
 	var noteSkinInputText:FlxUIInputText;
 	var noteSplashesInputText:FlxUIInputText;
@@ -615,12 +617,21 @@ class ChartingState extends MusicBeatState
 			//Debug.logInfo('CHECKED!');
 		};
 
+		var usingHUD = new FlxUICheckBox(notITGModchart.x, notITGModchart.y + 20, null, null, "usesHUD Cameras", 100);
+		usingHUD.checked = _song.usesHUD;
+		usingHUD.callback = function()
+		{
+			_song.usesHUD = usingHUD.checked;
+			//Debug.logInfo('CHECKED!');
+		};
+
 		var tab_group_song = new FlxUI(null, UI_box);
 		tab_group_song.name = "Song";
 		tab_group_song.add(UI_songTitle);
 
 		tab_group_song.add(check_voices);
 		tab_group_song.add(notITGModchart);
+		tab_group_song.add(usingHUD);
 		tab_group_song.add(clear_events);
 		tab_group_song.add(clear_notes);
 		tab_group_song.add(saveButton);

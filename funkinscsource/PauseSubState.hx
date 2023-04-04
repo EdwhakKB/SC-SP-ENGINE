@@ -14,6 +14,10 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.FlxCamera;
 import flixel.util.FlxStringUtil;
+import flixel.util.FlxTimer;
+import openfl.Assets;
+
+using StringTools;
 
 class PauseSubState extends MusicBeatSubstate
 {
@@ -33,8 +37,9 @@ class PauseSubState extends MusicBeatSubstate
 	var skipTimeText:FlxText;
 	var skipTimeTracker:Alphabet;
 	var curTime:Float = Math.max(0, Conductor.songPosition);
-	//var botplayText:FlxText;
+	var unPauseTimer:FlxTimer;
 
+	//var botplayText:FlxText;
 	public static var songName:String = '';
 
 	var crtFilter:FlxSprite;
@@ -56,7 +61,7 @@ class PauseSubState extends MusicBeatSubstate
 			if(!PlayState.instance.startingSong)
 			{
 				num = 1;
-				menuItemsOG.insert(3, 'Skip Time');
+				//menuItemsOG.insert(3, 'Skip Time');
 			}
 			menuItemsOG.insert(3 + num, 'End Song');
 			menuItemsOG.insert(4 + num, 'Toggle Practice Mode');
@@ -86,67 +91,6 @@ class PauseSubState extends MusicBeatSubstate
 		bg.alpha = 0;
 		bg.scrollFactor.set();
 		add(bg);
-
-		CoolUtil.precacheImage("overlays/ctr","image");
-		if (ClientPrefs.downScroll)
-		{
-			CoolUtil.precacheImage("overlays/white_scanline-ds","image");
-		}
-		else if (!ClientPrefs.downScroll)
-		{
-			CoolUtil.precacheImage("overlays/white_scanline","image");
-		}
-		CoolUtil.precacheImage("overlays/cam_fuck","image");
-		CoolUtil.precacheImage("static/static","image");
-		crtFilter = new FlxSprite().loadGraphic(Paths.image('overlays/crt'));
-		crtFilter.scrollFactor.set();
-		crtFilter.antialiasing = true;
-		crtFilter.screenCenter();
-
-		whiteAnimeshoun = new FlxSprite();
-		if (ClientPrefs.downScroll)
-		{
-			whiteAnimeshoun.frames = Paths.getSparrowAtlas('overlays/white_scanline-ds');
-		}
-		else if (!ClientPrefs.downScroll)
-		{
-			whiteAnimeshoun.frames = Paths.getSparrowAtlas('overlays/white_scanline');
-		}
-		whiteAnimeshoun.animation.addByPrefix('idle', 'scanline', 24, true);
-		whiteAnimeshoun.screenCenter();
-		whiteAnimeshoun.scrollFactor.set();
-		whiteAnimeshoun.antialiasing = true;
-		whiteAnimeshoun.animation.play('idle');
-
-		camAnimeshoun = new FlxSprite();
-		camAnimeshoun.frames = Paths.getSparrowAtlas('overlays/cam_fuck');
-		camAnimeshoun.animation.addByPrefix('idle', 'cam-idle', 24, true);
-		camAnimeshoun.screenCenter();
-		camAnimeshoun.scrollFactor.set();
-		camAnimeshoun.antialiasing = false;
-		camAnimeshoun.animation.play('idle', true);
-
-		staticAnimeshoun = new FlxSprite();
-		staticAnimeshoun.frames = Paths.getSparrowAtlas('static/static');
-		staticAnimeshoun.animation.addByPrefix('idle', 'idle', 24, true);
-		staticAnimeshoun.screenCenter();
-		staticAnimeshoun.scrollFactor.set();
-		staticAnimeshoun.animation.play('idle');
-		staticAnimeshoun.visible = false;
-
-		constantstaticAnimeshoun = new FlxSprite();
-		constantstaticAnimeshoun.frames = Paths.getSparrowAtlas('static/static');
-		constantstaticAnimeshoun.animation.addByPrefix('idle', 'idle', 24, true);
-		constantstaticAnimeshoun.screenCenter();
-		constantstaticAnimeshoun.scrollFactor.set();
-		constantstaticAnimeshoun.animation.play('idle');
-		constantstaticAnimeshoun.visible = false;
-
-		add(constantstaticAnimeshoun);
-		add(staticAnimeshoun);
-		add(whiteAnimeshoun);
-		add(camAnimeshoun);
-		add(crtFilter);
 
 		var levelInfo:FlxText = new FlxText(20, 15, 0, "", 32);
 		levelInfo.text += PlayState.SONG.song;
@@ -208,6 +152,9 @@ class PauseSubState extends MusicBeatSubstate
 
 	var holdTime:Float = 0;
 	var cantUnpause:Float = 0.1;
+	public var countdownReady:FlxSprite;
+	public var countdownSet:FlxSprite;
+	public var countdownGo:FlxSprite;
 	override function update(elapsed:Float)
 	{
 		cantUnpause -= elapsed;
@@ -215,7 +162,7 @@ class PauseSubState extends MusicBeatSubstate
 			pauseMusic.volume += 0.01 * elapsed;
 
 		super.update(elapsed);
-		updateSkipTextStuff();
+		//updateSkipTextStuff();
 
 		var upP = controls.UI_UP_P;
 		var downP = controls.UI_DOWN_P;
@@ -231,7 +178,7 @@ class PauseSubState extends MusicBeatSubstate
 		}
 
 		var daSelected:String = menuItems[curSelected];
-		switch (daSelected)
+		/*switch (daSelected)
 		{
 			case 'Skip Time':
 				if (controls.UI_LEFT_P)
@@ -259,7 +206,7 @@ class PauseSubState extends MusicBeatSubstate
 					else if(curTime < 0) curTime += FlxG.sound.music.length;
 					updateSkipTimeText();
 				}
-		}
+		}*/
 
 		if (accepted && (cantUnpause <= 0 || !ClientPrefs.controllerMode))
 		{
@@ -284,7 +231,33 @@ class PauseSubState extends MusicBeatSubstate
 			switch (daSelected)
 			{
 				case "Resume":
-					close();
+					unPauseTimer = new FlxTimer().start(Conductor.crochet / 1000, function(hmmm:FlxTimer)
+					{
+						if (unPauseTimer.loopsLeft == 4)
+						{
+							pauseCountDown('three');
+						}
+						else if (unPauseTimer.loopsLeft == 3)
+						{
+							pauseCountDown('two');
+						}
+						else if (unPauseTimer.loopsLeft == 2)
+						{
+							pauseCountDown('one');
+						}
+						else if (unPauseTimer.loopsLeft == 1)
+						{
+							pauseCountDown('go!');
+						}
+						else if (unPauseTimer.finished && unPauseTimer.loopsLeft == 0)
+						{
+							PlayState.instance.modchartTimers.remove('unPauseTimer');
+							close();
+						}
+					}, 5);
+					menuItems = [];
+					regenMenu();
+					//close();
 				case 'Change Difficulty':
 					menuItems = difficultyChoices;
 					deleteSkipTimeText();
@@ -298,7 +271,7 @@ class PauseSubState extends MusicBeatSubstate
 				case "Leave Charting Mode":
 					restartSong();
 					PlayState.chartingMode = false;
-				case 'Skip Time':
+				/*case 'Skip Time':
 					if(curTime < Conductor.songPosition)
 					{
 						PlayState.startOnTime = curTime;
@@ -312,7 +285,7 @@ class PauseSubState extends MusicBeatSubstate
 							PlayState.instance.setSongTime(curTime);
 						}
 						close();
-					}
+					}*/
 				case "End Song":
 					close();
 					PlayState.instance.finishSong(true);
@@ -340,6 +313,92 @@ class PauseSubState extends MusicBeatSubstate
 					PlayState.changedDifficulty = false;
 					PlayState.chartingMode = false;
 			}
+		}
+	}
+
+	function pauseCountDown(Number:String)
+	{
+		var introAssets:Map<String, Array<String>> = new Map<String, Array<String>>();
+		introAssets.set('default', ['ready', 'set', 'go']);
+		introAssets.set('pixel', ['pixelUI/ready-pixel', 'pixelUI/set-pixel', 'pixelUI/date-pixel']);
+
+		var introAlts:Array<String> = introAssets.get('default');
+		var antialias:Bool = ClientPrefs.globalAntialiasing;
+		if(PlayState.isPixelStage) {
+			introAlts = introAssets.get('pixel');
+			antialias = false;
+		}
+
+		switch (Number)
+		{
+			case 'three':
+				FlxG.sound.play(Paths.sound('intro3'), 1);
+			case 'two':
+				countdownReady = new FlxSprite().loadGraphic(Paths.image(introAlts[0]));
+				//countdownReady.cameras = [PlayState.instance.camHUD];
+				countdownReady.scrollFactor.set();
+				countdownReady.updateHitbox();
+				countdownReady.screenCenter();
+
+				if (PlayState.isPixelStage)
+					countdownReady.setGraphicSize(Std.int(countdownReady.width * PlayState.daPixelZoom));
+
+				countdownReady.screenCenter();
+				countdownReady.antialiasing = antialias;
+				add(countdownReady);
+				FlxTween.tween(countdownReady, {/*y: countdownReady.y + 100,*/ alpha: 0}, Conductor.crochet / 1000, {
+					ease: FlxEase.cubeInOut,
+					onComplete: function(twn:FlxTween)
+					{
+						remove(countdownReady);
+						countdownReady.destroy();
+					}
+				});
+				FlxG.sound.play(Paths.sound('intro2' + PlayState.instance.introSoundsSuffix), 0.6);
+			case 'one':
+				countdownSet = new FlxSprite().loadGraphic(Paths.image(introAlts[1]));
+				//countdownSet.cameras = [PlayState.instance.camHUD];
+				countdownSet.scrollFactor.set();
+				countdownSet.screenCenter();
+
+				if (PlayState.isPixelStage)
+					countdownSet.setGraphicSize(Std.int(countdownSet.width * PlayState.daPixelZoom));
+
+				countdownSet.screenCenter();
+				countdownSet.antialiasing = antialias;
+				add(countdownSet);
+				FlxTween.tween(countdownSet, {/*y: countdownSet.y + 100,*/ alpha: 0}, Conductor.crochet / 1000, {
+					ease: FlxEase.cubeInOut,
+					onComplete: function(twn:FlxTween)
+					{
+						remove(countdownSet);
+						countdownSet.destroy();
+					}
+				});
+				FlxG.sound.play(Paths.sound('intro1' + PlayState.instance.introSoundsSuffix), 0.6);
+			case 'go!':
+				countdownGo = new FlxSprite().loadGraphic(Paths.image(introAlts[2]));
+				//countdownGo.cameras = [PlayState.instance.camHUD];
+				countdownGo.scrollFactor.set();
+				countdownGo.screenCenter();
+
+				if (PlayState.isPixelStage)
+					countdownGo.setGraphicSize(Std.int(countdownGo.width * PlayState.daPixelZoom));
+
+				countdownGo.updateHitbox();
+
+				countdownGo.screenCenter();
+				countdownGo.antialiasing = antialias;
+				add(countdownGo);
+				FlxTween.tween(countdownGo, {alpha: 0}, Conductor.crochet / 1000, {
+					ease: FlxEase.cubeInOut,
+					onComplete: function(twn:FlxTween)
+					{
+						remove(countdownGo);
+						countdownGo.destroy();
+					}
+				});
+				FlxG.sound.play(Paths.sound('introGo' + PlayState.instance.introSoundsSuffix), 0.6);
 		}
 	}
 
@@ -405,11 +464,11 @@ class PauseSubState extends MusicBeatSubstate
 				item.alpha = 1;
 				// item.setGraphicSize(Std.int(item.width));
 
-				if(item == skipTimeTracker)
+				/*if(item == skipTimeTracker)
 				{
 					curTime = Math.max(0, Conductor.songPosition);
 					updateSkipTimeText();
-				}
+				}*/
 			}
 		}
 	}
@@ -428,7 +487,7 @@ class PauseSubState extends MusicBeatSubstate
 			item.targetY = i;
 			grpMenuShit.add(item);
 
-			if(menuItems[i] == 'Skip Time')
+			/*if(menuItems[i] == 'Skip Time')
 			{
 				skipTimeText = new FlxText(0, 0, 0, '', 64);
 				skipTimeText.setFormat(Paths.font("vcr.ttf"), 64, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -439,13 +498,13 @@ class PauseSubState extends MusicBeatSubstate
 
 				updateSkipTextStuff();
 				updateSkipTimeText();
-			}
+			}*/
 		}
 		curSelected = 0;
 		changeSelection();
 	}
 	
-	function updateSkipTextStuff()
+	/*function updateSkipTextStuff()
 	{
 		if(skipTimeText == null || skipTimeTracker == null) return;
 
@@ -457,5 +516,5 @@ class PauseSubState extends MusicBeatSubstate
 	function updateSkipTimeText()
 	{
 		skipTimeText.text = FlxStringUtil.formatTime(Math.max(0, Math.floor(curTime / 1000)), false) + ' / ' + FlxStringUtil.formatTime(Math.max(0, Math.floor(FlxG.sound.music.length / 1000)), false);
-	}
+	}*/
 }

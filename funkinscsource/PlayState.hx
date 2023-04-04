@@ -220,9 +220,18 @@ class PlayState extends MusicBeatState
 
 	public var iconP1:HealthIcon;
 	public var iconP2:HealthIcon;
-	public var camHUD:FlxCamera;
 	public var camGame:FlxCamera;
+	public var camVideo:FlxCamera;
+	public var camHUD2:FlxCamera;
+	public var camHUD:FlxCamera;
 	public var camOther:FlxCamera;
+	//public var camRatings:FlxCamera;
+	public var camStrums:FlxCamera;
+	public var camSplash:FlxCamera;
+	public var camSustains:FlxCamera;
+	public var camNotes:FlxCamera;
+	public var camStuff:FlxCamera;
+	public var mainCam:FlxCamera;
 	public var cameraSpeed:Float = 1;
 
 	var dialogue:Array<String> = ['blah blah blah', 'coolswag'];
@@ -340,6 +349,8 @@ class PlayState extends MusicBeatState
 	public var glow_kadeHealthSystem:Bool = false;
 	public var glow_kadeInputSystem:Bool = false;
 
+	public var usesHUD:Bool = false;
+
 	override public function create()
 	{
 		//Debug.logInfo('Playback Rate: ' + playbackRate);
@@ -367,6 +378,8 @@ class PlayState extends MusicBeatState
 			'NOTE_UP',
 			'NOTE_RIGHT'
 		];
+
+		usesHUD = SONG.usesHUD;
 
 		//Ratings
 		ratingsData.push(new Rating('sick')); //default rating
@@ -410,19 +423,76 @@ class PlayState extends MusicBeatState
 
 		// var gameCam:FlxCamera = FlxG.camera;
 		camGame = new FlxCamera();
+		camVideo = new FlxCamera();
+		camVideo.bgColor.alpha = 0;
+		camHUD2 = new FlxCamera();
+		camHUD2.bgColor.alpha = 0;
 		camHUD = new FlxCamera();
-		camOther = new FlxCamera();
 		camHUD.bgColor.alpha = 0;
+		camOther = new FlxCamera();
 		camOther.bgColor.alpha = 0;
+		/*camRatings = new FlxCamera();
+		camRatings.bgColor.alpha = 0;*/
+		camStrums = new FlxCamera();
+		camStrums.bgColor.alpha = 0;
+		camSplash = new FlxCamera();
+		camSplash.bgColor.alpha = 0;
+		camSustains = new FlxCamera();
+		camSustains.bgColor.alpha = 0;
+		camNotes = new FlxCamera();
+		camNotes.bgColor.alpha = 0;
+		camStuff = new FlxCamera();
+		camStuff.bgColor.alpha = 0;
+		mainCam = new FlxCamera();
+		mainCam.bgColor.alpha = 0;
 
+		// Game Camera (where stage and characters are)
 		FlxG.cameras.reset(camGame);
+
+		// Video Camera if you put funni videos or smth
+		FlxG.cameras.add(camVideo, false);
+
+		// for other stuff then the (Health Bar, scoreTxt, etc)
+		FlxG.cameras.add(camHUD2, false);
+
+		// HUD Camera (Health Bar, scoreTxt, etc)
 		FlxG.cameras.add(camHUD, false);
+
+		// for jumescares and shit
 		FlxG.cameras.add(camOther, false);
+
+		// Ratings Camera
+		//FlxG.cameras.add(camRatings, false);
+
+		// StrumLine Camera
+		FlxG.cameras.add(camStrums, false);
+
+		// NoteSplash Camera
+		FlxG.cameras.add(camSplash, false);
+
+		// Long Notes camera
+		FlxG.cameras.add(camSustains, false);
+
+		// Single Notes camera
+		FlxG.cameras.add(camNotes, false);
+
+		// Stuff camera (stuff that are on top of everything but lower then the ds camera)
+		FlxG.cameras.add(camStuff, false);
+
+		// Main Camera
+		FlxG.cameras.add(mainCam, false);
+
+		camHUD.zoom = 1;
+		camNotes.zoom = camHUD.zoom;
+		camSustains.zoom = camHUD.zoom;
+		camStrums.zoom = camHUD.zoom;
+		camSplash.zoom = camHUD.zoom;
+
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 		grpNoteSplashesCPU = new FlxTypedGroup<NoteSplash>();
 
-		FlxG.cameras.setDefaultDrawTarget(camGame, true);
-		CustomFadeTransition.nextCamera = camOther;
+		//FlxG.cameras.setDefaultDrawTarget(camGame, true);
+		CustomFadeTransition.nextCamera = mainCam;
 
 		persistentUpdate = true;
 		persistentDraw = true;
@@ -1099,7 +1169,10 @@ class PlayState extends MusicBeatState
 		// add(strumLine);
 		if (SONG.notITG){
 			playfieldRenderer = new PlayfieldRenderer(strumLineNotes, notes, this);
-			playfieldRenderer.cameras = [camHUD];
+			if (usesHUD)
+				playfieldRenderer.cameras = [camHUD];
+			else
+				playfieldRenderer.cameras = [camNotes];
 			add(playfieldRenderer);
 		}
 
@@ -1213,10 +1286,18 @@ class PlayState extends MusicBeatState
 
 		reloadHealthBarColors();
 
-		strumLineNotes.cameras = [camHUD];
-		grpNoteSplashes.cameras = [camHUD];
-		grpNoteSplashesCPU.cameras = [camHUD];
-		notes.cameras = [camHUD];
+		if (usesHUD)
+		{
+			strumLineNotes.cameras = [camHUD];
+			grpNoteSplashes.cameras = [camHUD];
+			grpNoteSplashesCPU.cameras = [camHUD];
+			notes.cameras = [camHUD];
+		}else{
+			strumLineNotes.cameras = [camStrums];
+			grpNoteSplashes.cameras = [camSplash];
+			grpNoteSplashesCPU.cameras = [camSplash];
+			notes.cameras = [camNotes];
+		}
 		healthBar.cameras = [camHUD];
 		healthBarBG.cameras = [camHUD];
 		healthBarOverlay.cameras = [camHUD];
@@ -1337,7 +1418,7 @@ class PlayState extends MusicBeatState
 		}
 		Paths.clearUnusedMemory();
 		
-		CustomFadeTransition.nextCamera = camOther;
+		CustomFadeTransition.nextCamera = mainCam;
 		if(eventNotes.length < 1) checkEventNote();
 	}
 
@@ -3063,7 +3144,9 @@ class PlayState extends MusicBeatState
 			botplayTxt.alpha = 1 - Math.sin((Math.PI * botplaySine) / 180);
 		}
 
-		if ((controls.PAUSE && startedCountdown && canPause) || canPause && !Main.focused)
+		if ((controls.PAUSE || !Main.focused)
+			&& startedCountdown
+			&& canPause)
 		{
 			var ret:Dynamic = callOnLuas('onPause', [], false);
 			if(ret != FunkinLua.Function_Stop) {
@@ -3168,6 +3251,11 @@ class PlayState extends MusicBeatState
 		{
 			FlxG.camera.zoom = FlxMath.lerp(defaultCamZoom, FlxG.camera.zoom, CoolUtil.boundTo(1 - (elapsed * 3.125 * camZoomingDecay * playbackRate), 0, 1));
 			camHUD.zoom = FlxMath.lerp(1, camHUD.zoom, CoolUtil.boundTo(1 - (elapsed * 3.125 * camZoomingDecay * playbackRate), 0, 1));
+
+			camNotes.zoom = camHUD.zoom;
+			camSustains.zoom = camHUD.zoom;
+			camStrums.zoom = camHUD.zoom;
+			camSplash.zoom = camHUD.zoom;
 		}
 
 		FlxG.watch.addQuick("secShit", curSection);
@@ -3195,6 +3283,21 @@ class PlayState extends MusicBeatState
 				dunceNote.spawned=true;
 				callOnLuas('onSpawnNote', [notes.members.indexOf(dunceNote), dunceNote.noteData, dunceNote.noteType, dunceNote.isSustainNote]);
 
+				if (usesHUD)
+				{
+					if (!dunceNote.isSustainNote)
+						dunceNote.cameras = [camHUD];
+					else
+						dunceNote.cameras = [camHUD];
+				}
+				else
+				{
+					if (!dunceNote.isSustainNote)
+						dunceNote.cameras = [camNotes];
+					else
+						dunceNote.cameras = [camSustains];
+				}
+
 				var index:Int = unspawnNotes.indexOf(dunceNote);
 				unspawnNotes.splice(index, 1);
 			}
@@ -3216,7 +3319,7 @@ class PlayState extends MusicBeatState
 
 					camFollow.x += camX;
 					camFollow.y += camY;
-
+					
 					if (dad.animation.curAnim.name.startsWith('idle')
 						|| dad.animation.curAnim.name.startsWith('right')
 						|| dad.animation.curAnim.name.startsWith('left'))
@@ -3338,7 +3441,7 @@ class PlayState extends MusicBeatState
 								if (daNote.animation.curAnim.name.endsWith('end')) {
 									daNote.y += 10.5 * (fakeCrochet / 400) * 1.5 * songSpeed + (46 * (songSpeed - 1));
 									daNote.y -= 46 * (1 - (fakeCrochet / 600)) * songSpeed;
-									if(PlayState.isPixelStage) {
+									if(PlayState.isPixelStage && ClientPrefs.noteSkin == 'NONE') {
 										daNote.y += 8 + (6 - daNote.originalHeightForCalcs) * PlayState.daPixelZoom;
 									} else {
 										daNote.y -= 19;
@@ -5174,12 +5277,8 @@ class PlayState extends MusicBeatState
 	}
 
 	public function spawnNoteSplash(x:Float, y:Float, data:Int, ?note:Note = null) {
-		//var suf:String = '';
 		var skin:String = 'noteSplashes';
 		if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) skin = PlayState.SONG.splashSkin;
-
-		/*if (ClientPrefs.hudStyle == 'GLOW_KADE')
-			suf = '-kade';*/
 
 		var hue:Float = 0;
 		var sat:Float = 0;
@@ -5203,12 +5302,8 @@ class PlayState extends MusicBeatState
 	}
 
 	public function spawnNoteSplashCPU(x:Float, y:Float, data:Int, ?note:Note = null) {
-		//var suf:String = '';
 		var skin:String = 'noteSplashes';
 		if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) skin = PlayState.SONG.splashSkin;
-
-		/*if (ClientPrefs.hudStyle == 'GLOW_KADE')
-			suf = '-kade';*/
 
 		var hue:Float = 0;
 		var sat:Float = 0;

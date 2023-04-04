@@ -281,7 +281,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         var lane = getLane(noteIndex);
         var noteScaleX = NoteMovement.defaultScale[lane];
         var noteScaleY = NoteMovement.defaultScale[lane];
-        if (ModchartUtil.getIsPixelStage(instance))
+        if (ModchartUtil.getIsPixelStage(instance) && ClientPrefs.noteSkin == 'NONE')
         {
             //work on pixel stages
             noteScaleX = 1*PlayState.daPixelZoom;

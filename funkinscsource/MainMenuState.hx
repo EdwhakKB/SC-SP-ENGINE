@@ -20,6 +20,7 @@ import lime.app.Application;
 import Achievements;
 import editors.MasterEditorMenu;
 import flixel.input.keyboard.FlxKey;
+import openfl.Lib;
 
 using StringTools;
 
@@ -171,6 +172,10 @@ class MainMenuState extends MusicBeatState
 
 	var selectedSomethin:Bool = false;
 
+	#if !mobile
+	var oldPos = FlxG.mouse.getScreenPosition();
+	#end
+
 	override function update(elapsed:Float)
 	{
 		if (FlxG.sound.music.volume < 0.8)
@@ -178,6 +183,27 @@ class MainMenuState extends MusicBeatState
 			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
 			if(FreeplayState.vocals != null) FreeplayState.vocals.volume += 0.5 * elapsed;
 		}
+
+		#if !mobile
+		if ((FlxG.mouse.getScreenPosition().x != oldPos.x || FlxG.mouse.getScreenPosition().y != oldPos.y) && !selectedSomethin)
+		{
+			oldPos = FlxG.mouse.getScreenPosition();
+			for (i in 0...menuItems.length)
+			{
+				if (FlxG.mouse.overlaps(menuItems.members[i]))
+				{
+					var pos = FlxG.mouse.getPositionInCameraView(FlxG.camera);
+					if (pos.y > i / menuItems.length * FlxG.height && pos.y < (i + 1) / menuItems.length * FlxG.height && curSelected != i)
+					{
+						curSelected = i;
+						FlxG.sound.play(Paths.sound('scrollMenu'));
+						changeItem();
+						break;
+					}
+				}
+			}
+		}
+		#end
 
 		var lerpVal:Float = CoolUtil.boundTo(elapsed * 7.5, 0, 1);
 		camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
@@ -203,7 +229,7 @@ class MainMenuState extends MusicBeatState
 				MusicBeatState.switchState(new TitleState());
 			}
 
-			if (controls.ACCEPT)
+			if (controls.ACCEPT|| (FlxG.mouse.overlaps(menuItems, FlxG.camera) && FlxG.mouse.pressed))
 			{
 				if (optionShit[curSelected] == 'donate')
 				{
@@ -234,23 +260,7 @@ class MainMenuState extends MusicBeatState
 							{
 								var daChoice:String = optionShit[curSelected];
 
-								switch (daChoice)
-								{
-									case 'story_mode':
-										MusicBeatState.switchState(new StoryMenuState());
-									case 'freeplay':
-										MusicBeatState.switchState(new FreeplayState());
-									#if MODS_ALLOWED
-									case 'mods':
-										MusicBeatState.switchState(new ModsMenuState());
-									#end
-									case 'awards':
-										MusicBeatState.switchState(new AchievementsMenuState());
-									case 'credits':
-										MusicBeatState.switchState(new CreditsState());
-									case 'options':
-										LoadingState.loadAndSwitchState(new options.OptionsState());
-								}
+								goToState(daChoice);
 							});
 						}
 					});
@@ -271,6 +281,27 @@ class MainMenuState extends MusicBeatState
 		{
 			spr.screenCenter(X);
 		});
+	}
+
+	function goToState(daChoice:String)
+	{
+		switch (daChoice)
+		{
+			case 'story_mode':
+				MusicBeatState.switchState(new StoryMenuState());
+			case 'freeplay':
+				MusicBeatState.switchState(new FreeplayState());
+			#if MODS_ALLOWED
+			case 'mods':
+				MusicBeatState.switchState(new ModsMenuState());
+			#end
+			case 'awards':
+				MusicBeatState.switchState(new AchievementsMenuState());
+			case 'credits':
+				MusicBeatState.switchState(new CreditsState());
+			case 'options':
+				LoadingState.loadAndSwitchState(new options.OptionsState());
+		}
 	}
 
 	function changeItem(huh:Int = 0)

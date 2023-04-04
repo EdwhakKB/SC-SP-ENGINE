@@ -406,7 +406,7 @@ class EditorPlayState extends MusicBeatState
 							if (daNote.animation.curAnim.name.endsWith('end')) {
 								daNote.y += 10.5 * (fakeCrochet / 400) * 1.5 * PlayState.SONG.speed + (46 * (PlayState.SONG.speed - 1));
 								daNote.y -= 46 * (1 - (fakeCrochet / 600)) * PlayState.SONG.speed;
-								if(PlayState.isPixelStage) {
+								if(PlayState.isPixelStage && ClientPrefs.noteSkin == 'NONE') {
 									daNote.y += 8;
 								} else {
 									daNote.y -= 19;

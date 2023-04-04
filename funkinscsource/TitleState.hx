@@ -112,6 +112,10 @@ class TitleState extends MusicBeatState
 		}
 		#end*/
 
+		FlxG.autoPause = false;
+
+		FlxG.mouse.visible = true;
+
 		FlxG.game.focusLostFramerate = 60;
 		FlxG.sound.muteKeys = muteKeys;
 		FlxG.sound.volumeDownKeys = volumeDownKeys;
@@ -119,6 +123,8 @@ class TitleState extends MusicBeatState
 		FlxG.keys.preventDefaultKeys = [TAB];
 
 		PlayerSettings.init();
+
+		FlxG.mouse.visible = true;
 
 		curWacky = FlxG.random.getObject(getIntroTextShit());
 
@@ -254,6 +260,8 @@ class TitleState extends MusicBeatState
 				FlxG.sound.playMusic(Paths.music('freakyMenu'), 0);
 			}
 		}
+
+		FlxG.mouse.visible = true;
 
 		Conductor.changeBPM(titleJSON.bpm);
 		persistentUpdate = true;
@@ -432,7 +440,7 @@ class TitleState extends MusicBeatState
 			Conductor.songPosition = FlxG.sound.music.time;
 		// FlxG.watch.addQuick('amp', FlxG.sound.music.amplitude);
 
-		var pressedEnter:Bool = FlxG.keys.justPressed.ENTER || controls.ACCEPT;
+		var pressedEnter:Bool = FlxG.keys.justPressed.ENTER || controls.ACCEPT || FlxG.mouse.justPressed;
 
 		#if mobile
 		for (touch in FlxG.touches.list)

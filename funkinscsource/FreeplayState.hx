@@ -52,6 +52,7 @@ class FreeplayState extends MusicBeatState
 
 	override function create()
 	{
+		FlxG.mouse.visible = true;
 		//Paths.clearStoredMemory();
 		//Paths.clearUnusedMemory();
 		
@@ -351,21 +352,26 @@ class FreeplayState extends MusicBeatState
 				#end
 			}
 		}
+		else if(controls.RESET)
+		{
+			persistentUpdate = false;
+			openSubState(new ResetScoreSubState(songs[curSelected].songName, curDifficulty, songs[curSelected].songCharacter));
+			FlxG.sound.play(Paths.sound('scrollMenu'));
+		}
 
-		else if (accepted)
+		for (item in grpSongs.members)
+			if (accepted
+				|| (((FlxG.mouse.overlaps(item) && item.targetY == 0) || (FlxG.mouse.overlaps(iconArray[curSelected])))
+					&& FlxG.mouse.pressed))
+			{
+				AcceptedSong();
+			}
+
+		/*else if (accepted)
 		{
 			persistentUpdate = false;
 			var songLowercase:String = Paths.formatToSongPath(songs[curSelected].songName);
 			var poop:String = Highscore.formatSong(songLowercase, curDifficulty);
-			/*#if MODS_ALLOWED
-			if(!sys.FileSystem.exists(Paths.modsJson(songLowercase + '/' + poop)) && !sys.FileSystem.exists(Paths.json(songLowercase + '/' + poop))) {
-			#else
-			if(!OpenFlAssets.exists(Paths.json(songLowercase + '/' + poop))) {
-			#end
-				poop = songLowercase;
-				curDifficulty = 1;
-				Debug.logInfo('Couldnt find file');
-			}*/
 			Debug.logInfo(poop);
 
 			PlayState.SONG = Song.loadFromJson(poop, songLowercase);
@@ -386,14 +392,44 @@ class FreeplayState extends MusicBeatState
 			FlxG.sound.music.volume = 0;
 					
 			destroyFreeplayVocals();
-		}
-		else if(controls.RESET)
-		{
-			persistentUpdate = false;
-			openSubState(new ResetScoreSubState(songs[curSelected].songName, curDifficulty, songs[curSelected].songCharacter));
-			FlxG.sound.play(Paths.sound('scrollMenu'));
-		}
+		}*/
 		super.update(elapsed);
+	}
+
+	function AcceptedSong()
+	{
+		persistentUpdate = false;
+		var songLowercase:String = Paths.formatToSongPath(songs[curSelected].songName);
+		var poop:String = Highscore.formatSong(songLowercase, curDifficulty);
+		/*#if MODS_ALLOWED
+		if(!sys.FileSystem.exists(Paths.modsJson(songLowercase + '/' + poop)) && !sys.FileSystem.exists(Paths.json(songLowercase + '/' + poop))) {
+		#else
+		if(!OpenFlAssets.exists(Paths.json(songLowercase + '/' + poop))) {
+		#end
+			poop = songLowercase;
+			curDifficulty = 1;
+			Debug.logInfo('Couldnt find file');
+		}*/
+
+		Debug.logInfo(poop);
+		PlayState.SONG = Song.loadFromJson(poop, songLowercase);
+		PlayState.isStoryMode = false;
+		PlayState.storyDifficulty = curDifficulty;
+
+		Debug.logInfo('CURRENT WEEK: ' + WeekData.getWeekFileName());
+		if(colorTween != null) {
+			colorTween.cancel();
+		}
+			
+		if (FlxG.keys.pressed.SHIFT){
+			LoadingState.loadAndSwitchState(new ChartingState());
+		}else{
+			LoadingState.loadAndSwitchState(new PlayState());
+		}
+
+		FlxG.sound.music.volume = 0;
+					
+		destroyFreeplayVocals();
 	}
 
 	public static function destroyFreeplayVocals() {

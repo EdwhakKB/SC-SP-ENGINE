@@ -218,7 +218,7 @@ class Note extends FlxSprite
 
 			offsetX -= width / 2;
 
-			if (PlayState.isPixelStage)
+			if (PlayState.isPixelStage && ClientPrefs.noteSkin == 'NONE')
 				offsetX += 30;
 
 			if (prevNote.isSustainNote)
@@ -231,7 +231,7 @@ class Note extends FlxSprite
 					prevNote.scale.y *= PlayState.instance.songSpeed;
 				}
 
-				if(PlayState.isPixelStage) {
+				if(PlayState.isPixelStage && ClientPrefs.noteSkin == 'NONE') {
 					prevNote.scale.y *= 1.19;
 					prevNote.scale.y *= (6 / height); //Auto adjust note size
 				}
@@ -239,7 +239,7 @@ class Note extends FlxSprite
 				// prevNote.setGraphicSize();
 			}
 
-			if(PlayState.isPixelStage) {
+			if(PlayState.isPixelStage && ClientPrefs.noteSkin == 'NONE') {
 				scale.y *= PlayState.daPixelZoom;
 				updateHitbox();
 			}
@@ -261,7 +261,10 @@ class Note extends FlxSprite
 		if(texture.length < 1) {
 			skin = PlayState.SONG.arrowSkin;
 			if(skin == null || skin.length < 1) {
-				skin = 'Skins/Notes/'+ClientPrefs.noteSkin+'/NOTE_assets';
+				if (ClientPrefs.noteSkin != 'NONE')
+					skin = 'Skins/Notes/'+ClientPrefs.noteSkin+'/NOTE_assets';
+				else
+					skin = 'NOTE_assets';
 			}
 		}
 
@@ -275,7 +278,7 @@ class Note extends FlxSprite
 
 		var lastScaleY:Float = scale.y;
 		var blahblah:String = arraySkin.join('/');
-		if(PlayState.isPixelStage) {
+		if(PlayState.isPixelStage && ClientPrefs.noteSkin == 'NONE') {
 			if(isSustainNote) {
 				loadGraphic(Paths.image('pixelUI/' + blahblah + 'ENDS'));
 				width = width / 4;

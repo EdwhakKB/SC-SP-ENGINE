@@ -14,7 +14,7 @@ class ClientPrefs {
 	public static var flashing:Bool = true;
 	public static var globalAntialiasing:Bool = true;
 	public static var hudStyle:String = 'PSYCH';
-	public static var noteSkin:String = 'FNF';
+	public static var noteSkin:String = 'NONE';
 	public static var noteSplashes:Bool = true;
 	public static var lowQuality:Bool = false;
 	public static var shaders:Bool = true;
