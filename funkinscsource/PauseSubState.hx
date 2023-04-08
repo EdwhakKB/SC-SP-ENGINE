@@ -61,7 +61,7 @@ class PauseSubState extends MusicBeatSubstate
 			if(!PlayState.instance.startingSong)
 			{
 				num = 1;
-				//menuItemsOG.insert(3, 'Skip Time');
+				menuItemsOG.insert(3, 'Skip Time');
 			}
 			menuItemsOG.insert(3 + num, 'End Song');
 			menuItemsOG.insert(4 + num, 'Toggle Practice Mode');
@@ -162,7 +162,7 @@ class PauseSubState extends MusicBeatSubstate
 			pauseMusic.volume += 0.01 * elapsed;
 
 		super.update(elapsed);
-		//updateSkipTextStuff();
+		updateSkipTextStuff();
 
 		var upP = controls.UI_UP_P;
 		var downP = controls.UI_DOWN_P;
@@ -178,7 +178,7 @@ class PauseSubState extends MusicBeatSubstate
 		}
 
 		var daSelected:String = menuItems[curSelected];
-		/*switch (daSelected)
+		switch (daSelected)
 		{
 			case 'Skip Time':
 				if (controls.UI_LEFT_P)
@@ -206,7 +206,7 @@ class PauseSubState extends MusicBeatSubstate
 					else if(curTime < 0) curTime += FlxG.sound.music.length;
 					updateSkipTimeText();
 				}
-		}*/
+		}
 
 		if (accepted && (cantUnpause <= 0 || !ClientPrefs.controllerMode))
 		{
@@ -256,6 +256,7 @@ class PauseSubState extends MusicBeatSubstate
 						}
 					}, 5);
 					menuItems = [];
+					deleteSkipTimeText();
 					regenMenu();
 					//close();
 				case 'Change Difficulty':
@@ -271,7 +272,7 @@ class PauseSubState extends MusicBeatSubstate
 				case "Leave Charting Mode":
 					restartSong();
 					PlayState.chartingMode = false;
-				/*case 'Skip Time':
+				case 'Skip Time':
 					if(curTime < Conductor.songPosition)
 					{
 						PlayState.startOnTime = curTime;
@@ -285,7 +286,7 @@ class PauseSubState extends MusicBeatSubstate
 							PlayState.instance.setSongTime(curTime);
 						}
 						close();
-					}*/
+					}
 				case "End Song":
 					close();
 					PlayState.instance.finishSong(true);
@@ -332,7 +333,7 @@ class PauseSubState extends MusicBeatSubstate
 		switch (Number)
 		{
 			case 'three':
-				FlxG.sound.play(Paths.sound('intro3'), 1);
+				FlxG.sound.play(Paths.sound('intro3' + PlayState.instance.introSoundsSuffix), 1);
 			case 'two':
 				countdownReady = new FlxSprite().loadGraphic(Paths.image(introAlts[0]));
 				//countdownReady.cameras = [PlayState.instance.camHUD];
@@ -464,11 +465,11 @@ class PauseSubState extends MusicBeatSubstate
 				item.alpha = 1;
 				// item.setGraphicSize(Std.int(item.width));
 
-				/*if(item == skipTimeTracker)
+				if(item == skipTimeTracker)
 				{
 					curTime = Math.max(0, Conductor.songPosition);
 					updateSkipTimeText();
-				}*/
+				}
 			}
 		}
 	}
@@ -487,7 +488,7 @@ class PauseSubState extends MusicBeatSubstate
 			item.targetY = i;
 			grpMenuShit.add(item);
 
-			/*if(menuItems[i] == 'Skip Time')
+			if(menuItems[i] == 'Skip Time')
 			{
 				skipTimeText = new FlxText(0, 0, 0, '', 64);
 				skipTimeText.setFormat(Paths.font("vcr.ttf"), 64, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -498,13 +499,13 @@ class PauseSubState extends MusicBeatSubstate
 
 				updateSkipTextStuff();
 				updateSkipTimeText();
-			}*/
+			}
 		}
 		curSelected = 0;
 		changeSelection();
 	}
 	
-	/*function updateSkipTextStuff()
+	function updateSkipTextStuff()
 	{
 		if(skipTimeText == null || skipTimeTracker == null) return;
 
@@ -516,5 +517,5 @@ class PauseSubState extends MusicBeatSubstate
 	function updateSkipTimeText()
 	{
 		skipTimeText.text = FlxStringUtil.formatTime(Math.max(0, Math.floor(curTime / 1000)), false) + ' / ' + FlxStringUtil.formatTime(Math.max(0, Math.floor(FlxG.sound.music.length / 1000)), false);
-	}*/
+	}
 }
