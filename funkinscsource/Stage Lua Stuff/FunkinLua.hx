@@ -3039,7 +3039,7 @@ class FunkinLua {
 			});
 	
 			//set Actors
-			Lua_helper.add_callback(lua,"setActorX", function(x:Int,id:String) {
+			Lua_helper.add_callback(lua,"setActorX", function(x:Int,id:String, ?bg:Bool = false) {
 				var shit:Dynamic = getObjectDirectly2(id);
 				shit.x = x;
 			});

@@ -11,6 +11,8 @@ import openfl.display.Sprite;
 import openfl.events.Event;
 import openfl.display.StageScaleMode;
 import lime.app.Application;
+import lime.system.System;
+import lime.ui.Window;
 
 #if desktop
 import Discord.DiscordClient;
@@ -42,6 +44,10 @@ class Main extends Sprite
 
 	public static var focused:Bool = true;
 	public static var fpsVar:FPS;
+
+	public static var appName:String = ''; // Application name.
+
+	public static var internetConnection:Bool = false; // If the user is connected to internet.
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
 
@@ -90,6 +96,8 @@ class Main extends Sprite
 
 		// Run this first so we can see logs.
 		Debug.onInitProgram();
+
+		game.framerate = Application.current.window.displayMode.refreshRate;
 	
 		ClientPrefs.loadDefaultKeys();
 		addChild(new FlxGame(game.width, game.height, game.initialState, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
@@ -111,6 +119,9 @@ class Main extends Sprite
 		
 		#if CRASH_HANDLER
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
+		// Get first window in case the coder creates more windows.
+		@:privateAccess
+		appName = openfl.Lib.application.windows[0].__backend.parent.__attributes.title;
 		#end
 
 		#if desktop
@@ -133,6 +144,32 @@ class Main extends Sprite
 
 		// Finish up loading debug tools.
 		Debug.onGameStart();
+	}
+
+	public function checkInternetConnection()
+	{
+		Debug.logInfo('Checking Internet connection through URL: https://www.google.com"');
+		var http = new haxe.Http("https://www.google.com");
+		http.onStatus = function(status:Int)
+		{
+			switch status
+			{
+				case 200: // success
+					internetConnection = true;
+					Debug.logInfo('CONNECTED');
+				default: // error
+					internetConnection = false;
+					Debug.logInfo('NO INTERNET CONNECTION');
+			}
+		};
+
+		http.onError = function(e)
+		{
+			internetConnection = false;
+			Debug.logInfo('NO INTERNET CONNECTION');
+		}
+
+		http.request();
 	}
 
 	// Code was entirely made by sqirra-rng for their fnf engine named "Izzy Engine", big props to them!!!

@@ -33,6 +33,8 @@ class MusicBeatState extends modcharting.ModchartMusicBeatState
 		return PlayerSettings.player1.controls;
 
 	override function create() {
+		FlxG.mouse.enabled = true;
+		FlxG.mouse.visible = true;
 		camBeat = FlxG.camera;
 		var skip:Bool = FlxTransitionableState.skipNextTransOut;
 		super.create();

@@ -1,5 +1,6 @@
 package;
 
+import flixel.util.FlxDestroyUtil;
 import animateatlas.AtlasFrameMaker;
 import flixel.math.FlxPoint;
 import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
@@ -366,23 +367,26 @@ class Paths
 		if(FileSystem.exists(modKey)) {
 			if (!currentTrackedAssets.exists(modKey)){
 				var bitmap:BitmapData = BitmapData.fromFile(modKey);
-				var graphic:FlxGraphic = null;
 
 				var graphic:FlxGraphic = null;
 				if (gpuRender){
-					var texture = FlxG.stage.context3D.createTexture(bitmap.width, bitmap.height, BGRA, false, 0);
+					bitmap.lock();
+					var texture = FlxG.stage.context3D.createRectangleTexture(bitmap.width, bitmap.height, BGRA, true);
 					texture.uploadFromBitmapData(bitmap);
-					currentTrackedTextures.set(modKey, texture);
-					bitmap.dispose();
+					
 					bitmap.disposeImage();
+
+					FlxDestroyUtil.dispose(bitmap);
+
 					bitmap = null;
-					graphic = FlxGraphic.fromBitmapData(BitmapData.fromTexture(texture), false, modKey);
-					Debug.logTrace('Adding new texture to cache: $modKey');
+
+					bitmap = BitmapData.fromTexture(texture);
+
+					bitmap.unlock();
 				}
-				else{
-					graphic = FlxGraphic.fromBitmapData(bitmap, false, modKey, false);
-					Debug.logTrace('Adding new bitmap to cache: $modKey');
-				}
+
+				graphic = FlxGraphic.fromBitmapData(bitmap, false, modKey, false);
+
 				graphic.persist = true;
 				currentTrackedAssets.set(modKey, graphic);
 			}
@@ -392,7 +396,6 @@ class Paths
 			}
 			localTrackedAssets.push(modKey);
 			return currentTrackedAssets.get(modKey);
-
 			/**if(!currentTrackedAssets.exists(modKey)) {
 				var newBitmap:BitmapData = BitmapData.fromFile(modKey);
 				var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(newBitmap, false, modKey);
@@ -410,34 +413,37 @@ class Paths
 
 		//Debug.logInfo(path);
 		if (OpenFlAssets.exists(path, IMAGE)){
-			if (!currentTrackedAssets.exists(key)){
+			if (!currentTrackedAssets.exists(path)){
 				var bitmap:BitmapData = OpenFlAssets.getBitmapData(path, false);
-				var graphic:FlxGraphic = null;
 
 				var graphic:FlxGraphic = null;
 				if (gpuRender){
-					var texture = FlxG.stage.context3D.createTexture(bitmap.width, bitmap.height, BGRA, false, 0);
+					bitmap.lock();
+					var texture = FlxG.stage.context3D.createRectangleTexture(bitmap.width, bitmap.height, BGRA, true);
 					texture.uploadFromBitmapData(bitmap);
-					currentTrackedTextures.set(key, texture);
-					bitmap.dispose();
+					
 					bitmap.disposeImage();
+
+					FlxDestroyUtil.dispose(bitmap);
+
 					bitmap = null;
-					graphic = FlxGraphic.fromBitmapData(BitmapData.fromTexture(texture), false, key);
-					Debug.logTrace('Adding new texture to cache: $key');
+
+					bitmap = BitmapData.fromTexture(texture);
+
+					bitmap.unlock();
 				}
-				else{
-					graphic = FlxGraphic.fromBitmapData(bitmap, false, key, false);
-					Debug.logTrace('Adding new bitmap to cache: $key');
-				}
+
+				graphic = FlxGraphic.fromBitmapData(bitmap, false, path, false);
+
 				graphic.persist = true;
-				currentTrackedAssets.set(key, graphic);
+				currentTrackedAssets.set(path, graphic);
 			}
 			else{
 				// Get data from cache.
 				// Debug.logTrace('Loading existing image from cache: $key');
 			}
-			localTrackedAssets.push(key);
-			return currentTrackedAssets.get(key);
+			localTrackedAssets.push(path);
+			return currentTrackedAssets.get(path);
 		}
 		/*if (OpenFlAssets.exists(path, IMAGE)) {
 			if(!currentTrackedAssets.exists(path)) {

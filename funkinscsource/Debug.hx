@@ -26,8 +26,8 @@ using StringTools;
 class Debug
 {
 	static final LOG_STYLE_ERROR:LogStyle = new LogStyle('[ERROR] ', 'FF8888', 12, true, false, false, 'flixel/sounds/beep', true);
-	static final LOG_STYLE_WARN:LogStyle = new LogStyle('[WARN ] ', 'D9F85C', 12, true, false, false, 'flixel/sounds/beep', true);
-	static final LOG_STYLE_INFO:LogStyle = new LogStyle('[INFO ] ', '5CF878', 12, false);
+	static final LOG_STYLE_WARN:LogStyle = new LogStyle('[WARN] ', 'D9F85C', 12, true, false, false, 'flixel/sounds/beep', true);
+	static final LOG_STYLE_INFO:LogStyle = new LogStyle('[INFO] ', '5CF878', 12, false);
 	static final LOG_STYLE_TRACE:LogStyle = new LogStyle('[TRACE] ', '5CF878', 12, false);
 
 	static var logFileWriter:DebugLogWriter = null;
@@ -226,16 +226,37 @@ class Debug
 	public static function onGameStart()
 	{
 		// Add the mouse position to the debug Watch window.
-		FlxG.watch.addMouse();
+		//FlxG.watch.addMouse();
 
-		defineTrackerProfiles();
-		defineConsoleCommands();
+		//defineTrackerProfiles();
+		//defineConsoleCommands();
 
 		// Now we can remember the log level.
 		if (FlxG.save.data.debugLogLevel == null)
 			FlxG.save.data.debugLogLevel = "TRACE";
 
 		logFileWriter.setLogLevel(FlxG.save.data.debugLogLevel);
+	}
+
+	public static function clearLogsFolder()
+	{
+		#if FEATURE_FILESYSTEM
+		var logFilePath = 'logs/${Sys.time()}.log';
+		var lastIndex:Int = logFilePath.lastIndexOf("/");
+		var logFolderPath:String = logFilePath.substr(0, lastIndex);
+		var files = sys.FileSystem.readDirectory(logFolderPath); // Reading all logs in an array.
+
+		for (file in files)
+		{
+			// To not consider the last one that is the current log text the game is writing to avoid crashes
+			if (files.indexOf(file) != files.length - 1)
+				sys.FileSystem.deleteFile('$logFolderPath/$file'); // Deleting each one from the log directory.
+		}
+
+		logInfo('Cleared logs folder.');
+		#else
+		return;
+		#end
 	}
 
 	static function writeToFlxGLog(data:Array<Dynamic>, logStyle:LogStyle)

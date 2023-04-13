@@ -26,6 +26,12 @@ class MusicBeatSubstate extends FlxSubState
 	inline function get_controls():Controls
 		return PlayerSettings.player1.controls;
 
+	override function create()
+	{
+		FlxG.mouse.enabled = true;
+		super.create();
+	}
+
 	override function update(elapsed:Float)
 	{
 		//everyStep();
