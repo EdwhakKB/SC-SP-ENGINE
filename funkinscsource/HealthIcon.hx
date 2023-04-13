@@ -8,9 +8,10 @@ using StringTools;
 class HealthIcon extends FlxSprite
 {
 	public var sprTracker:FlxSprite;
-	private var isOldIcon:Bool = false;
-	private var isPlayer:Bool = false;
-	private var char:String = '';
+	public var isOldIcon:Bool = false;
+	public var isPlayer:Bool = false;
+	public var hasWinning:Bool = true;
+	public var char:String = '';
 
 	public function new(char:String = 'bf', isPlayer:Bool = false)
 	{
@@ -41,14 +42,31 @@ class HealthIcon extends FlxSprite
 			if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-' + char; //Older versions of psych engine's support
 			if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-face'; //Prevents crash from missing icon
 			var file:Dynamic = Paths.image(name);
+			var fileSize:FlxSprite = new FlxSprite().loadGraphic(file); // blantados code
 
 			loadGraphic(file); //Load stupidly first for getting the file size
-			loadGraphic(file, true, Math.floor(width / 2), Math.floor(height)); //Then load it fr
+			//loadGraphic(file, true, Math.floor(width / 2), Math.floor(height)); //Then load it fr
+			loadGraphic(file, true, 150, 150);
 			iconOffsets[0] = (width - 150) / 2;
 			iconOffsets[1] = (width - 150) / 2;
 			updateHitbox();
 
-			animation.add(char, [0, 1], 0, false, isPlayer);
+			var animArray:Array<Int> = [];
+
+			if (fileSize.width == 450) // now with winning icon support
+			{
+				animArray = [0, 1, 2];
+				hasWinning = true;
+			}
+			else
+			{
+				animArray = [0, 1];
+				hasWinning = false;
+			}
+
+			Debug.logInfo('hasWinning Icon: ' + hasWinning);
+
+			animation.add(char, animArray, 0, false, isPlayer);
 			animation.play(char);
 			this.char = char;
 

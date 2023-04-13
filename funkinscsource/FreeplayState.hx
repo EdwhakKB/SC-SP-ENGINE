@@ -360,9 +360,9 @@ class FreeplayState extends MusicBeatState
 		}
 
 		for (item in grpSongs.members)
-			if (accepted
+			if ((accepted
 				|| (((FlxG.mouse.overlaps(item) && item.targetY == 0) || (FlxG.mouse.overlaps(iconArray[curSelected])))
-					&& FlxG.mouse.pressed))
+					&& FlxG.mouse.pressed)) && !space)
 			{
 				AcceptedSong();
 			}

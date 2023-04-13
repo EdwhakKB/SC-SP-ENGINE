@@ -68,6 +68,9 @@ class ClientPrefs {
 	public static var healthSystem:String = 'Glow_Kade';
 	public static var inputSystem:String = 'Glow_Kade';
 
+	//New Stuff
+	public static var useGL:Bool = true;
+
 	//Every key has two binds, add your key bind down here and then add your control on options/ControlsSubState.hx and Controls.hx
 	public static var keyBinds:Map<String, Array<FlxKey>> = [
 		//Key Bind, Name for ControlsSubState
@@ -118,6 +121,9 @@ class ClientPrefs {
 		//Input
 		FlxG.save.data.inputSystem = inputSystem;
 		FlxG.save.data.healthSystem = healthSystem;
+
+		//New Stuff
+		FlxG.save.data.useGL = useGL;
 
 		//FlxG.save.data.cursing = cursing;
 		//FlxG.save.data.violence = violence;
@@ -203,6 +209,11 @@ class ClientPrefs {
 		}
 		if (FlxG.save.data.healthSystem != null) {
 			healthSystem = FlxG.save.data.healthSystem;
+		}
+		
+		//New Stuff
+		if (FlxG.save.data.useGL!= null) {
+			useGL = FlxG.save.data.useGL;
 		}
 
 		/*if(FlxG.save.data.cursing != null) {

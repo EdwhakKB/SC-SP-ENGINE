@@ -42,12 +42,6 @@ class PauseSubState extends MusicBeatSubstate
 	//var botplayText:FlxText;
 	public static var songName:String = '';
 
-	var crtFilter:FlxSprite;
-	var whiteAnimeshoun:FlxSprite;
-	var camAnimeshoun:FlxSprite;
-	var staticAnimeshoun:FlxSprite;
-	var constantstaticAnimeshoun:FlxSprite;
-
 	public function new(x:Float, y:Float)
 	{
 		super();
