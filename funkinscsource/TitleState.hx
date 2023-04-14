@@ -140,7 +140,9 @@ class TitleState extends MusicBeatState
 		ClientPrefs.loadPrefs();
 
 		if (Main.internetConnection)
-			Highscore.load();
+		      getBuildVer();
+			
+		Highscore.load();
 
 		// IGNORE THIS!!!
 		titleJSON = Json.parse(Paths.getTextFromFile('images/gfDanceTitle.json'));
