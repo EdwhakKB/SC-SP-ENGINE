@@ -81,9 +81,6 @@ class GameOverSubstate extends MusicBeatSubstate
 				endSoundNameDad = 'gameOverEnd';
 		}
 
-		if (diedToScooby && !opponentMode)
-			Debug.logInfo("i'll get it right, next time");
-
 		if (opponentMode)
 		{
 			dad = new Character(x, y, characterNameDad);
