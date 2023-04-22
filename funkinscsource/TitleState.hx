@@ -89,7 +89,7 @@ class TitleState extends MusicBeatState
 		(cast(Lib.current.getChildAt(0), Main)).checkInternetConnection();
 
 		Paths.clearStoredMemory();
-		Paths.clearUnusedMemory();
+		Paths.clearUnusedMemory(ClientPrefs.useGL, false);
 
 		#if LUA_ALLOWED
 		Paths.pushGlobalMods();
@@ -140,7 +140,9 @@ class TitleState extends MusicBeatState
 		ClientPrefs.loadPrefs();
 
 		if (Main.internetConnection)
-			Highscore.load();
+			getBuildVer();
+			
+		Highscore.load();
 
 		// IGNORE THIS!!!
 		titleJSON = Json.parse(Paths.getTextFromFile('images/gfDanceTitle.json'));

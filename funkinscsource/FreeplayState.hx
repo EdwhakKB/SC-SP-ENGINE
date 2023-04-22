@@ -236,6 +236,7 @@ class FreeplayState extends MusicBeatState
 	var instPlaying:Int = -1;
 	public static var vocals:FlxSound = null;
 	var holdTime:Float = 0;
+	var startedBopping:Bool = false;
 	override function update(elapsed:Float)
 	{
 		if (FlxG.sound.music.volume < 0.7)
@@ -311,6 +312,22 @@ class FreeplayState extends MusicBeatState
 		else if (controls.UI_RIGHT_P)
 			changeDiff(1);
 		else if (upP || downP) changeDiff();
+
+		/*if (FlxG.sound.music.playing)
+			startedBopping = true;
+		else
+			startedBopping = false;
+
+		if (startedBopping){
+			var bpmRatio = Conductor.bpm / 100;
+			if (ClientPrefs.camZooms)
+			{
+				FlxG.camera.zoom = FlxMath.lerp(1, FlxG.camera.zoom, CoolUtil.boundTo(1 - (elapsed * 3.125 * bpmRatio), 0, 1));
+			}
+			var mult:Float = FlxMath.lerp(1, iconArray[curSelected].scale.x, CoolUtil.boundTo(1 - (elapsed * 35), 0, 1));
+			iconArray[curSelected].scale.set(mult, mult);
+			iconArray[curSelected].updateHitbox();
+		}*/
 
 		if (controls.BACK)
 		{
@@ -395,6 +412,31 @@ class FreeplayState extends MusicBeatState
 		}*/
 		super.update(elapsed);
 	}
+
+	/*override function beatHit()
+	{
+		super.beatHit();
+	}
+	
+	override function stepHit()
+	{
+		super.stepHit();
+
+		if (startedBopping)
+		{
+			if (ClientPrefs.camZooms && FlxG.camera.zoom < 1.35 && curStep % 16 == 0)
+			{
+				FlxG.camera.zoom += 0.03;
+			}
+			
+			if (curStep % 4 == 0)
+			{
+				iconArray[curSelected].scale.set(1.2, 1.2);			
+			
+				iconArray[curSelected].updateHitbox();
+			}
+		}
+	}*/
 
 	function AcceptedSong()
 	{

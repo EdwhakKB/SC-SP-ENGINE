@@ -93,6 +93,13 @@ class VisualsUISubState extends BaseOptionsMenu
 			true);
 		addOption(option);
 
+		var option:Option = new Option('Health Colors',
+			"If unchecked, No health colors, Back to normal funkin colors",
+			'healthColor',
+			'bool',
+			true);
+		addOption(option);
+
 		var option:Option = new Option('Health Bar Transparency',
 			'How much transparent should the health bar and icons be.',
 			'healthBarAlpha',

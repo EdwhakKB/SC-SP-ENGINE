@@ -52,7 +52,7 @@ class StoryMenuState extends MusicBeatState
 	override function create()
 	{
 		Paths.clearStoredMemory();
-		Paths.clearUnusedMemory();
+		Paths.clearUnusedMemory(ClientPrefs.useGL, false);
 
 		PlayState.isStoryMode = true;
 		WeekData.reloadWeekFiles(true);
@@ -227,22 +227,27 @@ class StoryMenuState extends MusicBeatState
 				changeDifficulty();
 			}
 
-			if (controls.UI_RIGHT)
+			var mouseRight = (FlxG.mouse.overlaps(rightArrow, FlxG.camera) && FlxG.mouse.justPressed);
+			var mouseLeft = (FlxG.mouse.overlaps(leftArrow, FlxG.camera) && FlxG.mouse.justPressed);
+
+			if (controls.UI_RIGHT || mouseRight)
 				rightArrow.animation.play('press')
 			else
 				rightArrow.animation.play('idle');
 
-			if (controls.UI_LEFT)
+			if (controls.UI_LEFT || mouseLeft)
 				leftArrow.animation.play('press');
 			else
 				leftArrow.animation.play('idle');
 
-			if (controls.UI_RIGHT_P)
+			if (controls.UI_RIGHT_P || mouseRight)
 				changeDifficulty(1);
-			else if (controls.UI_LEFT_P)
+			else if (controls.UI_LEFT_P || mouseLeft)
 				changeDifficulty(-1);
 			else if (upP || downP)
 				changeDifficulty();
+
+			var weekClicked = (FlxG.mouse.overlaps(grpWeekText.members[curWeek]) && FlxG.mouse.pressed && !stopspamming);
 
 			if(FlxG.keys.justPressed.CONTROL)
 			{
@@ -255,7 +260,7 @@ class StoryMenuState extends MusicBeatState
 				openSubState(new ResetScoreSubState('', curDifficulty, '', curWeek));
 				//FlxG.sound.play(Paths.sound('scrollMenu'));
 			}
-			else if (controls.ACCEPT)
+			else if (controls.ACCEPT || weekClicked)
 			{
 				selectWeek();
 			}

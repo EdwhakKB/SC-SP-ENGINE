@@ -50,6 +50,7 @@ class ClientPrefs {
 		'songspeed' => 1.0,
 		'healthgain' => 1.0,
 		'healthloss' => 1.0,
+		'opponent' => false,
 		'instakill' => false,
 		'modchart' => true,
 		'practice' => false,
@@ -70,6 +71,8 @@ class ClientPrefs {
 
 	//New Stuff
 	public static var useGL:Bool = true;
+	public static var healthColor:Bool = true;
+	public static var instantRespawn:Bool = false;
 
 	//Every key has two binds, add your key bind down here and then add your control on options/ControlsSubState.hx and Controls.hx
 	public static var keyBinds:Map<String, Array<FlxKey>> = [
@@ -124,6 +127,8 @@ class ClientPrefs {
 
 		//New Stuff
 		FlxG.save.data.useGL = useGL;
+		FlxG.save.data.healthColor = healthColor;
+		FlxG.save.data.instantRespawn = instantRespawn;
 
 		//FlxG.save.data.cursing = cursing;
 		//FlxG.save.data.violence = violence;
@@ -212,8 +217,16 @@ class ClientPrefs {
 		}
 		
 		//New Stuff
-		if (FlxG.save.data.useGL!= null) {
+		if (FlxG.save.data.useGL != null) {
 			useGL = FlxG.save.data.useGL;
+		}
+
+		if (FlxG.save.data.healthColor != null) {
+			healthColor = FlxG.save.data.healthColor;
+		}
+
+		if (FlxG.save.data.instantRespawn != null) {
+			instantRespawn = FlxG.save.data.instantRespawn;
 		}
 
 		/*if(FlxG.save.data.cursing != null) {

@@ -13,7 +13,6 @@ import openfl.display.StageScaleMode;
 import lime.app.Application;
 import lime.system.System;
 import lime.ui.Window;
-
 #if desktop
 import Discord.DiscordClient;
 #end

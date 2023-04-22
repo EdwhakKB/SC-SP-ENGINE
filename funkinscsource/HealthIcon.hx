@@ -36,6 +36,9 @@ class HealthIcon extends FlxSprite
 	}
 
 	private var iconOffsets:Array<Float> = [0, 0];
+	public var findAutoMaticSize:Bool;
+	public var needAutoSize:Bool;
+
 	public function changeIcon(char:String) {
 		if(this.char != char) {
 			var name:String = 'icons/' + char;
@@ -45,8 +48,19 @@ class HealthIcon extends FlxSprite
 			var fileSize:FlxSprite = new FlxSprite().loadGraphic(file); // blantados code
 
 			loadGraphic(file); //Load stupidly first for getting the file size
-			//loadGraphic(file, true, Math.floor(width / 2), Math.floor(height)); //Then load it fr
-			loadGraphic(file, true, 150, 150);
+
+			if (fileSize.width == 450 /*&& fileSize.height == 150*/) // now with winning icon support
+				needAutoSize = false;
+
+			findAutoMaticSize = (fileSize.width > 450 || 300 < fileSize.width);
+
+			/*Debug.logInfo('Found Automatic Size: ' + findAutoMaticSize);
+			Debug.logInfo('Need Automatic Size: ' + findAutoMaticSize);*/
+
+			if (findAutoMaticSize && needAutoSize)
+				loadGraphic(file, true, Math.floor(width / 2), Math.floor(height)); //Then load it fr
+			else
+				loadGraphic(file, true, 150, 150);
 			iconOffsets[0] = (width - 150) / 2;
 			iconOffsets[1] = (width - 150) / 2;
 			updateHitbox();
@@ -64,14 +78,14 @@ class HealthIcon extends FlxSprite
 				hasWinning = false;
 			}
 
-			Debug.logInfo('hasWinning Icon: ' + hasWinning);
+			//Debug.logInfo('hasWinning Icon: ' + hasWinning);
 
 			animation.add(char, animArray, 0, false, isPlayer);
 			animation.play(char);
 			this.char = char;
 
 			antialiasing = ClientPrefs.globalAntialiasing;
-			if(char.endsWith('-pixel')) {
+			if(char.contains('pixel')) {
 				antialiasing = false;
 			}
 		}

@@ -47,6 +47,8 @@ class Note extends FlxSprite
 	public var isSustainNote:Bool = false;
 	public var noteType(default, set):String = null;
 
+	public var dType:Int = 0;
+	
 	public var eventName:String = '';
 	public var eventLength:Int = 0;
 	public var eventVal1:String = '';
@@ -176,7 +178,13 @@ class Note extends FlxSprite
 		isSustainNote = sustainNote;
 		this.inEditor = inEditor;
 
-		x += (ClientPrefs.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X) + 50;
+		var scrollMidX = (PlayState.STRUM_X_MIDDLESCROLL = (PlayState.instance.opponentMode ? 278 : -278));
+
+		if (PlayState.instance.opponentMode)
+			x += (ClientPrefs.middleScroll ? scrollMidX : PlayState.STRUM_X) + 50;
+		else
+			x -= (ClientPrefs.middleScroll ? scrollMidX : PlayState.STRUM_X) + 50;
+		
 		// MAKE SURE ITS DEFINITELY OFF SCREEN?
 		y -= 2000;
 		this.strumTime = strumTime;

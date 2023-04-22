@@ -3148,6 +3148,28 @@ class FunkinLua {
 			return daColor;
 		});
 
+		Lua_helper.add_callback(lua,"setCamFollow", function(x:Float, y:Float) {
+			PlayState.instance.isCameraOnForcedPos = true;
+			PlayState.instance.camFollow.set(x, y);
+		});
+
+		Lua_helper.add_callback(lua,"offCamFollow", function(id:String) {
+			PlayState.instance.isCameraOnForcedPos = false;
+		});
+
+		Lua_helper.add_callback(lua,"snapCam", function(x:Float, y:Float) {
+			PlayState.instance.isCameraOnForcedPos = true;
+			
+			var camPosition:FlxObject = new FlxObject(0, 0, 1, 1);
+			camPosition.setPosition(x, y);
+			FlxG.camera.focusOn(camPosition.getPosition());
+		});
+
+		Lua_helper.add_callback(lua,"resetSnapCam", function(id:String) {
+			//The string does absolutely nothing
+			//PlayState.instance.defaultCamFollow = true;
+		});
+
 		call('onCreate', []);
 		#end
 	}

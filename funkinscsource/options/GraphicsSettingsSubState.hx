@@ -54,7 +54,7 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 		addOption(option);
 
 		var option:Option = new Option('GPU Rendering',
-			'If unchecked, disables GPU Rendering, decreases performance.',
+			'If unchecked, disables GPU Rendering, decreases performance. (Restart game for complete changes!)',
 			'useGL',
 			'bool',
 			true);

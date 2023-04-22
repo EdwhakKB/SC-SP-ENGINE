@@ -161,6 +161,13 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			['Glow_Kade', 'Psych']);
 		addOption(option);
 
+		var option:Option = new Option('Instant Respawning',
+			"If checked, You have to respawn, Else instant respawn!",
+			'instantRespawn',
+			'bool',
+			false);
+		addOption(option);
+
 		super();
 	}
 

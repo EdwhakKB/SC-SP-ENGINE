@@ -490,6 +490,7 @@ class ModchartEditorState extends MusicBeatState
     var dirtyUpdateEvents:Bool = false;
     var dirtyUpdateModifiers:Bool = false;
     var totalElapsed:Float = 0;
+    var camZooming:Bool = false;
     override public function update(elapsed:Float)
     {
         totalElapsed += elapsed;
@@ -836,6 +837,19 @@ class ModchartEditorState extends MusicBeatState
         }
 
         activeModifiersText.text = leText;
+
+       /* camZooming = FlxG.sound.music.playing;
+
+		if (camZooming) {
+            FlxG.camera.zoom = FlxMath.lerp(1, FlxG.camera.zoom, CoolUtil.boundTo(1 - (elapsed * 3.125 * 1 * playbackSpeed), 0, 1));
+            camHUD.zoom = FlxMath.lerp(1, camHUD.zoom, CoolUtil.boundTo(1 - (elapsed * 3.125 * 1 * playbackSpeed), 0, 1));
+        }
+
+		if (camZooming && FlxG.camera.zoom < 1.35 && ClientPrefs.camZooms && curStep % 16 == 0)
+		{
+			FlxG.camera.zoom += 0.015;
+            camHUD.zoom += 0.03;
+		}*/
     }
 
     function addNewEvent(time:Float)

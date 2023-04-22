@@ -13,6 +13,8 @@ import flixel.tweens.FlxTween;
 class GameOverSubstate extends MusicBeatSubstate
 {
 	public var boyfriend:Boyfriend;
+	public var dad:Character;
+
 	var camFollow:FlxPoint;
 	var camFollowPos:FlxObject;
 	var updateCamera:Bool = false;
@@ -25,18 +27,38 @@ class GameOverSubstate extends MusicBeatSubstate
 	public static var loopSoundName:String = 'gameOver';
 	public static var endSoundName:String = 'gameOverEnd';
 
+	public static var characterNameDad:String = 'dad-dead';
+	public static var deathSoundNameDad:String = 'fnf_loss_sfx';
+	public static var loopSoundNameDad:String = 'gameOver';
+	public static var endSoundNameDad:String = 'gameOverEnd';
+
+
 	public static var instance:GameOverSubstate;
 
 	public static function resetVariables() {
-		characterName = 'bf-dead';
-		deathSoundName = 'fnf_loss_sfx';
-		loopSoundName = 'gameOver';
-		endSoundName = 'gameOverEnd';
+		if (!PlayState.instance.opponentMode){
+			characterName = 'bf-dead';
+			deathSoundName = 'fnf_loss_sfx';
+			loopSoundName = 'gameOver';
+			endSoundName = 'gameOverEnd';
+		}
+		else
+		{
+			characterNameDad = 'dad-dead';
+			deathSoundNameDad = 'fnf_loss_sfx';
+			loopSoundNameDad = 'gameOver';
+			endSoundNameDad = 'gameOverEnd';
+		}
 	}
+
+	public static var opponentMode:Bool = false;
+	var char:Character;
 
 	override function create()
 	{
 		instance = this;
+		opponentMode = PlayState.instance.opponentMode;
+		char = opponentMode ? dad : boyfriend;
 		PlayState.instance.callOnLuas('onGameOverStart', []);
 
 		super.create();
@@ -50,12 +72,34 @@ class GameOverSubstate extends MusicBeatSubstate
 
 		Conductor.songPosition = 0;
 
-		boyfriend = new Boyfriend(x, y, characterName);
-		boyfriend.x += boyfriend.positionArray[0];
-		boyfriend.y += boyfriend.positionArray[1];
-		add(boyfriend);
+		switch (PlayState.instance.dad.curCharacter)
+		{
+			default:
+				characterNameDad = PlayState.instance.dad.curCharacter + '-dead';
+				deathSoundNameDad = 'fnf_loss_sfx';
+				loopSoundNameDad = 'gameOver';
+				endSoundNameDad = 'gameOverEnd';
+		}
 
-		camFollow = new FlxPoint(boyfriend.getGraphicMidpoint().x, boyfriend.getGraphicMidpoint().y);
+		if (diedToScooby && !opponentMode)
+			Debug.logInfo("i'll get it right, next time");
+
+		if (opponentMode)
+		{
+			dad = new Character(x, y, characterNameDad);
+			dad.x += dad.positionArray[0];
+			dad.y += dad.positionArray[1];
+			add(dad);
+		}
+		else
+		{
+			boyfriend = new Boyfriend(x, y, characterName);
+			boyfriend.x += boyfriend.positionArray[0];
+			boyfriend.y += boyfriend.positionArray[1];
+			add(boyfriend);
+		}
+
+		camFollow = new FlxPoint(char.getGraphicMidpoint().x, char.getGraphicMidpoint().y);
 
 		FlxG.sound.play(Paths.sound(deathSoundName));
 		Conductor.changeBPM(100);
@@ -64,18 +108,20 @@ class GameOverSubstate extends MusicBeatSubstate
 		FlxG.camera.scroll.set();
 		FlxG.camera.target = null;
 
-		boyfriend.playAnim('firstDeath');
+		char.playAnim('firstDeath');
 
 		camFollowPos = new FlxObject(0, 0, 1, 1);
 		camFollowPos.setPosition(FlxG.camera.scroll.x + (FlxG.camera.width / 2), FlxG.camera.scroll.y + (FlxG.camera.height / 2));
 		add(camFollowPos);
 	}
 
+	var startVibin:Bool = false;
 	var isFollowingAlready:Bool = false;
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
 
+		var char:Character = opponentMode ? dad : boyfriend;
 		PlayState.instance.callOnLuas('onUpdate', [elapsed]);
 		if(updateCamera) {
 			var lerpVal:Float = CoolUtil.boundTo(elapsed * 0.6, 0, 1);
@@ -104,18 +150,18 @@ class GameOverSubstate extends MusicBeatSubstate
 			PlayState.instance.callOnLuas('onGameOverConfirm', [false]);
 		}
 
-		if (boyfriend.animation.curAnim != null && boyfriend.animation.curAnim.name == 'firstDeath')
+		if (char.animation.curAnim != null && char.animation.curAnim.name == 'firstDeath')
 		{
-			if(boyfriend.animation.curAnim.curFrame >= 12 && !isFollowingAlready)
+			if(char.animation.curAnim.curFrame >= 12 && !isFollowingAlready)
 			{
 				FlxG.camera.follow(camFollowPos, LOCKON, 1);
 				updateCamera = true;
 				isFollowingAlready = true;
 			}
 
-			if (boyfriend.animation.curAnim.finished && !playingDeathSound)
+			if (char.animation.curAnim.name == 'firstDeath' && char.animation.curAnim.finished && !playingDeathSound)
 			{
-				if (PlayState.SONG.stage == 'tank')
+				if (PlayState.SONG.stage == 'tank' && !opponentMode)
 				{
 					playingDeathSound = true;
 					coolStartDeath(0.2);
@@ -134,7 +180,7 @@ class GameOverSubstate extends MusicBeatSubstate
 				{
 					coolStartDeath();
 				}
-				boyfriend.startedDeath = true;
+				startVibin = true;
 			}
 		}
 
@@ -149,7 +195,13 @@ class GameOverSubstate extends MusicBeatSubstate
 	{
 		super.beatHit();
 
-		//FlxG.log.add('beat');
+		if (startVibin && !isEnding)
+		{
+			char.playAnim('deathLoop', true);
+		}
+		#if debug
+		FlxG.log.add('beat');
+		#end
 	}
 
 	var isEnding:Bool = false;
@@ -164,7 +216,7 @@ class GameOverSubstate extends MusicBeatSubstate
 		if (!isEnding)
 		{
 			isEnding = true;
-			boyfriend.playAnim('deathConfirm', true);
+			char.playAnim('deathConfirm', true);
 			FlxG.sound.music.stop();
 			FlxG.sound.play(Paths.music(endSoundName));
 			new FlxTimer().start(0.7, function(tmr:FlxTimer)

@@ -72,7 +72,7 @@ class Paths
 		'assets/shared/music/tea-time.$SOUND_EXT',
 	];
 	/// haya I love you for the base cache dump I took to the max
-	public static function clearUnusedMemory() {
+	public static function clearUnusedMemory(gpuRender:Bool, notITG:Bool) {
 		// clear non local assets in the tracked assets list
 		var counter:Int = 0;
 		for (key in currentTrackedAssets.keys()) {
@@ -80,11 +80,14 @@ class Paths
 			if (!localTrackedAssets.contains(key)
 				&& !dumpExclusions.contains(key)) {
 				// get rid of it
-				if (currentTrackedTextures.exists(key)) {
-					var texture:Null<Texture> = currentTrackedTextures.get(key);
-					texture.dispose();
-					texture = null;
-					currentTrackedTextures.remove(key);
+				if ((gpuRender || !gpuRender) && !notITG)
+				{
+					if (currentTrackedTextures.exists(key)) {
+						var texture:Null<Texture> = currentTrackedTextures.get(key);
+						texture.dispose();
+						texture = null;
+						currentTrackedTextures.remove(key);
+					}	
 				}
 
 				var obj = currentTrackedAssets.get(key);
@@ -361,7 +364,7 @@ class Paths
 	}
 
 	public static function returnGraphic(key:String, ?library:String, ?gpuRender:Bool) {
-		gpuRender = gpuRender != null ? gpuRender : FlxG.save.data.gpuRender;
+		gpuRender = gpuRender != null ? gpuRender : ClientPrefs.useGL;
 		#if MODS_ALLOWED
 		var modKey:String = modsImages(key);
 		if(FileSystem.exists(modKey)) {
@@ -454,7 +457,7 @@ class Paths
 			localTrackedAssets.push(path);
 			return currentTrackedAssets.get(path);
 		}*/
-		Debug.logInfo('oh no its returning null NOOOO');
+		Debug.logWarn('oh no its returning null NOOOO');
 		Debug.logWarn('Could not find image at path $path');
 		return null;
 	}
@@ -527,9 +530,6 @@ class Paths
 
 					newGraphic = FlxGraphic.fromBitmapData(BitmapData.fromTexture(texture), false, key);
 				} 
-				else{
-					newGraphic = FlxGraphic.fromBitmapData(newBitmap, false, key);
-				}
 
 				newGraphic.persist = true;
 				currentTrackedAssets.set(key, newGraphic);

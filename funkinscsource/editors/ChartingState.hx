@@ -91,7 +91,8 @@ class ChartingState extends MusicBeatState
 		['Screen Shake', "Value 1: Camera shake\nValue 2: HUD shake\n\nEvery value works as the following example: \"1, 0.05\".\nThe first number (1) is the duration.\nThe second number (0.05) is the intensity."],
 		['Change Character', "Value 1: Character to change (Dad, BF, GF)\nValue 2: New character's name"],
 		['Change Scroll Speed', "Value 1: Scroll Speed Multiplier (1 is default)\nValue 2: Time it takes to change fully in seconds."],
-		['Set Property', "Value 1: Variable name\nValue 2: New value"]
+		['Set Property', "Value 1: Variable name\nValue 2: New value"],
+		['Reset Animation', "Resets the characters animation vars\n\nValue 1: Character Name\nValue 2: Nothing"]
 	];
 
 	var _file:FileReference;
@@ -670,6 +671,7 @@ class ChartingState extends MusicBeatState
 	var check_changeBPM:FlxUICheckBox;
 	var stepperSectionBPM:FlxUINumericStepper;
 	var check_altAnim:FlxUICheckBox;
+	var stepperDType:FlxUINumericStepper;
 
 	var sectionToCopy:Int = 0;
 	var notesCopied:Array<Dynamic>;
@@ -709,6 +711,10 @@ class ChartingState extends MusicBeatState
 		}
 		stepperSectionBPM.name = 'section_bpm';
 		blockPressWhileTypingOnStepper.push(stepperSectionBPM);
+
+		stepperDType = new FlxUINumericStepper(130, stepperSectionBPM.y, 1, 0, 0, 999, 0);
+		stepperDType.value = 0;
+		stepperDType.name = 'section_dtype';
 
 		var check_eventsSec:FlxUICheckBox = null;
 		var check_notesSec:FlxUICheckBox = null;
@@ -914,22 +920,13 @@ class ChartingState extends MusicBeatState
 		});
 
 		tab_group_section.add(new FlxText(stepperBeats.x, stepperBeats.y - 15, 0, 'Beats per Section:'));
-		tab_group_section.add(stepperBeats);
-		tab_group_section.add(stepperSectionBPM);
-		tab_group_section.add(check_mustHitSection);
-		tab_group_section.add(check_gfSection);
-		tab_group_section.add(check_altAnim);
-		tab_group_section.add(check_changeBPM);
-		tab_group_section.add(copyButton);
-		tab_group_section.add(pasteButton);
-		tab_group_section.add(clearSectionButton);
-		tab_group_section.add(check_notesSec);
-		tab_group_section.add(check_eventsSec);
-		tab_group_section.add(swapSection);
-		tab_group_section.add(stepperCopy);
-		tab_group_section.add(copyLastButton);
-		tab_group_section.add(duetButton);
-		tab_group_section.add(mirrorButton);
+
+		var swagArray:Array<Dynamic> = [stepperBeats, stepperSectionBPM, stepperDType, check_mustHitSection, check_gfSection, check_changeBPM, copyButton, pasteButton, clearSectionButton, check_notesSec, check_eventsSec, swapSection, stepperCopy, copyLastButton, duetButton, mirrorButton];
+		for (i in 0...swagArray.length){
+			tab_group_section.add(swagArray[i]);
+		}
+
+		tab_group_section.add(new FlxText(stepperDType.x + 60, stepperDType.y,'Section dType'));
 
 		UI_box.addGroup(tab_group_section);
 	}
@@ -1486,6 +1483,11 @@ class ChartingState extends MusicBeatState
 			{
 				vocals.volume = nums.value;
 			}
+			else if (wname == 'section_dtype')
+			{
+				_song.notes[curSec].dType = Std.int(nums.value);
+				updateGrid();
+			}
 		}
 		else if(id == FlxUIInputText.CHANGE_EVENT && (sender is FlxUIInputText)) {
 			if(sender == noteSplashesInputText) {
@@ -1549,6 +1551,7 @@ class ChartingState extends MusicBeatState
 
 	var lastConductorPos:Float;
 	var colorSine:Float = 0;
+	var camZooming:Bool = false;
 	override function update(elapsed:Float)
 	{
 		curStep = recalculateSteps();
@@ -2016,6 +2019,14 @@ class ChartingState extends MusicBeatState
 
 		FlxG.sound.music.pitch = playbackSpeed;
 		vocals.pitch = playbackSpeed;
+		camZooming = FlxG.sound.music.playing;
+
+		if (camZooming) FlxG.camera.zoom = FlxMath.lerp(1, FlxG.camera.zoom, CoolUtil.boundTo(1 - (elapsed * 3.125 * 1 * playbackSpeed), 0, 1));
+
+		if (camZooming && FlxG.camera.zoom < 1.35 && ClientPrefs.camZooms && curStep % 16 == 0)
+		{
+			FlxG.camera.zoom += 0.015;
+		}
 
 		bpmTxt.text =
 		Std.string(FlxMath.roundDecimal(Conductor.songPosition / 1000, 2)) + " / " + Std.string(FlxMath.roundDecimal(FlxG.sound.music.length / 1000, 2)) +
@@ -2088,6 +2099,17 @@ class ChartingState extends MusicBeatState
 		zoomTxt.text = 'Zoom: ' + zoomThing;
 		reloadGridLayer();
 	}
+
+	/*override function sectionHit()
+	{
+		super.sectionHit();
+
+		// move it here to uh much more useful then just each section
+		if (camZooming && FlxG.camera.zoom < 1.35 && ClientPrefs.camZooms && curSection % 1 == 0)
+		{
+			FlxG.camera.zoom += 0.015;
+		}
+	}*/
 
 	/*
 	function loadAudioBuffer() {
@@ -2504,6 +2526,7 @@ class ChartingState extends MusicBeatState
 		check_mustHitSection.checked = sec.mustHitSection;
 		check_gfSection.checked = sec.gfSection;
 		check_altAnim.checked = sec.altAnim;
+		stepperDType.value = sec.dType;
 		check_changeBPM.checked = sec.changeBPM;
 		stepperSectionBPM.value = sec.bpm;
 
@@ -2768,7 +2791,8 @@ class ChartingState extends MusicBeatState
 			gfSection: false,
 			sectionNotes: [],
 			typeOfSection: 0,
-			altAnim: false
+			altAnim: false,
+			dType: 0
 		};
 
 		_song.notes.push(sec);
