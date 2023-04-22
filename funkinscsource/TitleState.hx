@@ -140,7 +140,7 @@ class TitleState extends MusicBeatState
 		ClientPrefs.loadPrefs();
 
 		if (Main.internetConnection)
-			getBuildVer();
+		    getBuildVer();
 			
 		Highscore.load();
 
