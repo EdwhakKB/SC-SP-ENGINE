@@ -17,7 +17,11 @@ import flixel.tweens.FlxEase;
 import flixel.text.FlxText;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxPoint;
+#if (flixel >= "5.3.0")
+import flixel.sound.FlxSound;
+#else
 import flixel.system.FlxSound;
+#end
 import flixel.util.FlxTimer;
 import flixel.FlxSprite;
 import flixel.FlxCamera;
@@ -66,6 +70,7 @@ import hscript.Parser;
 import hscript.Interp;
 import hscript.Expr;
 #end
+import haxe.PosInfos;
 
 #if desktop
 import Discord;
@@ -110,6 +115,7 @@ class FunkinLua {
 				#else
 				luaTrace('Error loading lua script: "$script"\n' + resultStr, true, false, FlxColor.RED);
 				#end
+				MusicBeatState.switchState(new FreeplayState());
 				lua = null;
 				return;
 			}
@@ -136,7 +142,10 @@ class FunkinLua {
 		set('scrollSpeed', PlayState.SONG.speed);
 		set('crochet', Conductor.crochet);
 		set('stepCrochet', Conductor.stepCrochet);
-		set('songLength', FlxG.sound.music.length);
+		if (PlayState.instance.inst != null)
+			set('songLength', PlayState.instance.inst.length);
+		else
+			set('songLength', FlxG.sound.music.length);
 		set('songName', PlayState.SONG.song);
 		set('songPath', Paths.formatToSongPath(PlayState.SONG.song));
 		set('startedCountdown', false);
@@ -178,6 +187,8 @@ class FunkinLua {
 		set('inGameOver', false);
 		set('mustHitSection', false);
 		set('altAnim', false);
+		set('playerAltAnim', false);
+		set('CPUAltAnim', false);
 		set('gfSection', false);
 
 		// Gameplay settings
@@ -185,6 +196,7 @@ class FunkinLua {
 		set('healthLossMult', PlayState.instance.healthLoss);
 		set('playbackRate', PlayState.instance.playbackRate);
 		set('instakillOnMiss', PlayState.instance.instakillOnMiss);
+		set('opponent', PlayState.instance.opponentMode);
 		set('botPlay', PlayState.instance.cpuControlled);
 		set('practice', PlayState.instance.practiceMode);
 
@@ -239,6 +251,47 @@ class FunkinLua {
 		#else
 		set('buildTarget', 'unknown');
 		#end
+
+		Lua_helper.add_callback(lua,"changeDadCharacter", changeDadCharacter);
+		Lua_helper.add_callback(lua,"changeBoyfriendCharacter", changeBoyfriendCharacter);
+		Lua_helper.add_callback(lua,"changeGFCharacter", changeGFCharacter);
+		Lua_helper.add_callback(lua,"changeDadCharacterBetter", changeDadCharacterBetter);
+		Lua_helper.add_callback(lua,"changeBoyfriendCharacterBetter", changeBoyfriendCharacterBetter);
+		Lua_helper.add_callback(lua,"changeGFCharacterBetter", changeGFCharacterBetter);
+
+		//the auto stuff
+		Lua_helper.add_callback(lua,"changeBFAuto", changeBFAuto);
+
+		//cuz sometimes i type boyfriend instead of bf
+		Lua_helper.add_callback(lua,"changeBoyfriendAuto", changeBFAuto);
+
+		Lua_helper.add_callback(lua,"changeDadAuto", changeDadAuto);
+
+		Lua_helper.add_callback(lua,"changeGFAuto", changeGFAuto);
+
+		Lua_helper.add_callback(lua, "Debug", function(type:String, input:Dynamic, ?pos:haxe.PosInfos) {
+			switch (type)
+			{
+				case 'logError':
+					Debug.logError(input, pos);
+				case 'logWarn':
+					Debug.logWarn(input, pos);
+				case 'logInfo':
+					Debug.logInfo(input, pos);
+				case 'logTrace':
+					Debug.logTrace(input, pos);
+			}
+		});
+		
+		//auto Character Changes in lua.
+		/*Lua_helper.add_callback(lua, "changeCharacter", function(id:String, charType:Int = 0, allowedXY:Bool = false, x:Float  = 0, y:Float = 0) {
+			changeCharAuto(id, charType, allowedXY, allowedXY ? x : 0, allowedXY ? y : 0);
+
+			if (id != null)
+				luaTrace('New Character Loaded:' + id, false, false, FlxColor.RED);
+			else
+				luaTrace('No Character Loaded!', false, false, FlxColor.RED);
+		});*/
 
 		// custom substate
 		Lua_helper.add_callback(lua, "openCustomSubstate", function(name:String, pauseGame:Bool = false) {
@@ -1297,6 +1350,47 @@ class FunkinLua {
 			}
 		});
 
+		//wow very convenient
+		Lua_helper.add_callback(lua, "makeHealthIcon", function(tag:String, character:String, player:Bool = false) {
+			tag = tag.replace('.', '');
+			resetIconTag(tag);
+			var leSprite:ModchartIcon = new ModchartIcon(character, player);
+			PlayState.instance.modchartIcons.set(tag, leSprite); //yes
+			var shit:ModchartIcon = PlayState.instance.modchartIcons.get(tag);
+			shit.cameras = [PlayState.instance.camHUD];
+			getInstance().add(shit);
+		});
+
+		Lua_helper.add_callback(lua, "changeAddedIcon", function(tag:String, character:String){
+			var shit:ModchartIcon = PlayState.instance.modchartIcons.get(tag);
+			shit.changeIcon(character);
+		});
+		
+		//because the naming is stupid
+		Lua_helper.add_callback(lua, "makeLuaIcon", function(tag:String, character:String, player:Bool = false) {
+			tag = tag.replace('.', '');
+			resetIconTag(tag);
+			var leSprite:ModchartIcon = new ModchartIcon(character, player);
+			PlayState.instance.modchartIcons.set(tag, leSprite); //yes
+			var shit:ModchartIcon = PlayState.instance.modchartIcons.get(tag);
+			shit.cameras = [PlayState.instance.camHUD];
+			getInstance().add(shit);
+		});
+		
+		Lua_helper.add_callback(lua, "changeLuaIcon", function(tag:String, character:String){
+			var shit:ModchartIcon = PlayState.instance.modchartIcons.get(tag);
+			shit.changeIcon(character);
+		});
+
+		Lua_helper.add_callback(lua, "makeLuaCharacter", function(tag:String, character:String, isPlayer:Bool = false, flipped:Bool = false) {
+			makeLuaCharacter(tag, character, isPlayer, flipped);
+		});
+
+		Lua_helper.add_callback(lua, "changeLuaCharacter", function(tag:String, character:String){
+			var shit:Character = PlayState.instance.modchartCharacters.get(tag);
+			makeLuaCharacter(tag, character, shit.isPlayer, shit.flipMode);
+		});
+
 		Lua_helper.add_callback(lua, "cancelTween", function(tag:String) {
 			cancelTween(tag);
 		});
@@ -1613,14 +1707,15 @@ class FunkinLua {
 					PlayState.instance.boyfriendGroup.y = value;
 			}
 		});
-		/*Lua_helper.add_callback(lua, "cameraSetTarget", function(target:String) {
+		Lua_helper.add_callback(lua, "cameraSetTarget", function(target:String) {
 			var isDad:Bool = false;
 			if(target == 'dad') {
 				isDad = true;
 			}
-			PlayState.instance.moveCamera(isDad);
+			PlayState.instance.cameraTargeted = target;
+			PlayState.instance.camMustHit = isDad;
 			return isDad;
-		});*/
+		});
 		Lua_helper.add_callback(lua, "cameraShake", function(camera:String, intensity:Float, duration:Float) {
 			cameraFromString(camera).shake(intensity, duration);
 		});
@@ -1802,7 +1897,16 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "addAnimationByIndicesLoop", function(obj:String, name:String, prefix:String, indices:String, framerate:Int = 24) {
 			return addAnimByIndices(obj, name, prefix, indices, framerate, true);
 		});
-		
+
+		Lua_helper.add_callback(lua,"playActorAnimation", function(obj:String,anim:String,force:Bool = false,reverse:Bool = false, ?frame:Int = 0) {
+			var char:Character = getObjectDirectly(obj);
+
+			if (char != null && Std.isOfType(char, Character)){ //what am I doing? of course it'll be a character
+				char.playAnim(anim, force, reverse, frame);
+				return;
+			} 
+			luaTrace('playActorAnimation: Couldnt find object: ' + obj, false, false, FlxColor.RED);
+		});
 
 		Lua_helper.add_callback(lua, "playAnim", function(obj:String, name:String, forced:Bool = false, ?reverse:Bool = false, ?startFrame:Int = 0)
 		{
@@ -1822,9 +1926,36 @@ class FunkinLua {
 						{
 							luaObj.offset.set(daOffset[0], daOffset[1]);
 						}
+						else
+							luaObj.offset.set(0, 0);
+					}
+
+					if(Std.isOfType(luaObj, Character))
+					{
+						//convert luaObj to Character
+						var obj:Dynamic = luaObj;
+						var luaObj:Character = obj;
+						luaObj.playAnim(name, forced, reverse, startFrame);
 					}
 				}
-				return true;
+
+				var spr:FlxSprite = Reflect.getProperty(getInstance(), obj);
+				if(spr != null) {
+					if(spr.animation.getByName(name) != null)
+					{
+						if(Std.isOfType(spr, Character))
+						{
+							//convert spr to Character
+							var obj:Dynamic = spr;
+							var spr:Character = obj;
+							spr.playAnim(name, forced, reverse, startFrame);
+						}
+						else
+							spr.animation.play(name, forced, reverse, startFrame);
+					}
+					return true;
+				}
+				return false;
 			}
 
 			var spr:FlxSprite = Reflect.getProperty(getInstance(), obj);
@@ -1845,9 +1976,36 @@ class FunkinLua {
 			}
 			return false;
 		});
+
+		Lua_helper.add_callback(lua, "removeSpriteAnim", function(obj:String, anim:String) {
+			var killMe:Array<String> = obj.split('.');
+			var leObj:Dynamic = getObjectDirectly(killMe[0]);
+			if(killMe.length > 1) {
+				leObj = getVarInArray(getPropertyLoopThingWhatever(killMe), killMe[killMe.length-1]);
+			}
+
+			if(leObj != null) {
+				var daObj:FlxSprite = leObj;
+				daObj.animation.remove(anim);
+
+				if (Std.isOfType(leObj, Character) || Std.isOfType(leObj, ModchartSprite)){
+					leObj.animOffsets.remove(anim);
+				}
+				
+				return true;
+			}
+			return false;
+		});
+
 		Lua_helper.add_callback(lua, "addOffset", function(obj:String, anim:String, x:Float, y:Float) {
 			if(PlayState.instance.modchartSprites.exists(obj)) {
 				PlayState.instance.modchartSprites.get(obj).animOffsets.set(anim, [x, y]);
+				return true;
+			}
+
+			var mChar:Character = PlayState.instance.modchartCharacters.get(obj);
+			if(mChar != null) {
+				mChar.addOffset(anim, x, y);
 				return true;
 			}
 
@@ -1985,6 +2143,27 @@ class FunkinLua {
 			}
 		});
 
+		Lua_helper.add_callback(lua, "removeLuaIcon", function(tag:String, destroy:Bool = true) {
+			if(!PlayState.instance.modchartIcons.exists(tag)) {
+				return;
+			}
+			
+			var pee:ModchartIcon = PlayState.instance.modchartIcons.get(tag);
+			if(destroy) {
+				pee.kill();
+			}
+
+			if(pee.wasAdded) {
+				getInstance().remove(pee, true);
+				pee.wasAdded = false;
+			}
+
+			if(destroy) {
+				pee.destroy();
+				PlayState.instance.modchartIcons.remove(tag);
+			}
+		});
+
 		Lua_helper.add_callback(lua, "luaSpriteExists", function(tag:String) {
 			return PlayState.instance.modchartSprites.exists(tag);
 		});
@@ -2001,7 +2180,7 @@ class FunkinLua {
 			var right:FlxColor = Std.parseInt(rightHex);
 			if(!rightHex.startsWith('0x')) right = Std.parseInt('0xff' + rightHex);
 
-			PlayState.instance.healthBar.createFilledBar(left, right);
+			PlayState.instance.healthBar.createGradientBar([left, right], [left, right]);
 			PlayState.instance.healthBar.updateBar();
 		});
 		Lua_helper.add_callback(lua, "setTimeBarColors", function(leftHex:String, rightHex:String) {
@@ -2010,7 +2189,12 @@ class FunkinLua {
 			var right:FlxColor = Std.parseInt(rightHex);
 			if(!rightHex.startsWith('0x')) right = Std.parseInt('0xff' + rightHex);
 
-			PlayState.instance.timeBar.createFilledBar(right, left);
+			if (ClientPrefs.colorBarType == 'No Colors')
+				PlayState.instance.timeBar.createFilledBar(right, left);
+			else if (ClientPrefs.colorBarType == 'Main Colors')
+				PlayState.instance.timeBar.createGradientBar([FlxColor.BLACK], [right, left]);
+			else if (ClientPrefs.colorBarType == 'Reversed Colors')
+				PlayState.instance.timeBar.createGradientBar([FlxColor.BLACK], [left, right]);
 			PlayState.instance.timeBar.updateBar();
 		});
 
@@ -2316,6 +2500,24 @@ class FunkinLua {
 			#end
 		});
 
+		Lua_helper.add_callback(lua,"stopIdle", function(id:String, bool:Bool) {
+			if (PlayState.instance.modchartCharacters.exists(id))
+			{
+				PlayState.instance.modchartCharacters.get(id).stopIdle = bool;
+				return;
+			}
+			getActorByName(id).stopIdle = bool;
+		});
+
+		Lua_helper.add_callback(lua, "characterDance", function(character:String) {
+			if(PlayState.instance.modchartCharacters.exists(character)) {
+				var spr:Character = PlayState.instance.modchartCharacters.get(character);
+				spr.dance();
+			}
+			else
+				getObjectDirectly(character).dance();
+		});
+
 
 		// LUA TEXTS
 		Lua_helper.add_callback(lua, "makeLuaText", function(tag:String, text:String, width:Int, x:Float, y:Float) {
@@ -2615,7 +2817,13 @@ class FunkinLua {
 					if(PlayState.instance.gf != null && PlayState.instance.gf.animOffsets.exists(anim))
 						PlayState.instance.gf.playAnim(anim, forced);
 				default:
-					if(PlayState.instance.boyfriend.animOffsets.exists(anim))
+					if(PlayState.instance.modchartCharacters.exists(character)) {
+						var spr:Character = PlayState.instance.modchartCharacters.get(character);
+
+						if(spr.animOffsets.exists(anim))
+							spr.playAnim(anim, forced);
+					}
+					else if(PlayState.instance.boyfriend.animOffsets.exists(anim))
 						PlayState.instance.boyfriend.playAnim(anim, forced);
 			}
 		});
@@ -3054,6 +3262,21 @@ class FunkinLua {
 			}
 		});
 
+		//tween the fucking defaultCam SINCE I AM TIRED!
+		Lua_helper.add_callback(lua,"TweenDefaultCamZoom", function(tag:String, value:Float, duration:Float, ease:String) {
+			var zoomInstance:Dynamic = PlayState.instance;
+			if (zoomInstance != null){duration = duration / PlayState.instance.playbackRate;}
+			if (zoomInstance.defaultCamZoom != 0) {
+				zoomInstance.modchartTweens.set(tag, FlxTween.tween(zoomInstance, {defaultCamZoom: value}, duration, {ease: getFlxEaseByString(ease),
+					onComplete: function(twn:FlxTween) {
+						callOnCompleted("tween", tag);
+					}
+				}));
+			} else {
+				luaTrace('TweenDefaultCamZoom: Is 0, Cant change! ', false, false, FlxColor.RED);
+			}
+		});
+
 		Lua_helper.add_callback(lua, "RGBColor", function (r:Int,g:Int,b:Int, alpha:Int = 255) {
 			return FlxColor.fromRGB(r, g, b, alpha);
 		});
@@ -3168,6 +3391,95 @@ class FunkinLua {
 		Lua_helper.add_callback(lua,"resetSnapCam", function(id:String) {
 			//The string does absolutely nothing
 			//PlayState.instance.defaultCamFollow = true;
+		});
+
+		Lua_helper.add_callback(lua,"shakeCam", function (i:Float, d:Float) {
+			FlxG.camera.shake(i, d);
+		});
+
+		Lua_helper.add_callback(lua,"shakeHUD", function (i:Float, d:Float) {
+			PlayState.instance.camHUD.shake(i, d);
+		});
+
+		Lua_helper.add_callback(lua,"setCamZoom", function(zoomAmount:Float) {
+			FlxG.camera.zoom = zoomAmount;
+		});
+
+		Lua_helper.add_callback(lua,"addCamZoom", function(zoomAmount:Float) {
+			FlxG.camera.zoom += zoomAmount;
+		});
+
+		Lua_helper.add_callback(lua,"addHudZoom", function(zoomAmount:Float) {
+			PlayState.instance.camHUD.zoom += zoomAmount;
+		});
+
+		//Dumb QT shit which may or may not work
+		//Not everything is fully supported since you can just use the 'triggerEvent' function instead.
+		Lua_helper.add_callback(lua, "qtMod_SawbladeAlert", function(alertType:Int) {
+			PlayState.instance.kbATTACK_ALERT(alertType);
+		});
+		Lua_helper.add_callback(lua, "qtMod_SawbladePrepare", function(variable:String) {
+			PlayState.instance.KBATTACK(false);
+		});
+		Lua_helper.add_callback(lua, "qtMod_SawbladeAttack", function(attack:Bool = true, sound:String = "hazard/attack", shouldInstakill:Bool = false) {
+			PlayState.instance.KBATTACK(attack, sound, shouldInstakill);
+		});
+		Lua_helper.add_callback(lua, "qtMod_PincerPrepare", function(laneID:Int,goAway:Bool) {
+			PlayState.instance.KBPINCER_PREPARE(laneID,goAway);
+		});
+		Lua_helper.add_callback(lua, "qtMod_PincerGrab", function(laneID:Int) {
+			PlayState.instance.KBPINCER_GRAB(laneID);
+		});
+
+		//Tween shit for pincers.
+		Lua_helper.add_callback(lua, "qtMod_PincerTweenX", function(tag:String, note:Int, value:Dynamic, duration:Float, ease:String) {
+			cancelTween(tag);
+			if(note < 0) note = 0;
+			//Whoever named these variables, fuck you. I'm not having my variables names be 'testicle' or 'penis exam' or whatever.
+			var pincerToMove:FlxSprite = null;
+			switch(note){
+				case 1:
+					pincerToMove = PlayState.instance.pincer1;
+				case 2:
+					pincerToMove = PlayState.instance.pincer2;
+				case 3:
+					pincerToMove = PlayState.instance.pincer3;
+				case 4:
+					pincerToMove = PlayState.instance.pincer4;
+			}
+
+			if(pincerToMove != null) {
+				PlayState.instance.modchartTweens.set(tag, FlxTween.tween(pincerToMove, {x: value}, duration, {ease: getFlxEaseByString(ease),
+					onComplete: function(twn:FlxTween) {
+						PlayState.instance.callOnLuas('onTweenCompleted', [tag]);
+						PlayState.instance.modchartTweens.remove(tag);
+					}
+				}));
+			}
+		});
+		Lua_helper.add_callback(lua, "qtMod_PincerTweenY", function(tag:String, note:Int, value:Dynamic, duration:Float, ease:String) {
+			cancelTween(tag);
+			if(note < 0) note = 0;
+			var pincerToMove:FlxSprite = null;
+			switch(note){
+				case 1:
+					pincerToMove = PlayState.instance.pincer1;
+				case 2:
+					pincerToMove = PlayState.instance.pincer2;
+				case 3:
+					pincerToMove = PlayState.instance.pincer3;
+				case 4:
+					pincerToMove = PlayState.instance.pincer4;
+			}
+
+			if(pincerToMove != null) {
+				PlayState.instance.modchartTweens.set(tag, FlxTween.tween(pincerToMove, {y: value}, duration, {ease: getFlxEaseByString(ease),
+					onComplete: function(twn:FlxTween) {
+						PlayState.instance.callOnLuas('onTweenCompleted', [tag]);
+						PlayState.instance.modchartTweens.remove(tag);
+					}
+				}));
+			}
 		});
 
 		call('onCreate', []);
@@ -3421,6 +3733,32 @@ class FunkinLua {
 		}
 		pee.destroy();
 		PlayState.instance.modchartSprites.remove(tag);
+	}
+
+	function resetIconTag(tag:String) {
+		if(!PlayState.instance.modchartIcons.exists(tag)) {
+			return;
+		}
+		
+		var pee:ModchartIcon = PlayState.instance.modchartIcons.get(tag);
+		pee.kill();
+		if(pee.wasAdded) {
+			PlayState.instance.remove(pee, true);
+		}
+		pee.destroy();
+		PlayState.instance.modchartIcons.remove(tag);
+	}
+
+	public static function resetCharacterTag(tag:String) {
+		if(!PlayState.instance.modchartCharacters.exists(tag)) {
+			return;
+		}
+		
+		var pee:Dynamic = PlayState.instance.modchartCharacters.get(tag);
+		pee.kill();
+		PlayState.instance.remove(pee, true);
+		pee.destroy();
+		PlayState.instance.modchartCharacters.remove(tag);
 	}
 
 	function cancelTween(tag:String) {
@@ -3720,7 +4058,224 @@ class FunkinLua {
 		return PlayState.instance.isDead ? GameOverSubstate.instance : PlayState.instance;
 	}
 
-	function getActorByName(id:String):Dynamic //kade to psych
+	/*public static function changeCharAuto(id:String, charType:Int, allowedXY:Bool, x:Float, y:Float):Void
+	{
+		var charName:String = id;
+		var Type:Int = charType;
+		var XYPermitted:Bool = allowedXY;
+		var charX:Float = x;
+		var charY:Float = y;
+
+		switch (charType)
+		{
+			case 0:
+				Type = 0;
+				changeBoyfriendCharacter(charName, Type, XYPermitted, XYPermitted ? x : 0, XYPermitted ? y : 0);
+			case 1:
+				Type = 1;
+				changeDadCharacter(charName, Type, XYPermitted, XYPermitted ? x : 0, XYPermitted ? y : 0);
+			case 2:
+				Type = 2;
+				changeGirlfriendCharacter(charName, Type, XYPermitted, XYPermitted ? x : 0, XYPermitted ? y : 0);
+		}
+	}
+
+	public static function changeBoyfriendCharacter(id:String, charType:Int, allowedXY:Bool, x:Float, y:Float)
+	{
+		PlayState.instance.changeBoyfriendCharacter(id, charType, allowedXY, x, y);
+	}
+
+	public static function changeDadCharacter(id:String, charType:Int, allowedXY:Bool, x:Float, y:Float)
+	{
+		PlayState.instance.changeDadCharacter(id, charType, allowedXY, x, y);
+	}
+
+	public static function changeGirlfriendCharacter(id:String, charType:Int, allowedXY:Bool, x:Float, y:Float)
+	{
+		PlayState.instance.changeGirlfriendCharacter(id, charType, allowedXY, x, y);
+	}*/
+
+	public static function makeLuaCharacter(tag:String, character:String, isPlayer:Bool = false, flipped:Bool = false)
+	{
+		tag = tag.replace('.', '');
+
+		var animationName:String = "no way anyone have an anim name this big";
+		var animationFrame:Int = 0;	
+		var position:Int = -1;
+							
+		if (PlayState.instance.modchartCharacters.get(tag) != null)
+		{
+			var daChar:Character = PlayState.instance.modchartCharacters.get(tag);
+			animationName = daChar.animation.curAnim.name;
+			animationFrame = daChar.animation.curAnim.curFrame;
+			position = getInstance().members.indexOf(daChar);
+		}
+		
+		resetCharacterTag(tag);
+		var leSprite:Character = new Character(0, 0, character, isPlayer);
+		leSprite.flipMode = flipped;
+		PlayState.instance.modchartCharacters.set(tag, leSprite); //yes
+		var shit:Character = PlayState.instance.modchartCharacters.get(tag);
+		getInstance().add(shit);
+
+		if (position >= 0) //this should keep them in the same spot if they switch
+		{
+			getInstance().remove(shit, true);
+			getInstance().insert(position, shit);
+		}
+
+
+		if (flipped)
+			shit.flipMode = true;
+
+		if (!isPlayer)
+		{
+			var charX:Float = shit.positionArray[0];
+			var charY:Float = shit.positionArray[1];
+	
+			shit.x = PlayState.instance.DAD_X + charX + 100;
+			shit.y = PlayState.instance.DAD_Y + charY + 100;
+		}
+		else
+		{
+			var charX:Float = shit.positionArray[0];
+			var charY:Float = shit.positionArray[1] - 350;
+	
+			shit.x = PlayState.instance.BF_X + charX + 770;
+			shit.y = PlayState.instance.BF_Y + charY + 450;
+		}
+
+		if (shit.animOffsets.exists(animationName))
+			shit.playAnim(animationName, true, false, animationFrame);
+
+		PlayState.instance.startCharacterLua(shit.curCharacter);
+	}
+
+	//Kade why tf is it not like in PlayState???
+	//Blantados Code!
+
+	function changeGFCharacter(id:String, x:Float, y:Float)
+	{		
+		changeGFAuto(id);
+		PlayState.instance.gf.x = x;
+		PlayState.instance.gf.y = y;
+	}
+
+	function changeDadCharacter(id:String, x:Float, y:Float)
+	{		
+		changeDadAuto(id, false, false);
+		PlayState.instance.dad.x = x;
+		PlayState.instance.dad.y = y;
+	}
+
+	function changeBoyfriendCharacter(id:String, x:Float, y:Float)
+	{	
+		changeBFAuto(id, false, false);
+		PlayState.instance.boyfriend.x = x;
+		PlayState.instance.boyfriend.y = y;
+	}
+
+	// this is better. easier to port shit from playstate.
+	function changeGFCharacterBetter(x:Float, y:Float, id:String)
+	{		
+		changeGFCharacter(id, x, y);
+	}
+
+	function changeDadCharacterBetter(x:Float, y:Float, id:String)
+	{		
+		changeDadCharacter(id, x, y);
+	}
+
+	function changeBoyfriendCharacterBetter(x:Float, y:Float, id:String)
+	{							
+		changeBoyfriendCharacter(id, x, y);
+	}
+
+	//trying to do some auto stuff so i don't have to set manual x and y values
+	public static function changeBFAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false)
+	{	
+		var animationName:String = "no way anyone have an anim name this big";
+		var animationFrame:Int = 0;						
+		if (PlayState.instance.boyfriend.animation.curAnim.name.startsWith('sing'))
+		{
+			animationName = PlayState.instance.boyfriend.animation.curAnim.name;
+			animationFrame = PlayState.instance.boyfriend.animation.curAnim.curFrame;
+		}
+
+		PlayState.instance.removeObject(PlayState.instance.boyfriend);
+		PlayState.instance.destroyObject(PlayState.instance.boyfriend);
+		PlayState.instance.boyfriend = new Boyfriend(0, 0, id, !flipped);
+		PlayState.instance.boyfriend.flipMode = flipped;
+
+		var charX:Float = PlayState.instance.boyfriend.positionArray[0];
+		var charY:Float = PlayState.instance.boyfriend.positionArray[1] - 350;
+
+		PlayState.instance.boyfriend.x = PlayState.instance.BF_X + charX + 770;
+		PlayState.instance.boyfriend.y = PlayState.instance.BF_Y + charY + 450;
+
+		//PlayState.instance.addObject(PlayState.instance.bfTrail);
+		//PlayState.instance.bfTrail.resetTrail();
+		PlayState.instance.addObject(PlayState.instance.boyfriend);
+
+		PlayState.instance.iconP1.changeIcon(PlayState.instance.boyfriend.healthIcon);
+		
+		PlayState.instance.reloadHealthBarColors();
+
+		if (PlayState.instance.boyfriend.animOffsets.exists(animationName))
+			PlayState.instance.boyfriend.playAnim(animationName, true, false, animationFrame);
+
+
+		PlayState.instance.startCharacterLua(PlayState.instance.boyfriend.curCharacter);
+	}
+
+	public static function changeDadAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false)
+	{	
+		var animationName:String = "no way anyone have an anim name this big";
+		var animationFrame:Int = 0;						
+		if (PlayState.instance.dad.animation.curAnim.name.startsWith('sing'))
+		{
+			animationName = PlayState.instance.dad.animation.curAnim.name;
+			animationFrame = PlayState.instance.dad.animation.curAnim.curFrame;
+		}
+
+		//PlayState.instance.removeObject(PlayState.instance.dadTrail);
+		PlayState.instance.removeObject(PlayState.instance.dad);
+		PlayState.instance.destroyObject(PlayState.instance.dad);
+		PlayState.instance.dad = new Character(0, 0, id, flipped);
+		PlayState.instance.dad.flipMode = flipped;
+
+		
+		var charX:Float = PlayState.instance.dad.positionArray[0];
+		var charY:Float = PlayState.instance.dad.positionArray[1];
+		
+		PlayState.instance.dad.x = PlayState.instance.DAD_X + charX + 100;
+		PlayState.instance.dad.y = PlayState.instance.DAD_Y + charY + 100;
+		PlayState.instance.addObject(PlayState.instance.dad);
+
+		PlayState.instance.iconP2.changeIcon(PlayState.instance.dad.healthIcon);
+			
+		PlayState.instance.reloadHealthBarColors();
+
+		if (PlayState.instance.dad.animOffsets.exists(animationName))
+			PlayState.instance.dad.playAnim(animationName, true, false, animationFrame);
+
+		PlayState.instance.startCharacterLua(PlayState.instance.dad.curCharacter);
+	}
+
+	public static function changeGFAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false)
+	{		
+		PlayState.instance.removeObject(PlayState.instance.gf);
+		PlayState.instance.destroyObject(PlayState.instance.gf);
+		PlayState.instance.gf = new Character(0, 0, id);
+		PlayState.instance.gf.x = PlayState.instance.GF_X + 400 + PlayState.instance.gf.positionArray[0];
+		PlayState.instance.gf.y = PlayState.instance.GF_Y + 130 + PlayState.instance.gf.positionArray[1];
+		PlayState.instance.gf.scrollFactor.set(0.95, 0.95);
+		PlayState.instance.addObject(PlayState.instance.gf);
+
+		PlayState.instance.startCharacterLua(PlayState.instance.gf.curCharacter);
+	}
+
+	public static function getActorByName(id:String):Dynamic //kade to psych
 	{
 		// pre defined names
 		switch(id)
@@ -3728,28 +4283,10 @@ class FunkinLua {
 			case 'boyfriend' | 'bf':
                 @:privateAccess
 				return PlayState.instance.boyfriend;
-			case 'girlfriend' | 'gf':
-                @:privateAccess
-				return PlayState.instance.gf;
-			case 'dad':
-                @:privateAccess
-				return PlayState.instance.dad;
-			case 'camFollow':
-                @:privateAccess
-				return PlayState.instance.camFollow;
-			case 'camHUD':
-                @:privateAccess
-				return PlayState.instance.camHUD;
-			case 'camGame':
-                @:privateAccess
-				return FlxG.camera;
-			case 'camGame.scroll':
-                @:privateAccess
-				return FlxG.camera.scroll;
 		}
 
 		if (Std.parseInt(id) == null)
-			return Reflect.getProperty(getInstance(),id);
+			return Reflect.getProperty(getInstance(), id);
 
 		return PlayState.instance.strumLineNotes.members[Std.parseInt(id)];
 	}
@@ -3792,6 +4329,12 @@ class ModchartText extends FlxText
 		scrollFactor.set();
 		borderSize = 2;
 	}
+}
+
+class ModchartIcon extends HealthIcon
+{
+	public var wasAdded:Bool = false;
+	//public var isInFront:Bool = false;
 }
 
 class DebugLuaText extends FlxText
@@ -3882,6 +4425,7 @@ class HScript
 		#if (!flash && sys)
 		interp.variables.set('FlxRuntimeShader', FlxRuntimeShader);
 		#end
+		interp.variables.set('Debug', Debug);
 		interp.variables.set('ShaderFilter', openfl.filters.ShaderFilter);
 		interp.variables.set('StringTools', StringTools);
 

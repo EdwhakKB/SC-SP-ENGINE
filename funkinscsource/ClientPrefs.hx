@@ -27,6 +27,7 @@ class ClientPrefs {
 	public static var arrowHSV:Array<Array<Int>> = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
 	public static var ghostTapping:Bool = true;
 	public static var timeBarType:String = 'Time Left';
+	public static var floatingTitlegf:String = 'only floating logo';
 	public static var scoreZoom:Bool = true;
 	public static var noReset:Bool = false;
 	public static var healthBarAlpha:Float = 1;
@@ -54,15 +55,16 @@ class ClientPrefs {
 		'instakill' => false,
 		'modchart' => true,
 		'practice' => false,
-		'botplay' => false,
-		'opponentplay' => false
+		'botplay' => false
 	];
 
 	public static var comboOffset:Array<Int> = [0, 0, 0, 0];
 	public static var ratingOffset:Int = 0;
-	public static var sickWindow:Int = 45;
-	public static var goodWindow:Int = 90;
-	public static var badWindow:Int = 135;
+	public static var swagWindow:Float = 22.5;
+	public static var sickWindow:Float = 45;
+	public static var goodWindow:Float = 90;
+	public static var badWindow:Float = 135;
+	public static var shitWindow:Float = 180;
 	public static var safeFrames:Float = 10;
 
 	//Input
@@ -70,9 +72,12 @@ class ClientPrefs {
 	public static var inputSystem:String = 'Glow_Kade';
 
 	//New Stuff
-	public static var useGL:Bool = true;
 	public static var healthColor:Bool = true;
 	public static var instantRespawn:Bool = false;
+	public static var stillCombo:Bool = false;
+	public static var colorBarType:String = 'No Colors';
+	public static var mouseLook:String = 'FNF Cursor';
+	public static var judgementCounter:Bool = false;
 
 	//Every key has two binds, add your key bind down here and then add your control on options/ControlsSubState.hx and Controls.hx
 	public static var keyBinds:Map<String, Array<FlxKey>> = [
@@ -126,9 +131,12 @@ class ClientPrefs {
 		FlxG.save.data.healthSystem = healthSystem;
 
 		//New Stuff
-		FlxG.save.data.useGL = useGL;
 		FlxG.save.data.healthColor = healthColor;
 		FlxG.save.data.instantRespawn = instantRespawn;
+		FlxG.save.data.stillCombo = stillCombo;
+		FlxG.save.data.colorBarType = colorBarType;
+		FlxG.save.data.mouseLook = mouseLook;
+		FlxG.save.data.floatingTitlegf = floatingTitlegf;
 
 		//FlxG.save.data.cursing = cursing;
 		//FlxG.save.data.violence = violence;
@@ -146,9 +154,11 @@ class ClientPrefs {
 		FlxG.save.data.henchmenDeath = Achievements.henchmenDeath;
 
 		FlxG.save.data.ratingOffset = ratingOffset;
+		FlxG.save.data.swagWindow = swagWindow;
 		FlxG.save.data.sickWindow = sickWindow;
 		FlxG.save.data.goodWindow = goodWindow;
 		FlxG.save.data.badWindow = badWindow;
+		FlxG.save.data.shitWindow = shitWindow;
 		FlxG.save.data.safeFrames = safeFrames;
 		FlxG.save.data.gameplaySettings = gameplaySettings;
 		FlxG.save.data.controllerMode = controllerMode;
@@ -217,16 +227,28 @@ class ClientPrefs {
 		}
 		
 		//New Stuff
-		if (FlxG.save.data.useGL != null) {
-			useGL = FlxG.save.data.useGL;
-		}
-
 		if (FlxG.save.data.healthColor != null) {
 			healthColor = FlxG.save.data.healthColor;
 		}
 
 		if (FlxG.save.data.instantRespawn != null) {
 			instantRespawn = FlxG.save.data.instantRespawn;
+		}
+
+		if (FlxG.save.data.stillCombo != null) {
+			stillCombo = FlxG.save.data.stillCombo;
+		}
+
+		if (FlxG.save.data.colorBarType != null) {
+			colorBarType = FlxG.save.data.colorBarType;
+		}
+
+		if (FlxG.save.data.mouseLook != null) {
+			mouseLook = FlxG.save.data.mouseLook;
+		}
+
+		if (FlxG.save.data.floatingTitlegf != null) {
+			floatingTitlegf = FlxG.save.data.floatingTitlegf;
 		}
 
 		/*if(FlxG.save.data.cursing != null) {
@@ -276,6 +298,9 @@ class ClientPrefs {
 		if(FlxG.save.data.ratingOffset != null) {
 			ratingOffset = FlxG.save.data.ratingOffset;
 		}
+		if(FlxG.save.data.swagWindow != null) {
+			swagWindow = FlxG.save.data.swagWindow;
+		}
 		if(FlxG.save.data.sickWindow != null) {
 			sickWindow = FlxG.save.data.sickWindow;
 		}
@@ -284,6 +309,9 @@ class ClientPrefs {
 		}
 		if(FlxG.save.data.badWindow != null) {
 			badWindow = FlxG.save.data.badWindow;
+		}
+		if(FlxG.save.data.shitWindow != null) {
+			shitWindow = FlxG.save.data.shitWindow;
 		}
 		if(FlxG.save.data.safeFrames != null) {
 			safeFrames = FlxG.save.data.safeFrames;

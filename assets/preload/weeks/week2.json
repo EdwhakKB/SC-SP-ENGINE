@@ -15,8 +15,8 @@
 	"storyName": "Spooky Month",
 	"weekBefore": "week1",
 	"weekName": "Week 2",
-	"startUnlocked": true,
+	"startUnlocked": false,
 
 	"hideStoryMode": false,
-	"hideFreeplay": false
+	"hideFreeplay": true
 }

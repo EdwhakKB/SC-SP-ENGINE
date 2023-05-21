@@ -15,8 +15,8 @@
 	"storyName": "Daddy Dearest",
 	"weekBefore": "tutorial",
 	"weekName": "Week 1",
-	"startUnlocked": true,
+	"startUnlocked": false,
 
 	"hideStoryMode": false,
-	"hideFreeplay": false
+	"hideFreeplay": true
 }

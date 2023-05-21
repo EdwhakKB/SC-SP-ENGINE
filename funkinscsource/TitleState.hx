@@ -27,7 +27,11 @@ import flixel.input.gamepad.FlxGamepad;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
+#if (flixel >= "5.3.0")
+import flixel.sound.FlxSound;
+#else
 import flixel.system.FlxSound;
+#end
 import flixel.system.ui.FlxSoundTray;
 import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
@@ -86,10 +90,10 @@ class TitleState extends MusicBeatState
 
 	override public function create():Void
 	{
-		(cast(Lib.current.getChildAt(0), Main)).checkInternetConnection();
+		Main.gameContainer.checkInternetConnection();
 
 		Paths.clearStoredMemory();
-		Paths.clearUnusedMemory(ClientPrefs.useGL, false);
+		Paths.clearUnusedMemory();
 
 		#if LUA_ALLOWED
 		Paths.pushGlobalMods();
@@ -140,7 +144,7 @@ class TitleState extends MusicBeatState
 		ClientPrefs.loadPrefs();
 
 		if (Main.internetConnection)
-		    getBuildVer();
+			getBuildVer();
 			
 		Highscore.load();
 
@@ -268,8 +272,13 @@ class TitleState extends MusicBeatState
 		// bg.updateHitbox();
 		add(bg);
 
-		logoBl = new FlxSprite(titleJSON.titlex, titleJSON.titley);
+		var floatingBL:Bool = (ClientPrefs.floatingTitlegf == 'all floating' || ClientPrefs.floatingTitlegf == 'only floating logo');
+
+		logoBl = new FlxSprite(floatingBL ? titleJSON.titlex + 100 : titleJSON.titlex, floatingBL ? titleJSON.titley + 30 : titleJSON.titley);
 		logoBl.frames = Paths.getSparrowAtlas('logoBumpin');
+
+		if (floatingBL)
+			logoBl.scale.set(0.8, 0.8);
 
 		logoBl.antialiasing = ClientPrefs.globalAntialiasing;
 		logoBl.animation.addByPrefix('bump', 'logo bumpin', 24, false);
@@ -369,10 +378,27 @@ class TitleState extends MusicBeatState
 		var logo:FlxSprite = new FlxSprite().loadGraphic(Paths.image('logo'));
 		logo.screenCenter();
 		logo.antialiasing = ClientPrefs.globalAntialiasing;
-		// add(logo);
+		//add(logo);
 
-		// FlxTween.tween(logoBl, {y: logoBl.y + 50}, 0.6, {ease: FlxEase.quadInOut, type: PINGPONG});
-		// FlxTween.tween(logo, {y: logoBl.y + 50}, 0.6, {ease: FlxEase.quadInOut, type: PINGPONG, startDelay: 0.1});
+		var gfFloatTitleOn:Bool = (ClientPrefs.floatingTitlegf != 'none');
+		if (gfFloatTitleOn)
+		{
+			if (ClientPrefs.floatingTitlegf == 'not static gf and title only logo') {
+				FlxTween.tween(gfDance, {y: gfDance.y + 50}, 0.9, {ease: FlxEase.quadInOut, type: PINGPONG});
+				FlxTween.tween(titleText, {y: titleText.y + 50}, 0.8, {ease: FlxEase.quadInOut, type: PINGPONG});
+			}
+			else if (ClientPrefs.floatingTitlegf == 'only floating logo'){
+				FlxTween.tween(logoBl, {y: logoBl.y + 50}, 0.8, {ease: FlxEase.quadInOut, type: PINGPONG});
+				//FlxTween.tween(logo, {y: logo.y + 50}, 0.8, {ease: FlxEase.quadInOut, type: PINGPONG, startDelay: 0.1});
+			}
+			else if (ClientPrefs.floatingTitlegf == 'all floating')
+			{
+				FlxTween.tween(gfDance, {y: gfDance.y + 50}, 0.9, {ease: FlxEase.quadInOut, type: PINGPONG});
+				FlxTween.tween(logoBl, {y: logoBl.y + 50}, 0.8, {ease: FlxEase.quadInOut, type: PINGPONG});
+				//FlxTween.tween(logo, {y: logo.y + 50}, 0.8, {ease: FlxEase.quadInOut, type: PINGPONG, startDelay: 0.1});
+				FlxTween.tween(titleText, {y: titleText.y + 50}, 0.8, {ease: FlxEase.quadInOut, type: PINGPONG});
+			}
+		}
 
 		credGroup = new FlxGroup();
 		add(credGroup);
@@ -666,6 +692,12 @@ class TitleState extends MusicBeatState
 			else
 				gfDance.animation.play('danceLeft');
 		}
+
+		FlxG.camera.zoom = 1.025;
+
+		FlxTween.tween(FlxG.camera, {zoom: 1}, Conductor.crochet / 1300, {
+			ease: FlxEase.quadOut
+		});
 
 		if (!closedState)
 		{

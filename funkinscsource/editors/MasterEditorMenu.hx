@@ -11,7 +11,11 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxMath;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
+#if (flixel >= "5.3.0")
+import flixel.sound.FlxSound;
+#else
 import flixel.system.FlxSound;
+#end
 #if MODS_ALLOWED
 import sys.FileSystem;
 #end
@@ -128,9 +132,9 @@ class MasterEditorMenu extends MusicBeatState
 					LoadingState.loadAndSwitchState(new ChartingState(), false);
 			}
 			FlxG.sound.music.volume = 0;
-			#if PRELOAD_ALL
+			/*#if PRELOAD_ALL
 			FreeplayState.destroyFreeplayVocals();
-			#end
+			#end*/
 		}
 		
 		var bullShit:Int = 0;

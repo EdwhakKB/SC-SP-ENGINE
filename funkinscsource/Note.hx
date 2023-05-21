@@ -89,7 +89,7 @@ class Note extends FlxSprite
 	public var hitHealth:Float = 0.023;
 	public var missHealth:Float = 0.0475;
 	public var rating:String = 'unknown';
-	public var ratingMod:Float = 0; //9 = unknown, 0.25 = shit, 0.5 = bad, 0.75 = good, 1 = sick
+	public var ratingMod:Float = 0; //9 = unknown, 0.25 = shit, 0.5 = bad, 0.75 = good, 1 = sick, 1 = swag
 	public var ratingDisabled:Bool = false;
 
 	public var texture(default, set):String = null;
@@ -226,7 +226,7 @@ class Note extends FlxSprite
 
 			offsetX -= width / 2;
 
-			if (PlayState.isPixelStage && ClientPrefs.noteSkin == 'NONE')
+			if (texture.contains('pixel') || PlayState.containsAPixelTextureForNotes)
 				offsetX += 30;
 
 			if (prevNote.isSustainNote)
@@ -239,7 +239,7 @@ class Note extends FlxSprite
 					prevNote.scale.y *= PlayState.instance.songSpeed;
 				}
 
-				if(PlayState.isPixelStage && ClientPrefs.noteSkin == 'NONE') {
+				if(texture.contains('pixel') || PlayState.containsAPixelTextureForNotes) {
 					prevNote.scale.y *= 1.19;
 					prevNote.scale.y *= (6 / height); //Auto adjust note size
 				}
@@ -247,7 +247,7 @@ class Note extends FlxSprite
 				// prevNote.setGraphicSize();
 			}
 
-			if(PlayState.isPixelStage && ClientPrefs.noteSkin == 'NONE') {
+			if(texture.contains('pixel') || PlayState.containsAPixelTextureForNotes) {
 				scale.y *= PlayState.daPixelZoom;
 				updateHitbox();
 			}
@@ -286,7 +286,7 @@ class Note extends FlxSprite
 
 		var lastScaleY:Float = scale.y;
 		var blahblah:String = arraySkin.join('/');
-		if(PlayState.isPixelStage && ClientPrefs.noteSkin == 'NONE') {
+		if(texture.contains('pixel') || PlayState.containsAPixelTextureForNotes) {
 			if(isSustainNote) {
 				loadGraphic(Paths.image('pixelUI/' + blahblah + 'ENDS'));
 				width = width / 4;

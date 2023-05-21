@@ -43,7 +43,7 @@ class NoteSplash extends FlxSprite
 				texture = PlayState.SONG.splashSkin;
 		}
 
-		if (((texture != null || texture == null) && texture.contains('-kade')) || ((PlayState.SONG.splashSkin != null || PlayState.SONG.splashSkin == null) && PlayState.SONG.splashSkin.contains('-kade')))
+		if (((texture != null || texture == null) || (PlayState.SONG.splashSkin != null || PlayState.SONG.splashSkin == null)) && PlayState.SONG.splashSkin.contains('-kade'))
 		{
 			switch (texture)
 			{

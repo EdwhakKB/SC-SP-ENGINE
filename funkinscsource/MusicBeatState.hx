@@ -29,6 +29,11 @@ class MusicBeatState extends modcharting.ModchartMusicBeatState
 
 	public static var camBeat:FlxCamera;
 
+	public static var mouseX:Float = 0;
+	public static var mouseY:Float = 0;
+	public static var mouseS:Float = 0;
+	public static var mouseA:Bool = true;
+
 	inline function get_controls():Controls
 		return PlayerSettings.player1.controls;
 
@@ -70,6 +75,8 @@ class MusicBeatState extends modcharting.ModchartMusicBeatState
 		if(FlxG.save.data != null) FlxG.save.data.fullscreen = FlxG.fullscreen;
 
 		super.update(elapsed);
+
+		checkYourMouse(elapsed, this);
 	}
 
 	private function updateSection():Void
@@ -174,5 +181,37 @@ class MusicBeatState extends modcharting.ModchartMusicBeatState
 		var val:Null<Float> = 4;
 		if(PlayState.SONG != null && PlayState.SONG.notes[curSection] != null) val = PlayState.SONG.notes[curSection].sectionBeats;
 		return val == null ? 4 : val;
+	}
+
+	public static function checkYourMouse(elapsed:Float, state:FlxState):Void
+	{
+		mouseS += elapsed;
+		if (Math.abs(mouseX - FlxG.mouse.screenX) > 20 || Math.abs(mouseY - FlxG.mouse.screenY) > 20 || FlxG.mouse.justPressed)
+		{
+			mouseS = 0;
+			mouseX = FlxG.mouse.screenX;
+			mouseY = FlxG.mouse.screenY;
+		}
+		if (mouseS > 2)
+		{
+			FlxG.mouse.visible = false;
+			mouseA = false;
+		}
+		else
+		{
+			mouseA = true;
+			switch (ClientPrefs.mouseLook)
+			{
+				case 'FNF Cursor':
+					FlxG.mouse.visible = true;
+					FlxG.mouse.useSystemCursor = false;
+				case 'System Cursor':
+					FlxG.mouse.visible = true;
+					FlxG.mouse.useSystemCursor = true;
+				case 'No Cursor':
+					FlxG.mouse.visible = false;
+					mouseA = false;
+			}
+		}
 	}
 }

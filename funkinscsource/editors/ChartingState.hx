@@ -30,7 +30,11 @@ import flixel.group.FlxSpriteGroup;
 import flixel.input.keyboard.FlxKey;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
+#if (flixel >= "5.3.0")
+import flixel.sound.FlxSound;
+#else
 import flixel.system.FlxSound;
+#end
 import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
@@ -55,7 +59,11 @@ import sys.io.File;
 #end
 
 
+#if (flixel >= "5.3.0")
+@:access(flixel.sound.FlxSound._sound)
+#else
 @:access(flixel.system.FlxSound._sound)
+#end
 @:access(openfl.media.Sound.__buffer)
 
 class ChartingState extends MusicBeatState
@@ -671,6 +679,8 @@ class ChartingState extends MusicBeatState
 	var check_changeBPM:FlxUICheckBox;
 	var stepperSectionBPM:FlxUINumericStepper;
 	var check_altAnim:FlxUICheckBox;
+	var check_CPUAltAnim:FlxUICheckBox;
+	var check_playerAltAnim:FlxUICheckBox;
 	var stepperDType:FlxUINumericStepper;
 
 	var sectionToCopy:Int = 0;
@@ -690,14 +700,14 @@ class ChartingState extends MusicBeatState
 		check_gfSection.checked = _song.notes[curSec].gfSection;
 		// _song.needsVoices = check_mustHit.checked;
 
-		check_altAnim = new FlxUICheckBox(check_gfSection.x + 120, check_gfSection.y, null, null, "Alt Animation", 100);
+		check_altAnim = new FlxUICheckBox(check_gfSection.x + 120, check_gfSection.y + 30, null, null, "Alt Animation", 100);
 		check_altAnim.checked = _song.notes[curSec].altAnim;
+		check_altAnim.name = 'check_altAnim';
 
 		stepperBeats = new FlxUINumericStepper(10, 100, 1, 4, 1, 6, 2);
 		stepperBeats.value = getSectionBeats();
 		stepperBeats.name = 'section_beats';
 		blockPressWhileTypingOnStepper.push(stepperBeats);
-		check_altAnim.name = 'check_altAnim';
 
 		check_changeBPM = new FlxUICheckBox(10, stepperBeats.y + 30, null, null, 'Change BPM', 100);
 		check_changeBPM.checked = _song.notes[curSec].changeBPM;
@@ -711,6 +721,14 @@ class ChartingState extends MusicBeatState
 		}
 		stepperSectionBPM.name = 'section_bpm';
 		blockPressWhileTypingOnStepper.push(stepperSectionBPM);
+
+		check_CPUAltAnim = new FlxUICheckBox(check_mustHitSection.x + 110, check_mustHitSection.x, null, null, "CPU Alternate Animation", 100);
+		check_CPUAltAnim.checked = _song.notes[curSec].CPUAltAnim;
+		check_CPUAltAnim.name = 'check_CPUAltAnim';
+
+		check_playerAltAnim = new FlxUICheckBox(check_gfSection.x + 110, check_gfSection.y, null, null, "Player Alternate Animation", 100);
+		check_playerAltAnim.checked = _song.notes[curSec].playerAltAnim;
+		check_playerAltAnim.name = 'check_playerAltAnim';
 
 		stepperDType = new FlxUINumericStepper(130, stepperSectionBPM.y, 1, 0, 0, 999, 0);
 		stepperDType.value = 0;
@@ -921,12 +939,12 @@ class ChartingState extends MusicBeatState
 
 		tab_group_section.add(new FlxText(stepperBeats.x, stepperBeats.y - 15, 0, 'Beats per Section:'));
 
-		var swagArray:Array<Dynamic> = [stepperBeats, stepperSectionBPM, stepperDType, check_mustHitSection, check_gfSection, check_changeBPM, copyButton, pasteButton, clearSectionButton, check_notesSec, check_eventsSec, swapSection, stepperCopy, copyLastButton, duetButton, mirrorButton];
+		var swagArray:Array<Dynamic> = [stepperBeats, stepperSectionBPM, stepperDType, check_mustHitSection, check_gfSection, check_altAnim, check_CPUAltAnim, check_playerAltAnim, check_changeBPM, copyButton, pasteButton, clearSectionButton, check_notesSec, check_eventsSec, swapSection, stepperCopy, copyLastButton, duetButton, mirrorButton];
 		for (i in 0...swagArray.length){
 			tab_group_section.add(swagArray[i]);
 		}
 
-		tab_group_section.add(new FlxText(stepperDType.x + 60, stepperDType.y,'Section dType'));
+		tab_group_section.add(new FlxText(stepperDType.x + 60, stepperDType.y, 'Section dType'));
 
 		UI_box.addGroup(tab_group_section);
 	}
@@ -1441,6 +1459,11 @@ class ChartingState extends MusicBeatState
 					FlxG.log.add('changed bpm shit');
 				case "Alt Animation":
 					_song.notes[curSec].altAnim = check.checked;
+
+				case "CPU Alternate Animation":
+					_song.notes[curSec].CPUAltAnim = check.checked;
+				case "Player Alternate Animation":
+					_song.notes[curSec].playerAltAnim = check.checked;
 			}
 		}
 		else if (id == FlxUINumericStepper.CHANGE_EVENT && (sender is FlxUINumericStepper))
@@ -1551,7 +1574,6 @@ class ChartingState extends MusicBeatState
 
 	var lastConductorPos:Float;
 	var colorSine:Float = 0;
-	var camZooming:Bool = false;
 	override function update(elapsed:Float)
 	{
 		curStep = recalculateSteps();
@@ -2019,14 +2041,6 @@ class ChartingState extends MusicBeatState
 
 		FlxG.sound.music.pitch = playbackSpeed;
 		vocals.pitch = playbackSpeed;
-		camZooming = FlxG.sound.music.playing;
-
-		if (camZooming) FlxG.camera.zoom = FlxMath.lerp(1, FlxG.camera.zoom, CoolUtil.boundTo(1 - (elapsed * 3.125 * 1 * playbackSpeed), 0, 1));
-
-		if (camZooming && FlxG.camera.zoom < 1.35 && ClientPrefs.camZooms && curStep % 16 == 0)
-		{
-			FlxG.camera.zoom += 0.015;
-		}
 
 		bpmTxt.text =
 		Std.string(FlxMath.roundDecimal(Conductor.songPosition / 1000, 2)) + " / " + Std.string(FlxMath.roundDecimal(FlxG.sound.music.length / 1000, 2)) +
@@ -2099,17 +2113,6 @@ class ChartingState extends MusicBeatState
 		zoomTxt.text = 'Zoom: ' + zoomThing;
 		reloadGridLayer();
 	}
-
-	/*override function sectionHit()
-	{
-		super.sectionHit();
-
-		// move it here to uh much more useful then just each section
-		if (camZooming && FlxG.camera.zoom < 1.35 && ClientPrefs.camZooms && curSection % 1 == 0)
-		{
-			FlxG.camera.zoom += 0.015;
-		}
-	}*/
 
 	/*
 	function loadAudioBuffer() {
@@ -2526,6 +2529,8 @@ class ChartingState extends MusicBeatState
 		check_mustHitSection.checked = sec.mustHitSection;
 		check_gfSection.checked = sec.gfSection;
 		check_altAnim.checked = sec.altAnim;
+		check_playerAltAnim.checked = sec.playerAltAnim;
+		check_CPUAltAnim.checked = sec.CPUAltAnim;
 		stepperDType.value = sec.dType;
 		check_changeBPM.checked = sec.changeBPM;
 		stepperSectionBPM.value = sec.bpm;
@@ -2792,6 +2797,8 @@ class ChartingState extends MusicBeatState
 			sectionNotes: [],
 			typeOfSection: 0,
 			altAnim: false,
+			CPUAltAnim: false,
+			playerAltAnim: false,
 			dType: 0
 		};
 

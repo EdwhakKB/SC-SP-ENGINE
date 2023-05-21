@@ -30,7 +30,11 @@ import flixel.addons.display.FlxGridOverlay;
 import flixel.math.FlxMath;
 import flixel.FlxSprite;
 import flixel.util.FlxSort;
+#if (flixel >= "5.3.0")
+import flixel.sound.FlxSound;
+#else
 import flixel.system.FlxSound;
+#end
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.FlxCamera;
 import flixel.FlxG;
@@ -386,7 +390,7 @@ class ModchartEditorState extends MusicBeatState
 		opponentStrums = new FlxTypedGroup<StrumNoteType>();
 		playerStrums = new FlxTypedGroup<StrumNoteType>();
 
-		generateSong(PlayState.SONG.song);
+		generateSong();
 
 		playfieldRenderer = new PlayfieldRenderer(strumLineNotes, notes, this);
 		playfieldRenderer.cameras = [camHUD];
@@ -490,7 +494,6 @@ class ModchartEditorState extends MusicBeatState
     var dirtyUpdateEvents:Bool = false;
     var dirtyUpdateModifiers:Bool = false;
     var totalElapsed:Float = 0;
-    var camZooming:Bool = false;
     override public function update(elapsed:Float)
     {
         totalElapsed += elapsed;
@@ -837,19 +840,6 @@ class ModchartEditorState extends MusicBeatState
         }
 
         activeModifiersText.text = leText;
-
-       /* camZooming = FlxG.sound.music.playing;
-
-		if (camZooming) {
-            FlxG.camera.zoom = FlxMath.lerp(1, FlxG.camera.zoom, CoolUtil.boundTo(1 - (elapsed * 3.125 * 1 * playbackSpeed), 0, 1));
-            camHUD.zoom = FlxMath.lerp(1, camHUD.zoom, CoolUtil.boundTo(1 - (elapsed * 3.125 * 1 * playbackSpeed), 0, 1));
-        }
-
-		if (camZooming && FlxG.camera.zoom < 1.35 && ClientPrefs.camZooms && curStep % 16 == 0)
-		{
-			FlxG.camera.zoom += 0.015;
-            camHUD.zoom += 0.03;
-		}*/
     }
 
     function addNewEvent(time:Float)
@@ -989,7 +979,7 @@ class ModchartEditorState extends MusicBeatState
     }
 
 
-    private function generateSong(dataPath:String):Void
+    private function generateSong():Void
     {
 
         var songData = PlayState.SONG;

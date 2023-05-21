@@ -412,6 +412,7 @@ class CharacterEditorState extends MusicBeatState
 		}';
 
 	var charDropDown:FlxUIDropDownMenuCustom;
+	var parsedJson:CharacterFile;
 	function addSettingsUI() {
 		var tab_group = new FlxUI(null, UI_box);
 		tab_group.name = "Settings";
@@ -446,7 +447,7 @@ class CharacterEditorState extends MusicBeatState
 
 		var templateCharacter:FlxButton = new FlxButton(140, 50, "Load Template", function()
 		{
-			var parsedJson:CharacterFile = cast Json.parse(TemplateCharacter);
+			parsedJson = cast Json.parse(TemplateCharacter);
 			var characters:Array<Character> = [char, ghostChar];
 			for (character in characters)
 			{
@@ -476,7 +477,6 @@ class CharacterEditorState extends MusicBeatState
 			reloadCharacterImage();
 			reloadCharacterDropDown();
 			reloadCharacterOptions();
-			resetHealthBarColor();
 			updatePointerPos();
 			genBoyOffsets();
 		});
@@ -505,9 +505,9 @@ class CharacterEditorState extends MusicBeatState
 	var flipXCheckBox:FlxUICheckBox;
 	var noAntialiasingCheckBox:FlxUICheckBox;
 
-	var healthColorStepperR:FlxUINumericStepper;
-	var healthColorStepperG:FlxUINumericStepper;
-	var healthColorStepperB:FlxUINumericStepper;
+	var hexColorInputText:FlxUIInputText;
+
+	var iconColor:FlxColor;
 
 	function addCharacterUI() {
 		var tab_group = new FlxUI(null, UI_box);
@@ -523,17 +523,16 @@ class CharacterEditorState extends MusicBeatState
 			}
 		});
 
-		/*var decideIconColor:FlxButton = new FlxButton(reloadImage.x, reloadImage.y + 30, "Get Icon Color", function()
+		var decideIconColor:FlxButton = new FlxButton(reloadImage.x, reloadImage.y + 30, "Get Icon Color", function()
 			{
-				var coolColor = FlxColor.fromString(CoolUtil.dominantColor(leHealthIcon));
+				var coolColor:String = "#31B0D1";
 
-				healthColorStepperR.value = coolColor.red;
-				healthColorStepperG.value = coolColor.green;
-				healthColorStepperB.value = coolColor.blue;
-				getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperR, null);
-				getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperG, null);
-				getEvent(FlxUINumericStepper.CHANGE_EVENT, healthColorStepperB, null);
-			});*/
+				if (coolColor != null)
+					coolColor = hexColorInputText.text;
+
+				iconColor = FlxColor.fromString(coolColor);
+				getEvent(FlxUINumericStepper.CHANGE_EVENT, hexColorInputText, null);
+			});
 
 		healthIconInputText = new FlxUIInputText(15, imageInputText.y + 35, 75, leHealthIcon.getCharacter(), 8);
 
@@ -573,9 +572,7 @@ class CharacterEditorState extends MusicBeatState
 			saveCharacter();
 		});
 
-		/*healthColorStepperR = new FlxUINumericStepper(singDurationStepper.x, saveCharacterButton.y, 20, char.healthColorArray[0], 0, 255, 0);
-		healthColorStepperG = new FlxUINumericStepper(singDurationStepper.x + 65, saveCharacterButton.y, 20, char.healthColorArray[1], 0, 255, 0);
-		healthColorStepperB = new FlxUINumericStepper(singDurationStepper.x + 130, saveCharacterButton.y, 20, char.healthColorArray[2], 0, 255, 0);*/
+		hexColorInputText = new FlxUIInputText(singDurationStepper.x, saveCharacterButton.y, 150, "#31B0D1", 8);
 
 		tab_group.add(new FlxText(15, imageInputText.y - 18, 0, 'Image file name:'));
 		tab_group.add(new FlxText(15, healthIconInputText.y - 18, 0, 'Health icon name:'));
@@ -583,10 +580,10 @@ class CharacterEditorState extends MusicBeatState
 		tab_group.add(new FlxText(15, scaleStepper.y - 18, 0, 'Scale:'));
 		tab_group.add(new FlxText(positionXStepper.x, positionXStepper.y - 18, 0, 'Character X/Y:'));
 		tab_group.add(new FlxText(positionCameraXStepper.x, positionCameraXStepper.y - 18, 0, 'Camera X/Y:'));
-		//tab_group.add(new FlxText(healthColorStepperR.x, healthColorStepperR.y - 18, 0, 'Health bar R/G/B:'));
+		tab_group.add(new FlxText(hexColorInputText.x, hexColorInputText.y - 18, 0, 'Health bar R/G/B (Hex Color):'));
 		tab_group.add(imageInputText);
 		tab_group.add(reloadImage);
-		//tab_group.add(decideIconColor);
+		tab_group.add(decideIconColor);
 		tab_group.add(healthIconInputText);
 		tab_group.add(singDurationStepper);
 		tab_group.add(scaleStepper);
@@ -596,9 +593,7 @@ class CharacterEditorState extends MusicBeatState
 		tab_group.add(positionYStepper);
 		tab_group.add(positionCameraXStepper);
 		tab_group.add(positionCameraYStepper);
-		/*tab_group.add(healthColorStepperR);
-		tab_group.add(healthColorStepperG);
-		tab_group.add(healthColorStepperB);*/
+		tab_group.add(hexColorInputText);
 		tab_group.add(saveCharacterButton);
 		UI_characterbox.addGroup(tab_group);
 	}
@@ -661,8 +656,10 @@ class CharacterEditorState extends MusicBeatState
 			}
 
 			var lastOffsets:Array<Int> = [0, 0];
+			var lastplayerOffsets:Array<Int> = [0, 0];
 			for (anim in char.animationsArray) {
 				if(animationInputText.text == anim.anim) {
+					lastplayerOffsets = anim.playerOffsets;
 					lastOffsets = anim.offsets;
 					if(char.animation.getByName(animationInputText.text) != null) {
 						char.animation.remove(animationInputText.text);
@@ -677,7 +674,8 @@ class CharacterEditorState extends MusicBeatState
 				fps: Math.round(animationNameFramerate.value),
 				loop: animationLoopCheckBox.checked,
 				indices: indices,
-				offsets: lastOffsets
+				offsets: lastOffsets,
+				playerOffsets: lastplayerOffsets
 			};
 			if(indices != null && indices.length > 0) {
 				char.animation.addByIndices(newAnim.anim, newAnim.name, newAnim.indices, "", newAnim.fps, newAnim.loop);
@@ -767,6 +765,12 @@ class CharacterEditorState extends MusicBeatState
 			else if(sender == imageInputText) {
 				char.imageFile = imageInputText.text;
 			}
+			else if(sender == hexColorInputText)
+			{
+				var coloredFromHexText = FlxColor.fromString(hexColorInputText.text);
+				char.iconColor = coloredFromHexText;
+				iconColor = coloredFromHexText;
+			}
 		} else if(id == FlxUINumericStepper.CHANGE_EVENT && (sender is FlxUINumericStepper)) {
 			if (sender == scaleStepper)
 			{
@@ -809,21 +813,6 @@ class CharacterEditorState extends MusicBeatState
 				char.cameraPosition[1] = positionCameraYStepper.value;
 				updatePointerPos();
 			}
-			/*else if(sender == healthColorStepperR)
-			{
-				char.healthColorArray[0] = Math.round(healthColorStepperR.value);
-				healthBarBG.color = FlxColor.fromRGB(char.healthColorArray[0], char.healthColorArray[1], char.healthColorArray[2]);
-			}
-			else if(sender == healthColorStepperG)
-			{
-				char.healthColorArray[1] = Math.round(healthColorStepperG.value);
-				healthBarBG.color = FlxColor.fromRGB(char.healthColorArray[0], char.healthColorArray[1], char.healthColorArray[2]);
-			}
-			else if(sender == healthColorStepperB)
-			{
-				char.healthColorArray[2] = Math.round(healthColorStepperB.value);
-				healthBarBG.color = FlxColor.fromRGB(char.healthColorArray[0], char.healthColorArray[1], char.healthColorArray[2]);
-			}*/
 		}
 	}
 
@@ -840,12 +829,6 @@ class CharacterEditorState extends MusicBeatState
 		} else {
 			char.frames = Paths.getSparrowAtlas(char.imageFile);
 		}
-
-
-
-
-
-
 
 		if(char.animationsArray != null && char.animationsArray.length > 0) {
 			for (anim in char.animationsArray) {
@@ -987,7 +970,7 @@ class CharacterEditorState extends MusicBeatState
 			scaleStepper.value = char.jsonScale;
 			flipXCheckBox.checked = char.originalFlipX;
 			noAntialiasingCheckBox.checked = char.noAntialiasing;
-			resetHealthBarColor();
+			healthBarBG.color = char.iconColor;
 			leHealthIcon.changeIcon(healthIconInputText.text);
 			positionXStepper.value = char.positionArray[0];
 			positionYStepper.value = char.positionArray[1];
@@ -1070,13 +1053,6 @@ class CharacterEditorState extends MusicBeatState
 
 		charDropDown.setData(FlxUIDropDownMenuCustom.makeStrIdLabelArray(characterList, true));
 		charDropDown.selectedLabel = daAnim;
-	}
-
-	function resetHealthBarColor() {
-		/*healthColorStepperR.value = char.healthColorArray[0];
-		healthColorStepperG.value = char.healthColorArray[1];
-		healthColorStepperB.value = char.healthColorArray[2];*/
-		healthBarBG.color = char.iconColor;
 	}
 
 	function updatePresence() {

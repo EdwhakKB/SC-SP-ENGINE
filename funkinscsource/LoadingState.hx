@@ -70,9 +70,12 @@ class LoadingState extends MusicBeatState
 					if (PlayState.SONG.needsVoices)
 						checkLoadSong(getVocalPath());
 				}*/
-				checkLibrary("shared");
 				if(directory != null && directory.length > 0 && directory != 'shared') {
 					checkLibrary(directory);
+				}
+				else
+				{
+					checkLibrary("shared");
 				}
 
 				var fadeTime = 0.5;
@@ -157,6 +160,7 @@ class LoadingState extends MusicBeatState
 		StageData.forceNextDirectory = null;
 
 		if(weekDir != null && weekDir.length > 0 && weekDir != '') directory = weekDir;
+		else directory = 'shared';
 
 		Paths.setCurrentLevel(directory);
 		Debug.logInfo('Setting asset folder to ' + directory);
@@ -164,7 +168,7 @@ class LoadingState extends MusicBeatState
 		#if NO_PRELOAD_ALL
 		var loaded:Bool = false;
 		if (PlayState.SONG != null) {
-			loaded = isSoundLoaded(getSongPath()) && (!PlayState.SONG.needsVoices || isSoundLoaded(getVocalPath())) && isLibraryLoaded("shared") && isLibraryLoaded(directory);
+			loaded = isSoundLoaded(getSongPath()) && (!PlayState.SONG.needsVoices || isSoundLoaded(getVocalPath())) && (isLibraryLoaded("shared") || isLibraryLoaded(directory));
 		}
 		
 		if (!loaded)

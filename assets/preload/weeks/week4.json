@@ -15,8 +15,8 @@
 	"storyName": "MOMMY MUST MURDER",
 	"weekBefore": "week3",
 	"weekName": "Week 4",
-	"startUnlocked": true,
+	"startUnlocked": false,
 
 	"hideStoryMode": false,
-	"hideFreeplay": false
+	"hideFreeplay": true
 }

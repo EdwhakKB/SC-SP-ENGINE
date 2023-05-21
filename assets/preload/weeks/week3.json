@@ -15,8 +15,8 @@
 	"storyName": "PICO",
 	"weekBefore": "week2",
 	"weekName": "Week 3",
-	"startUnlocked": true,
+	"startUnlocked": false,
 
 	"hideStoryMode": false,
-	"hideFreeplay": false
+	"hideFreeplay": true
 }

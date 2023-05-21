@@ -48,6 +48,8 @@ class Main extends Sprite
 
 	public static var internetConnection:Bool = false; // If the user is connected to internet.
 
+	public static var gameContainer:Main = null; // Main instance to access when needed.
+
 	// You can pretty much ignore everything from here on - your code should go in your states.
 
 	public static function main():Void
@@ -111,10 +113,14 @@ class Main extends Sprite
 		}
 		#end
 
+		gameContainer = this;
+
 		#if html5
 		FlxG.autoPause = false;
 		FlxG.mouse.visible = false;
 		#end
+
+		FlxG.fixedTimestep = false;
 		
 		#if CRASH_HANDLER
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);

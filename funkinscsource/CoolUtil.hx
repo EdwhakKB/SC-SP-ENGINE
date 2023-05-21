@@ -2,11 +2,16 @@ package;
 
 import flixel.util.FlxSave;
 import flixel.FlxG;
+import flixel.FlxSprite;
 import openfl.utils.Assets;
 import lime.utils.Assets as LimeAssets;
 import lime.utils.AssetLibrary;
 import lime.utils.AssetManifest;
+#if (flixel >= "5.3.0")
+import flixel.sound.FlxSound;
+#else
 import flixel.system.FlxSound;
+#end
 #if sys
 import sys.io.File;
 import sys.FileSystem;
@@ -31,6 +36,9 @@ class CoolUtil
 	{
 		return defaultDifficulties[difficulty];
 	}
+
+	public static function clamp(value:Float, min:Float, max:Float):Float
+		return Math.max(min, Math.min(max, value));
 
 	inline public static function quantize(f:Float, snap:Float){
 		// changed so this actually works lol
@@ -58,6 +66,35 @@ class CoolUtil
 	public static function difficultyString():String
 	{
 		return difficulties[PlayState.storyDifficulty].toUpperCase();
+	}
+
+	public static function resetSprite(spr:FlxSprite, x:Float, y:Float) {
+		spr.reset(x, y);
+		spr.alpha = 1;
+		spr.visible = true;
+		spr.active = true;
+		//spr.antialiasing = FlxSprite.defaultAntialiasing;
+		//spr.rotOffset.set();
+	}
+
+	public static function resetSpriteAttributes(spr:FlxSprite)
+	{
+		spr.scale.x = 1;
+		spr.scale.y = 1;
+		spr.offset.x = 0;
+		spr.offset.y = 0;
+		spr.shader = null;
+		spr.alpha = 1;
+		spr.visible = true;
+		spr.flipX = false;
+		spr.flipY = false;
+
+		spr.centerOrigin();
+	}
+
+	public static inline function addZeros(str:String, num:Int) {
+		while(str.length < num) str = '0${str}';
+		return str;
 	}
 
 	inline public static function boundTo(value:Float, min:Float, max:Float):Float {

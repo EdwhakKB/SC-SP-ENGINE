@@ -62,13 +62,14 @@ class OptionsState extends MusicBeatState
 
 	var selectorLeft:Alphabet;
 	var selectorRight:Alphabet;
+	var bg:FlxSprite;
 
 	override function create() {
 		#if desktop
 		DiscordClient.changePresence("Options Menu", null);
 		#end
 
-		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
+		bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
 		bg.color = 0xFFea71fd;
 		bg.updateHitbox();
 
@@ -106,11 +107,33 @@ class OptionsState extends MusicBeatState
 	override function update(elapsed:Float) {
 		super.update(elapsed);
 
+		if (FlxG.sound.music != null){
+			if (!FlxG.sound.music.playing){
+				FlxG.sound.playMusic(Paths.music("freakyMenu"));
+				Conductor.changeBPM(102);
+				MainMenuState.freakyPlaying = true;
+			}
+			Conductor.songPosition = FlxG.sound.music.time;
+		}
+
+		var mult:Float = FlxMath.lerp(1.07, bg.scale.x, CoolUtil.clamp(1 - (elapsed * 9), 0, 1));
+		bg.scale.set(mult, mult);
+		bg.updateHitbox();
+		bg.offset.set();
+
 		if (controls.UI_UP_P) {
 			changeSelection(-1);
 		}
 		if (controls.UI_DOWN_P) {
 			changeSelection(1);
+		}
+
+		var shiftMult:Int = 1;
+
+		if(FlxG.mouse.wheel != 0)
+		{
+			FlxG.sound.play(Paths.sound('scrollMenu'), 0.2);
+			changeSelection(-shiftMult * FlxG.mouse.wheel);
 		}
 
 		if (controls.BACK) {
@@ -120,7 +143,8 @@ class OptionsState extends MusicBeatState
 			else
 			{
 				PauseSubState.goToOptions = false;
-				MusicBeatState.switchState(new PlayState());
+				MainMenuState.freakyPlaying = false;
+				LoadingState.loadAndSwitchState(new PlayState());
 			}
 		}
 
@@ -152,5 +176,13 @@ class OptionsState extends MusicBeatState
 			}
 		}
 		FlxG.sound.play(Paths.sound('scrollMenu'));
+	}
+
+	override function beatHit() {
+		super.beatHit();
+
+		bg.scale.set(1.11, 1.11);
+		bg.updateHitbox();
+		bg.offset.set();
 	}
 }

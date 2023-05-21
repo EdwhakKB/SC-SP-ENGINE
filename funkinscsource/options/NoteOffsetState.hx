@@ -16,6 +16,15 @@ import flixel.math.FlxPoint;
 
 using StringTools;
 
+typedef CustomHudData = {
+	var customHudName:String = 'Custom Hud v1';
+	var HealthBarStyle:String = 'FNF';
+	var CountDownStyle:Array<String> = ["ready", "set", "go"];
+	var CountDownSounds:Array<String> = ["intro3", "intro2", "intro1", "introGo"];
+	var RatingStyle:Array<Dynamic> = ["", null];
+	var GameOverStyle:String = "gameOver";
+}
+
 class NoteOffsetState extends MusicBeatState
 {
 	var boyfriend:Character;
@@ -88,10 +97,12 @@ class NoteOffsetState extends MusicBeatState
 
 		// Characters
 		gf = new Character(400, 130, 'gf');
+		gf.opponentMode = false;
 		gf.x += gf.positionArray[0];
 		gf.y += gf.positionArray[1];
 		gf.scrollFactor.set(0.95, 0.95);
 		boyfriend = new Character(770, 100, 'bf', true);
+		boyfriend.opponentMode = false;
 		boyfriend.x += boyfriend.positionArray[0];
 		boyfriend.y += boyfriend.positionArray[1];
 		add(gf);

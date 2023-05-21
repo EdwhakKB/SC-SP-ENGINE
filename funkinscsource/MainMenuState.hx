@@ -30,6 +30,8 @@ class MainMenuState extends MusicBeatState
 	public static var gameVer:String = '0.2.8'; // Main gameVersion
 	public static var curSelected:Int = 0;
 
+	public static var freakyPlaying:Bool;
+
 	var menuItems:FlxTypedGroup<FlxSprite>;
 	private var camGame:FlxCamera;
 	private var camAchievement:FlxCamera;
@@ -48,6 +50,9 @@ class MainMenuState extends MusicBeatState
 	var camFollow:FlxObject;
 	var camFollowPos:FlxObject;
 	var debugKeys:Array<FlxKey>;
+	var bg:FlxSprite;
+
+	public static var freakyMenuBPM:Float = 102;
 
 	override function create()
 	{
@@ -75,10 +80,17 @@ class MainMenuState extends MusicBeatState
 
 		persistentUpdate = persistentDraw = true;
 
+		if (!FlxG.sound.music.playing)
+		{
+			FlxG.sound.playMusic(Paths.music("freakyMenu"));
+			Conductor.changeBPM(freakyMenuBPM);
+			freakyPlaying = true;
+		}
+
 		var yScroll:Float = Math.max(0.25 - (0.05 * (optionShit.length - 4)), 0.1);
-		var bg:FlxSprite = new FlxSprite(-80).loadGraphic(Paths.image('menuBG'));
-		bg.scrollFactor.set(0, yScroll);
-		bg.setGraphicSize(Std.int(bg.width * 1.175));
+		bg = new FlxSprite(-80).loadGraphic(Paths.image('menuBG'));
+		bg.scrollFactor.set(0, 0/*yScroll*/);
+		//bg.setGraphicSize(Std.int(bg.width * ));
 		bg.updateHitbox();
 		bg.screenCenter();
 		bg.antialiasing = ClientPrefs.globalAntialiasing;
@@ -90,8 +102,8 @@ class MainMenuState extends MusicBeatState
 		add(camFollowPos);
 
 		magenta = new FlxSprite(-80).loadGraphic(Paths.image('menuDesat'));
-		magenta.scrollFactor.set(0, yScroll);
-		magenta.setGraphicSize(Std.int(magenta.width * 1.175));
+		magenta.scrollFactor.set(0, 0/*yScroll*/);
+		//magenta.setGraphicSize(Std.int(magenta.width * 1.175));
 		magenta.updateHitbox();
 		magenta.screenCenter();
 		magenta.visible = false;
@@ -178,10 +190,13 @@ class MainMenuState extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
-		if (FlxG.sound.music.volume < 0.8)
-		{
-			FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
-			if(FreeplayState.vocals != null) FreeplayState.vocals.volume += 0.5 * elapsed;
+		if (FlxG.sound.music != null) {
+			if (FlxG.sound.music.volume < 0.8){
+				FlxG.sound.music.volume += 0.5 * FlxG.elapsed;
+			}
+	
+			if (FlxG.sound.music != null)
+				Conductor.songPosition = FlxG.sound.music.time;
 		}
 
 		#if !mobile
@@ -207,6 +222,14 @@ class MainMenuState extends MusicBeatState
 
 		var lerpVal:Float = CoolUtil.boundTo(elapsed * 7.5, 0, 1);
 		camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
+
+		for (i in [bg, magenta])
+		{
+			var mult:Float = FlxMath.lerp(1, i.scale.x, CoolUtil.clamp(1 - (elapsed * 9), 0, 1));
+			i.scale.set(mult, mult);
+			i.updateHitbox();
+			i.offset.set();
+		}
 
 		if (!selectedSomethin)
 		{
@@ -281,6 +304,18 @@ class MainMenuState extends MusicBeatState
 		{
 			spr.screenCenter(X);
 		});
+	}
+
+	override function beatHit()
+	{
+		super.beatHit();
+
+		for (i in [bg, magenta])
+		{
+			i.scale.set(1.06,1.06);
+			i.updateHitbox();
+			i.offset.set();
+		}
 	}
 
 	function goToState(daChoice:String)

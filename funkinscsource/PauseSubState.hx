@@ -7,7 +7,11 @@ import flixel.FlxSubState;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.input.keyboard.FlxKey;
+#if (flixel >= "5.3.0")
+import flixel.sound.FlxSound;
+#else
 import flixel.system.FlxSound;
+#end
 import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
@@ -41,6 +45,8 @@ class PauseSubState extends MusicBeatSubstate
 
 	//var botplayText:FlxText;
 	public static var songName:String = '';
+
+	var bg:FlxSprite;
 
 	public function new(x:Float, y:Float)
 	{
@@ -81,7 +87,9 @@ class PauseSubState extends MusicBeatSubstate
 
 		FlxG.sound.list.add(pauseMusic);
 
-		var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+		CoolUtil.precacheImage('bg', null);
+
+		bg = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
 		bg.alpha = 0;
 		bg.scrollFactor.set();
 		add(bg);
@@ -149,6 +157,8 @@ class PauseSubState extends MusicBeatSubstate
 	public var countdownReady:FlxSprite;
 	public var countdownSet:FlxSprite;
 	public var countdownGo:FlxSprite;
+	public var inCountDown:Bool = false;
+	
 	override function update(elapsed:Float)
 	{
 		cantUnpause -= elapsed;
@@ -162,11 +172,11 @@ class PauseSubState extends MusicBeatSubstate
 		var downP = controls.UI_DOWN_P;
 		var accepted = controls.ACCEPT;
 
-		if (upP)
+		if (upP && !inCountDown)
 		{
 			changeSelection(-1);
 		}
-		if (downP)
+		if (downP && !inCountDown)
 		{
 			changeSelection(1);
 		}
@@ -202,7 +212,7 @@ class PauseSubState extends MusicBeatSubstate
 				}
 		}
 
-		if (accepted && (cantUnpause <= 0 || !ClientPrefs.controllerMode))
+		if (accepted && (cantUnpause <= 0 || !ClientPrefs.controllerMode) && !inCountDown)
 		{
 			if (menuItems == difficultyChoices)
 			{
@@ -227,28 +237,23 @@ class PauseSubState extends MusicBeatSubstate
 				case "Resume":
 					unPauseTimer = new FlxTimer().start(Conductor.crochet / 1000, function(hmmm:FlxTimer)
 					{
-						if (unPauseTimer.loopsLeft == 4)
+						switch (hmmm.loopsLeft)
 						{
-							pauseCountDown('three');
-						}
-						else if (unPauseTimer.loopsLeft == 3)
-						{
-							pauseCountDown('two');
-						}
-						else if (unPauseTimer.loopsLeft == 2)
-						{
-							pauseCountDown('one');
-						}
-						else if (unPauseTimer.loopsLeft == 1)
-						{
-							pauseCountDown('go!');
-						}
-						else if (unPauseTimer.finished && unPauseTimer.loopsLeft == 0)
-						{
-							PlayState.instance.modchartTimers.remove('unPauseTimer');
-							close();
+							case 4:
+								pauseCountDown();
+							case 3:
+								pauseCountDown();
+							case 2:
+								pauseCountDown();
+							case 1:
+								pauseCountDown();
+							case 0:
+								if (hmmm.finished)
+									PlayState.instance.modchartTimers.remove('hmmm'); 
+									close();
 						}
 					}, 5);
+					inCountDown = true;
 					menuItems = [];
 					deleteSkipTimeText();
 					regenMenu();
@@ -304,40 +309,79 @@ class PauseSubState extends MusicBeatSubstate
 						MusicBeatState.switchState(new FreeplayState());
 					}
 					PlayState.cancelMusicFadeTween();
-					FlxG.sound.playMusic(Paths.music('freakyMenu'));
+					//FlxG.sound.playMusic(Paths.music('freakyMenu'));
 					PlayState.changedDifficulty = false;
 					PlayState.chartingMode = false;
 			}
 		}
 	}
 
-	function pauseCountDown(Number:String)
+	var CDANumber:Int = 5;
+
+	function pauseCountDown()
 	{
 		var introAssets:Map<String, Array<String>> = new Map<String, Array<String>>();
 		introAssets.set('default', ['ready', 'set', 'go']);
 		introAssets.set('pixel', ['pixelUI/ready-pixel', 'pixelUI/set-pixel', 'pixelUI/date-pixel']);
 
+		introAssets.set(PlayState.curStage, PlayState.instance.stageIntroAssets);
+
 		var introAlts:Array<String> = introAssets.get('default');
 		var antialias:Bool = ClientPrefs.globalAntialiasing;
 		if(PlayState.isPixelStage) {
-			introAlts = introAssets.get('pixel');
 			antialias = false;
 		}
 
-		switch (Number)
+		for (value in introAssets.keys())
 		{
-			case 'three':
-				FlxG.sound.play(Paths.sound('intro3' + PlayState.instance.introSoundsSuffix), 1);
-			case 'two':
-				countdownReady = new FlxSprite().loadGraphic(Paths.image(introAlts[0]));
-				//countdownReady.cameras = [PlayState.instance.camHUD];
+			if (value == PlayState.curStage)
+			{
+				introAlts = introAssets.get(value);
+		
+				if (PlayState.instance.stageIntroSoundsSuffix != '')
+					PlayState.instance.introSoundsSuffix = PlayState.instance.stageIntroSoundsSuffix;
+				else
+					PlayState.instance.introSoundsSuffix = '';
+			}
+		}
+
+		CDANumber -= 1;
+
+		switch (CDANumber)
+		{
+			case 4:
+				if (PlayState.instance.has3rdIntroAsset)
+				{
+					var getready:FlxSprite = new FlxSprite().loadGraphic(Paths.image(introAlts[0]));
+					getready.scrollFactor.set();
+
+					if (PlayState.isPixelStage)
+						getready.setGraphicSize(Std.int(getready.width * PlayState.daPixelZoom));
+
+					getready.updateHitbox();
+					getready.screenCenter();
+					getready.antialiasing = antialias;
+					add(getready);
+					FlxTween.tween(getready, {alpha: 0}, Conductor.crochet / 1000, {
+						ease: FlxEase.cubeInOut,
+						onComplete: function(twn:FlxTween)
+						{
+							getready.destroy();
+						}
+					});
+				}
+				FlxG.sound.play(Paths.sound('intro3' + PlayState.instance.introSoundsSuffix), 0.6);
+			case 3:
+				if (PlayState.instance.has3rdIntroAsset)
+					countdownReady = new FlxSprite().loadGraphic(Paths.image(introAlts[1]));
+				else
+					countdownReady = new FlxSprite().loadGraphic(Paths.image(introAlts[0]));
 				countdownReady.scrollFactor.set();
-				countdownReady.updateHitbox();
-				countdownReady.screenCenter();
 
 				if (PlayState.isPixelStage)
 					countdownReady.setGraphicSize(Std.int(countdownReady.width * PlayState.daPixelZoom));
 
+				countdownReady.updateHitbox();
 				countdownReady.screenCenter();
 				countdownReady.antialiasing = antialias;
 				add(countdownReady);
@@ -350,15 +394,17 @@ class PauseSubState extends MusicBeatSubstate
 					}
 				});
 				FlxG.sound.play(Paths.sound('intro2' + PlayState.instance.introSoundsSuffix), 0.6);
-			case 'one':
-				countdownSet = new FlxSprite().loadGraphic(Paths.image(introAlts[1]));
-				//countdownSet.cameras = [PlayState.instance.camHUD];
+			case 2:
+				if (PlayState.instance.has3rdIntroAsset)
+					countdownSet = new FlxSprite().loadGraphic(Paths.image(introAlts[2]));
+				else
+					countdownSet = new FlxSprite().loadGraphic(Paths.image(introAlts[1]));
 				countdownSet.scrollFactor.set();
-				countdownSet.screenCenter();
 
 				if (PlayState.isPixelStage)
 					countdownSet.setGraphicSize(Std.int(countdownSet.width * PlayState.daPixelZoom));
 
+				countdownSet.updateHitbox();
 				countdownSet.screenCenter();
 				countdownSet.antialiasing = antialias;
 				add(countdownSet);
@@ -371,17 +417,17 @@ class PauseSubState extends MusicBeatSubstate
 					}
 				});
 				FlxG.sound.play(Paths.sound('intro1' + PlayState.instance.introSoundsSuffix), 0.6);
-			case 'go!':
-				countdownGo = new FlxSprite().loadGraphic(Paths.image(introAlts[2]));
-				//countdownGo.cameras = [PlayState.instance.camHUD];
+			case 1:
+				if (PlayState.instance.has3rdIntroAsset)
+					countdownGo = new FlxSprite().loadGraphic(Paths.image(introAlts[3]));
+				else
+					countdownGo = new FlxSprite().loadGraphic(Paths.image(introAlts[2]));
 				countdownGo.scrollFactor.set();
-				countdownGo.screenCenter();
 
 				if (PlayState.isPixelStage)
 					countdownGo.setGraphicSize(Std.int(countdownGo.width * PlayState.daPixelZoom));
 
 				countdownGo.updateHitbox();
-
 				countdownGo.screenCenter();
 				countdownGo.antialiasing = antialias;
 				add(countdownGo);
@@ -394,7 +440,11 @@ class PauseSubState extends MusicBeatSubstate
 					}
 				});
 				FlxG.sound.play(Paths.sound('introGo' + PlayState.instance.introSoundsSuffix), 0.6);
+			case 0:
 		}
+
+		/*if (Number == -1)
+			CountDownFinished = true;*/
 	}
 
 	function deleteSkipTimeText()

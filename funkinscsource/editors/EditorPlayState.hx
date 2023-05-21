@@ -13,7 +13,11 @@ import flixel.tweens.FlxTween;
 import flixel.math.FlxMath;
 import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
+#if (flixel >= "5.3.0")
+import flixel.sound.FlxSound;
+#else
 import flixel.system.FlxSound;
+#end
 import flixel.util.FlxSort;
 import flixel.util.FlxTimer;
 import flixel.input.keyboard.FlxKey;
@@ -111,7 +115,7 @@ class EditorPlayState extends MusicBeatState
 		else
 			vocals = new FlxSound();
 
-		generateSong(PlayState.SONG.song);
+		generateSong();
 		#if (LUA_ALLOWED && MODS_ALLOWED)
 		for (notetype in noteTypeMap.keys()) {
 			var luaToLoad:String = Paths.modFolders('custom_notetypes/' + notetype + '.lua');
@@ -191,7 +195,7 @@ class EditorPlayState extends MusicBeatState
 	var songHits:Int = 0;
 	var songMisses:Int = 0;
 	var startingSong:Bool = true;
-	private function generateSong(dataPath:String):Void
+	private function generateSong():Void
 	{
 		FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song), 0, false);
 		FlxG.sound.music.pause();
@@ -406,7 +410,7 @@ class EditorPlayState extends MusicBeatState
 							if (daNote.animation.curAnim.name.endsWith('end')) {
 								daNote.y += 10.5 * (fakeCrochet / 400) * 1.5 * PlayState.SONG.speed + (46 * (PlayState.SONG.speed - 1));
 								daNote.y -= 46 * (1 - (fakeCrochet / 600)) * PlayState.SONG.speed;
-								if(PlayState.isPixelStage && ClientPrefs.noteSkin == 'NONE') {
+								if(daNote.texture.contains('pixel') || PlayState.containsAPixelTextureForNotes) {
 									daNote.y += 8;
 								} else {
 									daNote.y -= 19;

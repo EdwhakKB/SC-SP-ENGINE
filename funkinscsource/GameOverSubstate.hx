@@ -27,28 +27,13 @@ class GameOverSubstate extends MusicBeatSubstate
 	public static var loopSoundName:String = 'gameOver';
 	public static var endSoundName:String = 'gameOverEnd';
 
-	public static var characterNameDad:String = 'dad-dead';
-	public static var deathSoundNameDad:String = 'fnf_loss_sfx';
-	public static var loopSoundNameDad:String = 'gameOver';
-	public static var endSoundNameDad:String = 'gameOverEnd';
-
-
 	public static var instance:GameOverSubstate;
 
 	public static function resetVariables() {
-		if (!PlayState.instance.opponentMode){
-			characterName = 'bf-dead';
-			deathSoundName = 'fnf_loss_sfx';
-			loopSoundName = 'gameOver';
-			endSoundName = 'gameOverEnd';
-		}
-		else
-		{
-			characterNameDad = 'dad-dead';
-			deathSoundNameDad = 'fnf_loss_sfx';
-			loopSoundNameDad = 'gameOver';
-			endSoundNameDad = 'gameOverEnd';
-		}
+		characterName = 'bf-dead';
+		deathSoundName = 'fnf_loss_sfx';
+		loopSoundName = 'gameOver';
+		endSoundName = 'gameOverEnd';
 	}
 
 	public static var opponentMode:Bool = false;
@@ -57,8 +42,7 @@ class GameOverSubstate extends MusicBeatSubstate
 	override function create()
 	{
 		instance = this;
-		opponentMode = PlayState.instance.opponentMode;
-		char = opponentMode ? dad : boyfriend;
+		char = boyfriend;
 		PlayState.instance.callOnLuas('onGameOverStart', []);
 
 		super.create();
@@ -72,36 +56,14 @@ class GameOverSubstate extends MusicBeatSubstate
 
 		Conductor.songPosition = 0;
 
-		switch (PlayState.instance.dad.curCharacter)
-		{
-			default:
-				characterNameDad = PlayState.instance.dad.curCharacter + '-dead';
-				deathSoundNameDad = 'fnf_loss_sfx';
-				loopSoundNameDad = 'gameOver';
-				endSoundNameDad = 'gameOverEnd';
-		}
+		boyfriend = new Boyfriend(x, y, characterName);
+		boyfriend.x += boyfriend.positionArray[0];
+		boyfriend.y += boyfriend.positionArray[1];
+		add(boyfriend);
 
-		if (opponentMode)
-		{
-			dad = new Character(x, y, characterNameDad);
-			dad.x += dad.positionArray[0];
-			dad.y += dad.positionArray[1];
-			add(dad);
-		}
-		else
-		{
-			boyfriend = new Boyfriend(x, y, characterName);
-			boyfriend.x += boyfriend.positionArray[0];
-			boyfriend.y += boyfriend.positionArray[1];
-			add(boyfriend);
-		}
-
-		camFollow = new FlxPoint(char.getGraphicMidpoint().x, char.getGraphicMidpoint().y);
+		camFollow = new FlxPoint(camX, camY);
 
 		FlxG.sound.play(Paths.sound(deathSoundName));
-		Conductor.changeBPM(100);
-		// FlxG.camera.followLerp = 1;
-		// FlxG.camera.focusOn(FlxPoint.get(FlxG.width / 2, FlxG.height / 2));
 		FlxG.camera.scroll.set();
 		FlxG.camera.target = null;
 
@@ -118,7 +80,6 @@ class GameOverSubstate extends MusicBeatSubstate
 	{
 		super.update(elapsed);
 
-		var char:Character = opponentMode ? dad : boyfriend;
 		PlayState.instance.callOnLuas('onUpdate', [elapsed]);
 		if(updateCamera) {
 			var lerpVal:Float = CoolUtil.boundTo(elapsed * 0.6, 0, 1);
@@ -196,9 +157,6 @@ class GameOverSubstate extends MusicBeatSubstate
 		{
 			char.playAnim('deathLoop', true);
 		}
-		#if debug
-		FlxG.log.add('beat');
-		#end
 	}
 
 	var isEnding:Bool = false;

@@ -72,6 +72,14 @@ class VisualsUISubState extends BaseOptionsMenu
 			['Time Left', 'Time Elapsed', 'Song Name', 'Disabled']);
 		addOption(option);
 
+		var option:Option = new Option('Time Bar Color:',
+			"What colors should the Time Bar display?",
+			'colorBarType',
+			'string',
+			'No Colors',
+			['No Colors', 'Main Colors', 'Reversed Colors']);
+		addOption(option);
+
 		var option:Option = new Option('Flashing Lights',
 			"Uncheck this if you're sensitive to flashing lights!",
 			'flashing',
@@ -145,6 +153,36 @@ class VisualsUISubState extends BaseOptionsMenu
 			'comboStacking',
 			'bool',
 			true);
+		addOption(option);
+
+		var option:Option = new Option('Combo Movement',
+			"If unchecked, Ratings and Combo will move in hud, Else stay in game and don't move",
+			'stillCombo',
+			'bool',
+			false);
+		addOption(option);
+
+		var option:Option = new Option('Mouse Look',
+			"What mouse should it display?",
+			'mouseLook',
+			'string',
+			'FNF Cursor',
+			['FNF Cursor', 'System Cursor', 'No Cursor']);
+		addOption(option);
+
+		var option:Option = new Option('Judgement Counter',
+			"If checked, A Judgement Counter is shown",
+			'judgementCounter',
+			'bool',
+			false);
+		addOption(option);
+
+		var option:Option = new Option('Title Movement:',
+			"What should the Title movement be?",
+			'floatingTitlegf',
+			'string',
+			'only floating logo',
+			['only floating logo', 'not static gf and title only logo', 'all floating', 'none']);
 		addOption(option);
 
 		super();
