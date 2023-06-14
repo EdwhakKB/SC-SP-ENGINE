@@ -43,20 +43,6 @@ class NoteSplash extends FlxSprite
 				texture = PlayState.SONG.splashSkin;
 		}
 
-		if (((texture != null || texture == null) || (PlayState.SONG.splashSkin != null || PlayState.SONG.splashSkin == null)) && PlayState.SONG.splashSkin.contains('-kade'))
-		{
-			switch (texture)
-			{
-				case 'noteSplashes-kade':
-					switch (note)
-					{
-						default:
-							this.x += 20;
-							this.y += 10;
-					}
-			}
-		}
-
 		if (textureLoaded != texture)
 		{
 			loadAnims(texture);
