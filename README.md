@@ -1,4 +1,8 @@
-# Friday Night Funkin' - Psych Engine
+This engine originaly for hitmans A. D.
+
+# Friday Night Funkin' - Sick Coder's Engine
+![iconOG](https://github.com/glowsoony/SC-SP-ENGINE/assets/84847356/eca4f86d-db0d-430b-9131-44abf92bb1fd)
+
 Engine originally used on [Mind Games Mod](https://gamebanana.com/mods/301107), intended to be a fix for the vanilla version's many issues while keeping the casual play aspect of it. Also aiming to be an easier alternative to newbie coders.
 
 ## Installation:
