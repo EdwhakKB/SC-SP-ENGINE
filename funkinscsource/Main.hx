@@ -100,7 +100,7 @@ class Main extends Sprite
 
 		game.framerate = Application.current.window.displayMode.refreshRate;
 	
-		ClientPrefs.loadDefaultKeys();
+		//ClientPrefs.loadDefaultKeys();
 		addChild(new FlxGame(game.width, game.height, game.initialState, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
 
 		#if !mobile

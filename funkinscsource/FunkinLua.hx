@@ -149,6 +149,7 @@ class FunkinLua {
 		set('songName', PlayState.SONG.song);
 		set('songPath', Paths.formatToSongPath(PlayState.SONG.song));
 		set('startedCountdown', false);
+		set('mania', PlayState.mania);
 		set('curStage', PlayState.SONG.stage);
 
 		set('isStoryMode', PlayState.isStoryMode);
@@ -200,7 +201,7 @@ class FunkinLua {
 		set('botPlay', PlayState.instance.cpuControlled);
 		set('practice', PlayState.instance.practiceMode);
 
-		for (i in 0...4) {
+		for (i in 0...PlayState.mania) {
 			set('defaultPlayerStrumX' + i, 0);
 			set('defaultPlayerStrumY' + i, 0);
 			set('defaultOpponentStrumX' + i, 0);
@@ -268,6 +269,10 @@ class FunkinLua {
 		Lua_helper.add_callback(lua,"changeDadAuto", changeDadAuto);
 
 		Lua_helper.add_callback(lua,"changeGFAuto", changeGFAuto);
+
+		Lua_helper.add_callback(lua, "changeMania", function(newValue:Int, skipTwn:Bool = false) {
+			PlayState.instance.changeMania(newValue, skipTwn);
+		});
 
 		Lua_helper.add_callback(lua, "Debug", function(type:String, input:Dynamic, ?pos:haxe.PosInfos) {
 			switch (type)
@@ -3411,75 +3416,6 @@ class FunkinLua {
 
 		Lua_helper.add_callback(lua,"addHudZoom", function(zoomAmount:Float) {
 			PlayState.instance.camHUD.zoom += zoomAmount;
-		});
-
-		//Dumb QT shit which may or may not work
-		//Not everything is fully supported since you can just use the 'triggerEvent' function instead.
-		Lua_helper.add_callback(lua, "qtMod_SawbladeAlert", function(alertType:Int) {
-			PlayState.instance.kbATTACK_ALERT(alertType);
-		});
-		Lua_helper.add_callback(lua, "qtMod_SawbladePrepare", function(variable:String) {
-			PlayState.instance.KBATTACK(false);
-		});
-		Lua_helper.add_callback(lua, "qtMod_SawbladeAttack", function(attack:Bool = true, sound:String = "hazard/attack", shouldInstakill:Bool = false) {
-			PlayState.instance.KBATTACK(attack, sound, shouldInstakill);
-		});
-		Lua_helper.add_callback(lua, "qtMod_PincerPrepare", function(laneID:Int,goAway:Bool) {
-			PlayState.instance.KBPINCER_PREPARE(laneID,goAway);
-		});
-		Lua_helper.add_callback(lua, "qtMod_PincerGrab", function(laneID:Int) {
-			PlayState.instance.KBPINCER_GRAB(laneID);
-		});
-
-		//Tween shit for pincers.
-		Lua_helper.add_callback(lua, "qtMod_PincerTweenX", function(tag:String, note:Int, value:Dynamic, duration:Float, ease:String) {
-			cancelTween(tag);
-			if(note < 0) note = 0;
-			//Whoever named these variables, fuck you. I'm not having my variables names be 'testicle' or 'penis exam' or whatever.
-			var pincerToMove:FlxSprite = null;
-			switch(note){
-				case 1:
-					pincerToMove = PlayState.instance.pincer1;
-				case 2:
-					pincerToMove = PlayState.instance.pincer2;
-				case 3:
-					pincerToMove = PlayState.instance.pincer3;
-				case 4:
-					pincerToMove = PlayState.instance.pincer4;
-			}
-
-			if(pincerToMove != null) {
-				PlayState.instance.modchartTweens.set(tag, FlxTween.tween(pincerToMove, {x: value}, duration, {ease: getFlxEaseByString(ease),
-					onComplete: function(twn:FlxTween) {
-						PlayState.instance.callOnLuas('onTweenCompleted', [tag]);
-						PlayState.instance.modchartTweens.remove(tag);
-					}
-				}));
-			}
-		});
-		Lua_helper.add_callback(lua, "qtMod_PincerTweenY", function(tag:String, note:Int, value:Dynamic, duration:Float, ease:String) {
-			cancelTween(tag);
-			if(note < 0) note = 0;
-			var pincerToMove:FlxSprite = null;
-			switch(note){
-				case 1:
-					pincerToMove = PlayState.instance.pincer1;
-				case 2:
-					pincerToMove = PlayState.instance.pincer2;
-				case 3:
-					pincerToMove = PlayState.instance.pincer3;
-				case 4:
-					pincerToMove = PlayState.instance.pincer4;
-			}
-
-			if(pincerToMove != null) {
-				PlayState.instance.modchartTweens.set(tag, FlxTween.tween(pincerToMove, {y: value}, duration, {ease: getFlxEaseByString(ease),
-					onComplete: function(twn:FlxTween) {
-						PlayState.instance.callOnLuas('onTweenCompleted', [tag]);
-						PlayState.instance.modchartTweens.remove(tag);
-					}
-				}));
-			}
 		});
 
 		call('onCreate', []);

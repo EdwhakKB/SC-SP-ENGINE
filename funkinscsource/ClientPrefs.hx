@@ -24,7 +24,17 @@ class ClientPrefs {
 	public static var camZooms:Bool = true;
 	public static var hideHud:Bool = false;
 	public static var noteOffset:Int = 0;
-	public static var arrowHSV:Array<Array<Int>> = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
+	public static var arrowHSV:Array<Array<Int>> = [
+		[0, 0, 0], [0, 0, 0], 
+		[0, 0, 0], [0, 0, 0], 
+		[0, 0, 0], [0, 0, 0], 
+		[0, 0, 0], [0, 0, 0], 
+		[0, 0, 0], [0, 0, 0],
+		[0, 0, 0], [0, 0, 0], 
+		[0, 0, 0], [0, 0, 0], 
+		[0, 0, 0], [0, 0, 0], 
+		[0, 0, 0], [0, 0, 0]
+	]; // Fuck
 	public static var ghostTapping:Bool = true;
 	public static var timeBarType:String = 'Time Left';
 	public static var floatingTitlegf:String = 'only floating logo';
@@ -35,6 +45,8 @@ class ClientPrefs {
 	public static var hitsoundVolume:Float = 0;
 	public static var pauseMusic:String = 'Tea Time';
 	public static var checkForUpdates:Bool = true;
+	public static var convertEK:Bool = true;
+	public static var showKeybindsOnStart:Bool = true;
 	public static var comboStacking = true;
 	public static var gameplaySettings:Map<String, Dynamic> = [
 		'scrollspeed' => 1.0,
@@ -68,8 +80,8 @@ class ClientPrefs {
 	public static var safeFrames:Float = 10;
 
 	//Input
-	public static var healthSystem:String = 'Glow_Kade';
-	public static var inputSystem:String = 'Glow_Kade';
+	public static var healthSystem:String = 'Psych';
+	public static var inputSystem:String = 'Psych';
 
 	//New Stuff
 	public static var healthColor:Bool = true;
@@ -78,14 +90,203 @@ class ClientPrefs {
 	public static var colorBarType:String = 'No Colors';
 	public static var mouseLook:String = 'FNF Cursor';
 	public static var judgementCounter:Bool = false;
+	public static var cameraMovementX:Float = 60;
+	public static var cameraMovementY:Float = 50;
 
 	//Every key has two binds, add your key bind down here and then add your control on options/ControlsSubState.hx and Controls.hx
 	public static var keyBinds:Map<String, Array<FlxKey>> = [
-		//Key Bind, Name for ControlsSubState
+		'note_one1'		=> [SPACE, NONE],
+
+		'note_two1'		=> [D, NONE],
+		'note_two2'		=> [K, NONE],
+
+		'note_three1'	=> [D, NONE],
+		'note_three2'	=> [SPACE, NONE],
+		'note_three3'	=> [K, NONE],
+
 		'note_left'		=> [A, LEFT],
 		'note_down'		=> [S, DOWN],
 		'note_up'		=> [W, UP],
 		'note_right'	=> [D, RIGHT],
+
+		'note_five1'	=> [D, NONE],
+		'note_five2'	=> [F, NONE],
+		'note_five3'	=> [SPACE, NONE],
+		'note_five4'	=> [J, NONE],
+		'note_five5'	=> [K, NONE],
+
+		'note_six1'		=> [S, NONE],
+		'note_six2'		=> [D, NONE],
+		'note_six3'		=> [F, NONE],
+		'note_six4'		=> [J, NONE],
+		'note_six5'		=> [K, NONE],
+		'note_six6'		=> [L, NONE],
+
+		'note_seven1'	=> [S, NONE],
+		'note_seven2'	=> [D, NONE],
+		'note_seven3'	=> [F, NONE],
+		'note_seven4'	=> [SPACE, NONE],
+		'note_seven5'	=> [J, NONE],
+		'note_seven6'	=> [K, NONE],
+		'note_seven7'	=> [L, NONE],
+
+		'note_eight1'	=> [A, NONE],
+		'note_eight2'	=> [S, NONE],
+		'note_eight3'	=> [D, NONE],
+		'note_eight4'	=> [F, NONE],
+		'note_eight5'	=> [H, NONE],
+		'note_eight6'	=> [J, NONE],
+		'note_eight7'	=> [K, NONE],
+		'note_eight8'	=> [L, NONE],
+
+		'note_nine1'	=> [A, NONE],
+		'note_nine2'	=> [S, NONE],
+		'note_nine3'	=> [D, NONE],
+		'note_nine4'	=> [F, NONE],
+		'note_nine5'	=> [SPACE, NONE],
+		'note_nine6'	=> [H, NONE],
+		'note_nine7'	=> [J, NONE],
+		'note_nine8'	=> [K, NONE],
+		'note_nine9'	=> [L, NONE],
+
+		'note_ten1'		=> [A, NONE],
+		'note_ten2'		=> [S, NONE],
+		'note_ten3'		=> [D, NONE],
+		'note_ten4'		=> [F, NONE],
+		'note_ten5'		=> [G, NONE],
+		'note_ten6'		=> [SPACE, NONE],
+		'note_ten7'		=> [H, NONE],
+		'note_ten8'     => [J, NONE],
+		'note_ten9'		=> [K, NONE],
+		'note_ten10'	=> [L, NONE],
+
+		'note_elev1'	=> [A, NONE],
+		'note_elev2'	=> [S, NONE],
+		'note_elev3'	=> [D, NONE],
+		'note_elev4'	=> [F, NONE],
+		'note_elev5'	=> [G, NONE],
+		'note_elev6'	=> [SPACE, NONE],
+		'note_elev7'	=> [H, NONE],
+		'note_elev8'    => [J, NONE],
+		'note_elev9'	=> [K, NONE],
+		'note_elev10'	=> [L, NONE],
+		'note_elev11'	=> [PERIOD, NONE],
+
+		// submitted by btoad#2337
+		'note_twel1'	=> [A, NONE],
+		'note_twel2'	=> [S, NONE],
+		'note_twel3'	=> [D, NONE],
+		'note_twel4'	=> [F, NONE],
+		'note_twel5'	=> [C, NONE],
+		'note_twel6'	=> [V, NONE],
+		'note_twel7'	=> [N, NONE],
+		'note_twel8'    => [M, NONE],
+		'note_twel9'	=> [H, NONE],
+		'note_twel10'	=> [J, NONE],
+		'note_twel11'	=> [K, NONE],
+		'note_twel12'	=> [L, NONE],
+
+		'note_thir1'	=> [A, NONE],
+		'note_thir2'	=> [S, NONE],
+		'note_thir3'	=> [D, NONE],
+		'note_thir4'	=> [F, NONE],
+		'note_thir5'	=> [C, NONE],
+		'note_thir6'	=> [V, NONE],
+		'note_thir7'	=> [SPACE, NONE],
+		'note_thir8'	=> [N, NONE],
+		'note_thir9'    => [M, NONE],
+		'note_thir10'	=> [H, NONE],
+		'note_thir11'	=> [J, NONE],
+		'note_thir12'	=> [K, NONE],
+		'note_thir13'	=> [L, NONE],
+
+		'note_fourt1'	=> [A, NONE],
+		'note_fourt2'	=> [S, NONE],
+		'note_fourt3'	=> [D, NONE],
+		'note_fourt4'	=> [F, NONE],
+		'note_fourt5'	=> [C, NONE],
+		'note_fourt6'	=> [V, NONE],
+		'note_fourt7'	=> [T, NONE],
+		'note_fourt8'    => [Y, NONE],
+		'note_fourt9'	=> [N, NONE],
+		'note_fourt10'	=> [M, NONE],
+		'note_fourt11'	=> [H, NONE],
+		'note_fourt12'	=> [J, NONE],
+		'note_fourt13'	=> [K, NONE],
+		'note_fourt14'	=> [L, NONE],
+
+		'note_151'	=> [A, NONE],
+		'note_152'	=> [S, NONE],
+		'note_153'	=> [D, NONE],
+		'note_154'	=> [F, NONE],
+		'note_155'	=> [C, NONE],
+		'note_156'	=> [V, NONE],
+		'note_157'	=> [T, NONE],
+		'note_158'    => [Y, NONE],
+		'note_159'    => [U, NONE],
+		'note_1510'	=> [N, NONE],
+		'note_1511'	=> [M, NONE],
+		'note_1512'	=> [H, NONE],
+		'note_1513'	=> [J, NONE],
+		'note_1514'	=> [K, NONE],
+		'note_1515'	=> [L, NONE],
+
+		'note_161'	=> [A, NONE],
+		'note_162'	=> [S, NONE],
+		'note_163'	=> [D, NONE],
+		'note_164'	=> [F, NONE],
+		'note_165'	=> [Q, NONE],
+		'note_166'	=> [W, NONE],
+		'note_167'	=> [E, NONE],
+		'note_168'    => [R, NONE],
+		'note_169'    => [Y, NONE],
+		'note_1610'	=> [U, NONE],
+		'note_1611'	=> [I, NONE],
+		'note_1612'	=> [O, NONE],
+		'note_1613'	=> [H, NONE],
+		'note_1614'	=> [J, NONE],
+		'note_1615'	=> [K, NONE],
+		'note_1616'	=> [L, NONE],
+	
+		'note_171'	=> [A, NONE],
+		'note_172'	=> [S, NONE],
+		'note_173'	=> [D, NONE],
+		'note_174'	=> [F, NONE],
+		'note_175'	=> [Q, NONE],
+		'note_176'	=> [W, NONE],
+		'note_177'	=> [E, NONE],
+		'note_178'    => [R, NONE],
+		'note_179'		=> [SPACE, NONE],
+		'note_1710'    => [Y, NONE],
+		'note_1711'	=> [U, NONE],
+		'note_1712'	=> [I, NONE],
+		'note_1713'	=> [O, NONE],
+		'note_1714'	=> [H, NONE],
+		'note_1715'	=> [J, NONE],
+		'note_1716'	=> [K, NONE],
+		'note_1717'	=> [L, NONE],
+
+
+		'note_181'	=> [A, NONE],
+		'note_182'	=> [S, NONE],
+		'note_183'	=> [D, NONE],
+		'note_184'	=> [F, NONE],
+		'note_185'	=> [SPACE, NONE],
+		'note_186'	=> [H, NONE],
+		'note_187'	=> [J, NONE],
+		'note_188'	=> [K, NONE],
+		'note_189'  => [L, NONE],
+
+		'note_1810' => [Q, NONE],
+		'note_1811'	=> [W, NONE],
+		'note_1812'	=> [E, NONE],
+		'note_1813'	=> [R, NONE],
+		'note_1814'	=> [T, NONE],
+		'note_1815'	=> [Y, NONE],
+		'note_1816'	=> [U, NONE],
+		'note_1817'	=> [I, NONE],
+		'note_1818'	=> [O, NONE],
+		
 		
 		'ui_left'		=> [A, LEFT],
 		'ui_down'		=> [S, DOWN],
@@ -105,12 +306,12 @@ class ClientPrefs {
 		'debug_2'		=> [EIGHT, NONE],
 		'debug_3'		=> [SIX, NONE]
 	];
-	public static var defaultKeys:Map<String, Array<FlxKey>> = null;
+	public static var defaultKeys:Map<String, Array<FlxKey>> = keyBinds;
 
-	public static function loadDefaultKeys() {
+	/*public static function loadDefaultKeys() {
 		defaultKeys = keyBinds.copy();
 		//Debug.logInfo(defaultKeys);
-	}
+	}*/
 
 	public static function saveSettings() {
 		FlxG.save.data.downScroll = downScroll;
@@ -152,6 +353,8 @@ class ClientPrefs {
 		FlxG.save.data.comboOffset = comboOffset;
 		FlxG.save.data.achievementsMap = Achievements.achievementsMap;
 		FlxG.save.data.henchmenDeath = Achievements.henchmenDeath;
+		FlxG.save.data.convertEK = convertEK;
+		FlxG.save.data.showKeybindsOnStart = showKeybindsOnStart;
 
 		FlxG.save.data.ratingOffset = ratingOffset;
 		FlxG.save.data.swagWindow = swagWindow;
@@ -349,6 +552,13 @@ class ClientPrefs {
 		}
 		if (FlxG.save.data.comboStacking != null)
 			comboStacking = FlxG.save.data.comboStacking;
+
+		if (FlxG.save.data.convertEK != null)
+		{
+			convertEK = FlxG.save.data.convertEK;
+		}
+		if (FlxG.save.data.showKeybindsOnStart != null)
+			showKeybindsOnStart = FlxG.save.data.showKeybindsOnStart;
 
 		var save:FlxSave = new FlxSave();
 		save.bind('controls_v2', CoolUtil.getSavePath());
