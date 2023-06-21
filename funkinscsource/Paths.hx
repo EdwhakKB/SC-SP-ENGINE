@@ -22,9 +22,6 @@ import flixel.graphics.FlxGraphic;
 import openfl.display.BitmapData;
 import haxe.Json;
 
-import flash.media.Sound;
-import openfl.display3D.textures.Texture; // GPU STUFF 
-
 using StringTools;
 
 class Paths
@@ -55,7 +52,6 @@ class Paths
 	// completely rewritten asset loading? fuck!
 	public static var currentTrackedAssets:Map<String, FlxGraphic> = [];
 	public static var currentTrackedSounds:Map<String, Sound> = [];
-	public static var currentTrackedTextures:Map<String, Texture> = [];
 
 	// define the locally tracked assets
 	public static var localTrackedAssets:Array<String> = [];

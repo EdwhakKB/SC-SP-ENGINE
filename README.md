@@ -1,3 +1,8 @@
+This engine originaly for hitmans A. D.
+
+# Friday Night Funkin' - Sick Coder's Engine / Sick Programmer's Engine (Psych Engine with other engines included).
+![iconOG](https://github.com/glowsoony/SC-SP-ENGINE/assets/84847356/eca4f86d-db0d-430b-9131-44abf92bb1fd)
+
 # Friday Night Funkin' - Psych Engine
 Engine originally used on [Mind Games Mod](https://gamebanana.com/mods/301107), intended to be a fix for the vanilla version's many issues while keeping the casual play aspect of it. Also aiming to be an easier alternative to newbie coders.
 
@@ -103,3 +108,12 @@ _____________________________________
 * Some stuff based on Week 7's changes has been put in (Background colors on Freeplay, Note splashes)
 * You can reset your Score on Freeplay/Story Mode by pressing Reset button.
 * You can listen to a song or adjust Scroll Speed/Damage taken/etc. on Freeplay by pressing Space. 
+
+### Other new features from SCE:
+* You can now choose to play as an opponent!
+* NOTITG Modcharts!
+* Include many other engine features such as (kade, forever, leather, denpa, etc..)
+
+### Project started and worked on by:
+- [Edwhak](https://github.com/EdwhakKB): Main lua coder and idea stater gor the engine.
+- [Glowsoony](https://github.com/glowsoony): Main Coder For UI, and new features + additions so funkinlua.
