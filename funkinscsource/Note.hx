@@ -71,13 +71,15 @@ class Note extends FlxSprite
 	public static var pixelNotesDivisionValue:Int = 18;
 	public static var pixelScales:Array<Float> = EKData.pixelScales;
 
+	public static var sizeOfNotes:Array<Float> = [112, 112, 112, 112, 108, 108, 108, 108, 108, 108, 108, 108, 108, 108, 108, 108, 108, 108];
+
 	public static var keysShit:Map<Int, Map<String, Dynamic>> = EKData.keysShit;
 
 	// End of extra keys stuff
 	//////////////////////////////////////////////////
 
 	//add these 2 variables for the renderer
-	public var mesh:flixel.FlxStrip = null; 
+	public var mesh:modcharting.SustainStrip = null; 
 	public var z:Float = 0;
 	public var extraData:Map<String,Dynamic> = [];
 
@@ -336,9 +338,9 @@ class Note extends FlxSprite
 
 		var skin:String = texture;
 		if(texture.length < 1) {
-			skin = PlayState.SONG.arrowSkin;
+			skin = (PlayState.mania == 3  ? PlayState.SONG.arrowSkin : 'shaggyNotes');
 			if(skin == null || skin.length < 1) {
-				if (ClientPrefs.noteSkin != 'NONE' && mania < 0)
+				if (ClientPrefs.noteSkin != 'NONE' && mania == 3)
 					skin = 'Skins/Notes/'+ClientPrefs.noteSkin+'/NOTE_assets';
 				else{
 					skin = (mania == 3 ? 'NOTE_assets' : 'shaggyNotes');

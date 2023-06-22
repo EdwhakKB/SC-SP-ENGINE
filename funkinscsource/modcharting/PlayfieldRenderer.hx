@@ -174,13 +174,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
 
         var noteAlpha:Float = 1;
         #if PSYCH
-        if (!notes.members[noteIndex].specialHurt){
-            noteAlpha = notes.members[noteIndex].multAlpha;
-            if (notes.members[noteIndex].hurtNote)
-                noteAlpha = 0.55;
-        }else{
-            noteAlpha = 0;
-        }
+        noteAlpha = notes.members[noteIndex].multAlpha;
         #else 
         if (notes.members[noteIndex].isSustainNote)
             noteAlpha = 0.6;

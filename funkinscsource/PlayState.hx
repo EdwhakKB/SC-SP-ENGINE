@@ -4169,7 +4169,7 @@ class PlayState extends MusicBeatState
 		{
 			persistentUpdate = false;
 			paused = true;
-			cancelMusicFadeTween();
+			cancelMusicFadeTween(true);
 			MusicBeatState.switchState(new CharacterEditorState(SONG.player2));
 		}
 
@@ -4578,7 +4578,7 @@ class PlayState extends MusicBeatState
 		/*if (FlxG.random.bool(0.1))
 			{
 				// gitaroo man easter egg
-				cancelMusicFadeTween();
+				cancelMusicFadeTween(true);
 				MusicBeatState.switchState(new GitarooPause());
 			}
 			else { */
@@ -4599,7 +4599,7 @@ class PlayState extends MusicBeatState
 	{
 		persistentUpdate = false;
 		paused = true;
-		cancelMusicFadeTween();
+		cancelMusicFadeTween(true);
 		MusicBeatState.switchState(new ChartingState());
 		chartingMode = true;
 
@@ -4612,7 +4612,7 @@ class PlayState extends MusicBeatState
 	{
 		persistentUpdate = false;
 		paused = true;
-		cancelMusicFadeTween();
+		cancelMusicFadeTween(true);
 		MusicBeatState.switchState(new modcharting.ModchartEditorState());
 		chartingMode = true;
 		if (!instance.notITGMod)
@@ -5533,7 +5533,7 @@ class PlayState extends MusicBeatState
 					WeekData.loadTheFirstEnabledMod();
 					FlxG.sound.playMusic(Paths.music('freakyMenu'));
 
-					cancelMusicFadeTween();
+					cancelMusicFadeTween(true);
 					if (FlxTransitionableState.skipNextTransIn)
 					{
 						CustomFadeTransition.nextCamera = null;
@@ -5591,13 +5591,13 @@ class PlayState extends MusicBeatState
 					{
 						new FlxTimer().start(1.5, function(tmr:FlxTimer)
 						{
-							cancelMusicFadeTween();
+							cancelMusicFadeTween(true);
 							LoadingState.loadAndSwitchState(new PlayState());
 						});
 					}
 					else
 					{
-						cancelMusicFadeTween();
+						cancelMusicFadeTween(true);
 						LoadingState.loadAndSwitchState(new PlayState());
 					}
 				}
@@ -5606,7 +5606,7 @@ class PlayState extends MusicBeatState
 			{
 				Debug.logInfo('WENT BACK TO FREEPLAY??');
 				WeekData.loadTheFirstEnabledMod();
-				cancelMusicFadeTween();
+				cancelMusicFadeTween(true);
 				if (FlxTransitionableState.skipNextTransIn)
 				{
 					CustomFadeTransition.nextCamera = null;
@@ -6185,10 +6185,10 @@ class PlayState extends MusicBeatState
 	private function keyShit():Void
 	{
 		// HOLDING
-		//var parsedHoldArray:Array<Bool> = parseKeys();
+		/*var parsedHoldArray:Array<Bool> = parseKeys();
 
 		// TO DO: Find a better way to handle controller inputs, this should work for now
-		/*if (ClientPrefs.controllerMode)
+		if (ClientPrefs.controllerMode)
 		{
 			var parsedArray:Array<Bool> = parseKeys('_P');
 			if (parsedArray.contains(true))
@@ -6728,7 +6728,7 @@ class PlayState extends MusicBeatState
 	{
 		var skin:String = (mania == 3 ? 'noteSplashes' : 'noteSplashes_shaggy');
 		if (PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0)
-			skin = PlayState.SONG.splashSkin;
+			skin = (mania == 3 ? PlayState.SONG.splashSkin : 'noteSplashes_shaggy');
 
 		var hue:Float = 0;
 		var sat:Float = 0;
@@ -6766,7 +6766,7 @@ class PlayState extends MusicBeatState
 	{
 		var skin:String = (mania == 3 ? 'noteSplashes' : 'noteSplashes_shaggy');
 		if (PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0)
-			skin = PlayState.SONG.splashSkin;
+			skin = (mania == 3 ? PlayState.SONG.splashSkin : 'noteSplashes_shaggy');
 
 		var hue:Float = 0;
 		var sat:Float = 0;
@@ -7015,9 +7015,9 @@ class PlayState extends MusicBeatState
 		super.destroy();
 	}
 
-	public static function cancelMusicFadeTween()
+	public static function cancelMusicFadeTween(cancelledInst:Bool = false)
 	{
-		if (PlayState.instance.inst != null)
+		if (cancelledInst != false)
 		{
 			if (PlayState.instance.inst.fadeTween != null)
 			{

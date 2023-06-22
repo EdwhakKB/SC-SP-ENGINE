@@ -362,11 +362,11 @@ class ModchartEditorState extends MusicBeatState
 
         #end
 
-        if (PlayState.SONG.middleScroll){
+        /*if (PlayState.SONG.middleScroll){
 			ClientPrefs.middleScroll = true;
 		}else if (PlayState.SONG.rightScroll){
 			ClientPrefs.middleScroll = false;
-		}
+		}*/
 
         #if PSYCH
 		strumLine = new FlxSprite(ClientPrefs.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X, 50).makeGraphic(FlxG.width, 10);
@@ -1030,7 +1030,14 @@ class ModchartEditorState extends MusicBeatState
 				if(songNotes[1] >= (!gottaHitNote ? PlayState.SONG.keyCount : PlayState.SONG.playerKeyCount))
 					gottaHitNote = !section.mustHitSection;
                 var daNoteData:Int = Std.int(songNotes[1] % (!gottaHitNote ? PlayState.SONG.keyCount : PlayState.SONG.playerKeyCount));
-                #else 
+                #elseif PSYCH 
+                var daNoteData:Int = Std.int(songNotes[1] % Note.ammo[PlayState.mania]);
+                var gottaHitNote:Bool = section.mustHitSection;
+                if (songNotes[1] > (Note.ammo[PlayState.mania] - 1))
+                {
+                    gottaHitNote = !section.mustHitSection;
+                }
+                #else
                 var daNoteData:Int = Std.int(songNotes[1] % 4);
                 var gottaHitNote:Bool = section.mustHitSection;
                 if (songNotes[1] > 3)
@@ -1038,9 +1045,6 @@ class ModchartEditorState extends MusicBeatState
                     gottaHitNote = !section.mustHitSection;
                 }
                 #end
-                
-
-
 
                 var oldNote:Note;
                 if (unspawnNotes.length > 0)
@@ -1053,7 +1057,7 @@ class ModchartEditorState extends MusicBeatState
                 var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote);
                 swagNote.sustainLength = songNotes[2];
                 swagNote.mustPress = gottaHitNote;
-                swagNote.gfNote = (section.gfSection && (songNotes[1]<4));
+                swagNote.gfNote = (section.gfSection && (songNotes[1]<Note.ammo[PlayState.mania]));
                 swagNote.noteType = songNotes[3];
                 if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = editors.ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
                 #elseif LEATHER 
@@ -1082,7 +1086,7 @@ class ModchartEditorState extends MusicBeatState
                         sustainNote.mustPress = gottaHitNote;
                         #end
                         #if PSYCH 
-                        sustainNote.gfNote = (section.gfSection && (songNotes[1]<4));
+                        sustainNote.gfNote = (section.gfSection && (songNotes[1]<Note.ammo[PlayState.mania]));
                         sustainNote.noteType = swagNote.noteType;
                         swagNote.tail.push(sustainNote);
                         sustainNote.parent = swagNote;
@@ -1112,6 +1116,10 @@ class ModchartEditorState extends MusicBeatState
         usedKeyCount = PlayState.SONG.keyCount;
 		if(player == 1)
 			usedKeyCount = PlayState.SONG.playerKeyCount;
+        #elseif PSYCH
+        usedKeyCount = Note.ammo[PlayState.mania];
+        #else
+        usedKeyCount = 4;
         #end
 
         for (i in 0...usedKeyCount)
@@ -1166,7 +1174,8 @@ class ModchartEditorState extends MusicBeatState
                 if(ClientPrefs.middleScroll)
                 {
                     babyArrow.x += 310;
-                    if(i > 1) { //Up and Right
+                    var separator:Int = Note.separator[PlayState.mania];
+                    if(i > separator) { //Up and Right
                         babyArrow.x += FlxG.width / 2 + 25;
                     }
                 }

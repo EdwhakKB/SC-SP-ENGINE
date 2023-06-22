@@ -19,9 +19,9 @@ class NoteSplash extends FlxSprite
 	{
 		super(x, y);
 
-		var skin:String = (PlayState.mania == 3 ? 'noteSplashes': 'noteSplashes_shaggy');
+		var skin:String = (PlayState.mania == 3 ? 'noteSplashes' : 'noteSplashes_shaggy');
 		if (PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0)
-			skin = PlayState.SONG.splashSkin;
+			skin = (PlayState.mania == 3 ? PlayState.SONG.splashSkin : 'noteSplashes_shaggy');
 
 		loadAnims(skin);
 
@@ -43,7 +43,21 @@ class NoteSplash extends FlxSprite
 		{
 			texture = (PlayState.mania == 3 ? 'noteSplashes': 'noteSplashes_shaggy');
 			if (PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0)
-				texture = PlayState.SONG.splashSkin;
+				texture = (PlayState.mania == 3 ? PlayState.SONG.splashSkin : 'noteSplashes_shaggy');
+		}
+
+		if (((texture != null || texture == null) || (PlayState.SONG.splashSkin != null || PlayState.SONG.splashSkin == null)) && PlayState.SONG.splashSkin.contains('-kade'))
+		{
+			switch (texture)
+			{
+				case 'noteSplashes-kade':
+					switch (note)
+					{
+						default:
+							this.x += 20;
+							this.y += 10;
+					}
+			}
 		}
 
 		if (textureLoaded != texture)
