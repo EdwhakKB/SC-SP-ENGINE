@@ -2,7 +2,7 @@
 <project>
 	<!-- _________________________ Application Settings _________________________ -->
 
-	<app title="Friday Night Funkin': SC ENGINE" file="SCEngine" packageName="com.shadowmario.psychengine" package="com.shadowmario.psychengine" main="Main" version="0.2.8" company="ShadowMario" />
+	<app title="Friday Night Funkin': SC ENGINE" file="SCEngine" packageName="com.SCTeam.SCengine" package="com.SCTeam.SCengine" main="Main" version="0.2.8" company="SCTeam" />
 
 	<!--Switch Export with Unique ApplicationID and Icon-->
 	<set name="APP_ID" value="0x0100f6c013bbc000" />
@@ -49,7 +49,7 @@
 	<define name="ACHIEVEMENTS_ALLOWED" />
 	<define name="VIDEOS_ALLOWED" if="web || windows" unless="32bits"/>
 	<define name="PSYCH_WATERMARKS"/> <!-- DELETE THIS TO REMOVE WATERMARKS/DEV NAMES ON TITLE SCREEN -->
-	<define name="TITLE_SCREEN_EASTER_EGG" if="officialBuild"/> <!-- DELETE THE if="officialBuild" for enabling this on an unofficial build -->
+	<define name="TITLE_SCREEN_EASTER_EGG" if="officalBuild"/> <!-- DELETE THE if="officialBuild" for enabling this on an unofficial build -->
 	<define name="CRASH_HANDLER" if="desktop release" />
 
 	<assets path="assets/preload" rename="assets" exclude="*.ogg" if="web"/>
@@ -66,7 +66,6 @@
 	<define name="PRELOAD_ALL" unless="web" />
 	<define name="NO_PRELOAD_ALL" unless="PRELOAD_ALL"/>
 	
-	<library name="videos"        preload="true" />
 	<section if="PRELOAD_ALL">
 		<library name="songs"         preload="true" />
 		<library name="shared"        preload="true" />
@@ -76,6 +75,7 @@
 		<library name="week5"         preload="true" />
 		<library name="week6"         preload="true" />
 		<library name="week7"         preload="true" />
+		<library name="videos"        preload="true" />
 	</section>
 	
 	<section if="NO_PRELOAD_ALL">
@@ -87,6 +87,7 @@
 		<library name="week5"         preload="false" />
 		<library name="week6"         preload="false" />
 		<library name="week7"         preload="false" />
+		<library name="videos"        preload="false" />
 	</section>
 	
 	<assets path="assets/videos"        library="videos"        if="VIDEOS_ALLOWED"/>
@@ -134,7 +135,10 @@
 	<!--In case you want to use the addons package-->
 	<haxelib name="flixel-addons" />
 	<haxelib name="hscript" />
-	<define name="hscriptPos" />
+	<define name="hscriptPos" value="true" />
+
+	<haxelib name="hxtelemetry" if="telemetry"/>
+	<haxedef name="HXCPP_TELEMETRY"  if="telemetry"/>
 
 	<!--In case you want to use the ui package-->
 	<haxelib name="flixel-ui" />
@@ -143,6 +147,8 @@
 	<haxelib name="faxe" if='switch'/>
 	<!--<haxelib name="polymod"/> -->
 	<haxelib name="discord_rpc" if="desktop"/>
+
+	<haxelib name="hxcpp-debug-server" if="cpp"/>
 
 	<!-- Enables a terminal log prompt on debug builds -->
 	<haxelib name="hxcpp-debug-server" if="debug"/>
@@ -165,9 +171,9 @@
 	<!--<haxedef name="FLX_NO_NATIVE_CURSOR" />-->
 
 	<!--Optimise inputs, be careful you will get null errors if you don't use conditionals in your game-->
-	<!-- <haxedef name="FLX_NO_MOUSE" if="mobile" /> -->
-	<!-- <haxedef name="FLX_NO_KEYBOARD" if="mobile" /> -->
-	<!-- <haxedef name="FLX_NO_TOUCH" if="desktop" /> -->
+	<haxedef name="FLX_NO_MOUSE" if="mobile" />
+	<haxedef name="FLX_NO_KEYBOARD" if="mobile" />
+	<haxedef name="FLX_NO_TOUCH" if="desktop" />
 	<!--<haxedef name="FLX_NO_GAMEPAD" />-->
 
 	<!--Disable the Flixel core sound tray-->
@@ -192,8 +198,12 @@
 	<haxedef name="NAPE_RELEASE_BUILD" unless="debug" />
 	
 	<!--Used for Izzy Engine's crash handler-->
+	<haxedef name="HXCPP_STACK_TRACE" if="CRASH_HANDLER"/>  <!--if you want stack traces--> 
 	<haxedef name="HXCPP_CHECK_POINTER" if="CRASH_HANDLER" />
 	<haxedef name="HXCPP_STACK_LINE" if="CRASH_HANDLER" />
+
+	<!-- No deprecation warnings. -->
+	<haxedef name="no-deprecation-warnings"/>
 
 	<!-- _________________________________ Custom _______________________________ -->
 
@@ -203,4 +213,6 @@
 	<icon path="art/icon32.png" size='32'/>
 	<icon path="art/icon64.png" size='64'/>
 	<icon path="art/iconOG.png" />
+
+	<config:hxtelemetry host="192.168.100.68" allocations="false" />
 </project>
