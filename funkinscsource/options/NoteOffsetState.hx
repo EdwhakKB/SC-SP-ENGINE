@@ -17,12 +17,12 @@ import flixel.math.FlxPoint;
 using StringTools;
 
 typedef CustomHudData = {
-	var customHudName:String = 'Custom Hud v1';
-	var HealthBarStyle:String = 'FNF';
-	var CountDownStyle:Array<String> = ["ready", "set", "go"];
-	var CountDownSounds:Array<String> = ["intro3", "intro2", "intro1", "introGo"];
-	var RatingStyle:Array<Dynamic> = ["", null];
-	var GameOverStyle:String = "gameOver";
+	var customHudName:String;
+	var HealthBarStyle:String;
+	var CountDownStyle:Array<String>;
+	var CountDownSounds:Array<String>;
+	var RatingStyle:Array<Dynamic>;
+	var GameOverStyle:String;
 }
 
 class NoteOffsetState extends MusicBeatState

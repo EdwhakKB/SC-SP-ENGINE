@@ -22,7 +22,7 @@ class NoteMovement
     public static var playerKeyCount = 4;
     public static var totalKeyCount = 8;
     public static var arrowScale:Float = 0.7;
-    public static var arrowSize:Float = Note.sizeOfNotes[PlayState.mania];
+    public static var arrowSize:Float = 112;
     public static var defaultStrumX:Array<Float> = [];
     public static var defaultStrumY:Array<Float> = [];
     public static var defaultScale:Array<Float> = [];
@@ -51,8 +51,6 @@ class NoteMovement
             #if LEATHER
             var localKeyCount = (i < keyCount ? keyCount : playerKeyCount);
             var s = Std.parseFloat(game.ui_settings[0]) * (Std.parseFloat(game.ui_settings[2]) - (Std.parseFloat(game.mania_size[localKeyCount-1])));
-            #elseif PSYCH
-            var s = Note.scales[PlayState.mania];
             #else
             var s = 0.7;
             #end
@@ -83,8 +81,6 @@ class NoteMovement
             #if LEATHER
             var localKeyCount = (i < keyCount ? keyCount : playerKeyCount);
             var s = Std.parseFloat(game.ui_settings[0]) * (Std.parseFloat(game.ui_settings[2]) - (Std.parseFloat(game.mania_size[localKeyCount-1])));
-            #elseif PSYCH
-            var s = Note.scales[PlayState.mania];
             #else
             var s = 0.7;
             #end
@@ -111,11 +107,7 @@ class NoteMovement
 
     public static function getLaneDiffFromCenter(lane:Int)
     {
-        #if PSYCH
-        var col:Float = lane%Note.ammo[PlayState.mania];
-        #else
         var col:Float = lane%4;
-        #end
         if ((col+1) > (keyCount*0.5))
         {
             col -= (keyCount*0.5)+1;
