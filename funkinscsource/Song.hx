@@ -30,8 +30,6 @@ typedef SwagSong =
 	var splashSkin:String;
 	var validScore:Bool;
 
-	var mania:Null<Int>;
-
 	var notITG:Bool;
 	var usesHUD:Bool;
 }
@@ -83,22 +81,6 @@ class Song
 					else i++;
 				}
 			}
-		}
-
-		if (songJson.mania == null && ClientPrefs.convertEK) //yall better not replace this
-		{
-			/*var highestMania:Int = -1;
-			for (i in 0...songJson.notes.length)
-			{
-				var notes:Array<Dynamic> = songJson.notes[i].sectionNotes;
-				if (notes[1] > -1 && notes[1] > highestMania)
-				{
-					highestMania = notes[1];
-				}
-			}*/
-	
-			songJson.mania = Note.defaultMania;
-			trace("Song mania value is NULL, set to " + Note.defaultMania);
 		}
 	}
 

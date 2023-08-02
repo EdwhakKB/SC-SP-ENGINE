@@ -1030,13 +1030,6 @@ class ModchartEditorState extends MusicBeatState
 				if(songNotes[1] >= (!gottaHitNote ? PlayState.SONG.keyCount : PlayState.SONG.playerKeyCount))
 					gottaHitNote = !section.mustHitSection;
                 var daNoteData:Int = Std.int(songNotes[1] % (!gottaHitNote ? PlayState.SONG.keyCount : PlayState.SONG.playerKeyCount));
-                #elseif PSYCH 
-                var daNoteData:Int = Std.int(songNotes[1] % Note.ammo[PlayState.mania]);
-                var gottaHitNote:Bool = section.mustHitSection;
-                if (songNotes[1] > (Note.ammo[PlayState.mania] - 1))
-                {
-                    gottaHitNote = !section.mustHitSection;
-                }
                 #else
                 var daNoteData:Int = Std.int(songNotes[1] % 4);
                 var gottaHitNote:Bool = section.mustHitSection;
@@ -1057,7 +1050,7 @@ class ModchartEditorState extends MusicBeatState
                 var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote);
                 swagNote.sustainLength = songNotes[2];
                 swagNote.mustPress = gottaHitNote;
-                swagNote.gfNote = (section.gfSection && (songNotes[1]<Note.ammo[PlayState.mania]));
+                swagNote.gfNote = (section.gfSection && (songNotes[1]<4));
                 swagNote.noteType = songNotes[3];
                 if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = editors.ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
                 #elseif LEATHER 
@@ -1086,7 +1079,7 @@ class ModchartEditorState extends MusicBeatState
                         sustainNote.mustPress = gottaHitNote;
                         #end
                         #if PSYCH 
-                        sustainNote.gfNote = (section.gfSection && (songNotes[1]<Note.ammo[PlayState.mania]));
+                        sustainNote.gfNote = (section.gfSection && (songNotes[1]<4));
                         sustainNote.noteType = swagNote.noteType;
                         swagNote.tail.push(sustainNote);
                         sustainNote.parent = swagNote;
@@ -1116,8 +1109,6 @@ class ModchartEditorState extends MusicBeatState
         usedKeyCount = PlayState.SONG.keyCount;
 		if(player == 1)
 			usedKeyCount = PlayState.SONG.playerKeyCount;
-        #elseif PSYCH
-        usedKeyCount = Note.ammo[PlayState.mania];
         #else
         usedKeyCount = 4;
         #end
@@ -1174,8 +1165,7 @@ class ModchartEditorState extends MusicBeatState
                 if(ClientPrefs.middleScroll)
                 {
                     babyArrow.x += 310;
-                    var separator:Int = Note.separator[PlayState.mania];
-                    if(i > separator) { //Up and Right
+                    if(i > 1) { //Up and Right
                         babyArrow.x += FlxG.width / 2 + 25;
                     }
                 }
