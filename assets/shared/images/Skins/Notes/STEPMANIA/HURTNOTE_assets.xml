@@ -37,6 +37,6 @@
 <SubTexture name="blue hold piece0000" x="766" y="503" width="154" height="44" frameX="0" frameY="0" frameWidth="154" frameHeight="44" />
 <SubTexture name="red hold end0000" x="308" y="311" width="154" height="154" frameX="0" frameY="0" frameWidth="154" frameHeight="154" />
 <SubTexture name="red hold piece0000" x="766" y="547" width="154" height="44" frameX="0" frameY="0" frameWidth="154" frameHeight="44" />
-<SubTexture name="pruple end hold0000" x="612" y="0" width="154" height="154" frameX="0" frameY="0" frameWidth="154" frameHeight="154" />
+<SubTexture name="purple hold end0000" x="612" y="0" width="154" height="154" frameX="0" frameY="0" frameWidth="154" frameHeight="154" />
 <SubTexture name="purple hold piece0000" x="612" y="154" width="151" height="44" frameX="-3" frameY="0" frameWidth="154" frameHeight="44" />
 </TextureAtlas>

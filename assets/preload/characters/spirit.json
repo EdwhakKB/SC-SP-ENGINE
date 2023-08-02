@@ -64,7 +64,11 @@
 	],
 	"healthicon": "spirit-pixel",
 	"flip_x": false,
-	"iconColor": "#FF3C6E",
+	"healthbar_colors": [
+		255,
+		60,
+		110
+	],
 	"camera_position": [
 		0,
 		0

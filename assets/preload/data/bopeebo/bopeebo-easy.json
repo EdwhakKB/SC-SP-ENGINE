@@ -801,7 +801,7 @@
 		],
 		"player2": "dad",
 		"player3": "gf",
-		"song": "Bopeebo",
+		"songId": "Bopeebo",
 		"needsVoices": true,
 		"validScore": true,
 		"bpm": 100,

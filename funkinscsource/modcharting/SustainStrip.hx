@@ -4,6 +4,8 @@ import flixel.graphics.tile.FlxDrawTrianglesItem.DrawData;
 import openfl.geom.Vector3D;
 #if LEATHER
 import game.Note;
+#else
+import objects.Note;
 #end
 import flixel.FlxStrip;
 

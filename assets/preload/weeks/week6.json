@@ -16,7 +16,7 @@
 	"weekBefore": "week5",
 	"weekName": "Week 6",
 	"startUnlocked": false,
-
+	"hiddenUntilUnlocked": true,
 	"hideStoryMode": false,
 	"hideFreeplay": true
 }

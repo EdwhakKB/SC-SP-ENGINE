@@ -119,7 +119,11 @@
 	],
 	"healthicon": "bf",
 	"flip_x": true,
-	"iconColor": "#B886E8",
+	"healthbar_colors": [
+		49,
+		176,
+		209
+	],
 	"camera_position": [
 		0,
 		0

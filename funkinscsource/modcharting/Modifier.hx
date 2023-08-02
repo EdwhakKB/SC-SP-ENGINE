@@ -3,15 +3,14 @@ package modcharting;
 import flixel.tweens.FlxEase;
 import flixel.math.FlxMath;
 import flixel.FlxG;
+import states.PlayState;
 
 #if LEATHER
-import states.PlayState;
 import game.Note;
 import game.StrumNote;
 import game.Conductor;
 #else 
-import PlayState;
-import Note;
+import objects.Note;
 #end
 
 enum ModifierType
@@ -673,8 +672,6 @@ class BeatZModifier extends Modifier
     }
 }
 
-
-
 class BounceXModifier extends Modifier
 {
     override function setupSubValues()
@@ -745,7 +742,8 @@ class EaseCurveAngleModifier extends EaseCurveModifier
         noteData.angle += (easeFunc(curPos*0.01)*currentValue*0.2);
     }
 }
-/*
+
+
 class EaseCurveScaleModifier extends EaseCurveModifier
 {
     override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
@@ -753,8 +751,7 @@ class EaseCurveScaleModifier extends EaseCurveModifier
         noteData.scaleX += (easeFunc(curPos*0.01)*currentValue*0.2);
         noteData.scaleY += (easeFunc(curPos*0.01)*currentValue*0.2);
     }
-}*/
-
+}
 
 class InvertSineModifier extends Modifier
 {
@@ -1057,3 +1054,33 @@ class StealthBoostModifier extends Modifier
         noteMath(noteData, lane, 0, pf); //just reuse same thing
     }
 }
+
+/*class BeatXNotesLDUR extends Modifier
+{
+    override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+    {
+        switch (lane)
+        {
+            case 0:
+                noteData.x += currentValue * BeatXModifier.getShift(noteData, 0, curPos, pf);
+            case 1:
+                noteData.y -= currentValue * BeatXModifier.getShift(noteData, 1, curPos, pf);
+            case 2:
+                noteData.y += currentValue * BeatXModifier.getShift(noteData, 2, curPos, pf);
+            case 3:
+                noteData.x -= currentValue * BeatXModifier.getShift(noteData, 3, curPos, pf);
+            case 4:
+                noteData.x += currentValue * BeatXModifier.getShift(noteData, 4, curPos, pf);
+            case 5:          
+                noteData.y -= currentValue * BeatXModifier.getShift(noteData, 5, curPos, pf);
+            case 6:
+                noteData.y += currentValue * BeatXModifier.getShift(noteData, 6, curPos, pf);
+            case 7:
+                noteData.x -= currentValue * BeatXModifier.getShift(noteData, 7, curPos, pf);
+        }
+    }
+    override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
+    {
+        noteMath(noteData, lane, 0, pf);
+    }
+}*/

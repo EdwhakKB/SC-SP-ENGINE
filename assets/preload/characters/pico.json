@@ -108,7 +108,11 @@
 	],
 	"healthicon": "pico",
 	"flip_x": true,
-	"iconColor": "#B7D855",
+	"healthbar_colors": [
+		183,
+		216,
+		85
+	],
 	"camera_position": [
 		0,
 		0
