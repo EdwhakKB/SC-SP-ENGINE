@@ -461,6 +461,6 @@
 		"bpm": 120,
 		"arrowSkin": null,
 		"needsVoices": true,
-		"song": "Roses"
+		"songId": "Roses"
 	}
 }

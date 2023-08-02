@@ -3022,7 +3022,7 @@
 		],
 		"player2": "tankman",
 		"player3": null,
-		"song": "Stress",
+		"songId": "Stress",
 		"stage": "tank",
 		"needsVoices": true,
 		"validScore": true,

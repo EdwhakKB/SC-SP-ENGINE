@@ -1,9 +1,8 @@
-package;
+package animateatlas;
 
 import animateatlas.JSONData.AtlasData;
 import openfl.display.BitmapData;
 import animateatlas.JSONData.AnimationData;
-import openfl.display.FPS;
 import openfl.Lib;
 import openfl.events.MouseEvent;
 import animateatlas.HelperEnums.LoopMode;
@@ -11,12 +10,13 @@ import openfl.events.Event;
 import openfl.display.Tilemap;
 import openfl.display.Tileset;
 import openfl.Assets;
-import haxe.Json;
+import tjson.TJSON as Json;
 import animateatlas.tilecontainer.TileAnimationLibrary;
 import animateatlas.tilecontainer.TileContainerMovieClip;
 import animateatlas.displayobject.SpriteAnimationLibrary;
 import animateatlas.displayobject.SpriteMovieClip;
 import openfl.display.Sprite;
+import openfl.display.FPS;
 
 class Main extends Sprite {
 	var aa:TileAnimationLibrary;
@@ -87,7 +87,7 @@ class Main extends Sprite {
 
 			t.currentLabel = t.getFrameLabels()[Std.random(t.getFrameLabels().length)];
 			spriteSymbols.push(t);
-			Debug.logInfo(spriteSymbols.length);
+			trace(spriteSymbols.length);
 		}
 	}
 
@@ -103,7 +103,7 @@ class Main extends Sprite {
 			t.currentLabel = t.getFrameLabels()[Std.random(t.getFrameLabels().length)];
 			tileSymbols.push(t);
 
-			Debug.logInfo(tileSymbols.length);
+			trace(tileSymbols.length);
 		}
 	}
 }

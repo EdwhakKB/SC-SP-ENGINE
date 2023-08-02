@@ -841,7 +841,7 @@
 			}
 		],
 		"player3": "gf",
-		"song": "Bopeebo",
+		"songId": "Bopeebo",
 		"needsVoices": true,
 		"validScore": true,
 		"speed": 1,

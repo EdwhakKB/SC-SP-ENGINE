@@ -4,14 +4,13 @@ import flixel.math.FlxMath;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.FlxSprite;
 import flixel.FlxG;
+import states.PlayState;
 
 #if LEATHER
-import states.PlayState;
 import game.Note;
-
 #else 
-import PlayState;
-import Note;
+import objects.Note;
+import modcharting.ModchartEditorState;
 #end
 
 using StringTools;
