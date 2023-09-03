@@ -2320,7 +2320,7 @@ class FunkinLua {
 		CustomSubstate.implement(this);
 		ShaderFunctions.implement(this);
 		DeprecatedFunctions.implement(this);
-		ModchartFuncs.loadLuaFunctions(this);
+		ModchartFuncs.implement(this);
 
 		try{
 			var result:Dynamic = LuaL.dofile(lua, scriptName);

@@ -173,7 +173,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         var strumScaleY = NoteMovement.defaultScale[i];
         var strumSkewX = NoteMovement.defaultSkewX[i];
         var strumSkewY = NoteMovement.defaultSkewY[i];
-        if (ModchartUtil.getIsPixelStage(instance) || pixelNotes && pixelStrums)
+        if (ModchartUtil.getIsPixelStage(instance))
         {
             //work on pixel stages
             strumScaleX = 1*PlayState.daPixelZoom;
@@ -219,7 +219,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
             noteAlpha = 1;
         #end
 
-        if (ModchartUtil.getIsPixelStage(instance) || pixelNotes && pixelStrums)
+        if (ModchartUtil.getIsPixelStage(instance))
         {
             //work on pixel stages
             noteScaleX = 1*PlayState.daPixelZoom;
