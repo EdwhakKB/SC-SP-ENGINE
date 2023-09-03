@@ -1,6 +1,5 @@
 package modcharting;
 
-
 import flixel.math.FlxMath;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;

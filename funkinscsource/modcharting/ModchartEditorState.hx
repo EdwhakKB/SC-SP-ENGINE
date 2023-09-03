@@ -1042,13 +1042,11 @@ class ModchartEditorState extends MusicBeatState
                     oldNote = null;
 
                 #if PSYCH 
-                var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, false, "noteSkins/NOTE_assets" + Note.getNoteSkinPostfix());
+                var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, false);
                 swagNote.sustainLength = songNotes[2];
                 swagNote.mustPress = gottaHitNote;
                 swagNote.gfNote = (section.gfSection && (songNotes[1]<4));
                 swagNote.noteType = songNotes[3];
-                swagNote.noteSkin = "noteSkins/NOTE_assets" + Note.getNoteSkinPostfix();
-                swagNote.texture = "noteSkins/NOTE_assets" + Note.getNoteSkinPostfix();
                 if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = states.editors.ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
                 #elseif LEATHER 
                 var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, false, 0, songNotes[4], null, [0], gottaHitNote);
@@ -1069,15 +1067,13 @@ class ModchartEditorState extends MusicBeatState
                         oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
 
                         #if PSYCH 
-                        var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote) + (Conductor.stepCrochet / FlxMath.roundDecimal(PlayState.SONG.speed, 2)), daNoteData, oldNote, true, "noteSkins/NOTE_assets" + Note.getNoteSkinPostfix());
+                        var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote) + (Conductor.stepCrochet / FlxMath.roundDecimal(PlayState.SONG.speed, 2)), daNoteData, oldNote, true);
                         sustainNote.mustPress = gottaHitNote;
                         #else 
                         var sustainNote:Note = new Note(daStrumTime + (Std.int(Conductor.stepCrochet) * susNote) + Std.int(Conductor.stepCrochet), daNoteData, oldNote, true, 0, songNotes[4], null, [0], gottaHitNote);
                         sustainNote.mustPress = gottaHitNote;
                         #end
                         #if PSYCH 
-                        sustainNote.noteSkin = "noteSkins/NOTE_assets" + Note.getNoteSkinPostfix();
-                        sustainNote.texture = "noteSkins/NOTE_assets" + Note.getNoteSkinPostfix();
                         sustainNote.gfNote = (section.gfSection && (songNotes[1]<4));
                         sustainNote.noteType = swagNote.noteType;
                         swagNote.tail.push(sustainNote);
