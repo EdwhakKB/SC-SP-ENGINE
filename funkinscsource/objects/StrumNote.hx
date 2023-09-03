@@ -3,7 +3,7 @@ package objects;
 import shaders.RGBPalette;
 import shaders.RGBPalette.RGBShaderReference;
 
-class StrumNote extends FlxSprite
+class StrumNote extends FlxSkewedSprite
 {
 	public var rgbShader:RGBShaderReference;
 	public var resetAnim:Float = 0;
