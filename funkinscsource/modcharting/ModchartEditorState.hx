@@ -18,8 +18,8 @@ import openfl.events.IOErrorEvent;
 import flixel.graphics.FlxGraphic;
 import flixel.addons.display.FlxBackdrop;
 import flixel.tweens.FlxTween;
-import backend.managers.TweenManager;
-import backend.managers.TimerManager;
+import managers.TweenManager;
+import managers.TimerManager;
 import flixel.addons.ui.FlxSlider;
 import flixel.text.FlxText;
 import openfl.geom.Rectangle;
@@ -1144,7 +1144,7 @@ class ModchartEditorState extends MusicBeatState
 			babyArrow.x += 100 - ((usedKeyCount - 4) * 16) + (usedKeyCount >= 10 ? 30 : 0);
 			babyArrow.x += ((FlxG.width / 2) * player);
             #elseif PSYCH 
-            var babyArrow:StrumNote = new StrumNote(ClientPrefs.data.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X, strumLine.y, i, player, 'noteSkins/NOTE_assets' + Note.getNoteSkinPostfix());
+            var babyArrow:StrumNote = new StrumNote(ClientPrefs.data.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X, strumLine.y, i, player);
             babyArrow.downScroll = ClientPrefs.data.downScroll;
             babyArrow.alpha = targetAlpha;
             #end

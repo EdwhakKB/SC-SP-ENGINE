@@ -4,6 +4,8 @@ import shaders.RGBPalette;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.graphics.frames.FlxFrame;
 
+import shaders.FlxFixedShader;
+
 typedef NoteSplashConfig = {
 	anim:String,
 	minFps:Int,
@@ -227,7 +229,7 @@ class PixelSplashShaderRef {
 	}
 }
 
-class PixelSplashShader extends FlxShader
+class PixelSplashShader extends FlxFixedShader
 {
 	@:glFragmentHeader('
 		#pragma header
