@@ -31,7 +31,6 @@ import game.Conductor;
 #else 
 import objects.Note;
 import objects.StrumNote;
-import objects.SkewSpriteGroup;
 #end
 
 import flixel.addons.effects.FlxSkewedSprite;
