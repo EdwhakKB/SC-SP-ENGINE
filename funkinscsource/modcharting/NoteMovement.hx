@@ -26,8 +26,6 @@ class NoteMovement
     public static var defaultStrumY:Array<Float> = [];
     public static var defaultScale:Array<Float> = [];
     public static var arrowSizes:Array<Float> = [];
-    public static var defaultSkewX:Array<Float> = [];
-    public static var defaultSkewY:Array<Float> = [];
     #if LEATHER
     public static var leatherEngineOffsetStuff:Map<String, Float> = [];
     #end
@@ -37,8 +35,6 @@ class NoteMovement
         defaultStrumY = []; 
         defaultScale = [];
         arrowSizes = [];
-        defaultSkewX = [];
-        defaultSkewY = [];
         keyCount = #if (LEATHER || KADE) PlayState.strumLineNotes.length-PlayState.playerStrums.length #else game.strumLineNotes.length-game.playerStrums.length #end; //base game doesnt have opponent strums as group
         playerKeyCount = #if (LEATHER || KADE) PlayState.playerStrums.length #else game.playerStrums.length #end;
 
@@ -49,8 +45,6 @@ class NoteMovement
             #else 
             var strum = game.strumLineNotes.members[i];
             #end
-            defaultSkewX.push(strum.skew.x);
-            defaultSkewY.push(strum.skew.y);
             defaultStrumX.push(strum.x);
             defaultStrumY.push(strum.y);
             #if LEATHER
@@ -75,16 +69,12 @@ class NoteMovement
         defaultStrumY = []; 
         defaultScale = [];
         arrowSizes = [];
-        defaultSkewX = [];
-        defaultSkewY = [];
         keyCount = game.strumLineNotes.length-game.playerStrums.length; //base game doesnt have opponent strums as group
         playerKeyCount = game.playerStrums.length;
 
         for (i in 0...game.strumLineNotes.members.length)
         {
             var strum = game.strumLineNotes.members[i];
-            defaultSkewX.push(strum.skew.x);
-            defaultSkewY.push(strum.skew.y);
             defaultStrumX.push(strum.x);
             defaultStrumY.push(strum.y);
             #if LEATHER
@@ -108,14 +98,11 @@ class NoteMovement
         daNote.y = defaultStrumY[lane];
         daNote.z = 0;
 
-        var pos = ModchartUtil.getCartesianCoords3D(incomingAngleX, incomingAngleY, curPos*noteDist);
+        var pos = ModchartUtil.getCartesianCoords3D(incomingAngleX,incomingAngleY, curPos*noteDist);
         daNote.y += pos.y;
         daNote.x += pos.x;
         daNote.z += pos.z;
-
-        daNote.skew.y = defaultSkewX[lane];
-        daNote.skew.x = defaultSkewY[lane];
-    } 
+    }
 
     public static function getLaneDiffFromCenter(lane:Int)
     {
@@ -131,7 +118,7 @@ class NoteMovement
 
         //col = (col-col-col); //flip pos/negative
 
-        //Debug.logTrace(col);
+        //trace(col);
 
         return col;
     }

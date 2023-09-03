@@ -31,7 +31,7 @@ typedef NoteSplashData = {
 	a:Float
 }
 
-class Note extends FlxSkewedSprite
+class Note extends FlxSprite
 {
 	public var mesh:modcharting.SustainStrip;
 	public var z:Float = 0;

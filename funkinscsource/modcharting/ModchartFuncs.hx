@@ -31,10 +31,12 @@ using StringTools;
 //for lua and hscript
 class ModchartFuncs
 {
-    public static function implement(parent:FunkinLua)
+    public static function loadLuaFunctions(parent:FunkinLua)
     {
         #if PSYCH
         #if LUA_ALLOWED
+        #if (SScript >= "3.0.0") FunkinHScript.implement(parent); #end
+        #if (SScript >= "3.0.0") FunkinHScript.initHaxeModule(parent); #end
         Lua_helper.add_callback(parent.lua, 'startMod', function(name:String, modClass:String, type:String = '', pf:Int = -1){
             startMod(name,modClass,type,pf);
 
@@ -75,32 +77,10 @@ class ModchartFuncs
             ease(beat, time, easeStr, argsAsString);
             
         });
-
-        loadHaxeFunctions(parent);
         #end
 
         #elseif LEATHER
 
-        #end
-    }
-
-    public static function loadHaxeFunctions(parent:FunkinLua)
-    {
-        #if PSYCH
-        #if HSCRIPT_ALLOWED
-        FunkinHScript.initHaxeModule(parent);
-
-        if (parent.hscript != null)
-        {
-            parent.hscript.set('Math', Math);
-            parent.hscript.set('PlayfieldRenderer', PlayfieldRenderer);
-            parent.hscript.set('ModchartUtil', ModchartUtil);
-            parent.hscript.set('Modifier', Modifier);
-            parent.hscript.set('NoteMovement', NoteMovement);
-            parent.hscript.set('NotePositionData', NotePositionData);
-            parent.hscript.set('ModchartFile', ModchartFile);
-        }
-        #end
         #end
     }
 
@@ -112,7 +92,7 @@ class ModchartFuncs
             if (instance.playfieldRenderer.modchart.scriptListen)
             {
                 instance.playfieldRenderer.modchart.data.modifiers.push([name, modClass, type, pf]);
-                trace(name, modClass, type, pf);
+                trace(name,modClass,type,pf);
             }
         }
 
@@ -300,7 +280,7 @@ class ModchartFuncs
                 {
                     var modName = subModCheck[0];
                     var subModName = subModCheck[1];
-                    //Debug.logTrace(subModCheck);
+                    //trace(subModCheck);
                     instance.playfieldRenderer.modifierTable.tweenModifierSubValue(modName,subModName,value,time*Conductor.crochet*0.001,ease, beat);
                 }
                 else

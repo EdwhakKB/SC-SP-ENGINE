@@ -12,7 +12,6 @@ import game.Note;
 import game.Conductor;
 #else 
 import objects.Note;
-import objects.StrumNote;
 #end
 
 using StringTools;
@@ -107,8 +106,8 @@ class ModchartUtil
                 xPos += (xPos + daNote.width > targetX + strum.width ? -0.1 : 0.1);
                 tempShit += (xPos + daNote.width > targetX + strum.width ? -0.1 : 0.1);
             }
-            //Debug.logTrace(arrayVal);
-            //Debug.logTrace(tempShit);
+            //trace(arrayVal);
+            //trace(tempShit);
 
             NoteMovement.leatherEngineOffsetStuff.set(arrayVal, tempShit);
         }
@@ -119,18 +118,7 @@ class ModchartUtil
         return (daNote.isSustainNote ? 37 : 0); //the magic number
         #end
     }
-
-    public static function getNoteSkew(daNote:Note, skewisX:Bool)
-    {
-        if (skewisX) return daNote.skew.x;
-        else return daNote.skew.y;
-    }  
-
-    public static function getStrumSkew(strumNote:StrumNote, skewisX:Bool)
-    {
-        if (skewisX) return strumNote.skew.x;
-        else return strumNote.skew.y;
-    } 
+    
 
     static var currentFakeCrochet:Float = -1;
     static var lastBpm:Float = -1;
@@ -193,6 +181,8 @@ class ModchartUtil
         pos.x = xPerspective+(FlxG.width*0.5); //offset it back to normal
         pos.y = yPerspective+(FlxG.height*0.5);
         pos.z = zPerspectiveOffset;
+
+        
 
         //pos.z -= 1;
         //pos = perspectiveMatrix.transformVector(pos);

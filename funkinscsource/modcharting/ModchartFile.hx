@@ -1,5 +1,4 @@
 package modcharting;
-
 import flixel.math.FlxMath;
 import haxe.Exception;
 import haxe.Json;
@@ -91,7 +90,7 @@ class ModchartFile
             folderShit = filePath.replace("modchart.json", "customMods/");
             #end
             
-            Debug.logTrace(filePath);
+            //trace(filePath);
             #if sys
             if(FileSystem.exists(filePath))
                 rawJson = File.getContent(filePath).trim();
@@ -104,21 +103,21 @@ class ModchartFile
         if (rawJson != null)
         {
             json = cast Json.parse(rawJson);
-            Debug.logTrace('loaded json');
-            Debug.logTrace(folderShit);
+            //trace('loaded json');
+            trace(folderShit);
             #if sys
             if (FileSystem.isDirectory(folderShit))
             {
-                Debug.logTrace("folder le exists");
+                //trace("folder le exists");
                 for (file in FileSystem.readDirectory(folderShit))
                 {
-                    Debug.logTrace(file);
+                    //trace(file);
                     if(file.endsWith('.hx')) //custom mods!!!!
                     {
                         var scriptStr = File.getContent(folderShit + file);
                         var script = new CustomModifierScript(scriptStr);
                         customModifiers.set(file.replace(".hx", ""), script);
-                        Debug.logTrace('loaded custom mod: ' + file);
+                        //trace('loaded custom mod: ' + file);
                     }
                 }
             }

@@ -3,7 +3,7 @@ package modcharting;
 import flixel.math.FlxMath;
 import flixel.tweens.FlxTween;
 import modcharting.Modifier;
-import backend.managers.TweenManager;
+import managers.TweenManager;
 #if LEATHER
 import game.Conductor;
 #end

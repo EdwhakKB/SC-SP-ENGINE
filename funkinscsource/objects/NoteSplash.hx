@@ -11,7 +11,7 @@ typedef NoteSplashConfig = {
 	offsets:Array<Array<Float>>
 }
 
-class NoteSplash extends FlxSkewedSprite
+class NoteSplash extends FlxSprite
 {
 	public var rgbShader:PixelSplashShaderRef;
 	private var idleAnim:String;
