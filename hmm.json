@@ -79,8 +79,7 @@
       "type": "git",
       "dir": null,
       "ref": "master",
-      "url": "https://github.com/haya3218/systools",
-      "rebuild": [windows, linux, mac]
+      "url": "https://github.com/haya3218/systools"
     },
     { 
       "name": "tentools",
