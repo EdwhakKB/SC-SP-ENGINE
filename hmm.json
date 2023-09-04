@@ -87,6 +87,13 @@
       "dir": null,
       "ref": "main",
       "url": "https://github.com/TentaRJ/tentools"
+    },
+    { 
+      "name": "fnf-modcharting-tools",
+      "type": "git",
+      "dir": null,
+      "ref": "main",
+      "url": "https://github.com/TheZoroForce240/FNF-Modcharting-Tools"
     }
   ]
 }
