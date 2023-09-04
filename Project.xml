@@ -145,7 +145,7 @@
 		
 	<haxelib name="tentools" />
 	<haxelib name="systools" />
-	<ndll name="systools" haxelib="systools" />
+	<ndll name="systools" rename="systools" />
 
 	<!--Set this to the engine you're using!-->
 	<define name="PSYCH"/>
