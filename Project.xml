@@ -142,10 +142,7 @@
 
 	<haxelib name="hxtelemetry" if="telemetry"/>
 	<haxedef name="HXCPP_TELEMETRY"  if="telemetry"/>
-
-	<!-- <haxelib name="away3d" /> -->
-
-	<haxelib name="HaxeGJClient" />
+		
 	<haxelib name="tentools" />
 	<haxelib name="systools" />
 	<ndll name="systools" haxelib="systools" />
