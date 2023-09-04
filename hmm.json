@@ -8,57 +8,57 @@
     {
       "name": "openfl",
       "type": "haxelib",
-      "version": null
+      "version": "9.0.2"
     },
     {
       "name": "flixel",
       "type": "haxelib",
-      "version": null
+      "version": "5.2.2"
     },
     {
       "name": "flixel-addons",
       "type": "haxelib",
-      "version": null
+      "version": "3.0.2"
     },
     {
       "name": "flixel-tools",
       "type": "haxelib",
-      "version": null
+      "version": "1.5.1"
     },
     {
       "name": "flixel-ui",
       "type": "haxelib",
-      "version": null
+      "version": "2.5.0"
     },
     {
       "name": "hxcpp",
       "type": "haxelib",
-      "version": null
+      "version": "4.3.2"
     },
     {
       "name": "tjson",
       "type": "haxelib",
-      "version": null
+      "version": "1.4.0"
     },
     {
       "name": "hxjsonast",
       "type": "haxelib",
-      "version": null
+      "version": "1.1.0"
     },
     {
       "name": "hxCodec",
       "type": "haxelib",
-      "version": null
+      "version": "3.0.0"
     },
     {
       "name": "SScript",
       "type": "haxelib",
-      "version": null
+      "version": "4.0.1"
     },
     {
       "name": "hxcpp-debug-server",
       "type": "haxelib",
-      "version": null
+      "version": "1.2.4"
     },
     {
       "name": "discord_rpc",
@@ -73,6 +73,20 @@
       "dir": null,
       "ref": "master",
       "url": "https://github.com/superpowers04/linc_luajit"
+    },
+    { 
+      "name": "systools",
+      "type": "git",
+      "dir": null,
+      "ref": "master",
+      "url": "https://github.com/haya3218/systools"
+    },
+    { 
+      "name": "tentools",
+      "type": "git",
+      "dir": null,
+      "ref": "main",
+      "url": "https://github.com/TentaRJ/tentools"
     }
   ]
 }
