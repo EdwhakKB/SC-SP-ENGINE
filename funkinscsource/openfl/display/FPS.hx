@@ -58,7 +58,6 @@ class FPS extends TextField
 	// Event Handlers
 	private function onEnter(_)
 	{
-
 		var now = Timer.stamp();
 
 		times.push(now);
