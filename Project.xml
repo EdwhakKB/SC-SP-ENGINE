@@ -158,7 +158,7 @@
 	<haxelib name="hxCodec" if="VIDEOS_ALLOWED"/>
 	<haxelib name="faxe" if='switch'/>
 	<haxelib name="hxp" />
-	<haxelib name="flxanimate" />
+	<!--<haxelib name="flxanimate" />-->
 	<!--<haxelib name="polymod"/> -->
 	<haxelib name="discord_rpc" if="desktop"/>
 
