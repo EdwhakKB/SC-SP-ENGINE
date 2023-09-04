@@ -94,6 +94,11 @@
       "dir": null,
       "ref": "main",
       "url": "https://github.com/TheZoroForce240/FNF-Modcharting-Tools"
+    },
+    {
+      "name": "hxp",
+      "type": "haxelib",
+      "version": "1.2.2"
     }
   ]
 }
