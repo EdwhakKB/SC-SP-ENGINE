@@ -13,6 +13,8 @@ class StrumNote extends FlxSkewedSprite
 	public var downScroll:Bool = false;//plan on doing scroll directions soon -bb
 	public var sustainReduce:Bool = true;
 	private var player:Int;
+
+	public var z:Float = 0;
 	
 	public var texture(default, set):String = null;
 	private function set_texture(value:String):String {

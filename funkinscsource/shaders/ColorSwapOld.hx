@@ -34,7 +34,7 @@ class ColorSwapOld {
 	}
 }
 
-class ColorSwapOldShader extends FlxShader {
+class ColorSwapOldShader extends FlxFixedShader {
 	@:glFragmentSource('
 		varying float openfl_Alphav;
 		varying vec4 openfl_ColorMultiplierv;

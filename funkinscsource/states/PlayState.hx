@@ -4352,7 +4352,7 @@ class PlayState extends MusicBeatState
 				sectionisgfsinging = false;
 			}
 
-			playBF = searchLuaVar('playBFSing', 'bool', true);
+			playBF = searchLuaVar('playBFSing', 'bool', false);
 
 			if(cpuControlled && (note.ignoreNote || note.hitCausesMiss)) return;
 

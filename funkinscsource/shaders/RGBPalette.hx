@@ -116,7 +116,7 @@ class RGBShaderReference
 	}
 }
 
-class RGBPaletteShader extends FlxShader {
+class RGBPaletteShader extends FlxFixedShader {
 	@:glFragmentHeader('
 		#pragma header
 		

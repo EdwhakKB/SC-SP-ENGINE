@@ -7,6 +7,8 @@ import openfl.display.ShaderInput;
 import openfl.display.ShaderParameter;
 import openfl.display.ShaderParameterType;
 
+import shaders.FlxFixedShader;
+
 /**
  * An wrapper for Flixel/OpenFL's shaders, which takes fragment and vertex source
  * in the constructor instead of using macros, so it can be provided data
@@ -22,7 +24,7 @@ import openfl.display.ShaderParameterType;
  * @see https://github.com/openfl/openfl/blob/develop/src/openfl/utils/_internal/ShaderMacro.hx
  * @see https://dixonary.co.uk/blog/shadertoy
  */
-class FlxRuntimeShader extends FlxShader
+class FlxRuntimeShader extends FlxFixedShader
 {
 	#if FLX_DRAW_QUADS
 	// We need to add stuff from FlxGraphicsShader too!
