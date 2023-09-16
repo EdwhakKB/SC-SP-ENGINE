@@ -513,6 +513,9 @@ class LuaUtils
 
 	public static function getActorByName(id:String):Dynamic //kade to psych
 	{
+		if (FunkinLua.lua_Cameras.exists(id))
+            		return FunkinLua.lua_Cameras.get(id).cam;
+		
 		// pre defined names
 		switch(id)
 		{
@@ -525,14 +528,6 @@ class LuaUtils
 			return Reflect.getProperty(getTargetInstance(), id);
 
 		return PlayState.instance.strumLineNotes.members[Std.parseInt(id)];
-	}
-
-	public static function cameraFromString(cam:String):FlxCamera {
-		switch(cam.toLowerCase()) {
-			case 'camhud' | 'hud': return PlayState.instance.camHUD;
-			case 'camother' | 'other': return PlayState.instance.camOther;
-		}
-		return PlayState.instance.camGame;
 	}
 	
 	public function callOnCompleted(type:String = "tween", tag:String, ?loops:Int, ?loopsLeft:Int)
