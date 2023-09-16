@@ -54,6 +54,15 @@ import shaders.ColorSwapOld;
 
 import flixel.util.FlxAxes;
 import objects.HealthIcon;
+import openfl.filters.BitmapFilter;
+import openfl.filters.ShaderFilter;
+
+typedef LuaCamera =
+{
+    var cam:FlxCamera;
+    var shaders:Array<BitmapFilter>;
+    var shaderNames:Array<String>;
+}
 
 class FunkinLua {
 	public static var Function_Stop:Dynamic = "##PSYCHLUA_FUNCTIONSTOP";
@@ -79,8 +88,19 @@ class FunkinLua {
 	public var callbacks:Map<String, Dynamic> = new Map<String, Dynamic>();
 	public static var customFunctions:Map<String, Dynamic> = new Map<String, Dynamic>();
 
+	public static var lua_Cameras:Map<String, LuaCamera> = [];
+	public static var lua_Shaders:Map<String, shaders.Shaders.ShaderEffectNew> = [];
+
 	public function new(scriptName:String) {
 		#if LUA_ALLOWED
+		lua_Cameras.set("game", {cam: PlayState.instance.camGame, shaders: [], shaderNames: []});
+        lua_Cameras.set("hud2", {cam: PlayState.instance.camHUD2, shaders: [], shaderNames: []});
+		lua_Cameras.set("hud", {cam: PlayState.instance.camHUD, shaders: [], shaderNames: []});
+        lua_Cameras.set("other", {cam: PlayState.instance.camOther, shaders: [], shaderNames: []});
+		lua_Cameras.set("notestuff", {cam: PlayState.instance.camNoteStuff, shaders: [], shaderNames: []});
+        lua_Cameras.set("stuff", {cam: PlayState.instance.camStuff, shaders: [], shaderNames: []});
+		lua_Cameras.set("main", {cam: PlayState.instance.mainCam, shaders: [], shaderNames: []});
+
 		lua = LuaL.newstate();
 		LuaL.openlibs(lua);
 
@@ -2305,6 +2325,139 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "clearEffects", function(camera:String) {
 			game.clearShaderFromCamera(camera);
 		});
+
+		// shader bullshit
+
+		Lua_helper.add_callback(lua,"setActor3DShader", function(id:String, ?speed:Float = 3, ?frequency:Float = 10, ?amplitude:Float = 0.25) {
+            var actor = LuaUtils.getActorByName(id);
+
+            if(actor != null)
+            {
+                var funnyShader:shaders.Shaders.ThreeDEffectNew = new shaders.Shaders.ThreeDEffectNew();
+                funnyShader.waveSpeed = speed;
+                funnyShader.waveFrequency = frequency;
+                funnyShader.waveAmplitude = amplitude;
+                lua_Shaders.set(id, funnyShader);
+                
+                actor.shader = funnyShader.shader;
+            }
+        });
+        
+        Lua_helper.add_callback(lua,"setActorNoShader", function(id:String) {
+            var actor = LuaUtils.getActorByName(id);
+
+            if(actor != null)
+            {
+                lua_Shaders.remove(id);
+                actor.shader = null;
+            }
+        });
+
+        Lua_helper.add_callback(lua, "initShaderFromHx", function(name:String, classString:String) {
+
+            if (!ClientPrefs.data.shaders)
+                return;
+
+            /*#if mobile
+            //Application.current.window.alert("loading shader: "+classString,"Leather Engine Modcharts");
+            if (mobileShaderBlacklist.contains(classString))
+                return;
+            #end*/
+
+            var shaderClass = Type.resolveClass('shaders.'+classString);
+            if (shaderClass != null)
+            {
+                var shad = Type.createInstance(shaderClass, []);
+                lua_Shaders.set(name, shad);
+                Debug.logInfo('created shader: '+name);
+            }
+            else 
+            {
+                Application.current.window.alert("shader brokey\n"+classString+" doesnt exist lol","Leather Engine Modcharts");
+            }
+        });
+        Lua_helper.add_callback(lua,"setActorShader", function(actorStr:String, shaderName:String) {
+            if (!ClientPrefs.data.shaders)
+                return;
+
+            var shad = lua_Shaders.get(shaderName);
+            var actor = LuaUtils.getActorByName(actorStr);
+            
+
+            if(actor != null && shad != null)
+            {
+                actor.shader = Reflect.getProperty(shad, 'shader'); //use reflect to workaround compiler errors
+
+                //trace('added shader '+shaderName+" to " + actorStr);
+
+            }
+        });
+
+        Lua_helper.add_callback(lua, "setShaderProperty", function(shaderName:String, prop:String, value:Dynamic) {
+            if (!ClientPrefs.data.shaders)
+                return;
+            var shad = lua_Shaders.get(shaderName);
+
+            if(shad != null)
+            {
+                Reflect.setProperty(shad, prop, value);
+                //trace('set shader prop');
+            }
+        });
+
+        Lua_helper.add_callback(lua,"tweenShaderProperty", function(shaderName:String, prop:String, value:Dynamic, time:Float, easeStr:String = "linear") {
+            if (!ClientPrefs.data.shaders)
+                return;
+            var shad = lua_Shaders.get(shaderName);
+            var ease = LuaUtils.getTweenEaseByString(easeStr);
+
+            if(shad != null)
+            {
+                var startVal = Reflect.getProperty(shad, prop);
+
+                PlayState.tweenManager.num(startVal, value, time, {onUpdate: function(tween:FlxTween){
+					var ting = FlxMath.lerp(startVal,value, ease(tween.percent));
+                    Reflect.setProperty(shad, prop, ting);
+				}, ease: ease, onComplete: function(tween:FlxTween) {
+					Reflect.setProperty(shad, prop, value);
+				}});
+                //trace('set shader prop');
+            }
+        });
+
+		Lua_helper.add_callback(lua,"setCameraShader", function(camStr:String, shaderName:String) {
+            if (!ClientPrefs.data.shaders)
+                return;
+            var cam = LuaUtils.getCameraByName(camStr);
+            var shad = lua_Shaders.get(shaderName);
+
+            if(cam != null && shad != null)
+            {
+                cam.shaders.push(new ShaderFilter(Reflect.getProperty(shad, 'shader'))); //use reflect to workaround compiler errors
+                cam.shaderNames.push(shaderName);
+                cam.cam.setFilters(cam.shaders);
+                //trace('added shader '+shaderName+" to " + camStr);
+            }
+        });
+        Lua_helper.add_callback(lua,"removeCameraShader", function(camStr:String, shaderName:String) {
+            if (!ClientPrefs.data.shaders)
+                return;
+            var cam = LuaUtils.getCameraByName(camStr);
+            if (cam != null)
+            {
+                if (cam.shaderNames.contains(shaderName))
+                {
+                    var idx:Int = cam.shaderNames.indexOf(shaderName);
+                    if (idx != -1)
+                    {
+                        cam.shaderNames.remove(cam.shaderNames[idx]);
+                        cam.shaders.remove(cam.shaders[idx]);
+                        cam.cam.setFilters(cam.shaders); //refresh filters
+                    }
+                    
+                }
+            }
+        });
 		
 		addLocalCallback("close", function() {
 			closed = true;
@@ -2454,6 +2607,8 @@ class FunkinLua {
 		#if LUA_ALLOWED
 		PlayState.instance.luaArray.remove(this);
 		closed = true;
+
+		lua_Cameras.clear();
 
 		if(lua == null) {
 			return;

@@ -2223,6 +2223,19 @@ class PlayState extends MusicBeatState
 			}
 		}
 
+		#if desktop
+		if (songStarted)
+		{
+			var shaderThing = FunkinLua.lua_Shaders;
+
+			for(shaderKey in shaderThing.keys())
+			{
+				if(shaderThing.exists(shaderKey))
+					shaderThing.get(shaderKey).update(elapsed);
+			}
+		}
+		#end
+
 		if (health <= 0 && practiceMode)
 			health = 0;
 		else if (health >= 2 && practiceMode)
@@ -4537,6 +4550,7 @@ class PlayState extends MusicBeatState
 		}
 		luaArray = [];
 		FunkinLua.customFunctions.clear();
+		LuaUtils.killShaders();
 		#end
 
 		#if HSCRIPT_ALLOWED
