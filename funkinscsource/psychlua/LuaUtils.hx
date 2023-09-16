@@ -10,6 +10,7 @@ import shaders.Shaders.ShaderEffect as ShaderEffect;
 import shaders.Shaders;
 
 import substates.GameOverSubstate;
+import psychlua.FunkinLua;
 
 typedef LuaTweenOptions = {
 	type:FlxTweenType,
@@ -433,7 +434,7 @@ class LuaUtils
 			case 'invert' | 'invertcolor': return new InvertColorsEffect();
 			case 'tiltshift': return new TiltshiftEffect(val1,val2);
 			case 'grain': return new GrainEffect(val1,val2,val3);
-			case 'scanline': return new ScanlineEffect(val1);
+			case 'scanline': return new ScanlineEffectOld(val1);
 			case 'outline': return new OutlineEffect(val1, val2, val3, val4);
 			case 'distortion': return new DistortBGEffect(val1, val2, val3);
 			case 'vcr': return new VCRDistortionEffect(val1,val2,val3,val4);
@@ -466,6 +467,49 @@ class LuaUtils
 		#end
 		return "unknown";
 	}
+
+	public static function cameraFromString(cam:String):FlxCamera
+	{
+		var camera:LuaCamera = getCameraByName(cam);
+		if (camera == null)
+		{
+			switch(cam.toLowerCase()) {
+				case 'camgame' | 'game': return PlayState.instance.camGame;
+				case 'camhud' | 'hud': return PlayState.instance.camHUD;
+				case 'camother' | 'other': return PlayState.instance.camOther;
+			}
+			
+			//modded cameras
+			if (Std.isOfType(PlayState.instance.variables.get(cam), FlxCamera)){
+				return PlayState.instance.variables.get(cam);
+			}
+			return PlayState.instance.camGame;
+		}
+		return camera.cam;
+	}
+	
+	public static function getCameraByName(id:String):FunkinLua.LuaCamera
+    {
+        if(FunkinLua.lua_Cameras.exists(id))
+            return FunkinLua.lua_Cameras.get(id);
+
+        switch(id.toLowerCase())
+        {
+            case 'camhud' | 'hud': return FunkinLua.lua_Cameras.get("hud");
+			case 'camother' | 'other': return FunkinLua.lua_Cameras.get("other");
+        }
+        
+        return FunkinLua.lua_Cameras.get("game");
+    }
+
+    public static function killShaders() //dead
+    {
+        for (cam in FunkinLua.lua_Cameras)
+        {
+            cam.shaders = [];
+            cam.shaderNames = [];
+        }
+    }
 
 	public static function getActorByName(id:String):Dynamic //kade to psych
 	{
