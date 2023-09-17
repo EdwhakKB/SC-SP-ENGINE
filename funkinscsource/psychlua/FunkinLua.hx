@@ -2324,12 +2324,12 @@ class FunkinLua {
 
 		// shader bullshit
 
-		Lua_helper.add_callback(lua,"setActor3DShader", function(id:String, ?speed:Float = 3, ?frequency:Float = 10, ?amplitude:Float = 0.25) {
+		Lua_helper.add_callback(lua,"setActorCircleShader", function(id:String, ?speed:Float = 3, ?frequency:Float = 10, ?amplitude:Float = 0.25) {
             var actor = LuaUtils.getActorByName(id);
 
             if(actor != null)
             {
-                var funnyShader:shaders.Shaders.ThreeDEffectNew = new shaders.Shaders.ThreeDEffectNew();
+                var funnyShader:shaders.Shaders.CircleShader = new shaders.Shaders.CircleShader();
                 funnyShader.waveSpeed = speed;
                 funnyShader.waveFrequency = frequency;
                 funnyShader.waveAmplitude = amplitude;
