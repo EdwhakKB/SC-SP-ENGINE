@@ -1,4 +1,5 @@
 package modcharting;
+
 import flixel.math.FlxMath;
 import haxe.Exception;
 import haxe.Json;
@@ -59,7 +60,7 @@ class ModchartFile
     public function new(renderer:PlayfieldRenderer)
     {
 
-        data = loadFromJson(PlayState.SONG.song.toLowerCase());
+        data = loadFromJson(PlayState.SONG.songId.toLowerCase());
         this.renderer = renderer;
         renderer.modchart = this;
         loadPlayfields();
@@ -90,7 +91,7 @@ class ModchartFile
             folderShit = filePath.replace("modchart.json", "customMods/");
             #end
             
-            //trace(filePath);
+            Debug.logTrace(filePath);
             #if sys
             if(FileSystem.exists(filePath))
                 rawJson = File.getContent(filePath).trim();
@@ -103,21 +104,21 @@ class ModchartFile
         if (rawJson != null)
         {
             json = cast Json.parse(rawJson);
-            //trace('loaded json');
-            trace(folderShit);
+            Debug.logTrace('loaded json');
+            Debug.logTrace(folderShit);
             #if sys
             if (FileSystem.isDirectory(folderShit))
             {
-                //trace("folder le exists");
+                Debug.logTrace("folder le exists");
                 for (file in FileSystem.readDirectory(folderShit))
                 {
-                    //trace(file);
+                    Debug.logTrace(file);
                     if(file.endsWith('.hx')) //custom mods!!!!
                     {
                         var scriptStr = File.getContent(folderShit + file);
                         var script = new CustomModifierScript(scriptStr);
                         customModifiers.set(file.replace(".hx", ""), script);
-                        //trace('loaded custom mod: ' + file);
+                        Debug.logTrace('loaded custom mod: ' + file);
                     }
                 }
             }
@@ -252,16 +253,16 @@ class CustomModifierScript
 		interp.variables.set('FlxTimer', flixel.util.FlxTimer);
 		interp.variables.set('FlxTween', flixel.tweens.FlxTween);
 		interp.variables.set('FlxEase', flixel.tweens.FlxEase);
-		interp.variables.set('PlayState', PlayState);
-		interp.variables.set('game', PlayState.instance);
-		interp.variables.set('Paths', Paths);
-		interp.variables.set('Conductor', Conductor);
+		interp.variables.set('PlayState', states.PlayState);
+		interp.variables.set('game', states.PlayState.instance);
+		interp.variables.set('Paths', backend.Paths);
+		interp.variables.set('Conductor', backend.Conductor);
         interp.variables.set('StringTools', StringTools);
-        interp.variables.set('Note', Note);
+        interp.variables.set('Note', objects.Note);
 
         #if PSYCH
-        interp.variables.set('ClientPrefs', ClientPrefs);
-        interp.variables.set('ColorSwap', ColorSwap);
+        interp.variables.set('ClientPrefs', backend.ClientPrefs);
+        interp.variables.set('ColorSwap', shaders.ColorSwap);
         #end
 
         

@@ -4,14 +4,13 @@ import flixel.math.FlxMath;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.FlxSprite;
 import flixel.FlxG;
+import states.PlayState;
 
 #if LEATHER
-import states.PlayState;
 import game.Note;
-
 #else 
-import PlayState;
-import Note;
+import objects.Note;
+import modcharting.ModchartEditorState;
 #end
 
 using StringTools;
@@ -22,11 +21,13 @@ class NoteMovement
     public static var playerKeyCount = 4;
     public static var totalKeyCount = 8;
     public static var arrowScale:Float = 0.7;
-    public static var arrowSize:Float = Note.sizeOfNotes[PlayState.mania];
+    public static var arrowSize:Float = 112;
     public static var defaultStrumX:Array<Float> = [];
     public static var defaultStrumY:Array<Float> = [];
     public static var defaultScale:Array<Float> = [];
     public static var arrowSizes:Array<Float> = [];
+    public static var defaultSkewX:Array<Float> = [];
+    public static var defaultSkewY:Array<Float> = [];
     #if LEATHER
     public static var leatherEngineOffsetStuff:Map<String, Float> = [];
     #end
@@ -36,6 +37,8 @@ class NoteMovement
         defaultStrumY = []; 
         defaultScale = [];
         arrowSizes = [];
+        defaultSkewX = [];
+        defaultSkewY = [];
         keyCount = #if (LEATHER || KADE) PlayState.strumLineNotes.length-PlayState.playerStrums.length #else game.strumLineNotes.length-game.playerStrums.length #end; //base game doesnt have opponent strums as group
         playerKeyCount = #if (LEATHER || KADE) PlayState.playerStrums.length #else game.playerStrums.length #end;
 
@@ -46,13 +49,13 @@ class NoteMovement
             #else 
             var strum = game.strumLineNotes.members[i];
             #end
+            defaultSkewX.push(strum.skew.x);
+            defaultSkewY.push(strum.skew.y);
             defaultStrumX.push(strum.x);
             defaultStrumY.push(strum.y);
             #if LEATHER
             var localKeyCount = (i < keyCount ? keyCount : playerKeyCount);
             var s = Std.parseFloat(game.ui_settings[0]) * (Std.parseFloat(game.ui_settings[2]) - (Std.parseFloat(game.mania_size[localKeyCount-1])));
-            #elseif PSYCH
-            var s = Note.scales[PlayState.mania];
             #else
             var s = 0.7;
             #end
@@ -72,19 +75,21 @@ class NoteMovement
         defaultStrumY = []; 
         defaultScale = [];
         arrowSizes = [];
+        defaultSkewX = [];
+        defaultSkewY = [];
         keyCount = game.strumLineNotes.length-game.playerStrums.length; //base game doesnt have opponent strums as group
         playerKeyCount = game.playerStrums.length;
 
         for (i in 0...game.strumLineNotes.members.length)
         {
             var strum = game.strumLineNotes.members[i];
+            defaultSkewX.push(strum.skew.x);
+            defaultSkewY.push(strum.skew.y);
             defaultStrumX.push(strum.x);
             defaultStrumY.push(strum.y);
             #if LEATHER
             var localKeyCount = (i < keyCount ? keyCount : playerKeyCount);
             var s = Std.parseFloat(game.ui_settings[0]) * (Std.parseFloat(game.ui_settings[2]) - (Std.parseFloat(game.mania_size[localKeyCount-1])));
-            #elseif PSYCH
-            var s = Note.scales[PlayState.mania];
             #else
             var s = 0.7;
             #end
@@ -103,19 +108,18 @@ class NoteMovement
         daNote.y = defaultStrumY[lane];
         daNote.z = 0;
 
-        var pos = ModchartUtil.getCartesianCoords3D(incomingAngleX,incomingAngleY, curPos*noteDist);
+        var pos = ModchartUtil.getCartesianCoords3D(incomingAngleX, incomingAngleY, curPos*noteDist);
         daNote.y += pos.y;
         daNote.x += pos.x;
         daNote.z += pos.z;
-    }
+
+        daNote.skew.y = defaultSkewX[lane];
+        daNote.skew.x = defaultSkewY[lane];
+    } 
 
     public static function getLaneDiffFromCenter(lane:Int)
     {
-        #if PSYCH
-        var col:Float = lane%Note.ammo[PlayState.mania];
-        #else
         var col:Float = lane%4;
-        #end
         if ((col+1) > (keyCount*0.5))
         {
             col -= (keyCount*0.5)+1;
@@ -127,7 +131,7 @@ class NoteMovement
 
         //col = (col-col-col); //flip pos/negative
 
-        //trace(col);
+        //Debug.logTrace(col);
 
         return col;
     }

@@ -9,7 +9,7 @@
 <SubTexture name="green hold piece0000" x="311" y="168" width="143" height="53" frameX="0" frameY="0" frameWidth="133" frameHeight="43" />
 <SubTexture name="green hold end0000" x="168" y="168" width="143" height="74" frameX="0" frameY="0" frameWidth="133" frameHeight="64" />
 <SubTexture name="purple hold piece0000" x="311" y="168" width="143" height="53" frameX="0" frameY="0" frameWidth="133" frameHeight="43" />
-<SubTexture name="pruple end hold0000" x="168" y="168" width="143" height="74" frameX="0" frameY="0" frameWidth="133" frameHeight="64" />
+<SubTexture name="purple hold end0000" x="168" y="168" width="143" height="74" frameX="0" frameY="0" frameWidth="133" frameHeight="64" />
 <SubTexture name="red hold piece0000" x="311" y="168" width="143" height="53" frameX="0" frameY="0" frameWidth="133" frameHeight="43" />
 <SubTexture name="red hold end0000" x="168" y="168" width="143" height="74" frameX="0" frameY="0" frameWidth="133" frameHeight="64" />
 </TextureAtlas>

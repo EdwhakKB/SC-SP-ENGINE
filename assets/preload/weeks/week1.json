@@ -11,12 +11,11 @@
 		"gf"
 	],
 	"weekBackground": "stage",
-
 	"storyName": "Daddy Dearest",
 	"weekBefore": "tutorial",
 	"weekName": "Week 1",
+	"hiddenUntilUnlocked": true,
 	"startUnlocked": false,
-
 	"hideStoryMode": false,
 	"hideFreeplay": true
 }

@@ -1,7 +1,7 @@
 package;
 
 import flixel.graphics.FlxGraphic;
-import flixel.FlxG;
+
 import flixel.FlxGame;
 import flixel.FlxState;
 import openfl.Assets;
@@ -11,11 +11,7 @@ import openfl.display.Sprite;
 import openfl.events.Event;
 import openfl.display.StageScaleMode;
 import lime.app.Application;
-import lime.system.System;
-import lime.ui.Window;
-#if desktop
-import Discord.DiscordClient;
-#end
+import states.TitleState;
 
 //crash handler stuff
 #if CRASH_HANDLER
@@ -26,8 +22,12 @@ import sys.FileSystem;
 import sys.io.File;
 import sys.io.Process;
 #end
-
-using StringTools;
+import gamejolt.GameJolt.GJToastManager as GJToastManager;
+import flixel.FlxG;
+import flixel.system.scaleModes.RatioScaleMode;
+import lime.app.Application;
+import backend.Debug;
+import flixel.input.keyboard.FlxKey;
 
 class Main extends Sprite
 {
@@ -37,7 +37,7 @@ class Main extends Sprite
 		initialState: TitleState, // initial game state
 		zoom: -1.0, // game state bounds
 		framerate: 60, // default framerate
-		skipSplash: false, // if the default flixel splash screen should be skipped
+		skipSplash: true, // if the default flixel splash screen should be skipped
 		startFullscreen: false // if the game should start at fullscreen mode
 	};
 
@@ -49,6 +49,8 @@ class Main extends Sprite
 	public static var internetConnection:Bool = false; // If the user is connected to internet.
 
 	public static var gameContainer:Main = null; // Main instance to access when needed.
+
+	public static var gjToastManager:GJToastManager;
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
 
@@ -97,10 +99,14 @@ class Main extends Sprite
 
 		// Run this first so we can see logs.
 		Debug.onInitProgram();
+	
+		#if LUA_ALLOWED Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(psychlua.CallbackHandler.call)); #end
 
 		game.framerate = Application.current.window.displayMode.refreshRate;
-	
-		//ClientPrefs.loadDefaultKeys();
+		Application.current.window.setIcon(lime.utils.Assets.getImage('assets/art/iconOG.png'));
+
+		Controls.instance = new Controls();
+		ClientPrefs.loadDefaultKeys();
 		addChild(new FlxGame(game.width, game.height, game.initialState, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
 
 		#if !mobile
@@ -109,9 +115,12 @@ class Main extends Sprite
 		Lib.current.stage.align = "tl";
 		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
 		if(fpsVar != null) {
-			fpsVar.visible = ClientPrefs.showFPS;
+			fpsVar.visible = ClientPrefs.data.showFPS;
 		}
 		#end
+
+		gjToastManager = new GJToastManager();
+		addChild(gjToastManager);
 
 		gameContainer = this;
 
@@ -121,22 +130,6 @@ class Main extends Sprite
 		#end
 
 		FlxG.fixedTimestep = false;
-		
-		#if CRASH_HANDLER
-		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
-		// Get first window in case the coder creates more windows.
-		@:privateAccess
-		appName = openfl.Lib.application.windows[0].__backend.parent.__attributes.title;
-		#end
-
-		#if desktop
-		if (!DiscordClient.isInitialized) {
-			DiscordClient.initialize();
-			Application.current.window.onClose.add(function() {
-				DiscordClient.shutdown();
-			});
-		}
-		#end
 
 		FlxG.signals.focusGained.add(function()
 		{
@@ -146,35 +139,46 @@ class Main extends Sprite
 		{
 			focused = false;
 		});
+		FlxG.signals.postStateSwitch.add(function()
+		{
+			cpp.vm.Gc.run(false);
+			cpp.vm.Gc.compact();
+		});
 
 		// Finish up loading debug tools.
 		Debug.onGameStart();
+
+		#if CRASH_HANDLER
+		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
+		// Get first window in case the coder creates more windows.
+		@:privateAccess
+		appName = openfl.Lib.application.windows[0].__backend.parent.__attributes.title;
+		#end
+
+		#if desktop
+		DiscordClient.start();
+		#end
+
+		// shader coords fix
+		FlxG.signals.gameResized.add(function (w, h) {
+		     if (FlxG.cameras != null) {
+			   for (cam in FlxG.cameras.list) {
+				@:privateAccess
+				if (cam != null && cam._filters != null)
+					resetSpriteCache(cam.flashSprite);
+			   }
+		     }
+
+		     if (FlxG.game != null)
+			 resetSpriteCache(FlxG.game);
+		});
 	}
 
-	public function checkInternetConnection()
-	{
-		Debug.logInfo('Checking Internet connection through URL: https://www.google.com"');
-		var http = new haxe.Http("https://www.google.com");
-		http.onStatus = function(status:Int)
-		{
-			switch status
-			{
-				case 200: // success
-					internetConnection = true;
-					Debug.logInfo('CONNECTED');
-				default: // error
-					internetConnection = false;
-					Debug.logInfo('NO INTERNET CONNECTION');
-			}
-		};
-
-		http.onError = function(e)
-		{
-			internetConnection = false;
-			Debug.logInfo('NO INTERNET CONNECTION');
+	static function resetSpriteCache(sprite:Sprite):Void {
+		@:privateAccess {
+		        sprite.__cacheBitmap = null;
+			sprite.__cacheBitmapData = null;
 		}
-
-		http.request();
 	}
 
 	// Code was entirely made by sqirra-rng for their fnf engine named "Izzy Engine", big props to them!!!
@@ -182,6 +186,8 @@ class Main extends Sprite
 	#if CRASH_HANDLER
 	function onCrash(e:UncaughtErrorEvent):Void
 	{
+		updateScreenBeforeCrash(FlxG.fullscreen);
+
 		var errMsg:String = "";
 		var path:String;
 		var callStack:Array<StackItem> = CallStack.exceptionStack(true);
@@ -218,4 +224,28 @@ class Main extends Sprite
 		Sys.exit(1);
 	}
 	#end
+
+	public function updateScreenBeforeCrash(isFullScreen:Bool)
+	{
+		FlxG.resizeWindow(1280, 720);
+		
+		@:privateAccess
+		{
+			FlxG.width = 1280;
+			FlxG.height = 720;
+		}
+
+		if (!(FlxG.scaleMode is RatioScaleMode)) // just to be sure yk.
+			FlxG.scaleMode = new RatioScaleMode();
+
+		Application.current.window.width = 1280; 
+		Application.current.window.height = 720;
+		Application.current.window.borderless = false;
+
+		//Add all this just in case it's not 1280 x 720 even without fullscreen
+		if (isFullScreen)
+		{
+			FlxG.fullscreen = false;
+		}
+	}
 }

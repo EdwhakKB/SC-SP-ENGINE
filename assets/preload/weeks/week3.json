@@ -1,8 +1,8 @@
 {
 	"songs": [
-		["Pico", "pico", [148, 22, 83]],
-		["Philly Nice", "pico", [148, 22, 83]],
-		["Blammed", "pico", [148, 22, 83]]
+		["pico", "pico", [148, 22, 83]],
+		["philly-nice", "pico", [148, 22, 83]],
+		["blammed", "pico", [148, 22, 83]]
 	],
 
 	"weekCharacters": [
@@ -16,7 +16,7 @@
 	"weekBefore": "week2",
 	"weekName": "Week 3",
 	"startUnlocked": false,
-
+	"hiddenUntilUnlocked": true,
 	"hideStoryMode": false,
 	"hideFreeplay": true
 }

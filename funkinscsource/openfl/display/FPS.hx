@@ -1,30 +1,17 @@
 package openfl.display;
 
 import haxe.Timer;
+import openfl.display.FPS;
 import openfl.events.Event;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
-import flixel.math.FlxMath;
-#if gl_stats
-import openfl.display._internal.stats.Context3DStats;
-import openfl.display._internal.stats.DrawCallContext;
-#end
-#if flash
+import flixel.FlxG;
+import flixel.util.FlxColor;
 import openfl.Lib;
-#end
-
-#if openfl
+import flixel.math.FlxMath;
+import haxe.Int64;
 import openfl.system.System;
-#end
 
-/**
-	The FPS class provides an easy-to-use monitor to display
-	the current frame rate of an OpenFL project
-**/
-#if !openfl_debug
-@:fileXml('tags="haxe,release"')
-@:noDebug
-#end
 class FPS extends TextField
 {
 	/**
@@ -32,79 +19,163 @@ class FPS extends TextField
 	**/
 	public var currentFPS(default, null):Int;
 
-	@:noCompletion private var cacheCount:Int;
-	@:noCompletion private var currentTime:Float;
-	@:noCompletion private var times:Array<Float>;
+	private var times:Array<Float>;
 
-	public function new(x:Float = 10, y:Float = 10, color:Int = 0x000000)
+	public var memoryMegas:Dynamic = 0;
+
+	public var taskMemoryMegas:Dynamic = 0;
+
+	public var memoryUsage:String = '';
+
+	private var cacheCount:Int;
+
+	public function new(inX:Float = 10, inY:Float = 10, inCol:Int = 0x000000)
 	{
 		super();
 
-		this.x = x;
-		this.y = y;
+		x = inX;
+		y = inY;
 
 		currentFPS = 0;
-		selectable = false;
-		mouseEnabled = false;
-		defaultTextFormat = new TextFormat("_sans", 14, color);
-		autoSize = LEFT;
-		multiline = true;
+
+		defaultTextFormat = new TextFormat("VCR OSD Mono", 14, inCol);
+
 		text = "FPS: ";
 
+		currentFPS = 0;
+
 		cacheCount = 0;
-		currentTime = 0;
+
 		times = [];
 
-		#if flash
-		addEventListener(Event.ENTER_FRAME, function(e)
-		{
-			var time = Lib.getTimer();
-			__enterFrame(time - currentTime);
-		});
-		#end
+		addEventListener(Event.ENTER_FRAME, onEnter);
+
+		width = 700;
+
+		height = 210;
 	}
 
 	// Event Handlers
-	@:noCompletion
-	private #if !flash override #end function __enterFrame(deltaTime:Float):Void
+	private function onEnter(_)
 	{
-		currentTime += deltaTime;
-		times.push(currentTime);
+		var now = Timer.stamp();
 
-		while (times[0] < currentTime - 1000)
-		{
+		times.push(now);
+
+		while (times[0] < now - 1)
 			times.shift();
-		}
 
 		var currentCount = times.length;
 		currentFPS = Math.round((currentCount + cacheCount) / 2);
-		if (currentFPS > ClientPrefs.framerate) currentFPS = ClientPrefs.framerate;
+		if (currentFPS > ClientPrefs.data.framerate) 
+			currentFPS = ClientPrefs.data.framerate;
 
-		if (currentCount != cacheCount /*&& visible*/)
+		if (visible)
 		{
-			text = "FPS: " + currentFPS;
-			var memoryMegas:Float = 0;
-			
-			#if openfl
-			memoryMegas = Math.abs(FlxMath.roundDecimal(System.totalMemory / 1000000, 1));
-			text += "\nMemory: " + memoryMegas + " MB";
+			text = "FPS: ";
+
+			memoryUsage = (ClientPrefs.data.memoryDisplay ? "RAM: " : "");
+
+			#if !html5
+			memoryMegas = Int64.make(0, System.totalMemory);
+
+			taskMemoryMegas = Int64.make(0, MemoryUtil.getMemoryfromProcess());
+
+			if (ClientPrefs.data.memoryDisplay)
+			{
+				if (memoryMegas >= 0x40000000)
+					memoryUsage += (Math.round(cast(memoryMegas, Float) / 0x400 / 0x400 / 0x400 * 1000) / 1000) + " GB";
+				else if (memoryMegas >= 0x100000)
+					memoryUsage += (Math.round(cast(memoryMegas, Float) / 0x400 / 0x400 * 1000) / 1000) + " MB";
+				else if (memoryMegas >= 0x400)
+					memoryUsage += (Math.round(cast(memoryMegas, Float) / 0x400 * 1000) / 1000) + " KB";
+				else
+					memoryUsage += memoryMegas + " B";
+
+				#if windows
+				if (taskMemoryMegas >= 0x40000000)
+					memoryUsage += " (" + (Math.round(cast(taskMemoryMegas, Float) / 0x400 / 0x400 / 0x400 * 1000) / 1000) + " GB)";
+				else if (taskMemoryMegas >= 0x100000)
+					memoryUsage += " (" + (Math.round(cast(taskMemoryMegas, Float) / 0x400 / 0x400 * 1000) / 1000) + " MB)";
+				else if (taskMemoryMegas >= 0x400)
+					memoryUsage += " (" + (Math.round(cast(taskMemoryMegas, Float) / 0x400 * 1000) / 1000) + " KB)";
+				else
+					memoryUsage += "(" + taskMemoryMegas + " B)";
+				#end
+			}
+			#else
+			memoryMegas = HelperFunctions.truncateFloat((MemoryUtil.getMemoryfromProcess() / (1024 * 1024)) * 10, 3);
+			memoryUsage += memoryMegas + " MB";
 			#end
 
+			text += '$memoryUsage';
+
+			var stateText:String = '\nState: ${Type.getClassName(Type.getClass(FlxG.state))}';
+			var substateText:String = '\nSubState: ${Type.getClassName(Type.getClass(FlxG.state.subState))}';
+
 			textColor = 0xFFFFFFFF;
-			if (memoryMegas > 3000 || currentFPS <= ClientPrefs.framerate / 2)
+			if (memoryMegas >= 0x40000000 || currentFPS <= ClientPrefs.data.framerate / 2)
 			{
 				textColor = 0xFFFF0000;
 			}
 
-			#if (gl_stats && !disable_cffi && (!html5 || !canvas))
-			text += "\ntotalDC: " + Context3DStats.totalDrawCalls();
-			text += "\nstageDC: " + Context3DStats.contextDrawCalls(DrawCallContext.STAGE);
-			text += "\nstage3DDC: " + Context3DStats.contextDrawCalls(DrawCallContext.STAGE3D);
-			#end
 
-			text += "\n";
+			text = "FPS: "
+			+ '${currentFPS}\n'
+			+ '$memoryUsage'
+
+			#if debug
+			+ '$stateText';
+			+ '$substateText';
+			#else
+			 ;
+			#end
 		}
 
 		cacheCount = currentCount;
+	}
+}
+
+#if windows
+@:cppFileCode('#include <windows.h>\n#include <psapi.h>')
+#end
+class MemoryUtil
+{
+	// https://stackoverflow.com/questions/63166/how-to-determine-cpu-and-memory-consumption-from-inside-a-process
+	// TODO: Adapt code for the other platforms. Wrote it for windows and html5 because they're the only ones I can test kek.
+	#if windows
+	@:functionCode('
+
+		PROCESS_MEMORY_COUNTERS_EX pmc;
+		if (GetProcessMemoryInfo(GetCurrentProcess(), (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc))){
+			
+			int convertData = static_cast<int>(pmc.WorkingSetSize);
+			return convertData;
+		}
+		else 
+			return 0;
+		')
+	static function getWindowsMemory():Int
+	{
+		return 0;
+	}
+	#end
+
+	#if html5
+	static function getJSMemory():Int
+	{
+		return js.Syntax.code("window.performance.memory.usedJSHeapSize");
+	}
+	#end
+
+	public static function getMemoryfromProcess():Int
+	{
+		#if windows
+		return getWindowsMemory();
+		#elseif html5
+		return getJSMemory();
+		#else
+		return System.totalMemory;
+		#end
 	}
 }

@@ -130,7 +130,11 @@
 	],
 	"healthicon": "tankman",
 	"flip_x": true,
-	"iconColor": "#FFFFFF",
+	"healthbar_colors": [
+		225,
+		225,
+		225
+	],
 	"camera_position": [
 		0,
 		0

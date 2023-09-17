@@ -1,47 +1,15 @@
 package options;
 
-#if desktop
-import Discord.DiscordClient;
-#end
-import flash.text.TextField;
-import flixel.FlxG;
-import flixel.FlxSprite;
-import flixel.addons.display.FlxGridOverlay;
-import flixel.group.FlxGroup.FlxTypedGroup;
-import flixel.math.FlxMath;
-import flixel.text.FlxText;
-import flixel.util.FlxColor;
-import lime.utils.Assets;
-import flixel.FlxSubState;
-import flash.text.TextField;
-import flixel.FlxG;
-import flixel.FlxSprite;
-import flixel.util.FlxSave;
-import haxe.Json;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
-import flixel.util.FlxTimer;
-import flixel.input.keyboard.FlxKey;
-import flixel.graphics.FlxGraphic;
-import Controls;
-
-using StringTools;
+import states.MainMenuState;
+import backend.StageData;
 
 class OptionsState extends MusicBeatState
 {
-	var options:Array<String> = ['Note Colors', 'Controls', 'Adjust Delay and Combo', 'Graphics', 'Visuals and UI', 'Gameplay'];
+	var options:Array<String> = ['Note Colors', 'Controls', 'Adjust Delay and Combo', 'Graphics', 'Visuals and UI', 'Gameplay', 'Game Jolt Login'];
 	private var grpOptions:FlxTypedGroup<Alphabet>;
 	private static var curSelected:Int = 0;
 	public static var menuBG:FlxSprite;
-
-	public static var isInPause = false;
-
-	public function new(pauseMenu:Bool = false)
-	{
-		super();
-	
-		isInPause = pauseMenu;
-	}
+	public static var onPlayState:Bool = false;
 
 	function openSelectedSubstate(label:String) {
 		switch(label) {
@@ -56,25 +24,26 @@ class OptionsState extends MusicBeatState
 			case 'Gameplay':
 				openSubState(new options.GameplaySettingsSubState());
 			case 'Adjust Delay and Combo':
-				LoadingState.loadAndSwitchState(new options.NoteOffsetState());
+				MusicBeatState.switchState(new options.NoteOffsetState());
+			case 'Game Jolt Login':
+				LoadingState.loadAndSwitchState(new gamejolt.GameJolt.GameJoltLogin());
 		}
 	}
 
 	var selectorLeft:Alphabet;
 	var selectorRight:Alphabet;
-	var bg:FlxSprite;
 
 	override function create() {
 		#if desktop
 		DiscordClient.changePresence("Options Menu", null);
 		#end
 
-		bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
+		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
+		bg.antialiasing = ClientPrefs.data.antialiasing;
 		bg.color = 0xFFea71fd;
 		bg.updateHitbox();
 
 		bg.screenCenter();
-		bg.antialiasing = ClientPrefs.globalAntialiasing;
 		add(bg);
 
 		grpOptions = new FlxTypedGroup<Alphabet>();
@@ -107,20 +76,6 @@ class OptionsState extends MusicBeatState
 	override function update(elapsed:Float) {
 		super.update(elapsed);
 
-		if (FlxG.sound.music != null){
-			if (!FlxG.sound.music.playing){
-				FlxG.sound.playMusic(Paths.music("freakyMenu"));
-				Conductor.changeBPM(102);
-				MainMenuState.freakyPlaying = true;
-			}
-			Conductor.songPosition = FlxG.sound.music.time;
-		}
-
-		var mult:Float = FlxMath.lerp(1.07, bg.scale.x, CoolUtil.clamp(1 - (elapsed * 9), 0, 1));
-		bg.scale.set(mult, mult);
-		bg.updateHitbox();
-		bg.offset.set();
-
 		if (controls.UI_UP_P) {
 			changeSelection(-1);
 		}
@@ -128,29 +83,17 @@ class OptionsState extends MusicBeatState
 			changeSelection(1);
 		}
 
-		var shiftMult:Int = 1;
-
-		if(FlxG.mouse.wheel != 0)
-		{
-			FlxG.sound.play(Paths.sound('scrollMenu'), 0.2);
-			changeSelection(-shiftMult * FlxG.mouse.wheel);
-		}
-
 		if (controls.BACK) {
 			FlxG.sound.play(Paths.sound('cancelMenu'));
-			if (!isInPause)
-				MusicBeatState.switchState(new MainMenuState());
-			else
+			if(onPlayState)
 			{
-				PauseSubState.goToOptions = false;
-				MainMenuState.freakyPlaying = false;
+				StageData.loadDirectory(PlayState.SONG);
 				LoadingState.loadAndSwitchState(new PlayState());
+				FlxG.sound.music.volume = 0;
 			}
+			else MusicBeatState.switchState(new MainMenuState());
 		}
-
-		if (controls.ACCEPT) {
-			openSelectedSubstate(options[curSelected]);
-		}
+		else if (controls.ACCEPT) openSelectedSubstate(options[curSelected]);
 	}
 	
 	function changeSelection(change:Int = 0) {
@@ -178,11 +121,9 @@ class OptionsState extends MusicBeatState
 		FlxG.sound.play(Paths.sound('scrollMenu'));
 	}
 
-	override function beatHit() {
-		super.beatHit();
-
-		bg.scale.set(1.11, 1.11);
-		bg.updateHitbox();
-		bg.offset.set();
+	override function destroy()
+	{
+		ClientPrefs.loadPrefs();
+		super.destroy();
 	}
 }
