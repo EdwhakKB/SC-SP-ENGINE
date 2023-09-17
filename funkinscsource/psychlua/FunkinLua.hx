@@ -95,7 +95,7 @@ class FunkinLua {
 		#if LUA_ALLOWED
 		lua_Cameras.set("game", {cam: PlayState.instance.camGame, shaders: [], shaderNames: []});
 		lua_Cameras.set("hud", {cam: PlayState.instance.camHUD, shaders: [], shaderNames: []});
-        lua_Cameras.set("other", {cam: PlayState.instance.camOther, shaders: [], shaderNames: []});
+    lua_Cameras.set("other", {cam: PlayState.instance.camOther, shaders: [], shaderNames: []});
 
 		lua = LuaL.newstate();
 		LuaL.openlibs(lua);

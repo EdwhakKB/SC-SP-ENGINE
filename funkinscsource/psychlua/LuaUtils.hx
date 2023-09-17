@@ -487,7 +487,7 @@ class LuaUtils
 	public static function getActorByName(id:String):Dynamic //kade to psych
 	{
 		if (FunkinLua.lua_Cameras.exists(id))
-            return FunkinLua.lua_Cameras.get(id).cam;
+      return FunkinLua.lua_Cameras.get(id).cam;
 		
 		// pre defined names
 		switch(id)

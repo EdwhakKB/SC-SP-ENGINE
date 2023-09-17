@@ -7,6 +7,7 @@ class StrumNote extends FlxSkewedSprite
 {
 	public var rgbShader:RGBShaderReference;
 	public var resetAnim:Float = 0;
+	public var z:Float = 0;
 	private var noteData:Int = 0;
 	public var direction:Float = 90;//plan on doing scroll directions soon -bb
 	public var downScroll:Bool = false;//plan on doing scroll directions soon -bb
