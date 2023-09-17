@@ -28,9 +28,9 @@ class ShaderEffectNew
         // nothing yet
     }
 }
-class ThreeDEffectNew extends ShaderEffectNew
+class CircleEffect extends ShaderEffectNew
 {
-    public var shader(default,null):ThreeDShaderNew = new ThreeDShaderNew();
+    public var shader(default,null):CircleShader = new CircleShader();
 
     public var waveSpeed(default, set):Float = 0;
 	public var waveFrequency(default, set):Float = 0;
@@ -70,7 +70,7 @@ class ThreeDEffectNew extends ShaderEffectNew
     }
 }
 
-class ThreeDShaderNew extends FlxFixedShader
+class CircleShaderNew extends FlxFixedShader
 {
     @:glFragmentSource('
     #pragma header
