@@ -94,12 +94,8 @@ class FunkinLua {
 	public function new(scriptName:String) {
 		#if LUA_ALLOWED
 		lua_Cameras.set("game", {cam: PlayState.instance.camGame, shaders: [], shaderNames: []});
-        lua_Cameras.set("hud2", {cam: PlayState.instance.camHUD2, shaders: [], shaderNames: []});
 		lua_Cameras.set("hud", {cam: PlayState.instance.camHUD, shaders: [], shaderNames: []});
         lua_Cameras.set("other", {cam: PlayState.instance.camOther, shaders: [], shaderNames: []});
-		lua_Cameras.set("notestuff", {cam: PlayState.instance.camNoteStuff, shaders: [], shaderNames: []});
-        lua_Cameras.set("stuff", {cam: PlayState.instance.camStuff, shaders: [], shaderNames: []});
-		lua_Cameras.set("main", {cam: PlayState.instance.mainCam, shaders: [], shaderNames: []});
 
 		lua = LuaL.newstate();
 		LuaL.openlibs(lua);
@@ -2315,17 +2311,7 @@ class FunkinLua {
 			shit.shader = newShader.shader;
 
 		});
-
-		Lua_helper.add_callback(lua, "addEffect", function(camera:String,effect:String, ?val1:Dynamic, ?val2:Dynamic, ?val3:Dynamic, ?val4:Dynamic) {
-			game.addShaderToCamera(camera, LuaUtils.getEffectFromString(effect, val1, val2, val3, val4));		
-		});
-		Lua_helper.add_callback(lua, "removeEffects", function(camera:String, effect:String) {
-			game.removeShaderFromCamera(camera, LuaUtils.getEffectFromString(effect));
-		});
-		Lua_helper.add_callback(lua, "clearEffects", function(camera:String) {
-			game.clearShaderFromCamera(camera);
-		});
-
+		
 		// shader bullshit
 
 		Lua_helper.add_callback(lua,"setActor3DShader", function(id:String, ?speed:Float = 3, ?frequency:Float = 10, ?amplitude:Float = 0.25) {

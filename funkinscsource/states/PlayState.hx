@@ -80,7 +80,7 @@ import psychlua.FunkinLua;
 import modcharting.ModchartFuncs;
 import modcharting.NoteMovement;
 import modcharting.PlayfieldRenderer;
-import shaders.Shaders.ShaderEffect as ShaderEffect;
+import shaders.Shaders.ShaderEffectNew as ShaderEffectNew;
 import shaders.Shaders;
 import gamejolt.GameJoltAPI;
 import shaders.FNFShader;
@@ -142,11 +142,6 @@ class PlayState extends MusicBeatState
 	public var GF_Y:Float = 130;
 	public var MOM_X:Float = 100;
 	public var MOM_Y:Float = 100;
-
-	public var camGameShaders:Array<ShaderEffect> = [];
-	public var camHUDShaders:Array<ShaderEffect> = [];
-	public var camOtherShaders:Array<ShaderEffect> = [];
-	public var shaderUpdates:Array<Float->Void> = [];
 
 	public var songSpeedTween:FlxTween;
 	public var songSpeed(default, set):Float = 1;
@@ -2690,13 +2685,6 @@ class PlayState extends MusicBeatState
 		}
 		#end
 
-		if (shaderUpdates != [])
-		{
-			for (i in shaderUpdates){
-				i(elapsed);
-			}
-		}
-
 		setOnScripts('cameraX', camFollow.x);
 		setOnScripts('cameraY', camFollow.y);
 		setOnScripts('botPlay', cpuControlled);
@@ -5144,111 +5132,6 @@ class PlayState extends MusicBeatState
 
 		return true;
 		#end
-	}
-
-	public function addShaderToCamera(cam:String,effect:ShaderEffect) //STOLE FROM ANDROMEDA
-	{
-		switch(cam.toLowerCase()) 
-		{
-			case 'camhud' | 'hud':
-					camHUDShaders.push(effect);
-					var newCamEffects:Array<BitmapFilter>=[]; // IT SHUTS HAXE UP IDK WHY BUT WHATEVER IDK WHY I CANT JUST ARRAY<SHADERFILTER>
-					for(i in camHUDShaders){
-					  newCamEffects.push(new ShaderFilter(i.shader));
-					}
-					camHUD.setFilters(newCamEffects);
-			case 'camother' | 'other':
-					camOtherShaders.push(effect);
-					var newCamEffects:Array<BitmapFilter>=[]; // IT SHUTS HAXE UP IDK WHY BUT WHATEVER IDK WHY I CANT JUST ARRAY<SHADERFILTER>
-					for(i in camOtherShaders){
-					  newCamEffects.push(new ShaderFilter(i.shader));
-					}
-					camOther.setFilters(newCamEffects);
-			case 'camgame' | 'game':
-					camGameShaders.push(effect);
-					var newCamEffects:Array<BitmapFilter>=[]; // IT SHUTS HAXE UP IDK WHY BUT WHATEVER IDK WHY I CANT JUST ARRAY<SHADERFILTER>
-					for(i in camGameShaders){
-					  newCamEffects.push(new ShaderFilter(i.shader));
-					}
-					camGame.setFilters(newCamEffects);
-			default:
-				var obj = null;
-				for (map in [modchartSprites, modchartIcons, modchartTexts, modchartCharacters]) {
-					if (map.exists(cam)) {
-						obj = map.get(cam);
-						break;
-					}
-				}
-				if (obj == null) {
-					obj = Reflect.getProperty(PlayState.instance, cam);
-				}
-				Reflect.setProperty(obj, "shader", effect.shader);
-		}
-	}
-
-	public function removeShaderFromCamera(cam:String,effect:ShaderEffect)
-	{
-		switch(cam.toLowerCase()) 
-		{
-			case 'camhud' | 'hud': 
-				camHUDShaders.remove(effect);
-				var newCamEffects:Array<BitmapFilter>=[];
-				for(i in camHUDShaders){
-				newCamEffects.push(new ShaderFilter(i.shader));
-				}
-				camHUD.setFilters(newCamEffects);
-			case 'camother' | 'other': 
-				camOtherShaders.remove(effect);
-				var newCamEffects:Array<BitmapFilter>=[];
-				for(i in camOtherShaders){
-				newCamEffects.push(new ShaderFilter(i.shader));
-				}
-				camOther.setFilters(newCamEffects);
-			case 'camgame' | 'game':
-				camGameShaders.remove(effect);
-				var newCamEffects:Array<BitmapFilter>=[];
-				for(i in camGameShaders){
-				newCamEffects.push(new ShaderFilter(i.shader));
-				}
-				camGame.setFilters(newCamEffects);
-			default: 
-				camGameShaders.remove(effect);
-				var newCamEffects:Array<BitmapFilter>=[];
-				for(i in camGameShaders){
-				newCamEffects.push(new ShaderFilter(i.shader));
-				}
-				camGame.setFilters(newCamEffects);
-		}	  
-	}
-
-	public function clearShaderFromCamera(cam:String)
-	{  
-		var newCamEffects:Array<BitmapFilter>=[];
-
-		switch(cam.toLowerCase()) 
-		{
-			case 'camhud' | 'hud': 
-				camHUDShaders = [];
-				camHUD.setFilters(newCamEffects);
-			case 'camother' | 'other': 
-				camOtherShaders = [];
-				camOther.setFilters(newCamEffects);
-			case 'camgame' | 'game':
-				camGameShaders = [];
-				camGame.setFilters(newCamEffects);
-			default: 
-				var obj = null;
-				for (map in [modchartSprites, modchartIcons, modchartTexts, modchartCharacters]) {
-					if (map.exists(cam)) {
-						obj = map.get(cam);
-						break;
-					}
-				}
-				if (obj == null) {
-					obj = Reflect.getProperty(PlayState.instance, cam);
-				}
-				Reflect.setProperty(obj, "shader", null);
-		}
 	}
 
 	#if (!flash && sys)
