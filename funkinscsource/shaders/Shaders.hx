@@ -119,6 +119,55 @@ class CircleShaderNew extends FlxFixedShader
     }
 }
 
+class RGBPincushionSplitEffect extends ShaderEffectNew
+{
+    public var shader(default,null):RGBPincushionSplitShader = new RGBPincushionSplitShader();
+    public var amount:Float = 0.0;
+    public var distortionFactor:Float = 0.0;
+
+	public function new():Void
+    {
+        shader.amount.value = [amount];
+        shader.distortionFactor.value = [distortionFactor];
+    }
+    override public function update(elapsed:Float):Void
+    {
+        super.update(elapsed);
+
+        shader.amount.value = [amount];
+        shader.distortionFactor.value = [distortionFactor];
+    }
+}
+
+class RGBPincushionSplitShader extends FlxFixedShader
+{
+    @:glFragmentSource('
+    #pragma header
+
+    uniform float amount = 0.05;
+    uniform float distortionFactor = 0.05;
+
+    vec2 uv = openfl_TextureCoordv.xy;
+    vec2 center = vec2(0.5, 0.5);
+
+    void main(void) {
+        vec2 distortedUV = uv - center;
+        float dist = length(distortedUV);
+        float distortion = pow(dist, 3.0) * distortionFactor;
+        vec4 col;
+        col.r = texture2D(bitmap, vec2(uv.x + amount * distortedUV.x + distortion / openfl_TextureSize.x, uv.y + amount * distortedUV.y + distortion / openfl_TextureSize.y)).r;
+        col.g = texture2D(bitmap, uv).g;
+        col.b = texture2D(bitmap, vec2(uv.x - amount * distortedUV.x - distortion / openfl_TextureSize.x, uv.y - amount * distortedUV.y - distortion / openfl_TextureSize.y)).b;
+        col.a = texture2D(bitmap, uv).a;
+        gl_FragColor = col;
+    }
+    ')
+
+    public function new()
+    {
+       super();
+    }
+}
 
 class ColorFillEffect extends ShaderEffectNew
 {
