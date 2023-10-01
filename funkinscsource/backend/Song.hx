@@ -13,11 +13,10 @@ import backend.Section;
 
 typedef SwagSong =
 {
-	@:deprecated
 	/**
 	 * Use to be the internal name of the song.
 	 */
-	var ?song:String;
+	var song:String;
 
 	/**
 	 * The internal name of the song, as used in the file system.
@@ -54,7 +53,6 @@ typedef SwagSong =
 
 class Song
 {
-	@:deprecated
 	public var song:String;
 
 	public var songId:String;
@@ -116,6 +114,9 @@ class Song
 				}
 			}
 		}
+
+		if (songJson.songId != null && songJson.song == null) songJson.song = songJson.songId;
+		else if (songJson.song != null && songJson.songId == null) songJson.songId = songJson.song;
 	}
 
 	public function new(song, notes, bpm)
@@ -170,6 +171,8 @@ class Song
 
 		var songJson:Dynamic = parseJSONshit(rawJson);
 		if(jsonInput != 'events') StageData.loadDirectory(songJson);
+		if (songJson.songId != null && songJson.song == null) songJson.song = songJson.songId;
+		else if (songJson.song != null && songJson.songId == null) songJson.songId = songJson.song;
 		onLoadJson(songJson);
 		return songJson;
 	}
