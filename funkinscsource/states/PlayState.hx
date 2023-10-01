@@ -3434,6 +3434,7 @@ class PlayState extends MusicBeatState
 
 	public var transitioning = false;
 	public var comboLetterRank:String = '';
+	public static var gameJoltIntForScoreBoard:Int = 0;
 	public function endSong()
 	{
 		//Should kill you if you tried to cheat
@@ -3498,7 +3499,9 @@ class PlayState extends MusicBeatState
 			Highscore.saveScore(SONG.songId, songScore, storyDifficulty, percent);
 			Highscore.saveCombo(SONG.songId, ratingFC, storyDifficulty);
 			Highscore.saveLetter(SONG.songId, comboLetterRank, storyDifficulty);
-			GameJoltAPI.addScore(songScore, 834581, SONG.songId + ' Score');
+
+			if (gameJoltIntForScoreBaord > 0)
+				GameJoltAPI.addScore(songScore, gameJoltIntForScoreBoard, SONG.songId + ' Score');
 			#end
 			playbackRate = 1;
 
