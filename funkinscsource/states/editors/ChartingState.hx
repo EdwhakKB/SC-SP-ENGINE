@@ -201,6 +201,7 @@ class ChartingState extends MusicBeatState
 		{
 			Difficulty.resetList();
 			_song = {
+				song: 'Test',
 				songId: 'Test',
 				notes: [],
 				events: [],
@@ -437,6 +438,8 @@ class ChartingState extends MusicBeatState
 		var loadAutosaveBtn:FlxButton = new FlxButton(reloadSongJson.x, reloadSongJson.y + 30, 'Load Autosave', function()
 		{
 			PlayState.SONG = Song.parseJSONshit(FlxG.save.data.autosave);
+			if (PlayState.SONG.songId != null && PlayState.SONG.song == null) PlayState.SONG.song = PlayState.SONG.songId;
+			else if (PlayState.SONG.song != null && PlayState.SONG.songId == null) PlayState.SONG.songId = PlayState.SONG.song;
 			MusicBeatState.resetState();
 		});
 
@@ -472,7 +475,7 @@ class ChartingState extends MusicBeatState
 
 		var startHere:FlxButton = new FlxButton(clear_events.x, clear_events.y - 30, 'Start Here', function()
 			{
-				PlayState.timeToStart = Conductor.songPosition;				
+				PlayState.timeToStart = Conductor.songPosition;			
 				startSong();
 			});
 
