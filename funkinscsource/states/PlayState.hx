@@ -4520,8 +4520,6 @@ class PlayState extends MusicBeatState
 						persistentUpdate = false;
 						openSubState(subStates[0]);
 						inResults = true;
-					}else if (ClientPrefs.data.resultsScreenType == 'SLUSHI'){
-
 					}
 					else
 					{
