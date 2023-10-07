@@ -12,8 +12,8 @@ package gamejolt;
  */
 class GJKeys {
 	/** Your Game ID from GameJolt **/
-	public static var id:Int = 667094;
+	public static var id:Int = 0;
 
 	/** Your Game Private Key from GameJolt **/
-	public static var key:String = 'd6f6bcce77f04f12c9e7af7e4232326d';
+	public static var key:String = '';
 }
