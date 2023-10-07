@@ -1,7 +1,6 @@
 package states.stages;
 
 import states.stages.objects.*;
-import backend.Achievements;
 
 enum HenchmenKillState
 {
@@ -240,7 +239,7 @@ class Limo extends BaseStage
 	var carTimer:FlxTimer;
 	function fastCarDrive()
 	{
-		//trace('Car drive');
+		//Debug.logTrace('Car drive');
 		FlxG.sound.play(Paths.soundRandom('carPass', 0, 1), 0.7);
 
 		fastCar.velocity.x = (FlxG.random.int(170, 220) / FlxG.elapsed) * 3;
@@ -264,15 +263,8 @@ class Limo extends BaseStage
 				limoKillingState = KILLING;
 
 				#if ACHIEVEMENTS_ALLOWED
-				Achievements.henchmenDeath++;
-				FlxG.save.data.henchmenDeath = Achievements.henchmenDeath;
-				var achieve:String = game.checkForAchievement(['roadkill_enthusiast']);
-				if (achieve != null) {
-					game.startAchievement(achieve);
-				} else {
-					FlxG.save.flush();
-				}
-				FlxG.log.add('Deaths: ' + Achievements.henchmenDeath);
+				var kills = Achievements.addScore("roadkill_enthusiast");
+				FlxG.log.add('Henchmen kills: $kills');
 				#end
 			}
 		}

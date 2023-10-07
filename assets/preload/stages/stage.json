@@ -16,5 +16,7 @@
 
 	"ratingSkin": ["", ""],
 	"countDownAssets": ["ready", "set", "go"],
-	"introSoundsSuffix": ""
+	"introSoundsSuffix": "",
+
+	"opponent2": [-10000]
 }

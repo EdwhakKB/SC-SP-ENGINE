@@ -30,6 +30,11 @@ import openfl.display.Sprite;
 
 import gamejolt.GameJoltAPI as GameJoltAPI;
 
+import flixel.addons.ui.FlxInputText;
+import flixel.addons.ui.FlxButtonPlus;
+
+import objects.Alphabet;
+
 using StringTools;
 
 class GameJoltInfo extends MusicBeatSubstate
@@ -71,16 +76,17 @@ class GameJoltInfo extends MusicBeatSubstate
 class GameJoltLogin extends MusicBeatState
 {
     var loginTexts:FlxTypedGroup<FlxText>;
-    var loginBoxes:FlxTypedGroup<FlxUIInputText>;
-    var loginButtons:FlxTypedGroup<FlxButton>;
+    var loginBoxes:FlxTypedGroup<FlxInputText>;
+    var loginButtons:FlxTypedGroup<FlxButtonPlus>;
     var usernameText:FlxText;
     var tokenText:FlxText;
-    var usernameBox:FlxUIInputText;
-    var tokenBox:FlxUIInputText;
-    var signInBox:FlxButton;
-    var helpBox:FlxButton;
-    var logOutBox:FlxButton;
-    var cancelBox:FlxButton;
+    var usernameBox:FlxInputText;
+    var tokenBox:FlxInputText;
+    var signInBox:FlxButtonPlus;
+    var helpBox:FlxButtonPlus;
+    var logOutBox:FlxButtonPlus;
+    var cancelBox:FlxButtonPlus;
+    var showPassBox:FlxButtonPlus;
     // var profileIcon:FlxSprite;
     var username1:FlxText;
     var username2:FlxText;
@@ -97,7 +103,7 @@ class GameJoltLogin extends MusicBeatState
     {
         if(!login)
         {
-            FlxG.sound.playMusic(Paths.music('freakyMenu'),0);
+            FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"),0);
             FlxG.sound.music.fadeIn(2, 0, 0.85);
         }
 
@@ -107,15 +113,16 @@ class GameJoltLogin extends MusicBeatState
         Conductor.bpm = 102;
 
         var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat', 'preload'));
-		bg.setGraphicSize(FlxG.width);
+		bg.setGraphicSize(FlxG.width, FlxG.height);
 		bg.antialiasing = true;
 		bg.updateHitbox();
 		bg.screenCenter();
 		bg.scrollFactor.set();
-		bg.alpha = 0.25;
+		bg.alpha = 0.45;
+        bg.color = FlxG.random.color();
 		add(bg);
 
-        charBop = new FlxSprite(FlxG.width - 400, 250);
+        charBop = new FlxSprite(FlxG.width - 380, 250);
 		charBop.frames = Paths.getSparrowAtlas('characters/BOYFRIEND', 'shared');
 		charBop.animation.addByPrefix('idle', 'BF idle dance', 24, false);
         charBop.animation.addByPrefix('loggedin', 'BF HEY', 24, false);
@@ -124,12 +131,19 @@ class GameJoltLogin extends MusicBeatState
         charBop.flipX = false;
 		add(charBop);
 
+        /*var textMiddle = new FlxText(200, 125, 300, "SIGN IN TO GAMEJOLT!", 80);
+        textMiddle.size = 80;
+        textMiddle.color = FlxColor.fromString('#90EE90');
+        textMiddle.y += 40;
+        textMiddle.font = Paths.font('vcr.ttf');
+        add(textMiddle);*/
+
         loginTexts = new FlxTypedGroup<FlxText>(2);
         add(loginTexts);
 
-        usernameText = new FlxText(0, 125, 300, "Username:", 20);
+        usernameText = new FlxText(0, 125, 300, "", 20);
 
-        tokenText = new FlxText(0, 225, 300, "Token:", 20);
+        tokenText = new FlxText(0, 225, 300, "", 20);
 
         loginTexts.add(usernameText);
         loginTexts.add(tokenText);
@@ -139,38 +153,36 @@ class GameJoltLogin extends MusicBeatState
             item.font = GameJoltInfo.font;
         });
 
-        loginBoxes = new FlxTypedGroup<FlxUIInputText>(2);
+        loginBoxes = new FlxTypedGroup<FlxInputText>(2);
         add(loginBoxes);
 
-        usernameBox = new FlxUIInputText(0, 175, 300, null, 32, FlxColor.BLACK, FlxColor.TRANSPARENT);
-        tokenBox = new FlxUIInputText(0, 275, 300, null, 32, FlxColor.BLACK, FlxColor.TRANSPARENT);
+        usernameBox = new FlxInputText(Math.floor(FlxG.width*0.5) - 700, 250, Math.floor(FlxG.width*0.4) + 20, '', 32);
+        tokenBox = new FlxInputText(Math.floor(FlxG.width*0.5) - 700, 400, Math.floor(FlxG.width*0.4) + 20, '', 32);
+
+        var text2:Alphabet = new Alphabet(Math.floor(FlxG.width*0.5) - 200, usernameBox.y - 100, 'User Name', true);
+        add(text2);
+        text2.x = FlxG.width*0.1;
+
+        var text3:Alphabet = new Alphabet(Math.floor(FlxG.width*0.5) - 200, tokenBox.y - 200, 'User Token', true);
+        add(text3);
+        text3.x = FlxG.width*0.1;
 
         loginBoxes.add(usernameBox);
         loginBoxes.add(tokenBox);
-        loginBoxes.forEach(function(item:FlxUIInputText){
-            item.screenCenter(X);
-            item.x += baseX;
+        loginBoxes.forEach(function(item:FlxInputText){
             item.font = GameJoltInfo.font;
         });
 
-        if(GameJoltAPI.getStatus())
-        {
-            remove(loginTexts);
-            remove(loginBoxes);
-        }
-
-        loginButtons = new FlxTypedGroup<FlxButton>(3);
+        loginButtons = new FlxTypedGroup<FlxButtonPlus>(4);
         add(loginButtons);
 
-        signInBox = new FlxButton(0, 475, "Sign In", function()
+        signInBox = new FlxButtonPlus(Math.floor(FlxG.width*0.25), 280, function()
         {
-            Debug.logInfo(usernameBox.text);
-            Debug.logInfo(tokenBox.text);
             GameJoltAPI.authDaUser(usernameBox.text, tokenBox.text, true);
             ClientPrefs.saveSettings();
-        });
+        }, "Sign In", 200, 60);
 
-        helpBox = new FlxButton(0, 550, "GameJolt Token", function()
+        helpBox = new FlxButtonPlus(Math.floor(FlxG.width*0.25), 355, function()
         {
             if (!GameJoltAPI.getStatus())
                 openLink('https://www.youtube.com/watch?v=T5-x7kAGGnE');
@@ -181,25 +193,34 @@ class GameJoltLogin extends MusicBeatState
                 Main.gjToastManager.createToast(GameJoltInfo.imagePath, "Score Submitting", "Score submitting is now " + (ClientPrefs.data.gjleaderboardToggle ? "Enabled" : "Disabled"), false);
                 ClientPrefs.saveSettings();
             }
-        });
+        }, "GameJolt Token", 200, 60);
         helpBox.color = FlxColor.fromRGB(84,155,149);
 
-        logOutBox = new FlxButton(0, 625, "Log Out & Close", function()
+        logOutBox = new FlxButtonPlus(Math.floor(FlxG.width*0.25), 445, function()
         {
             GameJoltAPI.deAuthDaUser();
+            GameJoltAPI.connect();
+            GameJoltAPI.authDaUser(ClientPrefs.data.gjUser, ClientPrefs.data.gjToken);
             ClientPrefs.saveSettings();
-        });
+            MusicBeatState.switchState(new options.OptionsState());
+        }, "Log Out & Close", 200, 60);
         logOutBox.color = FlxColor.RED /*FlxColor.fromRGB(255,134,61)*/ ;
 
-        cancelBox = new FlxButton(0,625, "Not Right Now", function()
+        cancelBox = new FlxButtonPlus(Math.floor(FlxG.width*0.25), 445, function()
         {
-           // FlxG.save.flush();
+           FlxG.save.flush();
             FlxG.sound.play(Paths.sound('confirmMenu'), 0.7, false, null, true, function(){
-                //FlxG.save.flush();
+                FlxG.save.flush();
                 MusicBeatState.switchState(new options.OptionsState());
                 ClientPrefs.saveSettings();
             });
-        });
+        }, "Not Right Now", 200, 60);
+
+        showPassBox = new FlxButtonPlus(Math.floor(FlxG.width*0.25) + 200, 185, function()
+        {
+            tokenBox.passwordMode = !tokenBox.passwordMode;
+        }, "Show Password?", 200, 60);
+        showPassBox.color = FlxColor.fromRGB(84,155,180);
 
         if(!GameJoltAPI.getStatus())
         {
@@ -207,28 +228,31 @@ class GameJoltLogin extends MusicBeatState
         }
         else
         {
-            cancelBox.y = 475;
+            cancelBox.y = 525;
             cancelBox.text = "Continue";
             loginButtons.add(logOutBox);
         }
         loginButtons.add(helpBox);
         loginButtons.add(cancelBox);
+        loginButtons.add(showPassBox);
 
-        loginButtons.forEach(function(item:FlxButton){
-            item.screenCenter(X);
-            item.setGraphicSize(Std.int(item.width) * 3);
-            item.x += baseX;
+        loginButtons.forEach(function(item:FlxButtonPlus){
+            item.textNormal.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+            item.textHighlight.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+            //item.screenCenter(X);
+            //item.setGraphicSize(Std.int(item.width) * 3);
+            //item.x += baseX;
         });
 
         if(GameJoltAPI.getStatus())
         {
-            username1 = new FlxText(0, 95, 0, "Signed in as:", 40);
+            username1 = new FlxText(0, 95, 0, "Signed in as with nick name of:", 40);
             username1.alignment = CENTER;
             username1.screenCenter(X);
             username1.x += baseX;
             add(username1);
 
-            username2 = new FlxText(0, 145, 0, "Nickname: " + GameJoltAPI.getUserInfo(true) + "", 40);
+            username2 = new FlxText(0, 145, 0, GameJoltAPI.getUserInfo(true), 40);
             username2.alignment = CENTER;
             username2.screenCenter(X);
             username2.x += baseX;
@@ -242,7 +266,7 @@ class GameJoltLogin extends MusicBeatState
                 username1.font = GameJoltInfo.font;
                 username2.font = GameJoltInfo.font;
             }
-            loginBoxes.forEach(function(item:FlxUIInputText){
+            loginBoxes.forEach(function(item:FlxInputText){
                 item.font = GameJoltInfo.font;
             });
             loginTexts.forEach(function(item:FlxText){
@@ -259,17 +283,29 @@ class GameJoltLogin extends MusicBeatState
             helpBox.color = (ClientPrefs.data.gjleaderboardToggle ? FlxColor.GREEN : FlxColor.RED);
         }
 
+        var gameJoltInputText:Array<FlxInputText> = [usernameBox, tokenBox];
+        for (i in 0...gameJoltInputText.length)
+        {
+            if (gameJoltInputText[i].hasFocus)
+            {
+                ClientPrefs.toggleVolumeKeys(false);
+				super.update(elapsed);
+				return;
+            }
+        }
+        ClientPrefs.toggleVolumeKeys(true);
+
         if (FlxG.sound.music != null)
             Conductor.songPosition = FlxG.sound.music.time;
 
         if (!FlxG.sound.music.playing)
         {
-            FlxG.sound.playMusic(Paths.music('freakyMenu'));
+            FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
         }
 
-        if (FlxG.keys.justPressed.ESCAPE)
+        if (FlxG.keys.justPressed.ESCAPE && !gameJoltInputText[0].hasFocus && !gameJoltInputText[1].hasFocus)
         {
-           // FlxG.save.flush();
+            FlxG.save.flush();
             FlxG.mouse.visible = false;
             MusicBeatState.switchState(new options.OptionsState());
             ClientPrefs.saveSettings();

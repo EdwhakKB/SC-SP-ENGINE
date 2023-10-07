@@ -46,8 +46,6 @@ class Main extends Sprite
 
 	public static var appName:String = ''; // Application name.
 
-	public static var internetConnection:Bool = false; // If the user is connected to internet.
-
 	public static var gameContainer:Main = null; // Main instance to access when needed.
 
 	public static var gjToastManager:GJToastManager;
@@ -83,6 +81,11 @@ class Main extends Sprite
 		setupGame();
 	}
 
+	var oldVol:Float = 1.0;
+	var newVol:Float = 0.2;
+
+	public static var focusMusicTween:FlxTween;
+
 	private function setupGame():Void
 	{
 		var stageWidth:Int = Lib.current.stage.stageWidth;
@@ -100,13 +103,14 @@ class Main extends Sprite
 		// Run this first so we can see logs.
 		Debug.onInitProgram();
 	
-		#if LUA_ALLOWED Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(psychlua.CallbackHandler.call)); #end
+		#if LUA_ALLOWED llua.Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(psychlua.CallbackHandler.call)); #end
 
 		game.framerate = Application.current.window.displayMode.refreshRate;
 		Application.current.window.setIcon(lime.utils.Assets.getImage('assets/art/iconOG.png'));
 
 		Controls.instance = new Controls();
 		ClientPrefs.loadDefaultKeys();
+		#if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
 		addChild(new FlxGame(game.width, game.height, game.initialState, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
 
 		#if !mobile
@@ -114,9 +118,6 @@ class Main extends Sprite
 		addChild(fpsVar);
 		Lib.current.stage.align = "tl";
 		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
-		if(fpsVar != null) {
-			fpsVar.visible = ClientPrefs.data.showFPS;
-		}
 		#end
 
 		gjToastManager = new GJToastManager();
@@ -131,18 +132,60 @@ class Main extends Sprite
 
 		FlxG.fixedTimestep = false;
 
-		FlxG.signals.focusGained.add(function()
+		FlxGraphic.defaultPersist = false;
+		FlxG.signals.preStateSwitch.add(function()
 		{
-			focused = true;
+
+			//i tihnk i finally fixed it
+
+			@:privateAccess
+			for (key in FlxG.bitmap._cache.keys())
+			{
+				var obj = FlxG.bitmap._cache.get(key);
+				if (obj != null)
+				{
+					lime.utils.Assets.cache.image.remove(key);
+					openfl.Assets.cache.removeBitmapData(key);
+					FlxG.bitmap._cache.remove(key);
+					//obj.destroy(); //breaks the game lol
+				}
+			}
+
+			//idk if this helps because it looks like just clearing it does the same thing
+			for (k => f in lime.utils.Assets.cache.font)
+				lime.utils.Assets.cache.font.remove(k);
+			for (k => s in lime.utils.Assets.cache.audio)
+				lime.utils.Assets.cache.audio.remove(k);
+
+			lime.utils.Assets.cache.clear();
+
+			openfl.Assets.cache.clear();
+	
+			FlxG.bitmap.dumpCache();
+	
+			#if polymod
+			polymod.Polymod.clearCache();
+			
+			#end
+
+			#if cpp
+			cpp.vm.Gc.enable(true);
+			#end
+	
+			#if sys
+			openfl.system.System.gc();	
+			#end
 		});
-		FlxG.signals.focusLost.add(function()
-		{
-			focused = false;
-		});
+
 		FlxG.signals.postStateSwitch.add(function()
 		{
-			cpp.vm.Gc.run(false);
-			cpp.vm.Gc.compact();
+			#if cpp
+			cpp.vm.Gc.enable(true);
+			#end
+	
+			#if sys
+			openfl.system.System.gc();	
+			#end
 		});
 
 		// Finish up loading debug tools.
@@ -150,35 +193,42 @@ class Main extends Sprite
 
 		#if CRASH_HANDLER
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
-		// Get first window in case the coder creates more windows.
-		@:privateAccess
-		appName = openfl.Lib.application.windows[0].__backend.parent.__attributes.title;
 		#end
 
 		#if desktop
 		DiscordClient.start();
+
+		// Get first window in case the coder creates more windows.
+		@:privateAccess
+		appName = openfl.Lib.application.windows[0].__backend.parent.__attributes.title;
+		Application.current.window.onFocusIn.add(onWindowFocusIn);
+		Application.current.window.onFocusOut.add(onWindowFocusOut);
 		#end
 
 		// shader coords fix
-		FlxG.signals.gameResized.add(function (w, h) {
-		     if (FlxG.cameras != null) {
-			   for (cam in FlxG.cameras.list) {
-				@:privateAccess
-				if (cam != null && cam._filters != null)
-					resetSpriteCache(cam.flashSprite);
-			   }
-		     }
-
-		     if (FlxG.game != null)
-			 resetSpriteCache(FlxG.game);
-		});
+		FlxG.signals.gameResized.add(fixCameraShaders);
 	}
 
-	static function resetSpriteCache(sprite:Sprite):Void {
-		@:privateAccess {
-		        sprite.__cacheBitmap = null;
-			sprite.__cacheBitmapData = null;
+	public static function fixCameraShaders(w:Int, h:Int) //fixes shaders after resizing the window / fullscreening
+	{
+		if (FlxG.cameras.list.length > 0)
+		{
+			for (cam in FlxG.cameras.list)
+			{
+				if (cam.flashSprite != null)
+				{
+					@:privateAccess 
+					{
+						cam.flashSprite.__cacheBitmap = null;
+						cam.flashSprite.__cacheBitmapData = null;
+						cam.flashSprite.__cacheBitmapData2 = null;
+						cam.flashSprite.__cacheBitmapData3 = null;
+						cam.flashSprite.__cacheBitmapColorTransform = null;
+					}
+				}
+			}
 		}
+		
 	}
 
 	// Code was entirely made by sqirra-rng for their fnf engine named "Izzy Engine", big props to them!!!
@@ -246,6 +296,50 @@ class Main extends Sprite
 		if (isFullScreen)
 		{
 			FlxG.fullscreen = false;
+		}
+	}
+
+	function onWindowFocusOut(){
+		focused = false;
+
+		if (Type.getClass(FlxG.state) != PlayState)
+		{
+			oldVol = FlxG.sound.volume;
+			if (oldVol > 0.3)
+			{
+				newVol = 0.3;
+			}
+			else
+			{
+				if (oldVol > 0.1)
+				{
+					newVol = 0.1;
+				}
+				else
+				{
+					newVol = 0;
+				}
+			}
+	
+			if (focusMusicTween != null)
+				focusMusicTween.cancel();
+			focusMusicTween = FlxTween.tween(FlxG.sound, {volume: newVol}, 2);
+		}
+	}
+
+	function onWindowFocusIn(){
+		new FlxTimer().start(0.2, function(tmr:FlxTimer)
+		{
+			focused = true;
+		});
+
+		if (Type.getClass(FlxG.state) != PlayState)
+		{
+			// Normal global volume when focused
+			if (focusMusicTween != null)
+				focusMusicTween.cancel();
+	
+			focusMusicTween = FlxTween.tween(FlxG.sound, {volume: oldVol}, 2);
 		}
 	}
 }

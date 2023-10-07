@@ -1,7 +1,13 @@
 package psychlua;
 
-class ModchartIcon extends objects.HealthIcon
+import objects.HealthIcon;
+
+class ModchartIcon extends HealthIcon
 {
-	public var wasAdded:Bool = false;
 	//public var isInFront:Bool = false;
+
+	public function new(character:String = 'bf', player:Bool = false)
+	{
+		super(character, player);
+	}
 }

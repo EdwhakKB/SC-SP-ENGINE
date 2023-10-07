@@ -1,4 +1,4 @@
-package;
+package unused;
 
 import flixel.graphics.frames.FlxAtlasFrames;
 
@@ -16,8 +16,10 @@ class GitarooPause extends MusicBeatState
 
 	override function create()
 	{
-		if (FlxG.sound.music != null)
+		if (FlxG.sound.music != null){
 			FlxG.sound.music.stop();
+			FlxG.sound.music.destroy();
+		}
 
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('pauseAlt/pauseBG'));
 		add(bg);
@@ -67,7 +69,7 @@ class GitarooPause extends MusicBeatState
 				PlayState.deathCounter = 0;
 				PlayState.cpuControlled = false;
 				MusicBeatState.switchState(new MainMenuState());
-				FlxG.sound.playMusic(Paths.music('freakyMenu'));
+				FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
 			}
 		}
 

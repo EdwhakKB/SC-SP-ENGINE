@@ -87,7 +87,7 @@ class Main extends Sprite {
 
 			t.currentLabel = t.getFrameLabels()[Std.random(t.getFrameLabels().length)];
 			spriteSymbols.push(t);
-			trace(spriteSymbols.length);
+			Debug.logTrace(spriteSymbols.length);
 		}
 	}
 
@@ -103,7 +103,7 @@ class Main extends Sprite {
 			t.currentLabel = t.getFrameLabels()[Std.random(t.getFrameLabels().length)];
 			tileSymbols.push(t);
 
-			trace(tileSymbols.length);
+			Debug.logTrace(tileSymbols.length);
 		}
 	}
 }

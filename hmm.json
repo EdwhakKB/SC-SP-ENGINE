@@ -3,62 +3,62 @@
     {
       "name": "lime",
       "type": "haxelib",
-      "version": "8.0.1"
+      "version": null
     },
     {
       "name": "openfl",
       "type": "haxelib",
-      "version": "9.2.2"
+      "version": null
     },
     {
       "name": "flixel",
       "type": "haxelib",
-      "version": "5.2.2"
+      "version": null
     },
     {
       "name": "flixel-addons",
       "type": "haxelib",
-      "version": "3.0.2"
+      "version": null
     },
     {
       "name": "flixel-tools",
       "type": "haxelib",
-      "version": "1.5.1"
+      "version": null
     },
     {
       "name": "flixel-ui",
       "type": "haxelib",
-      "version": "2.5.0"
+      "version": null
     },
     {
       "name": "hxcpp",
       "type": "haxelib",
-      "version": "4.3.2"
+      "version": null
     },
     {
       "name": "tjson",
       "type": "haxelib",
-      "version": "1.4.0"
+      "version": null
     },
     {
       "name": "hxjsonast",
       "type": "haxelib",
-      "version": "1.1.0"
+      "version": null
     },
     {
       "name": "hxCodec",
       "type": "haxelib",
-      "version": "3.0.0"
+      "version": null
     },
     {
       "name": "SScript",
       "type": "haxelib",
-      "version": "4.0.1"
+      "version": null
     },
     {
       "name": "hxcpp-debug-server",
       "type": "haxelib",
-      "version": "1.2.4"
+      "version": null
     },
     {
       "name": "discord_rpc",
@@ -73,32 +73,6 @@
       "dir": null,
       "ref": "master",
       "url": "https://github.com/superpowers04/linc_luajit"
-    },
-    { 
-      "name": "systools",
-      "type": "git",
-      "dir": null,
-      "ref": "master",
-      "url": "https://github.com/haya3218/systools"
-    },
-    { 
-      "name": "tentools",
-      "type": "git",
-      "dir": null,
-      "ref": "main",
-      "url": "https://github.com/TentaRJ/tentools"
-    },
-    { 
-      "name": "fnf-modcharting-tools",
-      "type": "git",
-      "dir": null,
-      "ref": "main",
-      "url": "https://github.com/TheZoroForce240/FNF-Modcharting-Tools"
-    },
-    {
-      "name": "hxp",
-      "type": "haxelib",
-      "version": "1.2.2"
     }
   ]
 }

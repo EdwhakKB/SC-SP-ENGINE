@@ -337,7 +337,7 @@ class DialogueEditorState extends MusicBeatState
 			}
 			if(FlxG.keys.justPressed.ESCAPE) {
 				MusicBeatState.switchState(new states.editors.MasterEditorMenu());
-				FlxG.sound.playMusic(Paths.music('freakyMenu'), 1);
+				FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"), 1);
 				transitioning = true;
 			}
 			var negaMult:Array<Int> = [1, -1];
@@ -459,7 +459,7 @@ class DialogueEditorState extends MusicBeatState
 				if(loadedDialog.dialogue != null && loadedDialog.dialogue.length > 0) //Make sure it's really a dialogue file
 				{
 					var cutName:String = _file.name.substr(0, _file.name.length - 5);
-					trace("Successfully loaded file: " + cutName);
+					Debug.logTrace("Successfully loaded file: " + cutName);
 					dialogueFile = loadedDialog;
 					changeText();
 					_file = null;
@@ -469,7 +469,7 @@ class DialogueEditorState extends MusicBeatState
 		}
 		_file = null;
 		#else
-		trace("File couldn't be loaded! You aren't on Desktop, are you?");
+		Debug.logTrace("File couldn't be loaded! You aren't on Desktop, are you?");
 		#end
 	}
 
@@ -482,7 +482,7 @@ class DialogueEditorState extends MusicBeatState
 		_file.removeEventListener(Event.CANCEL, onLoadCancel);
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
 		_file = null;
-		trace("Cancelled file loading.");
+		Debug.logTrace("Cancelled file loading.");
 	}
 
 	/**
@@ -494,7 +494,7 @@ class DialogueEditorState extends MusicBeatState
 		_file.removeEventListener(Event.CANCEL, onLoadCancel);
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
 		_file = null;
-		trace("Problem loading file");
+		Debug.logTrace("Problem loading file");
 	}
 
 	function saveDialogue() {

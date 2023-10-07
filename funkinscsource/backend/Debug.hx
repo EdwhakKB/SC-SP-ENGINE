@@ -274,7 +274,7 @@ class Debug
 	static function defineTrackerProfiles()
 	{
 		// Example: This will display all the properties that FlxSprite does, along with curCharacter and HealthBarColorArray.
-		FlxG.debugger.addTrackerProfile(new TrackerProfile(objects.Character, ["curCharacter", "isPlayer", "iconColor"], [FlxSprite]));
+		FlxG.debugger.addTrackerProfile(new TrackerProfile(objects.Character, ["curCharacter", "isPlayer", "iconColor", "healthColorArray"], [FlxSprite]));
 		FlxG.debugger.addTrackerProfile(new TrackerProfile(objects.HealthIcon, ["char", "isPlayer", "isOldIcon"], [FlxSprite]));
 		FlxG.debugger.addTrackerProfile(new TrackerProfile(backend.Song, [
 			"song",

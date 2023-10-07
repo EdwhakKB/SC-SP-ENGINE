@@ -22,21 +22,21 @@ class DiscordClient
 
 	public function new()
 	{
-		trace("Discord Client starting...");
+		Debug.logTrace("Discord Client starting...");
 		DiscordRpc.start({
 			clientID: clientID,
 			onReady: onReady,
 			onError: onError,
 			onDisconnected: onDisconnected
 		});
-		trace("Discord Client started.");
+		Debug.logTrace("Discord Client started.");
 
 		var localID:String = clientID;
 		while (localID == clientID)
 		{
 			DiscordRpc.process();
 			sleep(2);
-			//trace('Discord Client Update $localID');
+			//Debug.logTrace('Discord Client Update $localID');
 		}
 
 		//DiscordRpc.shutdown();
@@ -89,12 +89,12 @@ class DiscordClient
 
 	static function onError(_code:Int, _message:String)
 	{
-		trace('Error! $_code : $_message');
+		Debug.logTrace('Error! $_code : $_message');
 	}
 
 	static function onDisconnected(_code:Int, _message:String)
 	{
-		trace('Disconnected! $_code : $_message');
+		Debug.logTrace('Disconnected! $_code : $_message');
 	}
 
 	public static function initialize()
@@ -104,7 +104,7 @@ class DiscordClient
 		{
 			new DiscordClient();
 		});
-		trace("Discord Client initialized");
+		Debug.logTrace("Discord Client initialized");
 		isInitialized = true;
 	}
 
@@ -124,7 +124,7 @@ class DiscordClient
 		_options.endTimestamp = Std.int(endTimestamp / 1000);
 		DiscordRpc.presence(_options);
 
-		//trace('Discord RPC Updated. Arguments: $details, $state, $smallImageKey, $hasStartTimestamp, $endTimestamp');
+		//Debug.logTrace('Discord RPC Updated. Arguments: $details, $state, $smallImageKey, $hasStartTimestamp, $endTimestamp');
 	}
 	
 	public static function resetClientID()
@@ -137,18 +137,18 @@ class DiscordClient
 		if(pack != null && pack.discordRPC != null && pack.discordRPC != clientID)
 		{
 			clientID = pack.discordRPC;
-			//trace('Changing clientID! $clientID, $_defaultID');
+			//Debug.logTrace('Changing clientID! $clientID, $_defaultID');
 		}
 	}
 	#end
 
 	#if LUA_ALLOWED
-	public static function addLuaCallbacks(lua:State) {
-		Lua_helper.add_callback(lua, "changeDiscordPresence", function(details:String, state:Null<String>, ?smallImageKey:String, ?hasStartTimestamp:Bool, ?endTimestamp:Float) {
+	public static function addLuaCallbacks(funk:psychlua.FunkinLua) {
+		funk.set("changeDiscordPresence", function(details:String, state:Null<String>, ?smallImageKey:String, ?hasStartTimestamp:Bool, ?endTimestamp:Float) {
 			changePresence(details, state, smallImageKey, hasStartTimestamp, endTimestamp);
 		});
 
-		Lua_helper.add_callback(lua, "changeDiscordClientID", function(?newID:String = null) {
+		funk.set("changeDiscordClientID", function(?newID:String = null) {
 			if(newID == null) newID = _defaultID;
 			clientID = newID;
 		});

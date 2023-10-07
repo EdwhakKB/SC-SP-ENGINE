@@ -13,6 +13,9 @@ class HealthIcon extends FlxSprite
 	public var findAutoMaticSize:Bool = false;
 	public var needAutoSize:Bool = true;
 
+	public var animatedIcon:Bool = false;
+	public var hasWinningAnimated:Bool = false;
+
 	public function new(char:String = 'bf', isPlayer:Bool = false, ?allowGPU:Bool = true)
 	{
 		super();
@@ -34,46 +37,65 @@ class HealthIcon extends FlxSprite
 		var name:String = 'icons/' + char;
 		if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-' + char; //Older versions of psych engine's support
 		if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-face'; //Prevents crash from missing icon
-		var graphic = Paths.image(name, allowGPU);
 
-		if (graphic.width == 450 || graphic.width == 300) // now with winning icon support
-			needAutoSize = false;
+		if (animatedIcon)
+		{
+			frames = Paths.getSparrowAtlas(name, allowGPU);
 
-		if (graphic.width == 300 && graphic.height == 150)
-			alreadySized = true;
-		else
-			alreadySized = false;
-
-		findAutoMaticSize = (graphic.width > 450  || graphic.width < 450 || 300 < graphic.width);
-
-		if ((findAutoMaticSize && needAutoSize) || alreadySized){
-			loadGraphic(graphic, true, Math.floor(graphic.width / 2), Math.floor(graphic.height)); //Then load it fr
-			iconOffset[0] = (width - 150) / 2;
-			iconOffset[1] = (height - 150) / 2;
-			hasWinning = false;
+			if (this.animation.curAnim.name.contains('win'))
+				hasWinningAnimated = true;
+			else
+				hasWinningAnimated = false;
+			updateHitbox();
+	
+			animation.addByPrefix('neutral', 'neutral', 30, true);
+			animation.addByPrefix('losing', 'losing', 30, true);
+			if (hasWinningAnimated)
+				animation.addByPrefix('winning', 'winning', 30, true);
 		}
 		else{
-			loadGraphic(graphic, true, Math.floor(graphic.width / 3), Math.floor(graphic.height));
-			iconOffset[0] = (width - 150) / 3;
-			iconOffset[1] = (height - 150) / 3;
-			hasWinning = true;
-		}
-		offset.set(iconOffset[0], iconOffset[1]);
-		updateHitbox();
+			var graphic = Paths.image(name, allowGPU);
 
-		var animArray:Array<Int> = [];
-
-		if (hasWinning) // now with winning icon support
-		{
-			animArray = [0, 1, 2];
+			if (graphic.width == 450 || graphic.width == 300) // now with winning icon support
+				needAutoSize = false;
+	
+			if (graphic.width == 300 && graphic.height == 150)
+				alreadySized = true;
+			else
+				alreadySized = false;
+	
+			findAutoMaticSize = (graphic.width > 450  || graphic.width < 450 || 300 < graphic.width);
+	
+			if ((findAutoMaticSize && needAutoSize) || alreadySized){
+				loadGraphic(graphic, true, Math.floor(graphic.width / 2), Math.floor(graphic.height)); //Then load it fr
+				iconOffset[0] = (width - 150) / 2;
+				iconOffset[1] = (height - 150) / 2;
+				hasWinning = false;
+			}
+			else{
+				loadGraphic(graphic, true, Math.floor(graphic.width / 3), Math.floor(graphic.height));
+				iconOffset[0] = (width - 150) / 3;
+				iconOffset[1] = (height - 150) / 3;
+				hasWinning = true;
+			}
+			offset.set(iconOffset[0], iconOffset[1]);
+			updateHitbox();
+	
+			var animArray:Array<Int> = [];
+	
+			if (hasWinning) // now with winning icon support
+			{
+				animArray = [0, 1, 2];
+			}
+			else
+			{
+				animArray = [0, 1];
+			}
+	
+			animation.add(char, animArray, 0, false, isPlayer);
+			animation.play(char);
 		}
-		else if (!hasWinning)
-		{
-			animArray = [0, 1];
-		}
 
-		animation.add(char, animArray, 0, false, isPlayer);
-		animation.play(char);
 		this.char = char;
 
 		if(char.contains('pixel'))

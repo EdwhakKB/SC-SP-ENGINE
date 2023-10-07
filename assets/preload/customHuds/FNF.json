@@ -2,11 +2,12 @@
 	"CustomHudName": "FNF",
 
 	"HealthBarStyle": "healthBar",
+	"HealthBarStyleOverlay": "healthBarOverlay",
 	
-	"CountDownStyle": ["ready", "set", "go"],
+	"CountDownStyle": [null, "ready", "set", "go"],
 	"CountDownSounds": ["intro3", "intro2", "intro1", "introGo"],
 
-	"RatingStyle": ["", null],
+	"RatingStyle": ["", ""],
 
 	"GameOverStyle": "gameOver"
 }

@@ -31,8 +31,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		DiscordClient.changePresence(rpcTitle, null);
 		#end
 		
-		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
-		bg.color = 0xFFea71fd;
+		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('stageBackForStates'));
 		bg.screenCenter();
 		bg.antialiasing = ClientPrefs.data.antialiasing;
 		add(bg);
@@ -64,7 +63,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 
 		for (i in 0...optionsArray.length)
 		{
-			var optionText:Alphabet = new Alphabet(290, 260, optionsArray[i].name, false);
+			var optionText:Alphabet = new Alphabet(290, 260, optionsArray[i].name, optionsArray[i].type == 'link');
 			optionText.isMenuItem = true;
 			/*optionText.forceX = 300;
 			optionText.yMult = 90;*/
@@ -76,7 +75,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 				checkbox.sprTracker = optionText;
 				checkbox.ID = i;
 				checkboxGroup.add(checkbox);
-			} else {
+			} else if (optionsArray[i].type != 'link') {
 				optionText.x -= 80;
 				optionText.startPosition.x -= 80;
 				//optionText.xAdd -= 80;
@@ -93,6 +92,8 @@ class BaseOptionsMenu extends MusicBeatSubstate
 
 		changeSelection();
 		reloadCheckboxes();
+
+		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
 	}
 
 	public function addOption(option:Option) {
@@ -122,7 +123,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		if(nextAccept <= 0)
 		{
 			var usesCheckbox = true;
-			if(curOption.type != 'bool')
+			if(curOption.type != 'bool' && curOption.type != 'link')
 			{
 				usesCheckbox = false;
 			}
@@ -131,7 +132,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 			{
 				if(controls.ACCEPT)
 				{
-					FlxG.sound.play(Paths.sound('scrollMenu'));
+					FlxG.sound.play(Paths.sound((curOption.type == 'link' ? 'confirmMenu' : 'scrollMenu')));
 					curOption.setValue((curOption.getValue() == true) ? false : true);
 					curOption.change();
 					reloadCheckboxes();
@@ -177,7 +178,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 
 									curOption.curOption = num;
 									curOption.setValue(curOption.options[num]); //lol
-									//trace(curOption.options[num]);
+									//Debug.logTrace(curOption.options[num]);
 							}
 							updateTextFrom(curOption);
 							curOption.change();

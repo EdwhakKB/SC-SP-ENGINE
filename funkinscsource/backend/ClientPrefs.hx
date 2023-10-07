@@ -10,7 +10,7 @@ import states.TitleState;
 class SaveVariables {
 	public var downScroll:Bool = false;
 	public var middleScroll:Bool = false;
-	public var opponentStrums:Bool = true;
+	public var LightUpStrumsOP:Bool = true;
 	public var showFPS:Bool = true;
 	public var flashing:Bool = true;
 	public var autoPause:Bool = true;
@@ -71,11 +71,12 @@ class SaveVariables {
 		'instakill' => false,
 		'practice' => false,
 		'showcasemode' => false,
+		'sustainnotesactive' => true,
+		'modchart' => true,
 		'botplay' => false
 	];
 
 	public var comboOffset:Array<Int> = [0, 0, 0, 0];
-	public var ratingOffset:Int = 0;
 	public var swagWindow:Float = 22.5;
 	public var sickWindow:Float = 45;
 	public var goodWindow:Float = 90;
@@ -85,15 +86,19 @@ class SaveVariables {
 	public var discordRPC:Bool = true;
 
 	public var hudStyle:String = 'Psych';
+	public var quantNotes:Bool = false;
 
 	public var gjUser:String = "";
 	public var gjToken:String = "";
 	public var gjleaderboardToggle:Bool = false;
 
 	//New Stuff
+	public var useGL:Bool = true;
 	public var healthColor:Bool = true;
 	public var instantRespawn:Bool = false;
 	public var stillCombo:Bool = false;
+	public var colorBarType:String = 'No Colors';
+	public var mouseLook:String = 'FNF Cursor';
 	public var judgementCounter:Bool = false;
 	public var memoryDisplay:Bool = true;
 	public var cameraMovement:Bool = false;
@@ -103,14 +108,36 @@ class SaveVariables {
 	public var militaryTime:Bool = true;
 	public var monthAsInt:Bool = true;
 	public var dayAsInt:Bool = true;
+	public var dateDisplay:Bool = true;
 
 	//Custom hud stuff
 	public var customHudName:String = 'FNF';
 	public var healthBarStyle:String = 'healthBar';
 	public var countDownStyle:Array<String> = ["ready", "set", "go"];
 	public var countDownSounds:Array<String> = ["intro3", "intro2", "intro1", "introGo"];
-	public var ratingStyle:Array<Dynamic> = ["", null];
+	public var ratingStyle:Array<String> = ["", ""];
 	public var gameOverStyle:String = "gameOver";
+
+	public var gameCombo:Bool = false;
+
+	public var splashAlphaAsStrumAlpha:Bool = false;
+	public var showCombo:Bool = false;
+	public var showComboNum:Bool = true;
+	public var showRating:Bool = true;
+
+	public var popupScoreForOp:Bool = true;
+
+	public var resultsScreenType:String = 'NONE';
+
+	public var systemUserName:String = "";
+
+	public var language:String = 'en-US';
+
+	public var SCEWatermark:Bool = true;
+
+	public var breakTimer:Bool = false;
+
+	public var laneTransparency:Float = 0;
 
 	public function new()
 	{
@@ -146,7 +173,9 @@ class ClientPrefs {
 		
 		'debug_1'		=> [SEVEN],
 		'debug_2'		=> [EIGHT],
-		'debug_3'		=> [SIX]
+		'debug_3'		=> [SIX],
+
+		'space'		=> [SPACE]
 	];
 	public static var gamepadBinds:Map<String, Array<FlxGamepadInputID>> = [
 		'note_up'		=> [DPAD_UP, Y],
@@ -201,11 +230,10 @@ class ClientPrefs {
 
 	public static function saveSettings() {
 		for (key in Reflect.fields(data)) {
-			trace('saved variable: $key');
+			Debug.logTrace('saved variable: $key');
 			Reflect.setField(FlxG.save.data, key, Reflect.field(data, key));
 		}
-		FlxG.save.data.achievementsMap = Achievements.achievementsMap;
-		FlxG.save.data.henchmenDeath = Achievements.henchmenDeath;
+		#if ACHIEVEMENTS_ALLOWED Achievements.save(); #end
 		FlxG.save.flush();
 
 		//Placing this in a separate save so that it can be manually deleted without removing your Score and stuff
@@ -220,10 +248,11 @@ class ClientPrefs {
 	public static function loadPrefs() {
 		if(data == null) data = new SaveVariables();
 		if(defaultData == null) defaultData = new SaveVariables();
+		#if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
 
 		for (key in Reflect.fields(data)) {
 			if (key != 'gameplaySettings' && Reflect.hasField(FlxG.save.data, key)) {
-				trace('loaded variable: $key');
+				Debug.logTrace('loaded variable: $key');
 				Reflect.setField(data, key, Reflect.field(FlxG.save.data, key));
 			}
 		}
@@ -301,5 +330,15 @@ class ClientPrefs {
 			FlxG.sound.volumeDownKeys = [];
 			FlxG.sound.volumeUpKeys = [];
 		}
+	}
+	public static function getkeys(keyname:String, separator:String = ' | ') // for lazyness
+	{
+		var keys:Array<String> = [];
+		for (i in 0...2)
+		{
+			var randomKey:String = InputFormatter.getKeyName(keyBinds.get(keyname)[i]);
+			keys[i] = randomKey;
+		}
+		return keys[0] == '---' ? keys[1] : keys[1] == '---' ? keys[0] : keys[0] + separator + keys[1];
 	}
 }

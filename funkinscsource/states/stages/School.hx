@@ -12,7 +12,14 @@ import openfl.utils.Assets as OpenFlAssets;
 
 class School extends BaseStage
 {
+	var bgSky:BGSprite;
+	var bgSchool:BGSprite;
+	var bgStreet:BGSprite;
+	var fgTrees:BGSprite;
+	var bgTrees:FlxSprite;
+	var treeLeaves:BGSprite;
 	var bgGirls:BackgroundGirls;
+
 	override function create()
 	{
 		var _song = PlayState.SONG;
@@ -21,30 +28,29 @@ class School extends BaseStage
 		if(_song.gameOverEnd == null || _song.gameOverEnd.trim().length < 1) GameOverSubstate.endSoundName = 'gameOverEnd-pixel';
 		if(_song.gameOverChar == null || _song.gameOverChar.trim().length < 1) GameOverSubstate.characterName = 'bf-pixel-dead';
 
-		var bgSky:BGSprite = new BGSprite('weeb/weebSky', 0, 0, 0.1, 0.1);
+		bgSky = new BGSprite('weeb/weebSky', 0, 0, 0.1, 0.1);
 		add(bgSky);
 		bgSky.antialiasing = false;
 
 		var repositionShit = -200;
 
-		var bgSchool:BGSprite = new BGSprite('weeb/weebSchool', repositionShit, 0, 0.6, 0.90);
+		bgSchool = new BGSprite('weeb/weebSchool', repositionShit, 0, 0.6, 0.90);
 		add(bgSchool);
 		bgSchool.antialiasing = false;
 
-		var bgStreet:BGSprite = new BGSprite('weeb/weebStreet', repositionShit, 0, 0.95, 0.95);
+		bgStreet = new BGSprite('weeb/weebStreet', repositionShit, 0, 0.95, 0.95);
 		add(bgStreet);
 		bgStreet.antialiasing = false;
 
 		var widShit = Std.int(bgSky.width * PlayState.daPixelZoom);
-		if(!ClientPrefs.data.lowQuality) {
-			var fgTrees:BGSprite = new BGSprite('weeb/weebTreesBack', repositionShit + 170, 130, 0.9, 0.9);
-			fgTrees.setGraphicSize(Std.int(widShit * 0.8));
-			fgTrees.updateHitbox();
-			add(fgTrees);
-			fgTrees.antialiasing = false;
-		}
+		fgTrees = new BGSprite('weeb/weebTreesBack', repositionShit + 170, 130, 0.9, 0.9);
+		fgTrees.setGraphicSize(Std.int(widShit * 0.8));
+		fgTrees.updateHitbox();
+		add(fgTrees);
+		fgTrees.antialiasing = false;
+		fgTrees.visible = !ClientPrefs.data.lowQuality;
 
-		var bgTrees:FlxSprite = new FlxSprite(repositionShit - 380, -800);
+		bgTrees = new FlxSprite(repositionShit - 380, -800);
 		bgTrees.frames = Paths.getPackerAtlas('weeb/weebTrees');
 		bgTrees.animation.add('treeLoop', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18], 12);
 		bgTrees.animation.play('treeLoop');
@@ -52,13 +58,12 @@ class School extends BaseStage
 		add(bgTrees);
 		bgTrees.antialiasing = false;
 
-		if(!ClientPrefs.data.lowQuality) {
-			var treeLeaves:BGSprite = new BGSprite('weeb/petals', repositionShit, -40, 0.85, 0.85, ['PETALS ALL'], true);
-			treeLeaves.setGraphicSize(widShit);
-			treeLeaves.updateHitbox();
-			add(treeLeaves);
-			treeLeaves.antialiasing = false;
-		}
+		treeLeaves = new BGSprite('weeb/petals', repositionShit, -40, 0.85, 0.85, ['PETALS ALL'], true);
+		treeLeaves.setGraphicSize(widShit);
+		treeLeaves.updateHitbox();
+		add(treeLeaves);
+		treeLeaves.antialiasing = false;
+		treeLeaves.visible = !ClientPrefs.data.lowQuality;
 
 		bgSky.setGraphicSize(widShit);
 		bgSchool.setGraphicSize(widShit);
@@ -70,12 +75,15 @@ class School extends BaseStage
 		bgStreet.updateHitbox();
 		bgTrees.updateHitbox();
 
-		if(!ClientPrefs.data.lowQuality) {
-			bgGirls = new BackgroundGirls(-100, 190);
-			bgGirls.scrollFactor.set(0.9, 0.9);
-			add(bgGirls);
-		}
+		bgGirls = new BackgroundGirls(-100, 190);
+		bgGirls.scrollFactor.set(0.9, 0.9);
+		bgGirls.visible = !ClientPrefs.data.lowQuality;
+		add(bgGirls);
+		
 		setDefaultGF('gf-pixel');
+
+		if (songName.contains('roses'))
+			if(bgGirls != null) bgGirls.swapDanceType();
 
 		switch (songName)
 		{
@@ -98,6 +106,33 @@ class School extends BaseStage
 		if(bgGirls != null) bgGirls.dance();
 	}
 
+	override function stepHit()
+	{
+		if (songName.contains('roses') && !PlayState.isStoryMode)
+		{
+			if (curStep == 671)
+				FlxTween.tween(game, {defaultCamZoom: defaultCamZoom + 1.2}, 4.58, {ease: FlxEase.quadIn});
+			if (curStep == 704)
+			{
+				FlxTween.tween(game.dad, {alpha: 0}, 0.2, {ease: FlxEase.quadIn});
+				if (game.gf != null)
+					FlxTween.tween(game.gf, {alpha: 0}, 0.2, {ease: FlxEase.quadIn});
+				FlxTween.tween(bgSky, {alpha: 0}, 0.2, {ease: FlxEase.quadIn});
+				FlxTween.tween(bgSchool, {alpha: 0}, 0.2, {ease: FlxEase.quadIn});
+				FlxTween.tween(bgStreet, {alpha: 0}, 0.2, {ease: FlxEase.quadIn});
+				FlxTween.tween(bgTrees, {alpha: 0}, 0.2, {ease: FlxEase.quadIn});
+				FlxTween.tween(fgTrees, {alpha: 0}, 0.2, {ease: FlxEase.quadIn});
+				FlxTween.tween(treeLeaves, {alpha: 0}, 0.2, {ease: FlxEase.quadIn});
+				if (bgGirls != null)
+					FlxTween.tween(bgGirls, {alpha: 0}, 0.2, {ease: FlxEase.quadIn});
+			}
+			if (curStep == 705)
+				FlxG.camera.flash(FlxColor.WHITE, 1);
+			if (curStep == 709)
+				game.defaultCamZoom = 1.05;
+		}
+	}
+
 	// For events
 	override function eventCalled(eventName:String, value1:String, value2:String, flValue1:Null<Float>, flValue2:Null<Float>, strumTime:Float)
 	{
@@ -111,13 +146,17 @@ class School extends BaseStage
 	var doof:DialogueBox = null;
 	function initDoof()
 	{
-		var file:String = Paths.txt(songName + '/' + songName + 'Dialogue'); //Checks for vanilla/Senpai dialogue
+		var file:String = Paths.txt('songs/' + songName + '/' + songName + 'Dialogue'); //Checks for vanilla/Senpai dialogue
 		#if MODS_ALLOWED
 		if (!FileSystem.exists(file))
 		#else
 		if (!OpenFlAssets.exists(file))
 		#end
 		{
+			if (FlxG.sound.music != null){
+				FlxG.sound.music.stop();
+				FlxG.sound.music.destroy();
+			}
 			startCountdown();
 			return;
 		}
@@ -147,8 +186,13 @@ class School extends BaseStage
 			{
 				if (doof != null)
 					add(doof);
-				else
+				else{
+					if (FlxG.sound.music != null){
+						FlxG.sound.music.stop();
+						FlxG.sound.music.destroy();
+					}
 					startCountdown();
+				}
 
 				remove(black);
 				black.destroy();

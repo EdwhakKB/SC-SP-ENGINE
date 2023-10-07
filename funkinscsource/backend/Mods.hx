@@ -18,7 +18,7 @@ class Mods
 {
 	static public var currentModDirectory:String = '';
 	public static var ignoreModFolders:Array<String> = [
-		'characters',
+		'data/characters',
 		'custom_events',
 		'custom_notetypes',
 		'data',
@@ -26,6 +26,7 @@ class Mods
 		'music',
 		'sounds',
 		'shaders',
+		'locale',
 		'videos',
 		'images',
 		'stages',
@@ -143,7 +144,7 @@ class Mods
 				#end
 				if(rawJson != null && rawJson.length > 0) return Json.parse(rawJson);
 			} catch(e:Dynamic) {
-				trace(e);
+				Debug.logTrace(e);
 			}
 		}
 		#end
@@ -159,7 +160,7 @@ class Mods
 		try {
 			for (mod in CoolUtil.coolTextFile('modsList.txt'))
 			{
-				//trace('Mod: $mod');
+				//Debug.logTrace('Mod: $mod');
 				if(mod.trim().length < 1) continue;
 
 				var dat = mod.split("|");
@@ -170,7 +171,7 @@ class Mods
 					list.disabled.push(dat[0]);
 			}
 		} catch(e) {
-			trace(e);
+			Debug.logTrace(e);
 		}
 		#end
 		return list;
@@ -194,7 +195,7 @@ class Mods
 				}
 			}
 		} catch(e) {
-			trace(e);
+			Debug.logTrace(e);
 		}
 		
 		// Scan for folders that aren't on modsList.txt yet
@@ -219,7 +220,7 @@ class Mods
 
 		File.saveContent('modsList.txt', fileStr);
 		updatedOnState = true;
-		//trace('Saved modsList.txt');
+		//Debug.logTrace('Saved modsList.txt');
 		#end
 	}
 

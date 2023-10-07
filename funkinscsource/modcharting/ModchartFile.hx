@@ -1,10 +1,13 @@
 package modcharting;
+//Diff files by glowsoony and edwhak
+//Main idea coder for hitmans diffs me -edwhak
+//Main idea coder for SCE diffs me -glowsoony
 
 import flixel.math.FlxMath;
 import haxe.Exception;
 import haxe.Json;
 import haxe.format.JsonParser;
-import lime.utils.Assets;
+import lime.utils.Assets as OpenFLAssets;
 #if LEATHER
 import states.PlayState;
 import game.Note;
@@ -57,10 +60,11 @@ class ModchartFile
     private var renderer:PlayfieldRenderer;
     public var scriptListen:Bool = false;
     public var customModifiers:Map<String, CustomModifierScript> = new Map<String, CustomModifierScript>();
+    public var hasDifficultyModchart:Bool = false;
     public function new(renderer:PlayfieldRenderer)
     {
 
-        data = loadFromJson(PlayState.SONG.songId.toLowerCase());
+        data = loadFromJson(PlayState.SONG.songId.toLowerCase(), Difficulty.getString() != null ? Difficulty.getString() : Difficulty.defaultList[PlayState.storyDifficulty]);
         this.renderer = renderer;
         renderer.modchart = this;
         loadPlayfields();
@@ -68,57 +72,217 @@ class ModchartFile
         loadEvents();
     }
 
-    public function loadFromJson(folder:String):ModchartJson //load da shit
+    public function loadFromJson(folder:String, difficulty:String):ModchartJson //load da shit
     {
         var rawJson = null;
+        var filePath = null;
+
         var folderShit:String = "";
-        #if sys
-        #if PSYCH
-		var moddyFile:String = Paths.modsJson(Paths.formatToSongPath(folder) + '/modchart');
-		if(FileSystem.exists(moddyFile)) {
-			rawJson = File.getContent(moddyFile).trim();
-            folderShit = moddyFile.replace("modchart.json", "customMods/");
-		}
-		#end
+
+        var moddyFile:String = Paths.json('songs/' + Paths.formatToSongPath(folder) + '/modchart-' + difficulty.toLowerCase());
+        var moddyFile2:String = Paths.json('songs/' + Paths.formatToSongPath(folder) + '/modchart');
+
+        #if MODS_ALLOWED
+        var moddyFileMods:String = Paths.modsJson('songs/' + Paths.formatToSongPath(folder) + '/modchart-' + difficulty.toLowerCase());
+        var moddyFileMods2:String = Paths.modsJson('songs/' + Paths.formatToSongPath(folder) + '/modchart');
         #end
+
+        #if PSYCH
+        try 
+        {
+
+            #if sys
+            #if MODS_ALLOWED
+            if(FileSystem.exists(moddyFileMods) && difficulty.toLowerCase() != null) 
+                hasDifficultyModchart = true;
+                if (FileSystem.exists(moddyFileMods2) && !FileSystem.exists(moddyFileMods))
+                    hasDifficultyModchart = false;
+            else if(FileSystem.exists(moddyFileMods2) && difficulty.toLowerCase() == null && !FileSystem.exists(moddyFileMods)) hasDifficultyModchart = false;
+            #end
+
+            if(FileSystem.exists(moddyFile) && difficulty.toLowerCase() != null) 
+                hasDifficultyModchart = true;
+                if (FileSystem.exists(moddyFile) && !FileSystem.exists(moddyFile))
+                    hasDifficultyModchart = false;
+            else if(FileSystem.exists(moddyFile2) && difficulty.toLowerCase() == null && !FileSystem.exists(moddyFile)) hasDifficultyModchart = false;
+
+            #if MODS_ALLOWED
+            if (hasDifficultyModchart)
+            {
+                rawJson = File.getContent(moddyFileMods).trim();
+                folderShit = moddyFileMods.replace("modchart-" + difficulty.toLowerCase() + ".json", "customMods/");
+
+                Debug.logInfo('${difficulty} Mochart Found In Mods! loading modchart-${difficulty.toLowerCase()}.json');
+            }
+            else
+            {
+                rawJson = File.getContent(moddyFileMods2).trim();
+                folderShit = moddyFileMods2.replace("modchart.json", "customMods/");
+
+                Debug.logInfo('${difficulty} Mochart Has Not Been Found In Mods! loading modchart.json');
+            }
+            #end
+
+            if (hasDifficultyModchart)
+            {
+                rawJson = File.getContent(moddyFile).trim();
+                folderShit = moddyFile.replace("modchart-" + difficulty.toLowerCase() + ".json", "customMods/");
+
+                Debug.logInfo('${difficulty} Mochart Found! loading modchart-${difficulty.toLowerCase()}.json');
+            }
+            else
+            {
+                rawJson = File.getContent(moddyFile2).trim();
+                folderShit = moddyFile2.replace("modchart.json", "customMods/");
+
+                Debug.logInfo('${difficulty} Mochart Has Not Been Found! loading modchart.json');
+            }
+            #else
+            #if MODS_ALLOWED
+            if(OpenFLAssets.exists(moddyFileMods) && difficulty.toLowerCase() != null) 
+                hasDifficultyModchart = true;
+                if (OpenFLAssets.exists(moddyFileMods2) && !OpenFLAssets.exists(moddyFileMods))
+                    hasDifficultyModchart = false;
+            else if(OpenFLAssets.exists(moddyFileMods2) && difficulty.toLowerCase() == null && !OpenFLAssets.exists(moddyFileMods)) hasDifficultyModchart = false;
+            #end
+
+            if(OpenFLAssets.exists(moddyFile) && difficulty.toLowerCase() != null) 
+                hasDifficultyModchart = true;
+                if (OpenFLAssets.exists(moddyFile) && !OpenFLAssets.exists(moddyFile))
+                    hasDifficultyModchart = false;
+            else if(OpenFLAssets.exists(moddyFile2) && difficulty.toLowerCase() == null && !OpenFLAssets.exists(moddyFile)) hasDifficultyModchart = false;
+
+            #if MODS_ALLOWED
+            if (hasDifficultyModchart)
+            {
+                rawJson = File.getContent(moddyFileMods).trim();
+                folderShit = moddyFileMods.replace("modchart-" + difficulty.toLowerCase() + ".json", "customMods/");
+
+                Debug.logInfo('${difficulty} Mochart Found In Mods! loading modchart-${difficulty.toLowerCase()}.json');
+            }
+            else
+            {
+                rawJson = File.getContent(moddyFileMods2).trim();
+                folderShit = moddyFileMods2.replace("modchart.json", "customMods/");
+
+                Debug.logInfo('${difficulty} Mochart Has Not Been Found In Mods! loading modchart.json');
+            }
+            #end
+
+            if (hasDifficultyModchart)
+            {
+                rawJson = File.getContent(moddyFile).trim();
+                folderShit = moddyFile.replace("modchart-" + difficulty.toLowerCase() + ".json", "customMods/");
+
+                Debug.logInfo('${difficulty} Mochart Found! loading modchart-${difficulty.toLowerCase()}.json');
+            }
+            else
+            {
+                rawJson = File.getContent(moddyFile2).trim();
+                folderShit = moddyFile2.replace("modchart.json", "customMods/");
+
+                Debug.logInfo('${difficulty} Mochart Has Not Been Found! loading modchart.json');
+            }
+            #end
+        }
+        catch(e:Dynamic)
+        {
+            Debug.logInfo(e);
+        }
+        #end
+        
         if (rawJson == null)
         {
-            #if LEATHER
-            var filePath = Paths.json("song data/" + folder + '/modchart');
-            folderShit = PolymodAssets.getPath(filePath.replace("modchart.json", "customMods/"));
-            #else 
-            var filePath = Paths.json(folder + '/modchart');
-            folderShit = filePath.replace("modchart.json", "customMods/");
-            #end
+            try
+            {
+                #if MODS_ALLOWED
+                if (hasDifficultyModchart)
+                {
+
+                    #if LEATHER
+                        filePath = Paths.modsJson("song data/" + folder + '/modchart-' + difficulty.toLowerCase());
+                        folderShit = PolymodAssets.getPath(filePath.replace("modchart-" + difficulty.toLowerCase() + ".json", "customMods/"));
+                    #else 
+                        filePath = Paths.modsJson('songs/' + folder + '/modchart-' + difficulty.toLowerCase());
+                        folderShit = filePath.replace("modchart-" + difficulty.toLowerCase() + ".json", "customMods/");
+                    #end
+
+                    Debug.logInfo('${difficulty} Mochart FolderShit Found In Mods! loading modchart-${difficulty.toLowerCase()}.json');
+                }
+                else
+                { 
+                    #if LEATHER
+                        filePath = Paths.modsJson("song data/" + folder + '/modchart');
+                        folderShit = PolymodAssets.getPath(filePath.replace("modchart.json", "customMods/"));
+                    #else 
+                        filePath = Paths.modsJson('songs/' + folder + '/modchart');
+                        folderShit = filePath.replace("modchart.json", "customMods/");
+                    #end
+
+                    Debug.logInfo('${difficulty} Mochart Has No FolderShit Found In Mods! loading modchart.json');
+                }
+                #end
+
+
+                if (hasDifficultyModchart)
+                {
+                    #if LEATHER
+                        filePath = Paths.json("song data/" + folder + '/modchart-' + difficulty.toLowerCase());
+                        folderShit = PolymodAssets.getPath(filePath.replace("modchart-" + difficulty.toLowerCase() + ".json", "customMods/"));
+                    #else 
+                        filePath = Paths.json('songs/' + folder + '/modchart-' + difficulty.toLowerCase());
+                        folderShit = filePath.replace("modchart-" + difficulty.toLowerCase() + ".json", "customMods/");
+                    #end
+
+                    Debug.logInfo('${difficulty} Mochart FolderShit Found! loading modchart-${difficulty.toLowerCase()}.json');
+                }
+                else
+                {
+                    #if LEATHER
+                        filePath = Paths.json("song data/" + folder + '/modchart');
+                        folderShit = PolymodAssets.getPath(filePath.replace("modchart.json", "customMods/"));
+                    #else 
+                        filePath = Paths.json('songs/' + folder + '/modchart');
+                        folderShit = filePath.replace("modchart.json", "customMods/");
+                    #end
+
+                    Debug.logInfo('${difficulty} Mochart Has No FolderShit Found! loading modchart.json');
+                }
+            }
+            catch(e:Dynamic)
+            {
+                Debug.logInfo(e);
+            }
             
-            Debug.logTrace(filePath);
+            Debug.logInfo(filePath);
             #if sys
             if(FileSystem.exists(filePath))
                 rawJson = File.getContent(filePath).trim();
             else #end //should become else if i think???
-                if (Assets.exists(filePath))
-                    rawJson = Assets.getText(filePath).trim();
+                if (OpenFLAssets.exists(filePath))
+                    rawJson = OpenFLAssets.getText(filePath).trim();
                 
         }
         var json:ModchartJson = null;
         if (rawJson != null)
         {
-            json = cast Json.parse(rawJson);
-            Debug.logTrace('loaded json');
-            Debug.logTrace(folderShit);
+            for (i in 0...difficulty.length)
+                json = cast Json.parse(rawJson);
+            Debug.logInfo('loaded json');
+            Debug.logInfo(folderShit);
             #if sys
             if (FileSystem.isDirectory(folderShit))
             {
-                Debug.logTrace("folder le exists");
+                Debug.logInfo("folder le exists");
                 for (file in FileSystem.readDirectory(folderShit))
                 {
-                    Debug.logTrace(file);
+                    Debug.logInfo(file);
                     if(file.endsWith('.hx')) //custom mods!!!!
                     {
                         var scriptStr = File.getContent(folderShit + file);
                         var script = new CustomModifierScript(scriptStr);
                         customModifiers.set(file.replace(".hx", ""), script);
-                        Debug.logTrace('loaded custom mod: ' + file);
+                        Debug.logInfo('loaded custom mod: ' + file);
                     }
                 }
             }

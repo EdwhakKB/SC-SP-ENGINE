@@ -39,7 +39,7 @@ using StringTools;
  * and on Lore engine FuckinHX/Yoshi engine's HxScript support 
  * @see https://github.com/sayofthelor/lore-engine/blob/main/source/lore/FunkinHX.hx
  */
-class ScriptHandler #if HAXE_EXTENSION extends tea.SScript implements IFlxDestroyable #end
+class ScriptHandler #if HAXE_EXTENSION extends tea.SScript #end
 {
 	var ignoreErrors:Bool = false;
 	var hxFileName:String = '';
@@ -100,7 +100,7 @@ class ScriptHandler #if HAXE_EXTENSION extends tea.SScript implements IFlxDestro
 		set('FlxGraphic', FlxGraphic);
 		set('File', File);
 		set('FlxTrail', FlxTrail);
-		//set('FlxShader', FlxFixedShader);
+		set('FlxShader', FlxFixedShader);
 		set('FlxBar', FlxBar);
 		set('FlxBackdrop', FlxBackdrop);
 		set('StageSizeScaleMode', StageSizeScaleMode);
@@ -113,7 +113,7 @@ class ScriptHandler #if HAXE_EXTENSION extends tea.SScript implements IFlxDestro
 		set('ShaderFilter', ShaderFilter);
 
 		//set('CustomMouse', CustomMouse);
-		//set('WindowsData', windowData.WindowsData);
+		set('WindowsData', WindowsData);
 		//set('OverlaySprite', OverlaySprite);
 		set('InputFormatter', backend.InputFormatter);
 		//set('Cache', Cache);
@@ -137,7 +137,7 @@ class ScriptHandler #if HAXE_EXTENSION extends tea.SScript implements IFlxDestro
 		set('Main', Main);
 		set('Note', objects.Note);
 		set('NoteSplash', objects.NoteSplash);
-		set('StrumNote', objects.StrumNote);
+		set('StrumArrow', objects.StrumArrow);
 		set('Paths', backend.Paths);
 		set('FunkinLua', psychlua.FunkinLua);
 		set('Achievements', backend.Achievements);
@@ -184,21 +184,7 @@ class ScriptHandler #if HAXE_EXTENSION extends tea.SScript implements IFlxDestro
 			call("postStateSwitch", []);
 		});
 
-		#if windows
-		set('buildTarget', 'windows');
-		#elseif linux
-		set('buildTarget', 'linux');
-		#elseif mac
-		set('buildTarget', 'mac');
-		#elseif html5
-		set('buildTarget', 'browser');
-		#elseif android
-		set('buildTarget', 'android');
-		#elseif switch
-		set('buildTarget', 'switch');
-		#else
-		set('buildTarget', 'unknown');
-		#end
+		set('buildTarget', FunkinLua.getBuildTarget());
 
 		set('sys', #if sys true #else false #end);
 
@@ -231,18 +217,13 @@ class ScriptHandler #if HAXE_EXTENSION extends tea.SScript implements IFlxDestro
 	}
 
 	#if HAXE_EXTENSION
-	#if (SScript >= "3.0.3")
-	override public function destroy()
+	override public function kill()
 	{
 		interp = null;
 		scriptFile = null;
+
+		super.kill();
 	}
-	#else
-	public function destroy()
-	{
-		active = false;
-	}
-	#end
 
 	public function varExists(key:String):Bool
 	{

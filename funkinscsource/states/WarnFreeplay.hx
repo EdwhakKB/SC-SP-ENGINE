@@ -20,8 +20,9 @@ class WarnFreeplay extends backend.MusicBeatState
 	{
 		super.create();
 
-		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
+		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('stageBackForStates'));
 		bg.setGraphicSize(FlxG.width, FlxG.height);
+		bg.color = FlxG.random.color();
 		add(bg);
 
 		warnText = new FlxText(0, 0, FlxG.width,

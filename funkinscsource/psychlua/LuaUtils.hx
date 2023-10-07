@@ -6,7 +6,7 @@ import objects.Character;
 import openfl.display.BlendMode;
 import animateatlas.AtlasFrameMaker;
 import Type.ValueType;
-import shaders.Shaders.ShaderEffect as ShaderEffect;
+import shaders.Shaders.ShaderEffectNew as ShaderEffectNew;
 import shaders.Shaders;
 
 import substates.GameOverSubstate;
@@ -64,7 +64,7 @@ class LuaUtils
 
 		if(allowMaps && isMap(instance))
 		{
-			//trace(instance);
+			//Debug.logTrace(instance);
 			instance.set(variable, value);
 			return value;
 		}
@@ -102,7 +102,7 @@ class LuaUtils
 		
 		if(allowMaps && isMap(instance))
 		{
-			//trace(instance);
+			//Debug.logTrace(instance);
 			return instance.get(variable);
 		}
 
@@ -124,7 +124,7 @@ class LuaUtils
 				return false;
 		}*/
 
-		//trace(variable);
+		//Debug.logTrace(variable);
 		if(variable.exists != null && variable.keyValueIterator != null) return true;
 		return false;
 	}
@@ -399,7 +399,7 @@ class LuaUtils
 			case 'sineout': return FlxEase.sineOut;
 			case 'smoothstepin': return FlxEase.smoothStepIn;
 			case 'smoothstepinout': return FlxEase.smoothStepInOut;
-			case 'smoothstepout': return FlxEase.smoothStepInOut;
+			case 'smoothstepout': return FlxEase.smoothStepOut;
 			case 'smootherstepin': return FlxEase.smootherStepIn;
 			case 'smootherstepinout': return FlxEase.smootherStepInOut;
 			case 'smootherstepout': return FlxEase.smootherStepOut;
@@ -426,33 +426,6 @@ class LuaUtils
 		}
 		return NORMAL;
 	}
-
-	public static function getEffectFromString(?effect:String = '', ?val1:Dynamic, ?val2:Dynamic, ?val3:Dynamic , ?val4:Dynamic = ""):ShaderEffect {
-		switch(effect.toLowerCase().trim()) {
-			case 'grayscale' | 'greyscale' : return new GreyscaleEffect();
-			case 'oldtv' : return new OldTVEffect();
-			case 'invert' | 'invertcolor': return new InvertColorsEffect();
-			case 'tiltshift': return new TiltshiftEffect(val1,val2);
-			case 'grain': return new GrainEffect(val1,val2,val3);
-			case 'scanline': return new ScanlineEffectOld(val1);
-			case 'outline': return new OutlineEffect(val1, val2, val3, val4);
-			case 'distortion': return new DistortBGEffect(val1, val2, val3);
-			case 'vcr': return new VCRDistortionEffect(val1,val2,val3,val4);
-			case 'glitch': return new GlitchEffect(val1, val2, val3);
-			case 'vcr2': return new VCRDistortionEffect2(); //the tails doll one
-			case '3d': return new ThreeDEffect(val1, val2, val3, val4);
-			case 'bloom': return new BloomEffect(val1/512.0,val2);
-			case 'rgbshiftglitch' | 'rgbshift': return new RGBShiftGlitchEffect(val1, val2);
-			case 'pulse': return new PulseEffect(val1,val2,val3);
-			case 'chromaticabberation' | 'ca': return new ChromaticAberrationEffect(val1);
-			case 'sketch': return new SketchEffect();
-			case 'desaturation': return new DesaturationEffect(val1);
-			case 'fisheye': return new FishEyeEffect(val1);
-			case 'channelmask': new ChannelMaskEffect(val1, val2, val3);
-			case 'colormask': new ColorMaskEffect(val1, val2);
-		}
-		return new GreyscaleEffect();
-	}
 	
 	public static function typeToString(type:Int):String {
 		#if LUA_ALLOWED
@@ -475,8 +448,12 @@ class LuaUtils
 		{
 			switch(cam.toLowerCase()) {
 				case 'camgame' | 'game': return PlayState.instance.camGame;
+				case 'camhud2' | 'hud2': return PlayState.instance.camHUD2;
 				case 'camhud' | 'hud': return PlayState.instance.camHUD;
 				case 'camother' | 'other': return PlayState.instance.camOther;
+				case 'camnotestuff' | 'notestuff': return PlayState.instance.camNoteStuff;
+				case 'camstuff' | 'stuff': return PlayState.instance.camStuff;
+				case 'maincam' | 'main': return PlayState.instance.mainCam;
 			}
 			
 			//modded cameras
@@ -487,7 +464,187 @@ class LuaUtils
 		}
 		return camera.cam;
 	}
+
+	public static function makeLuaCharacter(tag:String, character:String, isPlayer:Bool = false, flipped:Bool = false)
+	{
+		tag = tag.replace('.', '');
+
+		var animationName:String = "no way anyone have an anim name this big";
+		var animationFrame:Int = 0;	
+		var position:Int = -1;
+							
+		if (PlayState.instance.modchartCharacters.get(tag) != null)
+		{
+			var daChar:Character = PlayState.instance.modchartCharacters.get(tag);
+			animationName = daChar.animation.curAnim.name;
+			animationFrame = daChar.animation.curAnim.curFrame;
+			position = getTargetInstance().members.indexOf(daChar);
+		}
+		
+		resetCharacterTag(tag);
+		var leSprite:Character = new Character(0, 0, character, isPlayer);
+		leSprite.flipMode = flipped;
+		PlayState.instance.modchartCharacters.set(tag, leSprite); //yes
+		var shit:Character = PlayState.instance.modchartCharacters.get(tag);
+		getTargetInstance().add(shit);
+
+		if (position >= 0) //this should keep them in the same spot if they switch
+		{
+			getTargetInstance().remove(shit, true);
+			getTargetInstance().insert(position, shit);
+		}
+
+		if (flipped)
+			shit.flipMode = true;
+
+		if (!isPlayer)
+		{
+			var charX:Float = shit.positionArray[0];
+			var charY:Float = shit.positionArray[1];
 	
+			shit.x = PlayState.instance.DAD_X + charX + 100;
+			shit.y = PlayState.instance.DAD_Y + charY + 100;
+		}
+		else
+		{
+			var charX:Float = shit.positionArray[0];
+			var charY:Float = shit.positionArray[1] - 350;
+	
+			shit.x = PlayState.instance.BF_X + charX + 770;
+			shit.y = PlayState.instance.BF_Y + charY + 450;
+		}
+
+		if (shit.animOffsets.exists(animationName))
+			shit.playAnim(animationName, true, false, animationFrame);
+
+		PlayState.instance.startCharacterScripts(shit.curCharacter);
+	}
+
+	//Kade why tf is it not like in PlayState???
+	//Blantados Code!
+
+	public static function changeGFCharacter(id:String, x:Float, y:Float)
+	{		
+		changeGFAuto(id);
+		PlayState.instance.gf.x = x;
+		PlayState.instance.gf.y = y;
+	}
+
+	public static function changeDadCharacter(id:String, x:Float, y:Float)
+	{		
+		changeDadAuto(id, false, false);
+		PlayState.instance.dad.x = x;
+		PlayState.instance.dad.y = y;
+	}
+
+	public static function changeBoyfriendCharacter(id:String, x:Float, y:Float)
+	{	
+		changeBFAuto(id, false, false);
+		PlayState.instance.boyfriend.x = x;
+		PlayState.instance.boyfriend.y = y;
+	}
+
+	// this is better. easier to port shit from playstate.
+	public static function changeGFCharacterBetter(x:Float, y:Float, id:String)
+	{		
+		changeGFCharacter(id, x, y);
+	}
+
+	public static function changeDadCharacterBetter(x:Float, y:Float, id:String)
+	{		
+		changeDadCharacter(id, x, y);
+	}
+
+	public static function changeBoyfriendCharacterBetter(x:Float, y:Float, id:String)
+	{							
+		changeBoyfriendCharacter(id, x, y);
+	}
+
+	//trying to do some auto stuff so i don't have to set manual x and y values
+	public static function changeBFAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false)
+	{	
+		var animationName:String = "no way anyone have an anim name this big";
+		var animationFrame:Int = 0;						
+		if (PlayState.instance.boyfriend.animation.curAnim.name.startsWith('sing'))
+		{
+			animationName = PlayState.instance.boyfriend.animation.curAnim.name;
+			animationFrame = PlayState.instance.boyfriend.animation.curAnim.curFrame;
+		}
+
+		PlayState.instance.removeObject(PlayState.instance.boyfriend);
+		PlayState.instance.destroyObject(PlayState.instance.boyfriend);
+		PlayState.instance.boyfriend = new Character(0, 0, id, !flipped);
+		PlayState.instance.boyfriend.flipMode = flipped;
+
+		var charX:Float = PlayState.instance.boyfriend.positionArray[0];
+		var charY:Float = PlayState.instance.boyfriend.positionArray[1];
+
+		PlayState.instance.boyfriend.x = PlayState.instance.BF_X + charX;
+		PlayState.instance.boyfriend.y = PlayState.instance.BF_Y + charY;
+
+		PlayState.instance.addObject(PlayState.instance.boyfriend);
+
+		PlayState.instance.iconP1.changeIcon(PlayState.instance.boyfriend.healthIcon);
+		
+		PlayState.instance.reloadHealthBarColors();
+
+		if (PlayState.instance.boyfriend.animOffsets.exists(animationName))
+			PlayState.instance.boyfriend.playAnim(animationName, true, false, animationFrame);
+
+
+		PlayState.instance.startCharacterScripts(PlayState.instance.boyfriend.curCharacter);
+	}
+
+	public static function changeDadAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false)
+	{	
+		var animationName:String = "no way anyone have an anim name this big";
+		var animationFrame:Int = 0;						
+		if (PlayState.instance.dad.animation.curAnim.name.startsWith('sing'))
+		{
+			animationName = PlayState.instance.dad.animation.curAnim.name;
+			animationFrame = PlayState.instance.dad.animation.curAnim.curFrame;
+		}
+
+		PlayState.instance.removeObject(PlayState.instance.dad);
+		PlayState.instance.destroyObject(PlayState.instance.dad);
+		PlayState.instance.dad = new Character(0, 0, id, flipped);
+		PlayState.instance.dad.flipMode = flipped;
+
+		
+		var charX:Float = PlayState.instance.dad.positionArray[0];
+		var charY:Float = PlayState.instance.dad.positionArray[1];
+		
+		PlayState.instance.dad.x = PlayState.instance.DAD_X + charX;
+		PlayState.instance.dad.y = PlayState.instance.DAD_Y + charY;
+		PlayState.instance.addObject(PlayState.instance.dad);
+
+		PlayState.instance.iconP2.changeIcon(PlayState.instance.dad.healthIcon);
+			
+		PlayState.instance.reloadHealthBarColors();
+
+		if (PlayState.instance.dad.animOffsets.exists(animationName))
+			PlayState.instance.dad.playAnim(animationName, true, false, animationFrame);
+
+		PlayState.instance.startCharacterScripts(PlayState.instance.dad.curCharacter);
+	}
+
+	public static function changeGFAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false)
+	{		
+		PlayState.instance.removeObject(PlayState.instance.gf);
+		PlayState.instance.destroyObject(PlayState.instance.gf);
+		PlayState.instance.gf = new Character(0, 0, id);
+
+		var charX:Float = PlayState.instance.gf.positionArray[0];
+		var charY:Float = PlayState.instance.gf.positionArray[1];
+
+		PlayState.instance.gf.x = PlayState.instance.GF_X + charX;
+		PlayState.instance.gf.y = PlayState.instance.GF_Y + charY;
+		PlayState.instance.gf.scrollFactor.set(0.95, 0.95);
+		PlayState.instance.addObject(PlayState.instance.gf);
+
+		PlayState.instance.startCharacterScripts(PlayState.instance.gf.curCharacter);
+	}
+
 	public static function getCameraByName(id:String):FunkinLua.LuaCamera
     {
         if(FunkinLua.lua_Cameras.exists(id))
@@ -495,8 +652,12 @@ class LuaUtils
 
         switch(id.toLowerCase())
         {
+			case 'camhud2' | 'hud2': return FunkinLua.lua_Cameras.get("hud2");
             case 'camhud' | 'hud': return FunkinLua.lua_Cameras.get("hud");
 			case 'camother' | 'other': return FunkinLua.lua_Cameras.get("other");
+			case 'camnotestuff' | 'notestuff': return FunkinLua.lua_Cameras.get("notestuff");
+			case 'camstuff' | 'stuff': return FunkinLua.lua_Cameras.get("stuff");
+			case 'maincam' | 'main': return FunkinLua.lua_Cameras.get("main");
         }
         
         return FunkinLua.lua_Cameras.get("game");
@@ -514,8 +675,12 @@ class LuaUtils
 	public static function getActorByName(id:String):Dynamic //kade to psych
 	{
 		if (FunkinLua.lua_Cameras.exists(id))
-            		return FunkinLua.lua_Cameras.get(id).cam;
-		
+            return FunkinLua.lua_Cameras.get(id).cam;
+		else if (FunkinLua.lua_Shaders.exists(id))
+			return FunkinLua.lua_Shaders.get(id);
+		else if (FunkinLua.lua_Custom_Shaders.exists(id))
+			return FunkinLua.lua_Custom_Shaders.get(id);
+
 		// pre defined names
 		switch(id)
 		{
@@ -526,6 +691,11 @@ class LuaUtils
 
 		if (Std.parseInt(id) == null)
 			return Reflect.getProperty(getTargetInstance(), id);
+
+		if (Reflect.getProperty(PlayState.instance, id) != null)
+			return Reflect.getProperty(PlayState.instance, id);
+		else if (Reflect.getProperty(PlayState, id) != null)
+			return Reflect.getProperty(PlayState, id);
 
 		return PlayState.instance.strumLineNotes.members[Std.parseInt(id)];
 	}
