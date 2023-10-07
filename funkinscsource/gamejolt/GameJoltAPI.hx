@@ -30,6 +30,7 @@ import openfl.display.Sprite;
 
 import gamejolt.GameJolt.GameJoltInfo as GameJoltInfo;
 import gamejolt.GameJolt.GameJoltLogin as GameJoltLogin;
+import lime.app.Application;
 
 using StringTools;
 
@@ -88,7 +89,7 @@ class GameJoltAPI // Connects to tentools.api.FlxGameJolt
         Debug.logInfo("Grabbing API keys...");
         GJApi.init(Std.int(GJKeys.id), Std.string(GJKeys.key), function(data:Bool){
             #if debug
-            Main.gjToastManager.createToast(GameJoltInfo.imagePath, "Game " + (data ? "authenticated!" : "not authenticated..."), (!data ? "If you are a developer, check GJKeys.hx\nMake sure the id and key are formatted correctly!" : "Yay!"), false);
+            Application.current.window.alert("Game " + (data ? "authenticated!" : "not authenticated...") + (!data ? "If you are a developer, check GJKeys.hx\nMake sure the id and key are formatted correctly!" : "Yay!"));
             #end
         });
     }
@@ -145,13 +146,9 @@ class GameJoltAPI // Connects to tentools.api.FlxGameJolt
     {
         closeSession();
         userLogin = false;
-        Debug.logInfo("Username: " + ClientPrefs.data.gjUser + " Token: " + ClientPrefs.data.gjToken);
         ClientPrefs.data.gjUser = "";
         ClientPrefs.data.gjToken = "";
-        //FlxG.save.flush();
-        Debug.logInfo("Username: " + ClientPrefs.data.gjUser + " Token: " + ClientPrefs.data.gjToken);
-        Debug.logInfo("Logged out!");
-        //System.exit(0);
+        FlxG.save.flush();
     }
 
     /**

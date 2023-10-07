@@ -2,7 +2,7 @@
 <project>
 	<!-- _________________________ Application Settings _________________________ -->
 
-	<app title="Friday Night Funkin': Sick Coders Engine!" file="SCE" packageName="com.SCTeam.SCE" package="com.SCTeam.SCE" main="Main" version="0.2.8" company="SCTeam" />
+	<app title="Friday Night Funkin': SC ENGINE Edition" file="SCEngine" packageName="com.SCTeam.SCEE" package="com.SCTeam.SCEE" main="Main" version="0.2.8" company="SCTeam" />
 
 	<!--Switch Export with Unique ApplicationID and Icon-->
 	<set name="APP_ID" value="0x0100f6c013bbc000" />
@@ -21,7 +21,7 @@
 	<!-- ____________________________ Window Settings ___________________________ -->
 
 	<!--These window settings apply to all targets-->
-	<window width="1280" height="720" fps="" background="#000000" hardware="true" vsync="false" />
+	<window width="1280" height="740" fps="" background="#000000" hardware="true" vsync="false" />
 
 	<!--HTML5-specific-->
 	<window if="html5" resizable="true" />
@@ -134,9 +134,8 @@
 
 	<!--In case you want to use the addons package-->
 	<haxelib name="flixel-addons" />
-	<haxelib name="SScript" if="HSCRIPT_ALLOWED" />
-	<haxedef name="hscriptPos"/>-
-	<haxedef name="openflPos"/>
+	<haxelib name="SScript" if="HSCRIPT_ALLOWED"/>
+	<haxedef name="hscriptPos"/>
 
 	<haxelib name='tjson'/>
 
@@ -152,7 +151,9 @@
 
 	<!--Set this to the engine you're using!-->
 	<define name="PSYCH"/>
+	<define name="modchartingTools"/>
 	<haxelib name="fnf-modcharting-tools"/>
+	<define name="SCE_ExtraSides" value="0"/> <!--set this to 0.1 for extra sides Version of the engine-->
 
 	<!--In case you want to use the ui package-->
 	<haxelib name="flixel-addons" />

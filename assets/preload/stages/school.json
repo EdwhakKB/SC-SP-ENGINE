@@ -16,5 +16,8 @@
 
 	"ratingSkin": ["pixelUI/", "-pixel"],
 	"countDownAssets": ["pixelUI/ready-pixel", "pixelUI/set-pixel", "pixelUI/date-pixel"],
-	"introSoundsSuffix": "-pixel"
+	"introSoundsSuffix": "-pixel",
+
+	"cameraXYMovement": [20, 25],
+	"opponent2": [-100000]
 }

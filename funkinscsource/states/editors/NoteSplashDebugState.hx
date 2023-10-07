@@ -1,7 +1,7 @@
 package states.editors;
 
 import objects.Note;
-import objects.StrumNote;
+import objects.StrumArrow;
 import objects.NoteSplash;
 import flixel.addons.ui.FlxInputText;
 import flixel.addons.ui.FlxUINumericStepper;
@@ -14,7 +14,7 @@ class NoteSplashDebugState extends MusicBeatState
 	var maxNotes:Int = 4;
 
 	var selection:FlxSprite;
-	var notes:FlxTypedGroup<StrumNote>;
+	var notes:FlxTypedGroup<StrumArrow>;
 	var splashes:FlxTypedGroup<FlxSprite>;
 	
 	var nameInputText:FlxInputText;
@@ -34,7 +34,7 @@ class NoteSplashDebugState extends MusicBeatState
 		selection.alpha = 0.4;
 		add(selection);
 
-		notes = new FlxTypedGroup<StrumNote>();
+		notes = new FlxTypedGroup<StrumArrow>();
 		add(notes);
 
 		splashes = new FlxTypedGroup<FlxSprite>();
@@ -44,7 +44,7 @@ class NoteSplashDebugState extends MusicBeatState
 		{
 			var x = i * 220 + 240;
 			var y = 290;
-			var note:StrumNote = new StrumNote(x, y, i, 0);
+			var note:StrumArrow = new StrumArrow(x, y, i, 0, 'noteSkins/NOTE_assets' + Note.getNoteSkinPostfix());
 			note.alpha = 0.75;
 			note.playAnim('static');
 			notes.add(note);
@@ -55,8 +55,6 @@ class NoteSplashDebugState extends MusicBeatState
 			splash.antialiasing = ClientPrefs.data.antialiasing;
 			splashes.add(splash);
 		}
-
-
 		//
 		var txtx = 60;
 		var txty = 640;
@@ -72,7 +70,7 @@ class NoteSplashDebugState extends MusicBeatState
 					nameInputText.hasFocus = false;
 				
 				default:
-					trace('changed anim name to $text');
+					Debug.logTrace('changed anim name to $text');
 					config.anim = text;
 					curAnim = 1;
 					reloadAnims();
@@ -139,7 +137,7 @@ class NoteSplashDebugState extends MusicBeatState
 		if(controls.BACK && notTyping)
 		{
 			MusicBeatState.switchState(new MasterEditorMenu());
-			FlxG.sound.playMusic(Paths.music('freakyMenu'));
+			FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
 			FlxG.mouse.visible = false;
 		}
 		super.update(elapsed);
@@ -238,7 +236,7 @@ class NoteSplashDebugState extends MusicBeatState
 		{
 			if(forceFrame < 0) forceFrame = 0;
 			else if(forceFrame >= maxFrame) forceFrame = maxFrame - 1;
-			//trace('curFrame: $forceFrame');
+			//Debug.logTrace('curFrame: $forceFrame');
 			
 			curFrameText.text = 'Force Frame: ${forceFrame+1} / $maxFrame\n(Press Q/E to change)';
 			splashes.forEachAlive(function(spr:FlxSprite) {
@@ -295,7 +293,7 @@ class NoteSplashDebugState extends MusicBeatState
 		savedText.text = 'Saved to: $path';
 		sys.io.File.saveContent(path, strToSave);
 
-		//trace(strToSave);
+		//Debug.logTrace(strToSave);
 		#else
 		savedText.text = 'Can\'t save on this platform, too bad.';
 		#end
@@ -347,7 +345,7 @@ class NoteSplashDebugState extends MusicBeatState
 			});
 			if(loopContinue) maxAnims++;
 		}
-		trace('maxAnims: $maxAnims');
+		Debug.logTrace('maxAnims: $maxAnims');
 		changeAnim();
 	}
 

@@ -1,0 +1,14 @@
+{
+    "Lua.diagnostics.globals": [
+        "getProperty",
+        "checkAnimFrame",
+        "triggerEvent",
+        "curStep",
+        "setProperty",
+        "removeLuaSprite",
+        "addLuaSprite",
+        "doTweenY",
+        "doTweenX",
+        "getSongPosition"
+    ]
+}

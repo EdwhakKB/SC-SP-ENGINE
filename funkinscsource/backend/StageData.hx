@@ -18,12 +18,23 @@ typedef StageFile = {
 	var boyfriend:Array<Dynamic>;
 	var girlfriend:Array<Dynamic>;
 	var opponent:Array<Dynamic>;
+	var opponent2:Array<Dynamic>;
 	var hide_girlfriend:Bool;
 
 	var camera_boyfriend:Array<Float>;
 	var camera_opponent:Array<Float>;
+	var camera_opponent2:Array<Float>;
 	var camera_girlfriend:Array<Float>;
 	var camera_speed:Null<Float>;
+
+	var ratingSkin:Array<String>;
+	var countDownAssets:Array<String>;
+	var has3rdIntroAsset:Bool;
+
+	var introSoundsPrefix:String;
+	var introSoundsSuffix:String;
+
+	var cameraXYMovement:Array<Float>;
 }
 
 class StageData {
@@ -38,18 +49,30 @@ class StageData {
 			boyfriend: [770, 100],
 			girlfriend: [400, 130],
 			opponent: [100, 100],
+			opponent2: [100, 100],
 			hide_girlfriend: false,
 
 			camera_boyfriend: [0, 0],
 			camera_opponent: [0, 0],
+			camera_opponent2: [0, 0],
 			camera_girlfriend: [0, 0],
-			camera_speed: 1
+			camera_speed: 1,
+
+			ratingSkin: ['', ''],
+			countDownAssets: ['ready', 'set', 'go'],
+			has3rdIntroAsset: false,
+
+			introSoundsPrefix: "",
+			introSoundsSuffix: "",
+
+			cameraXYMovement: [50, 60]
 		};
 	}
 
 	public static var forceNextDirectory:String = null;
 	public static function loadDirectory(SONG:SwagSong) {
 		var stage:String = '';
+
 		if(SONG.stage != null) {
 			stage = SONG.stage;
 		} else if(SONG.songId != null) {

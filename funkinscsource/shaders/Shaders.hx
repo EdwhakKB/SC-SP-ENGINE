@@ -25,6 +25,72 @@ class ShaderEffectNew
         // nothing yet
     }
 }
+
+/*class RGBPinEffect extends ShaderEffectNew
+{
+    public var shader(default,null):RGBPinShader = new RGBPinShader();
+
+    public var amount(default, set):Float = 0;
+	public var distortionFactor(default, set):Float = 0;
+
+	public function new():Void
+	{
+		shader.amount.value = [amount];
+        shader.distortionFactor.value = [distortionFactor];
+	}
+
+    override public function update(elapsed:Float):Void
+    {
+        super.update(elapsed);
+
+        shader.amount.value = [amount];
+        shader.distortionFactor.value = [distortionFactor];
+    }
+
+    function set_amount(v:Float):Float
+    {
+        amount = v;
+        shader.amount.value = [amount];
+        return v;
+    }
+    
+    function set_distortionFactor(v:Float):Float
+    {
+        distortionFactor = v;
+        shader.distortionFactor.value = [distortionFactor];
+        return v;
+    }
+}
+
+class RGBPinShader extends FlxFixedShader
+{
+    @:glFragmentSource('
+    #pragma header
+
+    uniform float amount = 0.05;
+    uniform float distortionFactor = 0.05;
+    
+    vec2 uv = openfl_TextureCoordv.xy;
+    vec2 center = vec2(0.5, 0.5);
+    
+    void main(void) {
+        vec2 distortedUV = uv - center;
+        float dist = length(distortedUV);
+        float distortion = pow(dist, 3.0) * distortionFactor;
+        vec4 col;
+        col.r = texture2D(bitmap, vec2(uv.x + amount * distortedUV.x + distortion / openfl_TextureSize.x, uv.y + amount * distortedUV.y + distortion / openfl_TextureSize.y)).r;
+        col.g = texture2D(bitmap, uv).g;
+        col.b = texture2D(bitmap, vec2(uv.x - amount * distortedUV.x - distortion / openfl_TextureSize.x, uv.y - amount * distortedUV.y - distortion / openfl_TextureSize.y)).b;
+        col.a = texture2D(bitmap, uv).a;
+        gl_FragColor = col;
+    }')
+
+    public function new()
+    {
+       super();
+    }
+}*/
+
 class ThreeDEffectNew extends ShaderEffectNew
 {
     public var shader(default,null):ThreeDShaderNew = new ThreeDShaderNew();
@@ -2012,55 +2078,6 @@ class ChromaticAberrationShader extends FlxFixedShader
 	}
 }
 
-class ScanlineEffectOld extends ShaderEffectNew
-{
-	public var shader:ScanlineOld;
-
-    public var lockAlpha(default, set):Bool = false;
-
-    public function new()
-    {
-        shader.lockAlpha.value = [lockAlpha];
-    }
-
-    override public function update(elapsed:Float)
-    {
-        shader.lockAlpha.value = [lockAlpha];
-    }
-
-    public function set_lockAlpha(arg:Bool):Bool
-    {
-        lockAlpha = arg;
-        shader.lockAlpha.value = [lockAlpha];
-        return arg;
-    }
-}
-
-class ScanlineOld extends FlxFixedShader
-{
-	@:glFragmentSource('
-		#pragma header
-		const float scale = 1.0;
-		uniform bool lockAlpha = false;
-		void main()
-		{
-			if (mod(floor(openfl_TextureCoordv.y * openfl_TextureSize.y / scale), 2.0) == 0.0 ){
-				float bitch = 1.0;
-	
-				vec4 texColor = texture2D(bitmap, openfl_TextureCoordv);
-				if (lockAlpha) bitch = texColor.a;
-				gl_FragColor = vec4(0.0, 0.0, 0.0, bitch);
-			}else{
-				gl_FragColor = texture2D(bitmap, openfl_TextureCoordv);
-			}
-		}'
-	)
-	public function new()
-	{
-		super();
-	}
-}
-
 class TiltshiftEffect extends ShaderEffectNew
 {	
 	public var shader:Tiltshift;
@@ -3502,53 +3519,6 @@ void main()
 	
 }
 
-class GlitchEffect extends ShaderEffectNew
-{
-    public var shader:GlitchShader = new GlitchShader();
-
-    public var waveSpeed(default, set):Float = 0;
-	public var waveFrequency(default, set):Float = 0;
-	public var waveAmplitude(default, set):Float = 0;
-
-	public function new():Void
-	{
-		shader.uTime.value = [0];
-        shader.uSpeed.value = [waveSpeed];
-        shader.uFrequency.value = [waveFrequency];
-        shader.uWaveAmplitude.value = [waveAmplitude];
-	}
-
-    override public function update(elapsed:Float):Void
-    {
-        shader.uTime.value[0] += elapsed;
-        shader.uSpeed.value = [waveSpeed];
-        shader.uFrequency.value = [waveFrequency];
-        shader.uWaveAmplitude.value = [waveAmplitude];
-    }
-
-    function set_waveSpeed(v:Float):Float
-    {
-        waveSpeed = v;
-        shader.uSpeed.value = [waveSpeed];
-        return v;
-    }
-    
-    function set_waveFrequency(v:Float):Float
-    {
-        waveFrequency = v;
-        shader.uFrequency.value = [waveFrequency];
-        return v;
-    }
-    
-    function set_waveAmplitude(v:Float):Float
-    {
-        waveAmplitude = v;
-        shader.uWaveAmplitude.value = [waveAmplitude];
-        return v;
-    }
-
-}
-
 class DistortBGEffect extends ShaderEffectNew
 {
     public var shader:DistortBGShader = new DistortBGShader();
@@ -3665,55 +3635,6 @@ class InvertColorsEffect extends ShaderEffectNew //No Values!
 
 }
 
-class GlitchShader extends FlxFixedShader
-{
-    @:glFragmentSource('
-    #pragma header
-    //uniform float tx, ty; // x,y waves phase
-
-    //modified version of the wave shader to create weird garbled corruption like messes
-    uniform float uTime;
-    
-    /**
-     * How fast the waves move over time
-     */
-    uniform float uSpeed;
-    
-    /**
-     * Number of waves over time
-     */
-    uniform float uFrequency;
-    
-    /**
-     * How much the pixels are going to stretch over the waves
-     */
-    uniform float uWaveAmplitude;
-
-    vec2 sineWave(vec2 pt)
-    {
-        float x = 0.0;
-        float y = 0.0;
-        
-        float offsetX = sin(pt.y * uFrequency + uTime * uSpeed) * (uWaveAmplitude / pt.x * pt.y);
-        float offsetY = sin(pt.x * uFrequency - uTime * uSpeed) * (uWaveAmplitude / pt.y * pt.x);
-        pt.x += offsetX; // * (pt.y - 1.0); // <- Uncomment to stop bottom part of the screen from moving
-        pt.y += offsetY;
-
-        return vec2(pt.x + x, pt.y + y);
-    }
-
-    void main()
-    {
-        vec2 uv = sineWave(openfl_TextureCoordv);
-        gl_FragColor = texture2D(bitmap, uv);
-    }')
-
-    public function new()
-    {
-       super();
-    }
-}
-
 class InvertShader extends FlxFixedShader
 {
     @:glFragmentSource('
@@ -3789,77 +3710,45 @@ class DesaturationShader extends FlxFixedShader
 
 class FishEyeEffect extends ShaderEffectNew
 {
-    public var shader:FishEyeShader;
+    public var shader:FishEyeShader = new FishEyeShader();
 
-    public var power(default, set):Float = 0;
+    public var amount(default, set):Float = 0;
 
-    public function set_power(pow:Float):Float
-    {
-        power = pow;
-        shader.power.value = [power];
-        return pow;
+    public function new(){
+        shader.amount.value = [amount];
     }
 
-	public function new(){
-        shader.power.value = [power];
-		shader.iTime.value = [0];
-		shader.iResolution.value = [Lib.current.stage.stageWidth,Lib.current.stage.stageHeight];
-	}
-	
-	override public function update(elapsed:Float){
-        shader.power.value = [power];
-		shader.iTime.value[0] += elapsed;
-		shader.iResolution.value = [Lib.current.stage.stageWidth,Lib.current.stage.stageHeight];
-	}
+    override public function update(elapsed:Float)
+    {
+        shader.amount.value = [amount];
+    }
+
+    public function set_amount(v:Float):Float
+    {
+        amount = v;
+        shader.amount.value = [amount];
+        return v;
+    }
 }
 
-class FishEyeShader extends FlxFixedShader
+class FishEyeShader extends FlxShader
 {
-	@:glFragmentSource('
+    @:glFragmentSource('
     #pragma header
-    
-	uniform float power; // negative : anti fish eye. positive = fisheye
-    uniform vec3 iResolution;
-	uniform float iTime;
+    uniform float amount;
+    void main()
+    {
+        vec2 uv = openfl_TextureCoordv;
+        uv -= 0.5;
+        uv = 1.0 - amount / 2.0;
+        float r = sqrt(dot(uv,uv));
+        uv= 1.0 + r * amount;
+        uv += 0.5;
 
-	//Inspired by http://stackoverflow.com/questions/6030814/add-fisheye-effect-to-images-at-runtime-using-opengl-es
-	void main()//Drag mouse over rendering area
-	{
-		vec2 p = openfl_TextureCoordv;//normalized coords with some cheat
-																//(assume 1:1 prop)
-		float prop = iResolution.x / iResolution.y;//screen proroption
-		vec2 m = vec2(0.5, 0.5 / prop);//center coords
-		vec2 d = p - m;//vector from center to current fragment
-		float r = sqrt(dot(d, d)); // distance of pixel from center
 
-		float power = power * sin(iTime * 2.0);
-
-		float bind;//radius of 1:1 effect
-		if (power > 0.0) 
-			bind = sqrt(dot(m, m));//stick to corners
-		else {if (prop < 1.0) 
-			bind = m.x; 
-		else 
-			bind = m.y;}//stick to borders
-
-		//Weird formulas
-		vec2 uv = openfl_TextureCoordv;
-
-		if (power > 0.0)//fisheye
-			uv = m + normalize(d) * tan(r * power) * bind / tan( bind * power);
-		else if (power < 0.0)//antifisheye
-			uv = m + normalize(d) * atan(r * -power * 10.0) * bind / atan(-power * bind * 10.0);
-		else uv = p;//no effect for power = 1.0
-			
-		uv.y *= prop;
-
-		vec3 col = texture2D(bitmap, uv).rgb;
-		
-		// inverted
-		//vec3 col = texture2D(bitmap, vec2(uv.x, 1.0 - uv.y)).rgb;//Second part of cheat
-														//for round effect, not elliptical
-		gl_FragColor = vec4(col, 1.0);
-	}')
+        // Output to screen
+        gl_FragColor = flixel_texture2D(bitmap, uv);
+    }')
 
     public function new()
     {
@@ -4880,3 +4769,157 @@ class BloomNewShader extends FlxFixedShader // Taken from BBPanzu anime mod hueh
 		data.funbrightness.value = [brightness];
 	}
 }
+
+// class ReapterEffect extends ShaderEffectNew
+// {
+//     public var shader(default, null):ReapterShader = new ReapterShader();
+
+//     public var beat:Float = 0;
+//     public var mult:Float = 0;
+//     public var rotation:Float = 0;
+
+//     public function new():Void
+//     {
+//         shader.beat.value = [beat];
+//         shader.mult.value = [mult];
+//         shader.rotation.value = [rotation];
+//     }
+
+//     override public function update(elapsed:Float)
+//     {
+//         shader.beat.value = [beat];
+//         shader.mult.value = [mult];
+//         shader.rotation.value = [rotation];
+//     }
+// }
+
+// class ReapterShader extends FlxFixedShader
+// {
+//     @:glFragmentSource('
+//     #version 130
+
+//     uniform sampler2D sampler0;
+//     uniform float beat;
+//     uniform float mult;
+//     uniform vec2 textureSize;
+//     uniform vec2 imageSize;
+//     varying vec2 textureCoord;
+//     varying vec2 imageCoord;
+
+//     uniform float rotation;
+
+//     float luma(vec3 col)
+//     {
+//         return 1.0 - col.r * 0.2126 + col.g * 0.7152 + col.b * 0.0722;
+//     }
+
+//     vec2 texCoord2imgCoord( vec2 uv )
+//     {
+//     return uv / textureSize * imageSize;
+//     }
+
+
+//     vec2 modeSeven(vec2 uv, float scale, float skewx, float skewy, float rot){
+//         vec2 center = vec2(0.0, 0.0); // Center point for calculations, also translates the image
+//         vec2 offset = vec2(0.0, 0.0);
+        
+//         float a = scale; // ScaleX
+//         float b = skewy; // SkewY
+//         float c = skewx; // SkewX
+//         float d = scale; // ScaleY
+        
+//         mat2 m;
+//         m[0][0] = a;
+//         m[0][1] = b;
+//         m[1][0] = c;
+//         m[1][1] = d;
+        
+//         vec2 mul = vec2(uv.x + offset.x - center.x, uv.y + offset.y - center.y);
+        
+//         float theta = rot;
+//         theta *= 0.0174532925; // DEG2RAD
+//         mat2 mr;
+//         mr[0][0] = cos(theta);
+//         mr[0][1] = sin(theta);
+//         mr[1][0] = -sin(theta);
+//         mr[1][1] = cos(theta);
+        
+//         uv = m * mr * mul;
+//         return uv;
+//     }
+
+//     void main()
+//     {
+//         float fadeInStart = 527.0;
+//         float startTime = 531.0;
+//         float _t = beat - startTime;
+//         float amt = 1;
+//         vec4 fragColor = vec4(0, 0, 0, 1);
+//         vec2 uv = textureCoord;
+//     // uv.x += sin(_t) * 0.01 * amt;
+//     //  uv.y += cos(_t * 0.99) * 0.05 * amt;
+
+//         //fragColor = texture(sampler0, uv);
+//         //fragColor.a = luma(fragColor.rgb);
+//         vec4 col = vec4(0.0);
+//         float add = sin(_t) + cos(_t * 2.0) * amt;
+        
+//         float fadeEdge = 0.2;
+        
+//         for (float i = 1.0; i < 15.0; i += 1.0) {
+//             vec2 myUv = uv;
+//             float s = smoothstep(startTime, startTime + 4.0, beat);
+//             float speed = 0.015*mult;
+//             float separation = 0.05;
+//             s = 1.0;
+                
+//             //myUv.x += sin(_t) * 0.005 * i * s;
+//             //myUv.y += cos(_t * 1.2) * 0.02 * i * s;
+            
+//             float move = _t * speed * i + i * separation;
+            
+//             myUv.x += (move) * s;
+//             myUv.y += (move) * s;
+            
+//             myUv = fract(modeSeven(myUv, 1.0 + i * 0.2 * s, 0, 0, rotation * i));
+//             //myUv.x = fract(myUv.x);
+//             //myUv.y = mix(fract(myUv.y), 1.0 - fract(myUv.y), mod(myUv.y, 2.0) < 1.0);
+            
+            
+//             col = texture(sampler0, myUv);
+            
+//             if( myUv.x > (imageSize.x/textureSize.x)*(1-fadeEdge) ){
+//                 col = mix(col, vec4(0,0,0,1), (myUv.x-(imageSize.x/textureSize.x)*(1-fadeEdge))/((imageSize.x/textureSize.x)*fadeEdge));
+//             }
+//             if( myUv.y > (imageSize.y/textureSize.y)*(1-fadeEdge) ){
+//                 col = mix(col, vec4(0,0,0,1), (myUv.y-(imageSize.y/textureSize.y)*(1-fadeEdge))/((imageSize.y/textureSize.y)*fadeEdge));
+//             }
+//             if( myUv.x < (imageSize.x/textureSize.x)*(fadeEdge) ){
+//                 col = mix(vec4(0,0,0,1), col, (myUv.x)/((imageSize.x/textureSize.x)*fadeEdge));
+//             }
+//             if( myUv.y < (imageSize.y/textureSize.y)*(fadeEdge) ){
+//                 col = mix(vec4(0,0,0,1), col, (myUv.y)/((imageSize.y/textureSize.y)*fadeEdge));
+//             }
+            
+//             if( myUv.x >= (imageSize.x/textureSize.x)*0.99 || myUv.y >= (imageSize.y/textureSize.y)*0.99 || myUv.x <= 0.01 || myUv.x <= 0.01 ){
+//                 col = vec4(0,0,0,1);
+//             }
+            
+//             col.a = luma(col.rgb);
+
+//             //fragColor.rgb = mix(fragColor.rgb, col.rgb, col.a);
+//             float thresa = 0.0;
+//             float thresb = 1.0;
+//             if (myUv.x > thresa && myUv.x < thresb && myUv.y > thresa && myUv.y < thresb) {
+//                 fragColor.rgb += col.rgb * (1.0 - i / 20.0) * smoothstep(fadeInStart, startTime, beat);
+//             }
+//         }
+        
+//         gl_FragColor = fragColor;
+//     }    
+//     ')
+//     public function new()
+//     {
+//         super();
+//     }
+// }

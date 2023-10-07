@@ -3,8 +3,12 @@ package objects;
 import shaders.RGBPalette;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.graphics.frames.FlxFrame;
-
+#if sys
+import sys.FileSystem;
+#end
+import lime.utils.Assets as OpenFLAssets;
 import shaders.FlxFixedShader;
+import flixel.addons.effects.FlxSkewedSprite;
 
 typedef NoteSplashConfig = {
 	anim:String,
@@ -22,13 +26,30 @@ class NoteSplash extends FlxSkewedSprite
 	public static var defaultNoteSplash(default, never):String = 'noteSplashes/noteSplashes';
 	public static var configs:Map<String, NoteSplashConfig> = new Map<String, NoteSplashConfig>();
 	private var _configLoaded:String = null;
+	private var string1NoteSkin:String = null;
+	private var string2NoteSkin:String = null;
+
+	public static var containedPixelTexture:Bool = false;
 
 	public function new(x:Float = 0, y:Float = 0) {
 		super(x, y);
 
 		var skin:String = null;
-		if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) skin = PlayState.SONG.splashSkin;
-		else skin = defaultNoteSplash + getSplashSkinPostfix();
+		if (PlayState.instance != null){
+			string1NoteSkin = "noteSplashes-" + PlayState.instance.bfStrumStyle;
+			string2NoteSkin = "notes/noteSplashes-" + PlayState.instance.bfStrumStyle;
+		}
+		if (FileSystem.exists(Paths.getPreloadPath('shadred/images/$string1NoteSkin.png')))
+			skin = "noteSplashes-"+ PlayState.instance.bfStrumStyle;
+		else if (FileSystem.exists(Paths.getPreloadPath('shared/images/$string2NoteSkin.png')))
+			skin = "notes/noteSplashes-" + PlayState.instance.bfStrumStyle;
+		else{
+			if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) skin = PlayState.SONG.splashSkin;
+			else skin = defaultNoteSplash + getSplashSkinPostfix();
+		}
+
+		if (_textureLoaded.contains('pixel') || skin.contains('pixel'))
+			containedPixelTexture = true;
 		
 		rgbShader = new PixelSplashShaderRef();
 		shader = rgbShader.shader;
@@ -50,9 +71,23 @@ class NoteSplash extends FlxSkewedSprite
 		aliveTime = 0;
 
 		var texture:String = null;
-		if(note != null && note.noteSplashData.texture != null) texture = note.noteSplashData.texture;
-		else if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) texture = PlayState.SONG.splashSkin;
-		else texture = defaultNoteSplash + getSplashSkinPostfix();
+		if (PlayState.instance != null){
+			string1NoteSkin = "noteSplashes-" + PlayState.instance.bfStrumStyle;
+			string2NoteSkin = "notes/noteSplashes-" + PlayState.instance.bfStrumStyle;
+		}
+		if (OpenFLAssets.exists(string1NoteSkin, IMAGE) || FileSystem.exists(Paths.modFolders('images/$string1NoteSkin.png')))
+			texture = string1NoteSkin;
+		else if (OpenFLAssets.exists(string2NoteSkin, IMAGE) || FileSystem.exists(Paths.modFolders('images/$string2NoteSkin.png')))
+			texture = string2NoteSkin;
+		else
+		{
+			if(note != null && note.noteSplashData.texture != null) texture = note.noteSplashData.texture;
+			else if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) texture = PlayState.SONG.splashSkin;
+			else texture = defaultNoteSplash + getSplashSkinPostfix();
+		}
+
+		if (_textureLoaded.contains('pixel') || texture.contains('pixel'))
+			containedPixelTexture = true;
 		
 		var config:NoteSplashConfig = null;
 		if(_textureLoaded != texture)
@@ -74,12 +109,13 @@ class NoteSplash extends FlxSkewedSprite
 			else tempShader = Note.globalRgbShaders[direction];
 		}
 	
-		alpha = ClientPrefs.data.splashAlpha;
+		if (!ClientPrefs.data.splashAlphaAsStrumAlpha)
+			alpha = ClientPrefs.data.splashAlpha;
 		if(note != null) alpha = note.noteSplashData.a;
 		rgbShader.copyValues(tempShader);
 
 		if(note != null) antialiasing = note.noteSplashData.antialiasing;
-		if(PlayState.isPixelStage || !ClientPrefs.data.antialiasing) antialiasing = false;
+		if(texture.contains('pixel') || !ClientPrefs.data.antialiasing) antialiasing = false;
 
 		_textureLoaded = texture;
 		offset.set(10, 10);
@@ -92,7 +128,7 @@ class NoteSplash extends FlxSkewedSprite
 		if(config != null)
 		{
 			var animID:Int = direction + ((animNum - 1) * Note.colArray.length);
-			//trace('anim: ${animation.curAnim.name}, $animID');
+			//Debug.logTrace('anim: ${animation.curAnim.name}, $animID');
 			var offs:Array<Float> = config.offsets[FlxMath.wrap(animID, 0, config.offsets.length-1)];
 			offset.x += offs[0];
 			offset.y += offs[1];
@@ -141,12 +177,12 @@ class NoteSplash extends FlxSkewedSprite
 			var animID:Int = maxAnims + 1;
 			for (i in 0...Note.colArray.length) {
 				if (!addAnimAndCheck('note$i-$animID', '$animName ${Note.colArray[i]} $animID', 24, false)) {
-					//trace('maxAnims: $maxAnims');
+					//Debug.logTrace('maxAnims: $maxAnims');
 					return config;
 				}
 			}
 			maxAnims++;
-			//trace('currently: $maxAnims');
+			//Debug.logTrace('currently: $maxAnims');
 		}
 	}
 
@@ -223,9 +259,9 @@ class PixelSplashShaderRef {
 		shader.mult.value = [1];
 
 		var pixel:Float = 1;
-		if(PlayState.isPixelStage) pixel = PlayState.daPixelZoom;
+		if(NoteSplash.containedPixelTexture) pixel = PlayState.daPixelZoom;
 		shader.uBlocksize.value = [pixel, pixel];
-		//trace('Created shader ' + Conductor.songPosition);
+		//Debug.logTrace('Created shader ' + Conductor.songPosition);
 	}
 }
 

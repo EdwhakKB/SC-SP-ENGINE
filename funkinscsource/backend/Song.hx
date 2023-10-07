@@ -13,11 +13,11 @@ import backend.Section;
 
 typedef SwagSong =
 {
-	@:deprecated
+
 	/**
 	 * Use to be the internal name of the song.
 	 */
-	var ?song:String;
+	var song:String;
 
 	/**
 	 * The internal name of the song, as used in the file system.
@@ -39,7 +39,9 @@ typedef SwagSong =
 	var notITG:Bool;
 	var usesHUD:Bool;
 	var noIntroSkip:Bool;
-	var dodgeEnabled:Bool;
+
+	var rightScroll:Bool;
+	var middleScroll:Bool;
 
 	@:optional var gameOverChar:String;
 	@:optional var gameOverSound:String;
@@ -50,13 +52,20 @@ typedef SwagSong =
 
 	@:optional var arrowSkin:String;
 	@:optional var splashSkin:String;
+
+	@:optional var dadNoteStyle:String;
+	@:optional var bfNoteStyle:String;
+
+	@:optional var vocalsSuffix:String;
+	@:optional var instrumentalSuffix:String;
+
+	@:optional var vocalsPrefix:String;
+	@:optional var instrumentalPrefix:String;
 }
 
 class Song
 {
-	@:deprecated
 	public var song:String;
-
 	public var songId:String;
 
 	public var notes:Array<SwagSection>;
@@ -80,10 +89,18 @@ class Song
 	public var arrowSkin:String;
 	public var splashSkin:String;
 
+	public var dadNoteStyle:String = 'noteSkins/NOTE_assets';
+	public var bfNoteStyle:String = 'noteSkins/NOTE_assets';
+
 	public var notITG:Bool = false;
 	public var usesHUD:Bool = false;
 	public var noIntroSkip:Bool = false;
-	public var dodgeEnabled:Bool = false;
+
+	public var vocalsSuffix:String = '';
+	public var instrumentalSuffix:String = '';
+
+	public var vocalsPrefix:String = '';
+	public var instrumentalPrefix:String = '';
 
 	private static function onLoadJson(songJson:Dynamic) // Convert old charts to newest format
 	{
@@ -116,6 +133,9 @@ class Song
 				}
 			}
 		}
+
+		if(songJson.song != null && songJson.songId == null) songJson.songId = songJson.song;
+		else if(songJson.songId != null && songJson.song == null) songJson.song = songJson.songId;
 	}
 
 	public function new(song, notes, bpm)
@@ -132,7 +152,7 @@ class Song
 		var formattedFolder:String = Paths.formatToSongPath(folder);
 		var formattedSong:String = Paths.formatToSongPath(jsonInput);
 		#if MODS_ALLOWED
-		var moddyFile:String = Paths.modsJson(formattedFolder + '/' + formattedSong);
+		var moddyFile:String = Paths.modsJson('songs/' + formattedFolder + '/' + formattedSong);
 		if(FileSystem.exists(moddyFile)) {
 			rawJson = File.getContent(moddyFile).trim();
 		}
@@ -140,9 +160,9 @@ class Song
 
 		if(rawJson == null) {
 			#if sys
-			rawJson = File.getContent(Paths.json(formattedFolder + '/' + formattedSong)).trim();
+			rawJson = File.getContent(Paths.json('songs/' + formattedFolder + '/' + formattedSong)).trim();
 			#else
-			rawJson = Assets.getText(Paths.json(formattedFolder + '/' + formattedSong)).trim();
+			rawJson = Assets.getText(Paths.json('songs/' + formattedFolder + '/' + formattedSong)).trim();
 			#end
 		}
 
@@ -154,13 +174,13 @@ class Song
 
 		// FIX THE CASTING ON WINDOWS/NATIVE
 		// Windows???
-		// trace(songData);
+		// Debug.logTrace(songData);
 
-		// trace('LOADED FROM JSON: ' + songData.notes);
+		// Debug.logTrace('LOADED FROM JSON: ' + songData.notes);
 		/* 
 			for (i in 0...songData.notes.length)
 			{
-				trace('LOADED FROM JSON: ' + songData.notes[i].sectionNotes);
+				Debug.logTrace('LOADED FROM JSON: ' + songData.notes[i].sectionNotes);
 				// songData.notes[i].sectionNotes = songData.notes[i].sectionNotes
 			}
 
@@ -169,6 +189,8 @@ class Song
 				daBpm = songData.bpm; */
 
 		var songJson:Dynamic = parseJSONshit(rawJson);
+		if(songJson.song != null && songJson.songId == null) songJson.songId = songJson.song;
+		else if(songJson.songId != null && songJson.song == null) songJson.song = songJson.songId;
 		if(jsonInput != 'events') StageData.loadDirectory(songJson);
 		onLoadJson(songJson);
 		return songJson;

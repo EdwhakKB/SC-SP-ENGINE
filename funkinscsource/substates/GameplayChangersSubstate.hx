@@ -62,6 +62,9 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 		option.displayFormat = '%vX';
 		optionsArray.push(option);
 
+		var option:GameplayOption = new GameplayOption('Hold Notes Active', 'sustainnotesactive', 'bool', true);
+		optionsArray.push(option);
+
 		var option:GameplayOption = new GameplayOption('Opponent Mode', 'opponent', 'bool', false);
 		optionsArray.push(option);
 
@@ -244,7 +247,7 @@ class GameplayChangersSubstate extends MusicBeatSubstate
 											updateTextFrom(oOption);
 										}
 									}
-									//trace(curOption.options[num]);
+									//Debug.logTrace(curOption.options[num]);
 							}
 							updateTextFrom(curOption);
 							curOption.change();

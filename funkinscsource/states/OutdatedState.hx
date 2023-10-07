@@ -41,7 +41,10 @@ class OutdatedState extends MusicBeatState
 				FlxG.sound.play(Paths.sound('cancelMenu'));
 				FlxTween.tween(warnText, {alpha: 0}, 1, {
 					onComplete: function (twn:FlxTween) {
-						MusicBeatState.switchState(new MainMenuState());
+						//if (ClientPrefs.data.systemUserName != "")
+							MusicBeatState.switchState(new MainMenuState());
+						/*else
+							MusicBeatState.switchState(new states.WelcomeState());*/
 					}
 				});
 			}

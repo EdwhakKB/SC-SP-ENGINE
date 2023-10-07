@@ -20,21 +20,9 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			'bool');
 		addOption(option);
 
-		var option:Option = new Option('Opponent Notes',
-			'If unchecked, opponent notes get hidden.',
-			'opponentStrums',
-			'bool');
-		addOption(option);
-
 		var option:Option = new Option('Ghost Tapping',
 			"If checked, you won't get misses from pressing keys\nwhile there are no notes able to be hit.",
 			'ghostTapping',
-			'bool');
-		addOption(option);
-		
-		var option:Option = new Option('Auto Pause',
-			"If checked, the game automatically pauses if the screen isn't on focus.",
-			'autoPause',
 			'bool');
 		addOption(option);
 
@@ -42,41 +30,6 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			"If checked, pressing Reset won't do anything.",
 			'noReset',
 			'bool');
-		addOption(option);
-
-		var option:Option = new Option('Hitsound Volume',
-			'Funny notes does \"Tick!\" when you hit them."',
-			'hitsoundVolume',
-			'percent');
-		addOption(option);
-		option.scrollSpeed = 1.6;
-		option.minValue = 0.0;
-		option.maxValue = 1;
-		option.changeValue = 0.1;
-		option.decimals = 1;
-		option.onChange = onChangeHitsoundVolume;
-
-		var option:Option = new Option('Hitsound',
-			'Funny notes does \"Any Sound\" when you hit them."',
-			'hitSounds',
-			'string',
-			['None', 'quaver', 'osu', 'clap', 'camellia', 'stepmania', '21st century humor', 'vine boom', 'sexus']);
-		addOption(option);
-
-		var option:Option = new Option('Hitsound On What',
-			'notes does a sound but when you hit them on note or key?"',
-			'strumHit',
-			'bool');
-		addOption(option);
-
-		var option:Option = new Option('Rating Offset',
-			'Changes how late/early you have to hit for a "Sick!"\nHigher values mean you have to hit later.',
-			'ratingOffset',
-			'int');
-		option.displayFormat = '%vms';
-		option.scrollSpeed = 20;
-		option.minValue = -30;
-		option.maxValue = 30;
 		addOption(option);
 
 		var option:Option = new Option('Swag!! Hit Window',
@@ -144,6 +97,31 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		option.changeValue = 0.1;
 		addOption(option);
 
+		var option:Option = new Option('Hitsound On What',
+			'notes does a sound but when you hit them on note or key?"',
+			'strumHit',
+			'bool');
+		addOption(option);
+
+		var option:Option = new Option('Hitsound Volume',
+			'Funny notes does \"Tick!\" when you hit them."',
+			'hitsoundVolume',
+			'percent');
+		addOption(option);
+		option.scrollSpeed = 1.6;
+		option.minValue = 0.0;
+		option.maxValue = 1;
+		option.changeValue = 0.1;
+		option.decimals = 1;
+		option.onChange = onChangeHitsoundVolume;
+
+		var option:Option = new Option('Hitsound',
+			'Funny notes does \"Any Sound\" when you hit them."',
+			'hitSounds',
+			'string',
+			['None', 'quaver', 'osu', 'clap', 'camellia', 'stepmania', '21st century humor', 'vine boom', 'sexus']);
+		addOption(option);
+
 		var option:Option = new Option('Instant Respawning',
 			"If checked, You have to respawn, Else instant respawn!",
 			'instantRespawn',
@@ -159,6 +137,18 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		var option:Option = new Option('Miss Sounds',
 			"If checked, Miss sounds are active.",
 			'missSounds',
+			'bool');
+		addOption(option);
+
+		var option:Option = new Option('Opponent Pop Up Score',
+			"If checked, The opponent can have ratings appear!",
+			'popupScoreForOp',
+			'bool');
+		addOption(option);
+
+		var option:Option = new Option('Quant Notes',
+			"If checked, Notes will have quant colors like StepMania!",
+			'quantNotes',
 			'bool');
 		addOption(option);
 

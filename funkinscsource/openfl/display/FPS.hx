@@ -29,6 +29,8 @@ class FPS extends TextField
 
 	private var cacheCount:Int;
 
+	public static var stringTimeToReturn:String = '';
+
 	public function new(inX:Float = 10, inY:Float = 10, inCol:Int = 0x000000)
 	{
 		super();
@@ -58,6 +60,10 @@ class FPS extends TextField
 	// Event Handlers
 	private function onEnter(_)
 	{
+		//setup the date
+		if (ClientPrefs.data.dateDisplay)
+			DateSetup.initDate();
+
 		var now = Timer.stamp();
 
 		times.push(now);
@@ -119,10 +125,13 @@ class FPS extends TextField
 				textColor = 0xFFFF0000;
 			}
 
+			if (!ClientPrefs.data.dateDisplay)
+				stringTimeToReturn = '';
 
 			text = "FPS: "
 			+ '${currentFPS}\n'
 			+ '$memoryUsage'
+			+ '$stringTimeToReturn'
 
 			#if debug
 			+ '$stateText';
@@ -177,5 +186,119 @@ class MemoryUtil
 		#else
 		return System.totalMemory;
 		#end
+	}
+}
+
+class DateSetup
+{
+	public static function initDate()
+	{
+		var date = Date.now();
+		var realYear:String = Std.string(date.getFullYear());
+		var realMonth:String = '';
+		var realDay:String = '';
+		var hourCheck:String = '';
+		var minCheck:String = Std.string(date.getMinutes());
+		var secCheck:String = Std.string(date.getSeconds());
+
+		switch (date.getHours())
+		{
+			case 0:
+				hourCheck = (ClientPrefs.data.militaryTime ? '0' : '12 AM');
+			case 1:
+				hourCheck = (ClientPrefs.data.militaryTime ? '1' : '1 AM');
+			case 2:
+				hourCheck = (ClientPrefs.data.militaryTime ? '2' : '2 AM');
+			case 3:
+				hourCheck = (ClientPrefs.data.militaryTime ? '3' : '3 AM');
+			case 4:
+				hourCheck = (ClientPrefs.data.militaryTime ? '4' : '4 AM');
+			case 5:
+				hourCheck = (ClientPrefs.data.militaryTime ? '5' : '5 AM');
+			case 6:
+				hourCheck = (ClientPrefs.data.militaryTime ? '6' : '6 AM');
+			case 7:
+				hourCheck = (ClientPrefs.data.militaryTime ? '7' : '7 AM');
+			case 8:
+				hourCheck = (ClientPrefs.data.militaryTime ? '8' : '8 AM');
+			case 9:
+				hourCheck = (ClientPrefs.data.militaryTime ? '9' : '9 AM');
+			case 10:
+				hourCheck = (ClientPrefs.data.militaryTime ? '10' : '10 AM');
+			case 11:
+				hourCheck = (ClientPrefs.data.militaryTime ? '11' : '11 AM');
+			case 12:
+				hourCheck = (ClientPrefs.data.militaryTime ? '12' : '12 PM');
+			case 13:
+				hourCheck = (ClientPrefs.data.militaryTime ? '13' : '1 PM');
+			case 14:
+				hourCheck = (ClientPrefs.data.militaryTime ? '14' : '2 PM');
+			case 15:
+				hourCheck = (ClientPrefs.data.militaryTime ? '15' : '3 PM');
+			case 16:
+				hourCheck = (ClientPrefs.data.militaryTime ? '16' : '4 PM');
+			case 17:
+				hourCheck = (ClientPrefs.data.militaryTime ? '17' : '5 PM');
+			case 18:
+				hourCheck = (ClientPrefs.data.militaryTime ? '18' : '6 PM');
+			case 19:
+				hourCheck = (ClientPrefs.data.militaryTime ? '19' : '7 PM');
+			case 20:
+				hourCheck = (ClientPrefs.data.militaryTime ? '20' : '8 PM');
+			case 21:
+				hourCheck = (ClientPrefs.data.militaryTime ? '21' : '9 PM');
+			case 22:
+				hourCheck = (ClientPrefs.data.militaryTime ? '22' : '10 PM');
+			case 23:
+				hourCheck = (ClientPrefs.data.militaryTime ? '23' : '11 PM');
+		}
+
+		switch (date.getDay())
+		{
+			case 0:
+				realDay = (ClientPrefs.data.dayAsInt ? '7' : 'Sunday');
+			case 1:
+				realDay = (ClientPrefs.data.dayAsInt ? '1' : 'Monday');
+			case 2:
+				realDay = (ClientPrefs.data.dayAsInt ? '2' : 'Tuesday');
+			case 3:
+				realDay = (ClientPrefs.data.dayAsInt ? '3' : 'Wednesday');
+			case 4:
+				realDay = (ClientPrefs.data.dayAsInt ? '4' : 'Thursday');
+			case 5:
+				realDay = (ClientPrefs.data.dayAsInt ? '5' : 'Friday');
+			case 6:
+				realDay = (ClientPrefs.data.dayAsInt ? '6' : 'Saturday');
+		}
+
+		switch (date.getMonth())
+		{
+			case 0:
+				realMonth = (ClientPrefs.data.monthAsInt ? '1' : 'January');
+			case 1:
+				realMonth = (ClientPrefs.data.monthAsInt ? '2' : 'February');
+			case 2:
+				realMonth = (ClientPrefs.data.monthAsInt ? '3' : 'March');
+			case 3:
+				realMonth = (ClientPrefs.data.monthAsInt ? '4' : 'April');
+			case 4:
+				realMonth = (ClientPrefs.data.monthAsInt ? '5' : 'May');
+			case 5:
+				realMonth = (ClientPrefs.data.monthAsInt ? '6' : 'June');
+			case 6:
+				realMonth = (ClientPrefs.data.monthAsInt ? '7' : 'July');
+			case 7:
+				realMonth = (ClientPrefs.data.monthAsInt ? '8' : 'August');
+			case 8:
+				realMonth = (ClientPrefs.data.monthAsInt ? '9' : 'September');
+			case 9:
+				realMonth = (ClientPrefs.data.monthAsInt ? '10' : 'October');
+			case 10:
+				realMonth = (ClientPrefs.data.monthAsInt ? '11' : 'November');
+			case 11:
+				realMonth = (ClientPrefs.data.monthAsInt ? '12' : 'December');
+		}
+
+		return FPS.stringTimeToReturn = '\nDATE: (Year: $realYear | Month: $realMonth | Day: $realDay | Hour: $hourCheck | Min: $minCheck | Sec: $secCheck)';
 	}
 }

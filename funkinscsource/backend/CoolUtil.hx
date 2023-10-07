@@ -18,9 +18,12 @@ class CoolUtil
 	inline public static function quantize(f:Float, snap:Float){
 		// changed so this actually works lol
 		var m:Float = Math.fround(f * snap);
-		trace(snap);
+		Debug.logTrace(snap);
 		return (m / snap);
 	}
+
+	inline public static function curveNumber(input:Float = 1, ?curve:Float = 10):Float
+		return Math.sqrt(input)*curve;
 
 	inline public static function clamp(value:Float, min:Float, max:Float):Float
 		return Math.max(min, Math.min(max, value));
@@ -59,6 +62,18 @@ class CoolUtil
 
 	inline public static function boundTo(value:Float, min:Float, max:Float):Float {
 		return Math.max(min, Math.min(max, value));
+	}
+
+	public static function coolTextFile2(path:String):Array<String>
+	{
+		var daList:Array<String> = File.getContent(path).trim().split('\n');
+
+		for (i in 0...daList.length)
+		{
+			daList[i] = daList[i].trim();
+		}
+
+		return daList;
 	}
 
 	inline public static function coolTextFile(path:String):Array<String>

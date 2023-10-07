@@ -1,13 +1,13 @@
 package options;
 
 import objects.Note;
-import objects.StrumNote;
+import objects.StrumArrow;
 import objects.Alphabet;
 
 class VisualsUISubState extends BaseOptionsMenu
 {
 	var noteOptionID:Int = -1;
-	var notes:FlxTypedGroup<StrumNote>;
+	var notes:FlxTypedGroup<StrumArrow>;
 	var notesTween:Array<FlxTween> = [];
 	var noteY:Float = 90;
 	public function new()
@@ -16,13 +16,17 @@ class VisualsUISubState extends BaseOptionsMenu
 		rpcTitle = 'Visuals & UI Settings Menu'; //for Discord Rich Presence
 
 		// for note skins
-		notes = new FlxTypedGroup<StrumNote>();
+		notes = new FlxTypedGroup<StrumArrow>();
 		for (i in 0...Note.colArray.length)
 		{
-			var note:StrumNote = new StrumNote(370 + (560 / Note.colArray.length) * i, -200, i, 0);
+			var note:StrumArrow = new StrumArrow((ClientPrefs.data.middleScroll ? 370 + (560 / Note.colArray.length) * i : 620 + (560 / Note.colArray.length) * i ), !ClientPrefs.data.downScroll ? -200 : 760, i, 0, 'noteSkins/NOTE_assets' + Note.getNoteSkinPostfix());
 			note.centerOffsets();
 			note.centerOrigin();
-			note.playAnim('static');
+			//note.loadNoteAnims('noteSkins/NOTE_assets' + Note.getNoteSkinPostfix(), true);
+			//note.playAnim('static');
+			note.loadLane();
+			note.bgLane.updateHitbox();
+			note.bgLane.scrollFactor.set();
 			notes.add(note);
 		}
 
@@ -71,11 +75,21 @@ class VisualsUISubState extends BaseOptionsMenu
 		option.decimals = 1;
 		addOption(option);
 
-		var option:Option = new Option('HUD style:',
-		"What HUD you like more??.",
-		'hudStyle',
-		'string',
-		['PSYCH', 'GLOW_KADE', 'HITMANS']);
+		var option:Option = new Option('Note Lanes Opacity',
+			'How much transparent should the lanes under the notes be?',
+			'laneTransparency',
+			'percent');
+		option.scrollSpeed = 1.6;
+		option.minValue = 0.0;
+		option.maxValue = 1;
+		option.changeValue = 0.1;
+		option.decimals = 1;
+		addOption(option);
+
+		var option:Option = new Option('Note Splash Opacity As Strum Opacity',
+			'Should splashes be transparent as strums?',
+			'splashAlphaAsStrumAlpha',
+			'bool');
 		addOption(option);
 
 		var option:Option = new Option('Hide HUD',
@@ -83,12 +97,26 @@ class VisualsUISubState extends BaseOptionsMenu
 			'hideHud',
 			'bool');
 		addOption(option);
+
+		var option:Option = new Option('HUD style:',
+			"What HUD you like more??.",
+			'hudStyle',
+			'string',
+			['PSYCH', 'GLOW_KADE', 'HITMANS']);
+		addOption(option);
 		
 		var option:Option = new Option('Time Bar:',
 			"What should the Time Bar display?",
 			'timeBarType',
 			'string',
 			['Time Left', 'Time Elapsed', 'Song Name', 'Disabled']);
+		addOption(option);
+
+		var option:Option = new Option('Time Bar Color:',
+			"What colors should the Time Bar display?",
+			'colorBarType',
+			'string',
+			['No Colors', 'Main Colors', 'Reversed Colors']);
 		addOption(option);
 
 		var option:Option = new Option('Flashing Lights',
@@ -127,21 +155,6 @@ class VisualsUISubState extends BaseOptionsMenu
 		option.decimals = 1;
 		addOption(option);
 		
-		#if !mobile
-		var option:Option = new Option('FPS Counter',
-			'If unchecked, hides FPS Counter.',
-			'showFPS',
-			'bool');
-		addOption(option);
-		option.onChange = onChangeFPSCounter;
-
-		var option:Option = new Option('Memeory Display',
-			'If unchecked, Memory is displayed in counter.',
-			'memoryDisplay',
-			'bool');
-		addOption(option);
-		#end
-		
 		var option:Option = new Option('Pause Screen Song:',
 			"What song do you prefer for the Pause Screen?",
 			'pauseMusic',
@@ -178,6 +191,42 @@ class VisualsUISubState extends BaseOptionsMenu
 			'bool');
 		addOption(option);
 
+		var option:Option = new Option('Game Combo',
+			"If checked, Combo UI will be automated to camGame (stage, pl, op, gf)",
+			'gameCombo',
+			'bool');
+		addOption(option);
+
+		var option:Option = new Option('Show Combo',
+			"If checked, Combo Sprite will appear when note is hit.",
+			'showCombo',
+			'bool');
+		addOption(option);
+
+		var option:Option = new Option('Show Combo Num',
+			"If checked, Combo Number Sprite will appear when note is hit.",
+			'showComboNum',
+			'bool');
+		addOption(option);
+
+		var option:Option = new Option('Show Rating',
+			"If checked, Rating Sprite will appear when note is hit.",
+			'showRating',
+			'bool');
+		addOption(option);
+
+		var option:Option = new Option('Voiid Chronicles BreakTimer',
+			"If checked, A timer will appear to tell you when next notes are.",
+			'breakTimer',
+			'bool');
+		addOption(option);
+
+		var option:Option = new Option('Lights Opponent Strums Notes',
+			'If unchecked, opponent Strums wont light up.',
+			'LightUpStrumsOP',
+			'bool');
+		addOption(option);
+
 		super();
 		add(notes);
 	}
@@ -190,12 +239,12 @@ class VisualsUISubState extends BaseOptionsMenu
 
 		for (i in 0...Note.colArray.length)
 		{
-			var note:StrumNote = notes.members[i];
+			var note:StrumArrow = notes.members[i];
 			if(notesTween[i] != null) notesTween[i].cancel();
 			if(curSelected == noteOptionID)
-				notesTween[i] = FlxTween.tween(note, {y: noteY}, Math.abs(note.y / (200 + noteY)) / 3, {ease: FlxEase.quadInOut});
+				notesTween[i] = FlxTween.tween(note, {y: ClientPrefs.data.downScroll ? 420 : noteY}, Math.abs(note.y / (200 + noteY)) / 3, {ease: FlxEase.quadInOut});
 			else
-				notesTween[i] = FlxTween.tween(note, {y: -200}, Math.abs(note.y / (200 + noteY)) / 3, {ease: FlxEase.quadInOut});
+				notesTween[i] = FlxTween.tween(note, {y: ClientPrefs.data.downScroll ? 760 : -200}, Math.abs(note.y / (200 + noteY)) / 3, {ease: FlxEase.quadInOut});
 		}
 	}
 
@@ -220,35 +269,28 @@ class VisualsUISubState extends BaseOptionsMenu
 
 	function onChangeNoteSkin()
 	{
-		notes.forEachAlive(function(note:StrumNote) {
+		notes.forEachAlive(function(note:StrumArrow) {
 			changeNoteSkin(note);
 			note.centerOffsets();
 			note.centerOrigin();
 		});
 	}
 
-	function changeNoteSkin(note:StrumNote)
+	function changeNoteSkin(note:StrumArrow)
 	{
 		var skin:String = Note.defaultNoteSkin;
 		var customSkin:String = skin + Note.getNoteSkinPostfix();
 		if(Paths.fileExists('images/$customSkin.png', IMAGE)) skin = customSkin;
 
 		note.texture = skin; //Load texture and anims
-		note.reloadNote();
+		note.daStyle = skin;
+		note.reloadNote(skin);
 		note.playAnim('static');
 	}
 
 	override function destroy()
 	{
-		if(changedMusic && !OptionsState.onPlayState) FlxG.sound.playMusic(Paths.music('freakyMenu'), 1, true);
+		if(changedMusic && !OptionsState.onPlayState) FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"), 1, true);
 		super.destroy();
 	}
-
-	#if !mobile
-	function onChangeFPSCounter()
-	{
-		if(Main.fpsVar != null)
-			Main.fpsVar.visible = ClientPrefs.data.showFPS;
-	}
-	#end
 }

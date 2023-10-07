@@ -4,7 +4,7 @@ import flixel.addons.ui.FlxUIState;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.FlxState;
 
-class MusicBeatState extends modcharting.ModchartMusicBeatState
+class MusicBeatState extends #if modchartingTools modcharting.ModchartMusicBeatState #else FlxUIState #end
 {
 	private var curSection:Int = 0;
 	private var stepsToDo:Int = 0;
@@ -15,6 +15,9 @@ class MusicBeatState extends modcharting.ModchartMusicBeatState
 	private var curDecStep:Float = 0;
 	private var curDecBeat:Float = 0;
 	public var controls(get, never):Controls;
+
+	public static var subStates:Array<MusicBeatSubstate> = [];
+
 	private function get_controls()
 	{
 		return Controls.instance;
@@ -23,6 +26,28 @@ class MusicBeatState extends modcharting.ModchartMusicBeatState
 	public static var camBeat:FlxCamera;
 
 	var mouseCursor:FlxSprite;
+
+	override public function destroy()
+	{
+		if (subStates != null)
+		{
+			while (subStates.length > 5)
+			{
+				var subState:MusicBeatSubstate = subStates[0];
+				if (subState != null)
+				{
+					Debug.logTrace('Destroying Substates!');
+					subStates.remove(subState);
+					subState.destroy();
+				}
+				subState = null;
+			}
+
+			subStates.resize(0);
+		}
+
+		super.destroy();
+	}
 
 	override function create() {
 		/*switch (FlxG.random.int(0, 1))
@@ -33,6 +58,8 @@ class MusicBeatState extends modcharting.ModchartMusicBeatState
 				mouseCursor = new FlxSprite().loadGraphic(Paths.image('Default/noteCursor'));
 		} 
 		FlxG.mouse.load(mouseCursor.pixels);*/
+
+		destroySubStates = false;
 		FlxG.mouse.enabled = true;
 		FlxG.mouse.visible = true;
 		camBeat = FlxG.camera;
@@ -81,6 +108,57 @@ class MusicBeatState extends modcharting.ModchartMusicBeatState
 		super.update(elapsed);
 
 		//checkYourMouse(elapsed, this);
+	}
+
+	var trackedBPMChanges:Int = 0;
+	/**
+	 * A handy function to calculate how many seconds it takes for the given steps to all be hit.
+	 * 
+	 * This function takes the future BPM into account.
+	 * If you feel this is not necessary, use `stepsToSecs_simple` instead.
+	 * @param targetStep The step value to calculate with.
+	 * @param isFixedStep If true, calculation will assume `targetStep` is not being calculated as in "after `targetStep` steps", but rather as in "time until `targetStep` is hit".
+	 * @return The amount of seconds as a float.
+	 */
+	inline public function stepsToSecs(targetStep:Int, isFixedStep:Bool = false):Float {
+		final playbackRate:Single = PlayState.instance != null ? PlayState.instance.playbackRate : 1;
+		function calc(stepVal:Single, crochetBPM:Int = -1) {
+			return ((crochetBPM == -1 ? Conductor.calculateCrochet(Conductor.bpm)/4 : Conductor.calculateCrochet(crochetBPM)/4) * (stepVal - curStep)) / 1000;
+		}
+
+		final realStep:Single = isFixedStep ? targetStep : targetStep + curStep;
+		var secRet:Float = calc(realStep);
+
+		for(i in 0...Conductor.bpmChangeMap.length - trackedBPMChanges) {
+			var nextChange = Conductor.bpmChangeMap[trackedBPMChanges+i];
+			if(realStep < nextChange.stepTime) break;
+
+			final diff = realStep - nextChange.stepTime;
+			if(i == 0) secRet -= calc(diff);
+			else secRet -= calc(diff, Std.int(Conductor.bpmChangeMap[(trackedBPMChanges+i) - 1].bpm)); //calc away bpm from before, not beginning bpm
+
+			secRet += calc(diff, Std.int(nextChange.bpm));
+		}
+		//trace(secRet);
+		return secRet / playbackRate;
+	}
+
+	inline public function beatsToSecs(targetBeat:Int, isFixedBeat:Bool = false):Float
+		return stepsToSecs(targetBeat * 4, isFixedBeat);
+
+	/**
+	 * A handy function to calculate how many seconds it takes for the given steps to all be hit.
+	 * 
+	 * This function does not take the future BPM into account.
+	 * If you need to account for BPM, use `stepsToSecs` instead.
+	 * @param targetStep The step value to calculate with.
+	 * @param isFixedStep If true, calculation will assume `targetStep` is not being calculated as in "after `targetStep` steps", but rather as in "time until `targetStep` is hit".
+	 * @return The amount of seconds as a float.
+	 */
+	inline public function stepsToSecs_simple(targetStep:Int, isFixedStep:Bool = false):Float {
+		final playbackRate:Single = PlayState.instance != null ? PlayState.instance.playbackRate : 1;
+
+		return ((Conductor.stepCrochet * (isFixedStep ? targetStep : curStep + targetStep)) / 1000) / playbackRate;
 	}
 
 	private function updateSection():Void
@@ -182,7 +260,7 @@ class MusicBeatState extends modcharting.ModchartMusicBeatState
 	public var stages:Array<BaseStage> = [];
 	public function beatHit():Void
 	{
-		//trace('Beat: ' + curBeat);
+		//Debug.logTrace('Beat: ' + curBeat);
 		stagesFunc(function(stage:BaseStage) {
 			stage.curBeat = curBeat;
 			stage.curDecBeat = curDecBeat;
@@ -192,7 +270,7 @@ class MusicBeatState extends modcharting.ModchartMusicBeatState
 
 	public function sectionHit():Void
 	{
-		//trace('Section: ' + curSection + ', Beat: ' + curBeat + ', Step: ' + curStep);
+		//Debug.logTrace('Section: ' + curSection + ', Beat: ' + curBeat + ', Step: ' + curStep);
 		stagesFunc(function(stage:BaseStage) {
 			stage.curSection = curSection;
 			stage.sectionHit();

@@ -35,42 +35,42 @@ class ModchartFuncs
     {
         #if PSYCH
         #if LUA_ALLOWED
-        Lua_helper.add_callback(parent.lua, 'startMod', function(name:String, modClass:String, type:String = '', pf:Int = -1){
+        parent.set('startMod', function(name:String, modClass:String, type:String = '', pf:Int = -1){
             startMod(name,modClass,type,pf);
 
             PlayState.instance.playfieldRenderer.modifierTable.reconstructTable(); //needs to be reconstructed for lua modcharts
         });
-        Lua_helper.add_callback(parent.lua, 'setMod', function(name:String, value:Float){
+        parent.set('setMod', function(name:String, value:Float){
             setMod(name, value);
         });
-        Lua_helper.add_callback(parent.lua, 'setSubMod', function(name:String, subValName:String, value:Float){
+        parent.set('setSubMod', function(name:String, subValName:String, value:Float){
             setSubMod(name, subValName,value);
         });
-        Lua_helper.add_callback(parent.lua, 'setModTargetLane', function(name:String, value:Int){
+        parent.set('setModTargetLane', function(name:String, value:Int){
             setModTargetLane(name, value);
         });
-        Lua_helper.add_callback(parent.lua, 'setModPlayfield', function(name:String, value:Int){
+        parent.set('setModPlayfield', function(name:String, value:Int){
             setModPlayfield(name,value);
         });
-        Lua_helper.add_callback(parent.lua, 'addPlayfield', function(?x:Float = 0, ?y:Float = 0, ?z:Float = 0){
+        parent.set('addPlayfield', function(?x:Float = 0, ?y:Float = 0, ?z:Float = 0){
             addPlayfield(x,y,z);
         });
-        Lua_helper.add_callback(parent.lua, 'removePlayfield', function(idx:Int){
+        parent.set('removePlayfield', function(idx:Int){
             removePlayfield(idx);
         });
-        Lua_helper.add_callback(parent.lua, 'tweenModifier', function(modifier:String, val:Float, time:Float, ease:String){
+        parent.set('tweenModifier', function(modifier:String, val:Float, time:Float, ease:String){
             tweenModifier(modifier,val,time,ease);
         });
-        Lua_helper.add_callback(parent.lua, 'tweenModifierSubValue', function(modifier:String, subValue:String, val:Float, time:Float, ease:String){
+        parent.set('tweenModifierSubValue', function(modifier:String, subValue:String, val:Float, time:Float, ease:String){
             tweenModifierSubValue(modifier,subValue,val,time,ease);
         });
-        Lua_helper.add_callback(parent.lua, 'setModEaseFunc', function(name:String, ease:String){
+        parent.set('setModEaseFunc', function(name:String, ease:String){
             setModEaseFunc(name,ease);
         });
-        Lua_helper.add_callback(parent.lua, 'set', function(beat:Float, argsAsString:String){
+        parent.set('set', function(beat:Float, argsAsString:String){
             set(beat, argsAsString);
         });
-        Lua_helper.add_callback(parent.lua, 'ease', function(beat:Float, time:Float, easeStr:String, argsAsString:String){
+        parent.set('ease', function(beat:Float, time:Float, easeStr:String, argsAsString:String){
 
             ease(beat, time, easeStr, argsAsString);
             
@@ -174,8 +174,11 @@ class ModchartFuncs
         {
             instance.playfieldRenderer.modchart.data.events.push(["set", [0, value+","+name+":"+subValName]]);
         }
-        if (instance.playfieldRenderer.modifierTable.modifiers.exists(name))
-            instance.playfieldRenderer.modifierTable.modifiers.get(name).subValues.get(subValName).value = value;
+        if (instance.playfieldRenderer.modifiers.exists(name))
+            if (instance.playfieldRenderer.modifiers.get(name).subValues.exists(subValName))
+                instance.playfieldRenderer.modifiers.get(name).subValues.get(subValName).value = value;
+            else
+                instance.playfieldRenderer.modifiers.get(name).subValues.set(subValName,new Modifier.ModifierSubValue(value));
     }
     public static function setModTargetLane(name:String, value:Int, ?instance:ModchartMusicBeatState = null)
     {

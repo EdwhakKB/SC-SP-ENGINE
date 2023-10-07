@@ -12,7 +12,7 @@ import game.Note;
 import game.Conductor;
 #else 
 import objects.Note;
-import objects.StrumNote;
+import objects.StrumArrow;
 #end
 
 using StringTools;
@@ -73,10 +73,23 @@ class ModchartUtil
     {
         if (instance == null)
             return false;
+        var pixelNotes:Bool = false;
+        var pixelStrums:Bool = false;
         #if LEATHER
         return PlayState.SONG.ui_Skin == 'pixel';
         #else 
-        return PlayState.isPixelStage;
+        if (Note.instance != null) 
+            return (Note.instance.containsPixelTexture || Note.instance.texture.contains('pixel') || Note.instance.noteSkin.contains('pixel'));
+        else if (PlayState.instance != null) {
+            for (n in PlayState.instance.notes.members)
+                if (n.texture.contains('pixel') || n.noteSkin.contains('pixel'))
+                    pixelNotes = true;
+            for (i in PlayState.instance.strumLineNotes.members)
+                if (i.texture.contains('pixel') || i.daStyle.contains('pixel'))
+                    pixelStrums = true;
+            return (pixelStrums && pixelNotes);
+        }
+        else return PlayState.isPixelStage;
         #end
     }
 
@@ -126,10 +139,10 @@ class ModchartUtil
         else return daNote.skew.y;
     }  
 
-    public static function getStrumSkew(strumNote:StrumNote, skewisX:Bool)
+    public static function getStrumSkew(strumArrow:StrumArrow, skewisX:Bool)
     {
-        if (skewisX) return strumNote.skew.x;
-        else return strumNote.skew.y;
+        if (skewisX) return strumArrow.skew.x;
+        else return strumArrow.skew.y;
     } 
 
     static var currentFakeCrochet:Float = -1;

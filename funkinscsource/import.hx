@@ -1,13 +1,11 @@
-
+#if !macro
 //Discord API
 #if desktop
 import backend.Discord;
 #end
 
-//Psych
-#if LUA_ALLOWED
-import llua.*;
-import llua.Lua;
+#if ACHIEVEMENTS_ALLOWED
+import backend.Achievements;
 #end
 
 import backend.Paths;
@@ -47,6 +45,8 @@ import flixel.tweens.FlxTween;
 import flixel.group.FlxSpriteGroup;
 import flixel.group.FlxGroup.FlxTypedGroup;
 
-import flixel.addons.effects.FlxSkewedSprite;
+import language.LocalLanguage;
+import psychlua.CustomFlxColor;
 
 using StringTools;
+#end
