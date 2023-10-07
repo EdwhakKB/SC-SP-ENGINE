@@ -773,16 +773,6 @@ class PlayState extends MusicBeatState
 		boyfriend.noteSkinStyleOfCharacter = PlayState.SONG.bfNoteStyle;
 		startCharacterScripts(boyfriend.curCharacter);
 
-		switch (curStage)
-		{
-			case 'somewhere':
-				dad.x -= 300;
-				dad.y += 32;
-				gf.x += 300;
-				gf.y += 100;
-				boyfriend.x += 50;
-		}
-
 		if (boyfriend.deadChar != null)
 			GameOverSubstate.characterName = boyfriend.deadChar;
 		else
