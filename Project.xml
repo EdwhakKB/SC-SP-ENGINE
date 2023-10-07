@@ -144,7 +144,7 @@
 
 	<haxelib name="away3d" />
 
-	<haxelib name="HaxeGJClient" />
+	<!--<haxelib name="HaxeGJClient" />-->
 	<haxelib name="tentools" />
 	<haxelib name="systools" />
 	<ndll name="systools" haxelib="systools" />
