@@ -237,19 +237,27 @@ class Main extends Sprite
 	// Code was entirely made by sqirra-rng for their fnf engine named "Izzy Engine", big props to them!!!
 	// very cool person for real they don't get enough credit for their work
 	#if CRASH_HANDLER
+		
+	static final quotes:Array<String> = [
+	"Ha, a null object reference?", // Slushi
+        "What the fuck you did!?", //Edwhak
+	"CAGASTE." // Slushi
+	];
+	
 	function onCrash(e:UncaughtErrorEvent):Void
 	{
 		updateScreenBeforeCrash(FlxG.fullscreen);
 
-		var errMsg:String = "";
+		var errMsg:String = "Call Stack:\n";
 		var path:String;
 		var callStack:Array<StackItem> = CallStack.exceptionStack(true);
 		var dateNow:String = Date.now().toString();
+		var build = Sys.systemName();
 
 		dateNow = dateNow.replace(" ", "_");
 		dateNow = dateNow.replace(":", "'");
 
-		path = "./crash/" + "PsychEngine_" + dateNow + ".txt";
+		path = "./crash/" + "SCEngine_" + dateNow + ".txt";
 
 		for (stackItem in callStack)
 		{
@@ -262,8 +270,17 @@ class Main extends Sprite
 			}
 		}
 
-		errMsg += "\nUncaught Error: " + e.error + "\nPlease report this error to the GitHub page: https://github.com/ShadowMario/FNF-PsychEngine\n\n> Crash Handler written by: sqirra-rng";
-
+		errMsg += 
+			"\n---------------------"
+			+ "\n" + quotes[Std.random(quotes.length)]
+			+ "\n---------------------"
+			+ "\n\nThis build is running in " + build + "\n(SCE v" + states.MainMenuState.SCEVersion + ")" 
+		 	+ "\nPlease report this error to Github page: https://github.com/EdwhakKB/SC-SP-ENGINE"	 
+			+ "\n\n"
+			+ "Uncaught Error:\n"
+			+ e.error;
+		// Structure of the error message by Slushi
+		
 		if (!FileSystem.exists("./crash/"))
 			FileSystem.createDirectory("./crash/");
 
@@ -272,7 +289,23 @@ class Main extends Sprite
 		Sys.println(errMsg);
 		Sys.println("Crash dump saved in " + Path.normalize(path));
 
-		Application.current.window.alert(errMsg, "Error!");
+		var crashDialoguePath:String = "SCE-CrashDialog";
+	
+		#if windows
+		crashDialoguePath += ".exe";
+		#end
+
+		if (FileSystem.exists(crashDialoguePath))
+		{
+			Debug.logInfo("\nFound crash dialog program " + "[" + crashDialoguePath + "]");
+			new Process(crashDialoguePath, ["xd ", path]);
+		}
+		else
+		{
+			Debug.logInfo("No crash dialog found! Making a simple alert instead...");
+			Application.current.window.alert(errMsg, "Oh no... SC Engine has crashed!");
+		}
+
 		DiscordClient.shutdown();
 		Sys.exit(1);
 	}
