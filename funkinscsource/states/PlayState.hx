@@ -445,6 +445,20 @@ class PlayState extends MusicBeatState
 
 	public var charCacheList:Array<String> = [];
 
+	var quantcolord:Array<FlxColor> = [
+		0xFFFF0000,0xFF0000FF,0xFF800080,0xFFFFFF00,
+        0xFFFF00FF,0xFFFF7300,0xFF00FFDD,0xFF00FF00
+	];
+	var quantcolord2:Array<FlxColor> = [ 
+		0xFF7F0000,0xFF00007F,0xFF400040,0xFF7F7F00,
+        0xFF8A018A,0xFF883D00,0xFF008573,0xFF007F00
+	];
+	var col:Int = 0xFFFFD700;
+	var col2:Int = 0xFFFFD700;
+	
+	var beat:Float = 0;
+	var dataStuff:Float = 0;
+
 	override public function create()
 	{
 		Paths.clearStoredMemory();
@@ -1130,6 +1144,8 @@ class PlayState extends MusicBeatState
 		FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 		callOnScripts('onCreatePost');
 
+		setUpNoteQuant();
+
 		cacheCountdown();
 		cachePopUpScore();
 		if (ClientPrefs.data.popupScoreForOp) cachePopUpScoreOp();
@@ -1177,6 +1193,89 @@ class PlayState extends MusicBeatState
 
 		if (ClientPrefs.data.resultsScreenType == 'KADE') subStates.push(new ResultsScreenKade()); // 0
 	}
+
+	private function round(num:Float, numDecimalPlaces:Int){
+		var mult = 10^numDecimalPlaces;
+		return Math.floor(num * mult + 0.5) / mult;
+	}
+
+	public function setUpNoteQuant()
+	{
+		var bpmChanges = Conductor.bpmChangeMap;
+		var strumTime:Float = 0;
+		var currentBPM = PlayState.SONG.bpm;
+		if (ClientPrefs.data.quantNotes && !PlayState.SONG.disableNoteRGB)
+		{
+			for (note in unspawnNotes) 
+			{
+				strumTime = note.strumTime;
+				var newTime = strumTime;
+				for (i in 1...bpmChanges.length)
+					if (strumTime > bpmChanges[i].songTime){
+						currentBPM = bpmChanges[i].bpm;
+						newTime = strumTime - bpmChanges[i].songTime;
+					}
+				if (note.quantColorsOnNotes && note.rgbShader.enabled){
+					dataStuff = ((currentBPM * (newTime - ClientPrefs.data.noteOffset)) / 1000 / 60);
+					beat = round(dataStuff * 48, 0);
+					if (!note.isSustainNote)
+					{
+						if(beat%(192/4)==0){
+							col = quantcolord[0];
+							col2 = quantcolord2[0];
+						}
+						else if(beat%(192/6)==0){
+							col = quantcolord[1];
+							col2 = quantcolord2[1];
+						}
+						else if(beat%(192/8)==0){
+							col = quantcolord[2];
+							col2 = quantcolord2[2];
+						}
+						else if(beat%(192/12)==0){
+							col = quantcolord[3];
+							col2 = quantcolord2[3];
+						}
+						else if(beat%(192/16)==0){
+							col = quantcolord[4];
+							col2 = quantcolord2[4];
+						}
+						else if(beat%(192/24)==0){
+							col = quantcolord[5];
+							col2 = quantcolord2[5];
+						}
+						else if(beat%(192/32)==0){
+							col = quantcolord[6];
+							col2 = quantcolord2[6];
+						}
+						note.rgbShader.r = col;
+						note.rgbShader.b = col2;
+				
+					}else{
+						note.rgbShader.r = note.prevNote.rgbShader.r;
+						note.rgbShader.b = note.prevNote.rgbShader.b;  
+					}
+				}
+			   
+			
+				for (this2 in opponentStrums)
+				{
+					this2.rgbShader.r = 0xFFFFFFFF;
+					this2.rgbShader.b = 0xFF000000;  
+					this2.rgbShader.enabled = false;
+				}
+				for (this2 in playerStrums)
+				{
+					this2.rgbShader.r = 0xFFFFFFFF;
+					this2.rgbShader.b = 0xFF000000;  
+					this2.rgbShader.enabled = false;
+				}
+			}
+			finishedSetUpQuantStuff = true;
+	    }
+	}
+
+	var finishedSetUpQuantStuff = false;
 
 	public var songInfo:String = '';
 
@@ -3481,6 +3580,20 @@ class PlayState extends MusicBeatState
 		setOnScripts('botPlay', cpuControlled);
 		callOnScripts('onUpdatePost', [elapsed]);
 
+		if (finishedSetUpQuantStuff)
+		{
+			if (ClientPrefs.data.quantNotes && !PlayState.SONG.disableNoteRGB)
+			{
+				for (this2 in playerStrums){
+					if (this2.animation.curAnim.name == 'static'){
+						this2.rgbShader.r = 0xFFFFFFFF;
+						this2.rgbShader.b = 0xFF808080;
+					}
+				}
+			}
+		}
+
+
 		super.update(elapsed);
 	}
 
@@ -5645,6 +5758,14 @@ class PlayState extends MusicBeatState
 		var result:Dynamic = callOnLuas('opponentNoteHit', [notes.members.indexOf(note), Math.abs(note.noteData), note.noteType, note.isSustainNote, note.dType]);
 		if(result != FunkinLua.Function_Stop && result != FunkinLua.Function_StopHScript && result != FunkinLua.Function_StopAll) callOnHScript('opponentNoteHit', [note]);
 
+		if (finishedSetUpQuantStuff)
+		{
+			if (ClientPrefs.data.quantNotes && !PlayState.SONG.disableNoteRGB){
+				opponentStrums.members[note.noteData].rgbShader.r = note.rgbShader.r;
+				opponentStrums.members[note.noteData].rgbShader.b = note.rgbShader.b;
+			}
+		}
+
 		if (!note.isSustainNote)
 		{
 			note.kill();
@@ -5825,6 +5946,14 @@ class PlayState extends MusicBeatState
 			if(result != FunkinLua.Function_Stop && result != FunkinLua.Function_StopHScript && result != FunkinLua.Function_StopAll) callOnHScript('bfNoteHit', [note]);
 			var result:Dynamic = callOnLuas('goodNoteHit', [notes.members.indexOf(note), leData, leType, isSus, leDType]);
 			if(result != FunkinLua.Function_Stop && result != FunkinLua.Function_StopHScript && result != FunkinLua.Function_StopAll) callOnHScript('goodNoteHit', [note]);
+
+			if (finishedSetUpQuantStuff)
+			{
+				if (ClientPrefs.data.quantNotes && !PlayState.SONG.disableNoteRGB){
+					playerStrums.members[leData].rgbShader.r = note.rgbShader.r;
+					playerStrums.members[leData].rgbShader.b = note.rgbShader.b;
+				}
+			}
 
 			if (!note.isSustainNote)
 			{
