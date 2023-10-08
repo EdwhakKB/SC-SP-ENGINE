@@ -3044,7 +3044,7 @@ class ChartingState extends MusicBeatState
 
 		var beats:Float = getSectionBeats(isNextSection ? 1 : 0);
 		note.y = getYfromStrumArrows(daStrumTime - sectionStartTime(), beats);
-		if(isNextSection) note.y += gridBG.height;
+		//if(isNextSection) note.y += gridBG.height;
 		if(note.y < -150) note.y = -150;
 		return note;
 	}
