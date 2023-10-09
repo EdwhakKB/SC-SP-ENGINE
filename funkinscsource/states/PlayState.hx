@@ -1724,7 +1724,7 @@ class PlayState extends MusicBeatState
 
 	//CountDown Stuff
 	public var stageHas3rdIntroAsset:Bool = false;
-	public var stageIntroAssets:Array<String> = [];
+	public var stageIntroAssets:Array<String> = null;
 	public var stageIntroSoundsSuffix:String = '';
 	public var stageIntroSoundsPrefix:String = '';
 
@@ -1745,10 +1745,19 @@ class PlayState extends MusicBeatState
 			}
 		}
 
+		var arrowSetupStuffDAD:String = dad.noteSkin;
+		var arrowSetupStuffBF:String = boyfriend.noteSkin;
+
+		if (boyfriend.noteSkin == null || boyfriend.noteSkin == '' || boyfriend.noteSkin == "")
+			arrowSetupStuffBF = (PlayState.SONG.arrowSkin != null ? PlayState.SONG.arrowSkin : 'noteSkins/NOTE_assets' + Note.getNoteSkinPostfix());
+
+		if (dad.noteSkin == null || dad.noteSkin == '' || dad.noteSkin == "")
+			arrowSetupStuffDAD = (PlayState.SONG.arrowSkin != null ? PlayState.SONG.arrowSkin : 'noteSkins/NOTE_assets' + Note.getNoteSkinPostfix());
+
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.stop();
 
-		if (inst.playing)
+		if (inst != null)
 			inst.stop();
 		if (vocals != null)
 			vocals.stop();
@@ -1760,8 +1769,8 @@ class PlayState extends MusicBeatState
 		if(ret != FunkinLua.Function_Stop) {
 			var skippedAhead = false;
 			if (skipCountdown || startOnTime > 0) skippedAhead = true;
-			setupArrowStuff(0, dad.noteSkin);
-			setupArrowStuff(1, boyfriend.noteSkin);
+			setupArrowStuff(0, arrowSetupStuffDAD);
+			setupArrowStuff(1, arrowSetupStuffBF);
 			updateDefaultPos();
 			if (!arrowsAppeared){
 				appearStrumArrows(skippedAhead ? false : ((!isStoryMode || storyPlaylist.length >= 3 || SONG.songId == 'tutorial') && !skipArrowStartTween));
@@ -2353,7 +2362,12 @@ class PlayState extends MusicBeatState
 				else
 					oldNote = null;
 
-				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, false, (gottaHitNote ? (playerSectionNoteStyle != "" ? playerSectionNoteStyle : noteSkinBF) : (opponentSectionNoteStyle != "" ? opponentSectionNoteStyle : noteSkinDad)));
+				var noteSkinUsed:String = (gottaHitNote ? (playerSectionNoteStyle != "" ? playerSectionNoteStyle : noteSkinBF) : (opponentSectionNoteStyle != "" ? opponentSectionNoteStyle : noteSkinDad));
+
+				if (noteSkinUsed == "" || noteSkinUsed == '' || noteSkinUsed == null)
+					noteSkinUsed = 'noteSkins/NOTE_assets' + Note.getNoteSkinPostfix();
+
+				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, false, noteSkinUsed);
 				swagNote.mustPress = gottaHitNote;
 				swagNote.gfNote = (section.gfSection && (songNotes[1]<4));
 				swagNote.dType = section.dType;
@@ -2385,7 +2399,7 @@ class PlayState extends MusicBeatState
 					{
 						oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
 
-						var sustainNote:Note = new Note(daStrumTime + (anotherStepCrochet * susNote), daNoteData, oldNote, true, (gottaHitNote ? (playerSectionNoteStyle != "" ? playerSectionNoteStyle : noteSkinBF) : (opponentSectionNoteStyle != "" ? opponentSectionNoteStyle : noteSkinDad)));
+						var sustainNote:Note = new Note(daStrumTime + (anotherStepCrochet * susNote), daNoteData, oldNote, true, noteSkinUsed);
 						sustainNote.mustPress = gottaHitNote;
 						sustainNote.gfNote = (section.gfSection && (songNotes[1]<4));
 						sustainNote.dType = swagNote.dType;
@@ -2688,12 +2702,12 @@ class PlayState extends MusicBeatState
 		{
 			var targetAlpha:Float = 1;
 			
-			if (babyArrow.player < 1)
+			if (babyArrow.player < 1 && !opponentMode)
 			{
 				if (ClientPrefs.data.middleScroll)
 					targetAlpha = 0.35;
 			}
-			else if (babyArrow.player > 0)
+			else if (babyArrow.player > 0 && opponentMode)
 			{
 				if (ClientPrefs.data.middleScroll)
 					targetAlpha = 0.35;
@@ -3929,17 +3943,29 @@ class PlayState extends MusicBeatState
 
 				if (!SONG.notITG && !notITGMod)
 				{
-					for (n in notes.members)
+					if (boyfriend.noteSkin != null || dad.noteSkin != null)
 					{
-						n.texture = (n.mustPress ? boyfriend.noteSkin : dad.noteSkin);
-						n.noteSkin = (n.mustPress ? boyfriend.noteSkin : dad.noteSkin);
-						n.reloadNote(n.noteSkin);
-					}
-					for (i in strumLineNotes.members)
-					{
-						i.texture = (i.player == 1 ? boyfriend.noteSkin : dad.noteSkin);
-						i.daStyle = (i.player == 1 ? boyfriend.noteSkin : dad.noteSkin);
-						i.reloadNote(i.daStyle);
+						for (n in notes.members)
+						{
+							n.texture = (n.mustPress ? boyfriend.noteSkin : dad.noteSkin);
+							n.noteSkin = (n.mustPress ? boyfriend.noteSkin : dad.noteSkin);
+							n.reloadNote(n.noteSkin);
+						}
+						for (i in strumLineNotes.members)
+						{
+							i.texture = (i.player == 1 ? boyfriend.noteSkin : dad.noteSkin);
+							i.daStyle = (i.player == 1 ? boyfriend.noteSkin : dad.noteSkin);
+							i.reloadNote(i.daStyle);
+						}
+					}else{
+						switch (charType)
+						{
+
+							case 0:
+								Debug.logInfo('NoteSkin for boyfriend is null');
+							case 1:
+								Debug.logInfo('NoteSkin for dad is null');
+						}
 					}
 				}
 
