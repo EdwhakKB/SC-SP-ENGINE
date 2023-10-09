@@ -784,8 +784,7 @@ class PlayState extends MusicBeatState
 		if (SONG.player4 == '' || SONG.player4 == "" || SONG.player4 == null){
 			mom.alpha = 0;
 			mom.visible = false;
-			remove(mom);
-			mom.destroy();
+			mom = null;
 		}
 
 		boyfriend = new Character(0, 0, SONG.player1, true);
