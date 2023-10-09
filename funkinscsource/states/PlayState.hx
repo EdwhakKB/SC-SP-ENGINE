@@ -1754,11 +1754,20 @@ class PlayState extends MusicBeatState
 		var arrowSetupStuffDAD:String = dad.noteSkin;
 		var arrowSetupStuffBF:String = boyfriend.noteSkin;
 
-		if (boyfriend.noteSkin == null || boyfriend.noteSkin == '' || boyfriend.noteSkin == "")
-			arrowSetupStuffBF = (PlayState.SONG.arrowSkin != null ? PlayState.SONG.arrowSkin : 'noteSkins/NOTE_assets' + Note.getNoteSkinPostfix());
+		var songArrowSkins:Bool = true;
 
-		if (dad.noteSkin == null || dad.noteSkin == '' || dad.noteSkin == "")
-			arrowSetupStuffDAD = (PlayState.SONG.arrowSkin != null ? PlayState.SONG.arrowSkin : 'noteSkins/NOTE_assets' + Note.getNoteSkinPostfix());
+		if (PlayState.SONG.arrowSkin == null || PlayState.SONG.arrowSkin == '' || PlayState.SONG.arrowSkin == "")
+			songArrowSkins = false;
+
+		if (arrowSetupStuffBF == null || arrowSetupStuffBF == '' || arrowSetupStuffBF == "")
+			arrowSetupStuffBF = (!songArrowSkins ? 'noteSkins/NOTE_assets' : PlayState.SONG.arrowSkin);
+		else
+			arrowSetupStuffBF = boyfriend.noteSkin;
+
+		if (arrowSetupStuffDAD == null || arrowSetupStuffDAD == '' || arrowSetupStuffDAD == "")
+			arrowSetupStuffDAD = (!songArrowSkins ? 'noteSkins/NOTE_assets' : PlayState.SONG.arrowSkin);
+		else
+			arrowSetupStuffDAD = dad.noteSkin;
 
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.stop();
@@ -2371,7 +2380,7 @@ class PlayState extends MusicBeatState
 				var noteSkinUsed:String = (gottaHitNote ? (playerSectionNoteStyle != "" ? playerSectionNoteStyle : noteSkinBF) : (opponentSectionNoteStyle != "" ? opponentSectionNoteStyle : noteSkinDad));
 
 				if (noteSkinUsed == "" || noteSkinUsed == '' || noteSkinUsed == null)
-					noteSkinUsed = 'noteSkins/NOTE_assets' + Note.getNoteSkinPostfix();
+					noteSkinUsed = 'noteSkins/NOTE_assets';
 
 				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, false, noteSkinUsed);
 				swagNote.mustPress = gottaHitNote;
