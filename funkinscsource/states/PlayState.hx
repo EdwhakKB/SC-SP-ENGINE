@@ -3741,10 +3741,12 @@ class PlayState extends MusicBeatState
 
 				paused = true;
 
-				vocals.stop();
 				inst.stop();
 				inst.volume = 0;
-				vocals.volume = 0;
+				if (SONG.needsVoices){
+					vocals.volume = 0;
+					vocals.stop();
+				}
 
 				persistentUpdate = false;
 				persistentDraw = false;
@@ -4550,8 +4552,10 @@ class PlayState extends MusicBeatState
 		updateTime = false;
 		inst.volume = 0;
 		inst.pause();
-		vocals.volume = 0;
-		vocals.pause();
+		if (SONG.needsVoices){
+			vocals.volume = 0;
+			vocals.pause();
+		}
 		if(ClientPrefs.data.noteOffset <= 0 || ignoreNoteOffset) {
 			endCallback();
 		} else {
@@ -4599,8 +4603,10 @@ class PlayState extends MusicBeatState
 
 		inst.volume = 0;
 		inst.stop();
-		vocals.volume = 0;
-		vocals.stop();
+		if (SONG.needsVoices){
+			vocals.volume = 0;
+			vocals.stop();
+		}
 
 		#if ACHIEVEMENTS_ALLOWED
 		var weekNoMiss:String = WeekData.getWeekFileName() + '_nomiss';
@@ -5602,7 +5608,8 @@ class PlayState extends MusicBeatState
 
 		if(instakillOnMiss)
 		{
-			vocals.volume = 0;
+			if (SONG.needsVoices)
+				vocals.volume = 0;
 			doDeathCheck(true);
 		}
 		combo = 0;
@@ -5669,7 +5676,8 @@ class PlayState extends MusicBeatState
 				gf.specialAnim = true;
 			}
 		}
-		vocals.volume = 0;
+		if (SONG.needsVoices)
+			vocals.volume = 0;
 	}
 
 	public var comboOp:Int = 0;
@@ -6161,14 +6169,16 @@ class PlayState extends MusicBeatState
 
 		if (curStep % 64 == 60 && SONG.songId.toLowerCase() == 'tutorial' && dad.curCharacter == 'gf' && curStep > 64 && curStep < 192)
 		{
-			if (vocals.volume != 0)
-			{
-				boyfriend.playAnim('hey', true);
-				boyfriend.specialAnim = true;
-				boyfriend.heyTimer = 0.6;
-				dad.playAnim('cheer', true);
-				dad.specialAnim = true;
-				dad.heyTimer = 0.6;
+			if (SONG.needsVoices){
+				if (vocals.volume != 0)
+				{
+					boyfriend.playAnim('hey', true);
+					boyfriend.specialAnim = true;
+					boyfriend.heyTimer = 0.6;
+					dad.playAnim('cheer', true);
+					dad.specialAnim = true;
+					dad.heyTimer = 0.6;
+				}
 			}
 		}
 
