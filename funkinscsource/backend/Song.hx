@@ -134,6 +134,7 @@ class Song
 			}
 		}
 
+		if (songJson.arrowSkin == '' || songJson.arrowSkin == "" || songJson.arrowSkin == null) songJson.arrowSkin = "noteSkins/NOTE_assets" + Note.getNoteSkinPostfix();
 		if(songJson.song != null && songJson.songId == null) songJson.songId = songJson.song;
 		else if(songJson.songId != null && songJson.song == null) songJson.song = songJson.songId;
 	}
@@ -191,6 +192,7 @@ class Song
 		var songJson:Dynamic = parseJSONshit(rawJson);
 		if(songJson.song != null && songJson.songId == null) songJson.songId = songJson.song;
 		else if(songJson.songId != null && songJson.song == null) songJson.song = songJson.songId;
+		if (songJson.arrowSkin == '' || songJson.arrowSkin == "" || songJson.arrowSkin == null) songJson.arrowSkin = "noteSkins/NOTE_assets" + Note.getNoteSkinPostfix();
 		if(jsonInput != 'events') StageData.loadDirectory(songJson);
 		onLoadJson(songJson);
 		return songJson;
