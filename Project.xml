@@ -243,5 +243,4 @@
 	<config:hxtelemetry host="192.168.100.68" allocations="false" />
 
 	<assets path="SCE-CrashDialog.exe" type="template" if="windows release" />
-    <assets path="SCE-CrashDialog" type="template" if="linux release" />
 </project>
