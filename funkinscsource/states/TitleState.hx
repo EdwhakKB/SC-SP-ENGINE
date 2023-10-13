@@ -30,7 +30,6 @@ import gamejolt.GameJoltAPI;
 import sys.thread.Mutex;
 import flixel.graphics.FlxGraphic;
 import openfl.display.FPS;
-import cpp.CPPInterface;
 
 typedef TitleData =
 {
