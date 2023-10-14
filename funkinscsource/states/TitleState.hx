@@ -120,13 +120,8 @@ class TitleState extends MusicBeatState
 		GameJoltAPI.authDaUser(ClientPrefs.data.gjUser, ClientPrefs.data.gjToken);
 
 		Highscore.load();
-
+		
 		FlxG.worldBounds.set(0, 0);
-
-		#if cpp
-		cpp.NativeGc.enable(true);
-		cpp.NativeGc.run(true);
-		#end
 
 		Assets.cache.enabled = true;
 
@@ -160,7 +155,6 @@ class TitleState extends MusicBeatState
 		{
 			StoryMenuState.weekCompleted = FlxG.save.data.weekCompleted;
 		}
-
 		FlxG.mouse.visible = false;
 
 		bg = new FlxSprite();
@@ -172,12 +166,13 @@ class TitleState extends MusicBeatState
 				bg.antialiasing = false;
 			else
 				bg.antialiasing = ClientPrefs.data.antialiasing;
+		}else{
+			bg.makeGraphic(FlxG.width, FlxG.height, 0xFF000000);
 		}
 
 		// bg.setGraphicSize(Std.int(bg.width * 0.6));
 		// bg.updateHitbox();
-		if (titleJSON.backgroundSprite != null)
-			add(bg);
+		add(bg);
 
 		logoBl = new FlxSprite(titleJSON.titlex, titleJSON.titley);
 		logoBl.frames = Paths.getSparrowAtlas('logoBumpin');
@@ -288,6 +283,15 @@ class TitleState extends MusicBeatState
 			ngSpr.antialiasing = ClientPrefs.data.antialiasing;
 		}
 
+		if(FlxG.sound.music == null) 
+		{
+			FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"), 0);
+			MainMenuState.freakyPlaying = true;
+
+			FlxG.sound.music.fadeIn(4, 0, 0.7);
+			Conductor.bpm = titleJSON.bpm;
+		}
+
 		super.create();
 
 		#if FREEPLAY
@@ -343,15 +347,6 @@ class TitleState extends MusicBeatState
 
 			add(credGroup);
 			add(ngSpr);
-
-			if(FlxG.sound.music == null) 
-			{
-				FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"), 0);
-				MainMenuState.freakyPlaying = true;
-
-				FlxG.sound.music.fadeIn(4, 0, 0.7);
-				Conductor.bpm = titleJSON.bpm;
-			}
 		}
 
 		// credGroup.add(credTextShit);
@@ -432,6 +427,8 @@ class TitleState extends MusicBeatState
 				titleText.color = FlxColor.interpolate(titleTextColors[0], titleTextColors[1], timer);
 				titleText.alpha = FlxMath.lerp(titleTextAlphas[0], titleTextAlphas[1], timer);
 			}
+
+			FlxG.camera.angle = 0;
 			
 			titleText.color = FlxColor.WHITE;
 			titleText.alpha = 1;
@@ -783,7 +780,8 @@ class TitleState extends MusicBeatState
 			}
 
 			if (!initialized)
-				FlxG.sound.music.time = 9400; // 9.4 seconds
+				if (FlxG.sound.music == null)
+					FlxG.sound.music.time = 9400; // 9.4 seconds
 
 			skippedIntro = true;
 			FlxG.camera.angle = 0;
