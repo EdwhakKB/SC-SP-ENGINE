@@ -5629,21 +5629,24 @@ class PlayState extends MusicBeatState
 
 		playBF = searchLuaVar('playBFSing', 'bool', false);
 
-		var animArrayToMiss:Array<String> = ['singLEFTmiss', 'singDOWNmiss', 'singUPmiss', 'singRIGHTmiss'];
-		var hasMissedAnimations:Bool = false;
+		var altAnim:String = '';
+		if(note != null) altAnim = note.animSuffix;
 
-		for (i in animArrayToMiss)
-		{
-			if (char.animOffsets.exists(i))
-				hasMissedAnimations = true;
-			else 
-				hasMissedAnimations = false;
-		}
+		var normalArraySingAnims:Bool = (
+			char.animOffsets.exists('singLEFTmiss') && char.animOffsets.exists('singDOWNmiss') && char.animOffsets.exists('singUPmiss') && char.animOffsets.exists('singRIGHTmiss')
+		);
+		var altArraySingAnims:Bool = (
+			char.animOffsets.exists('singLEFTmiss' + altAnim) && char.animOffsets.exists('singDOWNmiss' + altAnim) && char.animOffsets.exists('singUPmiss' + altAnim) && char.animOffsets.exists('singRIGHTmiss' + altAnim)
+		);
+		var hasMissedAnimations:Bool = false;
+	
+		if (normalArraySingAnims || altArraySingAnims)
+			hasMissedAnimations = true;
+		else 
+			hasMissedAnimations = false;
 		
 		if(char != null && char.hasMissAnimations)
 		{
-			var altAnim:String = '';
-			if(note != null) altAnim = note.animSuffix; 
 			var animToPlay:String = singAnimations[Std.int(Math.abs(Math.min(singAnimations.length-1, direction)))] + 'miss' + altAnim;
 			if (char == boyfriend)
 			{
@@ -5733,16 +5736,18 @@ class PlayState extends MusicBeatState
 		}
 
 		var animToPlay:String = singAnimations[Std.int(Math.abs(Math.min(singAnimations.length-1, note.noteData)))] + altAnim;
-		var animArrayToAnimationsPlayed:Array<String> = ['singLEFT' + altAnim, 'singDOWN' + altAnim, 'singUP' + altAnim, 'singRIGHT' + altAnim];
+		var normalArraySingAnims:Bool = (
+			char.animOffsets.exists('singLEFT') && char.animOffsets.exists('singDOWN') && char.animOffsets.exists('singUP') && char.animOffsets.exists('singRIGHT')
+		);
+		var altArraySingAnims:Bool = (
+			char.animOffsets.exists('singLEFT' + altAnim) && char.animOffsets.exists('singDOWN' + altAnim) && char.animOffsets.exists('singUP' + altAnim) && char.animOffsets.exists('singRIGHT' + altAnim)
+		);
 		var hasAnimations:Bool = false;
 	
-		for (i in animArrayToAnimationsPlayed)
-		{
-			if (char.animOffsets.exists(i))
-				hasAnimations = true;
-			else 
-				hasAnimations = false;
-		}
+		if (normalArraySingAnims || altArraySingAnims)
+			hasAnimations = true;
+		else 
+			hasAnimations = false;
 
 		if (ClientPrefs.data.cameraMovement)
 		{
@@ -5910,16 +5915,18 @@ class PlayState extends MusicBeatState
 			}
 
 			var animToPlay:String = singAnimations[Std.int(Math.abs(Math.min(singAnimations.length-1, note.noteData)))] + altAnim;
-			var animArrayToAnimationsPlayed:Array<String> = ['singLEFT' + altAnim, 'singDOWN' + altAnim, 'singUP' + altAnim, 'singRIGHT' + altAnim];
+			var normalArraySingAnims:Bool = (
+				char.animOffsets.exists('singLEFT') && char.animOffsets.exists('singDOWN') && char.animOffsets.exists('singUP') && char.animOffsets.exists('singRIGHT')
+			);
+			var altArraySingAnims:Bool = (
+				char.animOffsets.exists('singLEFT' + altAnim) && char.animOffsets.exists('singDOWN' + altAnim) && char.animOffsets.exists('singUP' + altAnim) && char.animOffsets.exists('singRIGHT' + altAnim)
+			);
 			var hasAnimations:Bool = false;
 		
-			for (i in animArrayToAnimationsPlayed)
-			{
-				if (char.animOffsets.exists(i))
-					hasAnimations = true;
-				else 
-					hasAnimations = false;
-			}
+			if (normalArraySingAnims || altArraySingAnims)
+				hasAnimations = true;
+			else 
+				hasAnimations = false;
 
 			if (ClientPrefs.data.cameraMovement)
 			{
