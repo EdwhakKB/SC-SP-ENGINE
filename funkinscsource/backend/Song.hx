@@ -10,6 +10,7 @@ import sys.FileSystem;
 #end
 
 import backend.Section;
+import objects.Note;
 
 typedef SwagSong =
 {
