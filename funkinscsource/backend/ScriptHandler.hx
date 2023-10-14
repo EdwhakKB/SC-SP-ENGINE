@@ -113,7 +113,6 @@ class ScriptHandler #if HAXE_EXTENSION extends tea.SScript #end
 		set('ShaderFilter', ShaderFilter);
 
 		//set('CustomMouse', CustomMouse);
-		set('WindowsData', WindowsData);
 		//set('OverlaySprite', OverlaySprite);
 		set('InputFormatter', backend.InputFormatter);
 		//set('Cache', Cache);

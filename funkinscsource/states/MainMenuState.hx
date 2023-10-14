@@ -18,7 +18,7 @@ import flixel.addons.display.FlxGridOverlay;
 class MainMenuState extends MusicBeatState
 {
 	public static var psychEngineVersion:String = '0.7.1h'; //This is also used for Discord RPC
-	public static var SCEVersion:String = '0.1.2 BETA'; //This is also used for Discord RPC
+	public static var SCEVersion:String = '0.2.3 Beta'; //This is also used for Discord RPC
 	public static var curSelected:Int = 0;
 
 	var menuItems:FlxTypedGroup<FlxSprite>;
