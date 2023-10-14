@@ -77,7 +77,7 @@ _____________________________________
   * On Thorns, the HUD is hidden during the cutscene
   * Also there's the Background girls being spooky during the "Hey!" parts of the Instrumental
 ### Week 7:
-  * No etra features yet!
+  * No extra features yet!
 
 ## Cool new Chart Editor changes and countless bug fixes
 ![](https://github.com/ShadowMario/FNF-PsychEngine/blob/main/docs/img/chart.png?raw=true)
