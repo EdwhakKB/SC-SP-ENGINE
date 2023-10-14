@@ -30,7 +30,7 @@ same goes for *Lua Scripts*, comment out or delete the line with `LUA_ALLOWED`, 
 ## SCE Credits:
 * Glowsoony - Programmer
 * Edwhak_Killbot - Programmer (Leader of SCE)
-* Slushi - Programmer (Has helped with the Crash Handler and a few other things! he is also a beta tester for bugs! ***thanks***!
+* Slushi - Programmer (Has helped with the Crash Handler and a few other things! he is also a beta tester for bugs! ***thanks***)!
 
 ### Special Thanks
 * bbpanzu - Ex-Programmer
