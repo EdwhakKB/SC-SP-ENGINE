@@ -317,7 +317,7 @@ class ScriptHandler #if HAXE_EXTENSION extends tea.SScript #end
 		set('StrumArrow', objects.StrumArrow);
 		set('Paths', backend.Paths);
 		set('FunkinLua', psychlua.FunkinLua);
-		set('Achievements', objects.Achievements);
+		set('Achievements', backend.Achievements);
 		set('ClientPrefs', backend.ClientPrefs);
 		set('ColorSwap', shaders.ColorSwap);
 
