@@ -5619,8 +5619,8 @@ class PlayState extends MusicBeatState
 		totalPlayed++;
 		RecalculateRating(true);
 
-		if((note != null && note.gfNote) || (SONG.notes[curSection] != null && SONG.notes[curSection].gfSection)) char = gf;
-		if((note != null && note.momNote) || (SONG.notes[curSection] != null && SONG.notes[curSection].gfSection)) char = mom;
+		if(((note != null && note.gfNote) || (SONG.notes[curSection] != null && SONG.notes[curSection].gfSection)) && gf != null) char = gf;
+		if(((note != null && note.momNote) || (SONG.notes[curSection] != null && SONG.notes[curSection].gfSection)) && mom != null) char = mom;
 
 		if (note != null)
 			dType = note.dType;
@@ -5692,11 +5692,11 @@ class PlayState extends MusicBeatState
 		var singData:Int = Std.int(Math.abs(note.noteData));
 		var char:Character = null;
 
-		if (note.gfNote)
+		if (note.gfNote && gf != null)
 		{
 			char = gf;
 		}
-		else if (SONG.notes[curSection] != null && SONG.notes[curSection].player4Section || note.momNote)
+		else if ((SONG.notes[curSection] != null && SONG.notes[curSection].player4Section || note.momNote) && mom != null)
 		{
 			char = mom;
 		}
