@@ -4023,7 +4023,11 @@ class PlayState extends MusicBeatState
 				}
 				catch(e:Dynamic)
 				{
+					#if (SScript == "6.1.80")
 					HScript.hscriptTrace('ERROR ("Set Property" Event) - $e', FlxColor.RED);
+					#else
+					addTextToDebug('ERROR ("Set Property" Event) - ' + e.message.substr(0, e.message.indexOf('\n')), FlxColor.RED);
+					#end
 				}
 			
 			case 'Play Sound':
@@ -6115,7 +6119,11 @@ class PlayState extends MusicBeatState
 			if(script != null)
 			{
 				script.call('onDestroy');
+				#if (SScript == "6.1.80")
 				script.kill();
+				#else
+				script.destroy();
+				#end
 			}
 		while (hscriptArray.length > 0)
 			hscriptArray.pop();
@@ -6446,6 +6454,7 @@ class PlayState extends MusicBeatState
 		{
 			var times:Float = Date.now().getTime();
 			var newScript:HScript = new HScript(null, file);
+			#if (SScript == "6.1.80")
 			if(newScript.parsingException != null)
 			{
 				var e = newScript.parsingException.message;
@@ -6454,6 +6463,18 @@ class PlayState extends MusicBeatState
 				newScript.kill();
 				return;
 			}
+			#else
+			@:privateAccess
+			if(newScript.parsingExceptions != null && newScript.parsingExceptions.length > 0)
+			{
+				@:privateAccess
+				for (e in newScript.parsingExceptions)
+					if(e != null)
+						addTextToDebug('ERROR ON LOADING ($file): ${e.message.substr(0, e.message.indexOf('\n'))}', FlxColor.RED);
+				newScript.destroy();
+				return;
+			}
+			#end
 
 			hscriptArray.push(newScript);
 			if(newScript.exists('onCreate'))
@@ -6462,12 +6483,21 @@ class PlayState extends MusicBeatState
 				if(!callValue.succeeded)
 				{
 					for (e in callValue.exceptions)
+						#if (SScript == "6.1.80")
 						if (e != null) {
 							var e:String = e.toString();
 							if (!e.contains(newScript.origin)) e = '${newScript.origin}: $e';
 							HScript.hscriptTrace('ERROR (onCreate) - $e', FlxColor.RED);
 						}
+						#else
+						if (e != null)
+							addTextToDebug('ERROR ($file: onCreate) - ${e.message.substr(0, e.message.indexOf('\n'))}', FlxColor.RED);
+						#end
+					#if (SScript == "6.1.80")
 					newScript.kill();
+					#else
+					newScript.destroy();
+					#end
 					hscriptArray.remove(newScript);
 					return;
 				}
@@ -6478,14 +6508,21 @@ class PlayState extends MusicBeatState
 		catch(e)
 		{
 			var newScript:HScript = cast (SScript.global.get(file), HScript);
-
+			#if (SScript == "6.1.80")
 			var e:String = e.toString();
 			if (!e.contains(newScript.origin)) e = '${newScript.origin}: $e';
 			HScript.hscriptTrace('ERROR - $e', FlxColor.RED);
+			#else
+			addTextToDebug('ERROR ($file) - ' + e.message.substr(0, e.message.indexOf('\n')), FlxColor.RED);
+			#end
 
 			if(newScript != null)
 			{
+				#if (SScript == "6.1.80")
 				newScript.kill();
+				#else
+				newScript.destroy();
+				#end
 				hscriptArray.remove(newScript);
 			}
 		}
