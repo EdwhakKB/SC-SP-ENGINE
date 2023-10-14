@@ -123,6 +123,11 @@ class TitleState extends MusicBeatState
 		
 		FlxG.worldBounds.set(0, 0);
 
+		#if cpp
+		cpp.NativeGc.enable(true);
+		cpp.NativeGc.run(true);
+		#end
+
 		Assets.cache.enabled = true;
 
 		#if FEATURE_MULTITHREADING
