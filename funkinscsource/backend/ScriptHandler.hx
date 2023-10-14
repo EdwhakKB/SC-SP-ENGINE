@@ -290,8 +290,10 @@ class ScriptHandler #if HAXE_EXTENSION extends tea.SScript #end
 		set('FlxBackdrop', FlxBackdrop);
 		set('StageSizeScaleMode', StageSizeScaleMode);
 		set('FlxBarFillDirection', FlxBarFillDirection);
+		#if (flixel < "5.0.0")
 		set('FlxAxes', FlxAxes);
 		set('FlxPoint', FlxPoint);
+		#end
 		set('GraphicsShader', GraphicsShader);
 		set('ShaderFilter', ShaderFilter);
 
