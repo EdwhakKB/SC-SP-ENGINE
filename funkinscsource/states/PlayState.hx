@@ -4686,9 +4686,9 @@ class PlayState extends MusicBeatState
 				if (storyPlaylist.length <= 0)
 				{
 					paused = true;
-
-					vocals.stop();
+					
 					inst.stop();
+					inst.volume = 0;
 
 					if (ClientPrefs.data.resultsScreenType == 'KADE')
 					{
@@ -4733,6 +4733,7 @@ class PlayState extends MusicBeatState
 
 					PlayState.SONG = Song.loadFromJson(PlayState.storyPlaylist[0] + difficulty, PlayState.storyPlaylist[0]);
 					inst.stop();
+					inst.volume = 0;
 
 					//cancelMusicFadeTween();
 					LoadingState.loadAndSwitchState(new PlayState());
@@ -4743,8 +4744,8 @@ class PlayState extends MusicBeatState
 				persistentUpdate = false;
 				paused = true;
 
-				vocals.stop();
 				inst.stop();
+				inst.volume = 0;
 
 				if (ClientPrefs.data.resultsScreenType == 'KADE')
 				{
