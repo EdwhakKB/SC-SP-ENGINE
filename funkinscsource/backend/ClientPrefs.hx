@@ -73,7 +73,8 @@ class SaveVariables {
 		'showcasemode' => false,
 		'sustainnotesactive' => true,
 		'modchart' => true,
-		'botplay' => false
+		'botplay' => false,
+		'guitarherosustains' => false
 	];
 
 	public var comboOffset:Array<Int> = [0, 0, 0, 0];
