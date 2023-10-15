@@ -278,7 +278,7 @@ class MainMenuState extends MusicBeatState
 										if(FlxG.save.data.freeplayWarn == null && !WarnFreeplay.leftState) 
 											MusicBeatState.switchState(new WarnFreeplay());
 										else
-											MusicBeatState.switchState(new WarnFreeplay());
+											MusicBeatState.switchState(new FreeplayState());
 									#if MODS_ALLOWED
 									case 'mods':
 										MusicBeatState.switchState(new ModsMenuState());
