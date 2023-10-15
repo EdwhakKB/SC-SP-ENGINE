@@ -4505,10 +4505,6 @@ class PlayState extends MusicBeatState
 
 		inst.volume = 0;
 		inst.stop();
-		if (SONG.needsVoices){
-			vocals.volume = 0;
-			vocals.stop();
-		}
 
 		#if ACHIEVEMENTS_ALLOWED
 		var weekNoMiss:String = WeekData.getWeekFileName() + '_nomiss';
@@ -4580,8 +4576,8 @@ class PlayState extends MusicBeatState
 				{
 					paused = true;
 
-					inst.stop();
 					inst.volume = 0;
+					inst.stop();
 
 					if (ClientPrefs.data.resultsScreenType == 'KADE')
 					{
@@ -4625,8 +4621,9 @@ class PlayState extends MusicBeatState
 					prevCamFollow = camFollow;
 
 					PlayState.SONG = Song.loadFromJson(PlayState.storyPlaylist[0] + difficulty, PlayState.storyPlaylist[0]);
-					inst.stop();
+
 					inst.volume = 0;
+					inst.stop();
 
 					//cancelMusicFadeTween();
 					LoadingState.loadAndSwitchState(new PlayState());
@@ -4637,8 +4634,8 @@ class PlayState extends MusicBeatState
 				persistentUpdate = false;
 				paused = true;
 
-				inst.stop();
 				inst.volume = 0;
+				inst.stop();
 
 				if (ClientPrefs.data.resultsScreenType == 'KADE')
 				{
