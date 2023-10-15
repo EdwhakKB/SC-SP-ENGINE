@@ -2,6 +2,7 @@
 * This engine brings features the may apply to modified gameplay!, other results screens!, betadciu things support!, more stuff is added to the engine for it to be modified however *you* entend to use this engine!*
 * SCE brings NOTITG Modchart support along with many other features!
 * This engine is made with **psych engine**!
+* [Input Rewrite! by this psych pull request!](https://github.com/ShadowMario/FNF-PsychEngine/pull/13448)
 # Friday Night Funkin' - Psych Engine
 Engine originally used on [Mind Games Mod](https://gamebanana.com/mods/301107), intended to be a fix for the vanilla version's many issues while keeping the casual play aspect of it. Also aiming to be an easier alternative to newbie coders.
 
