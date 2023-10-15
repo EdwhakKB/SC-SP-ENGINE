@@ -69,10 +69,10 @@ class ScriptHandler #if HAXE_EXTENSION extends tea.SScript #end
 		Debug.logInfo('haxe file loaded succesfully:' + hxFileName);*/
 
 		// CLASSES (HAXE)
-		set(Type);
-		set(Math);
-		set(Std);
-		set(Date);
+		setClass(Type);
+		setClass(Math);
+		setClass(Std);
+		setClass(Date);
 
 		// CLASSES (FLIXEL);
 		setClass(FlxG);
