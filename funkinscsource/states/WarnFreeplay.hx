@@ -44,9 +44,12 @@ class WarnFreeplay extends backend.MusicBeatState
 
 		var back:Bool = controls.BACK;
 		if (controls.ACCEPT || back) {
+			leftState = true;
 			FlxTransitionableState.skipNextTransIn = true;
 			FlxTransitionableState.skipNextTransOut = true;
 			if(!back) {
+				ClientPrefs.data.freeplayWarn = false;
+				ClientPrefs.saveSettings();
 				FlxG.sound.play(Paths.sound('confirmMenu'));
 				FlxFlicker.flicker(warnText, 1, 0.1, false, true, function(flk:FlxFlicker) {
 					new FlxTimer().start(0.5, function (tmr:FlxTimer) {
@@ -54,6 +57,8 @@ class WarnFreeplay extends backend.MusicBeatState
 					});
 				});
 			} else {
+				ClientPrefs.data.freeplayWarn = true;
+				ClientPrefs.saveSettings();
 				FlxG.sound.play(Paths.sound('cancelMenu'));
 				FlxTween.tween(warnText, {alpha: 0}, 1, {
 					onComplete: function (twn:FlxTween) {

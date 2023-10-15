@@ -73,7 +73,8 @@ class SaveVariables {
 		'showcasemode' => false,
 		'sustainnotesactive' => true,
 		'modchart' => true,
-		'botplay' => false
+		'botplay' => false,
+		'guitarherosustains' => false
 	];
 
 	public var comboOffset:Array<Int> = [0, 0, 0, 0];
@@ -138,6 +139,9 @@ class SaveVariables {
 	public var breakTimer:Bool = false;
 
 	public var laneTransparency:Float = 0;
+
+	//Started Freeplay Warn!
+	public var freeplayWarn:Bool = false;
 
 	public function new()
 	{
