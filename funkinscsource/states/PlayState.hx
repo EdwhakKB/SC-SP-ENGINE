@@ -4031,11 +4031,11 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	public function changeBoyfriendCharacter(char:String, charType:Int, ?spriteAllowedXY:Bool = false, ?x:Float, ?y:Float)
+	public function changeBoyfriendCharacter(char:String, charType:Int, ?spriteAllowedXY:Bool = false, ?x:Float, ?y:Float, ?playAnimationBeforeSwitch:Bool = false)
 	{
 		var animationName:String = "no way anyone have an anim name this big";
 		var animationFrame:Int = 0;
-		if (boyfriend.animation.curAnim.name.startsWith('sing'))
+		if (boyfriend.animation.curAnim.name.startsWith('sing') && playAnimationBeforeSwitch)
 		{
 			animationName = boyfriend.animation.curAnim.name;
 			animationFrame = boyfriend.animation.curAnim.curFrame;
@@ -4060,15 +4060,15 @@ class PlayState extends MusicBeatState
 		iconP1.changeIcon(boyfriend.healthIcon);
 		reloadHealthBarColors();
 
-		if (boyfriend.animOffsets.exists(animationName))
+		if (boyfriend.animOffsets.exists(animationName) && playAnimationBeforeSwitch)
 			boyfriend.playAnim(animationName, true, false, animationFrame);
 	}
 
-	public function changeDadCharacter(char:String, charType:Int, ?spriteAllowedXY:Bool = false, ?x:Float, ?y:Float)
+	public function changeDadCharacter(char:String, charType:Int, ?spriteAllowedXY:Bool = false, ?x:Float, ?y:Float, ?playAnimationBeforeSwitch:Bool = false)
 	{
 		var animationName:String = "no way anyone have an anim name this big";
 		var animationFrame:Int = 0;
-		if (dad.animation.curAnim.name.startsWith('sing'))
+		if (dad.animation.curAnim.name.startsWith('sing') && playAnimationBeforeSwitch)
 		{
 			animationName = dad.animation.curAnim.name;
 			animationFrame = dad.animation.curAnim.curFrame;
@@ -4105,19 +4105,21 @@ class PlayState extends MusicBeatState
 		iconP2.changeIcon(dad.healthIcon);
 		reloadHealthBarColors();
 
-		if (dad.animOffsets.exists(animationName))
+		if (dad.animOffsets.exists(animationName) && playAnimationBeforeSwitch)
 			dad.playAnim(animationName, true, false, animationFrame);
 	}
 
 
-	public function changeMomCharacter(char:String, charType:Int, ?spriteAllowedXY:Bool = false, ?x:Float, ?y:Float)
+	public function changeMomCharacter(char:String, charType:Int, ?spriteAllowedXY:Bool = false, ?x:Float, ?y:Float, ?playAnimationBeforeSwitch:Bool = false)
 	{
 		var animationName:String = "no way anyone have an anim name this big";
 		var animationFrame:Int = 0;
-		if (mom.animation.curAnim.name.startsWith('sing'))
-		{
-			animationName = mom.animation.curAnim.name;
-			animationFrame = mom.animation.curAnim.curFrame;
+		if (mom != null && playAnimationBeforeSwitch){
+			if (mom.animation.curAnim.name.startsWith('sing'))
+			{
+				animationName = mom.animation.curAnim.name;
+				animationFrame = mom.animation.curAnim.curFrame;
+			}
 		}
 
 		if (!momMap.exists(char))
@@ -4150,18 +4152,21 @@ class PlayState extends MusicBeatState
 		//iconP2.changeIcon(dad.healthIcon);
 		//reloadHealthBarColors();
 
-		if (mom.animOffsets.exists(animationName))
+		if (mom.animOffsets.exists(animationName) && playAnimationBeforeSwitch)
 			mom.playAnim(animationName, true, false, animationFrame);
 	}
 
-	public function changeGirlfriendCharacter(char:String, charType:Int, ?spriteAllowedXY:Bool = false, ?x:Float, ?y:Float)
+	public function changeGirlfriendCharacter(char:String, charType:Int, ?spriteAllowedXY:Bool = false, ?x:Float, ?y:Float, ?playAnimationBeforeSwitch:Bool = false)
 	{
 		var animationName:String = "no way anyone have an anim name this big";
 		var animationFrame:Int = 0;
-		if (gf.animation.curAnim.name.startsWith('sing'))
+		if (gf != null && playAnimationBeforeSwitch)
 		{
-			animationName = gf.animation.curAnim.name;
-			animationFrame = gf.animation.curAnim.curFrame;
+			if (gf.animation.curAnim.name.startsWith('sing'))
+			{
+				animationName = gf.animation.curAnim.name;
+				animationFrame = gf.animation.curAnim.curFrame;
+			}
 		}
 
 		if (!gfMap.exists(char))
@@ -4181,7 +4186,7 @@ class PlayState extends MusicBeatState
 		gf.alpha = lastAlpha;
 		reloadHealthBarColors();
 
-		if (gf.animOffsets.exists(animationName))
+		if (gf.animOffsets.exists(animationName) && playAnimationBeforeSwitch)
 			gf.playAnim(animationName, true, false, animationFrame);
 	}
 
