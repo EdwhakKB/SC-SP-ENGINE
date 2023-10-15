@@ -105,9 +105,6 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
 		return timer.start(Time, OnComplete, Loops);
 	}
 
-    public var pixelNotes:Bool = false;
-    public var pixelStrums:Bool = false;
-
     public function new(strumGroup:FlxTypedGroup<StrumArrow>, notes:FlxTypedGroup<Note>, instance:ModchartMusicBeatState) 
     {
         super(0,0);
@@ -122,11 +119,6 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
 
         //fix stupid crash because the renderer in playstate is still technically null at this point and its needed for json loading
         instance.playfieldRenderer = this;
-
-        for (n in notes.members)
-            pixelNotes = (n.texture.contains('pixel') || n.noteSkin.contains('pixel'));
-        for (i in strumGroup.members)
-            pixelStrums = (i.texture.contains('pixel') || i.daStyle.contains('pixel'));
 
         tweenManager = new FlxTweenManager();
         timerManager = new FlxTimerManager();
@@ -183,7 +175,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         var strumScaleY = NoteMovement.defaultScale[i];
         var strumSkewX = NoteMovement.defaultSkewX[i];
         var strumSkewY = NoteMovement.defaultSkewY[i];
-        if (ModchartUtil.getIsPixelStage(instance) || pixelNotes && pixelStrums)
+        if (ModchartUtil.getIsPixelStage(instance))
         {
             //work on pixel stages
             strumScaleX = 1*PlayState.daPixelZoom;
@@ -229,7 +221,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
             noteAlphas = 1;
         #end
 
-        if (ModchartUtil.getIsPixelStage(instance) || pixelNotes && pixelStrums)
+        if (ModchartUtil.getIsPixelStage(instance))
         {
             //work on pixel stages
             noteScaleX = 1*PlayState.daPixelZoom;

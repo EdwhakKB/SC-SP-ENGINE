@@ -78,18 +78,7 @@ class ModchartUtil
         #if LEATHER
         return PlayState.SONG.ui_Skin == 'pixel';
         #else 
-        if (Note.instance != null) 
-            return (Note.instance.containsPixelTexture || Note.instance.texture.contains('pixel') || Note.instance.noteSkin.contains('pixel'));
-        else if (PlayState.instance != null) {
-            for (n in PlayState.instance.notes.members)
-                if (n.texture.contains('pixel') || n.noteSkin.contains('pixel'))
-                    pixelNotes = true;
-            for (i in PlayState.instance.strumLineNotes.members)
-                if (i.texture.contains('pixel') || i.daStyle.contains('pixel'))
-                    pixelStrums = true;
-            return (pixelStrums && pixelNotes);
-        }
-        else return PlayState.isPixelStage;
+      	return PlayState.isPixelStage;
         #end
     }
 
