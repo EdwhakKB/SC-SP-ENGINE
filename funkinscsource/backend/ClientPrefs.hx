@@ -139,6 +139,9 @@ class SaveVariables {
 
 	public var laneTransparency:Float = 0;
 
+	//Started Freeplay Warn!
+	public var freeplayWarn:Bool = false;
+
 	public function new()
 	{
 		//Why does haxe needs this again?
