@@ -89,16 +89,25 @@ class ModchartFuncs
         #if PSYCH
         #if HSCRIPT_ALLOWED
         FunkinHScript.initHaxeModule(parent);
-
         if (parent.hscript != null)
         {
-            parent.hscript.set('Math', Math);
-            parent.hscript.set('PlayfieldRenderer', PlayfieldRenderer);
-            parent.hscript.set('ModchartUtil', ModchartUtil);
-            parent.hscript.set('Modifier', Modifier);
-            parent.hscript.set('NoteMovement', NoteMovement);
-            parent.hscript.set('NotePositionData', NotePositionData);
-            parent.hscript.set('ModchartFile', ModchartFile);
+            #if (SScript == "6.1.80")
+                parent.hscript.setClass(Math);
+                parent.hscript.setClass(PlayfieldRenderer);
+                parent.hscript.setClass(ModchartUtil);
+                parent.hscript.setClass(Modifier);
+                parent.hscript.setClass(NoteMovement);
+                parent.hscript.setClass(NotePositionData);
+                parent.hscript.setClass(ModchartFile);
+            #else
+                parent.hscript.set('Math', Math);
+                parent.hscript.set('PlayfieldRenderer', PlayfieldRenderer);
+                parent.hscript.set('ModchartUtil', ModchartUtil);
+                parent.hscript.set('Modifier', Modifier);
+                parent.hscript.set('NoteMovement', NoteMovement);
+                parent.hscript.set('NotePositionData', NotePositionData);
+                parent.hscript.set('ModchartFile', ModchartFile);
+            #end
         }
         #end
         #end
