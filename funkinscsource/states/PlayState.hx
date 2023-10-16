@@ -6179,7 +6179,6 @@ class PlayState extends MusicBeatState
 		{
 			if (gf != null 
 				&& idleToBeat
-				&& !gfScared
 				&& beat % gfSpeed == 0
 				&& gf.animation.curAnim != null
 				&& !gf.animation.curAnim.name.startsWith("sing")
