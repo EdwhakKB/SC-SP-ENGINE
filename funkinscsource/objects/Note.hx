@@ -54,6 +54,8 @@ class Note extends FlxSkewedSprite
 	public var prevNote:Note;
 	public var nextNote:Note;
 
+	public var missed:Bool = false;
+
 	public var noteSection:Int = 0;
 
 	public var spawned:Bool = false;

@@ -5462,9 +5462,9 @@ class PlayState extends MusicBeatState
 
 	function noteMiss(daNote:Note):Void { //You didn't hit the key and let it go offscreen, also used by Hurt Notes
 		//Dupe note remove
-		notes.forEachAlive(function(note:Note) {
+		notes.forEachAlive(function(daNote:Note) {
 			if (daNote != note && daNote.mustPress && daNote.noteData == note.noteData && daNote.isSustainNote == note.isSustainNote && Math.abs(daNote.strumTime - note.strumTime) < 1)
-				invalidateNote(note);
+				invalidateNote(daNote);
 		});
 
 		var dType:Int = 0;
@@ -5767,7 +5767,7 @@ class PlayState extends MusicBeatState
 		}
 
 		if (!note.isSustainNote)
-			invalidateNote(daNote);
+			invalidateNote(note);
 	}
 
 	public function goodNoteHit(note:Note):Void
@@ -5876,10 +5876,8 @@ class PlayState extends MusicBeatState
 				if (playBF)
 				{
 					if (char == boyfriend && !opponentMode){
-						if (!bfDodging){
-							boyfriend.playAnim(animToPlay, true);
-							boyfriend.holdTimer = 0;
-						}
+						boyfriend.playAnim(animToPlay, true);
+						boyfriend.holdTimer = 0;
 					}
 					else if (char == gf)
 					{
@@ -5948,7 +5946,7 @@ class PlayState extends MusicBeatState
 		}
 
 		if (!note.isSustainNote)
-			invalidateNote(daNote);
+			invalidateNote(note);
 	}
 
 	public function invalidateNote(note:Note):Void {
@@ -6200,8 +6198,7 @@ class PlayState extends MusicBeatState
 					&& boyfriend.animation.curAnim != null
 					&& !boyfriend.animation.curAnim.name.startsWith('sing')
 					&& !boyfriend.specialAnim
-					&& !boyfriend.stunned
-					&& !bfDodging)
+					&& !boyfriend.stunned)
 				{
 					boyfriend.dance(forcedToIdle, SONG.notes[curSection].playerAltAnim);
 					bfcamY = 0;
@@ -6215,8 +6212,7 @@ class PlayState extends MusicBeatState
 					&& boyfriend.animation.curAnim != null
 					&& !boyfriend.animation.curAnim.name.startsWith('sing')
 					&& !boyfriend.specialAnim
-					&& !boyfriend.stunned
-					&& !bfDodging)
+					&& !boyfriend.stunned)
 				{
 					boyfriend.dance(forcedToIdle, SONG.notes[curSection].playerAltAnim);
 					bfcamY = 0;
