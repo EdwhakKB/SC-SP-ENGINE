@@ -89,7 +89,6 @@ class GameJoltLogin extends MusicBeatState
     var showPassBox:FlxButtonPlus;
     // var profileIcon:FlxSprite;
     var username1:FlxText;
-    var username2:FlxText;
     // var gamename:FlxText;
     // var trophy:FlxBar;
     // var trophyText:FlxText;
@@ -199,7 +198,7 @@ class GameJoltLogin extends MusicBeatState
                 Main.gjToastManager.createToast(GameJoltInfo.imagePath, "Score Submitting", "Score submitting is now " + (ClientPrefs.data.gjleaderboardToggle ? "Enabled" : "Disabled"), false);
                 ClientPrefs.saveSettings();
             }
-        }, "GameJolt Token", 200, 60);
+        }, "GameJolt Token", !GameJoltAPI.getStatus() ? 200 : 300, 60);
         helpBox.color = FlxColor.fromRGB(84,155,149);
 
         logOutBox = new FlxButtonPlus(Math.floor(FlxG.width*0.5), helpBox.y+100, function()
@@ -215,12 +214,17 @@ class GameJoltLogin extends MusicBeatState
         cancelBox = new FlxButtonPlus(Math.floor(FlxG.width*0.5), logOutBox.y+100, function()
         {
            FlxG.save.flush();
-            FlxG.sound.play(Paths.sound('confirmMenu'), 0.7, false, null, true, function(){
-                FlxG.save.flush();
-                MusicBeatState.switchState(new options.OptionsState());
-                ClientPrefs.saveSettings();
-            });
+            FlxG.sound.play(Paths.sound('confirmMenu'), 0.2, false, null, true);
+            FlxG.save.flush();
+            MusicBeatState.switchState(new options.OptionsState());
+            ClientPrefs.saveSettings();
         }, "Not Right Now", 200, 60);
+
+        usernameBox.visible = !GameJoltAPI.getStatus();
+        tokenBox.visible = !GameJoltAPI.getStatus();
+        text2.visible = !GameJoltAPI.getStatus();
+        text3.visible = !GameJoltAPI.getStatus();
+        showPassBox.visible = !GameJoltAPI.getStatus();
 
         if(!GameJoltAPI.getStatus())
         {
@@ -228,8 +232,7 @@ class GameJoltLogin extends MusicBeatState
         }
         else
         {
-            cancelBox.y = 525;
-            cancelBox.text = "Continue";
+            cancelBox.text = "Back";
             loginButtons.add(logOutBox);
         }
         loginButtons.add(helpBox);
@@ -246,17 +249,10 @@ class GameJoltLogin extends MusicBeatState
 
         if(GameJoltAPI.getStatus())
         {
-            username1 = new FlxText(0, 95, 0, "Signed in as with nick name of:", 40);
+            username1 = new FlxText(0, 35, 0, "Signed in with nick name of: " + GameJoltAPI.getUserInfo(true), 40);
             username1.alignment = CENTER;
             username1.screenCenter(X);
-            username1.x += baseX;
             add(username1);
-
-            username2 = new FlxText(0, 145, 0, GameJoltAPI.getUserInfo(true), 40);
-            username2.alignment = CENTER;
-            username2.screenCenter(X);
-            username2.x += baseX;
-            add(username2);
         }
 
         if(GameJoltInfo.font != null)
@@ -264,7 +260,6 @@ class GameJoltLogin extends MusicBeatState
             if (GameJoltAPI.getStatus())
             {
                 username1.font = GameJoltInfo.font;
-                username2.font = GameJoltInfo.font;
             }
             loginBoxes.forEach(function(item:FlxInputText){
                 item.font = GameJoltInfo.font;

@@ -627,17 +627,10 @@ class TitleState extends MusicBeatState
 		}
 
 		FlxG.camera.zoom = 1.125;
-		if (!initialized)
-			FlxG.camera.angle = danceLeft ? 10 : -10;
 
 		FlxTween.tween(FlxG.camera, {zoom: 1}, Conductor.crochet / 1300, {
 			ease: FlxEase.quadOut
 		});
-
-		if (!initialized)
-			FlxTween.tween(FlxG.camera, {angle: danceLeft ? -10 : 10}, Conductor.crochet / 1300, {
-				ease: FlxEase.quadOut
-			});
 
 		if (initialized)
 			FlxG.camera.angle = 0;

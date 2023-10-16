@@ -629,7 +629,7 @@ class NotesSubState extends MusicBeatSubstate
 		for (i in 0...dataArray.length)
 		{
 			Note.initializeGlobalRGBShader(i);
-			var newNote:StrumArrow = new StrumArrow(150 + (480 / dataArray.length * i), 200, i, 0, 'noteSkins/NOTE_assets' + Note.getNoteSkinPostfix());
+			var newNote:StrumArrow = new StrumArrow(150 + (480 / dataArray.length * i), 200, i, 0, !onPixel ? 'noteSkins/NOTE_assets' + Note.getNoteSkinPostfix() : 'pixelUI/noteSkins/NOTE_assets' + Note.getNoteSkinPostfix());
 			newNote.useRGBShader = true;
 			newNote.setGraphicSize(102);
 			newNote.updateHitbox();
@@ -638,6 +638,8 @@ class NotesSubState extends MusicBeatSubstate
 		}
 
 		bigNote = new Note(0, 0, false, true);
+		bigNote.texture = !onPixel ? 'noteSkins/NOTE_assets' + Note.getNoteSkinPostfix() : 'pixelUI/noteSkins/NOTE_assets' + Note.getNoteSkinPostfix();
+		bigNote.noteSkin = !onPixel ? 'noteSkins/NOTE_assets' + Note.getNoteSkinPostfix() : 'pixelUI/noteSkins/NOTE_assets' + Note.getNoteSkinPostfix();
 		bigNote.setPosition(250, 325);
 		bigNote.setGraphicSize(250);
 		bigNote.updateHitbox();
