@@ -493,24 +493,24 @@ class NotesSubState extends MusicBeatSubstate
 
 	function pointerOverlaps(obj:Dynamic)
 	{
-		if (!controls.controllerMode) return FlxG.mouse.overlaps(obj);
-		return FlxG.overlap(controllerPointer, obj);
+		if (controls.controllerMode) return FlxG.overlap(controllerPointer, obj);
+		return FlxG.mouse.overlaps(obj);
 	}
 
 	function pointerX():Float
 	{
-		if (!controls.controllerMode) return FlxG.mouse.x;
-		return controllerPointer.x;
+		if (controls.controllerMode) return controllerPointer.x;
+		return FlxG.mouse.x;	
 	}
 	function pointerY():Float
 	{
-		if (!controls.controllerMode) return FlxG.mouse.y;
-		return controllerPointer.y;
+		if (controls.controllerMode) return controllerPointer.y;
+		return FlxG.mouse.y;	
 	}
 	function pointerFlxPoint():FlxPoint
 	{
-		if (!controls.controllerMode) return FlxG.mouse.getScreenPosition();
-		return controllerPointer.getScreenPosition();
+		if (controls.controllerMode) return controllerPointer.getScreenPosition();
+		return FlxG.mouse.getScreenPosition();
 	}
 
 	function centerHexTypeLine()
