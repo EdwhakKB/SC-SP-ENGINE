@@ -156,14 +156,14 @@ class GameJoltLogin extends MusicBeatState
         loginBoxes = new FlxTypedGroup<FlxInputText>(2);
         add(loginBoxes);
 
-        usernameBox = new FlxInputText(Math.floor(FlxG.width*0.5) - 700, 250, Math.floor(FlxG.width*0.4) + 20, '', 32);
-        tokenBox = new FlxInputText(Math.floor(FlxG.width*0.5) - 700, 400, Math.floor(FlxG.width*0.4) + 20, '', 32);
+        usernameBox = new FlxInputText(Math.floor(FlxG.width*0.5) - 600, 250, Math.floor(FlxG.width*0.4) + 20, '', 32);
+        tokenBox = new FlxInputText(Math.floor(FlxG.width*0.5) - 600, 400, Math.floor(FlxG.width*0.4) + 20, '', 32);
 
-        var text2:Alphabet = new Alphabet(Math.floor(FlxG.width*0.5) - 200, usernameBox.y - 100, 'User Name', true);
+        var text2:Alphabet = new Alphabet(Math.floor(FlxG.width*0.5)-100, usernameBox.y - 100, 'User Name', true);
         add(text2);
         text2.x = FlxG.width*0.1;
 
-        var text3:Alphabet = new Alphabet(Math.floor(FlxG.width*0.5) - 200, tokenBox.y - 200, 'User Token', true);
+        var text3:Alphabet = new Alphabet(Math.floor(FlxG.width*0.5)-100, tokenBox.y - 100, 'User Token', true);
         add(text3);
         text3.x = FlxG.width*0.1;
 
@@ -176,13 +176,19 @@ class GameJoltLogin extends MusicBeatState
         loginButtons = new FlxTypedGroup<FlxButtonPlus>(4);
         add(loginButtons);
 
-        signInBox = new FlxButtonPlus(Math.floor(FlxG.width*0.25), 280, function()
+        showPassBox = new FlxButtonPlus(Math.floor(FlxG.width*0.5), 100, function()
+        {
+            tokenBox.passwordMode = !tokenBox.passwordMode;
+        }, "Show Password?", 200, 60);
+        showPassBox.color = FlxColor.fromRGB(84,155,180);
+
+        signInBox = new FlxButtonPlus(Math.floor(FlxG.width*0.5), showPassBox.y+100, function()
         {
             GameJoltAPI.authDaUser(usernameBox.text, tokenBox.text, true);
             ClientPrefs.saveSettings();
         }, "Sign In", 200, 60);
 
-        helpBox = new FlxButtonPlus(Math.floor(FlxG.width*0.25), 355, function()
+        helpBox = new FlxButtonPlus(Math.floor(FlxG.width*0.5), signInBox.y+100, function()
         {
             if (!GameJoltAPI.getStatus())
                 openLink('https://www.youtube.com/watch?v=T5-x7kAGGnE');
@@ -196,7 +202,7 @@ class GameJoltLogin extends MusicBeatState
         }, "GameJolt Token", 200, 60);
         helpBox.color = FlxColor.fromRGB(84,155,149);
 
-        logOutBox = new FlxButtonPlus(Math.floor(FlxG.width*0.25), 445, function()
+        logOutBox = new FlxButtonPlus(Math.floor(FlxG.width*0.5), helpBox.y+100, function()
         {
             GameJoltAPI.deAuthDaUser();
             GameJoltAPI.connect();
@@ -206,7 +212,7 @@ class GameJoltLogin extends MusicBeatState
         }, "Log Out & Close", 200, 60);
         logOutBox.color = FlxColor.RED /*FlxColor.fromRGB(255,134,61)*/ ;
 
-        cancelBox = new FlxButtonPlus(Math.floor(FlxG.width*0.25), 445, function()
+        cancelBox = new FlxButtonPlus(Math.floor(FlxG.width*0.5), logOutBox.y+100, function()
         {
            FlxG.save.flush();
             FlxG.sound.play(Paths.sound('confirmMenu'), 0.7, false, null, true, function(){
@@ -215,12 +221,6 @@ class GameJoltLogin extends MusicBeatState
                 ClientPrefs.saveSettings();
             });
         }, "Not Right Now", 200, 60);
-
-        showPassBox = new FlxButtonPlus(Math.floor(FlxG.width*0.25) + 200, 185, function()
-        {
-            tokenBox.passwordMode = !tokenBox.passwordMode;
-        }, "Show Password?", 200, 60);
-        showPassBox.color = FlxColor.fromRGB(84,155,180);
 
         if(!GameJoltAPI.getStatus())
         {
