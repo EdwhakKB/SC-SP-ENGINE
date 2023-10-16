@@ -5508,9 +5508,9 @@ class PlayState extends MusicBeatState
 		// GUITAR HERO SUSTAIN CHECK LOL!!!!
 		if (note != null && guitarHeroSustains && note.parent == null) {
 			if(note.tail.length > 0) {
-				note.alpha = 0.35;
+				note.alpha *= 0.35;
 				for(childNote in note.tail) {
-					childNote.alpha = note.alpha;
+					childNote.alpha *= note.alpha;
 					childNote.missed = true;
 					childNote.canBeHit = false;
 					childNote.ignoreNote = true;
