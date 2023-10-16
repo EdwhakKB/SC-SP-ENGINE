@@ -16,6 +16,7 @@ class WarnFreeplay extends backend.MusicBeatState
 {
 	var warnText:FlxText;
 	var txtSine:Float = 0;
+	public static var leftState:Bool = false;
 	override function create()
 	{
 		super.create();
