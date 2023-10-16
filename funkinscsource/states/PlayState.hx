@@ -5510,7 +5510,7 @@ class PlayState extends MusicBeatState
 			if(note.tail.length > 0) {
 				note.alpha *= 0.35;
 				for(childNote in note.tail) {
-					childNote.alpha = note.alpha;
+					childNote.alpha *= note.alpha;
 					childNote.missed = true;
 					childNote.canBeHit = false;
 					childNote.ignoreNote = true;
