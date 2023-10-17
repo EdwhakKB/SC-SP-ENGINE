@@ -72,6 +72,7 @@ class ControlsSubState extends MusicBeatSubstate
 		bg = new FlxSprite().loadGraphic(Paths.image('stageBackForStates'));
 		bg.color = keyboardColor;
 		bg.antialiasing = ClientPrefs.data.antialiasing;
+		bg.setGraphicSize(FlxG.width + 250, FlxG.height + 250);
 		bg.screenCenter();
 		add(bg);
 

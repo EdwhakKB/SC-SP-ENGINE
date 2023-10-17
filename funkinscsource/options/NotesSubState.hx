@@ -50,10 +50,11 @@ class NotesSubState extends MusicBeatSubstate
 
 	public function new() {
 		super();
-		
+
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('stageBackForStates'));
 		bg.color = 0xFFEA71FD;
 		bg.screenCenter();
+		bg.setGraphicSize(FlxG.width + 200, FlxG.height + 200);
 		bg.antialiasing = ClientPrefs.data.antialiasing;
 		add(bg);
 
@@ -496,7 +497,6 @@ class NotesSubState extends MusicBeatSubstate
 		if (controls.controllerMode) return FlxG.overlap(controllerPointer, obj);
 		return FlxG.mouse.overlaps(obj);
 	}
-
 	function pointerX():Float
 	{
 		if (controls.controllerMode) return controllerPointer.x;

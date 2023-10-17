@@ -49,28 +49,12 @@ class OptionsState extends MusicBeatState
 		DiscordClient.changePresence("Options Menu", null);
 		#end
 
-		camMain = new FlxCamera();
-		camSub = new FlxCamera();
-		camSub.bgColor.alpha = 0;
+		FlxG.camera.zoom = 0.9;
 
-		FlxG.cameras.reset(camMain);
-		FlxG.cameras.add(camSub, false);
-
-		FlxG.cameras.setDefaultDrawTarget(camMain, true);
-		CustomFadeTransition.nextCamera = camSub;
-
-		camFollow = new FlxObject(0, 0, 1, 1);
-		camFollowPos = new FlxObject(0, 0, 1, 1);
-		add(camFollow);
-		add(camFollowPos);
-		FlxG.camera.follow(camFollowPos, null, 1);
-
-		final yScroll:Float = Math.max(0.25 - (0.05 * (options.length - 4)), 0.1);
 		bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
 		bg.color = 0xFF98f0f8;
-		bg.scale.set(1.07, 1.07);
+		//bg.scale.set(1.4, 1.4);
 		bg.updateHitbox();
-		bg.scrollFactor.set(0, yScroll/3);
 		bg.screenCenter();
 		bg.y += 5;
 		add(bg);
@@ -83,15 +67,12 @@ class OptionsState extends MusicBeatState
 			var optionText:Alphabet = new Alphabet(0, 0, options[i], true);
 			optionText.screenCenter();
 			optionText.y += (110 * (i - (options.length / 2))) + 50;
-			optionText.scrollFactor.set(0, yScroll);
 			grpOptions.add(optionText);
 		}
 
 		selectorLeft = new Alphabet(0, 0, '>', true);
-		selectorLeft.scrollFactor.set(0, yScroll);
 		add(selectorLeft);
 		selectorRight = new Alphabet(0, 0, '<', true);
-		selectorRight.scrollFactor.set(0, yScroll);
 		add(selectorRight);
 
 		changeSelection();
@@ -110,9 +91,6 @@ class OptionsState extends MusicBeatState
 
 		if (FlxG.sound.music != null)
 			Conductor.songPosition = FlxG.sound.music.time;
-
-		var lerpVal:Float = CoolUtil.clamp(elapsed * 7.5, 0, 1);
-		camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));
 	
 		var mult:Float = FlxMath.lerp(1.07, bg.scale.x, CoolUtil.clamp(1 - (elapsed * 9), 0, 1));
 		bg.scale.set(mult, mult);
@@ -167,8 +145,6 @@ class OptionsState extends MusicBeatState
 				selectorLeft.y = item.y;
 				selectorRight.x = item.x + item.width + 15;
 				selectorRight.y = item.y;
-				final add:Float = (grpOptions.members.length > 4 ? grpOptions.members.length * 8 : 0);
-				camFollow.setPosition(item.getGraphicMidpoint().x, item.getGraphicMidpoint().y - add);
 			}
 		}
 		FlxG.sound.play(Paths.sound('scrollMenu'));
