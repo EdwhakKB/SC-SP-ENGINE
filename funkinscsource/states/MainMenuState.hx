@@ -178,7 +178,11 @@ class MainMenuState extends MusicBeatState
 			if (FlxG.sound.music != null)
 				Conductor.songPosition = FlxG.sound.music.time;
 		}
+		#if (flixel >= "5.4.0")
+		FlxG.camera.followLerp = FlxMath.bound(elapsed * 9 * (FlxG.updateFramerate / 60), 0, 1);
+		#else
 		FlxG.camera.followLerp = FlxMath.bound(elapsed * 9 / (FlxG.updateFramerate / 60), 0, 1);
+		#end
 
 		#if !mobile
 		if ((FlxG.mouse.getScreenPosition().x != oldPos.x || FlxG.mouse.getScreenPosition().y != oldPos.y) && !selectedSomethin)

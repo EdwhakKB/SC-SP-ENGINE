@@ -144,7 +144,11 @@ class GameOverSubstate extends MusicBeatSubstate
 			}
 		}
 		
+		#if (flixel >= "5.4.0")
+		if(updateCamera) FlxG.camera.followLerp = FlxMath.bound(elapsed * 0.6 * (FlxG.updateFramerate / 60), 0, 1);
+		#else
 		if(updateCamera) FlxG.camera.followLerp = FlxMath.bound(elapsed * 0.6 / (FlxG.updateFramerate / 60), 0, 1);
+		#end
 		else FlxG.camera.followLerp = 0;
 
 		if (FlxG.sound.music.playing)

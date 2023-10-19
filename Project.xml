@@ -162,6 +162,7 @@
 	<haxelib name="hxCodec" if="VIDEOS_ALLOWED"/>
 	<haxelib name="faxe" if='switch'/>
 	<!--<haxelib name="flxanimate" />-->
+	<haxelib name="parallaxlt" />
 	<!--<haxelib name="polymod"/> -->
 	<haxelib name="discord_rpc" if="desktop"/>
 

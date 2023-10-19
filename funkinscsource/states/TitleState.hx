@@ -97,19 +97,7 @@ class TitleState extends MusicBeatState
 		#end
 		Mods.loadTopMod();
 
-		FlxG.fixedTimestep = false;
-		FlxG.game.focusLostFramerate = 60;
-		FlxG.keys.preventDefaultKeys = [TAB];
-
-		FlxG.autoPause = false;
-		
-		FlxG.mouse.visible = true;
-
 		curWacky = FlxG.random.getObject(getIntroTextShit());
-
-		FlxG.save.bind('funkin', CoolUtil.getSavePath());
-
-		ClientPrefs.loadPrefs();
 
 		checkInternetConnection();
 
@@ -122,11 +110,6 @@ class TitleState extends MusicBeatState
 		Highscore.load();
 		
 		FlxG.worldBounds.set(0, 0);
-
-		#if cpp
-		cpp.NativeGc.enable(true);
-		cpp.NativeGc.run(true);
-		#end
 
 		Assets.cache.enabled = true;
 

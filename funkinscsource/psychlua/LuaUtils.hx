@@ -11,6 +11,9 @@ import shaders.Shaders;
 
 import substates.GameOverSubstate;
 import psychlua.FunkinLua;
+#if (flixel >= "5.3.0")
+import flixel_5_3_1.ParallaxSprite;
+#end
 
 typedef LuaTweenOptions = {
 	type:FlxTweenType,
@@ -282,6 +285,30 @@ class LuaUtils
 		#end
 	}
 
+	#if (flixel >= "5.3.0")
+	public static function resetSpriteTag(tag:String, isParallax:Bool = false) {
+		#if LUA_ALLOWED
+		if(!PlayState.instance.modchartSprites.exists(tag) || !PlayState.instance.modchartParallax.exists(tag)) {
+			return;
+		}
+		if (isParallax)
+		{
+			var target:ParallaxSprite = PlayState.instance.modchartParallax.get(tag);
+			target.kill();
+			PlayState.instance.remove(target, true);
+			target.destroy();
+			PlayState.instance.modchartParallax.remove(tag);
+			return;
+		}
+
+		var target:ModchartSprite = PlayState.instance.modchartSprites.get(tag);
+		target.kill();
+		PlayState.instance.remove(target, true);
+		target.destroy();
+		PlayState.instance.modchartSprites.remove(tag);
+		#end
+	}
+	#else
 	public static function resetSpriteTag(tag:String) {
 		#if LUA_ALLOWED
 		if(!PlayState.instance.modchartSprites.exists(tag)) {
@@ -295,6 +322,7 @@ class LuaUtils
 		PlayState.instance.modchartSprites.remove(tag);
 		#end
 	}
+	#end
 
 	public static function resetIconTag(tag:String) {
 		#if LUA_ALLOWED
@@ -307,6 +335,20 @@ class LuaUtils
 		PlayState.instance.remove(target, true);
 		target.destroy();
 		PlayState.instance.modchartIcons.remove(tag);
+		#end
+	}
+
+	public static function resetSkewedSpriteTag(tag:String) {
+		#if LUA_ALLOWED
+		if(!PlayState.instance.modchartSkewedSprite.exists(tag)) {
+			return;
+		}
+		
+		var target:FlxSkewedSprite = PlayState.instance.modchartSkewedSprite.get(tag);
+		target.kill();
+		PlayState.instance.remove(target, true);
+		target.destroy();
+		PlayState.instance.modchartSkewedSprite.remove(tag);
 		#end
 	}
 

@@ -37,7 +37,7 @@ class Main extends Sprite
 		initialState: TitleState, // initial game state
 		zoom: -1.0, // game state bounds
 		framerate: 60, // default framerate
-		skipSplash: true, // if the default flixel splash screen should be skipped
+		skipSplash: false, // if the default flixel splash screen should be skipped
 		startFullscreen: false // if the game should start at fullscreen mode
 	};
 
@@ -111,16 +111,11 @@ class Main extends Sprite
 		Controls.instance = new Controls();
 		ClientPrefs.loadDefaultKeys();
 		#if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
-		addChild(new FlxGame(game.width, game.height, game.initialState, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
+		addChild(new FlxGame(game.width, game.height, Init, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
 
 		#if !mobile
-		fpsVar = new FPS(10, 3, 0xFFFFFF);
-		addChild(fpsVar);
 		Lib.current.stage.align = "tl";
 		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
-		if (fpsVar != null){
-			fpsVar.visible = ClientPrefs.data.showFPS;
-		}
 		#end
 
 		gjToastManager = new GJToastManager();
@@ -133,7 +128,9 @@ class Main extends Sprite
 		FlxG.mouse.visible = false;
 		#end
 
+		#if !(flixel >= "5.4.0")
 		FlxG.fixedTimestep = false;
+		#end
 
 		FlxGraphic.defaultPersist = false;
 		FlxG.signals.preStateSwitch.add(function()
@@ -209,29 +206,36 @@ class Main extends Sprite
 		#end
 
 		// shader coords fix
-		FlxG.signals.gameResized.add(fixCameraShaders);
+		FlxG.signals.gameResized.add(function(w, h)
+		{	
+			if (FlxG.cameras != null) {
+				for (cam in FlxG.cameras.list) {
+			  		#if (flixel >= "5.4.0")
+						if (cam != null && cam.filters != null)
+							resetSpriteCache(cam.flashSprite);
+					#else
+					@:privateAccess
+					if (cam != null && cam._filters != null)
+						resetSpriteCache(cam.flashSprite);
+					#end
+				}
+	  		}
+
+			if (FlxG.game != null)
+				resetSpriteCache(FlxG.game);
+		});
 	}
 
-	public static function fixCameraShaders(w:Int, h:Int) //fixes shaders after resizing the window / fullscreening
-	{
-		if (FlxG.cameras.list.length > 0)
-		{
-			for (cam in FlxG.cameras.list)
-			{
-				if (cam.flashSprite != null)
-				{
-					@:privateAccess 
-					{
-						cam.flashSprite.__cacheBitmap = null;
-						cam.flashSprite.__cacheBitmapData = null;
-						cam.flashSprite.__cacheBitmapData2 = null;
-						cam.flashSprite.__cacheBitmapData3 = null;
-						cam.flashSprite.__cacheBitmapColorTransform = null;
-					}
-				}
-			}
+	static function resetSpriteCache(sprite:Sprite):Void {
+		@:privateAccess {
+			sprite.__cacheBitmap = null;
+			sprite.__cacheBitmapData = null;
+			#if (flixel < "5.4.1")
+			sprite.__cacheBitmapData2 = null;
+			sprite.__cacheBitmapData3 = null;
+			sprite.__cacheBitmapColorTransform = null;
+			#end
 		}
-		
 	}
 
 	// Code was entirely made by sqirra-rng for their fnf engine named "Izzy Engine", big props to them!!!

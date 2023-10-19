@@ -27,6 +27,8 @@ import objects.BGSprite;
 import states.PlayState;
 import states.LoadingState;
 
+import flixel.addons.effects.FlxSkewedSprite;
+
 //Flixel
 #if (flixel >= "5.3.0")
 import flixel.sound.FlxSound;

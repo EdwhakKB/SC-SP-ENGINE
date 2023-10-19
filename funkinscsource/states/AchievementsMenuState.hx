@@ -205,7 +205,11 @@ class AchievementsMenuState extends MusicBeatState
 			}
 		}
 	
+		#if (flixel >= "5.4.0")
+		FlxG.camera.followLerp = FlxMath.bound(elapsed * 9 * (FlxG.updateFramerate / 60), 0, 1);
+		#else
 		FlxG.camera.followLerp = FlxMath.bound(elapsed * 9 / (FlxG.updateFramerate / 60), 0, 1);
+		#end
 
 		if (controls.BACK) {
 			FlxG.sound.play(Paths.sound('cancelMenu'));

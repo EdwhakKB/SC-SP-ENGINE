@@ -1123,6 +1123,39 @@ class FunkinLua {
 			game.modchartSprites.set(tag, leSprite);
 		});
 
+		#if (flixel >= "5.3.0")
+		set("makeParallaxSprite", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0) {
+			tag = tag.replace('.', '');
+			LuaUtils.resetSpriteTag(tag, true);
+			var leSprite:ParallaxSprite = new ParallaxSprite(x, y, Paths.image(image));
+			game.modchartParallax.set(tag, leSprite);
+			leSprite.active = true;
+		});
+		set("fixateParallaxSprite", function(obj:String, anchorX:Int = 0, anchorY:Int = 0, scrollOneX:Float = 1, scrollOneY:Float = 1, scrollTwoX:Float = 1.1, scrollTwoY:Float = 1.1, 
+			direct:String = 'horizontal')
+		{
+			var spr:ParallaxSprite = LuaUtils.getObjectDirectly(obj, false);
+			if(spr != null) spr.fixate(anchorX, anchorY, scrollOneX, scrollOneY, scrollTwoX, scrollTwoY, direct);
+		});
+		#end
+
+		set("makeLuaSkewedSprite", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0, ?skewX:Float = 0, ?skewY:Float = 0) {
+			tag = tag.replace('.', '');
+			LuaUtils.resetSkewedSpriteTag(tag);
+			var leSprite:FlxSkewedSprite = null;
+			if(image != null && image.length > 0)
+			{
+				leSprite = new FlxSkewedSprite();
+				leSprite.loadGraphic(Paths.image(image));
+				leSprite.x = x;
+				leSprite.y = y;
+				leSprite.skew.x = skewX;
+				leSprite.skew.y = skewY;
+			}
+			game.modchartSkewedSprite.set(tag, leSprite);
+			leSprite.active = true;
+		});
+
 		set("makeGraphic", function(obj:String, width:Int = 256, height:Int = 256, color:String = 'FFFFFF') {
 			var spr:FlxSprite = LuaUtils.getObjectDirectly(obj, false);
 			if(spr != null) spr.makeGraphic(width, height, CoolUtil.colorFromString(color));
@@ -1294,6 +1327,37 @@ class FunkinLua {
 				}
 			}
 		});
+		#if (flixel >= "5.3.0")
+		set("addParallaxSprite", function(tag:String, front:Bool = false) {
+			if(game.modchartParallax.exists(tag)) {
+				var spr:ParallaxSprite = game.modchartParallax.get(tag);
+				if(front)
+					LuaUtils.getTargetInstance().add(spr);
+				else
+				{
+					if(!game.isDead)
+						game.insert(game.members.indexOf(LuaUtils.getLowestCharacterGroup()), spr);
+					else
+						GameOverSubstate.instance.insert(GameOverSubstate.instance.members.indexOf(GameOverSubstate.instance.boyfriend), spr);
+				}
+			}
+		});
+		#end
+		set("addSkewedSprite", function(tag:String, front:Bool = false) {
+			if(game.modchartSkewedSprite.exists(tag)) {
+				var spr:FlxSkewedSprite = game.modchartSkewedSprite.get(tag);
+				if(front)
+					LuaUtils.getTargetInstance().add(spr);
+				else
+				{
+					if(!game.isDead)
+						game.insert(game.members.indexOf(LuaUtils.getLowestCharacterGroup()), spr);
+					else
+						GameOverSubstate.instance.insert(GameOverSubstate.instance.members.indexOf(GameOverSubstate.instance.boyfriend), spr);
+				}
+			}
+		});
+
 		set("setGraphicSize", function(obj:String, x:Int, y:Int = 0, updateHitbox:Bool = true) {
 			if(game.getLuaObject(obj)!=null) {
 				var shit:FlxSprite = game.getLuaObject(obj);
@@ -1375,9 +1439,56 @@ class FunkinLua {
 			}
 		});
 
+		#if (flixel >= "5.3.0")
+		set("removeParallaxSprite", function(tag:String, destroy:Bool = true) {
+			if(!game.modchartParallax.exists(tag)) {
+				return;
+			}
+
+			var pee:ParallaxSprite = game.modchartParallax.get(tag);
+			if(destroy) {
+				pee.kill();
+			}
+
+			LuaUtils.getTargetInstance().remove(pee, true);
+			if(destroy) {
+				pee.destroy();
+				game.modchartParallax.remove(tag);
+			}
+		});
+		#end
+
+		set("removeSkewedSprite", function(tag:String, destroy:Bool = true) {
+			if(!game.modchartSkewedSprite.exists(tag)) {
+				return;
+			}
+
+			var pee:FlxSkewedSprite = game.modchartSkewedSprite.get(tag);
+			if(destroy) {
+				pee.kill();
+			}
+
+			LuaUtils.getTargetInstance().remove(pee, true);
+			if(destroy) {
+				pee.destroy();
+				game.modchartSkewedSprite.remove(tag);
+			}
+		});
+
 		set("luaSpriteExists", function(tag:String) {
 			return game.modchartSprites.exists(tag);
 		});
+
+		#if (flixel >= "5.3.0")
+		set("luaParallaxExists", function(tag:String) {
+			return game.modchartSprites.exists(tag);
+		});
+		#end
+
+		set("luaSkewedExists", function(tag:String) {
+			return game.modchartSprites.exists(tag);
+		});
+
 		set("luaTextExists", function(tag:String) {
 			return game.modchartTexts.exists(tag);
 		});

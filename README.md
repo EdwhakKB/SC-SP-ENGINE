@@ -1,7 +1,16 @@
 ## SCE Edition
 * This engine brings features the may apply to modified gameplay!, other results screens!, betadciu things support!, more stuff is added to the engine for it to be modified however *you* entend to use this engine!*
 * SCE brings NOTITG Modchart support along with many other features!
+* Parallax Stuff by Itz-Miles [THANK YOU SO MUCH!](https://github.com/ShadowMario/FNF-PsychEngine/pull/13397)
 * This engine is made with **psych engine**!
+
+## Other SCE Usage Stuff
+* BETADCIU Engine By Blantados [Stuff like character change and others are used from here!](https://github.com/Blantados/BETADCIU-Engine-Source/tree/main)
+* Kade stuff added from original stuff and my friend bolo! TYSM [Kade ResultsScreen and most stuff](https://github.com/Blantados/BETADCIU-Engine-Source/tree/main)
+* Newer versions of flixel fixes by system32unknown [FlxRuntimerShader, FlxAnimationController, Main](https://github.com/ShadowMario/FNF-PsychEngine/pull/13422)
+* FlxCustomColor Stuff from TheLeerName [Thanks](https://github.com/ShadowMario/FNF-PsychEngine/pull/13323)
+* Most other fixes, noteskin support, char json edits, and more all by me *glowsoony*
+
 * [Input Rewrite! by this psych pull request!](https://github.com/ShadowMario/FNF-PsychEngine/pull/13448)
 # Friday Night Funkin' - Psych Engine
 Engine originally used on [Mind Games Mod](https://gamebanana.com/mods/301107), intended to be a fix for the vanilla version's many issues while keeping the casual play aspect of it. Also aiming to be an easier alternative to newbie coders.
