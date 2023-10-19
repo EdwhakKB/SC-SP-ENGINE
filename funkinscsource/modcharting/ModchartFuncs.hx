@@ -91,7 +91,7 @@ class ModchartFuncs
         FunkinHScript.initHaxeModule(parent);
         if (parent.hscript != null)
         {
-            #if (SScript == "6.1.80")
+            #if (SScript >= "6.1.80")
                 parent.hscript.setClass(Math);
                 parent.hscript.setClass(PlayfieldRenderer);
                 parent.hscript.setClass(ModchartUtil);

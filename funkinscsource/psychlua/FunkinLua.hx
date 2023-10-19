@@ -2044,7 +2044,7 @@ class FunkinLua {
 		#if HSCRIPT_ALLOWED
 		if(hscript != null)
 		{
-			#if (SScript == "6.1.80")
+			#if (SScript >= "6.1.80")
 			hscript.kill();
 			#else
 			hscript.destroy();

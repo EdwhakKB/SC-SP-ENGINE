@@ -56,7 +56,7 @@ class ScriptHandler #if HAXE_EXTENSION extends tea.SScript #end
 		#end
 	}
 
-	#if (SScript == "6.1.80")
+	#if (SScript >= "6.1.80")
 	#if HAXE_EXTENSION
 	override public function preset():Void
 	{

@@ -7,7 +7,7 @@ import psychlua.CustomSubstate;
 import tea.SScript;
 
 #if HSCRIPT_ALLOWED
-#if (SScript == "6.1.80")
+#if (SScript >= "6.1.80")
 class HScript extends SScript
 {
 	public var parentLua:FunkinLua;
