@@ -2791,6 +2791,8 @@ class PlayState extends MusicBeatState
 
 	private var allowedEnter:Bool = false;
 
+	var alreadyEndedSong:Bool = false;
+
 	override public function update(elapsed:Float)
 	{
 		if (!alreadyEndedSong)
