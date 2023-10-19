@@ -6,7 +6,7 @@
 
 ## Other SCE Usage Stuff
 * BETADCIU Engine By Blantados [Stuff like character change and others are used from here!](https://github.com/Blantados/BETADCIU-Engine-Source/tree/main)
-* Kade stuff added from original stuff and my friend bolo! TYSM [Kade ResultsScreen and most stuff](https://github.com/Blantados/BETADCIU-Engine-Source/tree/main)
+* Kade stuff added from original stuff and my friend bolo! TYSM [Kade ResultsScreen and most stuff](https://github.com/BoloVEVO/Kade-Engine)
 * Newer versions of flixel fixes by system32unknown [FlxRuntimerShader, FlxAnimationController, Main](https://github.com/ShadowMario/FNF-PsychEngine/pull/13422)
 * FlxCustomColor Stuff from TheLeerName [Thanks](https://github.com/ShadowMario/FNF-PsychEngine/pull/13323)
 * Most other fixes, noteskin support, char json edits, and more all by me *glowsoony*
