@@ -1486,7 +1486,7 @@ class FunkinLua {
 		#end
 
 		set("luaSkewedExists", function(tag:String) {
-			return game.modchartSprites.exists(tag);
+			return game.modchartSkewedSprite.exists(tag);
 		});
 
 		set("luaTextExists", function(tag:String) {
