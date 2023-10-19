@@ -196,8 +196,6 @@ class Main extends Sprite
 		#end
 
 		#if desktop
-		DiscordClient.start();
-
 		// Get first window in case the coder creates more windows.
 		@:privateAccess
 		appName = openfl.Lib.application.windows[0].__backend.parent.__attributes.title;
