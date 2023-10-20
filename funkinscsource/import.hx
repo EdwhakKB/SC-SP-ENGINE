@@ -29,7 +29,7 @@ import states.LoadingState;
 
 import flixel.addons.effects.FlxSkewedSprite;
 
-#if (flixel >= "5.3.0")
+#if (flixel >= "5.3.1")
 import flixel_5_3_1.ParallaxSprite;
 #end
 
