@@ -142,7 +142,7 @@ class Achievements {
 		
 		if(Achievements.isUnlocked(name)) return null;
 
-		Debug.logTrace('Completed achievement "$name"');
+		Debug.logInfo('Completed achievement "$name"');
 		achievementsUnlocked.push(name);
 
 		// earrape prevention
@@ -179,7 +179,6 @@ class Achievements {
 
 		var newPop:AchievementPopup = new AchievementPopup(achieve, endFunc);
 		_popups.push(newPop);
-		//Debug.logTrace('Giving achievement ' + achieve);
 	}
 	
 	

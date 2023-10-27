@@ -19,7 +19,11 @@ import flixel.util.FlxColor;
 #if sys
 import sys.FileSystem;
 #end
+#if (flixel >= "5.3.0")
+import flixel.sound.FlxSound;
+#else
 import flixel.system.FlxSound;
+#end
 import flixel.text.FlxText;
 
 import flixel.addons.transition.FlxTransitionableState;
@@ -31,7 +35,6 @@ using StringTools;
 
 class AsyncAssetPreloader
 {
-	var uiSkins:Array<String> = [];
 	var characters:Array<String> = [];
 	var stages:Array<String> = [];
 	var audio:Array<String> = [];
@@ -65,14 +68,12 @@ class AsyncAssetPreloader
 
 		if (PlayState.SONG != null)
 		{
-			PlayState.customLoaded = true;
-
 			characters.push(PlayState.SONG.player1);
 			characters.push(PlayState.SONG.player2);
 			characters.push(PlayState.SONG.gfVersion);
 			characters.push(PlayState.SONG.player4);
 	
-			#if (SCE_ExtraSides == 0.1)
+			#if (SBETA == 0.1)
 			audio.push(Paths.inst((PlayState.SONG.instrumentalPrefix != null ? PlayState.SONG.instrumentalPrefix : ''), PlayState.SONG.songId, (PlayState.SONG.instrumentalSuffix != null ? PlayState.SONG.instrumentalSuffix : '')));
 			audio.push(Paths.voices((PlayState.SONG.vocalsPrefix != null ? PlayState.SONG.vocalsPrefix : ''), PlayState.SONG.songId, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : '')));
 			#else
@@ -86,7 +87,14 @@ class AsyncAssetPreloader
 				if(character.trim().length > 0)
 					characters.push(character);
 			}
-	
+
+			var stages:Array<String> = Mods.mergeAllTextsNamed('data/songs/${PlayState.SONG.songId.toLowerCase()}/preload-stage.txt', Paths.getPreloadPath());
+			for (stage in stages)
+			{
+				if(stage.trim().length > 0)
+					stages.push(stage);
+			}
+
 			// if(PlayState.SONG.events.length > 0)
 			// {
 			// 	for(event in PlayState.SONG.events)
@@ -136,7 +144,7 @@ class AsyncAssetPreloader
 			// }
 		}
 
-		totalLoadCount = audio.length + characters.length-1; //do -1 because it will be behind at the end when theres a small freeze
+		totalLoadCount = audio.length + characters.length + stages.length-1; //do -1 because it will be behind at the end when theres a small freeze
 	}
 
 	public function load(async:Bool = true)
@@ -159,6 +167,11 @@ class AsyncAssetPreloader
 					loadCharacters();
 					return true;
 				});
+				setupFuture(function()
+				{
+					loadStages();
+					return true;
+				});
 			}
 			else 
 			{
@@ -166,6 +179,7 @@ class AsyncAssetPreloader
 				{
 					loadAudio();
 					loadCharacters();
+					loadStages();
 					return true;
 				});
 			}
@@ -176,6 +190,7 @@ class AsyncAssetPreloader
 		{
 			loadAudio();
 			loadCharacters();
+			loadStages();
 			finish();
 		}
 	}
@@ -219,6 +234,16 @@ class AsyncAssetPreloader
 		}
 		trace('loaded characters');
 	}
+
+	public function loadStages()
+	{
+		for (i in stages)
+		{
+			loadedCount++;
+			new Stage(i, false);
+			trace('loaded stages');
+		}
+	}
 }
 
 class LoadingState extends MusicBeatState
@@ -258,15 +283,14 @@ class LoadingState extends MusicBeatState
 
 	override function create()
 	{
+		var startedString:String = (PlayState.SONG != null ? "Loading " + PlayState.SONG.songId + "..." : "Loading " + Type.getClass(target) + "...");
+		PlayState.customLoaded = true;
+		FlxG.worldBounds.set(0, 0);
 		#if desktop
-		if (PlayState.SONG != null)
-			DiscordClient.changePresence("Loading " + PlayState.SONG.songId + "...", null, null, true);
-		else
-			DiscordClient.changePresence("Loading " + Type.getClass(target) + "...", null, null, true);
+		DiscordClient.changePresence(startedString, null, null, true);
 		DiscordClient.resetClientID();
 		#end
 
-		#if PRELOAD_ALL
 		var bg:FlxSprite = new FlxSprite(0, 0).makeGraphic(FlxG.width, FlxG.height, 0xff4de7ff);
 		bg.antialiasing = ClientPrefs.data.antialiasing;
 		add(bg);
@@ -279,7 +303,18 @@ class LoadingState extends MusicBeatState
 		loadingScreen.antialiasing = ClientPrefs.data.antialiasing;
 		add(loadingScreen);
 
-		if (!ClientPrefs.data.cacheOnGPU){
+		loadingBar = new FlxBar(0, FlxG.height-25, LEFT_TO_RIGHT, FlxG.width, 25, this, 'lerpedPercent', 0, 1);
+		loadingBar.scrollFactor.set();
+		loadingBar.createFilledBar(0xFF000000, 0xFFFFFFFF);
+		add(loadingBar);
+
+		loadingText = new FlxText(2, FlxG.height-25-26, 0, startedString);
+		loadingText.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		add(loadingText);
+
+		#if PRELOAD_ALL
+		if (!ClientPrefs.data.cacheOnGPU)
+		{
 			loader = new AsyncAssetPreloader(function()
 			{
 				//FlxTransitionableState.skipNextTransOut = true;
@@ -288,17 +323,7 @@ class LoadingState extends MusicBeatState
 			});
 			loader.load(true);
 		}
-
-		loadingBar = new FlxBar(0, FlxG.height-25, LEFT_TO_RIGHT, FlxG.width, 25, this, 'lerpedPercent', 0, 1);
-		loadingBar.scrollFactor.set();
-		loadingBar.createFilledBar(0xFF000000, 0xFFFFFFFF);
-		add(loadingBar);
-
-		loadingText = new FlxText(2, FlxG.height-25-26, 0, "Loading...");
-		loadingText.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		add(loadingText);
-
-		if (ClientPrefs.data.cacheOnGPU)
+		else
 		{
 			loadingBar.visible = false;
 
@@ -343,7 +368,7 @@ class LoadingState extends MusicBeatState
 	}
 	
 	function checkLibrary(library:String) {
-		Debug.logTrace(Assets.hasLibrary(library));
+		Debug.logInfo(Assets.hasLibrary(library));
 		if (Assets.getLibrary(library) == null)
 		{
 			@:privateAccess
@@ -400,7 +425,7 @@ class LoadingState extends MusicBeatState
 	
 	static function getSongPath()
 	{
-		#if (SCE_ExtraSides == 0.1)
+		#if (SBETA == 0.1)
 		return Paths.inst((PlayState.SONG.instrumentalPrefix != null ? PlayState.SONG.instrumentalPrefix : ''), PlayState.SONG.songId, (PlayState.SONG.instrumentalSuffix != null ? PlayState.SONG.instrumentalSuffix : ''));
 		#else
 		return Paths.inst(PlayState.SONG.songId);
@@ -409,7 +434,7 @@ class LoadingState extends MusicBeatState
 	
 	static function getVocalPath()
 	{
-		#if (SCE_ExtraSides == 0.1)
+		#if (SBETA == 0.1)
 		return Paths.voices((PlayState.SONG.vocalsPrefix != null ? PlayState.SONG.vocalsPrefix : ''), PlayState.SONG.songId, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : ''));
 		#else
 		return Paths.voices(PlayState.SONG.songId);
@@ -430,7 +455,7 @@ class LoadingState extends MusicBeatState
 		if(weekDir != null && weekDir.length > 0 && weekDir != '') directory = weekDir;
 
 		Paths.setCurrentLevel(directory);
-		Debug.logTrace('Setting asset folder to ' + directory);
+		Debug.logInfo('Setting asset folder to ' + directory);
 
 		#if NO_PRELOAD_ALL
 		var loaded:Bool = false;
@@ -452,7 +477,7 @@ class LoadingState extends MusicBeatState
 	#if NO_PRELOAD_ALL
 	static function isSoundLoaded(path:String):Bool
 	{
-		Debug.logTrace(path);
+		Debug.logInfo(path);
 		return Assets.cache.hasSound(path);
 	}
 	
@@ -586,7 +611,7 @@ class MultiCallback
 	inline function log(msg):Void
 	{
 		if (logId != null)
-			Debug.logTrace('$logId: $msg');
+			Debug.logInfo('$logId: $msg');
 	}
 	
 	public function getFired() return fired.copy();

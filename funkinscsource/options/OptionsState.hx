@@ -161,6 +161,7 @@ class OptionsState extends MusicBeatState
 	override function destroy()
 	{
 		ClientPrefs.loadPrefs();
+		ClientPrefs.keybindSaveLoad();
 		super.destroy();
 	}
 }

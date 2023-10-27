@@ -24,9 +24,7 @@ class MusicBeatState extends #if modchartingTools modcharting.ModchartMusicBeatS
 	}
 
 	public static var camBeat:FlxCamera;
-
-	var mouseCursor:FlxSprite;
-
+	
 	override public function destroy()
 	{
 		if (subStates != null)
@@ -36,7 +34,7 @@ class MusicBeatState extends #if modchartingTools modcharting.ModchartMusicBeatS
 				var subState:MusicBeatSubstate = subStates[0];
 				if (subState != null)
 				{
-					Debug.logTrace('Destroying Substates!');
+					Debug.logInfo('Destroying Substates!');
 					subStates.remove(subState);
 					subState.destroy();
 				}
@@ -49,16 +47,8 @@ class MusicBeatState extends #if modchartingTools modcharting.ModchartMusicBeatS
 		super.destroy();
 	}
 
-	override function create() {
-		/*switch (FlxG.random.int(0, 1))
-		{
-			case 0:
-				mouseCursor = new FlxSprite().loadGraphic(Paths.image('Default/cursor'));
-			case 1:
-				mouseCursor = new FlxSprite().loadGraphic(Paths.image('Default/noteCursor'));
-		} 
-		FlxG.mouse.load(mouseCursor.pixels);*/
-
+	override function create()
+	{
 		destroySubStates = false;
 		FlxG.mouse.enabled = true;
 		FlxG.mouse.visible = true;
@@ -100,10 +90,6 @@ class MusicBeatState extends #if modchartingTools modcharting.ModchartMusicBeatS
 		}
 
 		if(FlxG.save.data != null) FlxG.save.data.fullscreen = FlxG.fullscreen;
-		
-		stagesFunc(function(stage:BaseStage) {
-			stage.update(elapsed);
-		});
 
 		super.update(elapsed);
 
@@ -245,44 +231,28 @@ class MusicBeatState extends #if modchartingTools modcharting.ModchartMusicBeatS
 		return cast (FlxG.state, MusicBeatState);
 	}
 
+	public function getNoteSkinPostfix()
+	{
+		var skin:String = '';
+		if(ClientPrefs.data.noteSkin != ClientPrefs.defaultData.noteSkin)
+			skin = '-' + ClientPrefs.data.noteSkin.trim().toLowerCase().replace(' ', '_');
+		return skin;
+	}
+
 	public function stepHit():Void
 	{
-		stagesFunc(function(stage:BaseStage) {
-			stage.curStep = curStep;
-			stage.curDecStep = curDecStep;
-			stage.stepHit();
-		});
-
 		if (curStep % 4 == 0)
 			beatHit();
 	}
 
-	public var stages:Array<BaseStage> = [];
 	public function beatHit():Void
 	{
-		//Debug.logTrace('Beat: ' + curBeat);
-		stagesFunc(function(stage:BaseStage) {
-			stage.curBeat = curBeat;
-			stage.curDecBeat = curDecBeat;
-			stage.beatHit();
-		});
 	}
 
 	public function sectionHit():Void
 	{
-		//Debug.logTrace('Section: ' + curSection + ', Beat: ' + curBeat + ', Step: ' + curStep);
-		stagesFunc(function(stage:BaseStage) {
-			stage.curSection = curSection;
-			stage.sectionHit();
-		});
 	}
 
-	function stagesFunc(func:BaseStage->Void)
-	{
-		for (stage in stages)
-			if(stage != null && stage.exists && stage.active)
-				func(stage);
-	}
 
 	function getBeatsOnSection()
 	{
@@ -290,36 +260,4 @@ class MusicBeatState extends #if modchartingTools modcharting.ModchartMusicBeatS
 		if(PlayState.SONG != null && PlayState.SONG.notes[curSection] != null) val = PlayState.SONG.notes[curSection].sectionBeats;
 		return val == null ? 4 : val;
 	}
-
-	/*public static function checkYourMouse(elapsed:Float, state:FlxState):Void
-	{
-		mouseS += elapsed;
-		if (Math.abs(mouseX - FlxG.mouse.screenX) > 20 || Math.abs(mouseY - FlxG.mouse.screenY) > 20 || FlxG.mouse.justPressed)
-		{
-			mouseS = 0;
-			mouseX = FlxG.mouse.screenX;
-			mouseY = FlxG.mouse.screenY;
-		}
-		if (mouseS > 2)
-		{
-			FlxG.mouse.visible = false;
-			mouseA = false;
-		}
-		else
-		{
-			mouseA = true;
-			switch (ClientPrefs.data.mouseLook)
-			{
-				case 'FNF Cursor':
-					FlxG.mouse.visible = true;
-					FlxG.mouse.useSystemCursor = false;
-				case 'System Cursor':
-					FlxG.mouse.visible = true;
-					FlxG.mouse.useSystemCursor = true;
-				case 'No Cursor':
-					FlxG.mouse.visible = false;
-					mouseA = false;
-			}
-		}
-	}*/
 }

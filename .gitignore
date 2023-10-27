@@ -4,12 +4,12 @@ APIStuff.hx
 art/build_x32-officialrelease.bat
 art/build_x64-officialrelease.bat
 art/test_x64-debug-officialrelease.bat
-
 ### VS Code
 export/*
 .vscode/*
 .haxelib/
 *.code-workspace
+vs_Community.exe
 # Local history which shouldn't be shared.
 .history
 .ionide

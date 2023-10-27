@@ -12,13 +12,38 @@ import objects.StrumArrow;
 import flixel.math.FlxRect;
 import flixel.addons.effects.FlxSkewedSprite;
 
+import flash.display.BitmapData;
+import flash.display.Graphics;
+import flash.geom.ColorTransform;
+import flixel.FlxG;
+import flixel.FlxSprite;
+import flixel.graphics.FlxGraphic;
+import flixel.graphics.frames.FlxAtlasFrames;
+import flixel.graphics.tile.FlxDrawTrianglesItem.DrawData;
+import flixel.math.FlxMath;
+import flixel.util.FlxColor;
+import modcharting.RenderPath;
+import openfl.Vector;
+
 using StringTools;
 
 typedef EventNote = {
 	strumTime:Float,
 	event:String,
 	value1:String,
-	value2:String
+	value2:String,
+	value3:String,
+	value4:String,
+	value5:String,
+	value6:String,
+	value7:String,
+	value8:String,
+	value9:String,
+	value10:String,
+	value11:String,
+	value12:String,
+	value13:String,
+	value14:String
 }
 
 typedef NoteSplashData = {
@@ -43,18 +68,20 @@ class Note extends FlxSkewedSprite
 	public var extraData:Map<String, Dynamic> = new Map<String, Dynamic>();
 
 	public var strumTime:Float = 0;
-	public var mustPress:Bool = false;
 	public var noteData:Int = 0;
+
+	public var mustPress:Bool = false;
 	public var canBeHit:Bool = false;
 	public var tooLate:Bool = false;
+
 	public var wasGoodHit:Bool = false;
+	public var missed:Bool = false;
+
 	public var ignoreNote:Bool = false;
 	public var hitByOpponent:Bool = false;
 	public var noteWasHit:Bool = false;
 	public var prevNote:Note;
 	public var nextNote:Note;
-
-	public var missed:Bool = false;
 
 	public var noteSection:Int = 0;
 
@@ -75,6 +102,18 @@ class Note extends FlxSkewedSprite
 	public var eventLength:Int = 0;
 	public var eventVal1:String = '';
 	public var eventVal2:String = '';
+	public var eventVal3:String = '';
+	public var eventVal4:String = '';
+	public var eventVal5:String = '';
+	public var eventVal6:String = '';
+	public var eventVal7:String = '';
+	public var eventVal8:String = '';
+	public var eventVal9:String = '';
+	public var eventVal10:String = '';
+	public var eventVal11:String = '';
+	public var eventVal12:String = '';
+	public var eventVal13:String = '';
+	public var eventVal14:String = '';
 
 	public var rgbShader:RGBShaderReference;
 	public static var globalRgbShaders:Array<RGBPalette> = [];
@@ -118,6 +157,7 @@ class Note extends FlxSkewedSprite
 	public var hitHealth:Float = 0.023;
 	public var missHealth:Float = 0.0475;
 	public var rating:RatingWindow;
+	public var ratingToString:String = '';
 
 	public var texture(default, set):String = null;
 
@@ -141,7 +181,6 @@ class Note extends FlxSkewedSprite
 	private function set_multSpeed(value:Float):Float {
 		resizeByRatio(value / multSpeed);
 		multSpeed = value;
-		//Debug.logTrace('fuck cock');
 		return value;
 	}
 
@@ -244,9 +283,8 @@ class Note extends FlxSkewedSprite
 
 		this.noteData = noteData;
 
-		texture = noteSkin;
-
 		if(noteData > -1) {
+			texture = noteSkin;
 			rgbShader = new RGBShaderReference(this, initializeGlobalRGBShader(noteData));
 			if(PlayState.SONG != null && PlayState.SONG.disableNoteRGB) rgbShader.enabled = false;
 
@@ -261,7 +299,6 @@ class Note extends FlxSkewedSprite
 		if (texture.contains('pixel') || noteSkin.contains('pixel'))
 			containsPixelTexture = true;
 
-		// Debug.logTrace(prevNote);
 
 		if(prevNote != null)
 			prevNote.nextNote = this;
@@ -418,6 +455,37 @@ class Note extends FlxSkewedSprite
 						centerOrigin();
 					}
 				}
+			case 'pixel' | 'default' | 'normal':
+				if(texture.contains('pixel') || noteStyleType.contains('pixel') || containsPixelTexture) {
+					if(isSustainNote) {
+						var graphic = Paths.image('pixelUI/noteSkins/NOTE_assets' + 'ENDS' + getNoteSkinPostfix());
+						loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
+						originalHeight = graphic.height / 2;
+					} else {
+						var graphic = Paths.image('pixelUI/noteSkins/NOTE_assets' + getNoteSkinPostfix());
+						loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
+					}
+					setGraphicSize(Std.int(width * PlayState.daPixelZoom));
+					loadPixelNoteAnims();
+					antialiasing = false;
+		
+					if(isSustainNote) {
+						offsetX += _lastNoteOffX;
+						_lastNoteOffX = (width - 7) * (PlayState.daPixelZoom / 2);
+						offsetX -= _lastNoteOffX;
+					}
+				} else {
+					if (ClientPrefs.data.cacheOnGPU)
+						frames = Paths.getSparrowAtlas("noteSkins/NOTE_assets" + getNoteSkinPostfix(), null, false);
+					else
+						frames = Paths.getSparrowAtlas("noteSkins/NOTE_assets" + getNoteSkinPostfix());
+					loadNoteAnims();
+					if(!isSustainNote)
+					{
+						centerOffsets();
+						centerOrigin();
+					}
+				}
 		}
 	}
 
@@ -519,7 +587,7 @@ class Note extends FlxSkewedSprite
 				{
 					y -= PlayState.daPixelZoom * 9.5;
 				}
-				y -= (frameHeight * scale.y) - (Note.swagWidth / 2);
+				y -= (frameHeight * scale.y) - (swagWidth / 2);
 			}
 		}
 
@@ -529,7 +597,7 @@ class Note extends FlxSkewedSprite
 
 	public function clipToStrumArrow(myStrum:StrumArrow)
 	{
-		var center:Float = myStrum.y + offsetY + Note.swagWidth / 2;
+		var center:Float = myStrum.y + offsetY + swagWidth / 2;
 		if(isSustainNote && (mustPress || !ignoreNote) &&
 			(!mustPress || (wasGoodHit || (prevNote.wasGoodHit && !canBeHit))))
 		{

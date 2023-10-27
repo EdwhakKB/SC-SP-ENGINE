@@ -4,6 +4,19 @@ import shaders.RGBPalette;
 import shaders.RGBPalette.RGBShaderReference;
 import flixel.addons.effects.FlxSkewedSprite;
 
+import flash.geom.ColorTransform;
+import flixel.FlxSprite;
+import flixel.FlxStrip;
+import flixel.graphics.FlxGraphic;
+import flixel.graphics.frames.FlxAtlasFrames;
+import flixel.graphics.tile.FlxDrawTrianglesItem;
+import flixel.math.FlxMath;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
+import flixel.util.FlxColor;
+import modcharting.RenderPath;
+import openfl.Vector;
+
 class StrumArrow extends FlxSkewedSprite
 {
 	public var rgbShader:RGBShaderReference;
@@ -126,7 +139,79 @@ class StrumArrow extends FlxSkewedSprite
 				}
 				else
 				{
-					frames = Paths.getSparrowAtlas(style);
+					if (ClientPrefs.data.cacheOnGPU)
+						frames = Paths.getSparrowAtlas(style, null, false);
+					else
+						frames = Paths.getSparrowAtlas(style);
+					animation.addByPrefix('green', 'arrowUP');
+					animation.addByPrefix('blue', 'arrowDOWN');
+					animation.addByPrefix('purple', 'arrowLEFT');
+					animation.addByPrefix('red', 'arrowRIGHT');
+		
+					antialiasing = ClientPrefs.data.antialiasing;
+					setGraphicSize(Std.int(width * 0.7));
+		
+					switch (Math.abs(noteData) % 4)
+					{
+						case 0:
+							animation.addByPrefix('static', 'arrowLEFT');
+							animation.addByPrefix('pressed', 'left press', 24, false);
+							animation.addByPrefix('confirm', 'left confirm', 24, false);
+						case 1:
+							animation.addByPrefix('static', 'arrowDOWN');
+							animation.addByPrefix('pressed', 'down press', 24, false);
+							animation.addByPrefix('confirm', 'down confirm', 24, false);
+						case 2:
+							animation.addByPrefix('static', 'arrowUP');
+							animation.addByPrefix('pressed', 'up press', 24, false);
+							animation.addByPrefix('confirm', 'up confirm', 24, false);
+						case 3:
+							animation.addByPrefix('static', 'arrowRIGHT');
+							animation.addByPrefix('pressed', 'right press', 24, false);
+							animation.addByPrefix('confirm', 'right confirm', 24, false);
+					}
+				}
+			case 'default' | 'pixel' | 'normal':
+				if(texture.contains('pixel') || style.contains('pixel') || daStyle.contains('pixel') || containsPixelTexture)
+				{
+					loadGraphic(Paths.image('pixelUI/noteSkins/NOTE_assets' + Note.getNoteSkinPostfix()));
+					width = width / 4;
+					height = height / 5;
+					loadGraphic(Paths.image('pixelUI/noteSkins/NOTE_assets' + Note.getNoteSkinPostfix()), true, Math.floor(width), Math.floor(height));
+		
+					antialiasing = false;
+					setGraphicSize(Std.int(width * PlayState.daPixelZoom));
+		
+					animation.add('green', [6]);
+					animation.add('red', [7]);
+					animation.add('blue', [5]);
+					animation.add('purple', [4]);
+					switch (Math.abs(noteData) % 4)
+					{
+						case 0:
+							animation.add('static', [0]);
+							animation.add('pressed', [4, 8], 12, false);
+							animation.add('confirm', [12, 16], 24, false);
+						case 1:
+							animation.add('static', [1]);
+							animation.add('pressed', [5, 9], 12, false);
+							animation.add('confirm', [13, 17], 24, false);
+						case 2:
+							animation.add('static', [2]);
+							animation.add('pressed', [6, 10], 12, false);
+							animation.add('confirm', [14, 18], 12, false);
+						case 3:
+							animation.add('static', [3]);
+							animation.add('pressed', [7, 11], 12, false);
+							animation.add('confirm', [15, 19], 24, false);
+					}
+				}
+				else
+				{
+					if (ClientPrefs.data.cacheOnGPU)
+						frames = Paths.getSparrowAtlas('noteSkins/NOTE_assets' + Note.getNoteSkinPostfix(), null, false);
+					else
+						frames = Paths.getSparrowAtlas('noteSkins/NOTE_assets' + Note.getNoteSkinPostfix());
 					animation.addByPrefix('green', 'arrowUP');
 					animation.addByPrefix('blue', 'arrowDOWN');
 					animation.addByPrefix('purple', 'arrowLEFT');
@@ -198,6 +283,7 @@ class StrumArrow extends FlxSkewedSprite
 				bgLane.x = (x - 2) - (bgLane.angle / 2);
 	
 			bgLane.alpha = ClientPrefs.data.laneTransparency * alpha;
+			//bgLane.scale.set(this.scale.x * 14.2857143, this.scale.y * 14.2857143);
 			bgLane.visible = visible;
 		}
 		super.update(elapsed);

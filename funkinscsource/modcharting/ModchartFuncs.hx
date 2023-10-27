@@ -78,9 +78,6 @@ class ModchartFuncs
 
         loadHaxeFunctions(parent);
         #end
-
-        #elseif LEATHER
-
         #end
     }
 
@@ -89,6 +86,7 @@ class ModchartFuncs
         #if PSYCH
         #if HSCRIPT_ALLOWED
         FunkinHScript.initHaxeModule(parent);
+
         if (parent.hscript != null)
         {
             #if (SScript >= "6.1.80")
@@ -312,7 +310,6 @@ class ModchartFuncs
                 {
                     var modName = subModCheck[0];
                     var subModName = subModCheck[1];
-                    //Debug.logTrace(subModCheck);
                     instance.playfieldRenderer.modifierTable.tweenModifierSubValue(modName,subModName,value,time*Conductor.crochet*0.001,ease, beat);
                 }
                 else

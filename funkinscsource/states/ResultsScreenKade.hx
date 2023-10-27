@@ -1,6 +1,10 @@
 package states;
 
+#if (flixel >= "5.3.0")
+import flixel.sound.FlxSound;
+#else
 import flixel.system.FlxSound;
+#end
 import flixel.input.FlxInput;
 import flixel.util.FlxAxes;
 import flixel.util.FlxSpriteUtil;
@@ -110,7 +114,7 @@ class ResultsScreenKade extends backend.MusicBeatSubstate
         //FlxCamera.defaultCameras = [camResults];
 		FlxG.cameras.setDefaultDrawTarget(camResults, true);
 
-		#if (SCE_ExtraSides == 0.1)
+		#if (SBETA == 0.1)
 		music = new FlxSound().loadEmbedded(Paths.inst((PlayState.SONG.instrumentalPrefix != null ? PlayState.SONG.instrumentalPrefix : ''), PlayState.SONG.songId, (PlayState.SONG.instrumentalSuffix != null ? PlayState.SONG.instrumentalSuffix : '')), true, true);
 		#else
 		music = new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.songId), true, true);

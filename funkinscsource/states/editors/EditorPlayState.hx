@@ -89,7 +89,7 @@ class EditorPlayState extends MusicBeatSubstate
 			FlxG.sound.music.stop();
 
 		cachePopUpScore();
-		if(ClientPrefs.data.hitsoundVolume > 0) Paths.sound('hitsound');
+		if (ClientPrefs.data.hitSounds != "None") if(ClientPrefs.data.hitsoundVolume > 0) Paths.sound('hitsounds/${ClientPrefs.data.hitSounds}');
 
 		/* setting up Editor PlayState stuff */
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
@@ -230,7 +230,7 @@ class EditorPlayState extends MusicBeatSubstate
 			if (Math.abs(FlxG.sound.music.time - (Conductor.songPosition - Conductor.offset)) > (20 * playbackRate)
 				|| (PlayState.SONG.needsVoices && Math.abs(vocals.time - (Conductor.songPosition - Conductor.offset)) > (20 * playbackRate)))
 			{
-				resyncVocals();
+				resyncMusic();
 			}
 		}
 		super.stepHit();
@@ -245,7 +245,6 @@ class EditorPlayState extends MusicBeatSubstate
 	override function beatHit()
 	{
 		if(lastBeatHit >= curBeat) {
-			//Debug.logTrace('BEAT HIT: ' + curBeat + ', LAST HIT: ' + lastBeatHit);
 			return;
 		}
 		notes.sort(FlxSort.byY, ClientPrefs.data.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
@@ -307,7 +306,7 @@ class EditorPlayState extends MusicBeatSubstate
 		Conductor.bpm = songData.bpm;
 
 		vocals = new FlxSound();
-		#if (SCE_ExtraSides == 0.1)
+		#if (SBETA == 0.1)
 		if (songData.needsVoices) vocals.loadEmbedded(Paths.voices((songData.vocalsPrefix != null ? songData.vocalsPrefix : ''), songData.songId, (songData.vocalsSuffix != null ? songData.vocalsSuffix : '')));
 		#else
 		if (songData.needsVoices) vocals.loadEmbedded(Paths.voices(songData.songId));
@@ -317,7 +316,7 @@ class EditorPlayState extends MusicBeatSubstate
 		vocals.pitch = playbackRate;
 		FlxG.sound.list.add(vocals);
 
-		#if (SCE_ExtraSides == 0.1)
+		#if (SBETA == 0.1)
 		inst = new FlxSound().loadEmbedded(Paths.inst((songData.instrumentalPrefix != null ? songData.instrumentalPrefix : ''), songData.songId, (songData.instrumentalSuffix != null ? songData.instrumentalSuffix : '')));
 		#else
 		inst = new FlxSound().loadEmbedded(Paths.inst(songData.songId));
@@ -517,7 +516,6 @@ class EditorPlayState extends MusicBeatSubstate
 	private function popUpScore(note:Note = null):Void
 	{
 		var noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition);
-		//Debug.logTrace(noteDiff, ' ' + Math.abs(note.strumTime - Conductor.songPosition));
 
 		vocals.volume = 1;
 		var placement:String = Std.string(combo);
@@ -648,10 +646,6 @@ class EditorPlayState extends MusicBeatSubstate
 			if(numScore.x > xThing) xThing = numScore.x;
 		}
 		comboSpr.x = xThing + 50;
-		/*
-			Debug.logTrace(combo);
-			Debug.logTrace(seperatedScore);
-			*/
 
 		coolText.text = Std.string(seperatedScore);
 		// add(coolText);
@@ -676,7 +670,6 @@ class EditorPlayState extends MusicBeatSubstate
 	{
 		var eventKey:FlxKey = event.keyCode;
 		var key:Int = PlayState.getKeyFromEvent(keysArray, eventKey);
-		//Debug.logTrace('Pressed: ' + eventKey);
 
 		if (!controls.controllerMode && FlxG.keys.checkStatus(eventKey, JUST_PRESSED)) keyPressed(key);
 	}
@@ -745,7 +738,6 @@ class EditorPlayState extends MusicBeatSubstate
 	{
 		var eventKey:FlxKey = event.keyCode;
 		var key:Int = PlayState.getKeyFromEvent(keysArray, eventKey);
-		//Debug.logTrace('Pressed: ' + eventKey);
 
 		if(!controls.controllerMode && key > -1) keyReleased(key);
 	}
@@ -825,8 +817,9 @@ class EditorPlayState extends MusicBeatSubstate
 		if (!note.wasGoodHit)
 		{
 			note.wasGoodHit = true;
-			if (ClientPrefs.data.hitsoundVolume > 0 && !note.hitsoundDisabled)
-				FlxG.sound.play(Paths.sound('hitsound'), ClientPrefs.data.hitsoundVolume);
+			if (ClientPrefs.data.hitSounds != "None")
+				if (ClientPrefs.data.hitsoundVolume > 0 && !note.hitsoundDisabled)
+					FlxG.sound.play(Paths.sound('hitsounds/${ClientPrefs.data.hitSounds}'), ClientPrefs.data.hitsoundVolume);
 
 			if(note.hitCausesMiss) {
 				noteMiss(note);
@@ -894,7 +887,7 @@ class EditorPlayState extends MusicBeatSubstate
 		grpNoteSplashes.add(splash);
 	}
 	
-	function resyncVocals():Void
+	function resyncMusic():Void
 	{
 		if(finishTimer != null) return;
 

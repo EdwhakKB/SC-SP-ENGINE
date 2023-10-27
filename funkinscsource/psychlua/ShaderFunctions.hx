@@ -249,11 +249,9 @@ class ShaderFunctions
 				return false;
 			}
 
-			// Debug.logTrace('bitmapdatapath: $bitmapdataPath');
 			var value = Paths.image(bitmapdataPath);
 			if(value != null && value.bitmap != null)
 			{
-				// Debug.logTrace('Found bitmapdata. Width: ${value.bitmap.width} Height: ${value.bitmap.height}');
 				shader.setSampler2D(prop, value.bitmap);
 				return true;
 			}
@@ -291,7 +289,7 @@ class ShaderFunctions
 					for (i in 0...daFilters.length){	
 						var filter:ShaderFilter = daFilters[i];
 						
-						if (filter.shader.glFragmentSource == FlxRuntimeShader.processFragmentSource(arr[0])){
+						if (filter.shader.glFragmentSource == arr[0]){
 							shader = filter.shader;
 							break;
 						}

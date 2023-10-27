@@ -2,11 +2,13 @@ package;
 
 import backend.MusicBeatState;
 import states.TitleState;
+import cpp.CPPInterface;
 import openfl.display.FPS;
 import openfl.Lib;
 
 class Init extends MusicBeatState
 {
+	var mouseCursor:FlxSprite;
 	override function create()
 	{
 		#if !mobile
@@ -24,6 +26,18 @@ class Init extends MusicBeatState
 		FlxG.save.bind('funkin', CoolUtil.getSavePath());
 
 		ClientPrefs.loadPrefs();
+		ClientPrefs.keybindSaveLoad();
+
+		switch (FlxG.random.int(0, 1))
+		{
+			case 0:
+				mouseCursor = new FlxSprite().loadGraphic(Paths.getPreloadPath('images/Default/cursor'));
+			case 1:
+				mouseCursor = new FlxSprite().loadGraphic(Paths.getPreloadPath('images/Default/noteCursor'));
+		} 
+		FlxG.mouse.load(mouseCursor.pixels);
+		FlxG.mouse.enabled = true;
+		FlxG.mouse.visible = true;
 
 		#if !mobile
 		if (Main.fpsVar != null)
@@ -36,6 +50,10 @@ class Init extends MusicBeatState
 		DiscordClient.start();
 		#end
 		
+		#if cpp
+		CPPInterface.darkMode();
+		#end
+
 		#if cpp
 		cpp.NativeGc.enable(true);
 		cpp.NativeGc.run(true);

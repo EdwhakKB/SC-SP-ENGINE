@@ -94,6 +94,12 @@ class StageData {
 					stage = 'schoolEvil';
 				case 'ugh' | 'guns' | 'stress':
 					stage = 'tank';
+				case 'termination':
+					stage = 'street-termination';
+				case 'peace':
+					stage = 'somewhere';
+				case 'milf-starcatcher':
+					stage = 'limostarcatcher';
 				default:
 					stage = 'stage';
 			}

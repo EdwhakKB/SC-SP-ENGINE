@@ -443,7 +443,6 @@ class ModchartEditorState extends MusicBeatState
         NoteMovement.getDefaultStrumPosEditor(this);
 
         //gridGap = FlxMath.remapToRange(Conductor.stepCrochet, 0, Conductor.stepCrochet, 0, gridSize); //idk why i even thought this was how i do it
-        //Debug.logTrace(gridGap);
 
         debugText = new FlxText(0, gridSize*2, 0, "", 16);
         debugText.alignment = FlxTextAlign.LEFT;
@@ -719,7 +718,6 @@ class ModchartEditorState extends MusicBeatState
                             highlightedEvent = event.data;
                             stackedHighlightedEvents.push(event.data);
                             onSelectEvent();
-                            //Debug.logTrace(stackedHighlightedEvents);
                         }   
                         if (FlxG.keys.justPressed.BACKSPACE)
                             deleteEvent();
@@ -735,7 +733,6 @@ class ModchartEditorState extends MusicBeatState
                 if (FlxG.mouse.justPressed)
                 {
                     var timeFromMouse = ((highlight.x-grid.x)/gridSize/4)-1;
-                    //Debug.logTrace(timeFromMouse);
                     var event = addNewEvent(timeFromMouse);
                     highlightedEvent = event;
                     onSelectEvent();
@@ -806,7 +803,6 @@ class ModchartEditorState extends MusicBeatState
         }
         if (curBpmChange.bpm != Conductor.bpm)
         {
-            //Debug.logTrace('changed bpm to ' + curBpmChange.bpm);
             Conductor.bpm = curBpmChange.bpm;
         }
 
@@ -874,8 +870,6 @@ class ModchartEditorState extends MusicBeatState
         //         daEvent.visible = false;
         //         daEvent.alpha = 0;
         //         eventSprites.remove(daEvent, true);
-        //         Debug.logTrace(daEvent.getBeatTime());
-        //         Debug.logTrace("removed event sprite "+ daEvent.getBeatTime());
         //     }
         //     --i;
         // }
@@ -887,7 +881,6 @@ class ModchartEditorState extends MusicBeatState
             {
                 var daEvent:ModchartEditorEvent = new ModchartEditorEvent(playfieldRenderer.modchart.data.events[i]);
                 eventSprites.add(daEvent);
-                //Debug.logTrace("added event sprite "+beat);
             }
         }
     }
@@ -911,7 +904,6 @@ class ModchartEditorState extends MusicBeatState
     override public function beatHit()
     {
         updateEventSprites();
-        //Debug.logTrace("beat hit");
         super.beatHit();
     }
 
@@ -985,7 +977,7 @@ class ModchartEditorState extends MusicBeatState
         {
             #if LEATHER 
             vocals = new FlxSound().loadEmbedded(Paths.voices(PlayState.SONG.songId, (PlayState.SONG.specialAudioName == null ? PlayState.storyDifficultyStr.toLowerCase() : PlayState.SONG.specialAudioName)));
-            #elseif (SCE_ExtraSides == 0.1)
+            #elseif (SBETA == 0.1)
             vocals = new FlxSound().loadEmbedded(Paths.voices((PlayState.SONG.vocalsPrefix != null ? PlayState.SONG.vocalsPrefix : ''), PlayState.SONG.songId, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : '')));
             #else
             vocals = new FlxSound().loadEmbedded(Paths.voices(PlayState.SONG.songId));
@@ -997,7 +989,7 @@ class ModchartEditorState extends MusicBeatState
         //vocals.pitch = playbackRate;
         FlxG.sound.list.add(vocals);
 
-        #if (SCE_ExtraSides == 0.1)
+        #if (SBETA == 0.1)
         inst = new FlxSound().loadEmbedded(Paths.inst((PlayState.SONG.instrumentalPrefix != null ? PlayState.SONG.instrumentalPrefix : ''), PlayState.SONG.songId, (PlayState.SONG.instrumentalSuffix != null ? PlayState.SONG.instrumentalSuffix : '')));
         #else
         inst = new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.songId));
@@ -1054,13 +1046,13 @@ class ModchartEditorState extends MusicBeatState
                     oldNote = null;
 
                 #if PSYCH 
-                var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, false, "noteSkins/NOTE_assets" + Note.getNoteSkinPostfix());
+                var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, false, "noteSkins/NOTE_assets" + getNoteSkinPostfix());
                 swagNote.sustainLength = songNotes[2];
                 swagNote.mustPress = gottaHitNote;
                 swagNote.gfNote = (section.gfSection && (songNotes[1]<4));
                 swagNote.noteType = songNotes[3];
-                swagNote.noteSkin = "noteSkins/NOTE_assets" + Note.getNoteSkinPostfix();
-                swagNote.texture = "noteSkins/NOTE_assets" + Note.getNoteSkinPostfix();
+                swagNote.noteSkin = "noteSkins/NOTE_assets" + getNoteSkinPostfix();
+                swagNote.texture = "noteSkins/NOTE_assets" + getNoteSkinPostfix();
                 if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = states.editors.ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
                 #elseif LEATHER 
                 var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, false, 0, songNotes[4], null, [0], gottaHitNote);
@@ -1081,15 +1073,15 @@ class ModchartEditorState extends MusicBeatState
                         oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
 
                         #if PSYCH 
-                        var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote) + (Conductor.stepCrochet / FlxMath.roundDecimal(PlayState.SONG.speed, 2)), daNoteData, oldNote, true, "noteSkins/NOTE_assets" + Note.getNoteSkinPostfix());
+                        var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote) + (Conductor.stepCrochet / FlxMath.roundDecimal(PlayState.SONG.speed, 2)), daNoteData, oldNote, true, "noteSkins/NOTE_assets" + getNoteSkinPostfix());
                         sustainNote.mustPress = gottaHitNote;
                         #else 
                         var sustainNote:Note = new Note(daStrumTime + (Std.int(Conductor.stepCrochet) * susNote) + Std.int(Conductor.stepCrochet), daNoteData, oldNote, true, 0, songNotes[4], null, [0], gottaHitNote);
                         sustainNote.mustPress = gottaHitNote;
                         #end
                         #if PSYCH 
-                        sustainNote.noteSkin = "noteSkins/NOTE_assets" + Note.getNoteSkinPostfix();
-                        sustainNote.texture = "noteSkins/NOTE_assets" + Note.getNoteSkinPostfix();
+                        sustainNote.noteSkin = "noteSkins/NOTE_assets" + getNoteSkinPostfix();
+                        sustainNote.texture = "noteSkins/NOTE_assets" + getNoteSkinPostfix();
                         sustainNote.gfNote = (section.gfSection && (songNotes[1]<4));
                         sustainNote.noteType = swagNote.noteType;
                         swagNote.tail.push(sustainNote);
@@ -1159,7 +1151,7 @@ class ModchartEditorState extends MusicBeatState
 			babyArrow.x += 100 - ((usedKeyCount - 4) * 16) + (usedKeyCount >= 10 ? 30 : 0);
 			babyArrow.x += ((FlxG.width / 2) * player);
             #elseif PSYCH 
-            var babyArrow:StrumArrow = new StrumArrow(ClientPrefs.data.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X, strumLine.y, i, player, 'noteSkins/NOTE_assets' + Note.getNoteSkinPostfix());
+            var babyArrow:StrumArrow = new StrumArrow(ClientPrefs.data.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X, strumLine.y, i, player, 'noteSkins/NOTE_assets' + getNoteSkinPostfix());
             babyArrow.downScroll = ClientPrefs.data.downScroll;
             babyArrow.alpha = targetAlpha;
             #end
@@ -1290,7 +1282,6 @@ class ModchartEditorState extends MusicBeatState
 
             if (currentModifier != null)
             {
-                //Debug.logTrace(currentModifier);
                 modNameInputText.text = currentModifier[MOD_NAME];
                 modClassInputText.text = currentModifier[MOD_CLASS];
                 modTypeInputText.text = currentModifier[MOD_TYPE];
@@ -1564,7 +1555,7 @@ class ModchartEditorState extends MusicBeatState
             case "ease": 
                 if (newType == 'set')
                 {
-                    Debug.logTrace('converting ease to set');
+                    Debug.logInfo('converting ease to set');
                     var temp:Array<Dynamic> = [newType, [
                         data[EVENT_DATA][EVENT_TIME],
                         data[EVENT_DATA][EVENT_EASEDATA],
@@ -1574,18 +1565,17 @@ class ModchartEditorState extends MusicBeatState
             case "set": 
                 if (newType == 'ease')
                 {
-                    Debug.logTrace('converting set to ease');
+                    Debug.logInfo('converting set to ease');
                     var temp:Array<Dynamic> = [newType, [
                         data[EVENT_DATA][EVENT_TIME],
                         1,
                         "linear",
                         data[EVENT_DATA][EVENT_SETDATA],
                     ], data[EVENT_REPEAT]];
-                    Debug.logTrace(temp);
+                    Debug.logInfo(temp);
                     data = temp.copy();
                 }
         } 
-        //Debug.logTrace(data);
         return data;
     }
 
@@ -1746,14 +1736,14 @@ class ModchartEditorState extends MusicBeatState
         eventTypeDropDown = new FlxUIDropDownMenu(25 + 500, 50, FlxUIDropDownMenu.makeStrIdLabelArray(eventTypes, true), function(mod:String)
         {
             var et = eventTypes[Std.parseInt(mod)];
-            Debug.logTrace(et);
+            Debug.logInfo(et);
             var data = getCurrentEventInData();
             if (data != null)
             {
                 //if (data[EVENT_TYPE] != et)
                 data = convertModData(data, et);
                 highlightedEvent = data;
-                Debug.logTrace(highlightedEvent);
+                Debug.logInfo(highlightedEvent);
             }
             eventEaseInputText.alpha = 1;
             eventTimeInputText.alpha = 1;
@@ -2023,7 +2013,6 @@ class ModchartEditorState extends MusicBeatState
                 case "stackedEvent": 
                     if (highlightedEvent != null)
                     {
-                        //Debug.logTrace(stackedHighlightedEvents);
                         highlightedEvent = stackedHighlightedEvents[Std.int(stackedEventStepper.value)];
                         onSelectEvent(true);
                     }

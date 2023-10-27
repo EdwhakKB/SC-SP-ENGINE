@@ -144,7 +144,7 @@ class Mods
 				#end
 				if(rawJson != null && rawJson.length > 0) return Json.parse(rawJson);
 			} catch(e:Dynamic) {
-				Debug.logTrace(e);
+				Debug.logInfo(e);
 			}
 		}
 		#end
@@ -160,7 +160,6 @@ class Mods
 		try {
 			for (mod in CoolUtil.coolTextFile('modsList.txt'))
 			{
-				//Debug.logTrace('Mod: $mod');
 				if(mod.trim().length < 1) continue;
 
 				var dat = mod.split("|");
@@ -171,7 +170,7 @@ class Mods
 					list.disabled.push(dat[0]);
 			}
 		} catch(e) {
-			Debug.logTrace(e);
+			Debug.logInfo(e);
 		}
 		#end
 		return list;
@@ -195,7 +194,7 @@ class Mods
 				}
 			}
 		} catch(e) {
-			Debug.logTrace(e);
+			Debug.logInfo(e);
 		}
 		
 		// Scan for folders that aren't on modsList.txt yet
@@ -220,7 +219,6 @@ class Mods
 
 		File.saveContent('modsList.txt', fileStr);
 		updatedOnState = true;
-		//Debug.logTrace('Saved modsList.txt');
 		#end
 	}
 

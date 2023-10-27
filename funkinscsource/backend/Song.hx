@@ -50,6 +50,7 @@ typedef SwagSong =
 	@:optional var gameOverEnd:String;
 
 	@:optional var disableNoteRGB:Bool;
+	@:optional var disableNoteQuant:Bool;
 
 	@:optional var arrowSkin:String;
 	@:optional var splashSkin:String;
@@ -80,6 +81,7 @@ class Song
 	public var gameOverLoop:String;
 	public var gameOverEnd:String;
 	public var disableNoteRGB:Bool = false;
+	public var disableNoteQuant:Bool = false;
 
 	public var player1:String = 'bf';
 	public var player2:String = 'dad';
@@ -135,7 +137,7 @@ class Song
 			}
 		}
 
-		if (songJson.arrowSkin == '' || songJson.arrowSkin == "" || songJson.arrowSkin == null) songJson.arrowSkin = "noteSkins/NOTE_assets" + Note.getNoteSkinPostfix();
+		if(songJson.arrowSkin == '' || songJson.arrowSkin == "" || songJson.arrowSkin == null) songJson.arrowSkin = "noteSkins/NOTE_assets" + Note.getNoteSkinPostfix();
 		if(songJson.song != null && songJson.songId == null) songJson.songId = songJson.song;
 		else if(songJson.songId != null && songJson.song == null) songJson.song = songJson.songId;
 	}
@@ -176,24 +178,22 @@ class Song
 
 		// FIX THE CASTING ON WINDOWS/NATIVE
 		// Windows???
-		// Debug.logTrace(songData);
 
-		// Debug.logTrace('LOADED FROM JSON: ' + songData.notes);
 		/* 
 			for (i in 0...songData.notes.length)
 			{
-				Debug.logTrace('LOADED FROM JSON: ' + songData.notes[i].sectionNotes);
 				// songData.notes[i].sectionNotes = songData.notes[i].sectionNotes
 			}
 
-				daNotes = songData.notes;
-				daSong = songData.song;
-				daBpm = songData.bpm; */
+			daNotes = songData.notes;
+			daSong = songData.song;
+			daBpm = songData.bpm; 
+		*/
 
 		var songJson:Dynamic = parseJSONshit(rawJson);
+		if(songJson.arrowSkin == '' || songJson.arrowSkin == "" || songJson.arrowSkin == null) songJson.arrowSkin = "noteSkins/NOTE_assets" + Note.getNoteSkinPostfix();
 		if(songJson.song != null && songJson.songId == null) songJson.songId = songJson.song;
 		else if(songJson.songId != null && songJson.song == null) songJson.song = songJson.songId;
-		if (songJson.arrowSkin == '' || songJson.arrowSkin == "" || songJson.arrowSkin == null) songJson.arrowSkin = "noteSkins/NOTE_assets" + Note.getNoteSkinPostfix();
 		if(jsonInput != 'events') StageData.loadDirectory(songJson);
 		onLoadJson(songJson);
 		return songJson;

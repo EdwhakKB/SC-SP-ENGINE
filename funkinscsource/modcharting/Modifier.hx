@@ -1001,6 +1001,8 @@ class SkewModifier extends Modifier
         currentValue = 1.0;
         subValues.set('x', new ModifierSubValue(0.0));
         subValues.set('y', new ModifierSubValue(0.0));
+        subValues.set('xDmod', new ModifierSubValue(0.0));
+        subValues.set('yDmod', new ModifierSubValue(0.0));
     }
     override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
     {
@@ -1008,8 +1010,12 @@ class SkewModifier extends Modifier
         if (instance != null)
             if (ModchartUtil.getDownscroll(instance))
                 daswitch = 1;
+
         noteData.skewX += subValues.get('x').value * daswitch;
         noteData.skewY += subValues.get('y').value * daswitch;
+
+        noteData.skewX += subValues.get('xDmod').value * daswitch;
+        noteData.skewY += subValues.get('yDmod').value * daswitch;
     }
     override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
     {
@@ -1073,6 +1079,8 @@ class NotesModifier extends Modifier
         subValues.set('z', new ModifierSubValue(0.0));
         subValues.set('skewx', new ModifierSubValue(0.0));
         subValues.set('skewy', new ModifierSubValue(0.0));
+        subValues.set('invert', new ModifierSubValue(0.0));
+        subValues.set('flip', new ModifierSubValue(0.0));
     }
     override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
     {
@@ -1080,12 +1088,19 @@ class NotesModifier extends Modifier
         if (instance != null)
             if (ModchartUtil.getDownscroll(instance))
                 daswitch = -1;
+        
         noteData.x += subValues.get('x').value;
         noteData.y += subValues.get('y').value * daswitch;
         noteData.angle += subValues.get('angle').value;
         noteData.z += subValues.get('z').value;
         noteData.skewX += subValues.get('skewx').value * -daswitch;
         noteData.skewY += subValues.get('skewy').value * -daswitch;
+        noteData.x += NoteMovement.arrowSizes[lane] * (lane % 2 == 0 ? 1 : -1) * subValues.get('invert').value;
+
+        var nd = lane % NoteMovement.keyCount;
+        var newPos = FlxMath.remapToRange(nd, 0, NoteMovement.keyCount, NoteMovement.keyCount, -NoteMovement.keyCount);
+        noteData.x += NoteMovement.arrowSizes[lane] * newPos * subValues.get('flip').value;
+        noteData.x -= NoteMovement.arrowSizes[lane] * subValues.get('flip').value;
     }
     override function reset()
     {

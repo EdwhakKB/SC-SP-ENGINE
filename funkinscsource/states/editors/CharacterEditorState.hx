@@ -774,7 +774,7 @@ class CharacterEditorState extends MusicBeatState
 
 			reloadAnimationDropDown();
 			genBoyOffsets();
-			Debug.logTrace('Added/Updated animation: ' + animationInputText.text);
+			Debug.logInfo('Added/Updated animation: ' + animationInputText.text);
 		});
 
 		var removeButton:FlxButton = new FlxButton(180, animationIndicesInputText.y + 30, "Remove", function() {
@@ -796,7 +796,7 @@ class CharacterEditorState extends MusicBeatState
 					}
 					reloadAnimationDropDown();
 					genBoyOffsets();
-					Debug.logTrace('Removed animation: ' + animationInputText.text);
+					Debug.logInfo('Removed animation: ' + animationInputText.text);
 					break;
 				}
 			}

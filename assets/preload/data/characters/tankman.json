@@ -75,6 +75,7 @@
 			"fps": 24,
 			"anim": "singDOWN-alt",
 			"loop": false,
+			"interrupt": false,
 			"name": "PRETTY GOOD tankman"
 		},
 		{
@@ -139,7 +140,7 @@
 		0,
 		0
 	],
-	
+	"noteSkin": "noteSkins/NOTE_assets",
 	"sing_duration": 4,
 	"scale": 1
 }

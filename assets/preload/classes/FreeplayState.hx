@@ -7,3 +7,7 @@ function onCreate()
 	FreeplayState.scorecolorDifficulty.set('EASY', CoolUtil.returnColor('green'));
 	FreeplayState.scorecolorDifficulty.set('', CoolUtil.returnColor('transparent'));
 }
+
+function onCreatePost()
+{
+}

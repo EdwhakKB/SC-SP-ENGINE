@@ -57,6 +57,7 @@ using StringTools;
 	zIndex:Float,
 }*/
 
+
 class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can edit draw
 {
     public var strumGroup:FlxTypedGroup<StrumArrow>;

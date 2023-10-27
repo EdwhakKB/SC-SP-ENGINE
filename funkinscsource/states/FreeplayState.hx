@@ -548,7 +548,7 @@ class FreeplayState extends MusicBeatState
 				lastRate = rate;
 			}
 
-			previewtext.text = "Preview Rate: < " + FlxMath.roundDecimal(rate, 2) + "x >";
+			previewtext.text = "Preview Rate: < " + FlxMath.roundDecimal(rate, 2)  + "x >";
 			previewtext.updateHitbox();
 		}
 		else {
@@ -643,7 +643,7 @@ class FreeplayState extends MusicBeatState
 							else
 							{
 								FlxFlicker.flicker(e);
-								Debug.logTrace(curSelected);
+								Debug.logInfo(curSelected);
 							}
 						});
 						break;
@@ -655,7 +655,7 @@ class FreeplayState extends MusicBeatState
 			}
 			catch(e:Dynamic)
 			{
-				Debug.logTrace('ERROR! $e');
+				Debug.logInfo('ERROR! $e');
 
 				var errorStr:String = e.toString();
 				if(errorStr.startsWith('[file_contents,assets/data/')) errorStr = 'Missing file: ' + errorStr.substring(27, errorStr.length-1); //Missing chart
@@ -671,7 +671,8 @@ class FreeplayState extends MusicBeatState
 			}
 		}
 
-		updateTexts(elapsed);
+		if (canSelectSong)
+			updateTexts(elapsed);
 		super.update(elapsed);
 		menuScript.callFunc('onUpdatePost', [elapsed]);
 	}
@@ -710,7 +711,7 @@ class FreeplayState extends MusicBeatState
 
 				songPath = PlayState.SONG.songId;
 
-				#if (SCE_ExtraSides == 0.1)
+				#if (SBETA == 0.1)
 				inst = new FlxSound().loadEmbedded(Paths.inst((PlayState.SONG.instrumentalPrefix != null ? PlayState.SONG.instrumentalPrefix : ''), songPath, (PlayState.SONG.instrumentalSuffix != null ? PlayState.SONG.instrumentalSuffix : '')));
 				#else
 				inst = new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.songId));
@@ -878,6 +879,8 @@ class FreeplayState extends MusicBeatState
 	inline private function _updateSongLastDifficulty()
 	{
 		if (curDifficulty < 1)
+			songs[curSelected].lastDifficulty = Difficulty.list[0];
+		else if (Difficulty.list.length == 0)
 			songs[curSelected].lastDifficulty = Difficulty.list[0];
 		else
 			songs[curSelected].lastDifficulty = Difficulty.getString(curDifficulty);

@@ -251,6 +251,29 @@ class StoryMenuState extends MusicBeatState
 			}
 		}
 
+		
+		if (FlxG.mouse.overlaps(rightArrow)) {
+			if (FlxG.mouse.justPressed) {
+				changeDifficulty(1);
+			}
+			if (FlxG.mouse.pressed) {
+				rightArrow.animation.play('press');
+			} else {
+				rightArrow.animation.play('idle');
+			}
+		}
+
+		if (FlxG.mouse.overlaps(leftArrow)) {
+			if (FlxG.mouse.justPressed) {
+				changeDifficulty(-1);
+			}
+			if (FlxG.mouse.pressed) {
+				leftArrow.animation.play('press');
+			} else {
+				leftArrow.animation.play('idle');
+			}
+		}
+
 		if (controls.BACK && !movedBack && !selectedWeek)
 		{
 			Conductor.bpm = 102.0;

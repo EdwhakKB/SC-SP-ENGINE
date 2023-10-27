@@ -22,8 +22,8 @@ class VisualsUISubState extends BaseOptionsMenu
 			var note:StrumArrow = new StrumArrow((ClientPrefs.data.middleScroll ? 370 + (560 / Note.colArray.length) * i : 620 + (560 / Note.colArray.length) * i ), !ClientPrefs.data.downScroll ? -200 : 760, i, 0, 'noteSkins/NOTE_assets' + Note.getNoteSkinPostfix());
 			note.centerOffsets();
 			note.centerOrigin();
-			//note.loadNoteAnims('noteSkins/NOTE_assets' + Note.getNoteSkinPostfix(), true);
-			//note.playAnim('static');
+			note.loadNoteAnims('noteSkins/NOTE_assets' + Note.getNoteSkinPostfix(), true);
+			note.playAnim('static');
 			note.loadLane();
 			note.bgLane.updateHitbox();
 			note.bgLane.scrollFactor.set();
@@ -246,14 +246,6 @@ class VisualsUISubState extends BaseOptionsMenu
 			else
 				notesTween[i] = FlxTween.tween(note, {y: ClientPrefs.data.downScroll ? 760 : -200}, Math.abs(note.y / (200 + noteY)) / 3, {ease: FlxEase.quadInOut});
 		}
-	}
-
-	override function beatHit(){
-		if (curBeat % 2 == 0) this.cameras[0].zoom += 0.015;
-	}
-	override function update(elapsed) {
-		super.update(elapsed);
-		this.cameras[0].zoom = FlxMath.lerp(1, this.cameras[0].zoom, CoolUtil.clamp(1 - (elapsed * 3.125), 0, 1));
 	}
 
 	var changedMusic:Bool = false;

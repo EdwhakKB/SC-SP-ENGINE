@@ -10,6 +10,15 @@ import lime.utils.Assets as OpenFLAssets;
 import shaders.FlxFixedShader;
 import flixel.addons.effects.FlxSkewedSprite;
 
+import flash.geom.ColorTransform;
+import flixel.FlxG;
+import flixel.FlxSprite;
+import flixel.graphics.FlxGraphic;
+import flixel.graphics.frames.FlxAtlasFrames;
+import flixel.graphics.tile.FlxDrawTrianglesItem.DrawData;
+import modcharting.RenderPath;
+import openfl.Vector;
+
 typedef NoteSplashConfig = {
 	anim:String,
 	minFps:Int,
@@ -113,6 +122,7 @@ class NoteSplash extends FlxSkewedSprite
 			alpha = ClientPrefs.data.splashAlpha;
 		if(note != null) alpha = note.noteSplashData.a;
 		rgbShader.copyValues(tempShader);
+		rgbShader.containsPixel = containedPixelTexture;
 
 		if(note != null) antialiasing = note.noteSplashData.antialiasing;
 		if(texture.contains('pixel') || !ClientPrefs.data.antialiasing) antialiasing = false;
@@ -128,7 +138,6 @@ class NoteSplash extends FlxSkewedSprite
 		if(config != null)
 		{
 			var animID:Int = direction + ((animNum - 1) * Note.colArray.length);
-			//Debug.logTrace('anim: ${animation.curAnim.name}, $animID');
 			var offs:Array<Float> = config.offsets[FlxMath.wrap(animID, 0, config.offsets.length-1)];
 			offset.x += offs[0];
 			offset.y += offs[1];
@@ -177,12 +186,10 @@ class NoteSplash extends FlxSkewedSprite
 			var animID:Int = maxAnims + 1;
 			for (i in 0...Note.colArray.length) {
 				if (!addAnimAndCheck('note$i-$animID', '$animName ${Note.colArray[i]} $animID', 24, false)) {
-					//Debug.logTrace('maxAnims: $maxAnims');
 					return config;
 				}
 			}
 			maxAnims++;
-			//Debug.logTrace('currently: $maxAnims');
 		}
 	}
 
@@ -232,6 +239,8 @@ class NoteSplash extends FlxSkewedSprite
 class PixelSplashShaderRef {
 	public var shader:PixelSplashShader = new PixelSplashShader();
 
+	public var containsPixel:Bool = false;
+
 	public function copyValues(tempShader:RGBPalette)
 	{
 		var enabled:Bool = false;
@@ -259,9 +268,8 @@ class PixelSplashShaderRef {
 		shader.mult.value = [1];
 
 		var pixel:Float = 1;
-		if(NoteSplash.containedPixelTexture) pixel = PlayState.daPixelZoom;
+		if(containsPixel) pixel = PlayState.daPixelZoom;
 		shader.uBlocksize.value = [pixel, pixel];
-		//Debug.logTrace('Created shader ' + Conductor.songPosition);
 	}
 }
 

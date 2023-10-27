@@ -100,8 +100,8 @@ class Paths
 
 					currentTrackedAssets.remove(key);
 					counter++;
-					Debug.logTrace('Cleared $key form RAM');
-					Debug.logTrace('Cleared and removed $counter assets.');
+					Debug.logInfo('Cleared $key form RAM');
+					Debug.logInfo('Cleared and removed $counter assets.');
 				}
 			}
 		}
@@ -151,8 +151,8 @@ class Paths
 				obj.destroy();
 				obj = null;
 				counterAssets++;
-				Debug.logTrace('Cleared $key from RAM');
-				Debug.logTrace('Cleared and removed $counterAssets cached assets.');
+				Debug.logInfo('Cleared $key from RAM');
+				Debug.logInfo('Cleared and removed $counterAssets cached assets.');
 			}
 		}
 
@@ -163,13 +163,12 @@ class Paths
 		{
 			if (!localTrackedAssets.contains(key) && !dumpExclusions.contains(key) && key != null)
 			{
-				// Debug.logTrace('test: ' + dumpExclusions, key);
 				OpenFlAssets.cache.clear(key);
 				OpenFlAssets.cache.removeSound(key);
 				currentTrackedSounds.remove(key);
 				counterSound++;
-				Debug.logTrace('Cleared $key from RAM');
-				Debug.logTrace('Cleared and removed $counterSound cached sounds.');
+				Debug.logInfo('Cleared $key from RAM');
+				Debug.logInfo('Cleared and removed $counterSound cached sounds.');
 			}
 		}
 
@@ -316,10 +315,6 @@ class Paths
 	{
 		return getPath('shaders/$key.vert', TEXT, library);
 	}
-	inline static public function localeFile(key:String, ?library:String):String
-	{
-		return getPath('locale/$key/lang.json', TEXT, library);
-	}
 	inline static public function lua(key:String, ?library:String):String
 	{
 		return getPath('$key.lua', TEXT, library);
@@ -365,7 +360,7 @@ class Paths
 		return file;
 	}
 
-	#if (SCE_ExtraSides == 0.1)
+	#if (SBETA == 0.1)
 	inline static public function voices(?prefix:String = '', song:String, ?suffix:String = ''):Any
 	{
 		#if html5
@@ -446,7 +441,7 @@ class Paths
 		if (FileSystem.exists(getPreloadPath('classes/$key.hx')))
 			return getPreloadPath('classes/$key.hx');
 
-		Debug.logTrace('File for script $key.hx not found!');
+		Debug.logInfo('File for script $key.hx not found!');
 		return null;
 	}
 
@@ -480,29 +475,45 @@ class Paths
 
 		if (bitmap != null)
 		{
-			localTrackedAssets.push(file);
-			if (allowGPU && ClientPrefs.data.cacheOnGPU)
-			{
-				bitmap.lock();
-				var texture = FlxG.stage.context3D.createRectangleTexture(bitmap.width, bitmap.height, BGRA, true);
-				texture.uploadFromBitmapData(bitmap);
-				bitmap.image.data = null;
-				bitmap.dispose();
-				bitmap.disposeImage();
-				FlxDestroyUtil.dispose(bitmap);
-				bitmap = null;
-				bitmap = BitmapData.fromTexture(texture);
-				bitmap.unlock();
-			}
-			var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(bitmap, false, file, false);
-			newGraphic.persist = true;
-			newGraphic.destroyOnNoUse = false;
-			currentTrackedAssets.set(file, newGraphic);
-			return newGraphic;
+			var retVal = cacheBitmap(file, bitmap, allowGPU);
+			if(retVal != null) return retVal;
 		}
 
-		Debug.logTrace('oh no its returning null NOOOO ($file)');
+		Debug.logInfo('oh no its returning null NOOOO ($file)');
 		return null;
+	}
+
+	static public function cacheBitmap(file:String, ?bitmap:BitmapData = null, ?allowGPU:Bool = true)
+	{
+		if(bitmap == null)
+		{
+			#if MODS_ALLOWED
+			if (FileSystem.exists(file))
+				bitmap = BitmapData.fromFile(file);
+			else
+			#else
+			if (OpenFlAssets.exists(file, IMAGE))
+				bitmap = OpenFlAssets.getBitmapData(file);
+			#end
+
+			if(bitmap == null) return null;
+		}
+
+		localTrackedAssets.push(file);
+		if (allowGPU && ClientPrefs.data.cacheOnGPU)
+		{
+			var texture:RectangleTexture = FlxG.stage.context3D.createRectangleTexture(bitmap.width, bitmap.height, BGRA, true);
+			texture.uploadFromBitmapData(bitmap);
+			bitmap.image.data = null;
+			bitmap.dispose();
+			bitmap.disposeImage();
+			bitmap = BitmapData.fromTexture(texture);
+		}
+		var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(bitmap, false, file);
+		newGraphic.persist = true;
+		newGraphic.destroyOnNoUse = false;
+		currentTrackedAssets.set(file, newGraphic);
+		return newGraphic;
 	}
 
 	static public function getTextFromFile(key:String, ?ignoreMods:Bool = false):String
@@ -567,84 +578,79 @@ class Paths
 	}
 
 	// less optimized but automatic handling
-	static public function getAtlas(key:String, ?library:String = null, atlasType):FlxAtlasFrames
+	static public function getAtlas(key:String, ?library:String = null, ?allowGPU:Bool = true):FlxAtlasFrames
 	{
-		#if MODS_ALLOWED
-		if(FileSystem.exists(modsXml(key)) || OpenFlAssets.exists(getPath('images/$key.xml', library), TEXT))
-		#else
-		if(OpenFlAssets.exists(getPath('images/$key.xml', library)))
-		#end
+		var useMod = false;
+		var imageLoaded:FlxGraphic = image(key, library, allowGPU);
+		var myXml:Dynamic = getPath('images/$key.xml', TEXT, library, true);
+		if(OpenFlAssets.exists(myXml) #if MODS_ALLOWED || (FileSystem.exists(myXml) && (useMod = true)) #end )
 		{
-			return getSparrowAtlas(key, library);
+			#if MODS_ALLOWED
+			return FlxAtlasFrames.fromSparrow(imageLoaded, (useMod ? File.getContent(myXml) : myXml));
+			#else
+			return FlxAtlasFrames.fromSparrow(imageLoaded, myXml);
+			#end
 		}
 		return getPackerAtlas(key, library);
 	}
 
 	inline static public function getSparrowAtlas(key:String, ?library:String = null, ?allowGPU:Bool = true):FlxAtlasFrames
 	{
-		#if MODS_ALLOWED
 		var imageLoaded:FlxGraphic = image(key, library, allowGPU);
+		#if MODS_ALLOWED
 		var xmlExists:Bool = false;
 
 		var xml:String = modsXml(key);
-		if(FileSystem.exists(xml)) {
-			xmlExists = true;
-		}
+		if(FileSystem.exists(xml)) xmlExists = true;
 
-		return FlxAtlasFrames.fromSparrow((imageLoaded != null ? imageLoaded : image(key, library, allowGPU)), (xmlExists ? File.getContent(xml) : getPath('images/$key.xml', library)));
+		return FlxAtlasFrames.fromSparrow(imageLoaded, (xmlExists ? File.getContent(xml) : getPath('images/$key.xml', library)));
 		#else
-		return FlxAtlasFrames.fromSparrow(image(key, library, allowGPU), getPath('images/$key.xml', library));
+		return FlxAtlasFrames.fromSparrow(imageLoaded, getPath('images/$key.xml', library));
 		#end
 	}
 
 	inline static public function getPackerAtlas(key:String, ?library:String = null, ?allowGPU:Bool = true):FlxAtlasFrames
 	{
-		#if MODS_ALLOWED
 		var imageLoaded:FlxGraphic = image(key, library, allowGPU);
+		#if MODS_ALLOWED
 		var txtExists:Bool = false;
 		
 		var txt:String = modsTxt(key);
-		if(FileSystem.exists(txt)) {
-			txtExists = true;
-		}
+		if(FileSystem.exists(txt)) txtExists = true;
 
-		return FlxAtlasFrames.fromSpriteSheetPacker((imageLoaded != null ? imageLoaded : image(key, library, allowGPU)), (txtExists ? File.getContent(txt) : getPath('images/$key.txt', library)));
+		return FlxAtlasFrames.fromSpriteSheetPacker(imageLoaded, (txtExists ? File.getContent(txt) : getPath('images/$key.txt', library)));
 		#else
-		return FlxAtlasFrames.fromSpriteSheetPacker(image(key, library, allowGPU), getPath('images/$key.txt', library));
+		return FlxAtlasFrames.fromSpriteSheetPacker(imageLoaded, getPath('images/$key.txt', library));
 		#end
 	}
 
 	inline static public function getXmlAtlas(key:String, ?library:String, ?allowGPU:Bool = true):FlxAtlasFrames
 	{
-		#if MODS_ALLOWED
 		var imageLoaded:FlxGraphic = image(key, library, allowGPU);
+		#if MODS_ALLOWED
 		var xmlExists:Bool = false;
 		
 		var xml:String = modsXml(key);
-		if(FileSystem.exists(xml)) {
-			xmlExists = true;
-		}
+		if(FileSystem.exists(xml)) xmlExists = true;
 
-		return FlxAtlasFrames.fromTexturePackerXml((imageLoaded != null ? imageLoaded : image(key, library, allowGPU)), (xmlExists ? File.getContent(xml) : getPath('images/$key.xml', library)));
+		return FlxAtlasFrames.fromTexturePackerXml(imageLoaded, (xmlExists ? File.getContent(xml) : getPath('images/$key.xml', library)));
 		#else
-		return FlxAtlasFrames.fromTexturePackerXml(image(key, library, allowGPU), getPath('images/$key.xml', library));
+		return FlxAtlasFrames.fromTexturePackerXml(imageLoaded, getPath('images/$key.xml', library));
 		#end
 	}
 
 	inline static public function getJsonAtlas(key:String, ?library:String, ?allowGPU:Bool = true):FlxAtlasFrames
 	{
-		#if MODS_ALLOWED
 		var imageLoaded:FlxGraphic = image(key, library, allowGPU);
+		#if MODS_ALLOWED
 		var jsonExists:Bool = false;
 		
 		var json:String = modsJsonImage(key);
-		if(FileSystem.exists(json)) {
-			jsonExists = true;
-		}
+		if(FileSystem.exists(json)) jsonExists = true;
 
-		return FlxAtlasFrames.fromTexturePackerJson((imageLoaded != null ? imageLoaded : image(key, library, allowGPU)), (jsonExists ? File.getContent(json) : getPath('images/$key.json', library)));
+		return FlxAtlasFrames.fromTexturePackerJson(imageLoaded, (jsonExists ? File.getContent(json) : getPath('images/$key.json', library)));
 		#else
-		return FlxAtlasFrames.fromTexturePackerJson(image(key, library, allowGPU), getPath('images/$key.json', library));
+		return FlxAtlasFrames.fromTexturePackerJson(imageLoaded, getPath('images/$key.json', library));
 		#end
 	}
 
@@ -686,7 +692,6 @@ class Paths
 		// I hate this so god damn much
 		var gottenPath:String = getPath('$path/$key.$SOUND_EXT', SOUND, library);
 		gottenPath = gottenPath.substring(gottenPath.indexOf(':') + 1, gottenPath.length);
-		// Debug.logTrace(gottenPath);
 		if(!currentTrackedSounds.exists(gottenPath))
 		#if MODS_ALLOWED
 			currentTrackedSounds.set(gottenPath, Sound.fromFile('./' + gottenPath));
@@ -738,11 +743,6 @@ class Paths
 	inline static public function modsJsonImage(key:String):String
 	{
 		return modFolders('images/' + key + '.json');
-	}
-
-	inline static public function modsLocaleFile(key:String):String
-	{
-		return modFolders('locale/' + key + '/lang.json');
 	}
 
 	/* Goes unused for now

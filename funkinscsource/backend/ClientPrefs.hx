@@ -132,8 +132,6 @@ class SaveVariables {
 
 	public var systemUserName:String = "";
 
-	public var language:String = 'en-US';
-
 	public var SCEWatermark:Bool = true;
 
 	public var breakTimer:Bool = false;
@@ -234,7 +232,6 @@ class ClientPrefs {
 
 	public static function saveSettings() {
 		for (key in Reflect.fields(data)) {
-			Debug.logTrace('saved variable: $key');
 			Reflect.setField(FlxG.save.data, key, Reflect.field(data, key));
 		}
 		#if ACHIEVEMENTS_ALLOWED Achievements.save(); #end
@@ -256,7 +253,6 @@ class ClientPrefs {
 
 		for (key in Reflect.fields(data)) {
 			if (key != 'gameplaySettings' && Reflect.hasField(FlxG.save.data, key)) {
-				Debug.logTrace('loaded variable: $key');
 				Reflect.setField(data, key, Reflect.field(FlxG.save.data, key));
 			}
 		}
@@ -288,7 +284,9 @@ class ClientPrefs {
 		#if desktop
 		DiscordClient.check();
 		#end
+	}
 
+	public static function keybindSaveLoad() {
 		// controls on a separate save file
 		var save:FlxSave = new FlxSave();
 		save.bind('controls_v3', CoolUtil.getSavePath());
@@ -307,7 +305,7 @@ class ClientPrefs {
 				}
 			}
 			reloadVolumeKeys();
-		}
+		}	
 	}
 
 	inline public static function getGameplaySetting(name:String, defaultValue:Dynamic = null, ?customDefaultValue:Bool = false):Dynamic {

@@ -11,7 +11,7 @@ import shaders.Shaders;
 
 import substates.GameOverSubstate;
 import psychlua.FunkinLua;
-#if (flixel >= "5.3.1")
+#if (flixel >= "5.3.0")
 import flixel_5_3_1.ParallaxSprite;
 #end
 
@@ -52,6 +52,18 @@ class LuaUtils
 				if(retVal != null)
 					target = retVal;
 			}
+			else if (PlayState.instance.Stage.swagBacks.exists(splitProps[0]))
+			{
+				var retVal:Dynamic = PlayState.instance.Stage.swagBacks.get(splitProps[0]);
+				if(retVal != null)
+					target = retVal;
+			}
+			else if (Stage.instance.swagBacks.exists(splitProps[0]))
+			{
+				var retVal:Dynamic = Stage.instance.swagBacks.get(splitProps[0]);
+				if(retVal != null)
+					target = retVal;
+			}
 			else target = Reflect.getProperty(instance, splitProps[0]);
 
 			for (i in 1...splitProps.length)
@@ -67,7 +79,6 @@ class LuaUtils
 
 		if(allowMaps && isMap(instance))
 		{
-			//Debug.logTrace(instance);
 			instance.set(variable, value);
 			return value;
 		}
@@ -76,6 +87,16 @@ class LuaUtils
 		{
 			PlayState.instance.variables.set(variable, value);
 			return value;
+		}
+		if (PlayState.instance.Stage.swagBacks.exists(variable))
+		{
+			PlayState.instance.Stage.swagBacks.set(variable, value);
+			return true;
+		}
+		else if (Stage.instance.swagBacks.exists(variable))
+		{
+			Stage.instance.setProperty(variable, value);
+			return true;
 		}
 		Reflect.setProperty(instance, variable, value);
 		return value;
@@ -92,6 +113,18 @@ class LuaUtils
 				if(retVal != null)
 					target = retVal;
 			}
+			else if (PlayState.instance.Stage.swagBacks.exists(splitProps[0]))
+			{
+				var retVal:Dynamic = PlayState.instance.Stage.swagBacks.get(splitProps[0]);
+				if(retVal != null)
+					target = retVal;
+			}
+			else if (Stage.instance.swagBacks.exists(splitProps[0]))
+			{
+				var retVal:Dynamic = Stage.instance.swagBacks.get(splitProps[0]);
+				if(retVal != null)
+					target = retVal;
+			}
 			else
 				target = Reflect.getProperty(instance, splitProps[0]);
 
@@ -105,7 +138,6 @@ class LuaUtils
 		
 		if(allowMaps && isMap(instance))
 		{
-			//Debug.logTrace(instance);
 			return instance.get(variable);
 		}
 
@@ -114,6 +146,18 @@ class LuaUtils
 			var retVal:Dynamic = PlayState.instance.variables.get(variable);
 			if(retVal != null)
 				return retVal;
+		}
+		if (PlayState.instance.Stage.swagBacks.exists(variable))
+		{
+			var retVal:Dynamic = PlayState.instance.Stage.swagBacks.get(variable);
+			if(retVal != null)
+				return retVal;
+		}
+		if (Stage.instance.swagBacks.exists(variable))
+		{
+			var retVal:Dynamic = Stage.instance.swagBacks.get(variable);
+				if(retVal != null)
+					return retVal;
 		}
 		return Reflect.getProperty(instance, variable);
 	}
@@ -127,7 +171,6 @@ class LuaUtils
 				return false;
 		}*/
 
-		//Debug.logTrace(variable);
 		if(variable.exists != null && variable.keyValueIterator != null) return true;
 		return false;
 	}
@@ -179,7 +222,15 @@ class LuaUtils
 				return PlayState.instance;
 			
 			default:
-				var obj:Dynamic = PlayState.instance.getLuaObject(objectName, checkForTextsToo);
+				var obj:Dynamic = null;
+
+				if(Stage.instance.swagBacks.exists(objectName))
+					obj = Stage.instance.swagBacks.get(objectName);
+				else if(PlayState.instance.Stage.swagBacks.exists(objectName))
+					obj = PlayState.instance.Stage.swagBacks.get(objectName);
+				else if(PlayState.instance.getLuaObject(objectName) != null) 
+					obj = PlayState.instance.getLuaObject(objectName, checkForTextsToo);
+
 				if(obj == null) obj = getVarInArray(getTargetInstance(), objectName, allowMaps);
 				if (obj == null) obj = getActorByName(objectName);
 				return obj;
@@ -205,22 +256,22 @@ class LuaUtils
 		return PlayState.instance.isDead ? GameOverSubstate.instance : PlayState.instance;
 	}
 
-	public static inline function getLowestCharacterGroup():FlxSpriteGroup
+	public static inline function getLowestCharacterPlacement():Character
 	{
-		var group:FlxSpriteGroup = PlayState.instance.gfGroup;
+		var group:Character = PlayState.instance.gf;
 		var pos:Int = PlayState.instance.members.indexOf(group);
 
-		var newPos:Int = PlayState.instance.members.indexOf(PlayState.instance.boyfriendGroup);
+		var newPos:Int = PlayState.instance.members.indexOf(PlayState.instance.boyfriend);
 		if(newPos < pos)
 		{
-			group = PlayState.instance.boyfriendGroup;
+			group = PlayState.instance.boyfriend;
 			pos = newPos;
 		}
 		
-		newPos = PlayState.instance.members.indexOf(PlayState.instance.dadGroup);
+		newPos = PlayState.instance.members.indexOf(PlayState.instance.dad);
 		if(newPos < pos)
 		{
-			group = PlayState.instance.dadGroup;
+			group = PlayState.instance.dad;
 			pos = newPos;
 		}
 		return group;
@@ -228,6 +279,31 @@ class LuaUtils
 	
 	public static function addAnimByIndices(obj:String, name:String, prefix:String, indices:Any = null, framerate:Int = 24, loop:Bool = false)
 	{
+		if (Stage.instance.swagBacks.exists(obj))
+		{
+			var spr:Dynamic = Stage.instance.swagBacks.get(obj);
+			var obj:FlxSprite = changeSpriteClass(spr);
+
+			if(indices == null) indices = [];
+			if(Std.isOfType(indices, String))
+			{
+				var strIndices:Array<String> = cast (indices, String).trim().split(',');
+				var myIndices:Array<Int> = [];
+				for (i in 0...strIndices.length) {
+					myIndices.push(Std.parseInt(strIndices[i]));
+				}
+				indices = myIndices;
+			}
+
+			
+			obj.animation.addByIndices(name, prefix, indices, '', framerate, loop);
+			if(obj.animation.curAnim == null)
+			{
+				obj.animation.play(name, true);
+			}
+			return true;
+		}
+
 		var obj:Dynamic = LuaUtils.getObjectDirectly(obj, false);
 		if(obj != null && obj.animation != null)
 		{
@@ -251,6 +327,10 @@ class LuaUtils
 			return true;
 		}
 		return false;
+	}
+
+	public static function changeSpriteClass(tag:Dynamic):FlxSprite {
+		return tag;
 	}
 	
 	public static function loadFrames(spr:FlxSprite, image:String, spriteType:String)
@@ -288,7 +368,7 @@ class LuaUtils
 	#if (flixel >= "5.3.0")
 	public static function resetSpriteTag(tag:String, isParallax:Bool = false) {
 		#if LUA_ALLOWED
-		if(!PlayState.instance.modchartSprites.exists(tag) || !PlayState.instance.modchartParallax.exists(tag)) {
+		if(!PlayState.instance.modchartSprites.exists(tag) && !Stage.instance.swagBacks.exists(tag) || !PlayState.instance.modchartParallax.exists(tag)) {
 			return;
 		}
 		if (isParallax)
@@ -301,25 +381,51 @@ class LuaUtils
 			return;
 		}
 
-		var target:ModchartSprite = PlayState.instance.modchartSprites.get(tag);
-		target.kill();
-		PlayState.instance.remove(target, true);
-		target.destroy();
-		PlayState.instance.modchartSprites.remove(tag);
+		if(PlayState.instance.modchartSprites.exists(tag))
+		{
+			var target:ModchartSprite = PlayState.instance.modchartSprites.get(tag);
+			target.kill();
+			PlayState.instance.remove(target, true);
+			target.destroy();
+			PlayState.instance.modchartSprites.remove(tag);
+		}
+
+		if(Stage.instance.swagBacks.exists(tag))
+		{
+			var pee:ModchartSprite = Stage.instance.swagBacks.get(tag);
+			pee.kill();
+			PlayState.instance.remove(pee, true);
+			pee.destroy();
+			Stage.instance.swagBacks.remove(tag);
+			return;
+		}
 		#end
 	}
 	#else
 	public static function resetSpriteTag(tag:String) {
 		#if LUA_ALLOWED
-		if(!PlayState.instance.modchartSprites.exists(tag)) {
+		if(!PlayState.instance.modchartSprites.exists(tag) && !Stage.instance.swagBacks.exists(tag)) {
 			return;
 		}
 
-		var target:ModchartSprite = PlayState.instance.modchartSprites.get(tag);
-		target.kill();
-		PlayState.instance.remove(target, true);
-		target.destroy();
-		PlayState.instance.modchartSprites.remove(tag);
+		if(PlayState.instance.modchartSprites.exists(tag))
+		{
+			var target:ModchartSprite = PlayState.instance.modchartSprites.get(tag);
+			target.kill();
+			PlayState.instance.remove(target, true);
+			target.destroy();
+			PlayState.instance.modchartSprites.remove(tag);
+		}
+
+		if(Stage.instance.swagBacks.exists(tag))
+		{
+			var pee:ModchartSprite = Stage.instance.swagBacks.get(tag);
+			pee.kill();
+			PlayState.instance.remove(pee, true);
+			pee.destroy();
+			Stage.instance.swagBacks.remove(tag);
+			return;
+		}
 		#end
 	}
 	#end
@@ -536,6 +642,10 @@ class LuaUtils
 			getTargetInstance().insert(position, shit);
 		}
 
+		var charOffset = new CharacterOffsets(character, flipped);
+		var charX:Float = charOffset.daOffsetArray[0];
+		var charY:Float =  charOffset.daOffsetArray[1] + (flipped ? 350 : 0);
+
 		if (flipped)
 			shit.flipMode = true;
 
@@ -544,16 +654,20 @@ class LuaUtils
 			var charX:Float = shit.positionArray[0];
 			var charY:Float = shit.positionArray[1];
 	
-			shit.x = PlayState.instance.DAD_X + charX + 100;
-			shit.y = PlayState.instance.DAD_Y + charY + 100;
+			shit.x = PlayState.instance.Stage.dadXOffset + charX + PlayState.instance.DAD_X;
+			shit.y = PlayState.instance.Stage.dadYOffset + charY + PlayState.instance.DAD_Y;
 		}
 		else
 		{
-			var charX:Float = shit.positionArray[0];
-			var charY:Float = shit.positionArray[1] - 350;
+			var charOffset = new CharacterOffsets(character, !flipped);
+			var charX:Float = charOffset.daOffsetArray[0];
+			var charY:Float = charOffset.daOffsetArray[1] - (!flipped ? 0 : 350);
+
+			charX = shit.positionArray[0];
+			charY = shit.positionArray[1] - 350;
 	
-			shit.x = PlayState.instance.BF_X + charX + 770;
-			shit.y = PlayState.instance.BF_Y + charY + 450;
+			shit.x = PlayState.instance.Stage.bfXOffset + charX + PlayState.instance.BF_X;
+			shit.y = PlayState.instance.Stage.bfYOffset + charY + PlayState.instance.BF_Y;
 		}
 
 		if (shit.animOffsets.exists(animationName))
@@ -586,6 +700,13 @@ class LuaUtils
 		PlayState.instance.boyfriend.y = y;
 	}
 
+	public static function changeMomCharacter(id:String, x:Float, y:Float)
+	{	
+		changeMomAuto(id, false, false);
+		PlayState.instance.boyfriend.x = x;
+		PlayState.instance.boyfriend.y = y;
+	}
+
 	// this is better. easier to port shit from playstate.
 	public static function changeGFCharacterBetter(x:Float, y:Float, id:String)
 	{		
@@ -602,27 +723,38 @@ class LuaUtils
 		changeBoyfriendCharacter(id, x, y);
 	}
 
+	public static function changeMomCharacterBetter(x:Float, y:Float, id:String)
+	{							
+		changeMomCharacter(id, x, y);
+	}
+
 	//trying to do some auto stuff so i don't have to set manual x and y values
-	public static function changeBFAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false)
+	public static function changeBFAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false, ?playAnimationBeforeSwitch:Bool = false)
 	{	
 		var animationName:String = "no way anyone have an anim name this big";
 		var animationFrame:Int = 0;						
-		if (PlayState.instance.boyfriend.animation.curAnim.name.startsWith('sing'))
+		if (PlayState.instance.boyfriend.animation.curAnim.name.startsWith('sing') && playAnimationBeforeSwitch)
 		{
 			animationName = PlayState.instance.boyfriend.animation.curAnim.name;
 			animationFrame = PlayState.instance.boyfriend.animation.curAnim.curFrame;
 		}
+
+		PlayState.instance.boyfriend.resetAnimationVars();
 
 		PlayState.instance.removeObject(PlayState.instance.boyfriend);
 		PlayState.instance.destroyObject(PlayState.instance.boyfriend);
 		PlayState.instance.boyfriend = new Character(0, 0, id, !flipped);
 		PlayState.instance.boyfriend.flipMode = flipped;
 
-		var charX:Float = PlayState.instance.boyfriend.positionArray[0];
-		var charY:Float = PlayState.instance.boyfriend.positionArray[1];
+		var charOffset = new CharacterOffsets(id, !flipped);
+		var charX:Float = charOffset.daOffsetArray[0];
+		var charY:Float =  charOffset.daOffsetArray[1] - (!flipped ? 0 : 350);
 
-		PlayState.instance.boyfriend.x = PlayState.instance.BF_X + charX;
-		PlayState.instance.boyfriend.y = PlayState.instance.BF_Y + charY;
+		charX = PlayState.instance.boyfriend.positionArray[0];
+		charY = PlayState.instance.boyfriend.positionArray[1] - 350;
+
+		PlayState.instance.boyfriend.x = PlayState.instance.Stage.bfXOffset + charX + PlayState.instance.BF_X;
+		PlayState.instance.boyfriend.y = PlayState.instance.Stage.bfYOffset + charY + PlayState.instance.BF_Y;
 
 		PlayState.instance.addObject(PlayState.instance.boyfriend);
 
@@ -630,48 +762,55 @@ class LuaUtils
 		
 		PlayState.instance.reloadHealthBarColors();
 
-		if (PlayState.instance.boyfriend.animOffsets.exists(animationName))
+		if (PlayState.instance.boyfriend.animOffsets.exists(animationName) && playAnimationBeforeSwitch)
 			PlayState.instance.boyfriend.playAnim(animationName, true, false, animationFrame);
 
 
 		PlayState.instance.startCharacterScripts(PlayState.instance.boyfriend.curCharacter);
 	}
 
-	public static function changeDadAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false)
+	public static function changeDadAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false, ?playAnimationBeforeSwitch:Bool = false)
 	{	
 		var animationName:String = "no way anyone have an anim name this big";
 		var animationFrame:Int = 0;						
-		if (PlayState.instance.dad.animation.curAnim.name.startsWith('sing'))
+		if (PlayState.instance.dad.animation.curAnim.name.startsWith('sing') && playAnimationBeforeSwitch)
 		{
 			animationName = PlayState.instance.dad.animation.curAnim.name;
 			animationFrame = PlayState.instance.dad.animation.curAnim.curFrame;
 		}
+
+		PlayState.instance.dad.resetAnimationVars();
 
 		PlayState.instance.removeObject(PlayState.instance.dad);
 		PlayState.instance.destroyObject(PlayState.instance.dad);
 		PlayState.instance.dad = new Character(0, 0, id, flipped);
 		PlayState.instance.dad.flipMode = flipped;
 
+		var charOffset = new CharacterOffsets(id, flipped);
+		var charX:Float = charOffset.daOffsetArray[0];
+		var charY:Float = charOffset.daOffsetArray[1] + (flipped ? 350 : 0);
 		
-		var charX:Float = PlayState.instance.dad.positionArray[0];
-		var charY:Float = PlayState.instance.dad.positionArray[1];
+		charX = PlayState.instance.dad.positionArray[0];
+		charY = PlayState.instance.dad.positionArray[1];
 		
-		PlayState.instance.dad.x = PlayState.instance.DAD_X + charX;
-		PlayState.instance.dad.y = PlayState.instance.DAD_Y + charY;
+		PlayState.instance.dad.x = PlayState.instance.Stage.dadXOffset + charX + PlayState.instance.DAD_X;
+		PlayState.instance.dad.y = PlayState.instance.Stage.dadYOffset + charY + PlayState.instance.DAD_Y;
 		PlayState.instance.addObject(PlayState.instance.dad);
 
 		PlayState.instance.iconP2.changeIcon(PlayState.instance.dad.healthIcon);
 			
 		PlayState.instance.reloadHealthBarColors();
 
-		if (PlayState.instance.dad.animOffsets.exists(animationName))
+		if (PlayState.instance.dad.animOffsets.exists(animationName) && playAnimationBeforeSwitch)
 			PlayState.instance.dad.playAnim(animationName, true, false, animationFrame);
 
 		PlayState.instance.startCharacterScripts(PlayState.instance.dad.curCharacter);
 	}
 
-	public static function changeGFAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false)
+	public static function changeGFAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false, ?playAnimationBeforeSwitch:Bool = false)
 	{		
+		PlayState.instance.gf.resetAnimationVars();
+
 		PlayState.instance.removeObject(PlayState.instance.gf);
 		PlayState.instance.destroyObject(PlayState.instance.gf);
 		PlayState.instance.gf = new Character(0, 0, id);
@@ -679,12 +818,50 @@ class LuaUtils
 		var charX:Float = PlayState.instance.gf.positionArray[0];
 		var charY:Float = PlayState.instance.gf.positionArray[1];
 
-		PlayState.instance.gf.x = PlayState.instance.GF_X + charX;
-		PlayState.instance.gf.y = PlayState.instance.GF_Y + charY;
+		PlayState.instance.gf.x = PlayState.instance.Stage.gfXOffset + PlayState.instance.GF_X + PlayState.instance.gf.positionArray[0];
+		PlayState.instance.gf.y = PlayState.instance.Stage.gfYOffset + PlayState.instance.GF_Y + PlayState.instance.gf.positionArray[1];
 		PlayState.instance.gf.scrollFactor.set(0.95, 0.95);
 		PlayState.instance.addObject(PlayState.instance.gf);
 
 		PlayState.instance.startCharacterScripts(PlayState.instance.gf.curCharacter);
+	}
+
+	public static function changeMomAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false, ?playAnimationBeforeSwitch:Bool = false)
+	{	
+		var animationName:String = "no way anyone have an anim name this big";
+		var animationFrame:Int = 0;						
+		if (PlayState.instance.mom.animation.curAnim.name.startsWith('sing') && playAnimationBeforeSwitch)
+		{
+			animationName = PlayState.instance.mom.animation.curAnim.name;
+			animationFrame = PlayState.instance.mom.animation.curAnim.curFrame;
+		}
+
+		PlayState.instance.mom.resetAnimationVars();
+
+		PlayState.instance.removeObject(PlayState.instance.mom);
+		PlayState.instance.destroyObject(PlayState.instance.mom);
+		PlayState.instance.mom = new Character(0, 0, id, flipped);
+		PlayState.instance.mom.flipMode = flipped;
+
+		var charOffset = new CharacterOffsets(id, flipped);
+		var charX:Float = charOffset.daOffsetArray[0];
+		var charY:Float = charOffset.daOffsetArray[1] + (flipped ? 350 : 0);
+		
+		charX = PlayState.instance.mom.positionArray[0];
+		charY = PlayState.instance.mom.positionArray[1];
+		
+		PlayState.instance.mom.x = PlayState.instance.Stage.momXOffset + charX + PlayState.instance.MOM_X;
+		PlayState.instance.mom.y = PlayState.instance.Stage.momYOffset + charY + PlayState.instance.MOM_Y;
+		PlayState.instance.addObject(PlayState.instance.dad);
+
+		//PlayState.instance.iconP2.changeIcon(PlayState.instance.dad.healthIcon);
+			
+		//PlayState.instance.reloadHealthBarColors();
+
+		if (PlayState.instance.dad.animOffsets.exists(animationName) && playAnimationBeforeSwitch)
+			PlayState.instance.dad.playAnim(animationName, true, false, animationFrame);
+
+		PlayState.instance.startCharacterScripts(PlayState.instance.mom.curCharacter);
 	}
 
 	public static function getCameraByName(id:String):FunkinLua.LuaCamera
@@ -731,6 +908,12 @@ class LuaUtils
 				return PlayState.instance.boyfriend;
 		}
 
+		if (id.contains('stage-'))
+		{
+			var daID:String = id.split('-')[1];
+			return PlayState.instance.Stage.swagBacks[daID];
+		}
+
 		if (Std.parseInt(id) == null)
 			return Reflect.getProperty(getTargetInstance(), id);
 
@@ -753,5 +936,42 @@ class LuaUtils
 		}	
 			
 		(type.toLowerCase() == 'timer' ? PlayState.instance.modchartTimers.remove(tag) : PlayState.instance.modchartTweens.remove(tag));
+	}
+
+	public static function changeStageOffsets(char:String, x:Float = -10000, ?y:Float = -10000) //in case you need to change or test the stage offsets for the auto commands
+	{
+		switch (char)
+		{
+			case 'boyfriend' | 'bf':
+				if (x != -10000)
+					PlayState.instance.Stage.bfXOffset = x;
+				if (y != -10000)
+					PlayState.instance.Stage.bfYOffset = y;
+			case 'gf':
+				if (x != -10000)
+					PlayState.instance.Stage.gfXOffset = x;
+				if (y != -10000)
+					PlayState.instance.Stage.gfYOffset = y;
+			default:
+				if (x != -10000)
+					PlayState.instance.Stage.dadXOffset = x;
+				if (y != -10000)
+					PlayState.instance.Stage.dadYOffset = y;
+		}
+	}
+
+	public static function doFunction(id:String, ?val1:Dynamic, ?val2:Dynamic, ?val3:Dynamic, ?val4:Dynamic)
+	{
+		//this is dumb but idk how else to do it and i don't wanna make multiple functions for different playstate functions so yeah.
+		switch (id)
+		{
+			case 'startCountdown': PlayState.instance.startCountdown();
+			case 'resyncMusic': PlayState.instance.resyncMusic();	
+			//case 'doTimeTravel': PlayState.instance.doTimeTravel(val1, val2);		
+			//case 'uncacheImage': Paths.clearStoredMemory2(val1, 'image');	
+			//case 'uncacheSound': Paths.clearStoredMemory2(val1, 'sound');			
+			//case 'cacheImage': Paths.cacheImage(val1, val2);
+			case 'spawnStartingNoteSplash': PlayState.instance.preCacheNoteSplashes(0, 0, 0, val1);	
+		}
 	}
 }

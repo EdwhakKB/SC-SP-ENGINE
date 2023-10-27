@@ -5,6 +5,8 @@ package psychlua;
 // I would suggest not messing with these, as it could break mods.
 //
 
+import objects.Character;
+
 class DeprecatedFunctions
 {
 	public static function implement(funk:FunkinLua)
@@ -17,12 +19,7 @@ class DeprecatedFunctions
 
 		funk.set("objectPlayAnimation", function(obj:String, name:String, forced:Bool = false, ?startFrame:Int = 0) {
 			FunkinLua.luaTrace("objectPlayAnimation is deprecated! Use playAnim instead", false, true);
-			if(PlayState.instance.getLuaObject(obj,false) != null) {
-				PlayState.instance.getLuaObject(obj,false).animation.play(name, forced, false, startFrame);
-				return true;
-			}
-
-			var spr:FlxSprite = Reflect.getProperty(LuaUtils.getTargetInstance(), obj);
+			var spr:Dynamic = (PlayState.instance.getLuaObject(obj,false) != null ? PlayState.instance.getLuaObject(obj,false) : Reflect.getProperty(LuaUtils.getTargetInstance(), obj));
 			if(spr != null) {
 				spr.animation.play(name, forced, false, startFrame);
 				return true;
@@ -39,7 +36,13 @@ class DeprecatedFunctions
 					if(PlayState.instance.gf != null && PlayState.instance.gf.animOffsets.exists(anim))
 						PlayState.instance.gf.playAnim(anim, forced);
 				default:
-					if(PlayState.instance.boyfriend.animOffsets.exists(anim))
+					if(PlayState.instance.modchartCharacters.exists(character)) {
+						var spr:Character = PlayState.instance.modchartCharacters.get(character);
+
+						if(spr.animOffsets.exists(anim))
+							spr.playAnim(anim, forced);
+					}
+					else if(PlayState.instance.boyfriend.animOffsets.exists(anim))
 						PlayState.instance.boyfriend.playAnim(anim, forced);
 			}
 		});
@@ -109,13 +112,13 @@ class DeprecatedFunctions
 		funk.set("getPropertyLuaSprite", function(tag:String, variable:String) {
 			FunkinLua.luaTrace("getPropertyLuaSprite is deprecated! Use getProperty instead", false, true);
 			if(PlayState.instance.modchartSprites.exists(tag)) {
-				var killMe:Array<String> = variable.split('.');
-				if(killMe.length > 1) {
-					var coverMeInPiss:Dynamic = Reflect.getProperty(PlayState.instance.modchartSprites.get(tag), killMe[0]);
-					for (i in 1...killMe.length-1) {
-						coverMeInPiss = Reflect.getProperty(coverMeInPiss, killMe[i]);
+				var split:Array<String> = variable.split('.');
+				if(split.length > 1) {
+					var coverMeInPiss:Dynamic = Reflect.getProperty(PlayState.instance.modchartSprites.get(tag), split[0]);
+					for (i in 1...split.length-1) {
+						coverMeInPiss = Reflect.getProperty(coverMeInPiss, split[i]);
 					}
-					return Reflect.getProperty(coverMeInPiss, killMe[killMe.length-1]);
+					return Reflect.getProperty(coverMeInPiss, split[split.length-1]);
 				}
 				return Reflect.getProperty(PlayState.instance.modchartSprites.get(tag), variable);
 			}
@@ -124,13 +127,13 @@ class DeprecatedFunctions
 		funk.set("setPropertyLuaSprite", function(tag:String, variable:String, value:Dynamic) {
 			FunkinLua.luaTrace("setPropertyLuaSprite is deprecated! Use setProperty instead", false, true);
 			if(PlayState.instance.modchartSprites.exists(tag)) {
-				var killMe:Array<String> = variable.split('.');
-				if(killMe.length > 1) {
-					var coverMeInPiss:Dynamic = Reflect.getProperty(PlayState.instance.modchartSprites.get(tag), killMe[0]);
-					for (i in 1...killMe.length-1) {
-						coverMeInPiss = Reflect.getProperty(coverMeInPiss, killMe[i]);
+				var split:Array<String> = variable.split('.');
+				if(split.length > 1) {
+					var coverMeInPiss:Dynamic = Reflect.getProperty(PlayState.instance.modchartSprites.get(tag), split[0]);
+					for (i in 1...split.length-1) {
+						coverMeInPiss = Reflect.getProperty(coverMeInPiss, split[i]);
 					}
-					Reflect.setProperty(coverMeInPiss, killMe[killMe.length-1], value);
+					Reflect.setProperty(coverMeInPiss, split[split.length-1], value);
 					return true;
 				}
 				Reflect.setProperty(PlayState.instance.modchartSprites.get(tag), variable, value);

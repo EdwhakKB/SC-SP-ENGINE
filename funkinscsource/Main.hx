@@ -12,6 +12,7 @@ import openfl.events.Event;
 import openfl.display.StageScaleMode;
 import lime.app.Application;
 import states.TitleState;
+import flixel.FlxSprite;
 
 //crash handler stuff
 #if CRASH_HANDLER
@@ -31,7 +32,7 @@ import flixel.input.keyboard.FlxKey;
 
 class Main extends Sprite
 {
-	var game = {
+	public static var game = {
 		width: 1280, // WINDOW width
 		height: 720, // WINDOW height
 		initialState: TitleState, // initial game state
@@ -196,6 +197,7 @@ class Main extends Sprite
 		#end
 
 		#if desktop
+
 		// Get first window in case the coder creates more windows.
 		@:privateAccess
 		appName = openfl.Lib.application.windows[0].__backend.parent.__attributes.title;
@@ -240,10 +242,12 @@ class Main extends Sprite
 	// very cool person for real they don't get enough credit for their work
 	#if CRASH_HANDLER
 		
-	static final quotes:Array<String> = [
-	"Ha, a null object reference?", // Slushi
+	static final quotes:Array<String> = 
+	[
+		"Ha, a null object reference?", // Slushi
         "What the fuck you did!?", //Edwhak
-	"CAGASTE." // Slushi
+		"CAGASTE.", // Slushi
+		"It was Bolo!" //Glowsoony
 	];
 	
 	function onCrash(e:UncaughtErrorEvent):Void

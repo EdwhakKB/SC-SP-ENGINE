@@ -1,3 +1,0 @@
-en-US
-es-ES
-pt-BR

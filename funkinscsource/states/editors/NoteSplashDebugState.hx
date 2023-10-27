@@ -44,7 +44,7 @@ class NoteSplashDebugState extends MusicBeatState
 		{
 			var x = i * 220 + 240;
 			var y = 290;
-			var note:StrumArrow = new StrumArrow(x, y, i, 0, 'noteSkins/NOTE_assets' + Note.getNoteSkinPostfix());
+			var note:StrumArrow = new StrumArrow(x, y, i, 0, 'noteSkins/NOTE_assets' + getNoteSkinPostfix());
 			note.alpha = 0.75;
 			note.playAnim('static');
 			notes.add(note);
@@ -70,7 +70,7 @@ class NoteSplashDebugState extends MusicBeatState
 					nameInputText.hasFocus = false;
 				
 				default:
-					Debug.logTrace('changed anim name to $text');
+					Debug.logInfo('changed anim name to $text');
 					config.anim = text;
 					curAnim = 1;
 					reloadAnims();
@@ -236,7 +236,6 @@ class NoteSplashDebugState extends MusicBeatState
 		{
 			if(forceFrame < 0) forceFrame = 0;
 			else if(forceFrame >= maxFrame) forceFrame = maxFrame - 1;
-			//Debug.logTrace('curFrame: $forceFrame');
 			
 			curFrameText.text = 'Force Frame: ${forceFrame+1} / $maxFrame\n(Press Q/E to change)';
 			splashes.forEachAlive(function(spr:FlxSprite) {
@@ -292,8 +291,6 @@ class NoteSplashDebugState extends MusicBeatState
 		var path:String = pathSplit[pathSplit.length-1].trim();
 		savedText.text = 'Saved to: $path';
 		sys.io.File.saveContent(path, strToSave);
-
-		//Debug.logTrace(strToSave);
 		#else
 		savedText.text = 'Can\'t save on this platform, too bad.';
 		#end
@@ -345,7 +342,7 @@ class NoteSplashDebugState extends MusicBeatState
 			});
 			if(loopContinue) maxAnims++;
 		}
-		Debug.logTrace('maxAnims: $maxAnims');
+		Debug.logInfo('maxAnims: $maxAnims');
 		changeAnim();
 	}
 

@@ -275,7 +275,7 @@ class PauseSubState extends MusicBeatSubstate
 						return;
 					}					
 				}catch(e:Dynamic){
-					Debug.logTrace('ERROR! $e');
+					Debug.logInfo('ERROR! $e');
 
 					var errorStr:String = e.toString();
 					if(errorStr.startsWith('[file_contents,assets/data/songs/')) errorStr = 'Missing file: ' + errorStr.substring(27, errorStr.length-1); //Missing chart
@@ -336,7 +336,7 @@ class PauseSubState extends MusicBeatSubstate
 				case 'Skip Time':
 					if(curTime < Conductor.songPosition)
 					{
-						PlayState.startOnTime = curTime;
+						PlayState.instance.startOnTime = curTime;
 						restartSong(true);
 					}
 					else
@@ -393,6 +393,7 @@ class PauseSubState extends MusicBeatSubstate
 					PlayState.changedDifficulty = false;
 					PlayState.chartingMode = false;
 					PlayState.modchartMode = false;
+					PlayState.instance.alreadyEndedSong = false;
 					FlxG.camera.followLerp = 0;
 					if (PlayState.forceMiddleScroll){
 						if (PlayState.savePrefixScrollR && PlayState.prefixRightScroll){
@@ -412,31 +413,35 @@ class PauseSubState extends MusicBeatSubstate
 
 	function pauseCountDown()
 	{
+		game.stageIntroSoundsSuffix = game.Stage.stageIntroSoundsSuffix;
+		game.stageIntroSoundsPrefix = game.Stage.stageIntroSoundsPrefix;
+		
 		var introAssets:Map<String, Array<String>> = new Map<String, Array<String>>();
 		var introImagesArray:Array<String> = switch(PlayState.stageUI) {
 			case "pixel": ['${PlayState.stageUI}UI/ready-pixel', '${PlayState.stageUI}UI/set-pixel', '${PlayState.stageUI}UI/date-pixel'];
 			case "normal": ["ready", "set" ,"go"];
 			default: ['${PlayState.stageUI}UI/ready', '${PlayState.stageUI}UI/set', '${PlayState.stageUI}UI/go'];
 		}
-		if (game.stageIntroAssets != null)
-			introAssets.set(PlayState.curStage, game.stageIntroAssets);
+		if (game.Stage.stageIntroAssets != null)
+			introAssets.set(PlayState.curStage, game.Stage.stageIntroAssets);
 		else
 			introAssets.set(PlayState.stageUI, introImagesArray);
 
-		var introAlts:Array<String> = introAssets.get(PlayState.stageUI);
-		var antialias:Bool = (ClientPrefs.data.antialiasing && !PlayState.isPixelStage);
+		var isPixelated:Bool = PlayState.isPixelStage;
+		var introAlts:Array<String> = (game.Stage.stageIntroAssets != null ? introAssets.get(PlayState.curStage) : introAssets.get(PlayState.stageUI));
+		var antialias:Bool = (ClientPrefs.data.antialiasing && !isPixelated);
 		for (value in introAssets.keys())
 		{
 			if (value == PlayState.curStage)
 			{
 				introAlts = introAssets.get(value);
 
-				if (game.stageIntroSoundsSuffix != '')
+				if (game.stageIntroSoundsSuffix != '' || game.stageIntroSoundsSuffix != null || game.stageIntroSoundsSuffix != "")
 					game.introSoundsSuffix = game.stageIntroSoundsSuffix;
 				else
 					game.introSoundsSuffix = '';
 
-				if (game.stageIntroSoundsPrefix != '')
+				if (game.stageIntroSoundsPrefix != '' || game.stageIntroSoundsPrefix != null || game.stageIntroSoundsPrefix != "")
 					game.introSoundsPrefix = game.stageIntroSoundsPrefix;
 				else
 					game.introSoundsPrefix = '';
@@ -448,40 +453,26 @@ class PauseSubState extends MusicBeatSubstate
 		switch (CDANumber)
 		{
 			case 4:
-				if (game.stageHas3rdIntroAsset)
-					getReady = createCountdownSprite(introAlts[0], antialias);
-				FlxG.sound.play(Paths.sound('intro3' + game.introSoundsSuffix), 0.6);
+				var isNotNull = (introAlts.length > 3 ? introAlts[0] : "missingRating");
+				getReady = createCountdownSprite(isNotNull, antialias, game.introSoundsPrefix + 'intro3' + game.introSoundsSuffix);
 			case 3:
-				if (game.stageHas3rdIntroAsset)
-					countdownReady = createCountdownSprite(introAlts[1], antialias);
-				else
-					countdownReady = createCountdownSprite(introAlts[0], antialias);
-				FlxG.sound.play(Paths.sound('intro2' + game.introSoundsSuffix), 0.6);
+				countdownReady = createCountdownSprite(introAlts[introAlts.length - 3], antialias, game.introSoundsPrefix + 'intro2' + game.introSoundsSuffix);
 			case 2:
-				if (game.stageHas3rdIntroAsset)
-					countdownSet = createCountdownSprite(introAlts[2], antialias);
-				else
-					countdownSet = createCountdownSprite(introAlts[1], antialias);
-				FlxG.sound.play(Paths.sound('intro1' + game.introSoundsSuffix), 0.6);
+				countdownSet = createCountdownSprite(introAlts[introAlts.length - 2], antialias, game.introSoundsPrefix + 'intro1' + game.introSoundsSuffix);
 			case 1:
-				if (game.stageHas3rdIntroAsset)
-					countdownGo = createCountdownSprite(introAlts[3], antialias);
-				else
-					countdownGo = createCountdownSprite(introAlts[2], antialias);
-				FlxG.sound.play(Paths.sound('introGo' + game.introSoundsSuffix), 0.6);
+				countdownGo = createCountdownSprite(introAlts[introAlts.length - 1], antialias, game.introSoundsPrefix + 'introGo' + game.introSoundsSuffix);
 			case 0:
+				
 		}
-		/*if (Number == -1)
-			CountDownFinished = true;*/
 	}
-
-	inline private function createCountdownSprite(image:String, antialias:Bool):FlxSprite
+	
+	inline private function createCountdownSprite(image:String, antialias:Bool, soundName:String):FlxSprite
 	{
 		var spr:FlxSprite = new FlxSprite(-100).loadGraphic(Paths.image(image));
 		spr.scrollFactor.set();
 		spr.updateHitbox();
 
-		if (PlayState.isPixelStage)
+		if (image.contains("-pixel"))
 			spr.setGraphicSize(Std.int(spr.width * PlayState.daPixelZoom));
 
 		spr.screenCenter();
@@ -495,6 +486,7 @@ class PauseSubState extends MusicBeatSubstate
 				spr.destroy();
 			}
 		});
+		FlxG.sound.play(Paths.sound(soundName), 0.6);
 		return spr;
 	}
 

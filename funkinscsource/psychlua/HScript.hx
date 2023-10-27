@@ -6,6 +6,8 @@ import psychlua.FunkinLua;
 import psychlua.CustomSubstate;
 import tea.SScript;
 
+using StringTools;
+
 #if HSCRIPT_ALLOWED
 #if (SScript >= "6.1.80")
 class HScript extends SScript
@@ -17,7 +19,7 @@ class HScript extends SScript
 		if(parent.hscript == null)
 		{
 			var times:Float = Date.now().getTime();
-			Debug.logTrace('initialized sscript interp successfully: ${parent.scriptName} (${Std.int(Date.now().getTime() - times)}ms)');
+			Debug.logInfo('initialized sscript interp successfully: ${parent.scriptName} (${Std.int(Date.now().getTime() - times)}ms)');
 			parent.hscript = new HScript(parent);
 		}
 	}
@@ -42,7 +44,7 @@ class HScript extends SScript
 
 	public static function hscriptTrace(text:String, color:FlxColor = FlxColor.WHITE) {
 		PlayState.instance.addTextToDebug(text, color);
-		Debug.logTrace(text);
+		Debug.logInfo(text);
 	}
 
 	public var origin:String;
@@ -65,7 +67,6 @@ class HScript extends SScript
 	{
 		super.preset();
 
-		// Some very commonly used classes
 		setClass(flixel.FlxG);
 		setClass(flixel.FlxSprite);
 		setClass(flixel.FlxCamera);
@@ -80,20 +81,13 @@ class HScript extends SScript
 		setClass(Alphabet);
 		setClass(objects.Note);
 		setClass(CustomSubstate);
-		setClass(backend.BaseStage.Countdown);
+		setClass(backend.Stage.Countdown);
 		#if (!flash && sys)
 		setClass(flixel.addons.display.FlxRuntimeShader);
 		#end
 		setClass(openfl.filters.ShaderFilter);
 		setClass(psychlua.FunkinLua);
-
-		//Custom Ones
-		setClass(modcharting.PlayfieldRenderer);
-		setClass(modcharting.ModchartUtil);
-		setClass(modcharting.Modifier);
-		setClass(modcharting.NoteMovement);
-		setClass(modcharting.NotePositionData);
-		setClass(modcharting.ModchartFile);
+		//set('StringTools', StringTools);
 
 		// Functions & Variables
 		set('setVar', function(name:String, value:Dynamic)
@@ -174,6 +168,21 @@ class HScript extends SScript
 		set('Function_StopHScript', FunkinLua.Function_StopHScript);
 		set('Function_StopAll', FunkinLua.Function_StopAll);
 
+		if (Stage.instance != null){
+			set('hideLastBG', Stage.instance.hideLastBG);
+			set('layerInFront', function(layer:Int = 0, id:Dynamic) Stage.instance.layInFront[layer].push(id));
+			set('toAdd', function(id:Dynamic) Stage.instance.toAdd.push(id));
+			set('setSwagBack', function(id:String, sprite:Dynamic) Stage.instance.swagBacks.set(id, sprite));
+			set('getSwagBack', function(id:String) Stage.instance.swagBacks.get(id));
+			set('setSlowBacks', function(id:Dynamic, sprite:Array<FlxSprite>) Stage.instance.slowBacks.set(id, sprite));
+			set('getSlowBacks', function(id:Dynamic) Stage.instance.slowBacks.get(id));
+			set('setSwagGroup', function(id:String, group:FlxTypedGroup<Dynamic>) Stage.instance.swagGroup.set(id, group));
+			set('getSwagGroup', function(id:String) Stage.instance.swagGroup.get(id));
+			set('animatedBacks', function(id:FlxSprite) Stage.instance.animatedBacks.push(id));
+			set('animatedBacks2', function(id:FlxSprite) Stage.instance.animatedBacks2.push(id));
+
+			set('useSwagBack', function(id:String) Stage.instance.swagBacks[id]);
+		}
 		set('add', function(obj:FlxBasic) PlayState.instance.add(obj));
 		set('addBehindGF', function(obj:FlxBasic) PlayState.instance.addBehindGF(obj));
 		set('addBehindDad', function(obj:FlxBasic) PlayState.instance.addBehindDad(obj));
@@ -230,7 +239,6 @@ class HScript extends SScript
 			{
 				for (key in Reflect.fields(varsToBring))
 				{
-					//Debug.logTrace('Key $key: ' + Reflect.field(varsToBring, key));
 					funk.hscript.set(key, Reflect.field(varsToBring, key));
 				}
 			}
@@ -383,12 +391,13 @@ class HScript extends SScript
 		set('Alphabet', Alphabet);
 		set('Note', objects.Note);
 		set('CustomSubstate', CustomSubstate);
-		set('Countdown', backend.BaseStage.Countdown);
+		set('Countdown', backend.Stage.Countdown);
 		#if (!flash && sys)
 		set('FlxRuntimeShader', flixel.addons.display.FlxRuntimeShader);
 		#end
 		set('ShaderFilter', openfl.filters.ShaderFilter);
 		set('StringTools', StringTools);
+		set('FunkinLua', psychlua.FunkinLua);
 
 		// Functions & Variables
 		set('setVar', function(name:String, value:Dynamic)

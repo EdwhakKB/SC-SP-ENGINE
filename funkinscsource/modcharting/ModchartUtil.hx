@@ -73,12 +73,10 @@ class ModchartUtil
     {
         if (instance == null)
             return false;
-        var pixelNotes:Bool = false;
-        var pixelStrums:Bool = false;
         #if LEATHER
         return PlayState.SONG.ui_Skin == 'pixel';
         #else 
-      	return PlayState.isPixelStage;
+        return PlayState.isPixelStage;
         #end
     }
 
@@ -109,8 +107,6 @@ class ModchartUtil
                 xPos += (xPos + daNote.width > targetX + strum.width ? -0.1 : 0.1);
                 tempShit += (xPos + daNote.width > targetX + strum.width ? -0.1 : 0.1);
             }
-            //Debug.logTrace(arrayVal);
-            //Debug.logTrace(tempShit);
 
             NoteMovement.leatherEngineOffsetStuff.set(arrayVal, tempShit);
         }

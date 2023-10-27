@@ -16,7 +16,7 @@ import backend.MusicBeatSubstate;
 import backend.CustomFadeTransition;
 import backend.ClientPrefs;
 import backend.Conductor;
-import backend.BaseStage;
+import backend.Stage;
 import backend.Difficulty;
 import backend.Mods;
 import backend.Debug;
@@ -28,10 +28,6 @@ import states.PlayState;
 import states.LoadingState;
 
 import flixel.addons.effects.FlxSkewedSprite;
-
-#if (flixel >= "5.3.1")
-import flixel_5_3_1.ParallaxSprite;
-#end
 
 //Flixel
 #if (flixel >= "5.3.0")
@@ -51,8 +47,8 @@ import flixel.tweens.FlxTween;
 import flixel.group.FlxSpriteGroup;
 import flixel.group.FlxGroup.FlxTypedGroup;
 
-import language.LocalLanguage;
 import psychlua.CustomFlxColor;
+import objects.CharacterOffsets;
 
 using StringTools;
 #end

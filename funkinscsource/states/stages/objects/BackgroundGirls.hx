@@ -3,12 +3,12 @@ package states.stages.objects;
 class BackgroundGirls extends FlxSprite
 {
 	var isPissed:Bool = true;
-	public function new(x:Float, y:Float)
+	public function new(x:Float, y:Float, ?prefix:String)
 	{
 		super(x, y);
 
 		// BG fangirls dissuaded
-		frames = Paths.getSparrowAtlas('weeb/bgFreaks');
+		frames = Paths.getSparrowAtlas('weeb/' + prefix + 'bgFreaks');
 		antialiasing = false;
 		swapDanceType();
 

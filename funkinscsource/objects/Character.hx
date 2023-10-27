@@ -90,6 +90,15 @@ class Character extends FlxSprite
 
 	var tex:FlxFramesCollection = null;
 
+	public var trailAdjusted:Bool = false; //
+
+	public var idleToBeat:Bool = true; // change if bf and dad would idle to the beat of the song
+	public var idleBeat:Int = 2; // how frequently bf and dad would play their idle animation(1 - every beat, 2 - every 2 beats and so on)
+	public var gfSpeed:Int = 1; // how frequently gf would play their beat animation
+
+	public var curColor:FlxColor;
+	public var doMissThing:Bool = false;
+
 	public function new(x:Float, y:Float, ?character:String = 'bf', ?isPlayer:Bool = false)
 	{
 		super(x, y);
@@ -112,7 +121,9 @@ class Character extends FlxSprite
 
 		iconColor = isPlayer ? '#66FF33' : '#FF0000';
 
-		noteSkinStyleOfCharacter = isPlayer ? 'noteSkins/NOTE_assets' : 'noteSkins/NOTE_assets';
+		noteSkinStyleOfCharacter = 'noteSkins/NOTE_assets';
+
+		curColor = 0xFFFFFFFF;
 
 		antialiasing = ClientPrefs.data.antialiasing;
 
@@ -130,8 +141,6 @@ class Character extends FlxSprite
 
 			default:
 				isPsychPlayer = false;
-
-				Debug.logInfo('Generating character (${curCharacter}) from JSON data...');
 
 				// Load the data from JSON and cast it to a struct we can easily read.
 				var characterPath:String = 'data/characters/' + curCharacter + '.json';
@@ -247,11 +256,12 @@ class Character extends FlxSprite
 				colorPreString = FlxColor.fromRGB(healthColorArray[0], healthColorArray[1], healthColorArray[2]);
 				colorPreCut = colorPreString.toHexString();
 	
-				// I HATE YOU SO MUCH!
+
 				iconColor = '0x' + colorPreCut.substring(2);
 
-				if (iconColor.contains('0xFF')){
-					var newForm:String = iconColor.replace('#', '').replace('0xFF', '');
+				// I HATE YOU SO MUCH! -- code by me, glowsoony
+				if (iconColor.contains('0xFF') || iconColor.contains('#') || iconColor.contains('0x')){
+					var newForm:String = iconColor.replace('#', '').replace('0xFF', '').replace('0x', '');
 					iconColor = '#' + newForm;
 				}
 
@@ -319,18 +329,20 @@ class Character extends FlxSprite
 					quickAnimAdd('idle', 'BF idle dance');
 					Debug.logInfo('Something went wrong with the animations!');
 				}
-				Debug.logInfo('Loaded json file character: ' + curCharacter);
 
 				json.startingAnim != null ? playAnim(json.startingAnim) : (animOffsets.exists('danceRight') ? playAnim('danceRight') : playAnim('idle'));
 		}
 		originalFlipX = flipX;
 
 		if(animation.getByName('danceLeft') != null && animation.getByName('danceRight') != null)
-			if (isDancing != true)
+			if (!isDancing)
 				isDancing = true;
 
 		if (animOffsets.exists('singLEFTmiss') || animOffsets.exists('singDOWNmiss') || animOffsets.exists('singUPmiss') || animOffsets.exists('singRIGHTmiss'))
 			hasMissAnimations = true;
+
+		if(animation.getByName('singUPmiss') == null)
+			doMissThing = true; //if for some reason you only have an up miss, why?
 		
 		dance();
 
@@ -354,19 +366,12 @@ class Character extends FlxSprite
 		{
 			case 'pico-speaker':
 				skipDance = true;
+				stopIdle = true;
 				loadMappedAnims();
 				playAnim("shoot1");
 		}
 	}
-
-	function getCharNoteSkinPostfix() // I HATE YOU
-	{
-		var skin:String = '';
-		if (ClientPrefs.data.noteSkin != ClientPrefs.defaultData.noteSkin)
-			skin = '-' + ClientPrefs.data.noteSkin.trim().toLowerCase().replace(' ', '_');
-		return skin;
-	}
-
+	
 	override function update(elapsed:Float)
 	{
 		if (!debugMode && animation.curAnim != null)
@@ -489,24 +494,43 @@ class Character extends FlxSprite
 					}
 					else
 					{
-						if (altAnim && animation.getByName('idle-alt') != null && animation.getByName('idle-alt2') != null)
+						if (altAnim && (animation.getByName('idle-alt') != null || animation.getByName('idle-alt2') != null))
 							playAnim('idle-alt', forced);
 						else
 							playAnim('idle' + idleSuffix, forced);
 					}
 				}
 			}
+
+			if (color != curColor && doMissThing)
+				color = curColor;
 		}
 	}
+
+	var missed:Bool = false;
 
 	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
 	{
 		specialAnim = false;
+		missed = false;
 		
 		if (nonanimated)
 			return;
+
+		if (AnimName.endsWith('miss') && animation.getByName(AnimName) == null)
+		{
+			AnimName = AnimName.substr(0, AnimName.length - 4);
+
+			if (doMissThing)
+				missed = true;
+		}
 		
 		animation.play(AnimName, Force, Reversed, Frame);
+
+		if (missed)
+			color = 0xCFAFFF;
+		else if (color != curColor && doMissThing)
+			color = curColor;
 
 		var daOffset = animOffsets.get(AnimName);
 
@@ -596,7 +620,7 @@ class Character extends FlxSprite
 
 	public function resetAnimationVars()
 	{
-		for (i in ['flipMode', 'stopIdle', 'skipDance', 'nonanimated', 'specialAnim', 'stunned'])
+		for (i in ['flipMode', 'stopIdle', 'skipDance', 'nonanimated', 'specialAnim', 'doMissThing', 'stunned'])
 		{
 			Reflect.setProperty(this, i, false);
 		}
@@ -629,6 +653,7 @@ class Character extends FlxSprite
 
 		super.destroy();
 	}
+
 }
 
 

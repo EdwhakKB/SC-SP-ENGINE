@@ -175,7 +175,7 @@ class Debug
 	public static function onInitProgram()
 	{
 		// Initialize logging tools.
-		Debug.logTrace('Initializing Debug tools...');
+		Debug.logInfo('Initializing Debug tools...');
 
 		// Override Haxe's vanilla Debug.logTrace() calls to use the Flixel console.
 		Log.trace = function(data:Dynamic, ?info:PosInfos)
@@ -277,7 +277,7 @@ class Debug
 		FlxG.debugger.addTrackerProfile(new TrackerProfile(objects.Character, ["curCharacter", "isPlayer", "iconColor", "healthColorArray"], [FlxSprite]));
 		FlxG.debugger.addTrackerProfile(new TrackerProfile(objects.HealthIcon, ["char", "isPlayer", "isOldIcon"], [FlxSprite]));
 		FlxG.debugger.addTrackerProfile(new TrackerProfile(backend.Song, [
-			"song",
+			"songId",
 			"speed",
 			"player1",
 			"player2",

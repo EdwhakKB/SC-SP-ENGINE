@@ -11,6 +11,7 @@ import game.Note;
 #else 
 import objects.Note;
 import modcharting.ModchartEditorState;
+import objects.StrumArrow;
 #end
 
 using StringTools;
@@ -28,6 +29,7 @@ class NoteMovement
     public static var arrowSizes:Array<Float> = [];
     public static var defaultSkewX:Array<Float> = [];
     public static var defaultSkewY:Array<Float> = [];
+    public static var strumGroup:FlxTypedGroup<StrumArrow> = null;
     #if LEATHER
     public static var leatherEngineOffsetStuff:Map<String, Float> = [];
     #end
@@ -39,8 +41,14 @@ class NoteMovement
         arrowSizes = [];
         defaultSkewX = [];
         defaultSkewY = [];
-        keyCount = #if (LEATHER || KADE) PlayState.strumLineNotes.length-PlayState.playerStrums.length #else game.strumLineNotes.length-game.playerStrums.length #end; //base game doesnt have opponent strums as group
-        playerKeyCount = #if (LEATHER || KADE) PlayState.playerStrums.length #else game.playerStrums.length #end;
+        #if (LEATHER || KADE)
+        strumGroup = PlayState.playerStrums;
+        #else
+        strumGroup = game.playerStrums;
+        #end
+
+        keyCount = #if (LEATHER || KADE) PlayState.strumLineNotes.length-strumGroup.length #else game.strumLineNotes.length-strumGroup.length #end; //base game doesnt have opponent strums as group
+        playerKeyCount = strumGroup.length;
 
         for (i in #if (LEATHER || KADE) 0...PlayState.strumLineNotes.members.length #else 0...game.strumLineNotes.members.length #end)
         {
@@ -130,8 +138,6 @@ class NoteMovement
         }
 
         //col = (col-col-col); //flip pos/negative
-
-        //Debug.logTrace(col);
 
         return col;
     }

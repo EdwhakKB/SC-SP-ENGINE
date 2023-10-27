@@ -17,7 +17,7 @@
 	"ratingSkin": ["", ""],
 	"countDownAssets": ["ready", "set", "go"],
 	"introSoundsSuffix": "",
+	"introSoundsPrefix": "",
 
-	"cameraXYMovement": [50, 48],
-	"opponent2": [-100000]
+	"cameraXYMovement": [50, 48]
 }

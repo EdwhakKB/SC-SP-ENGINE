@@ -2,7 +2,7 @@
 <project>
 	<!-- _________________________ Application Settings _________________________ -->
 
-	<app title="Friday Night Funkin': SC ENGINE Edition" file="SCE" packageName="com.SCTeam.SCEE" package="com.SCTeam.SCEE" main="Main" version="0.2.8" company="SCTeam" />
+	<app title="Friday Night Funkin': SC ENGINE Edition" file="SCE" packageName="com.SCTeam.SCEE" package="com.SCTeam.SCE" main="Main" version="0.2.8" company="SCTeam" />
 
 	<!--Switch Export with Unique ApplicationID and Icon-->
 	<set name="APP_ID" value="0x0100f6c013bbc000" />
@@ -153,7 +153,7 @@
 	<define name="PSYCH"/>
 	<define name="modchartingTools"/>
 	<haxelib name="fnf-modcharting-tools"/>
-	<define name="SCE_ExtraSides" value="0"/> <!--set this to 0.1 for extra sides Version of the engine-->
+	<define name="SBETA" value="0.1"/> <!--set this to 0.1 for extra sides Version of the engine-->
 
 	<!--In case you want to use the ui package-->
 	<haxelib name="flixel-addons" />
@@ -161,7 +161,8 @@
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
 	<haxelib name="hxCodec" if="VIDEOS_ALLOWED"/>
 	<haxelib name="faxe" if='switch'/>
-	<!--<haxelib name="flxanimate" />-->
+	<haxelib name="hxp" />
+	<!-- <haxelib name="flxanimate" /> --> <!--if you want flxAnimate Support!-->
 	<haxelib name="parallaxlt" />
 	<!--<haxelib name="polymod"/> -->
 	<haxelib name="discord_rpc" if="desktop"/>
@@ -226,6 +227,8 @@
 	<haxedef name="no-deprecation-warnings"/>
 
 	<!-- <haxedef name="queue_experimental_optimization"/> -->
+
+	<!-- <error value="Targets besides desktop are not supported" unless="desktop" />-->
 
 	<!--Macro fixes-->
 	<haxeflag name="--macro" value="allowPackage('flash')" />

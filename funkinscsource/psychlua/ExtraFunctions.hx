@@ -96,7 +96,7 @@ class ExtraFunctions
 				case 'down': return PlayState.instance.controls.NOTE_DOWN_P;
 				case 'up': return PlayState.instance.controls.NOTE_UP_P;
 				case 'right': return PlayState.instance.controls.NOTE_RIGHT_P;
-				case 'space': return PlayState.instance.controls.justPressed('space');
+				case 'space': return PlayState.instance.controls.justPressed('qt_dodge');
 				default: return PlayState.instance.controls.justPressed(name);
 			}
 			return false;
@@ -108,7 +108,7 @@ class ExtraFunctions
 				case 'down': return PlayState.instance.controls.NOTE_DOWN;
 				case 'up': return PlayState.instance.controls.NOTE_UP;
 				case 'right': return PlayState.instance.controls.NOTE_RIGHT;
-				case 'space': return PlayState.instance.controls.pressed('space');
+				case 'space': return PlayState.instance.controls.pressed('qt_dodge');
 				default: return PlayState.instance.controls.pressed(name);
 			}
 			return false;
@@ -120,7 +120,7 @@ class ExtraFunctions
 				case 'down': return PlayState.instance.controls.NOTE_DOWN_R;
 				case 'up': return PlayState.instance.controls.NOTE_UP_R;
 				case 'right': return PlayState.instance.controls.NOTE_RIGHT_R;
-				case 'space': return PlayState.instance.controls.justReleased('space');
+				case 'space': return PlayState.instance.controls.justReleased('qt_dodge');
 				default: return PlayState.instance.controls.justReleased(name);
 			}
 			return false;
@@ -284,5 +284,16 @@ class ExtraFunctions
 		funk.set("getRandomBool", function(chance:Float = 50) {
 			return FlxG.random.bool(chance);
 		});
+
+		//paths stuff
+		funk.set("paths", function(tag:String, text:String) {
+			switch(tag)
+			{
+				case 'font': return Paths.font(text);
+				case 'xml': return Paths.xml(text);
+				default: return '';
+			}
+		});
+
 	}
 }
