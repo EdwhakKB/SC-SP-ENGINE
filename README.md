@@ -1,6 +1,6 @@
 ## SCE Edition
 * This engine brings features the may apply to modified gameplay!, other results screens!, betadciu things support!, more stuff is added to the engine for it to be modified however *you* entend to use this engine!*
-* SCE brings notITG modchart support along with many other features!
+* SCE brings NotITG modchart support along with many other features!
 * Parallax Stuff by Itz-Miles [THANK YOU SO MUCH!](https://github.com/ShadowMario/FNF-PsychEngine/pull/13397)
 * This engine is made with **Psych Engine**!
 
