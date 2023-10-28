@@ -465,8 +465,6 @@ class Stage extends MusicBeatState
 					
 					setDefaultGF('gf-pixel');
 
-					if (songLowercase == 'roses')
-						if(bgGirls != null) bgGirls.visible = false;
 			
 					switch (songLowercase)
 					{
@@ -992,10 +990,6 @@ class Stage extends MusicBeatState
 				everyoneDance();
 			case 'tank':
 				if(num % 2 == 0) everyoneDance();
-			case 'school':
-				if (count == START)
-					if (songLowercase == 'roses')
-						if(bgGirls != null) bgGirls.visible = true; bgGirls.swapDanceType();
 		}
 	}
 
