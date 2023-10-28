@@ -3469,10 +3469,8 @@ class PlayState extends MusicBeatState
 								// Kill extremely late notes and cause misses
 								if (Conductor.songPosition - daNote.strumTime > noteKillOffset)
 								{
-									if (daNote.mustPress && !cpuControlled && !daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit)) {
-										var willMiss:Bool = true;
-										if (willMiss) noteMiss(daNote);
-									}
+									if (daNote.mustPress && !cpuControlled && !daNote.ignoreNote && !endingSong && (daNote.tooLate || !daNote.wasGoodHit))
+										noteMiss(daNote);
 		
 									daNote.active = daNote.visible = false;
 									invalidateNote(daNote);
@@ -5540,6 +5538,8 @@ class PlayState extends MusicBeatState
 			}
 		}
 
+		health -= subtract * healthLoss;
+
 		if(instakillOnMiss)
 		{
 			if (SONG.needsVoices)
@@ -5548,7 +5548,6 @@ class PlayState extends MusicBeatState
 		}
 		combo = 0;
 
-		health -= subtract * healthLoss;
 		if(!practiceMode) songScore -= 10;
 		if(!endingSong) songMisses++;
 		totalPlayed++;
@@ -5845,8 +5844,6 @@ class PlayState extends MusicBeatState
 				moveCameraXY(char, true, isDadCam, isGfCam, isMomCam, note.noteData, cameraMoveXYVar1, cameraMoveXYVar2);
 			}
 		}
-
-		health += note.hitHealth * healthGain;
 
 		playBF = searchLuaVar('playBFSing', 'bool', false);
 		

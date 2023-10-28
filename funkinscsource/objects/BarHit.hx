@@ -25,7 +25,7 @@ class BarHit extends FlxSpriteGroup
 	{
 		super(x, y);
 		
-		if(valueFunction != null) this.valueFunction = valueFunction;
+		this.valueFunction = valueFunction;
 		setBounds(boundX, boundY);
 		
 		bg = new FlxSprite().loadGraphic(Paths.image(image));
@@ -49,9 +49,20 @@ class BarHit extends FlxSpriteGroup
 		regenerateClips();
 	}
 
+	public var enabled:Bool = true;
 	override function update(elapsed:Float) {
-		var value:Null<Float> = FlxMath.remapToRange(FlxMath.bound(valueFunction(), bounds.min, bounds.max), bounds.min, bounds.max, 0, 100);
-		percent = (value != null ? value : 0);
+		if(!enabled)
+		{
+			super.update(elapsed);
+			return;
+		}
+
+		if(valueFunction != null)
+		{
+			var value:Null<Float> = FlxMath.remapToRange(FlxMath.bound(valueFunction(), bounds.min, bounds.max), bounds.min, bounds.max, 0, 100);
+			percent = (value != null ? value : 0);
+		}
+		else percent = 0;
 		super.update(elapsed);
 	}
 	
