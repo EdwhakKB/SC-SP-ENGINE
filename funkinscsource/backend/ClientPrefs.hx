@@ -177,7 +177,7 @@ class ClientPrefs {
 		'debug_2'		=> [EIGHT],
 		'debug_3'		=> [SIX],
 
-		'space'		=> [SPACE]
+		'dodge_key'		=> [SPACE]
 	];
 	public static var gamepadBinds:Map<String, Array<FlxGamepadInputID>> = [
 		'note_up'		=> [DPAD_UP, Y],
