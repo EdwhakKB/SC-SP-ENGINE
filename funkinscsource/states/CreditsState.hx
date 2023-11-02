@@ -70,9 +70,10 @@ class CreditsState extends MusicBeatState
 			['evilsk8r',			'evilsk8r',			"Artist of Friday Night Funkin'",								 'https://twitter.com/evilsk8r',		 '5ABD4B'],
 			['kawaisprite',			'kawaisprite',		"Composer of Friday Night Funkin'",								 'https://twitter.com/kawaisprite',		 '378FC7'],
 			[''],
-			['Extra stuff for SCE'],
+			['Extra SCE Stuff'],
 			['Blantados',			'blantados',		"Progammer of BETADCIU and code used from this engine to SCE!",	 'https://github.com/Blantados',		 '64B3FE'],
-			['Bolo Vevo',			'', 				"Most code for things gotten from this man's kade!",			 'https://github.com/BoloVEVO',			 'C7B1AB']
+			['Bolo Vevo',			'', 				"Most code for things gotten from this man's kade!",			 'https://github.com/BoloVEVO',			 'C7B1AB'],
+			['Itz-Miles',			'miles', 			"Code for parallaxLT!",			 						 'https://github.com/Itz-Miles',		 'CC875E']
 		];
 		
 		for(i in defaultList) {

@@ -97,8 +97,8 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		option.changeValue = 0.1;
 		addOption(option);
 
-		var option:Option = new Option('Hitsound On What',
-			'notes does a sound but when you hit them on note or key?"',
+		var option:Option = new Option('Hitsound on Strum or Key?',
+			'if checked, note and keys do a hitsound when pressed!, else just when notes are hit!',
 			'strumHit',
 			'bool');
 		addOption(option);

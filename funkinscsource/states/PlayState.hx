@@ -422,9 +422,6 @@ class PlayState extends MusicBeatState
 
 	private var triggeredAlready:Bool = false;
 
-	//Make sounds public for playbackRate
-	public var daHitSound:FlxSound;
-
 	//Edwhak muchas gracias!
 	public static var forceMiddleScroll:Bool = false; //yeah
 	public static var forceRightScroll:Bool = false; //so modcharts that NEED rightscroll will be forced (mainly for player vs enemy classic stuff like bf vs someone)
@@ -1054,7 +1051,6 @@ class PlayState extends MusicBeatState
 			eventNotes.sort(sortByTime);
 		}
 
-
 		// SONG SPECIFIC SCRIPTS
 		#if LUA_ALLOWED
 		var foldersToCheck:Array<String> = Mods.directoriesWithFile(Paths.getSharedPath(), 'data/songs/' + songName + '/');
@@ -1295,7 +1291,6 @@ class PlayState extends MusicBeatState
 		{
 			if(vocals != null) vocals.pitch = value;
 			if(inst != null) inst.pitch = value;
-			if(daHitSound != null) daHitSound.pitch = value;
 
 			var ratio:Float = playbackRate / value; //funny word huh
 			if(ratio != 1)
@@ -4803,7 +4798,7 @@ class PlayState extends MusicBeatState
 		if (cpuControlled)
 			noteDiff = 0;
 
-		var placement:Float = ClientPrefs.data.gameCombo ? FlxG.width * 0.52 : FlxG.width * 0.48;
+		var placement:Float = ClientPrefs.data.gameCombo ? FlxG.width * 0.55 : FlxG.width * 0.48;
 		var rating:FlxSprite = new FlxSprite();
 		var score:Float = 0;
 
@@ -4908,8 +4903,8 @@ class PlayState extends MusicBeatState
 		rating.velocity.x -= FlxG.random.int(0, 10) * playbackRate;
 		rating.visible = (!ClientPrefs.data.hideHud && showRating);
 		rating.alpha = ratingsAlpha;
-		rating.x += ClientPrefs.data.comboOffset[0] + offsetX;
-		rating.y -= ClientPrefs.data.comboOffset[1] + offsetY;
+		rating.x += ClientPrefs.data.comboOffset[0];
+		rating.y -= ClientPrefs.data.comboOffset[1];
 		rating.antialiasing = antialias;
 
 		var comboSpr:FlxSprite = new FlxSprite().loadGraphic(Paths.image(uiPrefix + 'combo' + uiSuffix));
@@ -4918,8 +4913,8 @@ class PlayState extends MusicBeatState
 		comboSpr.acceleration.y = FlxG.random.int(200, 300) * playbackRate * playbackRate;
 		comboSpr.velocity.y -= FlxG.random.int(140, 160) * playbackRate;
 		comboSpr.visible = (!ClientPrefs.data.hideHud && showCombo);
-		comboSpr.x += ClientPrefs.data.comboOffset[0] + offsetX;
-		comboSpr.y -= ClientPrefs.data.comboOffset[1] - offsetY;
+		comboSpr.x += ClientPrefs.data.comboOffset[0];
+		comboSpr.y -= ClientPrefs.data.comboOffset[1];
 		comboSpr.antialiasing = antialias;
 		comboSpr.y += 60 + offsetY;
 		comboSpr.velocity.x += FlxG.random.int(1, 10) * playbackRate;
@@ -4962,8 +4957,8 @@ class PlayState extends MusicBeatState
 		{
 			var numScore:FlxSprite = new FlxSprite().loadGraphic(Paths.image(uiPrefix + 'num' + Std.int(i) + uiSuffix));
 			numScore.screenCenter();
-			numScore.x = placement + (43 * daLoop) - 90 + ClientPrefs.data.comboOffset[2] + offsetX;
-			numScore.y += 80 - ClientPrefs.data.comboOffset[3] - offsetY;
+			numScore.x = placement + (43 * daLoop) - 90 + offsetX + ClientPrefs.data.comboOffset[2];
+			numScore.y += 80 - offsetY - ClientPrefs.data.comboOffset[3];
 
 			if (!uiPrefix.contains('pixel') || !uiSuffix.contains('pixel')) numScore.setGraphicSize(Std.int(numScore.width * 0.5));
 			else numScore.setGraphicSize(Std.int(numScore.width * 6));
@@ -5075,8 +5070,8 @@ class PlayState extends MusicBeatState
 		rating.velocity.y -= FlxG.random.int(140, 175) * playbackRate;
 		rating.velocity.x -= FlxG.random.int(0, 10) * playbackRate;
 		rating.visible = (!ClientPrefs.data.hideHud && showRating);
-		rating.x += ClientPrefs.data.comboOffset[0] + offsetX;
-		rating.y -= ClientPrefs.data.comboOffset[1] + offsetY;
+		rating.x += ClientPrefs.data.comboOffset[0];
+		rating.y -= ClientPrefs.data.comboOffset[1];
 		rating.antialiasing = antialias;
 		rating.alpha = ratingsAlpha;
 
@@ -5086,8 +5081,8 @@ class PlayState extends MusicBeatState
 		comboSpr.acceleration.y = FlxG.random.int(200, 300) * playbackRate * playbackRate;
 		comboSpr.velocity.y -= FlxG.random.int(140, 160) * playbackRate;
 		comboSpr.visible = (!ClientPrefs.data.hideHud && showCombo);
-		comboSpr.x += ClientPrefs.data.comboOffset[0] + offsetX;
-		comboSpr.y -= ClientPrefs.data.comboOffset[1] + offsetY;
+		comboSpr.x += ClientPrefs.data.comboOffset[0];
+		comboSpr.y -= ClientPrefs.data.comboOffset[1];
 		comboSpr.antialiasing = antialias;
 		comboSpr.y += 60 + offsetY;
 		comboSpr.velocity.x += FlxG.random.int(1, 10) * playbackRate;
@@ -5127,8 +5122,8 @@ class PlayState extends MusicBeatState
 		{
 			var numScore:FlxSprite = new FlxSprite().loadGraphic(Paths.image(uiPrefix + ('num' + Std.int(i)) + uiSuffix));
 			numScore.screenCenter();
-			numScore.x = placement + (43 * daLoop) - 90 + ClientPrefs.data.comboOffset[2] + offsetX;
-			numScore.y += 80 - ClientPrefs.data.comboOffset[3] - offsetY;
+			numScore.x = placement + (43 * daLoop) - 90 + offsetX + ClientPrefs.data.comboOffset[2];
+			numScore.y += 80 - offsetY - ClientPrefs.data.comboOffset[3];
 
 			if (!uiPrefix.contains('pixel') || !uiSuffix.contains('pixel')) numScore.setGraphicSize(Std.int(numScore.width * 0.5));
 			else numScore.setGraphicSize(Std.int(numScore.width * daPixelZoom));
@@ -5199,15 +5194,8 @@ class PlayState extends MusicBeatState
 		if (!cpuControlled && startedCountdown && !paused && key > -1)
 		{
 			if (ClientPrefs.data.hitsoundVolume != 0 && ClientPrefs.data.hitSounds != "None")
-			{
 				if (ClientPrefs.data.strumHit)
-				{
-					daHitSound = new FlxSound().loadEmbedded(Paths.sound('hitsounds/${ClientPrefs.data.hitSounds}'));
-					daHitSound.volume = ClientPrefs.data.hitsoundVolume;
-					daHitSound.pitch = playbackRate;
-					daHitSound.play();
-				}
-			}
+					FlxG.sound.play(Paths.sound('hitsounds/${ClientPrefs.data.hitSounds}'), ClientPrefs.data.hitsoundVolume).pitch = playbackRate;
 		}
 
 		// more accurate hit time for the ratings?
@@ -5782,17 +5770,10 @@ class PlayState extends MusicBeatState
 
 		if (!note.isSustainNote)
 		{
+			var hitSound:String = note.hitsound != '' ? 'hitsounds/${ClientPrefs.data.hitSounds}' : '';
 			if (ClientPrefs.data.hitsoundVolume != 0 && !note.hitsoundDisabled && ClientPrefs.data.hitSounds != "None")
-			{
 				if (!ClientPrefs.data.strumHit)
-				{
-					var hitSound:String = note.hitsound != '' ? 'hitsounds/${ClientPrefs.data.hitSounds}' : '';
-					daHitSound = new FlxSound().loadEmbedded(Paths.sound(hitSound));
-					daHitSound.volume = ClientPrefs.data.hitsoundVolume;
-					daHitSound.pitch = playbackRate;
-					daHitSound.play();
-				}
-			}
+					FlxG.sound.play(Paths.sound(hitSound), ClientPrefs.data.hitsoundVolume).pitch = playbackRate;
 
 			combo++;
 			if(combo > 9999) combo = 9999;

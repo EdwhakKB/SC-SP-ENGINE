@@ -249,7 +249,6 @@ class Main extends Sprite
 	{
 		var result:Bool = false;
 		if (GJKeys.key != '' && GJKeys.id != 0) result = true;
-		Debug.logInfo('exists Gamejolt key and id?: ' + result);
 		return result;
 	}
 

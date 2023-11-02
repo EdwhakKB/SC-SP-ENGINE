@@ -121,7 +121,7 @@ class NoteSplash extends FlxSkewedSprite
 		rgbShader.containsPixel = containedPixelTexture;
 
 		if(note != null) antialiasing = note.noteSplashData.antialiasing;
-		if(texture.contains('pixel') || !ClientPrefs.data.antialiasing) antialiasing = false;
+		if(texture.contains('pixel') || _textureLoaded.contains('pixel') || !ClientPrefs.data.antialiasing) antialiasing = false;
 
 		_textureLoaded = texture;
 		offset.set(10, 10);
