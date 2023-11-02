@@ -218,20 +218,20 @@ class ScriptHandler #if HAXE_EXTENSION extends tea.SScript #end
 
 	#if HAXE_EXTENSION
 	#if (SScript > "6.1.80" || SScript != "6.1.80")
-	override public function kill()
-	{
-		interp = null;
-		scriptFile = null;
-
-		super.kill();
-	}
-	#else
 	override public function destroy()
 	{
 		interp = null;
 		scriptFile = null;
 
 		super.destroy();
+	}
+	#else
+	override public function kill()
+	{
+		interp = null;
+		scriptFile = null;
+
+		super.kill();
 	}
 	#end
 
