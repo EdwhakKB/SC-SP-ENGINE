@@ -61,5 +61,8 @@ import modcharting.*;
 import psychlua.CustomFlxColor;
 import objects.CharacterOffsets;
 
+import gamejolt.GJKeys;
+import gamejolt.GameJoltAPI;
+
 using StringTools;
 #end

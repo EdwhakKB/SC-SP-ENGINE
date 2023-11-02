@@ -82,8 +82,6 @@ import shaders.Shaders.ShaderEffectNew as ShaderEffectNew;
 import shaders.Shaders;
 import shaders.FNFShader;
 
-import gamejolt.GameJoltAPI;
-
 import backend.ScriptHandler;
 import backend.HelperFunctions;
 
@@ -4533,7 +4531,6 @@ class PlayState extends MusicBeatState
 				Highscore.saveScore(SONG.songId, songScore, storyDifficulty, percent);
 				Highscore.saveCombo(SONG.songId, ratingFC, storyDifficulty);
 				Highscore.saveLetter(SONG.songId, comboLetterRank, storyDifficulty);
-				GameJoltAPI.addScore(songScore, 834581, SONG.songId + ' Score');
 			}
 			#end
 			playbackRate = 1;

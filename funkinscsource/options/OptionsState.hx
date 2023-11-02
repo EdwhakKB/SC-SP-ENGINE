@@ -12,7 +12,6 @@ class OptionsState extends MusicBeatState
 	private static var curSelected:Int = 0;
 	public static var menuBG:FlxSprite;
 	public static var onPlayState:Bool = false;
-
 	function openSelectedSubstate(label:String) {
 		switch(label) {
 			case 'Note Colors':
@@ -61,6 +60,8 @@ class OptionsState extends MusicBeatState
 
 		grpOptions = new FlxTypedGroup<Alphabet>();
 		add(grpOptions);
+
+		if (!Main.checkGJKeysAndId()) options = ['Note Colors', 'Controls', 'Adjust Delay and Combo', 'Graphics', 'Visuals and UI', 'Gameplay', 'Misc'];
 
 		for (i in 0...options.length)
 		{

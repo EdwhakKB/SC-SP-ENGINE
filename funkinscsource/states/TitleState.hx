@@ -21,7 +21,6 @@ import states.StoryMenuState;
 import states.OutdatedState;
 import states.MainMenuState;
 
-import gamejolt.GameJoltAPI;
 import sys.thread.Mutex;
 import flixel.graphics.FlxGraphic;
 import openfl.display.FPS;
@@ -98,8 +97,11 @@ class TitleState extends MusicBeatState
 		if (internetConnection)
 			getBuildVer();
 
-		GameJoltAPI.connect();
-		GameJoltAPI.authDaUser(ClientPrefs.data.gjUser, ClientPrefs.data.gjToken);
+		if (Main.checkGJKeysAndId())
+		{
+			GameJoltAPI.connect();
+			GameJoltAPI.authDaUser(ClientPrefs.data.gjUser, ClientPrefs.data.gjToken);
+		}
 
 		Highscore.load();
 		

@@ -21,8 +21,6 @@ import flixel.FlxCamera;
 
 import objects.HitGraph;
 
-import gamejolt.GameJoltAPI;
-
 import objects.Note;
 
 using StringTools;
@@ -220,8 +218,6 @@ class ResultsScreenKade extends backend.MusicBeatSubstate
 			Highscore.saveScore(PlayState.SONG.songId, game.songScore, PlayState.storyDifficulty, percent);
 			Highscore.saveCombo(PlayState.SONG.songId, game.ratingFC, PlayState.storyDifficulty);
 			Highscore.saveLetter(PlayState.SONG.songId, game.comboLetterRank, PlayState.storyDifficulty);
-
-			GameJoltAPI.addScore(game.songScore, 834581, PlayState.SONG.songId + ' Score');
 		}
 
 		mean = HelperFunctions.truncateFloat(mean / game.playerNotes, 2);

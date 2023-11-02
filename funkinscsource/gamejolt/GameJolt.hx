@@ -28,8 +28,6 @@ import openfl.Lib;
 import flixel.FlxG;
 import openfl.display.Sprite;
 
-import gamejolt.GameJoltAPI as GameJoltAPI;
-
 import flixel.addons.ui.FlxInputText;
 import flixel.addons.ui.FlxButtonPlus;
 

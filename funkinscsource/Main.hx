@@ -24,7 +24,8 @@ import openfl.events.UncaughtErrorEvent;
 import haxe.CallStack;
 import haxe.io.Path;
 #end
-import gamejolt.GameJolt.GJToastManager as GJToastManager;
+import gamejolt.GameJolt.GJToastManager;
+import gamejolt.*;
 import flixel.FlxG;
 import flixel.system.scaleModes.RatioScaleMode;
 import lime.app.Application;
@@ -242,6 +243,14 @@ class Main extends Sprite
 			sprite.__cacheBitmapColorTransform = null;
 			#end
 		}
+	}
+
+	public static function checkGJKeysAndId():Bool
+	{
+		var result:Bool = false;
+		if (GJKeys.key != '' && GJKeys.id != 0) result = true;
+		Debug.logInfo('exists Gamejolt key and id?: ' + result);
+		return result;
 	}
 
 	// Code was entirely made by sqirra-rng for their fnf engine named "Izzy Engine", big props to them!!!

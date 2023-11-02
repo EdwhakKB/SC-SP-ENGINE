@@ -28,8 +28,8 @@ import openfl.Lib;
 import flixel.FlxG;
 import openfl.display.Sprite;
 
-import gamejolt.GameJolt.GameJoltInfo as GameJoltInfo;
-import gamejolt.GameJolt.GameJoltLogin as GameJoltLogin;
+import gamejolt.GameJolt.GameJoltInfo;
+import gamejolt.GameJolt.GameJoltLogin;
 import lime.app.Application;
 
 using StringTools;
