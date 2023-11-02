@@ -973,16 +973,6 @@ class Stage extends MusicBeatState
 		
 				if (FlxG.random.bool(10) && fastCarCanDrive)
 					fastCarDrive();
-			case 'limostarcatcher':
-				if (FlxG.random.bool(8))
-					swagBacks['space'].animation.play('scroll2');
-				else if (FlxG.random.bool(4))
-					swagBacks['space'].animation.play('scroll1');
-				else if (FlxG.random.bool(2))
-					swagBacks['space'].animation.play('scroll0');
-				
-				if (FlxG.random.bool(10) && fastCarCanDrive)
-					fastCarDrive();
 			case 'school':
 				if(bgGirls != null) bgGirls.dance();
 			case 'mall' | 'tank':
@@ -1542,10 +1532,7 @@ class Stage extends MusicBeatState
 	function fastCarDrive()
 	{
 		//Debug.logTrace('Car drive');
-		if (curStage == 'limo')
-			FlxG.sound.play(Paths.soundRandom('carPass', 0, 1), 0.7);
-		else if (curStage == 'limostarcatcher')
-			FlxG.sound.play(Paths.soundRandom('starcatcher/carPass', 0, 1), 0.7);
+		FlxG.sound.play(Paths.soundRandom('carPass', 0, 1), 0.7);
 
 		swagBacks['fastCar'].velocity.x = (FlxG.random.int(170, 220) / FlxG.elapsed) * 3;
 		fastCarCanDrive = false;
