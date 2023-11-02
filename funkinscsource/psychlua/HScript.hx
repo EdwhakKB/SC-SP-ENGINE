@@ -41,7 +41,11 @@ class HScript extends SScript
 				var e:String = hs.parsingException.message;
 				if (!e.contains(hs.origin)) e = '${hs.origin}: $e';
 				FunkinLua.luaTrace('ERROR ON LOADING - $e', FlxColor.RED);
+				#if (SScript > "6.1.80" || SScript != "6.1.80")
+				hs.destroy();
+				#else
 				hs.kill();
+				#end
 			}
 		}
 	}
@@ -177,7 +181,7 @@ class HScript extends SScript
 		set('Function_StopAll', FunkinLua.Function_StopAll);
 
 		if (Stage.instance != null){
-			set('hideLastBG', Stage.instance.hideLastBG);
+			set('hideLastBG', function(hid:Bool) Stage.instance.hideLastBG = hid;);
 			set('layerInFront', function(layer:Int = 0, id:Dynamic) Stage.instance.layInFront[layer].push(id));
 			set('toAdd', function(id:Dynamic) Stage.instance.toAdd.push(id));
 			set('setSwagBack', function(id:String, sprite:Dynamic) Stage.instance.swagBacks.set(id, sprite));
