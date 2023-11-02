@@ -2,7 +2,7 @@ package;
 
 import backend.MusicBeatState;
 import states.TitleState;
-#if cpp
+#if (cpp && windows)
 import cpp.CPPInterface;
 #end
 import openfl.display.FPS;

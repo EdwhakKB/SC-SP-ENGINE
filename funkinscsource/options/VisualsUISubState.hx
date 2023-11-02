@@ -10,7 +10,7 @@ class VisualsUISubState extends BaseOptionsMenu
 	var notes:FlxTypedGroup<StrumArrow>;
 	var notesTween:Array<FlxTween> = [];
 	var noteY:Float = 90;
-	var stringedNote:String = (OptionsState.onPlayState ? (PlayState.isPixelStage ? 'pixelUI/noteSkins/NOTE_assets' + Note.getNoteSkinPostfix() : 'noteSkins/NOTE_assets' + Note.getNoteSkinPostfix()) : 'noteSkins/NOTE_assets' + Note.getNoteSkinPostfix());
+	var stringedNote:String = '';
 	public function new()
 	{
 		title = 'Visuals and UI';
@@ -20,6 +20,7 @@ class VisualsUISubState extends BaseOptionsMenu
 		notes = new FlxTypedGroup<StrumArrow>();
 		for (i in 0...Note.colArray.length)
 		{
+			stringedNote = (OptionsState.onPlayState ? (PlayState.isPixelStage ? 'pixelUI/noteSkins/NOTE_assets' + Note.getNoteSkinPostfix() : 'noteSkins/NOTE_assets' + Note.getNoteSkinPostfix()) : 'noteSkins/NOTE_assets' + Note.getNoteSkinPostfix());
 			var note:StrumArrow = new StrumArrow((ClientPrefs.data.middleScroll ? 370 + (560 / Note.colArray.length) * i : 620 + (560 / Note.colArray.length) * i), !ClientPrefs.data.downScroll ? -200 : 760, i, 0, stringedNote);
 			note.centerOffsets();
 			note.centerOrigin();
@@ -272,7 +273,11 @@ class VisualsUISubState extends BaseOptionsMenu
 
 	function changeNoteSkin(note:StrumArrow)
 	{
-		note.reloadNote(stringedNote);
+		var skin:String = Note.defaultNoteSkin;
+		var customSkin:String = skin + Note.getNoteSkinPostfix();
+		if(Paths.fileExists('images/$customSkin.png', IMAGE)) skin = customSkin;
+
+		note.reloadNote(skin);
 		note.playAnim('static');
 	}
 
