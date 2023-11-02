@@ -73,14 +73,14 @@
       "name": "tentools",
       "type": "git",
       "dir": null,
-      "ref": "master",
+      "ref": "main",
       "url": "https://github.com/TentaRJ/tentools.git"
     },
     {
       "name": "systools",
       "type": "git",
       "dir": null,
-      "ref": "master",
+      "ref": "main",
       "url": "https://github.com/haya3218/systools"
     }
   ]
