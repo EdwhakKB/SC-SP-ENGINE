@@ -844,10 +844,8 @@ class FreeplayState extends MusicBeatState
 
 	function updateTimeText()
 	{
-		if (PlayingPlayStateSong)
-			songLength.text = 'SONG LENGTH: ' + (FlxStringUtil.formatTime(FlxMath.roundDecimal(Conductor.songPosition / 1000 / rate, 2), false) + ' / ' + FlxStringUtil.formatTime(FlxMath.roundDecimal(inst.length / 1000 / rate, 2), false));
-		else
-			songLength.text = '';
+		if (PlayingPlayStateSong) if (inst != null && !paused && inst.time > 0) songLength.text = 'SONG LENGTH: ' + (FlxStringUtil.formatTime(FlxMath.roundDecimal(Conductor.songPosition / 1000 / rate, 2), false) + ' / ' + FlxStringUtil.formatTime(FlxMath.roundDecimal(inst.length / 1000 / rate, 2), false));
+		else songLength.text = '';
 	}
 
 	var paused:Bool = false;
