@@ -6785,6 +6785,7 @@ class PlayState extends MusicBeatState
 		remove(CacheChar);
 	}
 
+	#if (!flash && sys)
 	public var currentShaders:Array<FlxRuntimeShader> = [];
 
 	private function setShaders(obj:Dynamic, shaders:Array<FNFShader>)
@@ -6836,7 +6837,6 @@ class PlayState extends MusicBeatState
 		#end
 	}
 
-	#if (!flash && sys)
 	public var runtimeShaders:Map<String, Array<String>> = new Map<String, Array<String>>();
 	public function createRuntimeShader(name:String):FlxRuntimeShader
 	{

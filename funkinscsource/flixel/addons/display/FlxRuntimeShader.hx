@@ -19,7 +19,7 @@ import shaders.FlxFixedShader;
 
 #if (flixel_addons >= "3.2.1")
 #if (FLX_DRAW_QUADS && !flash)
-using StringToos;
+using StringTools;
 #end
 #end
 

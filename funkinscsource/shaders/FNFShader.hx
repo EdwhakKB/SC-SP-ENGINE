@@ -1,8 +1,10 @@
 package shaders;
 
+#if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
+#end
 
-class FNFShader extends FlxRuntimeShader
+class FNFShader #if (!flash && sys) extends FlxRuntimeShader #end
 {
 	public var name = null;
 
