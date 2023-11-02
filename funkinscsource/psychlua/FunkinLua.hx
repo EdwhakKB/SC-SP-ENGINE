@@ -1435,8 +1435,7 @@ class FunkinLua {
 				}
 				else
 				{
-					if(obj.anim != null) obj.anim.play(name, forced, reverse, startFrame); //FlxAnimate
-					else obj.animation.play(name, forced, reverse, startFrame);
+					obj.animation.play(name, forced, reverse, startFrame);
 					return true;
 				}
 				return false;
@@ -2191,7 +2190,6 @@ class FunkinLua {
 			#if desktop DiscordClient.addLuaCallbacks(this); #end
 			#if SScript HScript.implement(this); #end
 			#if ACHIEVEMENTS_ALLOWED Achievements.addLuaCallbacks(this); #end
-			#if (flxanimate && shadowMarioFlxAnimate == "0.1") FlxAnimateFunctions.implement(this); #end
 			ReflectionFunctions.implement(this);
 			TextFunctions.implement(this);
 			ExtraFunctions.implement(this);

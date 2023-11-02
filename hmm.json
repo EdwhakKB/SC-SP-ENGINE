@@ -80,13 +80,6 @@
       "url": "https://github.com/Aidan63/linc_discord-rpc"
     },
     {
-      "name": "flxanimate",
-      "type": "git",
-      "dir": null,
-      "ref": "dev",
-      "url": "https://github.com/ShadowMario/flxanimate.git"
-    },
-    {
       "name": "tentools",
       "type": "git",
       "dir": null,

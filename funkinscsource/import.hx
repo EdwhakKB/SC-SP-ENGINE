@@ -36,11 +36,6 @@ import states.LoadingState;
 
 import flixel.addons.effects.FlxSkewedSprite;
 
-
-#if (flxanimate && shadowMarioFlxAnimate == "0.1")
-import flxanimate.*;
-#end
-
 //Flixel
 #if (flixel >= "5.3.0")
 import flixel.sound.FlxSound;
