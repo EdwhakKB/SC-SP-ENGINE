@@ -36,8 +36,8 @@ jobs:
           sudo apt-get install libvlccore-dev
           haxelib setup ~/haxelib
           haxelib install hxcpp > /dev/null --quiet
-          haxelib run lime build linux systools > /dev/null --quiet
           haxe -cp ./setup -D analyzer-optimize -main Main --interp
+          haxelib run lime build linux systools > /dev/null --quiet
       - name: Create Version Tag
         run: echo "${{github.run_id}}" > VERSION
       - name: Compile
@@ -62,8 +62,8 @@ jobs:
         run: |
           haxelib setup C:/haxelib
           haxelib install hxcpp > /dev/null --quiet
-          haxelib run lime build windows systools > /dev/null --quiet
           haxe -cp ./setup -D analyzer-optimize -main Main --interp
+          haxelib run lime build windows systools > /dev/null --quiet
         shell: cmd
       - name: Create Version Tag
         run: echo "${{github.run_id}}" > VERSION
@@ -89,8 +89,8 @@ jobs:
         run: |
           haxelib setup ~/haxelib
           haxelib install hxcpp > /dev/null --quiet
-          haxelib run lime build mac systools > /dev/null --quiet
           haxe -cp ./setup -D analyzer-optimize -main Main --interp
+          haxelib run lime build mac systools > /dev/null --quiet
       - name: Create Version Tag
         run: echo "${{github.run_id}}" > VERSION
       - name: Compile
