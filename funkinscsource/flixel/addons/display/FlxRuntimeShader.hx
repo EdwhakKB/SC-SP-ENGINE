@@ -8,9 +8,9 @@ import flixel.graphics.tile.FlxGraphicsShader;
 import lime.utils.Float32Array;
 #end
 #else
-import flixel.system.FlxAssets.FlxShader;
 import lime.utils.Float32Array;
 #end
+import flixel.system.FlxAssets.FlxShader;
 import openfl.display.BitmapData;
 import openfl.display.ShaderInput;
 import openfl.display.ShaderParameter;
