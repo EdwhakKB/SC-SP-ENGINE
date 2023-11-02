@@ -56,6 +56,11 @@
       "version": "0.0.0"
     },
     {
+      "name": "hscript",
+      "type": "haxelib",
+      "version": null
+    },
+    {
       "name": "hxcpp-debug-server",
       "type": "haxelib",
       "version": null
