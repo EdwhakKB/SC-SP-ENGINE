@@ -340,6 +340,15 @@ class HScript extends SScript
 		return c;
 	}
 
+	#if (SScript > "6.1.80" || SScript != "6.1.80")
+	override public function destroy()
+	{
+		origin = null;
+		parentLua = null;
+
+		super.destroy();
+	}
+	#else
 	override public function kill()
 	{
 		origin = null;
@@ -347,6 +356,7 @@ class HScript extends SScript
 
 		super.kill();
 	}
+	#end
 }
 #else
 class HScript extends SScript

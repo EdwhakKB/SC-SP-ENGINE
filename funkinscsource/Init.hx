@@ -52,7 +52,7 @@ class Init extends MusicBeatState
 		DiscordClient.start();
 		#end
 		
-		#if cpp
+		#if (cpp && windows)
 		CPPInterface.darkMode();
 		#end
 
