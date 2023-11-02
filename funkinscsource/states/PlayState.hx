@@ -6010,10 +6010,10 @@ class PlayState extends MusicBeatState
 			if(script != null)
 			{
 				script.call('onDestroy');
-				#if (SScript >= "6.1.80")
-				script.kill();
-				#else
+				#if (SScript > "6.1.80" || SScript != "6.1.80")
 				script.destroy();
+				#else
+				script.kill();
 				#end
 			}
 		while (hscriptArray.length > 0)
@@ -6363,16 +6363,7 @@ class PlayState extends MusicBeatState
 		{
 			var times:Float = Date.now().getTime();
 			var newScript:HScript = new HScript(null, file);
-			#if (SScript >= "6.1.80")
-			if(newScript.parsingException != null)
-			{
-				var e = newScript.parsingException.message;
-				if (!e.contains(newScript.origin)) e = '${newScript.origin}: $e';
-				HScript.hscriptTrace('ERROR ON LOADING - $e', FlxColor.RED);
-				newScript.kill();
-				return;
-			}
-			#else
+			#if (SScript > "6.1.80" || SScript != "6.1.80")
 			@:privateAccess
 			if(newScript.parsingExceptions != null && newScript.parsingExceptions.length > 0)
 			{
@@ -6381,6 +6372,15 @@ class PlayState extends MusicBeatState
 					if(e != null)
 						addTextToDebug('ERROR ON LOADING ($file): ${e.message.substr(0, e.message.indexOf('\n'))}', FlxColor.RED);
 				newScript.destroy();
+				return;
+			}
+			#else
+			if(newScript.parsingException != null)
+			{
+				var e = newScript.parsingException.message;
+				if (!e.contains(newScript.origin)) e = '${newScript.origin}: $e';
+				HScript.hscriptTrace('ERROR ON LOADING - $e', FlxColor.RED);
+				newScript.kill();
 				return;
 			}
 			#end
@@ -6392,20 +6392,20 @@ class PlayState extends MusicBeatState
 				if(!callValue.succeeded)
 				{
 					for (e in callValue.exceptions)
-						#if (SScript >= "6.1.80")
+						#if (SScript > "6.1.80" || SScript != "6.1.80")
+						if (e != null)
+							addTextToDebug('ERROR ($file: onCreate) - ${e.message.substr(0, e.message.indexOf('\n'))}', FlxColor.RED);
+						#else
 						if (e != null) {
 							var e:String = e.toString();
 							if (!e.contains(newScript.origin)) e = '${newScript.origin}: $e';
 							HScript.hscriptTrace('ERROR (onCreate) - $e', FlxColor.RED);
 						}
-						#else
-						if (e != null)
-							addTextToDebug('ERROR ($file: onCreate) - ${e.message.substr(0, e.message.indexOf('\n'))}', FlxColor.RED);
 						#end
-					#if (SScript >= "6.1.80")
-					newScript.kill();
-					#else
+					#if (SScript > "6.1.80" || SScript != "6.1.80")
 					newScript.destroy();
+					#else
+					newScript.kill();
 					#end
 					hscriptArray.remove(newScript);
 					return;
@@ -6427,10 +6427,10 @@ class PlayState extends MusicBeatState
 
 			if(newScript != null)
 			{
-				#if (SScript >= "6.1.80")
-				newScript.kill();
-				#else
+				#if (SScript > "6.1.80" || SScript != "6.1.80")
 				newScript.destroy();
+				#else
+				newScript.kill();
 				#end
 				hscriptArray.remove(newScript);
 			}

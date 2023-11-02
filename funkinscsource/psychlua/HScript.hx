@@ -30,7 +30,11 @@ class HScript extends SScript
 		var hs:HScript = try parent.hscript catch (e) null;
 		if(hs != null)
 		{
+			#if (SScript > "6.1.80")
+			hs.doString(code);
+			#else
 			hs.doScript(code);
+			#end
 			@:privateAccess
 			if(hs.parsingException != null)
 			{
@@ -77,7 +81,6 @@ class HScript extends SScript
 		setClass(flixel.util.FlxTimer);
 		setClass(flixel.tweens.FlxTween);
 		setClass(flixel.tweens.FlxEase);
-		setClass(backend.Stage.Countdown);
 		setClass(PlayState);
 		setClass(Paths);
 		setClass(Conductor);

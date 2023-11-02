@@ -80,7 +80,6 @@ class ScriptHandler #if HAXE_EXTENSION extends tea.SScript #end
 		setClass(FlxCamera);
 		setClass(FlxSprite);
 		setClass(FlxText);
-		setClass(FlxTextBorderStyle);
 		#if (!flash && sys)
 		setClass(flixel.addons.display.FlxRuntimeShader);
 		#end
@@ -106,7 +105,6 @@ class ScriptHandler #if HAXE_EXTENSION extends tea.SScript #end
 		setClass(FlxBar);
 		setClass(FlxBackdrop);
 		setClass(StageSizeScaleMode);
-		setClass(FlxBarFillDirection);
 		#if (flixel < "5.0.0")
 		setClass(FlxAxes);
 		setClass(FlxPoint);
@@ -134,7 +132,7 @@ class ScriptHandler #if HAXE_EXTENSION extends tea.SScript #end
 		setClass(backend.Controls);
 		setClass(backend.CoolUtil);
 		setClass(backend.Conductor);
-		setClass(states.PlayState);
+		setClass(PlayState);
 		setClass(states.PlayState.instance);
 		setClass(Main);
 		setClass(objects.Note);
@@ -219,6 +217,7 @@ class ScriptHandler #if HAXE_EXTENSION extends tea.SScript #end
 	}
 
 	#if HAXE_EXTENSION
+	#if (SScript > "6.1.80" || SScript != "6.1.80")
 	override public function kill()
 	{
 		interp = null;
@@ -226,6 +225,15 @@ class ScriptHandler #if HAXE_EXTENSION extends tea.SScript #end
 
 		super.kill();
 	}
+	#else
+	override public function destroy()
+	{
+		interp = null;
+		scriptFile = null;
+
+		super.destroy();
+	}
+	#end
 
 	public function varExists(key:String):Bool
 	{
