@@ -773,12 +773,6 @@ class Stage extends MusicBeatState
 	{
 		super.update(elapsed);
 
-		if (isCustomStage && !preloading && isLuaStage)
-		{
-			setOnLuas('curDecStep', curDecStep);
-			setOnLuas('curDecBeat', curDecBeat);
-		}
-
 		switch (curStage)
 		{
 			case 'philly':
@@ -888,12 +882,6 @@ class Stage extends MusicBeatState
 	override function stepHit()
 	{
 		super.stepHit();
-		if (isCustomStage && !preloading && isLuaStage)
-		{
-			setOnLuas('curStep', curStep);
-			callOnLuas('stepHit', [curStep]);
-			callOnLuas('onStepHit', [curStep]);
-		}
 
 		var array = slowBacks[curStep];
 		if (array != null && array.length > 0)
@@ -979,23 +967,11 @@ class Stage extends MusicBeatState
 				everyoneDance();
 		}
 		super.beatHit();
-		if (isCustomStage && !preloading && isLuaStage)
-		{
-			setOnLuas('curBeat', curBeat);
-			callOnLuas('beatHit', [curBeat]);
-			callOnLuas('onBeatHit', [curBeat]);
-		}
 	}
 
 	override function sectionHit()
 	{
 		super.sectionHit();
-		if (isCustomStage && !preloading && isLuaStage)
-		{
-			setOnLuas('curSection', curSection);
-			callOnLuas('sectionHit', [curSection]);
-			callOnLuas('onSectionHit', [curSection]);
-		}
 	}
 
 	public var rainSound:FlxSound;

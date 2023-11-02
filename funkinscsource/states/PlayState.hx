@@ -6433,7 +6433,7 @@ class PlayState extends MusicBeatState
 	public function callOnLuas(funcToCall:String, args:Array<Dynamic> = null, ignoreStops = false, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
 		var returnVal:Dynamic = FunkinLua.Function_Continue;
 		#if LUA_ALLOWED
-		var stageExclusions:Array<String> = ["onCreatePost", "onUpdate", "onStepHit", "onBeatHit", "onSectionHit", "sectionHit", "beatHit", "stepHit"];
+		var stageExclusions:Array<String> = ["onCreatePost", "onUpdate"];
 
 		if (Stage != null && Stage.isCustomStage && Stage.isLuaStage && !(stageExclusions.contains(funcToCall)))
 			Stage.callOnLuas(funcToCall, args);
@@ -6524,9 +6524,8 @@ class PlayState extends MusicBeatState
 
 	public function setOnLuas(variable:String, arg:Dynamic, exclusions:Array<String> = null) {
 		#if LUA_ALLOWED
-		var stageExclusions:Array<String> = ["curBeat", "curStep", "curSection", "curDecStep", "curDecBeat"];
 
-		if (Stage != null && Stage.isCustomStage && Stage.isLuaStage && !(stageExclusions.contains(variable)))
+		if (Stage != null && Stage.isCustomStage && Stage.isLuaStage)
 			Stage.setOnLuas(variable, arg);	
 
 		if(exclusions == null) exclusions = [];

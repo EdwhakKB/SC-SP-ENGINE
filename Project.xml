@@ -128,6 +128,7 @@
 	<haxelib name="flixel-addons" />
 	<haxelib name="SScript" if="HSCRIPT_ALLOWED"/>
 
+	<haxelib name="flxanimate"/>
 	<haxelib name='tjson'/>
 
 	<haxelib name="hxtelemetry" if="telemetry"/>

@@ -1435,7 +1435,8 @@ class FunkinLua {
 				}
 				else
 				{
-					obj.animation.play(name, forced, reverse, startFrame);
+					if(obj.anim != null) obj.anim.play(name, forced, reverse, startFrame); //FlxAnimate
+					else obj.animation.play(name, forced, reverse, startFrame);
 					return true;
 				}
 				return false;
@@ -1548,24 +1549,29 @@ class FunkinLua {
 							Stage.instance.toAdd.push(shit);
 						else
 						{
-							if (place == true || place == "true"){place = 2;}
+							if (place == true || place == "true"){place = 4;}
 							Stage.instance.layInFront[place].push(shit);
 						}
 					}
+					return true;
 				}
 				else {
-					if(game.modchartSprites.exists(tag)) {
-						var shit:ModchartSprite = game.modchartSprites.get(tag);
-						if(place == 2 || place == true)
-							LuaUtils.getTargetInstance().add(shit);
+					var mySprite:FlxSprite = null;
+					if(game.modchartSprites.exists(tag)) mySprite = game.modchartSprites.get(tag);
+					else if(game.variables.exists(tag)) mySprite = game.variables.get(tag);
+		
+					if(mySprite == null) return false;
+		
+					if(place == 2 || place == true)
+						LuaUtils.getTargetInstance().add(mySprite);
+					else
+					{
+						if(!game.isDead)
+							game.insert(game.members.indexOf(LuaUtils.getLowestCharacterPlacement()), mySprite)
 						else
-						{
-							if(!game.isDead)
-								game.insert(game.members.indexOf(LuaUtils.getLowestCharacterPlacement()), shit);
-							else
-								GameOverSubstate.instance.insert(GameOverSubstate.instance.members.indexOf(GameOverSubstate.instance.boyfriend), shit);
-						}
+							GameOverSubstate.instance.insert(GameOverSubstate.instance.members.indexOf(GameOverSubstate.instance.boyfriend), mySprite);
 					}
+					return true;
 				}
 			});
 			#if (flixel >= "5.3.0")
@@ -2185,6 +2191,7 @@ class FunkinLua {
 			#if desktop DiscordClient.addLuaCallbacks(this); #end
 			#if SScript HScript.implement(this); #end
 			#if ACHIEVEMENTS_ALLOWED Achievements.addLuaCallbacks(this); #end
+			#if flxanimate FlxAnimateFunctions.implement(this); #end
 			ReflectionFunctions.implement(this);
 			TextFunctions.implement(this);
 			ExtraFunctions.implement(this);
