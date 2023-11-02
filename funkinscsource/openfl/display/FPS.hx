@@ -103,13 +103,13 @@ class FPS extends TextField
 
 			memoryUsage = (ClientPrefs.data.memoryDisplay ? "RAM: " : "");
 
-			memoryMegas = cast(System.totalMemory, UInt);
+			memoryMegas = Int64.make(0, System.totalMemory);
 
-			//taskMemoryMegas = cast(MemoryUtil.getMemoryfromProcess(), UInt);
+			taskMemoryMegas = Int64.make(0, MemoryUtil.getMemoryfromProcess());
 
 			if (ClientPrefs.data.memoryDisplay)
 			{
-				memoryUsage += '${FlxStringUtil.formatBytes(memoryMegas)}'; /*'(${FlxStringUtil.formatBytes(taskMemoryMegas)})';*/
+				memoryUsage += '${FlxStringUtil.formatBytes(memoryMegas)} (${FlxStringUtil.formatBytes(taskMemoryMegas)})';
 
 				text += '$memoryUsage';
 			}
