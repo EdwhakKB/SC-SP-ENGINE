@@ -37,7 +37,7 @@ import states.LoadingState;
 import flixel.addons.effects.FlxSkewedSprite;
 
 
-#if flxanimate
+#if (flxanimate && shadowMarioFlxAnimate == "0.1")
 import flxanimate.*;
 #end
 

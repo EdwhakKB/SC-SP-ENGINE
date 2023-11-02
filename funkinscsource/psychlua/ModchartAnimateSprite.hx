@@ -1,6 +1,6 @@
 package psychlua;
 
-#if flxanimate
+#if (flxanimate && shadowMarioFlxAnimate == "0.1")
 class ModchartAnimateSprite extends FlxAnimate
 {
 	public var animOffsets:Map<String, Array<Float>> = new Map<String, Array<Float>>();

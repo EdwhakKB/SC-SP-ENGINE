@@ -2191,7 +2191,7 @@ class FunkinLua {
 			#if desktop DiscordClient.addLuaCallbacks(this); #end
 			#if SScript HScript.implement(this); #end
 			#if ACHIEVEMENTS_ALLOWED Achievements.addLuaCallbacks(this); #end
-			#if flxanimate FlxAnimateFunctions.implement(this); #end
+			#if (flxanimate && shadowMarioFlxAnimate == "0.1") FlxAnimateFunctions.implement(this); #end
 			ReflectionFunctions.implement(this);
 			TextFunctions.implement(this);
 			ExtraFunctions.implement(this);

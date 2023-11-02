@@ -158,6 +158,8 @@
 
 	<haxelib name="hxcpp-debug-server" if="cpp"/>
 
+	<deinfe name="shadowMarioFlxAnimate" value="0.0">
+
 	<!-- Enables a terminal log prompt on debug builds -->
 	<haxelib name="hxcpp-debug-server" if="debug"/>
 
