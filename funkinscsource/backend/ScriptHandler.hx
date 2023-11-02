@@ -133,7 +133,6 @@ class ScriptHandler #if HAXE_EXTENSION extends tea.SScript #end
 		setClass(backend.CoolUtil);
 		setClass(backend.Conductor);
 		setClass(PlayState);
-		setClass(states.PlayState.instance);
 		setClass(Main);
 		setClass(objects.Note);
 		setClass(objects.NoteSplash);
