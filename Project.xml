@@ -142,7 +142,7 @@
 	<define name="PSYCH"/>
 	<define name="PSYCHVERSION" value="0.7" />
 	<define name="modchartingTools"/>
-	<define name="SBETA" value="0.0"/> <!--set this to 0.1 for extra sides Version of the engine-->
+	<define name="SBETA" value="0.1"/> <!--set this to 0.1 for extra sides Version of the engine-->
 
 	<!--In case you want to use the ui package-->
 	<haxelib name="flixel-addons" />
