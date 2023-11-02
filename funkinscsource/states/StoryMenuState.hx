@@ -326,7 +326,7 @@ class StoryMenuState extends MusicBeatState
 			}
 			catch(e:Dynamic)
 			{
-				trace('ERROR! $e');
+				Debug.logInfo('ERROR! $e');
 				return;
 			}
 			

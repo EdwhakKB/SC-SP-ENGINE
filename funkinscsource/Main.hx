@@ -1,9 +1,13 @@
 package;
 
-import flixel.graphics.FlxGraphic;
 
+#if android
+import android.content.Context;
+#end
+import flixel.graphics.FlxGraphic;
 import flixel.FlxGame;
 import flixel.FlxState;
+import haxe.io.Path;
 import openfl.Assets;
 import openfl.Lib;
 import openfl.display.FPS;
@@ -19,9 +23,6 @@ import flixel.FlxSprite;
 import openfl.events.UncaughtErrorEvent;
 import haxe.CallStack;
 import haxe.io.Path;
-import sys.FileSystem;
-import sys.io.File;
-import sys.io.Process;
 #end
 import gamejolt.GameJolt.GJToastManager as GJToastManager;
 import flixel.FlxG;
@@ -29,6 +30,8 @@ import flixel.system.scaleModes.RatioScaleMode;
 import lime.app.Application;
 import backend.Debug;
 import flixel.input.keyboard.FlxKey;
+
+import flixel.system.scaleModes.*;
 
 class Main extends Sprite
 {
@@ -61,6 +64,13 @@ class Main extends Sprite
 	public function new()
 	{
 		super();
+
+		// Credits to MAJigsaw77 (he's the og author for this code)
+		#if android
+		Sys.setCwd(Path.addTrailingSlash(Context.getExternalFilesDir()));
+		#elseif ios
+		Sys.setCwd(lime.system.System.applicationStorageDirectory);
+		#end
 
 		if (stage != null)
 		{
@@ -117,6 +127,7 @@ class Main extends Sprite
 		#if !mobile
 		Lib.current.stage.align = "tl";
 		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
+		FlxG.scaleMode = new FillScaleMode();
 		#end
 
 		gjToastManager = new GJToastManager();
@@ -163,11 +174,6 @@ class Main extends Sprite
 			openfl.Assets.cache.clear();
 	
 			FlxG.bitmap.dumpCache();
-	
-			#if polymod
-			polymod.Polymod.clearCache();
-			
-			#end
 
 			#if cpp
 			cpp.vm.Gc.enable(true);

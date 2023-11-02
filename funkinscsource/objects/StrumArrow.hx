@@ -14,8 +14,8 @@ import flixel.math.FlxMath;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
-import modcharting.RenderPath;
 import openfl.Vector;
+import openfl.Assets;
 
 class StrumArrow extends FlxSkewedSprite
 {
@@ -28,6 +28,7 @@ class StrumArrow extends FlxSkewedSprite
 	public var daStyle = 'style';
 	public var player:Int;
 	public var containsPixelTexture:Bool = false;
+	public var pathNotFound:Bool = false;
 
 	public var laneFollowsReceptor:Bool = true;
 
@@ -72,7 +73,10 @@ class StrumArrow extends FlxSkewedSprite
 
 		var customSkin:String = skin + Note.getNoteSkinPostfix();
 		if(Paths.fileExists('images/$customSkin.png', IMAGE)) skin = customSkin;
-		if(style == null) texture = skin;
+		if(style == null) {
+			texture = skin;
+			daStyle = skin;
+		}
 		scrollFactor.set();
 
 		if (texture.contains('pixel') || style.contains('pixel') || daStyle.contains('pixel'))
@@ -103,147 +107,104 @@ class StrumArrow extends FlxSkewedSprite
 		switch (style)
 		{
 			default:
-				if(texture.contains('pixel') || style.contains('pixel') || daStyle.contains('pixel') || containsPixelTexture)
-				{
-					loadGraphic(Paths.image(style != "" ? style : ('pixelUI/' + texture)));
-					width = width / 4;
-					height = height / 5;
-					loadGraphic(Paths.image(style != "" ? style : ('pixelUI/' + texture)), true, Math.floor(width), Math.floor(height));
-		
-					antialiasing = false;
-					setGraphicSize(Std.int(width * PlayState.daPixelZoom));
-		
-					animation.add('green', [6]);
-					animation.add('red', [7]);
-					animation.add('blue', [5]);
-					animation.add('purple', [4]);
-					switch (Math.abs(noteData) % 4)
+					if((texture.contains('pixel') || style.contains('pixel') || daStyle.contains('pixel') || containsPixelTexture) && !FileSystem.exists(Paths.modsXml(style)))
 					{
-						case 0:
-							animation.add('static', [0]);
-							animation.add('pressed', [4, 8], 12, false);
-							animation.add('confirm', [12, 16], 24, false);
-						case 1:
-							animation.add('static', [1]);
-							animation.add('pressed', [5, 9], 12, false);
-							animation.add('confirm', [13, 17], 24, false);
-						case 2:
-							animation.add('static', [2]);
-							animation.add('pressed', [6, 10], 12, false);
-							animation.add('confirm', [14, 18], 12, false);
-						case 3:
-							animation.add('static', [3]);
-							animation.add('pressed', [7, 11], 12, false);
-							animation.add('confirm', [15, 19], 24, false);
+						if (FileSystem.exists(Paths.modsImages('notes/' + style)) || FileSystem.exists(Paths.getSharedPath('images/notes/' + style)) || Assets.exists('notes/' + style))
+						{
+							loadGraphic(Paths.image(style != "" ? 'notes/' + style : ('pixelUI/' + style)));
+							width = width / 4;
+							height = height / 5;
+							loadGraphic(Paths.image(style != "" ? 'notes/' + style : ('pixelUI/' + style)), true, Math.floor(width), Math.floor(height));
+
+							addAnims(true);
+						}
+						else if (FileSystem.exists(Paths.modsImages(style)) || FileSystem.exists(Paths.getSharedPath('images/' + style)) || Assets.exists(style))
+						{
+							loadGraphic(Paths.image(style != "" ? style : ('pixelUI/' + style)));
+							width = width / 4;
+							height = height / 5;
+							loadGraphic(Paths.image(style != "" ? style : ('pixelUI/' + style)), true, Math.floor(width), Math.floor(height));
+
+							addAnims(true);
+						}
+						else
+						{
+							loadGraphic(Paths.image('pixelUI/noteSkins/NOTE_assets' + Note.getNoteSkinPostfix()));
+							width = width / 4;
+							height = height / 5;
+							loadGraphic(Paths.image('pixelUI/noteSkins/NOTE_assets' + Note.getNoteSkinPostfix()), true, Math.floor(width), Math.floor(height));
+
+							addAnims(true);
+						}
 					}
-				}
-				else
-				{
-					if (ClientPrefs.data.cacheOnGPU)
-						frames = Paths.getSparrowAtlas(style, null, false);
 					else
-						frames = Paths.getSparrowAtlas(style);
-					animation.addByPrefix('green', 'arrowUP');
-					animation.addByPrefix('blue', 'arrowDOWN');
-					animation.addByPrefix('purple', 'arrowLEFT');
-					animation.addByPrefix('red', 'arrowRIGHT');
-		
-					antialiasing = ClientPrefs.data.antialiasing;
-					setGraphicSize(Std.int(width * 0.7));
-		
-					switch (Math.abs(noteData) % 4)
 					{
-						case 0:
-							animation.addByPrefix('static', 'arrowLEFT');
-							animation.addByPrefix('pressed', 'left press', 24, false);
-							animation.addByPrefix('confirm', 'left confirm', 24, false);
-						case 1:
-							animation.addByPrefix('static', 'arrowDOWN');
-							animation.addByPrefix('pressed', 'down press', 24, false);
-							animation.addByPrefix('confirm', 'down confirm', 24, false);
-						case 2:
-							animation.addByPrefix('static', 'arrowUP');
-							animation.addByPrefix('pressed', 'up press', 24, false);
-							animation.addByPrefix('confirm', 'up confirm', 24, false);
-						case 3:
-							animation.addByPrefix('static', 'arrowRIGHT');
-							animation.addByPrefix('pressed', 'right press', 24, false);
-							animation.addByPrefix('confirm', 'right confirm', 24, false);
+						if (FileSystem.exists(Paths.modsImages('notes/' + style)) || FileSystem.exists(Paths.getSharedPath('images/notes/' + style)) || Assets.exists('notes/' + style))
+						{
+							if (ClientPrefs.data.cacheOnGPU)
+								frames = Paths.getSparrowAtlas('notes/' + style, null, false);
+							else
+								frames = Paths.getSparrowAtlas('notes/' + style);
+
+							addAnims();
+						}
+						else if (FileSystem.exists(Paths.modsImages(style)) || FileSystem.exists(Paths.getSharedPath('images/' + style)) || Assets.exists(style))
+						{
+							if (ClientPrefs.data.cacheOnGPU)
+								frames = Paths.getSparrowAtlas(style, null, false);
+							else
+								frames = Paths.getSparrowAtlas(style);
+
+							addAnims();
+						}
+						else
+						{
+							if (ClientPrefs.data.cacheOnGPU)
+								frames = Paths.getSparrowAtlas('noteSkins/NOTE_assets' + Note.getNoteSkinPostfix(), null, false);
+							else
+								frames = Paths.getSparrowAtlas('noteSkins/NOTE_assets' + Note.getNoteSkinPostfix());
+
+							addAnims();
+						}
 					}
-				}
-			case 'default' | 'pixel' | 'normal':
-				if(texture.contains('pixel') || style.contains('pixel') || daStyle.contains('pixel') || containsPixelTexture)
-				{
-					loadGraphic(Paths.image('pixelUI/noteSkins/NOTE_assets' + Note.getNoteSkinPostfix()));
-					width = width / 4;
-					height = height / 5;
-					loadGraphic(Paths.image('pixelUI/noteSkins/NOTE_assets' + Note.getNoteSkinPostfix()), true, Math.floor(width), Math.floor(height));
-		
-					antialiasing = false;
-					setGraphicSize(Std.int(width * PlayState.daPixelZoom));
-		
-					animation.add('green', [6]);
-					animation.add('red', [7]);
-					animation.add('blue', [5]);
-					animation.add('purple', [4]);
-					switch (Math.abs(noteData) % 4)
-					{
-						case 0:
-							animation.add('static', [0]);
-							animation.add('pressed', [4, 8], 12, false);
-							animation.add('confirm', [12, 16], 24, false);
-						case 1:
-							animation.add('static', [1]);
-							animation.add('pressed', [5, 9], 12, false);
-							animation.add('confirm', [13, 17], 24, false);
-						case 2:
-							animation.add('static', [2]);
-							animation.add('pressed', [6, 10], 12, false);
-							animation.add('confirm', [14, 18], 12, false);
-						case 3:
-							animation.add('static', [3]);
-							animation.add('pressed', [7, 11], 12, false);
-							animation.add('confirm', [15, 19], 24, false);
-					}
-				}
-				else
-				{
-					if (ClientPrefs.data.cacheOnGPU)
-						frames = Paths.getSparrowAtlas('noteSkins/NOTE_assets' + Note.getNoteSkinPostfix(), null, false);
-					else
-						frames = Paths.getSparrowAtlas('noteSkins/NOTE_assets' + Note.getNoteSkinPostfix());
-					animation.addByPrefix('green', 'arrowUP');
-					animation.addByPrefix('blue', 'arrowDOWN');
-					animation.addByPrefix('purple', 'arrowLEFT');
-					animation.addByPrefix('red', 'arrowRIGHT');
-		
-					antialiasing = ClientPrefs.data.antialiasing;
-					setGraphicSize(Std.int(width * 0.7));
-		
-					switch (Math.abs(noteData) % 4)
-					{
-						case 0:
-							animation.addByPrefix('static', 'arrowLEFT');
-							animation.addByPrefix('pressed', 'left press', 24, false);
-							animation.addByPrefix('confirm', 'left confirm', 24, false);
-						case 1:
-							animation.addByPrefix('static', 'arrowDOWN');
-							animation.addByPrefix('pressed', 'down press', 24, false);
-							animation.addByPrefix('confirm', 'down confirm', 24, false);
-						case 2:
-							animation.addByPrefix('static', 'arrowUP');
-							animation.addByPrefix('pressed', 'up press', 24, false);
-							animation.addByPrefix('confirm', 'up confirm', 24, false);
-						case 3:
-							animation.addByPrefix('static', 'arrowRIGHT');
-							animation.addByPrefix('pressed', 'right press', 24, false);
-							animation.addByPrefix('confirm', 'right confirm', 24, false);
-					}
-				}
 		}
 
 		if (first)
 			updateHitbox();
+	}
+
+	public function addAnims(?pixel:Bool = false)
+	{
+		if (pixel)
+		{
+			animation.add('green', [6]);
+			animation.add('red', [7]);
+			animation.add('blue', [5]);
+			animation.add('purple', [4]);
+
+			setGraphicSize(Std.int(width * PlayState.daPixelZoom));
+			antialiasing = false;
+			
+			animation.add('static', [0 + noteData]);
+			animation.add('pressed', [4 + noteData, 8 + noteData], 12, false);
+			animation.add('confirm', [12 + noteData, 16 + noteData], 24, false);
+		}
+		else
+		{	
+			antialiasing = ClientPrefs.data.antialiasing;
+			setGraphicSize(Std.int(width * 0.7));
+
+			var notesAnim:Array<String> = ['LEFT', 'DOWN', 'UP', 'RIGHT'];
+			var pressAnim:Array<String> = ['left', 'down', 'up', 'right'];
+			var colorAnims:Array<String> = ['purple', 'blue', 'green', 'red'];
+
+			animation.addByPrefix(colorAnims[noteData], 'arrow' + notesAnim[noteData]);
+
+			animation.addByPrefix('static', 'arrow' + notesAnim[noteData]);
+			animation.addByPrefix('pressed', pressAnim[noteData] + ' press', 24, false);
+			animation.addByPrefix('confirm', pressAnim[noteData] + ' confirm', 24, false);
+		}
+
 	}
 
 	public function loadLane(){

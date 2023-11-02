@@ -43,9 +43,7 @@ class ControlsSubState extends MusicBeatSubstate
 		[false, 'Key 1', 'debug_1', 'Debug Key #1'],
 		[false, 'Key 2', 'debug_2', 'Debug Key #2'],
 		[false, 'Key 3', 'debug_3', 'Debug Key #3'],
-		[false],
-		[false, 'Side Keys'],
-		[false, 'Dodge', 'dodge_key', 'Dodge']
+		[false]
 	];
 	var curOptions:Array<Int>;
 	var curOptionsValid:Array<Int>;
@@ -110,9 +108,12 @@ class ControlsSubState extends MusicBeatSubstate
 		text.setScale(0.4);
 		add(text);
 
-		createTexts();
-
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
+	}
+
+	override public function create():Void
+	{
+		createTexts();
 	}
 
 	var lastID:Int = 0;

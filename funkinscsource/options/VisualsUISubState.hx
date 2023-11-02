@@ -10,6 +10,7 @@ class VisualsUISubState extends BaseOptionsMenu
 	var notes:FlxTypedGroup<StrumArrow>;
 	var notesTween:Array<FlxTween> = [];
 	var noteY:Float = 90;
+	var stringedNote:String = (OptionsState.onPlayState ? (PlayState.isPixelStage ? 'pixelUI/noteSkins/NOTE_assets' + Note.getNoteSkinPostfix() : 'noteSkins/NOTE_assets' + Note.getNoteSkinPostfix()) : 'noteSkins/NOTE_assets' + Note.getNoteSkinPostfix());
 	public function new()
 	{
 		title = 'Visuals and UI';
@@ -19,10 +20,11 @@ class VisualsUISubState extends BaseOptionsMenu
 		notes = new FlxTypedGroup<StrumArrow>();
 		for (i in 0...Note.colArray.length)
 		{
-			var note:StrumArrow = new StrumArrow((ClientPrefs.data.middleScroll ? 370 + (560 / Note.colArray.length) * i : 620 + (560 / Note.colArray.length) * i ), !ClientPrefs.data.downScroll ? -200 : 760, i, 0, 'noteSkins/NOTE_assets' + Note.getNoteSkinPostfix());
+			var note:StrumArrow = new StrumArrow((ClientPrefs.data.middleScroll ? 370 + (560 / Note.colArray.length) * i : 620 + (560 / Note.colArray.length) * i), !ClientPrefs.data.downScroll ? -200 : 760, i, 0, stringedNote);
 			note.centerOffsets();
 			note.centerOrigin();
-			note.loadNoteAnims('noteSkins/NOTE_assets' + Note.getNoteSkinPostfix(), true);
+			note.reloadNote(stringedNote);
+			note.loadNoteAnims(stringedNote, true);
 			note.playAnim('static');
 			note.loadLane();
 			note.bgLane.updateHitbox();
@@ -32,7 +34,7 @@ class VisualsUISubState extends BaseOptionsMenu
 
 		// options
 
-		var noteSkins:Array<String> = Mods.mergeAllTextsNamed('images/noteSkins/list.txt', 'shared');
+		var noteSkins:Array<String> = Mods.mergeAllTextsNamed('images/noteSkins/list.txt');
 		if(noteSkins.length > 0)
 		{
 			if(!noteSkins.contains(ClientPrefs.data.noteSkin))
@@ -49,7 +51,7 @@ class VisualsUISubState extends BaseOptionsMenu
 			noteOptionID = optionsArray.length - 1;
 		}
 		
-		var noteSplashes:Array<String> = Mods.mergeAllTextsNamed('images/noteSplashes/list.txt', 'shared');
+		var noteSplashes:Array<String> = Mods.mergeAllTextsNamed('images/noteSplashes/list.txt');
 		if(noteSplashes.length > 0)
 		{
 			if(!noteSplashes.contains(ClientPrefs.data.splashSkin))
@@ -270,13 +272,7 @@ class VisualsUISubState extends BaseOptionsMenu
 
 	function changeNoteSkin(note:StrumArrow)
 	{
-		var skin:String = Note.defaultNoteSkin;
-		var customSkin:String = skin + Note.getNoteSkinPostfix();
-		if(Paths.fileExists('images/$customSkin.png', IMAGE)) skin = customSkin;
-
-		note.texture = skin; //Load texture and anims
-		note.daStyle = skin;
-		note.reloadNote(skin);
+		note.reloadNote(stringedNote);
 		note.playAnim('static');
 	}
 

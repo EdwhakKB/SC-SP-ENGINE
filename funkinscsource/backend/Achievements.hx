@@ -1,9 +1,14 @@
 package backend;
 
+#if ACHIEVEMENTS_ALLOWED
 import objects.AchievementPopup;
 import haxe.Exception;
+import tjson.TJSON as Json;
 
-#if ACHIEVEMENTS_ALLOWED
+#if LUA_ALLOWED
+import psychlua.FunkinLua;
+#end
+
 typedef Achievement =
 {
 	var name:String;
@@ -11,7 +16,9 @@ typedef Achievement =
 	@:optional var hidden:Bool;
 	@:optional var maxScore:Float;
 	@:optional var maxDecimals:Int;
-	@:optional var ID:Int; //handled automatically, ignore it
+	//handled automatically, ignore these two
+	@:optional var mod:String;
+	@:optional var ID:Int;
 }
 
 class Achievements {
@@ -142,7 +149,7 @@ class Achievements {
 		
 		if(Achievements.isUnlocked(name)) return null;
 
-		Debug.logInfo('Completed achievement "$name"');
+		Debug.logTrace('Completed achievement "$name"');
 		achievementsUnlocked.push(name);
 
 		// earrape prevention
@@ -179,17 +186,147 @@ class Achievements {
 
 		var newPop:AchievementPopup = new AchievementPopup(achieve, endFunc);
 		_popups.push(newPop);
+		//Debug.logTrace('Giving achievement ' + achieve);
 	}
 	
 	
 	// Map sorting cuz haxe is physically incapable of doing that by itself
 	static var _sortID = 0;
 	static var _originalLength = -1;
-	public static function createAchievement(name, data)
+	public static function createAchievement(name:String, data:Achievement, ?mod:String = null)
 	{
 		data.ID = _sortID;
+		data.mod = mod;
 		achievements.set(name, data);
 		_sortID++;
 	}
+
+	#if MODS_ALLOWED
+	public static function reloadList()
+	{
+		// remove modded achievements
+		if((_sortID + 1) > _originalLength)
+			for (key => value in achievements)
+				if(value.mod != null)
+					achievements.remove(key);
+
+		_sortID = _originalLength-1;
+
+		var modLoaded:String = Mods.currentModDirectory;
+		Mods.currentModDirectory = null;
+		loadAchievementJson(Paths.mods('data/achievements.json'));
+		for (i => mod in Mods.parseList().enabled)
+		{
+			Mods.currentModDirectory = mod;
+			loadAchievementJson(Paths.mods('$mod/data/achievements.json'));
+		}
+		Mods.currentModDirectory = modLoaded;
+	}
+
+	inline static function loadAchievementJson(path:String, addMods:Bool = true)
+	{
+		var retVal:Array<Dynamic> = null;
+		if(FileSystem.exists(path)) {
+			try {
+				var rawJson:String = File.getContent(path).trim();
+				if(rawJson != null && rawJson.length > 0) retVal = Json.parse(rawJson); //Json.parse('{"achievements": $rawJson}').achievements;
+
+				if(addMods && retVal != null)
+				{
+					for (i in 0...retVal.length)
+					{
+						var achieve:Dynamic = retVal[i];
+						if(achieve == null)
+						{
+							var errorTitle = 'Mod name: ' + Mods.currentModDirectory != null ? Mods.currentModDirectory : "None";
+							var errorMsg = 'Achievement #${i+1} is invalid.';
+							#if windows
+							lime.app.Application.current.window.alert(errorMsg, errorTitle);
+							#end
+							trace('$errorTitle - $errorMsg');
+							continue;
+						}
+
+						var key:String = achieve.save;
+						if(key == null || key.trim().length < 1)
+						{
+							var errorTitle = 'Error on Achievement: ' + (achieve.name != null ? achieve.name : achieve.save);
+							var errorMsg = 'Missing valid "save" value.';
+							#if windows
+							lime.app.Application.current.window.alert(errorMsg, errorTitle);
+							#end
+							trace('$errorTitle - $errorMsg');
+							continue;
+						}
+						key = key.trim();
+						if(achievements.exists(key)) continue;
+
+						createAchievement(key, achieve, Mods.currentModDirectory);
+					}
+				}
+			} catch(e:Dynamic) {
+				var errorTitle = 'Mod name: ' + Mods.currentModDirectory != null ? Mods.currentModDirectory : "None";
+				var errorMsg = 'Error loading achievements.json: $e';
+				#if windows
+				lime.app.Application.current.window.alert(errorMsg, errorTitle);
+				#end
+				trace('$errorTitle - $errorMsg');
+			}
+		}
+		return retVal;
+	}
+
+	#if LUA_ALLOWED
+	public static function addLuaCallbacks(funk:psychlua.FunkinLua)
+	{
+		funk.set("getAchievementScore", function(name:String):Float
+		{
+			if(!achievements.exists(name))
+			{
+				FunkinLua.luaTrace('getAchievementScore: Couldnt find achievement: $name', false, false, FlxColor.RED);
+				return -1;
+			}
+			return getScore(name);
+		});
+		funk.set("setAchievementScore", function(name:String, ?value:Float = 1, ?saveIfNotUnlocked:Bool = true):Float
+		{
+			if(!achievements.exists(name))
+			{
+				FunkinLua.luaTrace('setAchievementScore: Couldnt find achievement: $name', false, false, FlxColor.RED);
+				return -1;
+			}
+			return setScore(name, value, saveIfNotUnlocked);
+		});
+		funk.set("addAchievementScore", function(name:String, ?value:Float = 1, ?saveIfNotUnlocked:Bool = true):Float
+		{
+			if(!achievements.exists(name))
+			{
+				FunkinLua.luaTrace('addAchievementScore: Couldnt find achievement: $name', false, false, FlxColor.RED);
+				return -1;
+			}
+			return addScore(name, value, saveIfNotUnlocked);
+		});
+		funk.set("unlockAchievement", function(name:String):Dynamic
+		{
+			if(!achievements.exists(name))
+			{
+				FunkinLua.luaTrace('unlockAchievement: Couldnt find achievement: $name', false, false, FlxColor.RED);
+				return null;
+			}
+			return unlock(name);
+		});
+		funk.set("isAchievementUnlocked", function(name:String):Dynamic
+		{
+			if(!achievements.exists(name))
+			{
+				FunkinLua.luaTrace('isAchievementUnlocked: Couldnt find achievement: $name', false, false, FlxColor.RED);
+				return null;
+			}
+			return isUnlocked(name);
+		});
+		funk.set("achievementExists", function(name:String) return achievements.exists(name));
+	}
+	#end
+	#end
 }
 #end

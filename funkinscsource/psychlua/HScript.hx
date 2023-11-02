@@ -14,19 +14,19 @@ class HScript extends SScript
 {
 	public var parentLua:FunkinLua;
 	
-	public static function initHaxeModule(parent:FunkinLua)
+	public static function initHaxeModule(parent:FunkinLua, ?varsToBring:Any = null)
 	{
 		if(parent.hscript == null)
 		{
 			var times:Float = Date.now().getTime();
-			Debug.logInfo('initialized sscript interp successfully: ${parent.scriptName} (${Std.int(Date.now().getTime() - times)}ms)');
-			parent.hscript = new HScript(parent);
+			Debug.logTrace('initialized sscript interp successfully: ${parent.scriptName} (${Std.int(Date.now().getTime() - times)}ms)');
+			parent.hscript = new HScript(parent, null, varsToBring);
 		}
 	}
 
-	public static function initHaxeModuleCode(parent:FunkinLua, code:String)
+	public static function initHaxeModuleCode(parent:FunkinLua, code:String, ?varsToBring:Any = null)
 	{
-		initHaxeModule(parent);
+		initHaxeModule(parent, varsToBring);
 		var hs:HScript = try parent.hscript catch (e) null;
 		if(hs != null)
 		{
@@ -44,14 +44,16 @@ class HScript extends SScript
 
 	public static function hscriptTrace(text:String, color:FlxColor = FlxColor.WHITE) {
 		PlayState.instance.addTextToDebug(text, color);
-		Debug.logInfo(text);
+		Debug.logTrace(text);
 	}
 
 	public var origin:String;
-	override public function new(?parent:FunkinLua, ?file:String)
+	override public function new(?parent:FunkinLua, ?file:String, ?varsToBring:Any = null)
 	{
 		if (file == null)
 			file = '';
+
+		this.varsToBring = varsToBring;
 
 		super(file, false, false);
 		parentLua = parent;
@@ -63,25 +65,28 @@ class HScript extends SScript
 		execute();
 	}
 
+	var varsToBring:Any = null;
 	override function preset()
 	{
 		super.preset();
 
 		setClass(flixel.FlxG);
+		setClass(flixel.math.FlxMath);
 		setClass(flixel.FlxSprite);
 		setClass(flixel.FlxCamera);
 		setClass(flixel.util.FlxTimer);
 		setClass(flixel.tweens.FlxTween);
 		setClass(flixel.tweens.FlxEase);
+		setClass(backend.Stage.Countdown);
 		setClass(PlayState);
 		setClass(Paths);
 		setClass(Conductor);
 		setClass(ClientPrefs);
+		setClass(Achievements);
 		setClass(Character);
 		setClass(Alphabet);
 		setClass(objects.Note);
 		setClass(CustomSubstate);
-		setClass(backend.Stage.Countdown);
 		#if (!flash && sys)
 		setClass(flixel.addons.display.FlxRuntimeShader);
 		#end
@@ -190,6 +195,18 @@ class HScript extends SScript
 		set('addBehindBF', function(obj:FlxBasic) PlayState.instance.addBehindBF(obj));
 		set('insert', function(pos:Int, obj:FlxBasic) PlayState.instance.insert(pos, obj));
 		set('remove', function(obj:FlxBasic, splice:Bool = false) PlayState.instance.remove(obj, splice));
+
+		if(varsToBring != null)
+		{
+			for (key in Reflect.fields(varsToBring))
+			{
+				key = key.trim();
+				var value = Reflect.field(varsToBring, key);
+				//trace('Key $key: $value');
+				set(key, Reflect.field(varsToBring, key));
+			}
+			varsToBring = null;
+		}
 	}
 
 	public function executeCode(?funcToRun:String = null, ?funcArgs:Array<Dynamic> = null):TeaCall
@@ -239,6 +256,7 @@ class HScript extends SScript
 			{
 				for (key in Reflect.fields(varsToBring))
 				{
+					//Debug.logTrace('Key $key: ' + Reflect.field(varsToBring, key));
 					funk.hscript.set(key, Reflect.field(varsToBring, key));
 				}
 			}
@@ -343,22 +361,24 @@ class HScript extends SScript
 		#end
 	}
 
-	public static function initHaxeModuleCode(parent:FunkinLua, code:String)
+	public static function initHaxeModuleCode(parent:FunkinLua, code:String, ?varsToBring:Any = null)
 	{
 		#if (SScript >= "3.0.0")
 		if(parent.hscript == null)
 		{
 			trace('initializing haxe interp for: ${parent.scriptName}');
-			parent.hscript = new HScript(parent, code);
+			parent.hscript = new HScript(parent, code, varToBring);
 		}
 		#end
 	}
 
 	public var origin:String;
-	override public function new(?parent:FunkinLua, ?file:String)
+	override public function new(?parent:FunkinLua, ?file:String, ?varsToBring:Any = null)
 	{
 		if (file == null)
 			file = '';
+
+		this.varsToBring = varsToBring;
 	
 		super(file, false, false);
 		parentLua = parent;
@@ -370,6 +390,7 @@ class HScript extends SScript
 		execute();
 	}
 
+	var varToBring:Any = null;
 	override function preset()
 	{
 		#if (SScript >= "3.0.0")
@@ -377,21 +398,23 @@ class HScript extends SScript
 
 		// Some very commonly used classes
 		set('FlxG', flixel.FlxG);
+		set('FlxMath', flixel.math.FlxMath);
 		set('FlxSprite', flixel.FlxSprite);
 		set('FlxCamera', flixel.FlxCamera);
 		set('FlxTimer', flixel.util.FlxTimer);
 		set('FlxTween', flixel.tweens.FlxTween);
 		set('FlxEase', flixel.tweens.FlxEase);
 		set('FlxColor', CustomFlxColor);
+		set('Countdown', backend.BaseStage.Countdown);
 		set('PlayState', PlayState);
 		set('Paths', Paths);
 		set('Conductor', Conductor);
 		set('ClientPrefs', ClientPrefs);
+		set('Achievements', Achievements);
 		set('Character', Character);
 		set('Alphabet', Alphabet);
 		set('Note', objects.Note);
 		set('CustomSubstate', CustomSubstate);
-		set('Countdown', backend.Stage.Countdown);
 		#if (!flash && sys)
 		set('FlxRuntimeShader', flixel.addons.display.FlxRuntimeShader);
 		#end
@@ -484,6 +507,18 @@ class HScript extends SScript
 		set('addBehindBF', function(obj:FlxBasic) PlayState.instance.addBehindBF(obj));
 		set('insert', function(pos:Int, obj:FlxBasic) PlayState.instance.insert(pos, obj));
 		set('remove', function(obj:FlxBasic, splice:Bool = false) PlayState.instance.remove(obj, splice));
+
+		if(varsToBring != null)
+		{
+			for (key in Reflect.fields(varsToBring))
+			{
+				key = key.trim();
+				var value = Reflect.field(varsToBring, key);
+				//trace('Key $key: $value');
+				set(key, Reflect.field(varsToBring, key));
+			}
+			varsToBring = null;
+		}
 		#end
 	}
 
@@ -525,17 +560,9 @@ class HScript extends SScript
 	{
 		#if LUA_ALLOWED
 		funk.addLocalCallback("runHaxeCode", function(codeToRun:String, ?varsToBring:Any = null, ?funcToRun:String = null, ?funcArgs:Array<Dynamic> = null):Dynamic {
-			var retVal:SCall = null;
 			#if (SScript >= "3.0.0")
-			initHaxeModuleCode(funk, codeToRun);
-			if(varsToBring != null)
-			{
-				for (key in Reflect.fields(varsToBring))
-				{
-					//trace('Key $key: ' + Reflect.field(varsToBring, key));
-					funk.hscript.set(key, Reflect.field(varsToBring, key));
-				}
-			}
+			initHaxeModuleCode(funk, codeToRun, varsToBring);
+			var retVal:SCall = funk.hscript.executeCode(funcToRun, funcArgs);
 			retVal = funk.hscript.executeCode(funcToRun, funcArgs);
 			if (retVal != null)
 			{

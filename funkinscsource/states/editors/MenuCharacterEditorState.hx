@@ -11,9 +11,6 @@ import openfl.events.Event;
 import openfl.events.IOErrorEvent;
 import flash.net.FileFilter;
 import tjson.TJSON as Json;
-#if sys
-import sys.io.File;
-#end
 
 import objects.MenuCharacter;
 
@@ -338,7 +335,7 @@ class MenuCharacterEditorState extends MusicBeatState
 				if(loadedChar.idle_anim != null && loadedChar.confirm_anim != null) //Make sure it's really a character
 				{
 					var cutName:String = _file.name.substr(0, _file.name.length - 5);
-					Debug.logInfo("Successfully loaded file: " + cutName);
+					Debug.logTrace("Successfully loaded file: " + cutName);
 					characterFile = loadedChar;
 					reloadSelectedCharacter();
 					imageInputText.text = characterFile.image;
@@ -353,7 +350,7 @@ class MenuCharacterEditorState extends MusicBeatState
 		}
 		_file = null;
 		#else
-		Debug.logInfo("File couldn't be loaded! You aren't on Desktop, are you?");
+		Debug.logTrace("File couldn't be loaded! You aren't on Desktop, are you?");
 		#end
 	}
 
@@ -366,7 +363,7 @@ class MenuCharacterEditorState extends MusicBeatState
 		_file.removeEventListener(Event.CANCEL, onLoadCancel);
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
 		_file = null;
-		Debug.logInfo("Cancelled file loading.");
+		Debug.logTrace("Cancelled file loading.");
 	}
 
 	/**
@@ -378,7 +375,7 @@ class MenuCharacterEditorState extends MusicBeatState
 		_file.removeEventListener(Event.CANCEL, onLoadCancel);
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
 		_file = null;
-		Debug.logInfo("Problem loading file");
+		Debug.logTrace("Problem loading file");
 	}
 
 	function saveCharacter() {

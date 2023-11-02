@@ -142,32 +142,32 @@ class NativeAudioSource
 	public function play():Void
 	{
 		/*var pitch:Float = AL.getSourcef (handle, AL.PITCH);
-			Debug.logInfo(pitch);
+			Debug.logTrace(pitch);
 			AL.sourcef (handle, AL.PITCH, pitch*0.9);
 			pitch = AL.getSourcef (handle, AL.PITCH);
-			Debug.logInfo(pitch); */
+			Debug.logTrace(pitch); */
 		/*var pos = getPosition();
-			Debug.logInfo(AL.DISTANCE_MODEL);
+			Debug.logTrace(AL.DISTANCE_MODEL);
 			AL.distanceModel(AL.INVERSE_DISTANCE);
-			Debug.logInfo(AL.DISTANCE_MODEL);
+			Debug.logTrace(AL.DISTANCE_MODEL);
 			AL.sourcef(handle, AL.ROLLOFF_FACTOR, 5);
 			setPosition(new Vector4(10, 10, -100));
 			pos = getPosition();
-			Debug.logInfo(pos); */
+			Debug.logTrace(pos); */
 		/*var filter = AL.createFilter();
-			Debug.logInfo(AL.getErrorString());
+			Debug.logTrace(AL.getErrorString());
 
 			AL.filteri(filter, AL.FILTER_TYPE, AL.FILTER_LOWPASS);
-			Debug.logInfo(AL.getErrorString());
+			Debug.logTrace(AL.getErrorString());
 
 			AL.filterf(filter, AL.LOWPASS_GAIN, 0.5);
-			Debug.logInfo(AL.getErrorString());
+			Debug.logTrace(AL.getErrorString());
 
 			AL.filterf(filter, AL.LOWPASS_GAINHF, 0.5);
-			Debug.logInfo(AL.getErrorString());
+			Debug.logTrace(AL.getErrorString());
 
 			AL.sourcei(handle, AL.DIRECT_FILTER, filter);
-			Debug.logInfo(AL.getErrorString()); */
+			Debug.logTrace(AL.getErrorString()); */
 
 		if (playing || handle == null)
 		{

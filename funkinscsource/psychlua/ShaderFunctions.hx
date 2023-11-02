@@ -249,9 +249,11 @@ class ShaderFunctions
 				return false;
 			}
 
+			// Debug.logTrace('bitmapdatapath: $bitmapdataPath');
 			var value = Paths.image(bitmapdataPath);
 			if(value != null && value.bitmap != null)
 			{
+				// Debug.logTrace('Found bitmapdata. Width: ${value.bitmap.width} Height: ${value.bitmap.height}');
 				shader.setSampler2D(prop, value.bitmap);
 				return true;
 			}

@@ -16,9 +16,6 @@ import haxe.io.Path;
 
 import flixel.ui.FlxBar;
 import flixel.util.FlxColor;
-#if sys
-import sys.FileSystem;
-#end
 #if (flixel >= "5.3.0")
 import flixel.sound.FlxSound;
 #else
@@ -81,14 +78,14 @@ class AsyncAssetPreloader
 			audio.push(Paths.voices(PlayState.SONG.songId));
 			#end
 
-			var characters:Array<String> = Mods.mergeAllTextsNamed('data/songs/${PlayState.SONG.songId.toLowerCase()}/preload.txt', Paths.getPreloadPath());
+			var characters:Array<String> = Mods.mergeAllTextsNamed('data/songs/${PlayState.SONG.songId.toLowerCase()}/preload.txt', Paths.getSharedPath());
 			for (character in characters)
 			{
 				if(character.trim().length > 0)
 					characters.push(character);
 			}
 
-			var stages:Array<String> = Mods.mergeAllTextsNamed('data/songs/${PlayState.SONG.songId.toLowerCase()}/preload-stage.txt', Paths.getPreloadPath());
+			var stages:Array<String> = Mods.mergeAllTextsNamed('data/songs/${PlayState.SONG.songId.toLowerCase()}/preload-stage.txt', Paths.getSharedPath());
 			for (stage in stages)
 			{
 				if(stage.trim().length > 0)
@@ -312,7 +309,6 @@ class LoadingState extends MusicBeatState
 		loadingText.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(loadingText);
 
-		#if PRELOAD_ALL
 		if (!ClientPrefs.data.cacheOnGPU)
 		{
 			loader = new AsyncAssetPreloader(function()
@@ -338,7 +334,6 @@ class LoadingState extends MusicBeatState
 						if (PlayState.SONG.needsVoices)
 							checkLoadSong(getVocalPath());
 					}
-					checkLibrary("shared");
 					if(directory != null && directory.length > 0 && directory != 'shared') {
 						checkLibrary('week_assets');
 					}
@@ -349,7 +344,6 @@ class LoadingState extends MusicBeatState
 				}
 			);
 		}
-		#end
 	}
 	
 	function checkLoadSong(path:String)
@@ -368,7 +362,7 @@ class LoadingState extends MusicBeatState
 	}
 	
 	function checkLibrary(library:String) {
-		Debug.logInfo(Assets.hasLibrary(library));
+		Debug.logTrace(Assets.hasLibrary(library));
 		if (Assets.getLibrary(library) == null)
 		{
 			@:privateAccess
@@ -455,17 +449,17 @@ class LoadingState extends MusicBeatState
 		if(weekDir != null && weekDir.length > 0 && weekDir != '') directory = weekDir;
 
 		Paths.setCurrentLevel(directory);
-		Debug.logInfo('Setting asset folder to ' + directory);
+		Debug.logTrace('Setting asset folder to ' + directory);
 
-		#if NO_PRELOAD_ALL
+		/*#if NO_PRELOAD_ALL
 		var loaded:Bool = false;
 		if (PlayState.SONG != null) {
-			loaded = isSoundLoaded(getSongPath()) && (!PlayState.SONG.needsVoices || isSoundLoaded(getVocalPath())) && isLibraryLoaded("shared") && isLibraryLoaded('week_assets');
+			loaded = isSoundLoaded(getSongPath()) && (!PlayState.SONG.needsVoices || isSoundLoaded(getVocalPath())) && isLibraryLoaded('week_assets');
 		}
 		
 		if (!loaded)
 			return new LoadingState(target, stopMusic, directory);
-		#end
+		#end*/
 		if (stopMusic && FlxG.sound.music != null){
 			FlxG.sound.music.stop();
 			FlxG.sound.music.destroy();
@@ -474,10 +468,10 @@ class LoadingState extends MusicBeatState
 		else return new LoadingState(target, stopMusic, directory);
 	}
 	
-	#if NO_PRELOAD_ALL
+	/*#if NO_PRELOAD_ALL
 	static function isSoundLoaded(path:String):Bool
 	{
-		Debug.logInfo(path);
+		Debug.logTrace(path);
 		return Assets.cache.hasSound(path);
 	}
 	
@@ -485,7 +479,7 @@ class LoadingState extends MusicBeatState
 	{
 		return Assets.getLibrary(library) != null;
 	}
-	#end
+	#end*/
 	
 	override function destroy()
 	{
@@ -611,7 +605,7 @@ class MultiCallback
 	inline function log(msg):Void
 	{
 		if (logId != null)
-			Debug.logInfo('$logId: $msg');
+			Debug.logTrace('$logId: $msg');
 	}
 	
 	public function getFired() return fired.copy();

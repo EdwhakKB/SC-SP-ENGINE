@@ -22,20 +22,21 @@ class DiscordClient
 
 	public function new()
 	{
-		Debug.logInfo("Discord Client starting...");
+		Debug.logTrace("Discord Client starting...");
 		DiscordRpc.start({
 			clientID: clientID,
 			onReady: onReady,
 			onError: onError,
 			onDisconnected: onDisconnected
 		});
-		Debug.logInfo("Discord Client started.");
+		Debug.logTrace("Discord Client started.");
 
 		var localID:String = clientID;
 		while (localID == clientID)
 		{
 			DiscordRpc.process();
 			sleep(2);
+			//Debug.logTrace('Discord Client Update $localID');
 		}
 
 		//DiscordRpc.shutdown();
@@ -88,12 +89,12 @@ class DiscordClient
 
 	static function onError(_code:Int, _message:String)
 	{
-		Debug.logInfo('Error! $_code : $_message');
+		Debug.logTrace('Error! $_code : $_message');
 	}
 
 	static function onDisconnected(_code:Int, _message:String)
 	{
-		Debug.logInfo('Disconnected! $_code : $_message');
+		Debug.logTrace('Disconnected! $_code : $_message');
 	}
 
 	public static function initialize()
@@ -103,7 +104,7 @@ class DiscordClient
 		{
 			new DiscordClient();
 		});
-		Debug.logInfo("Discord Client initialized");
+		Debug.logTrace("Discord Client initialized");
 		isInitialized = true;
 	}
 
@@ -122,6 +123,8 @@ class DiscordClient
 		_options.startTimestamp = Std.int(startTimestamp / 1000);
 		_options.endTimestamp = Std.int(endTimestamp / 1000);
 		DiscordRpc.presence(_options);
+
+		//Debug.logTrace('Discord RPC Updated. Arguments: $details, $state, $smallImageKey, $hasStartTimestamp, $endTimestamp');
 	}
 	
 	public static function resetClientID()
@@ -134,6 +137,7 @@ class DiscordClient
 		if(pack != null && pack.discordRPC != null && pack.discordRPC != clientID)
 		{
 			clientID = pack.discordRPC;
+			//Debug.logTrace('Changing clientID! $clientID, $_defaultID');
 		}
 	}
 	#end

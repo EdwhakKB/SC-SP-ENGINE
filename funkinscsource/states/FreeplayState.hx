@@ -17,10 +17,6 @@ import flixel.util.FlxStringUtil;
 
 import flixel.effects.FlxFlicker;
 
-#if MODS_ALLOWED
-import sys.FileSystem;
-#end
-
 import backend.ScriptHandler;
 
 import flixel.addons.display.FlxBackdrop;
@@ -244,11 +240,7 @@ class FreeplayState extends MusicBeatState
 		add(textBG);
 
 		var leText:String = "";
-		#if PRELOAD_ALL
 		leText = "Press SPACE to listen to the Song / Press CTRL to open the Gameplay Changers Menu / Press RESET to Reset your Score and Accuracy.";
-		#else
-		leText = "Press CTRL to open the Gameplay Changers Menu / Press RESET to Reset your Score and Accuracy.";
-		#end
 		var downText:CoolText = new CoolText(textBG.x, textBG.y + 4, 14.5, 16, Paths.bitmapFont('fonts/vcr'));
 		downText.autoSize = true;
 		downText.antialiasing = FlxG.save.data.antialiasing;
@@ -643,7 +635,7 @@ class FreeplayState extends MusicBeatState
 							else
 							{
 								FlxFlicker.flicker(e);
-								Debug.logInfo(curSelected);
+								Debug.logTrace(curSelected);
 							}
 						});
 						break;
@@ -655,10 +647,10 @@ class FreeplayState extends MusicBeatState
 			}
 			catch(e:Dynamic)
 			{
-				Debug.logInfo('ERROR! $e');
+				Debug.logTrace('ERROR! $e');
 
 				var errorStr:String = e.toString();
-				if(errorStr.startsWith('[file_contents,assets/data/')) errorStr = 'Missing file: ' + errorStr.substring(27, errorStr.length-1); //Missing chart
+				if(errorStr.startsWith('[file_contents,assets/data/')) errorStr = 'Missing file: ' + errorStr.substring(34, errorStr.length-1); //Missing chart
 				missingText.text = 'ERROR WHILE LOADING CHART:\n$errorStr';
 				missingText.screenCenter(Y);
 				missingText.visible = true;

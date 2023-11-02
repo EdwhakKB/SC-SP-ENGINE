@@ -11,6 +11,12 @@ import openfl.Lib;
 import flixel.math.FlxMath;
 import haxe.Int64;
 import openfl.system.System;
+import flixel.util.FlxStringUtil;
+
+#if !openfl_debug
+@:fileXml('tags="haxe,release"')
+@:noDebug
+#end
 
 class FPS extends TextField
 {
@@ -19,17 +25,22 @@ class FPS extends TextField
 	**/
 	public var currentFPS(default, null):Int;
 
-	private var times:Array<Float>;
-
+	/**
+		The current memory usage.
+	**/
 	public var memoryMegas:Dynamic = 0;
 
 	public var taskMemoryMegas:Dynamic = 0;
 
 	public var memoryUsage:String = '';
 
-	private var cacheCount:Int;
+	@:noCompletion private var cacheCount:Int;
+	@:noCompletion private var currentTime:Float;
+	@:noCompletion private var times:Array<Float>;
 
 	public static var stringTimeToReturn:String = '';
+
+	var deltaTimeout:Float = 0.0;
 
 	public function new(inX:Float = 10, inY:Float = 10, inCol:Int = 0x000000)
 	{
@@ -50,25 +61,35 @@ class FPS extends TextField
 
 		times = [];
 
-		addEventListener(Event.ENTER_FRAME, onEnter);
+		width = 680;
 
-		width = 700;
+		height = 180;
 
-		height = 210;
+		#if flash
+		addEventListener(Event.ENTER_FRAME, function(e)
+		{
+			var time = Lib.getTimer();
+			__enterFrame(time - currentTime);
+		});
+		#end
 	}
 
 	// Event Handlers
-	private function onEnter(_)
+	@:noCompletion
+	private #if !flash override #end function __enterFrame(deltaTime:Float):Void
 	{
 		//setup the date
 		if (ClientPrefs.data.dateDisplay)
 			DateSetup.initDate();
 
-		var now = Timer.stamp();
-
-		times.push(now);
-
-		while (times[0] < now - 1)
+		if (deltaTimeout > 1000) {
+			// there's no need to update this every frame and it only causes performance losses.
+			deltaTimeout = 0.0;
+			return;
+		}
+		currentTime += deltaTime;
+		times.push(currentTime);
+		while (times[0] < currentTime - 1000)
 			times.shift();
 
 		var currentCount = times.length;
@@ -82,45 +103,22 @@ class FPS extends TextField
 
 			memoryUsage = (ClientPrefs.data.memoryDisplay ? "RAM: " : "");
 
-			#if !html5
-			memoryMegas = Int64.make(0, System.totalMemory);
+			memoryMegas = cast(System.totalMemory, UInt);
 
-			taskMemoryMegas = Int64.make(0, MemoryUtil.getMemoryfromProcess());
+			//taskMemoryMegas = cast(MemoryUtil.getMemoryfromProcess(), UInt);
 
 			if (ClientPrefs.data.memoryDisplay)
 			{
-				if (memoryMegas >= 0x40000000)
-					memoryUsage += (Math.round(cast(memoryMegas, Float) / 0x400 / 0x400 / 0x400 * 1000) / 1000) + " GB";
-				else if (memoryMegas >= 0x100000)
-					memoryUsage += (Math.round(cast(memoryMegas, Float) / 0x400 / 0x400 * 1000) / 1000) + " MB";
-				else if (memoryMegas >= 0x400)
-					memoryUsage += (Math.round(cast(memoryMegas, Float) / 0x400 * 1000) / 1000) + " KB";
-				else
-					memoryUsage += memoryMegas + " B";
+				memoryUsage += '${FlxStringUtil.formatBytes(memoryMegas)}'; /*'(${FlxStringUtil.formatBytes(taskMemoryMegas)})';*/
 
-				#if windows
-				if (taskMemoryMegas >= 0x40000000)
-					memoryUsage += " (" + (Math.round(cast(taskMemoryMegas, Float) / 0x400 / 0x400 / 0x400 * 1000) / 1000) + " GB)";
-				else if (taskMemoryMegas >= 0x100000)
-					memoryUsage += " (" + (Math.round(cast(taskMemoryMegas, Float) / 0x400 / 0x400 * 1000) / 1000) + " MB)";
-				else if (taskMemoryMegas >= 0x400)
-					memoryUsage += " (" + (Math.round(cast(taskMemoryMegas, Float) / 0x400 * 1000) / 1000) + " KB)";
-				else
-					memoryUsage += "(" + taskMemoryMegas + " B)";
-				#end
+				text += '$memoryUsage';
 			}
-			#else
-			memoryMegas = HelperFunctions.truncateFloat((MemoryUtil.getMemoryfromProcess() / (1024 * 1024)) * 10, 3);
-			memoryUsage += memoryMegas + " MB";
-			#end
-
-			text += '$memoryUsage';
 
 			var stateText:String = '\nState: ${Type.getClassName(Type.getClass(FlxG.state))}';
 			var substateText:String = '\nSubState: ${Type.getClassName(Type.getClass(FlxG.state.subState))}';
 
 			textColor = 0xFFFFFFFF;
-			if (memoryMegas >= 0x40000000 || currentFPS <= ClientPrefs.data.framerate / 2)
+			if (currentFPS <= ClientPrefs.data.framerate / 2)
 			{
 				textColor = 0xFFFF0000;
 			}
@@ -142,6 +140,7 @@ class FPS extends TextField
 		}
 
 		cacheCount = currentCount;
+		deltaTimeout += deltaTime;
 	}
 }
 

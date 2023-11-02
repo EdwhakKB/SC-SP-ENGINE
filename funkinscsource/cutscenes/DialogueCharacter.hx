@@ -1,11 +1,6 @@
 package cutscenes;
 
 import tjson.TJSON as Json;
-
-#if sys
-import sys.FileSystem;
-import sys.io.File;
-#end
 import lime.utils.Assets;
 
 typedef DialogueAnimArray = {
@@ -62,16 +57,16 @@ class DialogueCharacter extends FlxSprite
 		#if MODS_ALLOWED
 		var path:String = Paths.modFolders(characterPath);
 		if (!FileSystem.exists(path)) {
-			path = Paths.getPreloadPath(characterPath);
+			path = Paths.getSharedPath(characterPath);
 		}
 
 		if(!FileSystem.exists(path)) {
-			path = Paths.getPreloadPath('images/dialogue/' + DEFAULT_CHARACTER + '.json');
+			path = Paths.getSharedPath('images/dialogue/' + DEFAULT_CHARACTER + '.json');
 		}
 		rawJson = File.getContent(path);
 
 		#else
-		var path:String = Paths.getPreloadPath(characterPath);
+		var path:String = Paths.getSharedPath(characterPath);
 		rawJson = Assets.getText(path);
 		#end
 		
@@ -113,12 +108,14 @@ class DialogueCharacter extends FlxSprite
 			var anim:DialogueAnimArray = dialogueAnimations.get(leAnim);
 			if(playIdle) {
 				offset.set(anim.idle_offsets[0], anim.idle_offsets[1]);
+				//Debug.logTrace('Setting idle offsets: ' + anim.idle_offsets);
 			} else {
 				offset.set(anim.loop_offsets[0], anim.loop_offsets[1]);
+				//Debug.logTrace('Setting loop offsets: ' + anim.loop_offsets);
 			}
 		} else {
 			offset.set(0, 0);
-			Debug.logInfo('Offsets not found! Dialogue character is badly formatted, anim: ' + leAnim + ', ' + (playIdle ? 'idle anim' : 'loop anim'));
+			Debug.logTrace('Offsets not found! Dialogue character is badly formatted, anim: ' + leAnim + ', ' + (playIdle ? 'idle anim' : 'loop anim'));
 		}
 	}
 

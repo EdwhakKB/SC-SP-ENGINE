@@ -74,7 +74,7 @@ class NoteOffsetState extends MusicBeatState
 		gf.scrollFactor.set(0.95, 0.95);
 		boyfriend = new Character(770, 100, 'bf', true);
 		boyfriend.x += boyfriend.positionArray[0];
-		boyfriend.y += boyfriend.positionArray[1];
+		boyfriend.y += boyfriend.positionArray[1] - 350;
 		add(gf);
 		add(boyfriend);
 
@@ -83,7 +83,18 @@ class NoteOffsetState extends MusicBeatState
 		coolText.screenCenter();
 		coolText.x = FlxG.width * 0.35;
 
-		rating = new FlxSprite().loadGraphic(Paths.image('sick'));
+		var swagOrSick:String = '';
+
+		switch (FlxG.random.int(0, 1))
+		{
+			case 0:
+				swagOrSick = 'sick';
+			case 1:
+				swagOrSick = 'swag';
+
+		}
+
+		rating = new FlxSprite().loadGraphic(Paths.image(swagOrSick));
 		rating.cameras = [camHUD];
 		rating.antialiasing = ClientPrefs.data.antialiasing;
 		rating.setGraphicSize(Std.int(rating.width * 0.7));
@@ -202,6 +213,7 @@ class NoteOffsetState extends MusicBeatState
 
 		if(controls.controllerMode != _lastControllerMode)
 		{
+			//Debug.logTrace('changed controller mode');
 			FlxG.mouse.visible = !controls.controllerMode;
 			controllerPointer.visible = controls.controllerMode;
 
@@ -318,6 +330,7 @@ class NoteOffsetState extends MusicBeatState
 					holdingObjectType = true;
 					startComboOffset.x = ClientPrefs.data.comboOffset[2];
 					startComboOffset.y = ClientPrefs.data.comboOffset[3];
+					//Debug.logTrace('yo bro');
 				}
 				else if (startMousePos.x - rating.x >= 0 && startMousePos.x - rating.x <= rating.width &&
 						 startMousePos.y - rating.y >= 0 && startMousePos.y - rating.y <= rating.height)
@@ -325,10 +338,12 @@ class NoteOffsetState extends MusicBeatState
 					holdingObjectType = false;
 					startComboOffset.x = ClientPrefs.data.comboOffset[0];
 					startComboOffset.y = ClientPrefs.data.comboOffset[1];
+					//Debug.logTrace('heya');
 				}
 			}
 			if(FlxG.mouse.justReleased || gamepadReleased) {
 				holdingObjectType = null;
+				//Debug.logTrace('dead');
 			}
 
 			if(holdingObjectType != null)

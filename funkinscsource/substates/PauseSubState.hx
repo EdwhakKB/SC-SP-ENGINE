@@ -30,8 +30,6 @@ class PauseSubState extends MusicBeatSubstate
 	var missingTextBG:FlxSprite;
 	var missingText:FlxText;
 
-	var curSelect:FlxText;
-
 	public static var songName:String = '';
 
 	var settings = {
@@ -160,13 +158,6 @@ class PauseSubState extends MusicBeatSubstate
 		grpMenuShit = new FlxTypedGroup<Alphabet>();
 		add(grpMenuShit);
 
-		curSelect = new FlxText(0, 0, 0, '<', 80);
-		curSelect.font = Paths.font("vcr.ttf");
-		curSelect.borderStyle = OUTLINE;
-		curSelect.borderSize = 2;
-		curSelect.alpha = 0;
-		add(curSelect);
-
 		missingTextBG = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
 		missingTextBG.alpha = 0.6;
 		missingTextBG.visible = false;
@@ -275,7 +266,7 @@ class PauseSubState extends MusicBeatSubstate
 						return;
 					}					
 				}catch(e:Dynamic){
-					Debug.logInfo('ERROR! $e');
+					Debug.logTrace('ERROR! $e');
 
 					var errorStr:String = e.toString();
 					if(errorStr.startsWith('[file_contents,assets/data/songs/')) errorStr = 'Missing file: ' + errorStr.substring(27, errorStr.length-1); //Missing chart
@@ -313,7 +304,6 @@ class PauseSubState extends MusicBeatSubstate
 					}, 5);
 					inCountDown = true;
 					menuItems = [];
-					curSelect.alpha = 0;
 					deleteSkipTimeText();
 					stoppedUpdatingMusic = true;
 					regenMenu();
@@ -535,13 +525,6 @@ class PauseSubState extends MusicBeatSubstate
 		if (curSelected >= menuItems.length)
 			curSelected = 0;
 
-		for (i in 0...menuItems.length)
-		{
-			curSelect.x = grpMenuShit.members[i].x + grpMenuShit.members[i].width + 10;
-			if (grpMenuShit.members[i].targetY == 0)
-				curSelect.y = grpMenuShit.members[i].y;
-		}
-
 		var bullShit:Int = 0;
 
 		for (item in grpMenuShit.members)
@@ -576,11 +559,6 @@ class PauseSubState extends MusicBeatSubstate
 			grpMenuShit.remove(obj, true);
 			obj.destroy();
 		}
-
-		curSelect.kill();
-		remove(curSelect);
-		curSelect.destroy();
-
 		for (i in 0...menuItems.length) {
 			var item = new Alphabet(90, 320, menuItems[i], true);
 			item.isMenuItem = true;
@@ -601,16 +579,7 @@ class PauseSubState extends MusicBeatSubstate
 			}
 		}
 
-		curSelect = new FlxText(0, 0, 0, '<', 80);
-		curSelect.font = Paths.font("vcr.ttf");
-		curSelect.borderStyle = OUTLINE;
-		curSelect.borderSize = 2;
-		curSelect.alpha = 1;
-		add(curSelect);
-
 		curSelected = 0;
-		for (i in 0...menuItems.length)
-			curSelect.x = (60 + grpMenuShit.members[i].width) + 10;
 		changeSelection();
 	}
 	

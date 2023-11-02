@@ -16,43 +16,28 @@ class ReflectionFunctions
 	public static function implement(funk:FunkinLua)
 	{
 		funk.set("getProperty", function(variable:String, ?allowMaps:Bool = false) {
-			if (variable == 'gfSpeed')
-			{
-				return PlayState.instance.gf.gfSpeed;
+			var split:Array<String> = variable.split('.');
+			if (Stage.instance.swagBacks.exists(split[0])){
+				return Stage.instance.getProperty(variable);
 			}
-			else
-			{
-				var split:Array<String> = variable.split('.');
-				if (Stage.instance.swagBacks.exists(split[0])){
-					return Stage.instance.getProperty(variable);
-				}
-				if(split.length > 1)
-					return LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split, true, true, allowMaps), split[split.length-1], allowMaps);
-			}
+			if(split.length > 1)
+				return LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split, true, true, allowMaps), split[split.length-1], allowMaps);
 			return LuaUtils.getVarInArray(LuaUtils.getTargetInstance(), variable, allowMaps);
 		});
 		funk.set("setProperty", function(variable:String, value:Dynamic, allowMaps:Bool = false) {
-			if (variable == 'gfSpeed')
-			{
-				PlayState.instance.gf.gfSpeed = value;
+			var split:Array<String> = variable.split('.');
+			if (Stage.instance.swagBacks.exists(split[0])){
+				Stage.instance.setProperty(variable, value);
 				return true;
 			}
-			else
-			{
-				var split:Array<String> = variable.split('.');
-				if (Stage.instance.swagBacks.exists(split[0])){
-					Stage.instance.setProperty(variable, value);
-					return true;
-				}
-				if(split.length > 1) {
-					if (Std.isOfType(LuaUtils.getObjectDirectly(split[0]), Character) && split[split.length-1] == 'color')
-						LuaUtils.setVarInArray(LuaUtils.getPropertyLoop(split), 'doMissThing', "false");
+			if(split.length > 1) {
+				if (Std.isOfType(LuaUtils.getObjectDirectly(split[0]), Character) && split[split.length-1] == 'color')
+					LuaUtils.setVarInArray(LuaUtils.getPropertyLoop(split), 'doMissThing', "false");
 
-					LuaUtils.setVarInArray(LuaUtils.getPropertyLoop(split, true, true, allowMaps), split[split.length-1], value, allowMaps);
-					return true;
-				}
-				LuaUtils.setVarInArray(LuaUtils.getTargetInstance(), variable, value, allowMaps);
+				LuaUtils.setVarInArray(LuaUtils.getPropertyLoop(split, true, true, allowMaps), split[split.length-1], value, allowMaps);
+				return true;
 			}
+			LuaUtils.setVarInArray(LuaUtils.getTargetInstance(), variable, value, allowMaps);
 			return true;
 		});
 		funk.set("getPropertyFromClass", function(classVar:String, variable:String, ?allowMaps:Bool = false) {
@@ -213,6 +198,7 @@ class ReflectionFunctions
 		var split:Array<String> = funcStr.split('.');
 		var funcToRun:Function = null;
 		var obj:Dynamic = classObj;
+		//Debug.logTrace('start: $obj');
 		if(obj == null)
 		{
 			return null;
@@ -221,9 +207,11 @@ class ReflectionFunctions
 		for (i in 0...split.length)
 		{
 			obj = LuaUtils.getVarInArray(obj, split[i].trim());
+			//Debug.logTrace(obj, split[i]);
 		}
 
 		funcToRun = cast obj;
+		//Debug.logTrace('end: $obj');
 		return funcToRun != null ? Reflect.callMethod(obj, funcToRun, args) : null;
 	}
 }

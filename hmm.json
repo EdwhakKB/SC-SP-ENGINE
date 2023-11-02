@@ -41,11 +41,6 @@
       "version": null
     },
     {
-      "name": "hxjsonast",
-      "type": "haxelib",
-      "version": null
-    },
-    {
       "name": "hxCodec",
       "type": "haxelib",
       "version": null
@@ -73,6 +68,20 @@
       "dir": null,
       "ref": "master",
       "url": "https://github.com/superpowers04/linc_luajit"
+    },
+    {
+      "name": "tentools",
+      "type": "git",
+      "dir": null,
+      "ref": "master",
+      "url": "https://github.com/TentaRJ/tentools.git"
+    },
+    {
+      "name": "systools",
+      "type": "git",
+      "dir": null,
+      "ref": "master",
+      "url": "https://github.com/haya3218/systools"
     }
   ]
 }

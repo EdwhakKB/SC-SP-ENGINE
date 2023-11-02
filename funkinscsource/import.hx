@@ -8,6 +8,13 @@ import backend.Discord;
 import backend.Achievements;
 #end
 
+#if sys
+import sys.*;
+import sys.io.*;
+#elseif js
+import js.html.*;
+#end
+
 import backend.Paths;
 import backend.Controls;
 import backend.CoolUtil;
@@ -46,6 +53,10 @@ import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.group.FlxSpriteGroup;
 import flixel.group.FlxGroup.FlxTypedGroup;
+
+#if modchartingTools
+import modcharting.*;
+#end
 
 import psychlua.CustomFlxColor;
 import objects.CharacterOffsets;

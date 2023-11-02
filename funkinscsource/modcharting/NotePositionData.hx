@@ -36,14 +36,14 @@ class NotePositionData implements IFlxDestroyable
     public function setupStrum(x:Float, y:Float, z:Float, lane:Int, scaleX:Float, scaleY:Float, skewX:Float, skewY:Float, pf:Int)
     {
         this.x = x;
-        this.y = y;
+        this.y =  y;
         this.z = z;
         this.angle = 0;
         this.alpha = 1;
         this.scaleX = scaleX; 
         this.scaleY = scaleY; 
-        this.skewX = skewX;
-        this.skewY = skewY;
+        this.skewX = skewX; 
+        this.skewY = skewY; 
         this.index = lane;
         this.playfieldIndex = pf;
         this.lane = lane;
@@ -58,14 +58,14 @@ class NotePositionData implements IFlxDestroyable
     public function setupNote(x:Float, y:Float, z:Float, lane:Int, scaleX:Float, scaleY:Float, skewX:Float, skewY:Float, pf:Int, alpha:Float, curPos:Float, noteDist:Float, iaX:Float, iaY:Float, strumTime:Float, index:Int)
     {
         this.x = x;
-        this.y = y;
+        this.y =  y;
         this.z = z;
         this.angle = 0;
         this.alpha = alpha;
         this.scaleX = scaleX; 
         this.scaleY = scaleY; 
-        this.skewX = skewX;
-        this.skewY = skewY;
+        this.skewX = skewX; 
+        this.skewY = skewY; 
         this.index = index;
         this.playfieldIndex = pf;
         this.lane = lane;

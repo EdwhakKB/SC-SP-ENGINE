@@ -4,14 +4,16 @@ import flixel.math.FlxMath;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.FlxSprite;
 import flixel.FlxG;
-import states.PlayState;
 
 #if LEATHER
+import states.PlayState;
 import game.Note;
-#else 
+#elseif (PSYCH && PSYCHVERSION == 0.7)
+import states.PlayState;
 import objects.Note;
-import modcharting.ModchartEditorState;
-import objects.StrumArrow;
+#else
+import PlayState;
+import Note;
 #end
 
 using StringTools;
@@ -25,11 +27,10 @@ class NoteMovement
     public static var arrowSize:Float = 112;
     public static var defaultStrumX:Array<Float> = [];
     public static var defaultStrumY:Array<Float> = [];
-    public static var defaultScale:Array<Float> = [];
-    public static var arrowSizes:Array<Float> = [];
     public static var defaultSkewX:Array<Float> = [];
     public static var defaultSkewY:Array<Float> = [];
-    public static var strumGroup:FlxTypedGroup<StrumArrow> = null;
+    public static var defaultScale:Array<Float> = [];
+    public static var arrowSizes:Array<Float> = [];
     #if LEATHER
     public static var leatherEngineOffsetStuff:Map<String, Float> = [];
     #end
@@ -37,18 +38,12 @@ class NoteMovement
     {
         defaultStrumX = []; //reset
         defaultStrumY = []; 
+        defaultSkewX = [];
+        defaultSkewY = []; 
         defaultScale = [];
         arrowSizes = [];
-        defaultSkewX = [];
-        defaultSkewY = [];
-        #if (LEATHER || KADE)
-        strumGroup = PlayState.playerStrums;
-        #else
-        strumGroup = game.playerStrums;
-        #end
-
-        keyCount = #if (LEATHER || KADE) PlayState.strumLineNotes.length-strumGroup.length #else game.strumLineNotes.length-strumGroup.length #end; //base game doesnt have opponent strums as group
-        playerKeyCount = strumGroup.length;
+        keyCount = #if (LEATHER || KADE) PlayState.strumLineNotes.length-PlayState.playerStrums.length #else game.strumLineNotes.length-game.playerStrums.length #end; //base game doesnt have opponent strums as group
+        playerKeyCount = #if (LEATHER || KADE) PlayState.playerStrums.length #else game.playerStrums.length #end;
 
         for (i in #if (LEATHER || KADE) 0...PlayState.strumLineNotes.members.length #else 0...game.strumLineNotes.members.length #end)
         {
@@ -81,10 +76,10 @@ class NoteMovement
         #if ((PSYCH || LEATHER) && !DISABLE_MODCHART_EDITOR)
         defaultStrumX = []; //reset
         defaultStrumY = []; 
-        defaultScale = [];
-        arrowSizes = [];
         defaultSkewX = [];
         defaultSkewY = [];
+        defaultScale = [];
+        arrowSizes = [];
         keyCount = game.strumLineNotes.length-game.playerStrums.length; //base game doesnt have opponent strums as group
         playerKeyCount = game.playerStrums.length;
 
@@ -116,14 +111,14 @@ class NoteMovement
         daNote.y = defaultStrumY[lane];
         daNote.z = 0;
 
-        var pos = ModchartUtil.getCartesianCoords3D(incomingAngleX, incomingAngleY, curPos*noteDist);
+        var pos = ModchartUtil.getCartesianCoords3D(incomingAngleX,incomingAngleY, curPos*noteDist);
         daNote.y += pos.y;
         daNote.x += pos.x;
         daNote.z += pos.z;
 
-        daNote.skew.y = defaultSkewX[lane];
-        daNote.skew.x = defaultSkewY[lane];
-    } 
+        daNote.skew.x = defaultSkewX[lane];
+        daNote.skew.y = defaultSkewY[lane];
+    }
 
     public static function getLaneDiffFromCenter(lane:Int)
     {
@@ -138,6 +133,8 @@ class NoteMovement
         }
 
         //col = (col-col-col); //flip pos/negative
+
+        //trace(col);
 
         return col;
     }

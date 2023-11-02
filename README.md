@@ -16,7 +16,7 @@
 Engine originally used on [Mind Games Mod](https://gamebanana.com/mods/301107), intended to be a fix for the vanilla version's many issues while keeping the casual play aspect of it. Also aiming to be an easier alternative to newbie coders.
 
 ## Installation:
-You must have [the most up-to-date version of Haxe](https://haxe.org/download/), seriously, stop using 4.1.5, it misses some stuff.
+You must have [the most up-to-date version of Haxe](https://haxe.org/download/), seriously, stop using 4.1.5, it messes some stuff.
 
 open up a Command Prompt/PowerShell or Terminal, type `haxelib install hmm`
 
@@ -86,6 +86,7 @@ _____________________________________
 ### Week 6:
   * On Thorns, the HUD is hidden during the cutscene
   * Also there's the Background girls being spooky during the "Hey!" parts of the Instrumental
+  * Added rain for roses, added some effects to thorns but left senpai alone
 ### Week 7:
   * No extra features yet!
 

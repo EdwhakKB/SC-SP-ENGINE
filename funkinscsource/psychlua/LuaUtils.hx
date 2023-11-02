@@ -14,6 +14,7 @@ import psychlua.FunkinLua;
 #if (flixel >= "5.3.0")
 import flixel_5_3_1.ParallaxSprite;
 #end
+import flixel.addons.display.FlxBackdrop;
 
 typedef LuaTweenOptions = {
 	type:FlxTweenType,
@@ -79,6 +80,7 @@ class LuaUtils
 
 		if(allowMaps && isMap(instance))
 		{
+			//Debug.logTrace(instance);
 			instance.set(variable, value);
 			return value;
 		}
@@ -138,6 +140,7 @@ class LuaUtils
 		
 		if(allowMaps && isMap(instance))
 		{
+			//Debug.logTrace(instance);
 			return instance.get(variable);
 		}
 
@@ -171,6 +174,7 @@ class LuaUtils
 				return false;
 		}*/
 
+		//Debug.logTrace(variable);
 		if(variable.exists != null && variable.keyValueIterator != null) return true;
 		return false;
 	}
@@ -284,8 +288,9 @@ class LuaUtils
 			var spr:Dynamic = Stage.instance.swagBacks.get(obj);
 			var obj:FlxSprite = changeSpriteClass(spr);
 
-			if(indices == null) indices = [];
-			if(Std.isOfType(indices, String))
+			if(indices == null)
+				indices = [0];
+			else if(Std.isOfType(indices, String))
 			{
 				var strIndices:Array<String> = cast (indices, String).trim().split(',');
 				var myIndices:Array<Int> = [];
@@ -307,8 +312,9 @@ class LuaUtils
 		var obj:Dynamic = LuaUtils.getObjectDirectly(obj, false);
 		if(obj != null && obj.animation != null)
 		{
-			if(indices == null) indices = [];
-			if(Std.isOfType(indices, String))
+			if(indices == null)
+				indices = [0];
+			else if(Std.isOfType(indices, String))
 			{
 				var strIndices:Array<String> = cast (indices, String).trim().split(',');
 				var myIndices:Array<Int> = [];
@@ -455,6 +461,20 @@ class LuaUtils
 		PlayState.instance.remove(target, true);
 		target.destroy();
 		PlayState.instance.modchartSkewedSprite.remove(tag);
+		#end
+	}
+
+	public static function resetBackdropTag(tag:String) {
+		#if LUA_ALLOWED
+		if(!PlayState.instance.modchartBackdrop.exists(tag)) {
+			return;
+		}
+		
+		var target:FlxBackdrop = PlayState.instance.modchartBackdrop.get(tag);
+		target.kill();
+		PlayState.instance.remove(target, true);
+		target.destroy();
+		PlayState.instance.modchartBackdrop.remove(tag);
 		#end
 	}
 

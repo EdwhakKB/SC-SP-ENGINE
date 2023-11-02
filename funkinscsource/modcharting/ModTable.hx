@@ -3,7 +3,6 @@ package modcharting;
 import flixel.math.FlxMath;
 import flixel.tweens.FlxTween;
 import modcharting.Modifier;
-import backend.managers.TweenManager;
 #if LEATHER
 import game.Conductor;
 #end
@@ -78,7 +77,7 @@ class ModTable
         }
     }
 
-    public function reconstructTable():Void
+    public function reconstructTable() : Void
     {
         table = [];
 

@@ -21,11 +21,6 @@ import states.StoryMenuState;
 import states.OutdatedState;
 import states.MainMenuState;
 
-#if MODS_ALLOWED
-import sys.FileSystem;
-import sys.io.File;
-#end
-
 import gamejolt.GameJoltAPI;
 import sys.thread.Mutex;
 import flixel.graphics.FlxGraphic;
@@ -339,7 +334,7 @@ class TitleState extends MusicBeatState
 	function getIntroTextShit():Array<Array<String>>
 	{
 		#if MODS_ALLOWED
-		var firstArray:Array<String> = Mods.mergeAllTextsNamed('data/introText.txt', Paths.getPreloadPath());
+		var firstArray:Array<String> = Mods.mergeAllTextsNamed('data/introText.txt', Paths.getSharedPath());
 		#else
 		var fullText:String = Assets.getText(Paths.txt('introText'));
 		var firstArray:Array<String> = fullText.split('\n');
@@ -430,10 +425,7 @@ class TitleState extends MusicBeatState
 				if (mustUpdate) {
 					MusicBeatState.switchState(new OutdatedState());
 				} else {
-					//if (ClientPrefs.data.systemUserName != "")
-						MusicBeatState.switchState(new MainMenuState());
-					/*else
-						MusicBeatState.switchState(new states.WelcomeState());*/
+					MusicBeatState.switchState(new MainMenuState());
 				}
 				closedState = true;
 			});
@@ -447,12 +439,14 @@ class TitleState extends MusicBeatState
 				if(allowedKeys.contains(keyName)) {
 					easterEggKeysBuffer += keyName;
 					if(easterEggKeysBuffer.length >= 32) easterEggKeysBuffer = easterEggKeysBuffer.substring(1);
+					//Debug.logTrace('Test! Allowed Key pressed!!! Buffer: ' + easterEggKeysBuffer);
 
 					for (wordRaw in easterEggKeys)
 					{
 						var word:String = wordRaw.toUpperCase(); //just for being sure you're doing it right
 						if (easterEggKeysBuffer.contains(word))
 						{
+							//Debug.logTrace('YOOO! ' + word);
 							if (FlxG.save.data.psychDevsEasterEgg == word)
 								FlxG.save.data.psychDevsEasterEgg = '';
 							else
@@ -661,11 +655,9 @@ class TitleState extends MusicBeatState
 					// FlxTween.tween(FlxG.camera, {angle: -30}, 0.5);
 				case 14:
 					addMoreText('Funkin', 0, "random");
-					// FlxTween.tween(FlxG.camera, {angle: -30}, 0.5);
 				case 15:
 					if (ClientPrefs.data.SCEWatermark) addMoreText('Sick Coders Edition', 0, "#FFFF90");
 					else addMoreText('Psych Engine Edition', 0, "#FFFF90");
-					// FlxTween.tween(FlxG.camera, {angle: 30}, 0.5);
 				case 16:
 					// FlxTween.tween(FlxG.camera, {angle: 360}, 0.5);
 					skipIntro();

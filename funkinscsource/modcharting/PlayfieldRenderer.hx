@@ -1,6 +1,7 @@
 package modcharting;
 
 
+import flixel.util.FlxTimer.FlxTimerManager;
 import flixel.math.FlxMath;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
@@ -13,28 +14,26 @@ import flixel.util.FlxSpriteUtil;
 import flixel.graphics.frames.FlxFrame;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.FlxSprite;
-import flixel.util.FlxTimer;
-import openfl.Vector;
 
 import flixel.FlxG;
-import managers.*;
 import modcharting.Modifier;
+import managers.*;
 import flixel.system.FlxAssets.FlxShader;
-
-import states.PlayState;
 
 #if LEATHER
 import states.PlayState;
 import game.Note;
-import game.StrumArrow;
+import game.StrumNote;
 import game.Conductor;
-#else 
+#elseif (PSYCH && PSYCHVERSION == 0.7)
+import states.PlayState;
 import objects.Note;
 import objects.StrumArrow;
-import objects.SkewSpriteGroup;
+#else
+import PlayState;
+import Note;
+import StrumNote;
 #end
-
-import flixel.addons.effects.FlxSkewedSprite;
 
 using StringTools;
 
@@ -46,21 +45,17 @@ using StringTools;
 //finish setting up tooltips in editor
 //start documenting more stuff idk
 
-/*typedef RenderObject =
-{
-	graphic:FlxGraphic,
-
-	alphas:Array<Float>,
-	glows:Array<Float>,
-	uvData:Vector<Float>,
-	vertices:Vector<Float>,
-	zIndex:Float,
-}*/
-
+typedef StrumNoteType = 
+#if (PSYCH && PSYCHVERSION != 0.7 || LEATHER) StrumNote
+#elseif (PSYCH && PSYCHVERSION == 0.7) StrumArrow
+#elseif KADE StaticArrow
+#elseif FOREVER_LEGACY UIStaticArrow
+#elseif ANDROMEDA Receptor
+#else FlxSprite #end;
 
 class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can edit draw
 {
-    public var strumGroup:FlxTypedGroup<StrumArrow>;
+    public var strumGroup:FlxTypedGroup<StrumNoteType>;
     public var notes:FlxTypedGroup<Note>;
     public var instance:ModchartMusicBeatState;
     public var playStateInstance:PlayState;
@@ -68,6 +63,8 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
 
     public var eventManager:ModchartEventManager;
     public var modifierTable:ModTable;
+    public var tweenManager:FlxTweenManager = null;
+    public var timerManager:FlxTimerManager = null;
 
     public var modchart:ModchartFile;
     public var inEditor:Bool = false;
@@ -82,31 +79,8 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         return modifierTable.modifiers; //back compat with lua modcharts
     }
 
-    public var tweenManager:FlxTweenManager;
-    public var timerManager:FlxTimerManager;
 
-    public function createTween(Object:Dynamic, Values:Dynamic, Duration:Float, ?Options:TweenOptions):FlxTween
-	{
-		var tween:FlxTween = tweenManager.tween(Object, Values, Duration, Options);
-		tween.manager = tweenManager;
-		return tween;
-	}
-
-	public function createTweenNum(FromValue:Float, ToValue:Float, Duration:Float = 1, ?Options:TweenOptions, ?TweenFunction:Float->Void):FlxTween
-	{
-		var tween:FlxTween = tweenManager.num(FromValue, ToValue, Duration, Options, TweenFunction);
-		tween.manager = tweenManager;
-		return tween;
-	}
-
-	public function createTimer(Time:Float = 1, ?OnComplete:FlxTimer->Void, Loops:Int = 1):FlxTimer
-	{
-		var timer:FlxTimer = new FlxTimer();
-		timer.manager = timerManager;
-		return timer.start(Time, OnComplete, Loops);
-	}
-
-    public function new(strumGroup:FlxTypedGroup<StrumArrow>, notes:FlxTypedGroup<Note>, instance:ModchartMusicBeatState) 
+    public function new(strumGroup:FlxTypedGroup<StrumNoteType>, notes:FlxTypedGroup<Note>,instance:ModchartMusicBeatState) 
     {
         super(0,0);
         this.strumGroup = strumGroup;
@@ -129,6 +103,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         modchart = new ModchartFile(this);
     }
 
+
     public function addNewPlayfield(?x:Float = 0, ?y:Float = 0, ?z:Float = 0, ?alpha:Float = 1)
     {
         playfields.push(new Playfield(x,y,z,alpha));
@@ -137,10 +112,11 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
     override function update(elapsed:Float) 
     {
         eventManager.update(elapsed);
-        tweenManager.update(elapsed);
+        tweenManager.update(elapsed); //should be automatically paused when you pause in game
         timerManager.update(elapsed);
         super.update(elapsed);
     }
+
 
     override public function draw()
     {
@@ -154,11 +130,12 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         //draw notes to screen
     }
 
-    private function addDataToStrum(strumData:NotePositionData, strum:StrumArrow)
+
+    private function addDataToStrum(strumData:NotePositionData, strum: #if (PSYCH && PSYCHVERSION != 0.7 || LEATHER) StrumNote #elseif (PSYCH && PSYCHVERSION == 0.7) StrumArrow #end)
     {
         strum.x = strumData.x;
         strum.y = strumData.y;
-        strum.z = strumData.z;
+        //strum.z = strumData.z;
         strum.angle = strumData.angle;
         strum.alpha = strumData.alpha;
         strum.scale.x = strumData.scaleX;
@@ -189,6 +166,8 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         return strumData;
     }
 
+   
+
     private function addDataToNote(noteData:NotePositionData, daNote:Note)
     {
         daNote.x = noteData.x;
@@ -212,14 +191,14 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         var noteSkewX = notes.members[noteIndex].skew.x;
         var noteSkewY = notes.members[noteIndex].skew.y;
 
-        var noteAlphas:Float = 1;
+        var noteAlpha:Float = 1;
         #if PSYCH
-        noteAlphas = notes.members[noteIndex].multAlpha;
-        #else
+            noteAlpha = notes.members[noteIndex].multAlpha;
+        #else 
         if (notes.members[noteIndex].isSustainNote)
-            noteAlphas = 0.6;
-        else
-            noteAlphas = 1;
+            noteAlpha = 0.6;
+        else 
+            noteAlpha = 1;
         #end
 
         if (ModchartUtil.getIsPixelStage(instance))
@@ -230,7 +209,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         }
 
         var noteData:NotePositionData = NotePositionData.get();
-        noteData.setupNote(noteX, noteY, noteZ, lane, noteScaleX, noteScaleY, noteSkewX, noteSkewY, playfieldIndex, noteAlphas, 
+        noteData.setupNote(noteX, noteY, noteZ, lane, noteScaleX, noteScaleY, noteSkewX, noteSkewY, playfieldIndex, noteAlpha, 
             curPos, noteDist, incomingAngle[0], incomingAngle[1], notes.members[noteIndex].strumTime, noteIndex);
         playfields[playfieldIndex].applyOffsets(noteData);
         return noteData;
@@ -260,6 +239,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         return noteDist;
     }
 
+
     private function getNotePositions()
     {
         var notePositions:Array<NotePositionData> = [];
@@ -278,16 +258,16 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
 
                 var noteDist = getNoteDist(i);
                 noteDist = modifierTable.applyNoteDistMods(noteDist, lane, pf);
-                
+
                 var sustainTimeThingy:Float = 0;
 
                 //just causes too many issues lol, might fix it at some point
-                /*if (notes.members[i].isHoldEnd && ClientPrefs.data.downScroll)
+                /*if (notes.members[i].animation.curAnim.name.endsWith('end') && ClientPrefs.downScroll)
                 {
                     if (noteDist > 0)
-                        sustainTimeThingy = (ModchartUtil.getFakeCrochet()/4)/2; //fix stretched sustain ends (downscroll)
-                    else 
-                        sustainTimeThingy = (-ModchartUtil.getFakeCrochet()/4)/songSpeed;
+                        sustainTimeThingy = (NoteMovement.getFakeCrochet()/4)/2; //fix stretched sustain ends (downscroll)
+                    //else 
+                        //sustainTimeThingy = (-NoteMovement.getFakeCrochet()/4)/songSpeed;
                 }*/
                     
                 var curPos = getNoteCurPos(i, sustainTimeThingy);
@@ -329,17 +309,16 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
     {
         if (noteData.alpha <= 0)
             return;
-        var strumArrow = strumGroup.members[noteData.index];
-        var thisNotePos = ModchartUtil.calculatePerspective(new Vector3D(noteData.x+(strumArrow.width/2), noteData.y+(strumArrow.height/2), noteData.z*0.001), 
-        ModchartUtil.defaultFOV*(Math.PI/180), -(strumArrow.width/2), -(strumArrow.height/2));
+        var strumNote = strumGroup.members[noteData.index];
+        var thisNotePos = ModchartUtil.calculatePerspective(new Vector3D(noteData.x+(strumNote.width/2), noteData.y+(strumNote.height/2), noteData.z*0.001), 
+        ModchartUtil.defaultFOV*(Math.PI/180), -(strumNote.width/2), -(strumNote.height/2));
 
-        var skewX = ModchartUtil.getStrumSkew(strumArrow, true);
-        var skewY = ModchartUtil.getStrumSkew(strumArrow, false);
+        var skewX = ModchartUtil.getStrumSkew(strumNote, false);
+        var skewY = ModchartUtil.getStrumSkew(strumNote, true);
         noteData.x = thisNotePos.x;
         noteData.y = thisNotePos.y;
         noteData.scaleX *= (1/-thisNotePos.z);
         noteData.scaleY *= (1/-thisNotePos.z);
-
         // noteData.skewX = skewX + noteData.skewX;
         // noteData.skewY = skewY + noteData.skewY;
 
@@ -356,16 +335,14 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         var thisNotePos = ModchartUtil.calculatePerspective(new Vector3D(noteData.x+(daNote.width/2)+ModchartUtil.getNoteOffsetX(daNote, instance), noteData.y+(daNote.height/2), noteData.z*0.001), 
         ModchartUtil.defaultFOV*(Math.PI/180), -(daNote.width/2), -(daNote.height/2));
 
-        var skewX = ModchartUtil.getNoteSkew(daNote, true);
-        var skewY = ModchartUtil.getNoteSkew(daNote, false);
+        var skewX = ModchartUtil.getNoteSkew(daNote, false);
+        var skewY = ModchartUtil.getNoteSkew(daNote, true);
         noteData.x = thisNotePos.x;
         noteData.y = thisNotePos.y;
         noteData.scaleX *= (1/-thisNotePos.z);
         noteData.scaleY *= (1/-thisNotePos.z);
-
         // noteData.skewX = skewX + noteData.skewX;
         // noteData.skewY = skewY + noteData.skewY;
-
         //set note position using the position data
         addDataToNote(noteData, notes.members[noteData.index]); 
         //make sure it draws on the correct camera
@@ -398,6 +375,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         var timeToNextSustain = ModchartUtil.getFakeCrochet()/4;
         if (noteData.noteDist < 0)
             timeToNextSustain *= -1; //weird shit that fixes upscroll lol
+            // timeToNextSustain = -ModchartUtil.getFakeCrochet()/4; //weird shit that fixes upscroll lol
 
         var nextHalfNotePos = getSustainPoint(noteData, timeToNextSustain*0.5);
         var nextNotePos = getSustainPoint(noteData, timeToNextSustain);
@@ -432,7 +410,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         {
             if (noteData.isStrum) //draw strum
                 drawStrum(noteData);
-            else if (!notes.members[noteData.index].isSustainNote && !notes.members[noteData.index].isHoldEnd) //draw regular note
+            else if (!notes.members[noteData.index].isSustainNote) //draw regular note
                 drawNote(noteData);
             else //draw sustain
                 drawSustainNote(noteData);
@@ -458,7 +436,6 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         var incomingAngle:Array<Float> = modifierTable.applyIncomingAngleMods(lane, curPos, pf);
         if (noteDist < 0)
             incomingAngle[0] += 180; //make it match for both scrolls
-
         //get the general note path for the next note
         NoteMovement.setNotePath(daNote, lane, songSpeed, curPos, noteDist, incomingAngle[0], incomingAngle[1]);
         //save the position data 
@@ -485,10 +462,22 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         return 1.0; 
     }
 
+    public function createTween(Object:Dynamic, Values:Dynamic, Duration:Float, ?Options:TweenOptions):FlxTween
+    {
+        var tween:FlxTween = tweenManager.tween(Object, Values, Duration, Options);
+        tween.manager = tweenManager;
+        return tween;
+    }
+    
+    public function createTweenNum(FromValue:Float, ToValue:Float, Duration:Float = 1, ?Options:TweenOptions, ?TweenFunction:Float->Void):FlxTween
+    {
+        var tween:FlxTween = tweenManager.num(FromValue, ToValue, Duration, Options, TweenFunction);
+        tween.manager = tweenManager;
+        return tween;
+    }
+
     override public function destroy()
     {
-        tweenManager.clear();
-        timerManager.clear();
         if (modchart != null)
         {
             for (customMod in modchart.customModifiers)

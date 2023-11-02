@@ -152,18 +152,18 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			'bool');
 		addOption(option);
 
+		var option:Option = new Option('Sustains as One Note',
+			"If checked, Hold Notes can't be pressed if you miss,\nand count as a single Hit/Miss.\nUncheck this if you prefer the old Input System.",
+			'guitarHeroSustains',
+			'bool');
+		addOption(option);
+
 		super();
 	}
 
 	function onChangeHitsound()
-	{
-		if (ClientPrefs.data.hitSounds != "None" && ClientPrefs.data.hitsoundVolume != 0)
-			FlxG.sound.play(Paths.sound('hitsounds/${ClientPrefs.data.hitSounds}'), ClientPrefs.data.hitsoundVolume);
-	}
+		if (ClientPrefs.data.hitSounds != "None" && ClientPrefs.data.hitsoundVolume != 0) FlxG.sound.play(Paths.sound('hitsounds/${ClientPrefs.data.hitSounds}'), ClientPrefs.data.hitsoundVolume);
 
 	function onChangeHitsoundVolume()
-	{
-		if (ClientPrefs.data.hitSounds != "None")
-			FlxG.sound.play(Paths.sound('hitsounds/${ClientPrefs.data.hitSounds}'), ClientPrefs.data.hitsoundVolume);
-	}
+		if (ClientPrefs.data.hitSounds != "None") FlxG.sound.play(Paths.sound('hitsounds/${ClientPrefs.data.hitSounds}'), ClientPrefs.data.hitsoundVolume);
 }

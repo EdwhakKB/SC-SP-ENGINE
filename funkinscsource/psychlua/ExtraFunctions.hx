@@ -1,10 +1,5 @@
 package psychlua;
 
-#if sys
-import sys.FileSystem;
-import sys.io.File;
-#end
-
 import flixel.util.FlxSave;
 import openfl.utils.Assets;
 
@@ -96,7 +91,7 @@ class ExtraFunctions
 				case 'down': return PlayState.instance.controls.NOTE_DOWN_P;
 				case 'up': return PlayState.instance.controls.NOTE_UP_P;
 				case 'right': return PlayState.instance.controls.NOTE_RIGHT_P;
-				case 'space': return PlayState.instance.controls.justPressed('dodge_key');
+				case 'space': return PlayState.instance.controls.justPressed('space');
 				default: return PlayState.instance.controls.justPressed(name);
 			}
 			return false;
@@ -108,7 +103,7 @@ class ExtraFunctions
 				case 'down': return PlayState.instance.controls.NOTE_DOWN;
 				case 'up': return PlayState.instance.controls.NOTE_UP;
 				case 'right': return PlayState.instance.controls.NOTE_RIGHT;
-				case 'space': return PlayState.instance.controls.pressed('dodge_key');
+				case 'space': return PlayState.instance.controls.pressed('space');
 				default: return PlayState.instance.controls.pressed(name);
 			}
 			return false;
@@ -120,7 +115,7 @@ class ExtraFunctions
 				case 'down': return PlayState.instance.controls.NOTE_DOWN_R;
 				case 'up': return PlayState.instance.controls.NOTE_UP_R;
 				case 'right': return PlayState.instance.controls.NOTE_RIGHT_R;
-				case 'space': return PlayState.instance.controls.justReleased('dodge_key');
+				case 'space': return PlayState.instance.controls.justReleased('space');
 				default: return PlayState.instance.controls.justReleased(name);
 			}
 			return false;
@@ -165,6 +160,15 @@ class ExtraFunctions
 				return;
 			}
 			FunkinLua.luaTrace('setDataFromSave: Save file not initialized: ' + name, false, false, FlxColor.RED);
+		});
+		funk.set("eraseSaveData", function(name:String)
+		{
+			if (PlayState.instance.modchartSaves.exists(name))
+			{
+				PlayState.instance.modchartSaves.get(name).erase();
+				return;
+			}
+			FunkinLua.luaTrace('eraseSaveData: Save file not initialized: ' + name, false, false, FlxColor.RED);
 		});
 
 		// File management

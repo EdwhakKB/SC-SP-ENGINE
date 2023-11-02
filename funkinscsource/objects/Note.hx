@@ -22,9 +22,8 @@ import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.graphics.tile.FlxDrawTrianglesItem.DrawData;
 import flixel.math.FlxMath;
 import flixel.util.FlxColor;
-import modcharting.RenderPath;
 import openfl.Vector;
-
+import openfl.Assets;
 using StringTools;
 
 typedef EventNote = {
@@ -175,12 +174,14 @@ class Note extends FlxSkewedSprite
 	public var quantColorsOnNotes:Bool = true;
 
 	public var containsPixelTexture:Bool = false;
+	public var pathNotFound:Bool = false;
 
 	public static var instance:Note = null;
 
 	private function set_multSpeed(value:Float):Float {
 		resizeByRatio(value / multSpeed);
 		multSpeed = value;
+		//Debug.logTrace('fuck cock');
 		return value;
 	}
 
@@ -299,6 +300,7 @@ class Note extends FlxSkewedSprite
 		if (texture.contains('pixel') || noteSkin.contains('pixel'))
 			containsPixelTexture = true;
 
+		// Debug.logTrace(prevNote);
 
 		if(prevNote != null)
 			prevNote.nextNote = this;
@@ -425,65 +427,73 @@ class Note extends FlxSkewedSprite
 		switch(noteStyleType)
 		{
 			default:
-				if(texture.contains('pixel') || noteStyleType.contains('pixel') || containsPixelTexture) {
-					if(isSustainNote) {
-						var graphic = Paths.image(noteStyleType != "" ?  noteStyleType + 'ENDS' : ('pixelUI/' + skinPixel + 'ENDS' + skinPostfix));
-						loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
-						originalHeight = graphic.height / 2;
-					} else {
-						var graphic = Paths.image(noteStyleType != "" ? noteStyleType : ('pixelUI/' + skinPixel + skinPostfix));
-						loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
+				if((texture.contains('pixel') || noteStyleType.contains('pixel') || containsPixelTexture) && !FileSystem.exists(Paths.modsXml(noteStyleType))) {
+					if (FileSystem.exists(Paths.modsImages('notes/' + noteStyleType)) || FileSystem.exists(Paths.getSharedPath('images/notes/' + noteStyleType)) || Assets.exists('notes/' + noteStyleType))
+					{
+						if(isSustainNote) {
+							var graphic = Paths.image(noteStyleType != "" ?  'notes/' + noteStyleType + 'ENDS' : ('pixelUI/' + skinPixel + 'ENDS' + skinPostfix));
+							loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
+							originalHeight = graphic.height / 2;
+						} else {
+							var graphic = Paths.image(noteStyleType != "" ? 'notes/' + noteStyleType : ('pixelUI/' + skinPixel + skinPostfix));
+							loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
+						}
+
+						loadNoteAnims(true);
 					}
-					setGraphicSize(Std.int(width * PlayState.daPixelZoom));
-					loadPixelNoteAnims();
-					antialiasing = false;
-		
-					if(isSustainNote) {
-						offsetX += _lastNoteOffX;
-						_lastNoteOffX = (width - 7) * (PlayState.daPixelZoom / 2);
-						offsetX -= _lastNoteOffX;
+					else if (FileSystem.exists(Paths.modsImages(noteStyleType)) || FileSystem.exists(Paths.getSharedPath('images/' + noteStyleType)) || Assets.exists(noteStyleType))
+					{
+						if(isSustainNote) {
+							var graphic = Paths.image(noteStyleType != "" ?  noteStyleType + 'ENDS' : ('pixelUI/' + skinPixel + 'ENDS' + skinPostfix));
+							loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
+							originalHeight = graphic.height / 2;
+						} else {
+							var graphic = Paths.image(noteStyleType != "" ? noteStyleType : ('pixelUI/' + skinPixel + skinPostfix));
+							loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
+						}
+
+						loadNoteAnims(true);
+					}
+					else
+					{
+						if(isSustainNote) {
+							var graphic = Paths.image('pixelUI/noteSkins/NOTE_assets' + 'ENDS' + getNoteSkinPostfix());
+							loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
+							originalHeight = graphic.height / 2;
+						} else {
+							var graphic = Paths.image('pixelUI/noteSkins/NOTE_assets' + getNoteSkinPostfix());
+							loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
+						}
+						
+						loadNoteAnims(true);
 					}
 				} else {
-					if (ClientPrefs.data.cacheOnGPU)
-						frames = Paths.getSparrowAtlas(noteStyleType, null, false);
-					else
-						frames = Paths.getSparrowAtlas(noteStyleType);
-					loadNoteAnims();
-					if(!isSustainNote)
+					if (FileSystem.exists(Paths.modsImages('notes/' + noteStyleType)) || FileSystem.exists(Paths.getSharedPath('images/notes/' + noteStyleType)) || Assets.exists('notes/' + noteStyleType))
 					{
-						centerOffsets();
-						centerOrigin();
+						if (ClientPrefs.data.cacheOnGPU)
+							frames = Paths.getSparrowAtlas('notes/' + noteStyleType, null, false);
+						else
+							frames = Paths.getSparrowAtlas('notes/' + noteStyleType);
+
+						loadNoteAnims();
 					}
-				}
-			case 'pixel' | 'default' | 'normal':
-				if(texture.contains('pixel') || noteStyleType.contains('pixel') || containsPixelTexture) {
-					if(isSustainNote) {
-						var graphic = Paths.image('pixelUI/noteSkins/NOTE_assets' + 'ENDS' + getNoteSkinPostfix());
-						loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
-						originalHeight = graphic.height / 2;
-					} else {
-						var graphic = Paths.image('pixelUI/noteSkins/NOTE_assets' + getNoteSkinPostfix());
-						loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
-					}
-					setGraphicSize(Std.int(width * PlayState.daPixelZoom));
-					loadPixelNoteAnims();
-					antialiasing = false;
-		
-					if(isSustainNote) {
-						offsetX += _lastNoteOffX;
-						_lastNoteOffX = (width - 7) * (PlayState.daPixelZoom / 2);
-						offsetX -= _lastNoteOffX;
-					}
-				} else {
-					if (ClientPrefs.data.cacheOnGPU)
-						frames = Paths.getSparrowAtlas("noteSkins/NOTE_assets" + getNoteSkinPostfix(), null, false);
-					else
-						frames = Paths.getSparrowAtlas("noteSkins/NOTE_assets" + getNoteSkinPostfix());
-					loadNoteAnims();
-					if(!isSustainNote)
+					else if (FileSystem.exists(Paths.modsImages(noteStyleType)) || FileSystem.exists(Paths.getSharedPath('shared/images/' + noteStyleType)) || Assets.exists(noteStyleType))
 					{
-						centerOffsets();
-						centerOrigin();
+						if (ClientPrefs.data.cacheOnGPU)
+							frames = Paths.getSparrowAtlas(noteStyleType, null, false);
+						else
+							frames = Paths.getSparrowAtlas(noteStyleType);
+
+						loadNoteAnims();
+					}
+					else
+					{
+						if (ClientPrefs.data.cacheOnGPU)
+							frames = Paths.getSparrowAtlas("noteSkins/NOTE_assets" + getNoteSkinPostfix(), null, false);
+						else
+							frames = Paths.getSparrowAtlas("noteSkins/NOTE_assets" + getNoteSkinPostfix());
+
+						loadNoteAnims();
 					}
 				}
 		}
@@ -497,25 +507,43 @@ class Note extends FlxSkewedSprite
 		return skin;
 	}
 
-	function loadNoteAnims() {
-		if (isSustainNote)
+	public function loadNoteAnims(?pixel:Bool = false) 
+	{
+		if (pixel)
 		{
-			animation.addByPrefix('purpleholdend', 'pruple end hold', 24, true); // this fixes some retarded typo from the original note .FLA
-			animation.addByPrefix(colArray[noteData] + 'holdend', colArray[noteData] + ' hold end', 24, true);
-			animation.addByPrefix(colArray[noteData] + 'hold', colArray[noteData] + ' hold piece', 24, true);
+			setGraphicSize(Std.int(width * PlayState.daPixelZoom));
+			if(isSustainNote)
+			{
+				animation.add(colArray[noteData] + 'holdend', [noteData + 4], 24, true);
+				animation.add(colArray[noteData] + 'hold', [noteData], 24, true);
+			} else animation.add(colArray[noteData] + 'Scroll', [noteData + 4], 24, true);
+			antialiasing = false;
+
+			if(isSustainNote) {
+				offsetX += _lastNoteOffX;
+				_lastNoteOffX = (width - 7) * (PlayState.daPixelZoom / 2);
+				offsetX -= _lastNoteOffX;
+			}
 		}
-		else animation.addByPrefix(colArray[noteData] + 'Scroll', colArray[noteData] + '0');
-
-		setGraphicSize(Std.int(width * 0.7));
-		updateHitbox();
-	}
-
-	function loadPixelNoteAnims() {
-		if(isSustainNote)
+		else
 		{
-			animation.add(colArray[noteData] + 'holdend', [noteData + 4], 24, true);
-			animation.add(colArray[noteData] + 'hold', [noteData], 24, true);
-		} else animation.add(colArray[noteData] + 'Scroll', [noteData + 4], 24, true);
+			if (isSustainNote)
+			{
+				animation.addByPrefix('purpleholdend', 'pruple end hold', 24, true); // this fixes some retarded typo from the original note .FLA
+				animation.addByPrefix(colArray[noteData] + 'holdend', colArray[noteData] + ' hold end', 24, true);
+				animation.addByPrefix(colArray[noteData] + 'hold', colArray[noteData] + ' hold piece', 24, true);
+			}
+			else animation.addByPrefix(colArray[noteData] + 'Scroll', colArray[noteData] + '0');
+		
+			setGraphicSize(Std.int(width * 0.7));
+			updateHitbox();
+
+			if(!isSustainNote)
+			{
+				centerOffsets();
+				centerOrigin();
+			}
+		}
 	}
 
 	override function update(elapsed:Float)

@@ -18,7 +18,7 @@ import flixel.addons.display.FlxGridOverlay;
 class MainMenuState extends MusicBeatState
 {
 	public static var psychEngineVersion:String = '0.7.2'; //This is also used for Discord RPC
-	public static var SCEVersion:String = 'SCE PULBLIC RELEEASE - 0.0.1'; //This is also used for Discord RPC
+	public static var SCEVersion:String = '0.0.1'; //This is also used for Discord RPC
 	public static var curSelected:Int = 0;
 
 	var menuItems:FlxTypedGroup<FlxSprite>;
@@ -103,7 +103,7 @@ class MainMenuState extends MusicBeatState
 		for (i in 0...optionShit.length)
 		{
 			var offset:Float = 108 - (Math.max(optionShit.length, 4) - 4) * 80;
-			var menuItem:FlxSprite = new FlxSprite(0, (i * 140)  + offset);
+			var menuItem:FlxSprite = new FlxSprite((i * 120)  + offset, (i * 150)  + offset);
 			menuItem.antialiasing = ClientPrefs.data.antialiasing;
 			menuItem.scale.x = scale;
 			menuItem.scale.y = scale;
@@ -112,12 +112,21 @@ class MainMenuState extends MusicBeatState
 			menuItem.animation.addByPrefix('selected', optionShit[i] + " white", 24);
 			menuItem.animation.play('idle');
 			menuItem.ID = i;
-			menuItem.screenCenter(X);
+			//menuItem.screenCenter(X);
 			menuItems.add(menuItem);
 			var scr:Float = (optionShit.length - 4) * 0.135;
 			if(optionShit.length < 6) scr = 0;
 			menuItem.scrollFactor.set(0, scr);
 			//menuItem.setGraphicSize(Std.int(menuItem.width * 0.58));
+			switch (i)
+			{
+				case 0:
+					menuItem.x += 700;
+				case 1:
+					menuItem.x += 480;
+				case 2:
+					menuItem.x += 240;
+			}
 			menuItem.updateHitbox();
 
 			/*FlxTween.tween(menuItem, {x: 90}, 1 + (i * 0.25), {
@@ -156,6 +165,10 @@ class MainMenuState extends MusicBeatState
 		var leDate = Date.now();
 		if (leDate.getDay() == 5 && leDate.getHours() >= 18)
 			Achievements.unlock('friday_night_play');
+
+		#if MODS_ALLOWED
+		Achievements.reloadList();
+		#end
 		#end
 
 		super.create();
@@ -288,11 +301,11 @@ class MainMenuState extends MusicBeatState
 										MusicBeatState.switchState(new ModsMenuState());
 									#end
 									case 'awards':
-										LoadingState.loadAndSwitchState(new AchievementsMenuState());
+										MusicBeatState.switchState(new AchievementsMenuState());
 									case 'credits':
 										MusicBeatState.switchState(new CreditsState());
 									case 'options':
-										LoadingState.loadAndSwitchState(new OptionsState());
+										MusicBeatState.switchState(new OptionsState());
 										OptionsState.onPlayState = false;
 										if (PlayState.SONG != null)
 										{

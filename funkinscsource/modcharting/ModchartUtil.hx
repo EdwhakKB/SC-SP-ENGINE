@@ -5,14 +5,19 @@ import flixel.math.FlxMath;
 import flixel.math.FlxAngle;
 import openfl.geom.Vector3D;
 import flixel.FlxG;
-import states.PlayState;
 
 #if LEATHER
+import states.PlayState;
 import game.Note;
 import game.Conductor;
-#else 
+#elseif (PSYCH && PSYCHVERSION == 0.7)
+import states.PlayState;
 import objects.Note;
 import objects.StrumArrow;
+#else
+import PlayState;
+import Note;
+import StrumNote;
 #end
 
 using StringTools;
@@ -23,7 +28,9 @@ class ModchartUtil
     {
         //need to test each engine
         //not expecting all to work
-        #if PSYCH 
+        #if (PSYCH && PSYCHVERSION != 0.7)
+        return ClientPrefs.downScroll;
+        #elseif (PSYCH && PSYCHVERSION == 0.7)
         return ClientPrefs.data.downScroll;
         #elseif LEATHER
         return utilities.Options.getData("downscroll");
@@ -43,7 +50,9 @@ class ModchartUtil
     }
     public static function getMiddlescroll(instance:ModchartMusicBeatState)
     {
-        #if PSYCH 
+        #if (PSYCH && PSYCHVERSION != 0.7)
+        return ClientPrefs.middleScroll;
+        #elseif (PSYCH && PSYCHVERSION == 0.7)
         return ClientPrefs.data.middleScroll;
         #elseif LEATHER
         return utilities.Options.getData("middlescroll");
@@ -107,6 +116,8 @@ class ModchartUtil
                 xPos += (xPos + daNote.width > targetX + strum.width ? -0.1 : 0.1);
                 tempShit += (xPos + daNote.width > targetX + strum.width ? -0.1 : 0.1);
             }
+            //trace(arrayVal);
+            //trace(tempShit);
 
             NoteMovement.leatherEngineOffsetStuff.set(arrayVal, tempShit);
         }
@@ -117,18 +128,24 @@ class ModchartUtil
         return (daNote.isSustainNote ? 37 : 0); //the magic number
         #end
     }
-
-    public static function getNoteSkew(daNote:Note, skewisX:Bool)
+    
+    public static function getNoteSkew(daNote:Note, isSkewY:Bool)
     {
-        if (skewisX) return daNote.skew.x;
-        else return daNote.skew.y;
-    }  
+        if (!isSkewY){
+            return daNote.skew.x;
+        }else{
+            return daNote.skew.y;  
+        }
+    }
 
-    public static function getStrumSkew(strumArrow:StrumArrow, skewisX:Bool)
+    public static function getStrumSkew(daNote:#if (PSYCH && PSYCHVERSION != 0.7 || LEATHER) StrumNote #elseif (PSYCH && PSYCHVERSION == 0.7) StrumArrow #end, isSkewY:Bool)
     {
-        if (skewisX) return strumArrow.skew.x;
-        else return strumArrow.skew.y;
-    } 
+        if (!isSkewY){
+            return daNote.skew.x;
+        }else{
+            return daNote.skew.y;  
+        }
+    }
 
     static var currentFakeCrochet:Float = -1;
     static var lastBpm:Float = -1;
@@ -192,6 +209,8 @@ class ModchartUtil
         pos.y = yPerspective+(FlxG.height*0.5);
         pos.z = zPerspectiveOffset;
 
+        
+
         //pos.z -= 1;
         //pos = perspectiveMatrix.transformVector(pos);
 
@@ -253,7 +272,7 @@ class ModchartUtil
 			case 'sineout': return FlxEase.sineOut;
 			case 'smoothstepin': return FlxEase.smoothStepIn;
 			case 'smoothstepinout': return FlxEase.smoothStepInOut;
-			case 'smoothstepout': return FlxEase.smoothStepOut;
+			case 'smoothstepout': return FlxEase.smoothStepInOut;
 			case 'smootherstepin': return FlxEase.smootherStepIn;
 			case 'smootherstepinout': return FlxEase.smootherStepInOut;
 			case 'smootherstepout': return FlxEase.smootherStepOut;

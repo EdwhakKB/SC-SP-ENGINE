@@ -1007,7 +1007,7 @@
 				"mustHitSection": true
 			},
 			{
-				"dType": 2,
+				"dType": 0,
 				"sectionNotes": [
 					[
 						40000,
@@ -1079,7 +1079,7 @@
 				"mustHitSection": false
 			},
 			{
-				"dType": 2,
+				"dType": 0,
 				"sectionNotes": [
 					[
 						42000,
@@ -1273,7 +1273,7 @@
 				"mustHitSection": true
 			},
 			{
-				"dType": 1,
+				"dType": 0,
 				"sectionNotes": [
 					[
 						48000,
@@ -1558,7 +1558,7 @@
 				"mustHitSection": true
 			},
 			{
-				"dType": 2,
+				"dType": 0,
 				"sectionNotes": [
 					[
 						56000,
@@ -1645,7 +1645,7 @@
 				"mustHitSection": false
 			},
 			{
-				"dType": 2,
+				"dType": 0,
 				"sectionNotes": [
 					[
 						58000,
@@ -2262,7 +2262,7 @@
 				"mustHitSection": true
 			},
 			{
-				"dType": 2,
+				"dType": 0,
 				"sectionNotes": [
 					[
 						80000,
@@ -2349,7 +2349,7 @@
 				"mustHitSection": false
 			},
 			{
-				"dType": 1,
+				"dType": 0,
 				"sectionNotes": [
 					[
 						82000,
@@ -2619,8 +2619,8 @@
 			}
 		],
 		"player2": "senpai-angry",
-		"player4": "mom",
 		"stage": "school",
+		"arrowSkin": "pixel",
 		"needsVoices": true,
 		"bpm": 120,
 		"speed": 1.5

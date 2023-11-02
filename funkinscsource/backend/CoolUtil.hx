@@ -5,10 +5,6 @@ import flixel.util.FlxSave;
 import openfl.utils.Assets;
 import lime.utils.Assets as LimeAssets;
 
-#if sys
-import sys.io.File;
-import sys.FileSystem;
-#end
 import backend.DataType;
 import flixel.text.FlxBitmapText;
 import flixel.graphics.frames.FlxBitmapFont;
@@ -18,6 +14,7 @@ class CoolUtil
 	inline public static function quantize(f:Float, snap:Float){
 		// changed so this actually works lol
 		var m:Float = Math.fround(f * snap);
+		Debug.logTrace(snap);
 		return (m / snap);
 	}
 
@@ -169,18 +166,18 @@ class CoolUtil
 
 	inline public static function openFolder(folder:String, absolute:Bool = false) {
 		#if sys
-			#if linux
-			// TO DO: get linux command
-			//Sys.command('explorer.exe $folder');
-			#else
 			if(!absolute) folder =  Sys.getCwd() + '$folder';
 
 			folder = folder.replace('/', '\\');
 			if(folder.endsWith('/')) folder.substr(0, folder.length - 1);
 
-			Sys.command('explorer.exe $folder');
-			trace('explorer.exe $folder');
+			#if linux
+			var command:String = 'explorer.exe';
+			#else
+			var command:String = '/usr/bin/xdg-open';
 			#end
+			Sys.command(command, [folder]);
+			trace('$command $folder');
 		#else
 			FlxG.error("Platform is not supported for CoolUtil.openFolder");
 		#end

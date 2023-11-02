@@ -20,7 +20,6 @@ import openfl.display.GraphicsShader;
 import openfl.filters.ShaderFilter;
 import backend.Discord.DiscordClient as Discord;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
-import sys.io.File;
 import backend.*;
 import flixel.*;
 import states.*;

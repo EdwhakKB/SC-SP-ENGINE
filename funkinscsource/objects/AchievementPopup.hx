@@ -20,12 +20,25 @@ class AchievementPopup extends openfl.display.Sprite {
 		var graphic = null;
 		var hasAntialias:Bool = ClientPrefs.data.antialiasing;
 		var image:String = 'achievements/$achieve';
+
+		var achievement:Achievement = null;
+		if(Achievements.exists(achieve)) achievement = Achievements.get(achieve);
+
+		#if MODS_ALLOWED
+		var lastMod = Mods.currentModDirectory;
+		if(achievement != null) Mods.currentModDirectory = achievement.mod != null ? achievement.mod : '';
+		#end
+
 		if(Paths.fileExists('images/$image-pixel.png', IMAGE))
 		{
 			graphic = Paths.image('$image-pixel', false);
 			hasAntialias = false;
 		}
 		else graphic = Paths.image(image, false);
+
+		#if MODS_ALLOWED
+		Mods.currentModDirectory = lastMod;
+		#end
 
 		var sizeX = 100;
 		var sizeY = 100;
@@ -39,9 +52,8 @@ class AchievementPopup extends openfl.display.Sprite {
 		// achievement name/description
 		var name:String = 'Unknown';
 		var desc:String = 'Description not found';
-		if(Achievements.exists(achieve))
+		if(achievement != null)
 		{
-			var achievement:Achievement = Achievements.get(achieve);
 			if(achievement.name != null) name = achievement.name;
 			if(achievement.description != null)  desc = achievement.description;
 		}
@@ -102,6 +114,7 @@ class AchievementPopup extends openfl.display.Sprite {
 		var time = Lib.getTimer();
 		var elapsed:Float = (time - timePassed) / 1000;
 		timePassed = time;
+		//Debug.logTrace('update called! $elapsed');
 
 		if(elapsed >= 0.5) return; //most likely passed through a loading
 
@@ -133,6 +146,7 @@ class AchievementPopup extends openfl.display.Sprite {
 	public function destroy()
 	{
 		Achievements._popups.remove(this);
+		//Debug.logTrace('destroyed achievement, new count: ' + Achievements._popups.length);
 
 		if (FlxG.game.contains(this))
 		{

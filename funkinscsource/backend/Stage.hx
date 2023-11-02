@@ -19,11 +19,7 @@ import substates.GameOverSubstate;
 
 import cutscenes.DialogueBox;
 
-#if MODS_ALLOWED
-import sys.FileSystem;
-#else
 import openfl.utils.Assets as OpenFlAssets;
-#end
 
 import flixel.addons.display.FlxBackdrop;
 import psychlua.FunkinLua;
@@ -109,13 +105,14 @@ class Stage extends MusicBeatState
 	var bgTrees:FlxSprite;
 	var treeLeaves:BGSprite;
 	var bgGirls:BackgroundGirls;
+	var rosesRain:BGSprite;
 
 	//tankman
 	var tankWatchtower:BGSprite;
 	var tankGround:BackgroundTank;
 	var tankmanRun:FlxTypedGroup<TankmenBG>;
 	var foregroundSprites:FlxTypedGroup<BGSprite>;
-
+	
 	public var songLowercase:String = '';
 
 	public var isCustomStage:Bool = false;
@@ -462,9 +459,17 @@ class Stage extends MusicBeatState
 					bgGirls.scrollFactor.set(0.9, 0.9);
 					bgGirls.visible = !ClientPrefs.data.lowQuality;
 					toAdd.push(bgGirls);
+
+					rosesRain = new BGSprite('weeb/roses/rain', repositionShit, -40, 0.85, 0.85, ['rain'], true);
+					rosesRain.setGraphicSize(widShit);
+					rosesRain.updateHitbox();
+					if (songLowercase == 'roses')
+						layInFront[4].push(rosesRain);
+					rosesRain.antialiasing = false;
+					rosesRain.visible = !ClientPrefs.data.lowQuality;
+					rosesRain.alpha = 0;
 					
 					setDefaultGF('gf-pixel');
-
 			
 					switch (songLowercase)
 					{
@@ -479,6 +484,12 @@ class Stage extends MusicBeatState
 						if(songLowercase == 'roses') FlxG.sound.play(Paths.sound('ANGRY'));
 						initDoof();
 						setStartCallback(schoolIntro);
+
+						if (songLowercase == 'roses')
+						{
+							if (bgGirls != null) bgGirls.swapDanceType();
+							setEndCallback(rosesEnding);
+						}
 					}	
 				}
 			case 'schoolEvil'://Week 6 - Thorns
@@ -500,6 +511,8 @@ class Stage extends MusicBeatState
 			
 					bg.scale.set(PlayState.daPixelZoom, PlayState.daPixelZoom);
 					bg.antialiasing = false;
+					swagBacks['thornsBG'] = bg;
+					bg.alpha = 0;
 					toAdd.push(bg);
 					setDefaultGF('gf-pixel');
 			
@@ -593,7 +606,7 @@ class Stage extends MusicBeatState
 				{
 					isCustomStage = true;
 
-					if(!FileSystem.exists(Paths.getPreloadPath('stages/' + daStage + '.json')) && !FileSystem.exists(Paths.modFolders('stages/' + daStage + '.json')) && !Assets.exists(Paths.modFolders('stages/' + daStage + '.json')))
+					if(!FileSystem.exists(Paths.getSharedPath('stages/' + daStage + '.json')) && !FileSystem.exists(Paths.modFolders('stages/' + daStage + '.json')) && !Assets.exists(Paths.modFolders('stages/' + daStage + '.json')))
 					{
 						trace('oops we usin the default stage');
 						daStage = 'stage'; //defaults to stage if we can't find the path
@@ -602,8 +615,6 @@ class Stage extends MusicBeatState
 					isLuaStage = true;
 					PlayState.instance.startLuasNamed('stages/' + daStage + '.lua', true, preloading);
 					PlayState.instance.startHScriptsNamed('stages/' + daStage + '.hx');
-
-					callOnLuas('onCreatePost');
 				}
 		}
 	}
@@ -630,7 +641,7 @@ class Stage extends MusicBeatState
 	public var stageUIPrefixShit:String = '';
 
 	//CountDown Stuff
-	//public var stageHas3rdIntroAsset:Bool = false;
+	public var stageHas3rdIntroAsset:Bool = false;
 	public var stageIntroAssets:Array<String> = null;
 	public var stageIntroSoundsSuffix:String = '';
 	public var stageIntroSoundsPrefix:String = '';
@@ -641,6 +652,11 @@ class Stage extends MusicBeatState
 	public var girlfriendCameraOffset:Array<Float> = [0, 0];
 
 	public var hideGirlfriend:Bool = false;
+
+	public var stageCameraMoveXYVar1:Float = 0;
+	public var stageCameraMoveXYVar2:Float = 0;
+
+	public var stageCameraSpeed:Float = 1;
 
 	public function setupWeekDir(stage:String)
 	{
@@ -658,6 +674,7 @@ class Stage extends MusicBeatState
 		var stageData:StageFile = StageData.getStageFile(stage);
 		if(stageData == null) { //Stage couldn't be found, create a dummy stage for preventing a crash
 			stageData = StageData.dummy();
+			Debug.logInfo('stage failed to have .json or .json didn\'t load properly, loading stage.json....');
 		}
 
 		if (stageChanged)
@@ -695,8 +712,8 @@ class Stage extends MusicBeatState
 	
 		if (stageData.cameraXYMovement != null)
 		{
-			PlayState.instance.cameraMoveXYVar1 = stageData.cameraXYMovement[0];
-			PlayState.instance.cameraMoveXYVar2 = stageData.cameraXYMovement[1];
+			stageCameraMoveXYVar1 = stageData.cameraXYMovement[0];
+			stageCameraMoveXYVar2 = stageData.cameraXYMovement[1];
 		}
 
 		//stageHas3rdIntroAsset = stageData.has3rdIntroAsset;
@@ -733,7 +750,7 @@ class Stage extends MusicBeatState
 		}
 		
 		if(stageData.camera_speed != null)
-			PlayState.instance.cameraSpeed = stageData.camera_speed;
+			stageCameraSpeed = stageData.camera_speed;
 
 		boyfriendCameraOffset = stageData.camera_boyfriend;
 		if(boyfriendCameraOffset == null) //Fucks sake should have done it since the start :rolling_eyes:
@@ -871,7 +888,6 @@ class Stage extends MusicBeatState
 	override function stepHit()
 	{
 		super.stepHit();
-
 		if (isCustomStage && !preloading && isLuaStage)
 		{
 			setOnLuas('curStep', curStep);
@@ -957,6 +973,16 @@ class Stage extends MusicBeatState
 		
 				if (FlxG.random.bool(10) && fastCarCanDrive)
 					fastCarDrive();
+			case 'limostarcatcher':
+				if (FlxG.random.bool(8))
+					swagBacks['space'].animation.play('scroll2');
+				else if (FlxG.random.bool(4))
+					swagBacks['space'].animation.play('scroll1');
+				else if (FlxG.random.bool(2))
+					swagBacks['space'].animation.play('scroll0');
+				
+				if (FlxG.random.bool(10) && fastCarCanDrive)
+					fastCarDrive();
 			case 'school':
 				if(bgGirls != null) bgGirls.dance();
 			case 'mall' | 'tank':
@@ -982,6 +1008,8 @@ class Stage extends MusicBeatState
 		}
 	}
 
+	public var rainSound:FlxSound;
+
 	public function countdownTick(count:Countdown, num:Int) 
 	{
 		switch (curStage)
@@ -989,30 +1017,45 @@ class Stage extends MusicBeatState
 			case 'mall':
 				everyoneDance();
 			case 'tank':
-				if(num % 2 == 0) everyoneDance();
+				if(num % 2 == 0) everyoneDance();		
+			case 'school':
+				if (count == START && songLowercase == 'roses'){
+					rainSound = new FlxSound().loadEmbedded(Paths.sound('rainSnd'));
+					FlxG.sound.list.add(rainSound);
+					rainSound.volume = 0;
+					rainSound.looped = true;
+					rainSound.play();
+					rainSound.fadeIn(((Conductor.stepCrochet / 1000) * 4) / PlayState.instance.playbackRate, 0, 0.7);
+					if (rosesRain != null) FlxTween.tween(rosesRain, {alpha: 1}, ((Conductor.stepCrochet / 1000) * 4) / PlayState.instance.playbackRate);	
+				}
+			case 'schoolEvil':
+				if (count == START)
+				{
+					FlxTween.tween(swagBacks['thornsBG'], {alpha: 1}, 4);
+				}
 		}
 	}
 
 	// Substate close/open, for pausing Tweens/Timers
-	override function closeSubState() 
+	public function closeSubStateInStage(paused:Bool = false) 
 	{
-		if(PlayState.instance.paused)
+		if (paused)
 		{
+			if(rainSound != null) rainSound.play();
 			if(carTimer != null) carTimer.active = true;
 		}
-		super.closeSubState();
 	}
-	override function openSubState(SubState:FlxSubState) 
+	public function openSubStateInStage(paused:Bool = false) 
 	{
-		if(PlayState.instance.paused)
+		if (paused)
 		{
+			if(rainSound != null) rainSound.pause();
 			if(carTimer != null) carTimer.active = false;
 		}
-		super.openSubState(SubState);
 	}
 
 	// Ghouls event
-	var bgGhouls:BGSprite;
+	public var bgGhouls:BGSprite;
 	public function eventCalled(eventName:String, value1:String, value2:String, strumTime:Float, value3:String, value4:String, value5:String, value6:String, value7:String, value8:String, 
 		value9:String, value10:String, value11:String, value12:String, value13:String, value14:String):Void
 	{
@@ -1174,6 +1217,7 @@ class Stage extends MusicBeatState
 					bgGhouls.updateHitbox();
 					bgGhouls.visible = false;
 					bgGhouls.antialiasing = false;
+					swagBacks['thornGhouls'] = bgGhouls;
 					bgGhouls.animation.finishCallback = function(name:String)
 					{
 						if(name == 'BG freaks glitch instance')
@@ -1497,11 +1541,15 @@ class Stage extends MusicBeatState
 	var carTimer:FlxTimer;
 	function fastCarDrive()
 	{
-		FlxG.sound.play(Paths.soundRandom('carPass', 0, 1), 0.7);
+		//Debug.logTrace('Car drive');
+		if (curStage == 'limo')
+			FlxG.sound.play(Paths.soundRandom('carPass', 0, 1), 0.7);
+		else if (curStage == 'limostarcatcher')
+			FlxG.sound.play(Paths.soundRandom('starcatcher/carPass', 0, 1), 0.7);
 
 		swagBacks['fastCar'].velocity.x = (FlxG.random.int(170, 220) / FlxG.elapsed) * 3;
 		fastCarCanDrive = false;
-		carTimer = new FlxTimer().start(2, function(tmr:FlxTimer)
+		carTimer = PlayState.instance.createTimer(2, function(tmr:FlxTimer)
 		{
 			resetFastCar();
 			carTimer = null;
@@ -1549,7 +1597,7 @@ class Stage extends MusicBeatState
 			PlayState.instance.inCutscene = true;
 			PlayState.instance.canPause = false;
 
-			new FlxTimer().start(1.5, function(tmr:FlxTimer) {
+			PlayState.instance.createTimer(1.5, function(tmr:FlxTimer) {
 				endSong();
 			});
 		}
@@ -1578,7 +1626,7 @@ class Stage extends MusicBeatState
 		});
 
 		// zoom out
-		new FlxTimer().start(0.8, function(tmr:FlxTimer)
+		PlayState.instance.createTimer(0.8, function(tmr:FlxTimer)
 		{
 			PlayState.instance.camHUD.visible = true;
 			FlxTween.tween(FlxG.camera, {zoom: PlayState.instance.defaultCamZoom}, 2.5, {
@@ -1705,6 +1753,16 @@ class Stage extends MusicBeatState
 				}
 			});
 		}
+	}
+
+	function rosesEnding()
+	{
+		PlayState.instance.mainCam.visible = false;
+		if (rainSound != null) rainSound.fadeOut(0.7, 0, function(twn:FlxTween) {
+			rainSound.stop();
+			rainSound = null;
+		});
+		endSong();
 	}
 
 	function everyoneDance()

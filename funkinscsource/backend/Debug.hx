@@ -175,7 +175,7 @@ class Debug
 	public static function onInitProgram()
 	{
 		// Initialize logging tools.
-		Debug.logInfo('Initializing Debug tools...');
+		Debug.logTrace('Initializing Debug tools...');
 
 		// Override Haxe's vanilla Debug.logTrace() calls to use the Flixel console.
 		Log.trace = function(data:Dynamic, ?info:PosInfos)
@@ -237,13 +237,13 @@ class Debug
 		var logFilePath = 'logs/${Sys.time()}.log';
 		var lastIndex:Int = logFilePath.lastIndexOf("/");
 		var logFolderPath:String = logFilePath.substr(0, lastIndex);
-		var files = sys.FileSystem.readDirectory(logFolderPath); // Reading all logs in an array.
+		var files = FileSystem.readDirectory(logFolderPath); // Reading all logs in an array.
 
 		for (file in files)
 		{
 			// To not consider the last one that is the current log text the game is writing to avoid crashes
 			if (files.indexOf(file) != files.length - 1)
-				sys.FileSystem.deleteFile('$logFolderPath/$file'); // Deleting each one from the log directory.
+				FileSystem.deleteFile('$logFolderPath/$file'); // Deleting each one from the log directory.
 		}
 
 		logInfo('Cleared logs folder.');
@@ -399,11 +399,11 @@ class DebugLogWriter
 			var lastIndex:Int = logFilePath.lastIndexOf("/");
 			var logFolderPath:String = logFilePath.substr(0, lastIndex);
 			printDebug('Creating log folder $logFolderPath');
-			sys.FileSystem.createDirectory(logFolderPath);
+			FileSystem.createDirectory(logFolderPath);
 		}
 		// Open the file
 		printDebug('Creating log file $logFilePath');
-		file = sys.io.File.write(logFilePath, false);
+		file = File.write(logFilePath, false);
 		active = true;
 		#else
 		printDebug("Won't create log file; no file system access.");

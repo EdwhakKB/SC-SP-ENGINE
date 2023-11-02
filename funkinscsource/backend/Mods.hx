@@ -1,11 +1,5 @@
 package backend;
 
-#if sys
-import sys.FileSystem;
-import sys.io.File;
-#else
-import lime.utils.Assets;
-#end
 import tjson.TJSON as Json;
 
 typedef ModsList = {
@@ -26,7 +20,6 @@ class Mods
 		'music',
 		'sounds',
 		'shaders',
-		'locale',
 		'videos',
 		'images',
 		'stages',
@@ -61,7 +54,7 @@ class Mods
 			for (folder in FileSystem.readDirectory(modsFolder))
 			{
 				var path = haxe.io.Path.join([modsFolder, folder]);
-				if (sys.FileSystem.isDirectory(path) && !ignoreModFolders.contains(folder.toLowerCase()) && !list.contains(folder))
+				if (FileSystem.isDirectory(path) && !ignoreModFolders.contains(folder.toLowerCase()) && !list.contains(folder))
 					list.push(folder);
 			}
 		}
@@ -71,7 +64,7 @@ class Mods
 	
 	inline public static function mergeAllTextsNamed(path:String, defaultDirectory:String = null, allowDuplicates:Bool = false)
 	{
-		if(defaultDirectory == null) defaultDirectory = Paths.getPreloadPath();
+		if(defaultDirectory == null) defaultDirectory = Paths.getSharedPath();
 		defaultDirectory = defaultDirectory.trim();
 		if(!defaultDirectory.endsWith('/')) defaultDirectory += '/';
 		if(!defaultDirectory.startsWith('assets/')) defaultDirectory = 'assets/$defaultDirectory';
@@ -144,7 +137,7 @@ class Mods
 				#end
 				if(rawJson != null && rawJson.length > 0) return Json.parse(rawJson);
 			} catch(e:Dynamic) {
-				Debug.logInfo(e);
+				Debug.logTrace(e);
 			}
 		}
 		#end
@@ -160,6 +153,7 @@ class Mods
 		try {
 			for (mod in CoolUtil.coolTextFile('modsList.txt'))
 			{
+				//Debug.logTrace('Mod: $mod');
 				if(mod.trim().length < 1) continue;
 
 				var dat = mod.split("|");
@@ -170,7 +164,7 @@ class Mods
 					list.disabled.push(dat[0]);
 			}
 		} catch(e) {
-			Debug.logInfo(e);
+			Debug.logTrace(e);
 		}
 		#end
 		return list;
@@ -194,7 +188,7 @@ class Mods
 				}
 			}
 		} catch(e) {
-			Debug.logInfo(e);
+			Debug.logTrace(e);
 		}
 		
 		// Scan for folders that aren't on modsList.txt yet
@@ -219,6 +213,7 @@ class Mods
 
 		File.saveContent('modsList.txt', fileStr);
 		updatedOnState = true;
+		//Debug.logTrace('Saved modsList.txt');
 		#end
 	}
 

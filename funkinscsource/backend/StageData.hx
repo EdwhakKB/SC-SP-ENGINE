@@ -1,11 +1,6 @@
 package backend;
 
-#if MODS_ALLOWED
-import sys.io.File;
-import sys.FileSystem;
-#else
 import openfl.utils.Assets;
-#end
 import tjson.TJSON as Json;
 import backend.Song;
 
@@ -94,12 +89,6 @@ class StageData {
 					stage = 'schoolEvil';
 				case 'ugh' | 'guns' | 'stress':
 					stage = 'tank';
-				case 'termination':
-					stage = 'street-termination';
-				case 'peace':
-					stage = 'somewhere';
-				case 'milf-starcatcher':
-					stage = 'limostarcatcher';
 				default:
 					stage = 'stage';
 			}
@@ -117,7 +106,7 @@ class StageData {
 
 	public static function getStageFile(stage:String):StageFile {
 		var rawJson:String = null;
-		var path:String = Paths.getPreloadPath('stages/' + stage + '.json');
+		var path:String = Paths.getSharedPath('stages/' + stage + '.json');
 
 		#if MODS_ALLOWED
 		var modPath:String = Paths.modFolders('stages/' + stage + '.json');

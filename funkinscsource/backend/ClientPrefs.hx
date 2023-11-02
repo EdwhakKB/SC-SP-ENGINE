@@ -74,7 +74,6 @@ class SaveVariables {
 		'sustainnotesactive' => true,
 		'modchart' => true,
 		'botplay' => false,
-		'guitarherosustains' => false
 	];
 
 	public var comboOffset:Array<Int> = [0, 0, 0, 0];
@@ -132,6 +131,8 @@ class SaveVariables {
 
 	public var systemUserName:String = "";
 
+	public var language:String = 'en-US';
+
 	public var SCEWatermark:Bool = true;
 
 	public var breakTimer:Bool = false;
@@ -140,6 +141,8 @@ class SaveVariables {
 
 	//Started Freeplay Warn!
 	public var freeplayWarn:Bool = false;
+
+	public var guitarHeroSustains:Bool = true;
 
 	public function new()
 	{
@@ -177,7 +180,7 @@ class ClientPrefs {
 		'debug_2'		=> [EIGHT],
 		'debug_3'		=> [SIX],
 
-		'dodge_key'		=> [SPACE]
+		'space'		=> [SPACE]
 	];
 	public static var gamepadBinds:Map<String, Array<FlxGamepadInputID>> = [
 		'note_up'		=> [DPAD_UP, Y],
@@ -232,6 +235,7 @@ class ClientPrefs {
 
 	public static function saveSettings() {
 		for (key in Reflect.fields(data)) {
+			Debug.logTrace('saved variable: $key');
 			Reflect.setField(FlxG.save.data, key, Reflect.field(data, key));
 		}
 		#if ACHIEVEMENTS_ALLOWED Achievements.save(); #end
@@ -253,6 +257,7 @@ class ClientPrefs {
 
 		for (key in Reflect.fields(data)) {
 			if (key != 'gameplaySettings' && Reflect.hasField(FlxG.save.data, key)) {
+				Debug.logTrace('loaded variable: $key');
 				Reflect.setField(data, key, Reflect.field(FlxG.save.data, key));
 			}
 		}

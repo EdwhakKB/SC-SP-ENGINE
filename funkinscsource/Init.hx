@@ -31,9 +31,9 @@ class Init extends MusicBeatState
 		switch (FlxG.random.int(0, 1))
 		{
 			case 0:
-				mouseCursor = new FlxSprite().loadGraphic(Paths.getPreloadPath('images/Default/cursor'));
+				mouseCursor = new FlxSprite().loadGraphic(Paths.getSharedPath('images/Default/cursor'));
 			case 1:
-				mouseCursor = new FlxSprite().loadGraphic(Paths.getPreloadPath('images/Default/noteCursor'));
+				mouseCursor = new FlxSprite().loadGraphic(Paths.getSharedPath('images/Default/noteCursor'));
 		} 
 		FlxG.mouse.load(mouseCursor.pixels);
 		FlxG.mouse.enabled = true;

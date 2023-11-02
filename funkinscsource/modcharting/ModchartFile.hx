@@ -1,13 +1,9 @@
 package modcharting;
-//Diff files by glowsoony and edwhak
-//Main idea coder for hitmans diffs me -edwhak
-//Main idea coder for SCE diffs me -glowsoony
-
 import flixel.math.FlxMath;
 import haxe.Exception;
 import haxe.Json;
 import haxe.format.JsonParser;
-import lime.utils.Assets as OpenFLAssets;
+import lime.utils.Assets;
 #if LEATHER
 import states.PlayState;
 import game.Note;
@@ -15,10 +11,6 @@ import game.Conductor;
 #if polymod
 import polymod.backends.PolymodAssets;
 #end
-#end
-#if sys
-import sys.io.File;
-import sys.FileSystem;
 #end
 import hscript.*;
 using StringTools;
@@ -60,11 +52,15 @@ class ModchartFile
     private var renderer:PlayfieldRenderer;
     public var scriptListen:Bool = false;
     public var customModifiers:Map<String, CustomModifierScript> = new Map<String, CustomModifierScript>();
-    public var hasDifficultyModchart:Bool = false;
+    public var hasDifficultyModchart:Bool = false; //so it loads false as default!
+    
     public function new(renderer:PlayfieldRenderer)
     {
-
-        data = loadFromJson(PlayState.SONG.songId.toLowerCase(), Difficulty.getString() != null ? Difficulty.getString() : Difficulty.defaultList[PlayState.storyDifficulty]);
+        #if (PSYCH && PSYCHVERSION == 0.7)
+            data = loadFromJson(PlayState.SONG.songId.toLowerCase(), Difficulty.getString().toLowerCase() != null ? Difficulty.getString().toLowerCase() : Difficulty.defaultList[PlayState.storyDifficulty].toLowerCase());
+        #else
+            data = loadFromJson(PlayState.SONG.song.toLowerCase(), CoolUtil.difficultyString().toLowerCase() == null ? CoolUtil.difficulties[PlayState.storyDifficulty] : CoolUtil.difficultyString().toLowerCase());
+        #end
         this.renderer = renderer;
         renderer.modchart = this;
         loadPlayfields();
@@ -79,6 +75,7 @@ class ModchartFile
 
         var folderShit:String = "";
 
+        
         var moddyFile:String = Paths.json('songs/' + Paths.formatToSongPath(folder) + '/modchart-' + difficulty.toLowerCase());
         var moddyFile2:String = Paths.json('songs/' + Paths.formatToSongPath(folder) + '/modchart');
 
@@ -139,18 +136,18 @@ class ModchartFile
             }
             #else
             #if MODS_ALLOWED
-            if(OpenFLAssets.exists(moddyFileMods) && difficulty.toLowerCase() != null) 
+            if(Assets.exists(moddyFileMods) && difficulty.toLowerCase() != null) 
                 hasDifficultyModchart = true;
-                if (OpenFLAssets.exists(moddyFileMods2) && !OpenFLAssets.exists(moddyFileMods))
+                if (Assets.exists(moddyFileMods2) && !Assets.exists(moddyFileMods))
                     hasDifficultyModchart = false;
-            else if(OpenFLAssets.exists(moddyFileMods2) && difficulty.toLowerCase() == null && !OpenFLAssets.exists(moddyFileMods)) hasDifficultyModchart = false;
+            else if(Assets.exists(moddyFileMods2) && difficulty.toLowerCase() == null && !Assets.exists(moddyFileMods)) hasDifficultyModchart = false;
             #end
 
-            if(OpenFLAssets.exists(moddyFile) && difficulty.toLowerCase() != null) 
+            if(Assets.exists(moddyFile) && difficulty.toLowerCase() != null) 
                 hasDifficultyModchart = true;
-                if (OpenFLAssets.exists(moddyFile) && !OpenFLAssets.exists(moddyFile))
+                if (Assets.exists(moddyFile) && !Assets.exists(moddyFile))
                     hasDifficultyModchart = false;
-            else if(OpenFLAssets.exists(moddyFile2) && difficulty.toLowerCase() == null && !OpenFLAssets.exists(moddyFile)) hasDifficultyModchart = false;
+            else if(Assets.exists(moddyFile2) && difficulty.toLowerCase() == null && !Assets.exists(moddyFile)) hasDifficultyModchart = false;
 
             #if MODS_ALLOWED
             if (hasDifficultyModchart)
@@ -259,8 +256,8 @@ class ModchartFile
             if(FileSystem.exists(filePath))
                 rawJson = File.getContent(filePath).trim();
             else #end //should become else if i think???
-                if (OpenFLAssets.exists(filePath))
-                    rawJson = OpenFLAssets.getText(filePath).trim();
+                if (Assets.exists(filePath))
+                    rawJson = Assets.getText(filePath).trim();
                 
         }
         var json:ModchartJson = null;
@@ -417,16 +414,16 @@ class CustomModifierScript
 		interp.variables.set('FlxTimer', flixel.util.FlxTimer);
 		interp.variables.set('FlxTween', flixel.tweens.FlxTween);
 		interp.variables.set('FlxEase', flixel.tweens.FlxEase);
-		interp.variables.set('PlayState', states.PlayState);
-		interp.variables.set('game', states.PlayState.instance);
-		interp.variables.set('Paths', backend.Paths);
-		interp.variables.set('Conductor', backend.Conductor);
+		interp.variables.set('PlayState', #if (PSYCH && PSYCHVERSION == 0.7) states.PlayState #else PlayState #end);
+		interp.variables.set('game', #if (PSYCH && PSYCHVERSION == 0.7) states.PlayState.instance #else PlayState.instance #end);
+		interp.variables.set('Paths', #if (PSYCH && PSYCHVERSION == 0.7) backend.Paths #else Paths #end);
+		interp.variables.set('Conductor', #if (PSYCH && PSYCHVERSION == 0.7) backend.Conductor #else Conductor #end);
         interp.variables.set('StringTools', StringTools);
-        interp.variables.set('Note', objects.Note);
+        interp.variables.set('Note', #if (PSYCH && PSYCHVERSION == 0.7) objects.Note #else Note #end);
 
         #if PSYCH
-        interp.variables.set('ClientPrefs', backend.ClientPrefs);
-        interp.variables.set('ColorSwap', shaders.ColorSwap);
+        interp.variables.set('ClientPrefs', #if (PSYCHVERSION == 0.7) backend.ClientPrefs #else ClientPrefs #end);
+        interp.variables.set('ColorSwap', #if (PSYCHVERSION == 0.7) shaders.ColorSwap #else ColorSwap #end);
         #end
 
         

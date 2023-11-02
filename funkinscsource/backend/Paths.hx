@@ -21,10 +21,6 @@ import openfl.geom.Rectangle;
 import lime.utils.Assets;
 import flash.media.Sound;
 
-#if sys
-import sys.io.File;
-import sys.FileSystem;
-#end
 import tjson.TJSON as Json;
 
 import openfl.display3D.textures.Texture; // GPU STUFF
@@ -57,7 +53,7 @@ class Paths
 
 	public static var dumpExclusions:Array<String> =
 	[
-		'assets/music/freakyMenu.$SOUND_EXT',
+		'assets/shared/music/freakyMenu.$SOUND_EXT',
 		'assets/shared/music/breakfast.$SOUND_EXT',
 		'assets/shared/music/tea-time.$SOUND_EXT',
 	];
@@ -100,8 +96,8 @@ class Paths
 
 					currentTrackedAssets.remove(key);
 					counter++;
-					Debug.logInfo('Cleared $key form RAM');
-					Debug.logInfo('Cleared and removed $counter assets.');
+					Debug.logTrace('Cleared $key form RAM');
+					Debug.logTrace('Cleared and removed $counter assets.');
 				}
 			}
 		}
@@ -151,31 +147,30 @@ class Paths
 				obj.destroy();
 				obj = null;
 				counterAssets++;
-				Debug.logInfo('Cleared $key from RAM');
-				Debug.logInfo('Cleared and removed $counterAssets cached assets.');
+				Debug.logTrace('Cleared $key from RAM');
+				Debug.logTrace('Cleared and removed $counterAssets cached assets.');
 			}
 		}
 
-		#if PRELOAD_ALL
 		// clear all sounds that are cached
 		var counterSound:Int = 0;
 		for (key in currentTrackedSounds.keys())
 		{
 			if (!localTrackedAssets.contains(key) && !dumpExclusions.contains(key) && key != null)
 			{
+				// Debug.logTrace('test: ' + dumpExclusions, key);
 				OpenFlAssets.cache.clear(key);
 				OpenFlAssets.cache.removeSound(key);
 				currentTrackedSounds.remove(key);
 				counterSound++;
-				Debug.logInfo('Cleared $key from RAM');
-				Debug.logInfo('Cleared and removed $counterSound cached sounds.');
+				Debug.logTrace('Cleared $key from RAM');
+				Debug.logTrace('Cleared and removed $counterSound cached sounds.');
 			}
 		}
 
 		// flags everything to be cleared out next unused memory clear
 		localTrackedAssets = [];
 		openfl.Assets.cache.clear("songs");
-		#end
 
 		runGC();
 	}
@@ -191,7 +186,11 @@ class Paths
 		#if MODS_ALLOWED
 		if(modsAllowed)
 		{
-			var modded:String = modFolders(file);
+			var customFile:String = file;
+			if (library != null)
+				customFile = '$library/$file';
+
+			var modded:String = modFolders(customFile);
 			if(FileSystem.exists(modded)) return modded;
 		}
 		#end
@@ -207,18 +206,14 @@ class Paths
 				if (OpenFlAssets.exists(levelPath, type))
 					return levelPath;
 			}
-
-			levelPath = getLibraryPathForce(file, "shared");
-			if (OpenFlAssets.exists(levelPath, type))
-				return levelPath;
 		}
 
-		return getPreloadPath(file);
+		return getSharedPath(file);
 	}
 
-	static public function getLibraryPath(file:String, library = "preload"):String
+	static public function getLibraryPath(file:String, library = "shared"):String
 	{
-		return if (library == "preload" || library == "default") getPreloadPath(file); else getLibraryPathForce(file, library);
+		return if (library == "shared") getSharedPath(file); else getLibraryPathForce(file, library);
 	}
 
 	inline static function getLibraryPathForce(file:String, library:String, ?level:String):String
@@ -272,9 +267,9 @@ class Paths
 		}
 	}
 
-	inline public static function getPreloadPath(file:String = ''):String
+	inline public static function getSharedPath(file:String = ''):String
 	{
-		return 'assets/$file';
+		return 'assets/shared/$file';
 	}
 
 	inline static public function bitmapFont(key:String, ?library:String):FlxBitmapFont
@@ -363,46 +358,30 @@ class Paths
 	#if (SBETA == 0.1)
 	inline static public function voices(?prefix:String = '', song:String, ?suffix:String = ''):Any
 	{
-		#if html5
-		return 'songs:assets/songs/${formatToSongPath(song)}/${prefix}Voices${suffix}.$SOUND_EXT';
-		#else
 		var songKey:String = '${formatToSongPath(song)}/${prefix}Voices${suffix}';
-		var voices = returnSound('songs', songKey);
+		var voices = returnSound(null, songKey, 'songs');
 		return voices;
-		#end
 	}
 
 	inline static public function inst(?prefix:String = '', song:String, ?suffix:String = ''):Any
 	{
-		#if html5
-		return 'songs:assets/songs/${formatToSongPath(song)}/${prefix}Inst${suffix}.$SOUND_EXT';
-		#else
 		var songKey:String = '${formatToSongPath(song)}/${prefix}Inst${suffix}';
-		var inst = returnSound('songs', songKey);
+		var inst = returnSound(null, songKey, 'songs');
 		return inst;
-		#end
 	}
 	#else
 	inline static public function voices(song:String):Any
 	{
-		#if html5
-		return 'songs:assets/songs/${formatToSongPath(song)}/Voices.$SOUND_EXT';
-		#else
 		var songKey:String = '${formatToSongPath(song)}/Voices';
-		var voices = returnSound('songs', songKey);
+		var voices = returnSound(null, songKey, 'songs');
 		return voices;
-		#end
 	}
 
 	inline static public function inst(song:String):Any
 	{
-		#if html5
-		return 'songs:assets/songs/${formatToSongPath(song)}/Inst.$SOUND_EXT';
-		#else
 		var songKey:String = '${formatToSongPath(song)}/Inst';
-		var inst = returnSound('songs', songKey);
+		var inst = returnSound(null, songKey, 'songs');
 		return inst;
-		#end
 	}
 	#end
 	static public function songEvents(song:String, ?difficulty:String):String
@@ -438,10 +417,10 @@ class Paths
 		if (FileSystem.exists(modFolders('classes/$key.hx')))
 			return modFolders('classes/$key.hx');
 		#end
-		if (FileSystem.exists(getPreloadPath('classes/$key.hx')))
-			return getPreloadPath('classes/$key.hx');
+		if (FileSystem.exists(getSharedPath('classes/$key.hx')))
+			return getSharedPath('classes/$key.hx');
 
-		Debug.logInfo('File for script $key.hx not found!');
+		Debug.logTrace('File for script $key.hx not found!');
 		return null;
 	}
 
@@ -479,7 +458,7 @@ class Paths
 			if(retVal != null) return retVal;
 		}
 
-		Debug.logInfo('oh no its returning null NOOOO ($file)');
+		Debug.logTrace('oh no its returning null NOOOO ($file)');
 		return null;
 	}
 
@@ -502,14 +481,18 @@ class Paths
 		localTrackedAssets.push(file);
 		if (allowGPU && ClientPrefs.data.cacheOnGPU)
 		{
+			bitmap.lock();
 			var texture:RectangleTexture = FlxG.stage.context3D.createRectangleTexture(bitmap.width, bitmap.height, BGRA, true);
 			texture.uploadFromBitmapData(bitmap);
 			bitmap.image.data = null;
 			bitmap.dispose();
 			bitmap.disposeImage();
+			FlxDestroyUtil.dispose(bitmap);
+			bitmap = null;
 			bitmap = BitmapData.fromTexture(texture);
+			bitmap.unlock();
 		}
-		var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(bitmap, false, file);
+		var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(bitmap, false, file, false);
 		newGraphic.persist = true;
 		newGraphic.destroyOnNoUse = false;
 		currentTrackedAssets.set(file, newGraphic);
@@ -524,8 +507,8 @@ class Paths
 			return File.getContent(modFolders(key));
 		#end
 
-		if (FileSystem.exists(getPreloadPath(key)))
-			return File.getContent(getPreloadPath(key));
+		if (FileSystem.exists(getSharedPath(key)))
+			return File.getContent(getSharedPath(key));
 
 		if (currentLevel != null)
 		{
@@ -536,9 +519,6 @@ class Paths
 					return File.getContent(levelPath);
 			}
 
-			levelPath = getLibraryPathForce(key, 'shared');
-			if (FileSystem.exists(levelPath))
-				return File.getContent(levelPath);
 		}
 		#end
 		var path:String = getPath(key, TEXT);
@@ -678,9 +658,13 @@ class Paths
 	}
 
 	public static var currentTrackedSounds:Map<String, Sound> = [];
-	public static function returnSound(path:String, key:String, ?library:String) {
+	public static function returnSound(path:Null<String>, key:String, ?library:String) {
 		#if MODS_ALLOWED
-		var file:String = modsSounds(path, key);
+		var modLibPath:String = '';
+		if (library != null) modLibPath = '$library/';
+		if (path != null) modLibPath += '$path/';
+
+		var file:String = modsSounds(modLibPath, key);
 		if(FileSystem.exists(file)) {
 			if(!currentTrackedSounds.exists(file)) {
 				currentTrackedSounds.set(file, Sound.fromFile(file));
@@ -690,8 +674,11 @@ class Paths
 		}
 		#end
 		// I hate this so god damn much
-		var gottenPath:String = getPath('$path/$key.$SOUND_EXT', SOUND, library);
+		var gottenPath:String = '$key.$SOUND_EXT';
+		if(path != null) gottenPath = '$path/$gottenPath';
+		gottenPath = getPath(gottenPath, SOUND, library);
 		gottenPath = gottenPath.substring(gottenPath.indexOf(':') + 1, gottenPath.length);
+		// Debug.logTrace(gottenPath);
 		if(!currentTrackedSounds.exists(gottenPath))
 		#if MODS_ALLOWED
 			currentTrackedSounds.set(gottenPath, Sound.fromFile('./' + gottenPath));

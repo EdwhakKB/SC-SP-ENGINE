@@ -3,9 +3,6 @@ package objects;
 import shaders.RGBPalette;
 import flixel.system.FlxAssets.FlxShader;
 import flixel.graphics.frames.FlxFrame;
-#if sys
-import sys.FileSystem;
-#end
 import lime.utils.Assets as OpenFLAssets;
 import shaders.FlxFixedShader;
 import flixel.addons.effects.FlxSkewedSprite;
@@ -16,7 +13,6 @@ import flixel.FlxSprite;
 import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.graphics.tile.FlxDrawTrianglesItem.DrawData;
-import modcharting.RenderPath;
 import openfl.Vector;
 
 typedef NoteSplashConfig = {
@@ -48,9 +44,9 @@ class NoteSplash extends FlxSkewedSprite
 			string1NoteSkin = "noteSplashes-" + PlayState.instance.bfStrumStyle;
 			string2NoteSkin = "notes/noteSplashes-" + PlayState.instance.bfStrumStyle;
 		}
-		if (FileSystem.exists(Paths.getPreloadPath('shadred/images/$string1NoteSkin.png')))
+		if (FileSystem.exists(Paths.modsImages(string1NoteSkin)) || FileSystem.exists(Paths.getSharedPath('images/$string1NoteSkin.png')))
 			skin = "noteSplashes-"+ PlayState.instance.bfStrumStyle;
-		else if (FileSystem.exists(Paths.getPreloadPath('shared/images/$string2NoteSkin.png')))
+		else if (FileSystem.exists(Paths.modsImages('notes/$string2NoteSkin')) || FileSystem.exists(Paths.getSharedPath('images/notes/$string2NoteSkin.png')))
 			skin = "notes/noteSplashes-" + PlayState.instance.bfStrumStyle;
 		else{
 			if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) skin = PlayState.SONG.splashSkin;
@@ -84,10 +80,10 @@ class NoteSplash extends FlxSkewedSprite
 			string1NoteSkin = "noteSplashes-" + PlayState.instance.bfStrumStyle;
 			string2NoteSkin = "notes/noteSplashes-" + PlayState.instance.bfStrumStyle;
 		}
-		if (OpenFLAssets.exists(string1NoteSkin, IMAGE) || FileSystem.exists(Paths.modFolders('images/$string1NoteSkin.png')))
-			texture = string1NoteSkin;
-		else if (OpenFLAssets.exists(string2NoteSkin, IMAGE) || FileSystem.exists(Paths.modFolders('images/$string2NoteSkin.png')))
-			texture = string2NoteSkin;
+		if (FileSystem.exists(Paths.modsImages(string1NoteSkin)) || FileSystem.exists(Paths.getSharedPath('images/$string1NoteSkin.png')))
+			texture = "noteSplashes-"+ PlayState.instance.bfStrumStyle;
+		else if (FileSystem.exists(Paths.modsImages('notes/$string2NoteSkin')) || FileSystem.exists(Paths.getSharedPath('images/notes/$string2NoteSkin.png')))
+			texture = "notes/noteSplashes-" + PlayState.instance.bfStrumStyle;
 		else
 		{
 			if(note != null && note.noteSplashData.texture != null) texture = note.noteSplashData.texture;
@@ -138,6 +134,7 @@ class NoteSplash extends FlxSkewedSprite
 		if(config != null)
 		{
 			var animID:Int = direction + ((animNum - 1) * Note.colArray.length);
+			//Debug.logTrace('anim: ${animation.curAnim.name}, $animID');
 			var offs:Array<Float> = config.offsets[FlxMath.wrap(animID, 0, config.offsets.length-1)];
 			offset.x += offs[0];
 			offset.y += offs[1];
@@ -186,10 +183,12 @@ class NoteSplash extends FlxSkewedSprite
 			var animID:Int = maxAnims + 1;
 			for (i in 0...Note.colArray.length) {
 				if (!addAnimAndCheck('note$i-$animID', '$animName ${Note.colArray[i]} $animID', 24, false)) {
+					//Debug.logTrace('maxAnims: $maxAnims');
 					return config;
 				}
 			}
 			maxAnims++;
+			//Debug.logTrace('currently: $maxAnims');
 		}
 	}
 
@@ -270,6 +269,7 @@ class PixelSplashShaderRef {
 		var pixel:Float = 1;
 		if(containsPixel) pixel = PlayState.daPixelZoom;
 		shader.uBlocksize.value = [pixel, pixel];
+		//Debug.logTrace('Created shader ' + Conductor.songPosition);
 	}
 }
 

@@ -111,6 +111,45 @@ class SupportBETAFunctions
 			LuaUtils.getActorByName(id).flipY = flip;
 		});
 
+		
+        funk.set("setActorColorRGB", function(id:String, color:String) {
+            var actor:FlxSprite = LuaUtils.getActorByName(id);
+
+            var colors = color.split(',');
+            var red = Std.parseInt(colors[0]);
+            var green = Std.parseInt(colors[1]);
+            var blue = Std.parseInt(colors[2]);
+
+            if(actor != null)
+                Reflect.setProperty(actor, "color", FlxColor.fromRGB(red,green,blue));
+        });
+
+		funk.set("setActorScroll", function(x:Float,y:Float,id:String) {
+            var actor = LuaUtils.getActorByName(id);
+
+            if(LuaUtils.getActorByName(id) != null)
+            {
+                actor.scrollFactor.set(x,y);
+            }
+        });
+
+		funk.set("setActorColor", function(id:String,r:Int,g:Int,b:Int,alpha:Int = 255) {
+            if(LuaUtils.getActorByName(id) != null)
+            {
+                Reflect.setProperty(LuaUtils.getActorByName(id), "color", FlxColor.fromRGB(r, g, b, alpha));
+            }
+        });
+
+		funk.set("setActorLayer", function(id:String, layer:Int) {
+            var actor = LuaUtils.getActorByName(id);
+            
+            if(actor != null)
+            {
+                PlayState.instance.remove(actor);
+                PlayState.instance.insert(layer, actor);
+            }
+        });
+
 		//get actors
 		funk.set("getActorWidth", function (id:String) {
 			return LuaUtils.getActorByName(id).width;
@@ -163,6 +202,15 @@ class SupportBETAFunctions
 
 			return shit.getMidpoint().y;
 		});
+
+		funk.set("getActorLayer", function(id:String) {
+            var actor = LuaUtils.getActorByName(id);
+
+            if(actor != null)
+                return PlayState.instance.members.indexOf(actor);
+            else
+                return -1;
+        });
 
 		funk.set("characterZoom", function(id:String, zoomAmount:Float) {
 			if(PlayState.instance.modchartCharacters.exists(id)) {
@@ -853,7 +901,7 @@ class SupportBETAFunctions
 						if (daNote.mustPress)
 						{
 							if (daNote.noteType != "")
-								PlayState.instance.callOnLuas('onNoteChange', [style, postfix]); //i really don't wanna use this but I will if I have to
+								PlayState.instance.callOnScripts('onNoteChange', [style, postfix]); //i really don't wanna use this but I will if I have to
 							else
 								daNote.reloadNote(style, postfix);
 						}
@@ -864,7 +912,7 @@ class SupportBETAFunctions
 						if (!daNote.mustPress)
 						{
 							if (daNote.noteType != "")
-								PlayState.instance.callOnLuas('onNoteChange', [style, postfix]); //i really don't wanna use this but I will if I have to
+								PlayState.instance.callOnScripts('onNoteChange', [style, postfix]); //i really don't wanna use this but I will if I have to
 							else
 								daNote.reloadNote(style, postfix);
 						}

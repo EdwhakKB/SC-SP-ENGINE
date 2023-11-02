@@ -18,11 +18,6 @@ import flixel.addons.effects.FlxSkewedSprite;
 import flixel.addons.display.FlxRuntimeShader;
 #end
 
-#if sys
-import sys.FileSystem;
-import sys.io.File;
-#end
-
 import cutscenes.DialogueBoxPsych;
 
 import objects.StrumArrow;
@@ -118,6 +113,9 @@ class FunkinLua {
 		lua = LuaL.newstate();
 		LuaL.openlibs(lua);
 
+		//Debug.logTrace('Lua version: ' + Lua.version());
+		//Debug.logTrace("LuaJIT version: " + Lua.versionJIT());
+
 		//LuaL.dostring(lua, CLENSE);
 
 		this.preloading = preloading;
@@ -202,6 +200,7 @@ class FunkinLua {
 		set('healthGainMult', game.healthGain);
 		set('healthLossMult', game.healthLoss);
 		set('playbackRate', game.playbackRate);
+		set('guitarHeroSustains', game.guitarHeroSustains);
 		set('instakillOnMiss', game.instakillOnMiss);
 		set('botPlay', game.cpuControlled);
 		set('practice', game.practiceMode);
@@ -262,8 +261,8 @@ class FunkinLua {
 		set('hudZoom', game.camHUD.zoom);
 		set('cameraZoom', FlxG.camera.zoom);
 
+		// build target (windows, mac, linux, etc.)
 		set('buildTarget', getBuildTarget());
-
 		
 		if (preloading) //only the necessary functions for preloading are included
 		{
@@ -660,7 +659,7 @@ class FunkinLua {
 							if(luaInstance.scriptName == foundScript)
 							{
 								luaInstance.stop();
-								Debug.logInfo('Closing script ' + luaInstance.scriptName);
+								Debug.logTrace('Closing script ' + luaInstance.scriptName);
 								return true;
 							}
 	
@@ -668,7 +667,7 @@ class FunkinLua {
 							if(luaInstance.scriptName == foundScript)
 							{
 								luaInstance.stop();
-								Debug.logInfo('Closing script ' + luaInstance.scriptName);
+								Debug.logTrace('Closing script ' + luaInstance.scriptName);
 								return true;
 							}
 				}
@@ -993,6 +992,7 @@ class FunkinLua {
 						game.modchartTimers.remove(tag);
 					}
 					game.callOnLuas('onTimerCompleted', [tag, tmr.loops, tmr.loopsLeft]);
+					//Debug.logTrace('Timer Completed: ' + tag);
 				}, loops));
 			});
 			set("cancelTimer", function(tag:String) {
@@ -1092,6 +1092,7 @@ class FunkinLua {
 				game.triggerEvent(name, value1, value2, Conductor.songPosition, value3, value4, value5, value6, value7, value8, 
 					value9, value10, value11, value12, value13, value14
 				);
+				//Debug.logTrace('Triggered event: ' + name + ', ' + value1 + ', ' + value2);
 				return true;
 			});
 	
@@ -1295,16 +1296,16 @@ class FunkinLua {
 				}
 			});
 	
-			set("makeLuaBackdrop", function(tag:String, image:String, x:Float, y:Float, ?axes:String = "XY") {
+			set("makeLuaBackdrop", function(tag:String, image:String, spacingX:Float, spacingY:Float, ?axes:String = "XY") {
 				tag = tag.replace('.', '');
-				LuaUtils.resetSpriteTag(tag);
+				LuaUtils.resetBackdropTag(tag);
 				var leSprite:FlxBackdrop = null;
 				if(image != null && image.length > 0) 
 				{				
-					leSprite = new FlxBackdrop(Paths.image(image), FlxAxes.fromString(axes), Std.int(x), Std.int(y));
+					leSprite = new FlxBackdrop(Paths.image(image), FlxAxes.fromString(axes), Std.int(spacingX), Std.int(spacingY));
 				}
 				leSprite.antialiasing = ClientPrefs.data.antialiasing;
-				game.modchartSprites.set(tag, leSprite);
+				game.modchartBackdrop.set(tag, leSprite);
 				leSprite.active = true;
 			});
 			set("makeLuaSprite", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0) {
@@ -1411,7 +1412,7 @@ class FunkinLua {
 				return false;
 			});
 	
-			set("addAnimationByIndices", function(obj:String, name:String, prefix:String, indices:String, framerate:Int = 24, loop:Bool = false) {
+			set("addAnimationByIndices", function(obj:String, name:String, prefix:String, indices:Any, framerate:Int = 24, loop:Bool = false) {
 				return LuaUtils.addAnimByIndices(obj, name, prefix, indices, framerate, loop);
 			});
 	
@@ -1597,6 +1598,20 @@ class FunkinLua {
 					}
 				}
 			});
+			set("addBackdrop", function(tag:String, front:Bool = false) {
+				if(game.modchartBackdrop.exists(tag)) {
+					var spr:FlxBackdrop = game.modchartBackdrop.get(tag);
+					if(front)
+						LuaUtils.getTargetInstance().add(spr);
+					else
+					{
+						if(!game.isDead)
+							game.insert(game.members.indexOf(LuaUtils.getLowestCharacterPlacement()), spr);
+						else
+							GameOverSubstate.instance.insert(GameOverSubstate.instance.members.indexOf(GameOverSubstate.instance.boyfriend), spr);
+					}
+				}
+			});
 			set("setGraphicSize", function(obj:String, x:Int, y:Int = 0, updateHitbox:Bool = true) {
 				if(game.getLuaObject(obj)!=null) {
 					var shit:FlxSprite = game.getLuaObject(obj);
@@ -1717,6 +1732,23 @@ class FunkinLua {
 				if(destroy) {
 					pee.destroy();
 					game.modchartSkewedSprite.remove(tag);
+				}
+			});
+
+			set("removeBackdrop", function(tag:String, destroy:Bool = true) {
+				if(!game.modchartBackdrop.exists(tag)) {
+					return;
+				}
+	
+				var pee:FlxBackdrop = game.modchartBackdrop.get(tag);
+				if(destroy) {
+					pee.kill();
+				}
+	
+				LuaUtils.getTargetInstance().remove(pee, true);
+				if(destroy) {
+					pee.destroy();
+					game.modchartBackdrop.remove(tag);
 				}
 			});
 	
@@ -2078,7 +2110,7 @@ class FunkinLua {
 					case 'logInfo':
 						Debug.logInfo(input, pos);
 					case 'logTrace':
-						Debug.logInfo(input, pos);
+						Debug.logTrace(input, pos);
 				}
 			});
 	
@@ -2090,7 +2122,7 @@ class FunkinLua {
 				game.modchartIcons.set(tag, leSprite); //yes
 				var shit:ModchartIcon = game.modchartIcons.get(tag);
 				game.uiGroup.add(shit);
-				//shit.cameras = [game.camHUD];
+				shit.camera = game.camHUD;
 				//LuaUtils.getTargetInstance().add(shit);
 			});
 	
@@ -2107,7 +2139,7 @@ class FunkinLua {
 				game.modchartIcons.set(tag, leSprite); //yes
 				var shit:ModchartIcon = game.modchartIcons.get(tag);
 				game.uiGroup.add(shit);
-				//shit.cameras = [game.camHUD];
+				shit.camera = game.camHUD;
 				//LuaUtils.getTargetInstance().add(shit);
 			});
 			
@@ -2152,13 +2184,14 @@ class FunkinLua {
 			#if (SBETA == 0.1) SupportBETAFunctions.implement(this); #end
 			#if desktop DiscordClient.addLuaCallbacks(this); #end
 			#if SScript HScript.implement(this); #end
+			#if ACHIEVEMENTS_ALLOWED Achievements.addLuaCallbacks(this); #end
 			ReflectionFunctions.implement(this);
 			TextFunctions.implement(this);
 			ExtraFunctions.implement(this);
 			CustomSubstate.implement(this);
 			ShaderFunctions.implement(this);
 			DeprecatedFunctions.implement(this);
-			#if modchartingTools ModchartFuncs.implement(this); #end
+			#if modchartingTools if (!isStageLua && PlayState.SONG.notITG && ClientPrefs.getGameplaySetting('modchart')) ModchartFuncs.implement(this); #end
 		}
 
 		try{
@@ -2189,7 +2222,6 @@ class FunkinLua {
 			Debug.logInfo(e);
 			return;
 		}
-		call('start', []);
 		call('onCreate', []);
 
 		if (isStageLua)
@@ -2240,7 +2272,7 @@ class FunkinLua {
 			return result;
 		}
 		catch (e:Dynamic) {
-			Debug.logInfo(e);
+			Debug.logTrace(e);
 		}
 		#end
 		return Function_Continue;
@@ -2426,7 +2458,7 @@ class FunkinLua {
 				return;
 			}
 			PlayState.instance.addTextToDebug(text, color);
-			Debug.logInfo(text);
+			Debug.logTrace(text);
 		}
 		#end
 	}
@@ -2453,7 +2485,7 @@ class FunkinLua {
 	function findScript(scriptFile:String, ext:String = '.lua')
 	{
 		if(!scriptFile.endsWith(ext)) scriptFile += ext;
-		var preloadPath:String = Paths.getPreloadPath(scriptFile);
+		var preloadPath:String = Paths.getSharedPath(scriptFile);
 		#if MODS_ALLOWED
 		var path:String = Paths.modFolders(scriptFile);
 		if(FileSystem.exists(scriptFile))
@@ -2544,6 +2576,7 @@ class FunkinLua {
 				if(found)
 				{
 					runtimeShaders.set(name, [frag, vert]);
+					//Debug.logTrace('Found shader $name!');
 					return true;
 				}
 			}

@@ -19,11 +19,6 @@ import flash.net.FileFilter;
 import lime.system.Clipboard;
 import tjson.TJSON as Json;
 
-#if sys
-import sys.io.File;
-import sys.FileSystem;
-#end
-
 import objects.HealthIcon;
 import objects.MenuCharacter;
 import objects.MenuItem;
@@ -483,7 +478,7 @@ class WeekEditorState extends MusicBeatState
 				if(loadedWeek.weekCharacters != null && loadedWeek.weekName != null) //Make sure it's really a week
 				{
 					var cutName:String = _file.name.substr(0, _file.name.length - 5);
-					Debug.logInfo("Successfully loaded file: " + cutName);
+					Debug.logTrace("Successfully loaded file: " + cutName);
 					loadError = false;
 
 					weekFileName = cutName;
@@ -496,7 +491,7 @@ class WeekEditorState extends MusicBeatState
 		loadedWeek = null;
 		_file = null;
 		#else
-		Debug.logInfo("File couldn't be loaded! You aren't on Desktop, are you?");
+		Debug.logTrace("File couldn't be loaded! You aren't on Desktop, are you?");
 		#end
 	}
 
@@ -509,7 +504,7 @@ class WeekEditorState extends MusicBeatState
 		_file.removeEventListener(Event.CANCEL, onLoadCancel);
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
 		_file = null;
-		Debug.logInfo("Cancelled file loading.");
+		Debug.logTrace("Cancelled file loading.");
 	}
 
 	/**
@@ -521,7 +516,7 @@ class WeekEditorState extends MusicBeatState
 		_file.removeEventListener(Event.CANCEL, onLoadCancel);
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
 		_file = null;
-		Debug.logInfo("Problem loading file");
+		Debug.logTrace("Problem loading file");
 	}
 
 	public static function saveWeek(weekFile:WeekFile) {
@@ -770,7 +765,7 @@ class WeekEditorFreeplayState extends MusicBeatState
 				// item.setGraphicSize(Std.int(item.width));
 			}
 		}
-		Debug.logInfo(weekFile.songs[curSelected]);
+		Debug.logTrace(weekFile.songs[curSelected]);
 		iconInputText.text = weekFile.songs[curSelected][1];
 		bgColorStepperR.value = Math.round(weekFile.songs[curSelected][2][0]);
 		bgColorStepperG.value = Math.round(weekFile.songs[curSelected][2][1]);

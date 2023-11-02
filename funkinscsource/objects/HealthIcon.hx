@@ -13,8 +13,13 @@ class HealthIcon extends FlxSprite
 	public var findAutoMaticSize:Bool = false;
 	public var needAutoSize:Bool = true;
 
+	public var defaultSize:Bool = false;
+
 	public var animatedIcon:Bool = false;
 	public var hasWinningAnimated:Bool = false;
+
+	public var isOneSized:Bool = false;
+	public var divisionMult:Int = 1;
 
 	public function new(char:String = 'bf', isPlayer:Bool = false, ?allowGPU:Bool = true)
 	{
@@ -56,6 +61,8 @@ class HealthIcon extends FlxSprite
 		else{
 			var graphic = Paths.image(name, allowGPU);
 
+			isOneSized = (graphic.height == 150 && graphic.width == 150);
+
 			if (graphic.width == 450 || graphic.width == 300) // now with winning icon support
 				needAutoSize = false;
 	
@@ -66,18 +73,31 @@ class HealthIcon extends FlxSprite
 	
 			findAutoMaticSize = (graphic.width > 450  || graphic.width < 450 || 300 < graphic.width);
 	
-			if ((findAutoMaticSize && needAutoSize) || alreadySized){
-				loadGraphic(graphic, true, Math.floor(graphic.width / 2), Math.floor(graphic.height)); //Then load it fr
-				iconOffset[0] = (width - 150) / 2;
-				iconOffset[1] = (height - 150) / 2;
-				hasWinning = false;
+			if (!isOneSized)
+			{
+				if ((findAutoMaticSize && needAutoSize) || alreadySized)
+					divisionMult = 2;
+				else
+					divisionMult = 3;
 			}
-			else{
-				loadGraphic(graphic, true, Math.floor(graphic.width / 3), Math.floor(graphic.height));
-				iconOffset[0] = (width - 150) / 3;
-				iconOffset[1] = (height - 150) / 3;
+			else
+			{
+				divisionMult = 1;
+			}
+
+			loadGraphic(graphic, true, Math.floor(graphic.width / divisionMult), Math.floor(graphic.height));
+			iconOffset[0] = (width - 150) / divisionMult;
+			iconOffset[1] = (height - 150) / divisionMult;
+			if(divisionMult == 2)
+			{
+				hasWinning = false;
+				defaultSize = true;
+			}
+			else if (divisionMult == 3)
+			{
 				hasWinning = true;
 			}
+
 			offset.set(iconOffset[0], iconOffset[1]);
 			updateHitbox();
 	
@@ -87,9 +107,12 @@ class HealthIcon extends FlxSprite
 			{
 				animArray = [0, 1, 2];
 			}
-			else
+			else if (!hasWinning)
 			{
-				animArray = [0, 1];
+				if (defaultSize)
+					animArray = [0, 1, 1];
+				else
+					animArray = [0, 0, 0];
 			}
 	
 			animation.add(char, animArray, 0, false, isPlayer);

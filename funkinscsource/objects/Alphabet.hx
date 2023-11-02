@@ -448,7 +448,7 @@ class AlphaCharacter extends FlxSprite
 	{
 		if (animation.curAnim == null)
 		{
-			Debug.logInfo(character);
+			Debug.logTrace(character);
 			return;
 		}
 

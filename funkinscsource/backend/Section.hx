@@ -34,6 +34,6 @@ class Section
 	public function new(sectionBeats:Float = 4)
 	{
 		this.sectionBeats = sectionBeats;
-		Debug.logInfo('test created section: ' + sectionBeats);
+		Debug.logTrace('test created section: ' + sectionBeats);
 	}
 }

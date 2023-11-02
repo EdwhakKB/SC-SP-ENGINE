@@ -111,7 +111,7 @@ class GameJoltLogin extends MusicBeatState
 
         Conductor.bpm = 102;
 
-        var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat', 'preload'));
+        var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat', 'shared'));
 		bg.setGraphicSize(FlxG.width, FlxG.height);
 		bg.antialiasing = true;
 		bg.updateHitbox();

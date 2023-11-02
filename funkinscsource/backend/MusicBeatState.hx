@@ -34,7 +34,7 @@ class MusicBeatState extends #if modchartingTools modcharting.ModchartMusicBeatS
 				var subState:MusicBeatSubstate = subStates[0];
 				if (subState != null)
 				{
-					Debug.logInfo('Destroying Substates!');
+					Debug.logTrace('Destroying Substates!');
 					subStates.remove(subState);
 					subState.destroy();
 				}
@@ -247,10 +247,12 @@ class MusicBeatState extends #if modchartingTools modcharting.ModchartMusicBeatS
 
 	public function beatHit():Void
 	{
+		//Debug.logTrace('Beat: ' + curBeat);
 	}
 
 	public function sectionHit():Void
 	{
+		//Debug.logTrace('Section: ' + curSection + ', Beat: ' + curBeat + ', Step: ' + curStep);
 	}
 
 

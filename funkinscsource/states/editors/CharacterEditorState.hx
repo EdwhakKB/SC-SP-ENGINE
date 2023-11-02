@@ -24,10 +24,6 @@ import objects.Character;
 import objects.HealthIcon;
 import objects.Bar;
 
-#if MODS_ALLOWED
-import sys.FileSystem;
-#end
-
 class CharacterEditorState extends MusicBeatState
 {
 	var char:Character;
@@ -774,7 +770,7 @@ class CharacterEditorState extends MusicBeatState
 
 			reloadAnimationDropDown();
 			genBoyOffsets();
-			Debug.logInfo('Added/Updated animation: ' + animationInputText.text);
+			Debug.logTrace('Added/Updated animation: ' + animationInputText.text);
 		});
 
 		var removeButton:FlxButton = new FlxButton(180, animationIndicesInputText.y + 30, "Remove", function() {
@@ -796,7 +792,7 @@ class CharacterEditorState extends MusicBeatState
 					}
 					reloadAnimationDropDown();
 					genBoyOffsets();
-					Debug.logInfo('Removed animation: ' + animationInputText.text);
+					Debug.logTrace('Removed animation: ' + animationInputText.text);
 					break;
 				}
 			}
@@ -1177,7 +1173,7 @@ class CharacterEditorState extends MusicBeatState
 
 		#if MODS_ALLOWED
 		characterList = [];
-		var directories:Array<String> = [Paths.mods('data/characters/'), Paths.mods(Mods.currentModDirectory + '/data/characters/'), Paths.getPreloadPath('data/characters/')];
+		var directories:Array<String> = [Paths.mods('data/characters/'), Paths.mods(Mods.currentModDirectory + '/data/characters/'), Paths.getSharedPath('data/characters/')];
 		for(mod in Mods.getGlobalMods())
 			directories.push(Paths.mods(mod + '/data/characters/'));
 		for (i in 0...directories.length) {
@@ -1185,7 +1181,7 @@ class CharacterEditorState extends MusicBeatState
 			if(FileSystem.exists(directory)) {
 				for (file in FileSystem.readDirectory(directory)) {
 					var path = haxe.io.Path.join([directory, file]);
-					if (!sys.FileSystem.isDirectory(path) && file.endsWith('.json')) {
+					if (!FileSystem.isDirectory(path) && file.endsWith('.json')) {
 						var charToCheck:String = file.substr(0, file.length - 5);
 						if(!charsLoaded.exists(charToCheck)) {
 							characterList.push(charToCheck);
