@@ -790,20 +790,31 @@ class SupportBETAFunctions
 			var opponent:String;
 			var player:String;
 
-			if (dadColor == "")
+			if (dadColor == "" || dadColor == null || dadColor == '')
 				opponent = PlayState.instance.dad.iconColor;
 			else
 				opponent = dadColor;
 
-			if (bfColor == "")
+			if (bfColor == "" || bfColor == null || bfColor == '')
 				player = PlayState.instance.boyfriend.iconColor;
 			else
 				player = bfColor;
 
-			if (ClientPrefs.data.hudStyle != "HITMANS")
-				PlayState.instance.healthBar.setColors(CoolUtil.colorFromString(opponent), CoolUtil.colorFromString(player));
+			if ((opponent.contains('#') || opponent.contains('#FF') || opponent.contains('0x')) || 
+				(player.contains('#') || player.contains('#FF') || player.contains('0x')))
+			{
+				if (ClientPrefs.data.hudStyle != "HITMANS")
+					PlayState.instance.healthBar.setColors(FlxColor.fromString(opponent), FlxColor.fromString(player));
+				else
+					PlayState.instance.healthBarHit.setColors(FlxColor.fromString(opponent), FlxColor.fromString(player));
+			}
 			else
-				PlayState.instance.healthBarHit.setColors(CoolUtil.colorFromString(opponent), CoolUtil.colorFromString(player));
+			{
+				if (ClientPrefs.data.hudStyle != "HITMANS")
+					PlayState.instance.healthBar.setColors(CoolUtil.colorFromString(opponent), CoolUtil.colorFromString(player));
+				else
+					PlayState.instance.healthBarHit.setColors(CoolUtil.colorFromString(opponent), CoolUtil.colorFromString(player));
+			}
 		});
 
 		funk.set("getScared", function(id:String) {

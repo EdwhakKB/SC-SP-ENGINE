@@ -100,6 +100,8 @@ class StrumArrow extends FlxSkewedSprite
 		}
 	}
 
+	public var isPixel:Bool = false;
+
 	public function loadNoteAnims(style:String, ?first:Bool = false)
 	{
 		daStyle = style;
@@ -177,6 +179,7 @@ class StrumArrow extends FlxSkewedSprite
 	{
 		if (pixel)
 		{
+			isPixel = true;
 			animation.add('green', [6]);
 			animation.add('red', [7]);
 			animation.add('blue', [5]);
@@ -191,6 +194,8 @@ class StrumArrow extends FlxSkewedSprite
 		}
 		else
 		{	
+			isPixel = false;
+
 			antialiasing = ClientPrefs.data.antialiasing;
 			setGraphicSize(Std.int(width * 0.7));
 
@@ -244,7 +249,6 @@ class StrumArrow extends FlxSkewedSprite
 				bgLane.x = (x - 2) - (bgLane.angle / 2);
 	
 			bgLane.alpha = ClientPrefs.data.laneTransparency * alpha;
-			//bgLane.scale.set(this.scale.x * 14.2857143, this.scale.y * 14.2857143);
 			bgLane.visible = visible;
 		}
 		super.update(elapsed);

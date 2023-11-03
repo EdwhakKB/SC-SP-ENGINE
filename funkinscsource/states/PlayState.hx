@@ -376,6 +376,8 @@ class PlayState extends MusicBeatState
 
 	public var has3rdIntroAsset:Bool = false;
 
+	public static var startCharScripts:Array<String> = [];
+
 	//skip from kade 1.8!
 	var needSkip:Bool = false;
 	var skipActive:Bool = false;
@@ -639,7 +641,19 @@ class PlayState extends MusicBeatState
 			}
 		#end
 
+		if (FileSystem.exists(Paths.txt('songs/' + SONG.song.toLowerCase()  + "/preload")))
+		{
+			var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt('songs/' + SONG.song.toLowerCase()  + "/preload"));
+
+			for (i in 0...characters.length) // whoops. still need to load the luas
+			{
+				var data:Array<String> = characters[i].split(' ');
+				startCharScripts.push(characters[i]);
+			}
+		}
+
 		if(SONG.gfVersion == null || SONG.gfVersion.length < 1) SONG.gfVersion = 'gf'; //Fix for the Chart Editor
+		
 		gf = new Character(GF_X, GF_Y, SONG.gfVersion);
 		var gfOffset = new CharacterOffsets(SONG.gfVersion, false, true);
 		var daGFX:Float = gfOffset.daOffsetArray[0];
@@ -1049,6 +1063,12 @@ class PlayState extends MusicBeatState
 		{
 			for (event in eventNotes) event.strumTime -= eventEarlyTrigger(event);
 			eventNotes.sort(sortByTime);
+		}
+
+		for(i in 0...startCharScripts.length)
+		{
+			startCharacterScripts(startCharScripts[i]);
+			startCharScripts.remove(startCharScripts[i]);
 		}
 
 		// SONG SPECIFIC SCRIPTS
@@ -4468,7 +4488,6 @@ class PlayState extends MusicBeatState
 		seenCutscene = false;
 
 		songLength = 0;
-		Conductor.songPosition = 0;
 		chartingMode = false;
 		modchartMode = false;
 
@@ -4513,7 +4532,6 @@ class PlayState extends MusicBeatState
 			songLength = 0;
 			inst.time = 0;
 			vocals.time = 0;
-			Conductor.songPosition = 0;
 		}
 		var ret:Dynamic = callOnScripts('onEndSong', null, true);
 		if(ret != FunkinLua.Function_Stop && !transitioning)
@@ -4825,7 +4843,7 @@ class PlayState extends MusicBeatState
 
 		daRating.count++;
 
-		if((daRating.doNoteSplash && !note.noteSplashData.disabled) && !SONG.notITG)
+		if((daRating.doNoteSplash && !note.noteSplashData.disabled && ClientPrefs.data.noteSplashes) && !SONG.notITG)
 			spawnNoteSplashOnNote(note);
 
 		if (playbackRate >= 1.05)
@@ -5016,7 +5034,7 @@ class PlayState extends MusicBeatState
 		var placement:Float =  FlxG.width * 0.38;
 		var rating:FlxSprite = new FlxSprite();
 
-		if((!note.noteSplashData.disabled) && !SONG.notITG)
+		if((!note.noteSplashData.disabled && ClientPrefs.data.noteSplashesOP) && !SONG.notITG)
 			spawnNoteSplashOnNoteCPU(note);
 
 		var uiPrefix:String = "";
@@ -5609,7 +5627,7 @@ class PlayState extends MusicBeatState
 			popUpScoreOp(note);
 		}
 
-		if ((!note.noteSplashData.disabled && !note.isSustainNote) && !SONG.notITG)
+		if ((!note.noteSplashData.disabled && !note.isSustainNote && ClientPrefs.data.noteSplashesOP && !popupScoreForOp) && !SONG.notITG)
 			spawnNoteSplashOnNoteCPU(note);
 
 		playDad = searchLuaVar('playDadSing', 'bool', false);
@@ -5749,7 +5767,7 @@ class PlayState extends MusicBeatState
 
 		if(note.hitCausesMiss) {
 			noteMiss(note);
-			if((!note.noteSplashData.disabled && !note.isSustainNote) && !SONG.notITG)
+			if((!note.noteSplashData.disabled && !note.isSustainNote && ClientPrefs.data.noteSplashes) && !SONG.notITG)
 				spawnNoteSplashOnNote(note);
 
 			if(!note.noMissAnimation)
@@ -6433,7 +6451,7 @@ class PlayState extends MusicBeatState
 	public function callOnLuas(funcToCall:String, args:Array<Dynamic> = null, ignoreStops = false, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
 		var returnVal:Dynamic = FunkinLua.Function_Continue;
 		#if LUA_ALLOWED
-		var stageExclusions:Array<String> = ["onCreatePost", "onUpdate", "onStepHit", "onBeatHit", "onSectionHit", "sectionHit", "beatHit", "stepHit"];
+		var stageExclusions:Array<String> = ["onCreatePost", "onUpdate"];
 
 		if (Stage != null && Stage.isCustomStage && Stage.isLuaStage && !(stageExclusions.contains(funcToCall)))
 			Stage.callOnLuas(funcToCall, args);
@@ -6524,9 +6542,8 @@ class PlayState extends MusicBeatState
 
 	public function setOnLuas(variable:String, arg:Dynamic, exclusions:Array<String> = null) {
 		#if LUA_ALLOWED
-		var stageExclusions:Array<String> = ["curBeat", "curStep", "curSection", "curDecStep", "curDecBeat"];
 
-		if (Stage != null && Stage.isCustomStage && Stage.isLuaStage && !(stageExclusions.contains(variable)))
+		if (Stage != null && Stage.isCustomStage && Stage.isLuaStage)
 			Stage.setOnLuas(variable, arg);	
 
 		if(exclusions == null) exclusions = [];
@@ -6939,9 +6956,12 @@ class PlayState extends MusicBeatState
 		Stage.destroy();
 		
 		Stage = new Stage(id, true);
-		PlayState.instance.Stage.setupStageProperties(id, true, true);
+		Stage.setupStageProperties(id, true, true);
 		curStage = id;
 		defaultCamZoom = Stage.camZoom;
+		cameraMoveXYVar1 = Stage.stageCameraMoveXYVar1;
+		cameraMoveXYVar2 = Stage.stageCameraMoveXYVar1;
+		cameraSpeed = Stage.stageCameraSpeed;
 
 		for (i in Stage.toAdd){
 			add(i);

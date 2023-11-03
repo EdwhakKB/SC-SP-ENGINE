@@ -144,6 +144,9 @@ class SaveVariables {
 
 	public var guitarHeroSustains:Bool = true;
 
+	public var noteSplashes:Bool = true;
+	public var noteSplashesOP:Bool = true;
+
 	public function new()
 	{
 		//Why does haxe needs this again?

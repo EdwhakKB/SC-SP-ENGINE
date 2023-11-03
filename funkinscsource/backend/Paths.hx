@@ -471,8 +471,10 @@ class Paths
 				bitmap = BitmapData.fromFile(file);
 			else
 			#else
-			if (OpenFlAssets.exists(file, IMAGE))
-				bitmap = OpenFlAssets.getBitmapData(file);
+			{
+				if (OpenFlAssets.exists(file, IMAGE))
+					bitmap = OpenFlAssets.getBitmapData(file);
+			}
 			#end
 
 			if(bitmap == null) return null;
@@ -547,6 +549,9 @@ class Paths
 					return true;
 
 			if (FileSystem.exists(mods(Mods.currentModDirectory + '/' + key)) || FileSystem.exists(mods(key)))
+				return true;
+
+			if (FileSystem.exists(mods('$key')))
 				return true;
 		}
 		#end

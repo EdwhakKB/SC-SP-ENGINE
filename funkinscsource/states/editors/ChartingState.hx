@@ -162,7 +162,6 @@ class ChartingState extends MusicBeatState
 	var value12InputText:FlxUIInputText;
 	var value13InputText:FlxUIInputText;
 	var value14InputText:FlxUIInputText;
-	var currentSongName:String;
 
 	var zoomTxt:FlxText;
 
@@ -259,7 +258,7 @@ class ChartingState extends MusicBeatState
 
 		#if desktop
 		// Updating Discord Rich Presence
-		DiscordClient.changePresence("Chart Editor", StringTools.replace(_song.songId, '-', ' '));
+		DiscordClient.changePresence("Chart Editor", _song.songId);
 		#end
 
 		vortex = FlxG.save.data.chart_vortex;
@@ -310,7 +309,6 @@ class ChartingState extends MusicBeatState
 
 		// sections = _song.notes;
 
-		currentSongName = Paths.formatToSongPath(_song.songId);
 		loadSong();
 		reloadGridLayer();
 		Conductor.bpm = _song.bpm;
@@ -399,10 +397,10 @@ class ChartingState extends MusicBeatState
 		add(nextRenderedSustains);
 		add(nextRenderedNotes);
 
-		if(lastSong != currentSongName) {
+		if(lastSong != Paths.formatToSongPath(_song.song)) {
 			changeSection();
 		}
-		lastSong = currentSongName;
+		lastSong = Paths.formatToSongPath(_song.song);
 
 		zoomTxt = new FlxText(10, 10, 0, "Zoom: 1 / 1", 16);
 		zoomTxt.scrollFactor.set();
@@ -447,7 +445,6 @@ class ChartingState extends MusicBeatState
 
 		var reloadSong:FlxButton = new FlxButton(saveButton.x + 90, saveButton.y, "Reload Audio", function()
 		{
-			currentSongName = Paths.formatToSongPath(UI_songTitle.text);
 			loadSong();
 			updateWaveform();
 		});
@@ -666,7 +663,7 @@ class ChartingState extends MusicBeatState
 			openSubState(new Prompt('This action will clear current progress.\n\nProceed?', 0, function(){
 				PlayState.storyDifficulty = availableDifficulties[curSelected];
 				PlayState.changedDifficulty = true;
-				loadJson(currentSongName.toLowerCase());
+				loadJson(_song.songId.toLowerCase());
 			}, null,ignoreWarnings));
 		});		
 		difficultyDropDown.selectedLabel = Difficulty.list[PlayState.storyDifficulty];
@@ -1704,9 +1701,9 @@ class ChartingState extends MusicBeatState
 
 		var file:Dynamic = null;
 		#if (SBETA == 0.1)
-		file = Paths.voices((PlayState.SONG.vocalsPrefix != null ? PlayState.SONG.vocalsPrefix : ''), currentSongName, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : ''));
+		file = Paths.voices((PlayState.SONG.vocalsPrefix != null ? PlayState.SONG.vocalsPrefix : ''), _song.song, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : ''));
 		#else
-		file = Paths.voices(currentSongName);
+		file = Paths.voices(_song.song);
 		#end
 		vocals = new FlxSound();
 		if (Std.isOfType(file, Sound) || OpenFlAssets.exists(file)) {
@@ -1763,9 +1760,9 @@ class ChartingState extends MusicBeatState
 
 	function generateSong() {
 		#if (SBETA == 0.1)
-		FlxG.sound.playMusic(Paths.inst((PlayState.SONG.instrumentalPrefix != null ? PlayState.SONG.instrumentalPrefix : ''), currentSongName, (PlayState.SONG.instrumentalSuffix != null ? PlayState.SONG.instrumentalSuffix : '')), 1);
+		FlxG.sound.playMusic(Paths.inst((PlayState.SONG.instrumentalPrefix != null ? PlayState.SONG.instrumentalPrefix : ''), _song.song, (PlayState.SONG.instrumentalSuffix != null ? PlayState.SONG.instrumentalSuffix : '')), 1);
 		#else
-		FlxG.sound.playMusic(Paths.inst(currentSongName));
+		FlxG.sound.playMusic(Paths.inst(_song.song));
 		#end
 		FlxG.sound.music.autoDestroy = false;
 		if (instVolume != null) FlxG.sound.music.volume = instVolume.value;
@@ -2507,7 +2504,7 @@ class ChartingState extends MusicBeatState
 		var daLength = FlxMath.roundDecimal(FlxG.sound.music.length / 1000, 2);
 
 		bpmTxt.text =
-		currentSongName + ' [' + currentDifficulty + ']' + 
+		_song.song + ' [' + currentDifficulty + ']' + 
 		"\n"+ showTime +
 		"\n"+
 		"\n"+ 'Song Length: ' + Std.string(daSongPosition) + " / " + Std.string(daLength) +
@@ -3207,9 +3204,12 @@ class ChartingState extends MusicBeatState
 				curRenderedNotes.add(note);
 
 				var text:String = 'Event: ' + note.eventName + ' (' + Math.floor(note.strumTime) + ' ms)' + '\nValue 1: ' + note.eventVal1 + '\nValue 2: ' 
-				+ note.eventVal2 + '\nValue 3: ' + note.eventVal3 + '\nValue 4: ' + note.eventVal4 + '\nValue 5: ' + note.eventVal5 + '\nValue 6: ' + note.eventVal6
-				+ '\nValue 7: ' + note.eventVal7 + '\nValue 8: ' + note.eventVal8 + '\nValue 9: ' + note.eventVal9 + '\nValue 10: ' + note.eventVal10 + '\nValue 11: ' + note.eventVal11
-				+ '\nValue 12: ' + note.eventVal12 + '\nValue 13: ' + note.eventVal13 + '\nValue 14: ' + note.eventVal14;
+				+ note.eventVal2 + (note.eventVal3 != null ? '\nValue 3: ' + note.eventVal3 : '') + (note.eventVal4 != null ? '\nValue 4: ' + note.eventVal4 : '') + 
+				(note.eventVal5 != null ? '\nValue 5: ' + note.eventVal5 : '') + (note.eventVal6 != null ? '\nValue 6: ' + note.eventVal6 : '')
+				+ (note.eventVal7 != null ? '\nValue 7: ' + note.eventVal7 : '') + (note.eventVal8 != null ? '\nValue 8: ' + note.eventVal8 : '') + 
+				(note.eventVal9 != null ? '\nValue 9: ' + note.eventVal9 : '') + (note.eventVal10 != null ? '\nValue 10: ' + note.eventVal10 : '') 
+				+ (note.eventVal11 != null ? '\nValue 11: ' + note.eventVal11 : '') + (note.eventVal12 != null ? '\nValue 12: ' + note.eventVal12 : '') + 
+				(note.eventVal13 != null ? '\nValue 13: ' + note.eventVal13 : '') + (note.eventVal14 != null ? '\nValue 14: ' + note.eventVal14 : '');
 				if(note.eventLength > 1) text = note.eventLength + ' Events:\n' + note.eventName;
 
 				var daText:AttachedFlxText = new AttachedFlxText(0, 0, 410, text, 12);

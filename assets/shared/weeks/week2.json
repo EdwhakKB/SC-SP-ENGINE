@@ -18,5 +18,5 @@
 	"startUnlocked": false,
 	"hiddenUntilUnlocked": true,
 	"hideStoryMode": false,
-	"hideFreeplay": true
+	"hideFreeplay": false
 }

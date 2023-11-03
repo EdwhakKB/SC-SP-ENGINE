@@ -27,6 +27,7 @@ import flixel.addons.transition.FlxTransitionableState;
 import flixel.FlxG;
 import backend.Song;
 import objects.Character;
+import backend.CoolUtil;
 
 using StringTools;
 
@@ -238,6 +239,7 @@ class AsyncAssetPreloader
 		{
 			loadedCount++;
 			new Stage(i, false);
+			Stage.instance.setupStageProperties(i, false, true);
 			trace('loaded stages');
 		}
 	}
@@ -245,7 +247,7 @@ class AsyncAssetPreloader
 
 class LoadingState extends MusicBeatState
 {
-	inline static var MIN_TIME = 1.0;
+	inline static var MIN_TIME:Float = 1.0;
 
 	// Browsers will load create(), you can make your song load a custom directory there
 	// If you're compiling to desktop (or something that doesn't use NO_PRELOAD_ALL), search for getNextState instead
@@ -323,6 +325,25 @@ class LoadingState extends MusicBeatState
 		{
 			loadingBar.visible = false;
 
+			var WAIT_TIME:Float = 1.0;
+
+			if (Type.getClass(target) == PlayState)
+			{
+				if (FileSystem.exists(Paths.txt('songs/' + PlayState.SONG.song.toLowerCase()  + "/preload")))
+				{
+					var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt('songs/' + PlayState.SONG.song.toLowerCase()  + "/preload"));
+					for (i in 0...characters.length)
+						WAIT_TIME += 1;
+				}
+			
+				if (FileSystem.exists(Paths.txt('songs/' + PlayState.SONG.song.toLowerCase()  + "/preload-stage")))
+				{
+					var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt('songs/' + PlayState.SONG.song.toLowerCase()  + "/preload-stage"));
+					for (i in 0...characters.length)
+						WAIT_TIME += 1;
+				}
+			}
+
 			initSongsManifest().onComplete
 			(
 				function (lib)
@@ -337,10 +358,15 @@ class LoadingState extends MusicBeatState
 					if(directory != null && directory.length > 0 && directory != 'shared') {
 						checkLibrary('week_assets');
 					}
+
+					if (Type.getClass(target) == PlayState)
+					{
+						cacheStuff();
+					}
 	
 					var fadeTime = 0.5;
 					FlxG.camera.fade(FlxG.camera.bgColor, fadeTime, true);
-					new FlxTimer().start(fadeTime + MIN_TIME, function(_) introComplete());
+					new FlxTimer().start(fadeTime + WAIT_TIME, function(_) introComplete());
 				}
 			);
 		}
@@ -480,6 +506,41 @@ class LoadingState extends MusicBeatState
 		return Assets.getLibrary(library) != null;
 	}
 	#end*/
+
+	public function cacheStuff()
+	{ 
+		if (FileSystem.exists(Paths.txt('songs/' + PlayState.SONG.song.toLowerCase()  + "/preload")))
+		{
+			var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt('songs/' + PlayState.SONG.song.toLowerCase()  + "/preload"));
+			for (i in 0...characters.length)
+			{
+				var data:Array<String> = characters[i].split(' ');
+				var character = new objects.Character(0, 0, data[0]);
+
+				var luaFile:String = 'data/characters/' + data[0];
+
+				if (FileSystem.exists(Paths.modFolders('data/characters/'+data[0]+'.lua')) || FileSystem.exists(FileSystem.absolutePath("assets/shared/"+luaFile+'.lua')))
+					states.PlayState.startCharScripts.push(data[0]);
+
+				Debug.logInfo('found ' + data[0]);
+			}
+		}   
+		
+		if (FileSystem.exists(Paths.txt('songs/' + PlayState.SONG.song.toLowerCase()  + "/preload-stage")))
+		{
+			var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt('songs/' + PlayState.SONG.song.toLowerCase()  + "/preload-stage"));
+
+			for (i in 0...characters.length)
+			{
+				var data:Array<String> = characters[i].split(' ');
+				new backend.Stage(data[0], true);
+				Stage.instance.setupStageProperties(data[0], false, true);
+				trace ('stages are ' + data[0]);
+			}
+
+			states.PlayState.curStage = states.PlayState.SONG.stage;
+		}
+	}
 	
 	override function destroy()
 	{

@@ -323,7 +323,7 @@ class Note extends FlxSkewedSprite
 
 			offsetX -= width / 2;
 
-			if (texture.contains('pixel') || noteSkin.contains('pixel') || containsPixelTexture)
+			if (texture.contains('pixel') || noteSkin.contains('pixel') || containsPixelTexture || isPixel)
 				offsetX += 30;
 
 			if (prevNote.isSustainNote)
@@ -334,14 +334,14 @@ class Note extends FlxSkewedSprite
 				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.05;
 				if(createdFrom != null && createdFrom.songSpeed != null) prevNote.scale.y *= createdFrom.songSpeed;
 
-				if(texture.contains('pixel') || noteSkin.contains('pixel') || containsPixelTexture) {
+				if(texture.contains('pixel') || noteSkin.contains('pixel') || containsPixelTexture || isPixel) {
 					prevNote.scale.y *= 1.19;
 					prevNote.scale.y *= (6 / height); //Auto adjust note size
 				}
 				prevNote.updateHitbox();
 			}
 
-			if(texture.contains('pixel') || noteSkin.contains('pixel') || containsPixelTexture)
+			if(texture.contains('pixel') || noteSkin.contains('pixel') || containsPixelTexture || isPixel)
 			{
 				scale.y *= PlayState.daPixelZoom;
 				updateHitbox();
@@ -355,6 +355,8 @@ class Note extends FlxSkewedSprite
 		}
 		x += offsetX;
 	}
+
+	public var isPixel:Bool = false;
 
 	public static function initializeGlobalRGBShader(noteData:Int)
 	{
@@ -383,6 +385,7 @@ class Note extends FlxSkewedSprite
 		if(postfix == null) postfix = '';
 
 		var skin:String = noteStyle + postfix;
+		var wasPixelNote:Bool = isPixel;
 		if(noteStyle.length < 1) {
 			skin = PlayState.SONG != null ? PlayState.SONG.arrowSkin : null;
 			if(skin == null || skin.length < 1)
@@ -408,14 +411,32 @@ class Note extends FlxSkewedSprite
 
 		loadNoteTexture(noteSkin != "" ? noteStyle : skin, skinPostfix, skinPixel);
 
+		if(animName != null)
+			animation.play(animName, true);
+
+		var becomePixelNote:Bool = isPixel;
+
 		if(isSustainNote) {
 			scale.y = lastScaleY;
+
+			if (wasPixelNote && !becomePixelNote) //fixes the scaling
+			{
+				scale.y /= PlayState.daPixelZoom;
+				scale.y *= 0.7;
+
+				offsetX += 5;
+			}
+
+			if (becomePixelNote && !wasPixelNote) //fixes the scaling
+			{
+				scale.y /= 0.7;
+				scale.y *= PlayState.daPixelZoom;
+
+				offsetX -= 5;
+			}
 		}
 
 		updateHitbox();
-
-		if(animName != null)
-			animation.play(animName, true);
 
 		noteSkin = (noteSkin != "" ? noteStyle : skin);
 	}
@@ -511,6 +532,7 @@ class Note extends FlxSkewedSprite
 	{
 		if (pixel)
 		{
+			isPixel = true;
 			setGraphicSize(Std.int(width * PlayState.daPixelZoom));
 			if(isSustainNote)
 			{

@@ -12,8 +12,6 @@
 * Most other fixes, noteskin support, char json edits, and more all by me *glowsoony*
 
 * [Input Rewrite! by this psych pull request!](https://github.com/ShadowMario/FNF-PsychEngine/pull/13448)
-# Friday Night Funkin' - Psych Engine
-Engine originally used on [Mind Games Mod](https://gamebanana.com/mods/301107), intended to be a fix for the vanilla version's many issues while keeping the casual play aspect of it. Also aiming to be an easier alternative to newbie coders.
 
 ## Installation:
 You must have [the most up-to-date version of Haxe](https://haxe.org/download/), seriously, stop using 4.1.5, it messes some stuff.
@@ -91,7 +89,7 @@ _____________________________________
   * No extra features yet!
 
 ## Cool new Chart Editor changes and countless bug fixes
-![](https://github.com/ShadowMario/FNF-PsychEngine/blob/main/docs/img/chart.png?raw=true)
+![](https://github-production-user-asset-6210df.s3.amazonaws.com/84847356/280155297-2838bc71-8d1b-4cd3-9086-922e4d85f0f8.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20231103%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231103T004728Z&X-Amz-Expires=300&X-Amz-Signature=90fb8001a383a492bee7b6d284106a4c75a1b41c82b8c2154497ab0e751c9a40&X-Amz-SignedHeaders=host&actor_id=84847356&key_id=0&repo_id=620069939)
 * You can now chart "Event" notes, which are bookmarks that trigger specific actions that usually were hardcoded on the vanilla version of the game.
 * Your song's BPM can now have decimal values
 * You can manually adjust a Note's strum time if you're really going for milisecond precision
@@ -99,6 +97,7 @@ _____________________________________
   * Alt Animation: Forces an alt animation to play, useful for songs like Ugh/Stress
   * Hey: Forces a "Hey" animation instead of the base Sing animation, if Boyfriend hits this note, Girlfriend will do a "Hey!" too.
   * You can use gf and mom notes to make the second opponent or gf play animations!
+* You can now use up to 14 values for each event! 
 
 ## Multiple editors to assist you in making your own Mod
 ![Screenshot_3](https://user-images.githubusercontent.com/44785097/144629914-1fe55999-2f18-4cc1-bc70-afe616d74ae5.png)
@@ -111,7 +110,7 @@ _____________________________________
 * All menu characters are now in individual spritesheets, makes modding it easier.
 
 ## Credits menu
-![Screenshot_1](https://user-images.githubusercontent.com/44785097/144632635-f263fb22-b879-4d6b-96d6-865e9562b907.png)
+![Screenshot_1](https://github.com/EdwhakKB/SC-SP-ENGINE/assets/84847356/238c2a8d-edb9-441e-8162-588fbc2eb207)
 * You can add a head icon, name, description and a Redirect link for when the player presses Enter while the item is currently selected.
 
 ## Awards/Achievements

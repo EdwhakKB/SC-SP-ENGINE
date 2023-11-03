@@ -158,6 +158,18 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			'bool');
 		addOption(option);
 
+		var option:Option = new Option('Note Splashes',
+			"If checked, on rating swag or sick will give a splash effect.",
+			'noteSplashes',
+			'bool');
+		addOption(option);
+
+		var option:Option = new Option('Note Splashes Opponent',
+			"If checked, on a note being hit it will give a splash effect.",
+			'noteSplashesOP',
+			'bool');
+		addOption(option);
+
 		super();
 	}
 
