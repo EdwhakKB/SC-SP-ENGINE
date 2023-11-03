@@ -902,6 +902,7 @@ class FreeplayState extends MusicBeatState
         {
             LoadingState.loadAndSwitchState(new ChartingState());
         }else{
+			//restore this functionality
 			LoadingState.loadAndSwitchState(new PlayState());
 		}
 	}

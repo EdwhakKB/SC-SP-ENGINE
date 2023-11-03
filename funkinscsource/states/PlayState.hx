@@ -376,6 +376,8 @@ class PlayState extends MusicBeatState
 
 	public var has3rdIntroAsset:Bool = false;
 
+	public static var startCharScripts:Array<String> = [];
+
 	//skip from kade 1.8!
 	var needSkip:Bool = false;
 	var skipActive:Bool = false;
@@ -639,7 +641,19 @@ class PlayState extends MusicBeatState
 			}
 		#end
 
+		if (FileSystem.exists(Paths.txt('songs/' + SONG.song.toLowerCase()  + "/preload")))
+		{
+			var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt('songs/' + SONG.song.toLowerCase()  + "/preload"));
+
+			for (i in 0...characters.length) // whoops. still need to load the luas
+			{
+				var data:Array<String> = characters[i].split(' ');
+				startCharScripts.push(characters[i]);
+			}
+		}
+
 		if(SONG.gfVersion == null || SONG.gfVersion.length < 1) SONG.gfVersion = 'gf'; //Fix for the Chart Editor
+		
 		gf = new Character(GF_X, GF_Y, SONG.gfVersion);
 		var gfOffset = new CharacterOffsets(SONG.gfVersion, false, true);
 		var daGFX:Float = gfOffset.daOffsetArray[0];
@@ -1049,6 +1063,12 @@ class PlayState extends MusicBeatState
 		{
 			for (event in eventNotes) event.strumTime -= eventEarlyTrigger(event);
 			eventNotes.sort(sortByTime);
+		}
+
+		for(i in 0...startCharScripts.length)
+		{
+			startCharacterScripts(startCharScripts[i]);
+			startCharScripts.remove(startCharScripts[i]);
 		}
 
 		// SONG SPECIFIC SCRIPTS
@@ -6936,9 +6956,12 @@ class PlayState extends MusicBeatState
 		Stage.destroy();
 		
 		Stage = new Stage(id, true);
-		PlayState.instance.Stage.setupStageProperties(id, true, true);
+		Stage.setupStageProperties(id, true, true);
 		curStage = id;
 		defaultCamZoom = Stage.camZoom;
+		cameraMoveXYVar1 = Stage.stageCameraMoveXYVar1;
+		cameraMoveXYVar2 = Stage.stageCameraMoveXYVar1;
+		cameraSpeed = Stage.stageCameraSpeed;
 
 		for (i in Stage.toAdd){
 			add(i);

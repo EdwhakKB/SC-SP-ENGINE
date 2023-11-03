@@ -90,6 +90,13 @@ class Stage extends MusicBeatState
 	var fastCarCanDrive:Bool = true;
 	
 	var limoSpeed:Float = 0;
+	var grpLimoParticles:FlxTypedGroup<BGSprite>;
+	var limoMetalPole:BGSprite;
+	var bgLimo:BGSprite;
+	var limoCorpse:BGSprite;
+	var limoCorpseTwo:BGSprite;
+	var limoLight:BGSprite;
+	var fastCar:BGSprite;
 
 	// event
 	var limoKillingState:HenchmenKillState = WAIT;
@@ -272,56 +279,54 @@ class Stage extends MusicBeatState
 					var skyBG:BGSprite = new BGSprite('limo/limoSunset', -120, -50, 0.1, 0.1);
 					swagBacks['skyBG'] = skyBG;
 					toAdd.push(skyBG);
-			
-					if(!ClientPrefs.data.lowQuality) {
-						var limoMetalPole = new BGSprite('gore/metalPole', -500, 220, 0.4, 0.4);
-						swagBacks['limoMetalPole'] = limoMetalPole; 
-						toAdd.push(limoMetalPole);
-			
-						var bgLimo = new BGSprite('limo/bgLimo', -150, 480, 0.4, 0.4, ['background limo pink'], true);
-						swagBacks['bgLimo'] = bgLimo; 
-						toAdd.push(bgLimo);
-			
-						var limoCorpse = new BGSprite('gore/noooooo', -500, limoMetalPole.y - 130, 0.4, 0.4, ['Henchmen on rail'], true);
-						swagBacks['limoCorpse'] = limoCorpse;
-						toAdd.push(limoCorpse);
-			
-						var limoCorpseTwo = new BGSprite('gore/noooooo', -500, limoMetalPole.y, 0.4, 0.4, ['henchmen death'], true);
-						swagBacks['limoCorpseTwo'] = limoCorpseTwo;
-						toAdd.push(limoCorpseTwo);
-			
-						grpLimoDancers = new FlxTypedGroup<BackgroundDancer>();
-						swagGroup['grpLimoDancers'] = grpLimoDancers;
-						toAdd.push(grpLimoDancers);
-			
-						for (i in 0...5)
-						{
-							var dancer:BackgroundDancer = new BackgroundDancer((370 * i) + dancersDiff + bgLimo.x, bgLimo.y - 400);
-							dancer.scrollFactor.set(0.4, 0.4);
-							swagBacks['dancers' + i] = dancer;
-							grpLimoDancers.add(dancer);
-						}
-			
-						var limoLight = new BGSprite('gore/coldHeartKiller', limoMetalPole.x - 180, limoMetalPole.y - 80, 0.4, 0.4);
-						swagBacks['limoLight'] = limoLight;
-						toAdd.push(limoLight);
-			
-						var grpLimoParticles = new FlxTypedGroup<BGSprite>();
-						swagGroup['grpLimoParticles'] = grpLimoParticles;
-						toAdd.push(grpLimoParticles);
-			
-						//PRECACHE BLOOD
-						var particle:BGSprite = new BGSprite('gore/stupidBlood', -400, -400, 0.4, 0.4, ['blood'], false);
-						particle.alpha = 0.01;
-						grpLimoParticles.add(particle);
-						resetLimoKill();
-			
-						//PRECACHE SOUND
-						precacheSound('dancerdeath');
-						setDefaultGF('gf-car');
-					}
 
-					var fastCar = new BGSprite('limo/fastCarLol', -300, 160);
+
+					limoMetalPole = new BGSprite('gore/metalPole', -500, 220, 0.4, 0.4);
+					swagBacks['limoMetalPole'] = limoMetalPole; 
+					if(!ClientPrefs.data.lowQuality) toAdd.push(limoMetalPole);
+		
+					bgLimo = new BGSprite('limo/bgLimo', -150, 480, 0.4, 0.4, ['background limo pink'], true);
+					swagBacks['bgLimo'] = bgLimo; 
+					if(!ClientPrefs.data.lowQuality) toAdd.push(bgLimo);
+		
+					limoCorpse = new BGSprite('gore/noooooo', -500, limoMetalPole.y - 130, 0.4, 0.4, ['Henchmen on rail'], true);
+					swagBacks['limoCorpse'] = limoCorpse;
+					if(!ClientPrefs.data.lowQuality) toAdd.push(limoCorpse);
+		
+					limoCorpseTwo = new BGSprite('gore/noooooo', -500, limoMetalPole.y, 0.4, 0.4, ['henchmen death'], true);
+					swagBacks['limoCorpseTwo'] = limoCorpseTwo;
+					if(!ClientPrefs.data.lowQuality) toAdd.push(limoCorpseTwo);
+		
+					grpLimoDancers = new FlxTypedGroup<BackgroundDancer>();
+					swagGroup['grpLimoDancers'] = grpLimoDancers;
+					if(!ClientPrefs.data.lowQuality) toAdd.push(grpLimoDancers);
+		
+					for (i in 0...5)
+					{
+						var dancer:BackgroundDancer = new BackgroundDancer((370 * i) + dancersDiff + bgLimo.x, bgLimo.y - 400);
+						dancer.scrollFactor.set(0.4, 0.4);
+						swagBacks['dancers' + i] = dancer;
+						if(!ClientPrefs.data.lowQuality) grpLimoDancers.add(dancer);
+					}
+		
+					limoLight = new BGSprite('gore/coldHeartKiller', limoMetalPole.x - 180, limoMetalPole.y - 80, 0.4, 0.4);
+					swagBacks['limoLight'] = limoLight;
+					if(!ClientPrefs.data.lowQuality) toAdd.push(limoLight);
+		
+					grpLimoParticles = new FlxTypedGroup<BGSprite>();
+					if(!ClientPrefs.data.lowQuality) toAdd.push(grpLimoParticles);
+		
+					//PRECACHE BLOOD
+					var particle:BGSprite = new BGSprite('gore/stupidBlood', -400, -400, 0.4, 0.4, ['blood'], false);
+					particle.alpha = 0.01;
+					if(!ClientPrefs.data.lowQuality) grpLimoParticles.add(particle);
+					resetLimoKill();
+		
+					//PRECACHE SOUND
+					precacheSound('dancerdeath');
+					setDefaultGF('gf-car');
+
+					fastCar = new BGSprite('limo/fastCarLol', -300, 160);
 					swagBacks['fastCar'] = fastCar;
 					fastCar.active = true;
 					layInFront[4].push(fastCar);
@@ -794,50 +799,50 @@ class Stage extends MusicBeatState
 				}
 			case 'limo':
 				if(!ClientPrefs.data.lowQuality) {
-					swagGroup['grpLimoParticles'].forEach(function(spr:BGSprite) {
+					grpLimoParticles.forEach(function(spr:BGSprite) {
 						if(spr.animation.curAnim.finished) {
 							spr.kill();
-							swagGroup['grpLimoParticles'].remove(spr, true);
+							grpLimoParticles.remove(spr, true);
 							spr.destroy();
 						}
 					});
 		
 					switch(limoKillingState) {
 						case KILLING:
-							swagBacks['limoMetalPole'].x += 5000 * elapsed;
-							swagBacks['limoLight'].x = swagBacks['limoMetalPole'].x - 180;
-							swagBacks['limoCorpse'].x = swagBacks['limoLight'].x - 50;
-							swagBacks['limoCorpseTwo'].x = swagBacks['limoLight'].x + 35;
+							limoMetalPole.x += 5000 * elapsed;
+							limoLight.x = limoMetalPole.x - 180;
+							limoCorpse.x = limoLight.x - 50;
+							limoCorpseTwo.x = limoLight.x + 35;
 		
 							var dancers:Array<BackgroundDancer> = grpLimoDancers.members;
 							for (i in 0...dancers.length) {
-								if(dancers[i].x < FlxG.width * 1.5 && swagBacks['limoLight'].x > (370 * i) + 170) {
+								if(dancers[i].x < FlxG.width * 1.5 && limoLight.x > (370 * i) + 170) {
 									switch(i) {
 										case 0 | 3:
 											if(i == 0) FlxG.sound.play(Paths.sound('dancerdeath'), 0.5);
 		
 											var diffStr:String = i == 3 ? ' 2 ' : ' ';
 											var particle:BGSprite = new BGSprite('gore/noooooo', dancers[i].x + 200, dancers[i].y, 0.4, 0.4, ['hench leg spin' + diffStr + 'PINK'], false);
-											swagGroup['grpLimoParticles'].add(particle);
+											grpLimoParticles.add(particle);
 											var particle:BGSprite = new BGSprite('gore/noooooo', dancers[i].x + 160, dancers[i].y + 200, 0.4, 0.4, ['hench arm spin' + diffStr + 'PINK'], false);
-											swagGroup['grpLimoParticles'].add(particle);
+											grpLimoParticles.add(particle);
 											var particle:BGSprite = new BGSprite('gore/noooooo', dancers[i].x, dancers[i].y + 50, 0.4, 0.4, ['hench head spin' + diffStr + 'PINK'], false);
-											swagGroup['grpLimoParticles'].add(particle);
+											grpLimoParticles.add(particle);
 		
 											var particle:BGSprite = new BGSprite('gore/stupidBlood', dancers[i].x - 110, dancers[i].y + 20, 0.4, 0.4, ['blood'], false);
 											particle.flipX = true;
 											particle.angle = -57.5;
-											swagGroup['grpLimoParticles'].add(particle);
+											grpLimoParticles.add(particle);
 										case 1:
-											swagBacks['limoCorpse'].visible = true;
+											limoCorpse.visible = true;
 										case 2:
-											swagBacks['limoCorpseTwo'].visible = true;
+											limoCorpseTwo.visible = true;
 									} //Note: Nobody cares about the fifth dancer because he is mostly hidden offscreen :(
 									dancers[i].x += FlxG.width * 2;
 								}
 							}
 		
-							if(swagBacks['limoMetalPole'].x > FlxG.width * 2) {
+							if(limoMetalPole.x > FlxG.width * 2) {
 								resetLimoKill();
 								limoSpeed = 800;
 								limoKillingState = SPEEDING_OFFSCREEN;
@@ -845,8 +850,8 @@ class Stage extends MusicBeatState
 		
 						case SPEEDING_OFFSCREEN:
 							limoSpeed -= 4000 * elapsed;
-							swagBacks['bgLimo'].x -= limoSpeed * elapsed;
-							if(swagBacks['bgLimo'].x > FlxG.width * 1.5) {
+							bgLimo.x -= limoSpeed * elapsed;
+							if(bgLimo.x > FlxG.width * 1.5) {
 								limoSpeed = 3000;
 								limoKillingState = SPEEDING;
 							}
@@ -855,17 +860,17 @@ class Stage extends MusicBeatState
 							limoSpeed -= 2000 * elapsed;
 							if(limoSpeed < 1000) limoSpeed = 1000;
 		
-							swagBacks['bgLimo'].x -= limoSpeed * elapsed;
-							if(swagBacks['bgLimo'].x < -275) {
+							bgLimo.x -= limoSpeed * elapsed;
+							if(bgLimo.x < -275) {
 								limoKillingState = STOPPING;
 								limoSpeed = 800;
 							}
 							dancersParenting();
 		
 						case STOPPING:
-							swagBacks['bgLimo'].x = FlxMath.lerp(swagBacks['bgLimo'].x, -150, FlxMath.bound(elapsed * 9, 0, 1));
-							if(Math.round(swagBacks['bgLimo'].x) == -150) {
-								swagBacks['bgLimo'].x = -150;
+							bgLimo.x = FlxMath.lerp(bgLimo.x, -150, FlxMath.bound(elapsed * 9, 0, 1));
+							if(Math.round(bgLimo.x) == -150) {
+								bgLimo.x = -150;
 								limoKillingState = WAIT;
 							}
 							dancersParenting();
@@ -953,7 +958,7 @@ class Stage extends MusicBeatState
 				}
 			case 'limo':
 				if(!ClientPrefs.data.lowQuality) {
-					swagGroup['grpLimoDancers'].forEach(function(dancer:BackgroundDancer)
+					grpLimoDancers.forEach(function(dancer:BackgroundDancer)
 					{
 						dancer.dance();
 					});
@@ -1478,29 +1483,29 @@ class Stage extends MusicBeatState
 
 	function dancersParenting()
 	{
-		var dancers:Array<BackgroundDancer> = swagBacks['grpLimoDancers'].members;
+		var dancers:Array<BackgroundDancer> = grpLimoDancers.members;
 		for (i in 0...dancers.length) {
-			dancers[i].x = (370 * i) + dancersDiff + swagBacks['bgLimo'].x;
+			dancers[i].x = (370 * i) + dancersDiff + bgLimo.x;
 		}
 	}
 	
 	function resetLimoKill():Void
 	{
-		swagBacks['limoMetalPole'].x = -500;
-		swagBacks['limoMetalPole'].visible = false;
-		swagBacks['limoLight'].x = -500;
-		swagBacks['limoLight'].visible = false;
-		swagBacks['limoCorpse'].x = -500;
-		swagBacks['limoCorpse'].visible = false;
-		swagBacks['limoCorpseTwo'].x = -500;
-		swagBacks['limoCorpseTwo'].visible = false;
+		limoMetalPole.x = -500;
+		limoMetalPole.visible = false;
+		limoLight.x = -500;
+		limoLight.visible = false;
+		limoCorpse.x = -500;
+		limoCorpse.visible = false;
+		limoCorpseTwo.x = -500;
+		limoCorpseTwo.visible = false;
 	}
 
 	function resetFastCar():Void
 	{
-		swagBacks['fastCar'].x = -12600;
-		swagBacks['fastCar'].y = FlxG.random.int(140, 250);
-		swagBacks['fastCar'].velocity.x = 0;
+		fastCar.x = -12600;
+		fastCar.y = FlxG.random.int(140, 250);
+		fastCar.velocity.x = 0;
 		fastCarCanDrive = true;
 	}
 
@@ -1510,7 +1515,7 @@ class Stage extends MusicBeatState
 		//Debug.logTrace('Car drive');
 		FlxG.sound.play(Paths.soundRandom('carPass', 0, 1), 0.7);
 
-		swagBacks['fastCar'].velocity.x = (FlxG.random.int(170, 220) / FlxG.elapsed) * 3;
+		fastCar.velocity.x = (FlxG.random.int(170, 220) / FlxG.elapsed) * 3;
 		fastCarCanDrive = false;
 		carTimer = PlayState.instance.createTimer(2, function(tmr:FlxTimer)
 		{
@@ -1523,11 +1528,11 @@ class Stage extends MusicBeatState
 	{
 		if(!ClientPrefs.data.lowQuality) {
 			if(limoKillingState == WAIT) {
-				swagBacks['limoMetalPole'].x = -400;
-				swagBacks['limoMetalPole'].visible = true;
-				swagBacks['limoLight'].visible = true;
-				swagBacks['limoCorpse'].visible = false;
-				swagBacks['limoCorpseTwo'].visible = false;
+				limoMetalPole.x = -400;
+				limoMetalPole.visible = true;
+				limoLight.visible = true;
+				limoCorpse.visible = false;
+				limoCorpseTwo.visible = false;
 				limoKillingState = KILLING;
 
 				#if ACHIEVEMENTS_ALLOWED
