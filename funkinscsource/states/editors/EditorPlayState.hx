@@ -545,7 +545,7 @@ class EditorPlayState extends MusicBeatSubstate
 		if (playbackRate >= 1.05)
 			score = getRatesScore(playbackRate, score);
 
-		if(daRating.doNoteSplash && !note.noteSplashData.disabled)
+		if(daRating.doNoteSplash && !note.noteSplashData.disabled && ClientPrefs.data.noteSplashes)
 			spawnNoteSplashOnNote(note);
 
 		daRating.count++;
@@ -848,7 +848,7 @@ class EditorPlayState extends MusicBeatSubstate
 
 		if(note.hitCausesMiss) {
 			noteMiss(note);
-			if(!note.noteSplashData.disabled && !note.isSustainNote)
+			if(!note.noteSplashData.disabled && !note.isSustainNote && ClientPrefs.data.noteSplashes)
 				spawnNoteSplashOnNote(note);
 
 			if (note.isSustainNote)

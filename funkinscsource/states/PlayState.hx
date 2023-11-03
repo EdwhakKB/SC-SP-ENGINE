@@ -4843,7 +4843,7 @@ class PlayState extends MusicBeatState
 
 		daRating.count++;
 
-		if((daRating.doNoteSplash && !note.noteSplashData.disabled) && !SONG.notITG)
+		if((daRating.doNoteSplash && !note.noteSplashData.disabled && ClientPrefs.data.noteSplashes) && !SONG.notITG)
 			spawnNoteSplashOnNote(note);
 
 		if (playbackRate >= 1.05)
@@ -5034,7 +5034,7 @@ class PlayState extends MusicBeatState
 		var placement:Float =  FlxG.width * 0.38;
 		var rating:FlxSprite = new FlxSprite();
 
-		if((!note.noteSplashData.disabled) && !SONG.notITG)
+		if((!note.noteSplashData.disabled && ClientPrefs.data.noteSplashesOP) && !SONG.notITG)
 			spawnNoteSplashOnNoteCPU(note);
 
 		var uiPrefix:String = "";
@@ -5627,7 +5627,7 @@ class PlayState extends MusicBeatState
 			popUpScoreOp(note);
 		}
 
-		if ((!note.noteSplashData.disabled && !note.isSustainNote) && !SONG.notITG)
+		if ((!note.noteSplashData.disabled && !note.isSustainNote && ClientPrefs.data.noteSplashesOP && !popupScoreForOp) && !SONG.notITG)
 			spawnNoteSplashOnNoteCPU(note);
 
 		playDad = searchLuaVar('playDadSing', 'bool', false);
@@ -5767,7 +5767,7 @@ class PlayState extends MusicBeatState
 
 		if(note.hitCausesMiss) {
 			noteMiss(note);
-			if((!note.noteSplashData.disabled && !note.isSustainNote) && !SONG.notITG)
+			if((!note.noteSplashData.disabled && !note.isSustainNote && ClientPrefs.data.noteSplashes) && !SONG.notITG)
 				spawnNoteSplashOnNote(note);
 
 			if(!note.noMissAnimation)
