@@ -353,13 +353,12 @@ class ChartingState extends MusicBeatState
 			{name: "Section", label: 'Section'},
 			{name: "Note", label: 'Note'},
 			{name: "Charting", label: 'Charting'},
-			{name: "Data", label: 'Data'},
 		];
 
 		var tabs2 = [
 			{name: "Events", label: 'Events'},
-			//{name: "Events-Explained", label: 'Events-Explained'},
 			{name: "Tips", label: 'Tips'},
+			{name: "Data", label: 'Data'},
 		];
 
 		UI_box = new FlxUITabMenu(null, tabs, true);
@@ -377,6 +376,13 @@ class ChartingState extends MusicBeatState
 
 		add(UI_box);
 		add(UI_box2);
+
+		var startHere:FlxButton = new FlxButton(UI_box2.x, UI_box2.y - 30, 'Start Here', function()
+		{
+			PlayState.timeToStart = Conductor.songPosition;
+			startSong();
+		});
+		add(startHere);
 
 		addSongUI();
 		addSectionUI();
@@ -494,12 +500,6 @@ class ChartingState extends MusicBeatState
 			});
 		clear_events.color = FlxColor.RED;
 		clear_events.label.color = FlxColor.WHITE;
-
-		var startHere:FlxButton = new FlxButton(clear_events.x, clear_events.y - 30, 'Start Here', function()
-			{
-				PlayState.timeToStart = Conductor.songPosition;				
-				startSong();
-			});
 
 		var clear_notes:FlxButton = new FlxButton(200, clear_events.y + 30, 'Clear notes', function()
 			{
@@ -674,7 +674,7 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(UI_songTitle);
 
 		var swagSongGroup:Array<Dynamic> = [
-			check_voices, clear_events, clear_notes, startHere, saveButton, saveEvents, reloadSong, reloadSongJson, loadAutosaveBtn,
+			check_voices, clear_events, clear_notes, saveButton, saveEvents, reloadSong, reloadSongJson, loadAutosaveBtn,
 			loadEventJson, stepperBPM, stepperSpeed
 		];
 
@@ -1578,7 +1578,7 @@ class ChartingState extends MusicBeatState
 	var noteSplashesInputText:FlxUIInputText;
 	function addDataUI()
 	{
-		var tab_group_data = new FlxUI(null, UI_box);
+		var tab_group_data = new FlxUI(null, UI_box2);
 		tab_group_data.name = 'Data';
 
 		//
@@ -1688,7 +1688,7 @@ class ChartingState extends MusicBeatState
 
 		tab_group_data.add(new FlxText(noteSkinInputText.x, noteSkinInputText.y - 15, 0, 'Note Texture:'));
 		tab_group_data.add(new FlxText(noteSplashesInputText.x, noteSplashesInputText.y - 15, 0, 'Note Splashes Texture:'));
-		UI_box.addGroup(tab_group_data);
+		UI_box2.addGroup(tab_group_data);
 	}
 
 	function loadSong():Void
