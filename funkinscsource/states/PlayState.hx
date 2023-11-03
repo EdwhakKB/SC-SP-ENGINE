@@ -4468,7 +4468,6 @@ class PlayState extends MusicBeatState
 		seenCutscene = false;
 
 		songLength = 0;
-		Conductor.songPosition = 0;
 		chartingMode = false;
 		modchartMode = false;
 
@@ -4513,7 +4512,6 @@ class PlayState extends MusicBeatState
 			songLength = 0;
 			inst.time = 0;
 			vocals.time = 0;
-			Conductor.songPosition = 0;
 		}
 		var ret:Dynamic = callOnScripts('onEndSong', null, true);
 		if(ret != FunkinLua.Function_Stop && !transitioning)

@@ -268,6 +268,13 @@ class FreeplayState extends MusicBeatState
 			if (!FlxG.sound.music.playing)
 				FlxG.sound.playMusic(Paths.music("freakyMenu"));
 		}
+
+		if (inst != null)
+		{
+			inst = null;
+			PlayingPlayStateSong = false;
+			paused = false;
+		}
 		
 		updateTexts();
 		super.create();
@@ -844,7 +851,7 @@ class FreeplayState extends MusicBeatState
 
 	function updateTimeText()
 	{
-		if (PlayingPlayStateSong) if (inst != null && !paused && inst.time > 0) songLength.text = 'SONG LENGTH: ' + (FlxStringUtil.formatTime(FlxMath.roundDecimal(Conductor.songPosition / 1000 / rate, 2), false) + ' / ' + FlxStringUtil.formatTime(FlxMath.roundDecimal(inst.length / 1000 / rate, 2), false));
+		if (PlayingPlayStateSong) if (inst != null) songLength.text = 'SONG LENGTH: ' + (FlxStringUtil.formatTime(FlxMath.roundDecimal(Conductor.songPosition / 1000 / rate, 2), false) + ' / ' + FlxStringUtil.formatTime(FlxMath.roundDecimal(inst.length / 1000 / rate, 2), false));
 		else songLength.text = '';
 	}
 
@@ -866,6 +873,12 @@ class FreeplayState extends MusicBeatState
 
 	function AcceptedSong()
 	{
+		if (inst != null)
+		{
+			inst = null;
+			PlayingPlayStateSong = false;
+			paused = false;
+		}
 		persistentUpdate = false;
 		var songLowercase:String = Paths.formatToSongPath(songs[curSelected].songName);
 		var poop:String = Highscore.formatSong(songLowercase, curDifficulty);
