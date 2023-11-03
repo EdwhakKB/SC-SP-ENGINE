@@ -110,7 +110,7 @@ _____________________________________
 * All menu characters are now in individual spritesheets, makes modding it easier.
 
 ## Credits menu
-![Screenshot_1](https://user-images.githubusercontent.com/44785097/144632635-f263fb22-b879-4d6b-96d6-865e9562b907.png)
+![Screenshot_1](https://github.com/EdwhakKB/SC-SP-ENGINE/assets/84847356/238c2a8d-edb9-441e-8162-588fbc2eb207)
 * You can add a head icon, name, description and a Redirect link for when the player presses Enter while the item is currently selected.
 
 ## Awards/Achievements
