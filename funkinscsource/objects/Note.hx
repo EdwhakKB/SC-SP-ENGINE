@@ -176,6 +176,8 @@ class Note extends FlxSkewedSprite
 	public var containsPixelTexture:Bool = false;
 	public var pathNotFound:Bool = false;
 
+	public var isPixel:Bool = false;
+
 	public static var instance:Note = null;
 
 	private function set_multSpeed(value:Float):Float {
@@ -297,7 +299,7 @@ class Note extends FlxSkewedSprite
 			}
 		}
 
-		if (texture.contains('pixel') || noteSkin.contains('pixel'))
+		if (texture.contains('pixel') || noteSkin.contains('pixel') || isPixel)
 			containsPixelTexture = true;
 
 		// Debug.logTrace(prevNote);
@@ -341,11 +343,6 @@ class Note extends FlxSkewedSprite
 				prevNote.updateHitbox();
 			}
 
-			if(texture.contains('pixel') || noteSkin.contains('pixel') || containsPixelTexture || isPixel)
-			{
-				scale.y *= PlayState.daPixelZoom;
-				updateHitbox();
-			}
 			earlyHitMult = 0;
 		}
 		else if(!isSustainNote)
@@ -355,8 +352,6 @@ class Note extends FlxSkewedSprite
 		}
 		x += offsetX;
 	}
-
-	public var isPixel:Bool = false;
 
 	public static function initializeGlobalRGBShader(noteData:Int)
 	{
@@ -385,7 +380,6 @@ class Note extends FlxSkewedSprite
 		if(postfix == null) postfix = '';
 
 		var skin:String = noteStyle + postfix;
-		var wasPixelNote:Bool = isPixel;
 		if(noteStyle.length < 1) {
 			skin = PlayState.SONG != null ? PlayState.SONG.arrowSkin : null;
 			if(skin == null || skin.length < 1)
@@ -399,6 +393,7 @@ class Note extends FlxSkewedSprite
 
 		var skinPixel:String = skin;
 		var lastScaleY:Float = scale.y;
+		var wasPixelNote:Bool = isPixel;
 		var skinPostfix:String = getNoteSkinPostfix();
 		var customSkin:String = skin + skinPostfix;
 		var path:String = noteStyle.contains('pixel') ? 'pixelUI/' : '';
@@ -411,9 +406,6 @@ class Note extends FlxSkewedSprite
 
 		loadNoteTexture(noteSkin != "" ? noteStyle : skin, skinPostfix, skinPixel);
 
-		if(animName != null)
-			animation.play(animName, true);
-
 		var becomePixelNote:Bool = isPixel;
 
 		if(isSustainNote) {
@@ -421,22 +413,30 @@ class Note extends FlxSkewedSprite
 
 			if (wasPixelNote && !becomePixelNote) //fixes the scaling
 			{
-				scale.y /= PlayState.daPixelZoom;
-				scale.y *= 0.7;
-
-				offsetX += 5;
+				if (PlayState.instance != null)
+				{
+					scale.y /= PlayState.instance.playbackRate;
+					scale.y *= SUSTAIN_SIZE / frameHeight;
+				}
+	
+				offsetX += 3;
 			}
-
+	
 			if (becomePixelNote && !wasPixelNote) //fixes the scaling
 			{
-				scale.y /= 0.7;
-				scale.y *= PlayState.daPixelZoom;
-
-				offsetX -= 5;
+				if (PlayState.instance != null)
+				{
+					scale.y *= PlayState.daPixelZoom;
+				}
+	
+				offsetX -= 3;
 			}
 		}
 
 		updateHitbox();
+		
+		if(animName != null)
+			animation.play(animName, true);
 
 		noteSkin = (noteSkin != "" ? noteStyle : skin);
 	}
@@ -549,6 +549,7 @@ class Note extends FlxSkewedSprite
 		}
 		else
 		{
+			isPixel = false;
 			if (isSustainNote)
 			{
 				animation.addByPrefix('purpleholdend', 'pruple end hold', 24, true); // this fixes some retarded typo from the original note .FLA
@@ -570,7 +571,7 @@ class Note extends FlxSkewedSprite
 
 	override function update(elapsed:Float)
 	{
-		if (texture.contains('pixel') || noteSkin.contains('pixel'))
+		if (texture.contains('pixel') || noteSkin.contains('pixel') || isPixel)
 			containsPixelTexture = true;
 		super.update(elapsed);
 
