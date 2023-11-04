@@ -336,13 +336,12 @@ class Note extends FlxSkewedSprite
 				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.05;
 				if(createdFrom != null && createdFrom.songSpeed != null) prevNote.scale.y *= createdFrom.songSpeed;
 
-				if(texture.contains('pixel') || noteSkin.contains('pixel') || containsPixelTexture || isPixel) {
+				/*if(texture.contains('pixel') || noteSkin.contains('pixel') || containsPixelTexture || isPixel) {
 					prevNote.scale.y *= 1.19;
 					prevNote.scale.y *= (6 / height); //Auto adjust note size
-				}
+				}*/
 				prevNote.updateHitbox();
 			}
-
 			earlyHitMult = 0;
 		}
 		else if(!isSustainNote)
@@ -413,21 +412,16 @@ class Note extends FlxSkewedSprite
 
 			if (wasPixelNote && !becomePixelNote) //fixes the scaling
 			{
-				if (PlayState.instance != null)
-				{
-					scale.y /= PlayState.instance.playbackRate;
-					scale.y *= SUSTAIN_SIZE / frameHeight;
-				}
+				scale.y /= PlayState.daPixelZoom;
+				scale.y *= 0.7;
 	
 				offsetX += 3;
 			}
 	
 			if (becomePixelNote && !wasPixelNote) //fixes the scaling
 			{
-				if (PlayState.instance != null)
-				{
-					scale.y *= PlayState.daPixelZoom;
-				}
+				scale.y /= 0.7;
+				scale.y *= PlayState.daPixelZoom;
 	
 				offsetX -= 3;
 			}
@@ -571,7 +565,7 @@ class Note extends FlxSkewedSprite
 
 	override function update(elapsed:Float)
 	{
-		if (texture.contains('pixel') || noteSkin.contains('pixel') || isPixel)
+		if (texture.contains('pixel') || noteSkin.contains('pixel'))
 			containsPixelTexture = true;
 		super.update(elapsed);
 
