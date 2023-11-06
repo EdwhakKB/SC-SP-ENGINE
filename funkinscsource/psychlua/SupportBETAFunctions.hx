@@ -964,9 +964,19 @@ class SupportBETAFunctions
 		// shader bullshit
 
 		funk.set("setActor3DShader", function(id:String, ?speed:Float = 3, ?frequency:Float = 10, ?amplitude:Float = 0.25) {
-            var actor = LuaUtils.getActorByName(id);
+			if (LuaUtils.getObjectDirectly(id, false) != null)
+			{
 
-            if(actor != null)
+				var funnyShader:shaders.Shaders.ThreeDEffectNew = new shaders.Shaders.ThreeDEffectNew();
+                funnyShader.waveSpeed = speed;
+                funnyShader.waveFrequency = frequency;
+                funnyShader.waveAmplitude = amplitude;
+                FunkinLua.lua_Shaders.set(id, funnyShader);
+                
+				LuaUtils.getObjectDirectly(id, false).shader = funnyShader.shader;
+			}
+
+            if(LuaUtils.getActorByName(id) != null)
             {
                 var funnyShader:shaders.Shaders.ThreeDEffectNew = new shaders.Shaders.ThreeDEffectNew();
                 funnyShader.waveSpeed = speed;
@@ -974,17 +984,21 @@ class SupportBETAFunctions
                 funnyShader.waveAmplitude = amplitude;
                 FunkinLua.lua_Shaders.set(id, funnyShader);
                 
-                actor.shader = funnyShader.shader;
+                LuaUtils.getActorByName(id).shader = funnyShader.shader;
             }
         });
         
         funk.set("setActorNoShader", function(id:String) {
-            var actor = LuaUtils.getActorByName(id);
+			if (LuaUtils.getObjectDirectly(id, false) != null)
+			{
+				FunkinLua.lua_Shaders.remove(id);
+                LuaUtils.getObjectDirectly(id, false).shader = null;
+			}
 
-            if(actor != null)
+            if(LuaUtils.getActorByName(id) != null)
             {
                 FunkinLua.lua_Shaders.remove(id);
-                actor.shader = null;
+                LuaUtils.getActorByName(id).shader = null;
             }
         });
 
@@ -1008,18 +1022,28 @@ class SupportBETAFunctions
         funk.set("setActorShader", function(actorStr:String, shaderName:String) {
             if (!ClientPrefs.data.shaders)
                 return;
-
+			
             var shad = FunkinLua.lua_Shaders.get(shaderName);
-            var actor = LuaUtils.getActorByName(actorStr);
-            
+			var actor = LuaUtils.getActorByName(actorStr);
+			var spr:FlxSprite = PlayState.instance.getLuaObject(actorStr);
+	
+			if(spr==null){
+				var split:Array<String> = actorStr.split('.');
+				spr = LuaUtils.getObjectDirectly(split[0]);
+				if(split.length > 1) {
+					spr = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length-1]);
+				}
+			}
 
-            if(actor != null && shad != null)
-            {
-                actor.shader = Reflect.getProperty(shad, 'shader'); //use reflect to workaround compiler errors
-
-                //trace('added shader '+shaderName+" to " + actorStr);
-
-            }
+			if (shad != null)
+			{
+				if (spr != null)
+					spr.shader = Reflect.getProperty(shad, 'shader');
+				if (actor != null)
+					actor.shader = Reflect.getProperty(shad, 'shader');
+				
+				if (actor == null && spr == null) Debug.logInfo('Actor and spr are both null!');
+			}
         });
 
         funk.set("setShaderProperty", function(shaderName:String, prop:String, value:Dynamic) {
@@ -1094,11 +1118,17 @@ class SupportBETAFunctions
 
 		funk.set("setActorCustomShader", function(id:String, actor:String){
 			var funnyCustomShader:CustomShader = FunkinLua.lua_Custom_Shaders.get(id);
-			LuaUtils.getActorByName(actor).shader = funnyCustomShader;
+			if (LuaUtils.getActorByName(actor) != null)
+				LuaUtils.getActorByName(actor).shader = funnyCustomShader;
+			if (LuaUtils.getObjectDirectly(actor, false) != null)
+				LuaUtils.getObjectDirectly(actor, false).shader = funnyCustomShader;
 		});
 
 		funk.set("setActorNoCustomShader", function(actor:String){
-			LuaUtils.getActorByName(actor).shader = null;
+			if (LuaUtils.getActorByName(actor) != null)
+				LuaUtils.getActorByName(actor).shader = null;
+			if (LuaUtils.getObjectDirectly(actor, false) != null)
+				LuaUtils.getObjectDirectly(actor, false).shader = null;
 		});
 
 		funk.set("setCameraCustomShader", function(id:String, camera:String){

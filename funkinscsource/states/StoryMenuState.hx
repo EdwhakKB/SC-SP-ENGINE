@@ -250,7 +250,6 @@ class StoryMenuState extends MusicBeatState
 				selectWeek();
 			}
 		}
-
 		
 		if (FlxG.mouse.overlaps(rightArrow)) {
 			if (FlxG.mouse.justPressed) {

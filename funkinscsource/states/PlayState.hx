@@ -99,7 +99,7 @@ import flixel.addons.display.FlxBackdrop;
 import tea.SScript;
 #end
 
-#if (flixel >= "5.3.0")
+#if ((flixel == "5.3.1" || flixel >= "4.11.0" && flixel <= "5.0.0") && parallaxlt)
 import flixel_5_3_1.ParallaxSprite;
 #end
 
@@ -1489,7 +1489,7 @@ class PlayState extends MusicBeatState
 	public function getLuaObject(tag:String, text:Bool=true):FlxSprite {
 		#if LUA_ALLOWED
 		if(modchartSprites.exists(tag)) return modchartSprites.get(tag);
-		#if (flixel >= "5.3.0")
+		#if ((flixel == "5.3.1" || flixel >= "4.11.0" && flixel <= "5.0.0") && parallaxlt)
 		if(modchartParallax.exists(tag)) return modchartParallax.get(tag);
 		#end
 		if(modchartSkewedSprite.exists(tag)) return modchartSkewedSprite.get(tag);
@@ -1687,8 +1687,7 @@ class PlayState extends MusicBeatState
 		}
 
 		#if modchartingTools
-		if (SONG.notITG && notITGMod)
-			NoteMovement.getDefaultStrumPos(this);
+		if (SONG.notITG && notITGMod) NoteMovement.getDefaultStrumPos(this);
 		#end
 	}
 
@@ -5031,7 +5030,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		var placement:Float =  FlxG.width * 0.38;
+		var placement:Float = FlxG.width * 0.38;
 		var rating:FlxSprite = new FlxSprite();
 
 		if((!note.noteSplashData.disabled && ClientPrefs.data.noteSplashesOP) && !SONG.notITG)
@@ -5203,7 +5202,7 @@ class PlayState extends MusicBeatState
 	private function keyPressed(key:Int)
 	{
 		if(cpuControlled || paused || key < 0) return;
-		if(!generatedMusic || endingSong || boyfriend.stunned) return;
+		if(!generatedMusic || endingSong) return;
 
 		// had to name it like this else it'd break older scripts lol
 		var ret:Dynamic = callOnScripts('preKeyPress', [key], true);

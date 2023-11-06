@@ -702,10 +702,8 @@ class Stage extends MusicBeatState
 		}
 		else
 		{
-			if (stageData.isPixelStage)
-				stageIntroSoundsSuffix = '-pixel';
-			else
-				stageIntroSoundsSuffix = '';
+			if (stageData.isPixelStage) stageIntroSoundsSuffix = '-pixel';
+			else stageIntroSoundsSuffix = '';
 		}
 
 		if (stageData.introSoundsPrefix != "")
@@ -1470,7 +1468,6 @@ class Stage extends MusicBeatState
 			}
 		});
 	}
-
 	
 	function doFlash()
 	{
@@ -1479,7 +1476,6 @@ class Stage extends MusicBeatState
 
 		FlxG.camera.flash(color, 0.15, null, true);
 	}
-
 
 	function dancersParenting()
 	{
@@ -1643,7 +1639,7 @@ class Stage extends MusicBeatState
 	{
 		PlayState.instance.inCutscene = true;
 		PlayState.instance.camHUD.visible = false;
-		if (songLowercase == 'senpai' || songLowercase == 'roses')
+		if (songLowercase != 'thorns')
 		{
 			var black:FlxSprite = new FlxSprite(-100, -100).makeGraphic(FlxG.width * 2, FlxG.height * 2, FlxColor.BLACK);
 			black.scrollFactor.set();
@@ -1671,7 +1667,7 @@ class Stage extends MusicBeatState
 					black.destroy();
 				}
 			});
-		}else if (songLowercase == 'thorns'){
+		}else{
 			var red:FlxSprite = new FlxSprite(-100, -100).makeGraphic(FlxG.width * 2, FlxG.height * 2, 0xFFff1b31);
 			red.scrollFactor.set();
 			PlayState.instance.add(red);
@@ -1962,7 +1958,7 @@ class Stage extends MusicBeatState
 		cutsceneHandler.timer(15.2, function()
 		{
 			FlxTween.tween(PlayState.instance.camFollow, {x: 650, y: 300}, 1, {ease: FlxEase.sineOut});
-			FlxTween.tween(FlxG.camera, {zoom: 0.9 * 1.2 * 1.2}, 2.25, {ease: FlxEase.quadInOut});
+			FlxTween.tween(FlxG.camera, {zoom: 1.296}, 2.25, {ease: FlxEase.quadInOut});
 
 			gfDance.visible = false;
 			gfCutscene.alpha = 1;
@@ -2036,7 +2032,7 @@ class Stage extends MusicBeatState
 			PlayState.instance.camFollow.setPosition(PlayState.instance.boyfriend.x + 280, PlayState.instance.boyfriend.y + 200);
 			FlxG.camera.snapToTarget();
 			PlayState.instance.cameraSpeed = 12;
-			FlxTween.tween(FlxG.camera, {zoom: 0.9 * 1.2 * 1.2}, 0.25, {ease: FlxEase.elasticOut});
+			FlxTween.tween(FlxG.camera, {zoom: 1.296}, 0.25, {ease: FlxEase.elasticOut});
 		});
 
 		cutsceneHandler.timer(32.2, function()

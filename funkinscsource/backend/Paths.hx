@@ -272,6 +272,11 @@ class Paths
 		return 'assets/shared/$file';
 	}
 
+	inline public static function getPathOriginal(file:String = ''):String
+	{
+		return 'assets/$file';
+	}
+
 	inline static public function bitmapFont(key:String, ?library:String):FlxBitmapFont
 	{
 		return FlxBitmapFont.fromAngelCode(image(key, library), fontXML(key, library));

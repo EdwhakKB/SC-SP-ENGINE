@@ -56,7 +56,7 @@ import openfl.filters.BitmapFilter;
 import openfl.filters.ShaderFilter;
 import shaders.custom.CustomShader;
 
-#if (flixel >= "5.3.0")
+#if ((flixel == "5.3.1" || flixel >= "4.11.0" && flixel <= "5.0.0") && parallaxlt)
 import flixel_5_3_1.ParallaxSprite; // flixel 5 render pipeline
 #end
 
@@ -121,10 +121,8 @@ class FunkinLua {
 		this.preloading = preloading;
 
 		var game:PlayState = PlayState.instance;
-		if (!isStageLua)
-			game.luaArray.push(this);
-		else
-			game.Stage.luaArray.push(this);
+		if (!isStageLua) game.luaArray.push(this);
+		else game.Stage.luaArray.push(this);
 
 		// Lua shit
 		set('Function_StopLua', Function_StopLua);
@@ -1337,7 +1335,7 @@ class FunkinLua {
 					game.modchartSprites.set(tag, leSprite);
 				}
 			});
-			#if (flixel >= "5.3.0")
+			#if ((flixel == "5.3.1" || flixel >= "4.11.0" && flixel <= "5.0.0") && parallaxlt)
 			set("makeParallaxSprite", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0) {
 				tag = tag.replace('.', '');
 				LuaUtils.resetSpriteTag(tag, true);
@@ -1573,7 +1571,8 @@ class FunkinLua {
 					return true;
 				}
 			});
-			#if (flixel >= "5.3.0")
+			
+			#if ((flixel == "5.3.1" || flixel >= "4.11.0" && flixel <= "5.0.0") && parallaxlt)
 			set("addParallaxSprite", function(tag:String, front:Bool = false) {
 				if(game.modchartParallax.exists(tag)) {
 					var spr:ParallaxSprite = game.modchartParallax.get(tag);
@@ -1704,7 +1703,7 @@ class FunkinLua {
 				}
 			});
 	
-			#if (flixel >= "5.3.0")
+			#if ((flixel == "5.3.1" || flixel >= "4.11.0" && flixel <= "5.0.0") && parallaxlt)
 			set("removeParallaxSprite", function(tag:String, destroy:Bool = true) {
 				if(!game.modchartParallax.exists(tag)) {
 					return;
@@ -2196,7 +2195,7 @@ class FunkinLua {
 			CustomSubstate.implement(this);
 			ShaderFunctions.implement(this);
 			DeprecatedFunctions.implement(this);
-			#if modchartingTools if (!isStageLua && PlayState.SONG.notITG && ClientPrefs.getGameplaySetting('modchart')) ModchartFuncs.implement(this); #end
+			#if modchartingTools if (!isStageLua && PlayState.SONG.notITG && game.notITGMod) ModchartFuncs.implement(this); #end
 		}
 
 		try{

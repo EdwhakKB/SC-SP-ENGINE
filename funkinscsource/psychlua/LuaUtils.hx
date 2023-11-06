@@ -11,7 +11,7 @@ import shaders.Shaders;
 
 import substates.GameOverSubstate;
 import psychlua.FunkinLua;
-#if (flixel >= "5.3.0")
+#if ((flixel == "5.3.1" || flixel >= "4.11.0" && flixel <= "5.0.0") && parallaxlt)
 import flixel_5_3_1.ParallaxSprite;
 #end
 import flixel.addons.display.FlxBackdrop;
@@ -371,7 +371,7 @@ class LuaUtils
 		#end
 	}
 
-	#if (flixel >= "5.3.0")
+	#if ((flixel == "5.3.1" || flixel >= "4.11.0" && flixel <= "5.0.0") && parallaxlt)
 	public static function resetSpriteTag(tag:String, isParallax:Bool = false) {
 		#if LUA_ALLOWED
 		if(!PlayState.instance.modchartSprites.exists(tag) && !Stage.instance.swagBacks.exists(tag) || !PlayState.instance.modchartParallax.exists(tag)) {
