@@ -1,15 +1,5 @@
 package modcharting;
 
-
-import haxe.Json;
-import openfl.net.FileReference;
-#if LUA_ALLOWED
-import llua.Lua;
-import llua.LuaL;
-import llua.State;
-import llua.Convert;
-#end
-
 #if LEATHER
 import states.PlayState;
 import game.Conductor;
@@ -24,9 +14,6 @@ import modcharting.Modifier;
 import modcharting.PlayfieldRenderer;
 import modcharting.NoteMovement;
 import modcharting.ModchartUtil;
-
-import openfl.events.Event;
-import openfl.events.IOErrorEvent;
 
 using StringTools;
 

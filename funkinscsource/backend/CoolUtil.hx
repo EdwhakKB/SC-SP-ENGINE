@@ -238,6 +238,32 @@ class CoolUtil
 		obj.scale.set(Math.abs(((obj.width - width) / obj.width) - 1), Math.abs(((obj.height - height) / obj.height) - 1));
 	}
 
+	/**
+	 * Add several zeros at the end of a string, so that `2` becomes `20`, useful for ms.
+	 * @param str String to add zeros
+	 * @param num The length required
+	 */
+	 public static inline function addEndZeros(str:String, num:Int) {
+		while(str.length < num) str = '${str}0';
+		return str;
+	}
+
+	/**
+	 * Returns a string representation of a size, following this format: `1.02 GB`, `134.00 MB`
+	 * @param size Size to convert ot string
+	 * @return String Result string representation
+	 */
+	public static function getSizeString(size:Float):String {
+		var labels = [" B", " KB", " MB", " GB", " TB"];
+		var rSize:Float = size;
+		var label:Int = 0;
+		while(rSize > 1024 && label < labels.length-1) {
+			label++;
+			rSize /= 1024;
+		}
+		return '${Std.int(rSize) + "." + addZeros(Std.string(Std.int((rSize % 1) * 100)), 2)}${labels[label]}';
+	}
+
 	public static function getDataTypeStringArray():Array<String>
 	{
 		var enums:Array<DataType> = DataType.createAll();

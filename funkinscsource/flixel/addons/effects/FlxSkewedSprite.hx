@@ -1,6 +1,6 @@
 package flixel.addons.effects;
 
-import flash.geom.Matrix;
+import openfl.geom.Matrix;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -8,18 +8,13 @@ import flixel.graphics.frames.FlxFrame.FlxFrameAngle;
 import flixel.math.FlxAngle;
 import flixel.math.FlxPoint;
 import flixel.util.FlxDestroyUtil;
+
 /**
  * @author Zaphod
  */
 class FlxSkewedSprite extends FlxSprite
 {
-	
 	public var skew(default, null):FlxPoint = FlxPoint.get();
-
-	public var skewOffset:Bool = true;
-	public var flipSkew:Bool = false;
-
-	public var useTan:Bool = true; //I don't know why it uses TAN by default, but I added this so extreme values don't ruin everything.
 
 	/**
 	 * Tranformation matrix for this sprite.
@@ -81,11 +76,6 @@ class FlxSkewedSprite extends FlxSprite
 		if (isPixelPerfectRender(camera))
 			_point.floor();
 
-		var skewOffsetX:Float = 0;
-		if(skewOffset){
-			skewOffsetX = (skew.x * FlxAngle.TO_RAD * (height/2));
-			skewOffsetX *= (flipSkew ? -1 : 1);
-		}
 		_matrix.translate(_point.x, _point.y);
 		camera.drawPixels(_frame, framePixels, _matrix, colorTransform, blend, antialiasing, shader);
 	}
@@ -94,18 +84,10 @@ class FlxSkewedSprite extends FlxSprite
 	{
 		_skewMatrix.identity();
 
-		if(useTan){
-			if (skew.x != 0 || skew.y != 0)
-			{
-				_skewMatrix.b = Math.tan(skew.y * FlxAngle.TO_RAD);
-				_skewMatrix.c = Math.tan(skew.x * FlxAngle.TO_RAD);
-			}
-		}else{
-			if (skew.x != 0 || skew.y != 0)
-			{
-				_skewMatrix.b = skew.y * FlxAngle.TO_RAD;
-				_skewMatrix.c = skew.x * FlxAngle.TO_RAD;
-			}
+		if (skew.x != 0 || skew.y != 0)
+		{
+			_skewMatrix.b = Math.tan(skew.y * FlxAngle.TO_RAD);
+			_skewMatrix.c = Math.tan(skew.x * FlxAngle.TO_RAD);
 		}
 	}
 

@@ -635,6 +635,7 @@ class LuaUtils
 
 	public static function makeLuaCharacter(tag:String, character:String, isPlayer:Bool = false, flipped:Bool = false)
 	{
+		if (!ClientPrefs.data.characters) return;
 		tag = tag.replace('.', '');
 
 		var animationName:String = "no way anyone have an anim name this big";
@@ -700,7 +701,7 @@ class LuaUtils
 	//Blantados Code!
 
 	public static function changeGFCharacter(id:String, x:Float, y:Float)
-	{		
+	{
 		changeGFAuto(id);
 		PlayState.instance.gf.x = x;
 		PlayState.instance.gf.y = y;
@@ -750,7 +751,8 @@ class LuaUtils
 
 	//trying to do some auto stuff so i don't have to set manual x and y values
 	public static function changeBFAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false, ?playAnimationBeforeSwitch:Bool = false)
-	{	
+	{
+		if (!ClientPrefs.data.characters) return;
 		var animationName:String = "no way anyone have an anim name this big";
 		var animationFrame:Int = 0;						
 		if (PlayState.instance.boyfriend.animation.curAnim.name.startsWith('sing') && playAnimationBeforeSwitch)
@@ -791,6 +793,7 @@ class LuaUtils
 
 	public static function changeDadAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false, ?playAnimationBeforeSwitch:Bool = false)
 	{	
+		if (!ClientPrefs.data.characters) return;
 		var animationName:String = "no way anyone have an anim name this big";
 		var animationFrame:Int = 0;						
 		if (PlayState.instance.dad.animation.curAnim.name.startsWith('sing') && playAnimationBeforeSwitch)
@@ -828,7 +831,8 @@ class LuaUtils
 	}
 
 	public static function changeGFAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false, ?playAnimationBeforeSwitch:Bool = false)
-	{		
+	{
+		if (!ClientPrefs.data.characters) return;
 		PlayState.instance.gf.resetAnimationVars();
 
 		PlayState.instance.removeObject(PlayState.instance.gf);
@@ -847,7 +851,8 @@ class LuaUtils
 	}
 
 	public static function changeMomAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false, ?playAnimationBeforeSwitch:Bool = false)
-	{	
+	{
+		if (!ClientPrefs.data.characters) return;
 		var animationName:String = "no way anyone have an anim name this big";
 		var animationFrame:Int = 0;						
 		if (PlayState.instance.mom.animation.curAnim.name.startsWith('sing') && playAnimationBeforeSwitch)
@@ -924,8 +929,13 @@ class LuaUtils
 		switch(id)
 		{
 			case 'boyfriend' | 'bf':
-				@:privateAccess
 				return PlayState.instance.boyfriend;
+			case 'dad':
+				return PlayState.instance.dad;
+			case 'mom':
+				return PlayState.instance.mom;
+			case 'gf':
+				return PlayState.instance.gf;
 		}
 
 		if (id.contains('stage-'))

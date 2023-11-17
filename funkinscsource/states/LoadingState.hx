@@ -284,7 +284,7 @@ class LoadingState extends MusicBeatState
 	{
 		var startedString:String = (PlayState.SONG != null ? "Loading " + PlayState.SONG.songId + "..." : "Loading " + Type.getClass(target) + "...");
 		PlayState.customLoaded = true;
-		FlxG.worldBounds.set(0, 0);
+		//FlxG.worldBounds.set(0, 0);
 		#if desktop
 		DiscordClient.changePresence(startedString, null, null, true);
 		DiscordClient.resetClientID();
@@ -440,7 +440,7 @@ class LoadingState extends MusicBeatState
 			FlxG.sound.music.destroy();
 		}
 		
-		MusicBeatState.switchState(target);
+		FlxG.switchState(target);
 	}
 	
 	static function getSongPath()
@@ -463,7 +463,7 @@ class LoadingState extends MusicBeatState
 	
 	inline static public function loadAndSwitchState(target:FlxState, stopMusic = false)
 	{
-		MusicBeatState.switchState(getNextState(target, stopMusic));
+		FlxG.switchState(getNextState(target, stopMusic));
 	}
 	
 	static function getNextState(target:FlxState, stopMusic = false):FlxState
@@ -476,7 +476,6 @@ class LoadingState extends MusicBeatState
 
 		Paths.setCurrentLevel(directory);
 		Debug.logTrace('Setting asset folder to ' + directory);
-
 		/*#if NO_PRELOAD_ALL
 		var loaded:Bool = false;
 		if (PlayState.SONG != null) {
@@ -533,7 +532,7 @@ class LoadingState extends MusicBeatState
 			for (i in 0...characters.length)
 			{
 				var data:Array<String> = characters[i].split(' ');
-				new backend.Stage(data[0], true);
+				new Stage(data[0], true);
 				Stage.instance.setupStageProperties(data[0], false, true);
 				trace ('stages are ' + data[0]);
 			}

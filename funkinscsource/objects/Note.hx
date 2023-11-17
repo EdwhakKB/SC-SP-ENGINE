@@ -12,18 +12,11 @@ import objects.StrumArrow;
 import flixel.math.FlxRect;
 import flixel.addons.effects.FlxSkewedSprite;
 
-import flash.display.BitmapData;
-import flash.display.Graphics;
-import flash.geom.ColorTransform;
 import flixel.FlxG;
 import flixel.FlxSprite;
-import flixel.graphics.FlxGraphic;
-import flixel.graphics.frames.FlxAtlasFrames;
-import flixel.graphics.tile.FlxDrawTrianglesItem.DrawData;
-import flixel.math.FlxMath;
 import flixel.util.FlxColor;
-import openfl.Vector;
 import openfl.Assets;
+
 using StringTools;
 
 typedef EventNote = {
@@ -59,6 +52,9 @@ typedef NoteSplashData = {
 
 class Note extends FlxSkewedSprite
 {
+	public static var globalRgbShaders:Array<RGBPalette> = [];
+	public static var instance:Note = null;
+
 	#if modchartingTools
 	public var mesh:modcharting.SustainStrip;
 	public var z:Float = 0;
@@ -115,7 +111,7 @@ class Note extends FlxSkewedSprite
 	public var eventVal14:String = '';
 
 	public var rgbShader:RGBShaderReference;
-	public static var globalRgbShaders:Array<RGBPalette> = [];
+
 	public var inEditor:Bool = false;
 
 	public var animSuffix:String = '';
@@ -173,17 +169,14 @@ class Note extends FlxSkewedSprite
 	//Quant Stuff
 	public var quantColorsOnNotes:Bool = true;
 
+	//Extra support for textures
 	public var containsPixelTexture:Bool = false;
 	public var pathNotFound:Bool = false;
-
 	public var isPixel:Bool = false;
-
-	public static var instance:Note = null;
 
 	private function set_multSpeed(value:Float):Float {
 		resizeByRatio(value / multSpeed);
 		multSpeed = value;
-		//Debug.logTrace('fuck cock');
 		return value;
 	}
 
@@ -299,13 +292,9 @@ class Note extends FlxSkewedSprite
 			}
 		}
 
-		if (texture.contains('pixel') || noteSkin.contains('pixel') || isPixel)
-			containsPixelTexture = true;
+		if (texture.contains('pixel') || noteSkin.contains('pixel')) containsPixelTexture = true;
 
-		// Debug.logTrace(prevNote);
-
-		if(prevNote != null)
-			prevNote.nextNote = this;
+		if(prevNote != null) prevNote.nextNote = this;
 
 		if (isSustainNote && prevNote != null)
 		{
@@ -325,8 +314,7 @@ class Note extends FlxSkewedSprite
 
 			offsetX -= width / 2;
 
-			if (texture.contains('pixel') || noteSkin.contains('pixel') || containsPixelTexture || isPixel)
-				offsetX += 30;
+			if (texture.contains('pixel') || noteSkin.contains('pixel') || containsPixelTexture) offsetX += 30;
 
 			if (prevNote.isSustainNote)
 			{
@@ -336,6 +324,7 @@ class Note extends FlxSkewedSprite
 				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.05;
 				if(createdFrom != null && createdFrom.songSpeed != null) prevNote.scale.y *= createdFrom.songSpeed;
 
+				//Let's see if I might un-null it!
 				/*if(texture.contains('pixel') || noteSkin.contains('pixel') || containsPixelTexture || isPixel) {
 					prevNote.scale.y *= 1.19;
 					prevNote.scale.y *= (6 / height); //Auto adjust note size
@@ -359,7 +348,8 @@ class Note extends FlxSkewedSprite
 			var newRGB:RGBPalette = new RGBPalette();
 			globalRgbShaders[noteData] = newRGB;
 
-			var arr:Array<FlxColor> = (!PlayState.isPixelStage) ? ClientPrefs.data.arrowRGB[noteData] : ClientPrefs.data.arrowRGBPixel[noteData];
+			var arr:Array<FlxColor> = !PlayState.isPixelStage ? ClientPrefs.data.arrowRGB[noteData] : ClientPrefs.data.arrowRGBPixel[noteData];
+
 			if (noteData > -1 && noteData <= arr.length)
 			{
 				newRGB.r = arr[0];
@@ -381,14 +371,11 @@ class Note extends FlxSkewedSprite
 		var skin:String = noteStyle + postfix;
 		if(noteStyle.length < 1) {
 			skin = PlayState.SONG != null ? PlayState.SONG.arrowSkin : null;
-			if(skin == null || skin.length < 1)
-				skin = defaultNoteSkin + postfix;
+			if(skin == null || skin.length < 1) skin = defaultNoteSkin + postfix;
 		}
 
 		var animName:String = null;
-		if(animation.curAnim != null) {
-			animName = animation.curAnim.name;
-		}
+		if(animation.curAnim != null) animName = animation.curAnim.name;
 
 		var skinPixel:String = skin;
 		var lastScaleY:Float = scale.y;
@@ -396,6 +383,9 @@ class Note extends FlxSkewedSprite
 		var skinPostfix:String = getNoteSkinPostfix();
 		var customSkin:String = skin + skinPostfix;
 		var path:String = noteStyle.contains('pixel') ? 'pixelUI/' : '';
+
+		var noteStylePaths:Bool = (Paths.fileExists('images/' + path + noteStyle + '.png', IMAGE) || Paths.fileExists('images/notes/' + path + noteStyle + '.png', IMAGE));
+		var noteSkinPaths:Bool = (Paths.fileExists('images/' + path + noteSkin + '.png', IMAGE) || Paths.fileExists('images/notes/' + path + noteSkin + '.png', IMAGE));
 		if(customSkin == _lastValidChecked || Paths.fileExists('images/' + path + customSkin + '.png', IMAGE))
 		{
 			skin = customSkin;
@@ -403,7 +393,14 @@ class Note extends FlxSkewedSprite
 		}
 		else skinPostfix = '';
 
-		loadNoteTexture(noteSkin != "" ? noteStyle : skin, skinPostfix, skinPixel);
+		if (noteStylePaths && noteSkinPaths)
+		{
+			if (noteSkin != noteStyle) noteSkin = noteStyle;
+			if (skin != noteSkin) skin = noteSkin;
+		}
+		else skin = customSkin;
+
+		loadNoteTexture(skin, skinPostfix, skinPixel);
 
 		var becomePixelNote:Bool = isPixel;
 
@@ -420,7 +417,8 @@ class Note extends FlxSkewedSprite
 	
 			if (becomePixelNote && !wasPixelNote) //fixes the scaling
 			{
-				scale.y /= 0.7;
+				if (getNoteSkinPostfix() != '' && getNoteSkinPostfix() == '-future') scale.y /= 1.26;
+				else scale.y /= 0.7;
 				scale.y *= PlayState.daPixelZoom;
 	
 				offsetX -= 3;
@@ -429,21 +427,17 @@ class Note extends FlxSkewedSprite
 
 		updateHitbox();
 		
-		if(animName != null)
-			animation.play(animName, true);
-
-		noteSkin = (noteSkin != "" ? noteStyle : skin);
+		if(animName != null) animation.play(animName, true);
+		if(noteSkin != skin && noteSkin != noteStyle) noteSkin = skin;
 	}
 
 	function loadNoteTexture(noteStyleType:String, skinPostfix:String, skinPixel:String)
 	{
-		var initialStyle:String = noteStyleType;
-
 		switch(noteStyleType)
 		{
 			default:
-				if((texture.contains('pixel') || noteStyleType.contains('pixel') || containsPixelTexture) && !FileSystem.exists(Paths.modsXml(noteStyleType))) {
-					if (FileSystem.exists(Paths.modsImages('notes/' + noteStyleType)) || FileSystem.exists(Paths.getSharedPath('images/notes/' + noteStyleType)) || Assets.exists('notes/' + noteStyleType))
+				if(texture.contains('pixel') || noteStyleType.contains('pixel') || containsPixelTexture) {
+					if(FileSystem.exists(Paths.modsImages('notes/' + noteStyleType)) || FileSystem.exists(Paths.getSharedPath('images/notes/' + noteStyleType)) || Assets.exists('notes/' + noteStyleType))
 					{
 						if(isSustainNote) {
 							var graphic = Paths.image(noteStyleType != "" ?  'notes/' + noteStyleType + 'ENDS' : ('pixelUI/' + skinPixel + 'ENDS' + skinPostfix));
@@ -456,7 +450,7 @@ class Note extends FlxSkewedSprite
 
 						loadNoteAnims(true);
 					}
-					else if (FileSystem.exists(Paths.modsImages(noteStyleType)) || FileSystem.exists(Paths.getSharedPath('images/' + noteStyleType)) || Assets.exists(noteStyleType))
+					else if(FileSystem.exists(Paths.modsImages(noteStyleType)) || FileSystem.exists(Paths.getSharedPath('images/' + noteStyleType)) || Assets.exists(noteStyleType))
 					{
 						if(isSustainNote) {
 							var graphic = Paths.image(noteStyleType != "" ?  noteStyleType + 'ENDS' : ('pixelUI/' + skinPixel + 'ENDS' + skinPostfix));
@@ -471,43 +465,44 @@ class Note extends FlxSkewedSprite
 					}
 					else
 					{
-						if(isSustainNote) {
-							var graphic = Paths.image('pixelUI/noteSkins/NOTE_assets' + 'ENDS' + getNoteSkinPostfix());
-							loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
-							originalHeight = graphic.height / 2;
-						} else {
-							var graphic = Paths.image('pixelUI/noteSkins/NOTE_assets' + getNoteSkinPostfix());
-							loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
+						if (PlayState.SONG.disableNoteRGB)
+						{
+							if(isSustainNote) {
+								var graphic = Paths.image('pixelUI/NOTE_assetsENDS');
+								loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
+								originalHeight = graphic.height / 2;
+							} else {
+								var graphic = Paths.image('pixelUI/NOTE_assets');
+								loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
+							}
+						}else{
+							if(isSustainNote) {
+								var graphic = Paths.image('pixelUI/noteSkins/NOTE_assets' + 'ENDS' + getNoteSkinPostfix());
+								loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
+								originalHeight = graphic.height / 2;
+							} else {
+								var graphic = Paths.image('pixelUI/noteSkins/NOTE_assets' + getNoteSkinPostfix());
+								loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
+							}
 						}
 						
 						loadNoteAnims(true);
 					}
 				} else {
-					if (FileSystem.exists(Paths.modsImages('notes/' + noteStyleType)) || FileSystem.exists(Paths.getSharedPath('images/notes/' + noteStyleType)) || Assets.exists('notes/' + noteStyleType))
+					if(FileSystem.exists(Paths.modsImages('notes/' + noteStyleType)) || FileSystem.exists(Paths.getSharedPath('images/notes/' + noteStyleType)) || Assets.exists('notes/' + noteStyleType))
 					{
-						if (ClientPrefs.data.cacheOnGPU)
-							frames = Paths.getSparrowAtlas('notes/' + noteStyleType, null, false);
-						else
-							frames = Paths.getSparrowAtlas('notes/' + noteStyleType);
-
+						frames = Paths.getSparrowAtlas('notes/' + noteStyleType, null, !ClientPrefs.data.cacheOnGPU);
 						loadNoteAnims();
 					}
-					else if (FileSystem.exists(Paths.modsImages(noteStyleType)) || FileSystem.exists(Paths.getSharedPath('shared/images/' + noteStyleType)) || Assets.exists(noteStyleType))
+					else if(FileSystem.exists(Paths.modsImages(noteStyleType)) || FileSystem.exists(Paths.getSharedPath('shared/images/' + noteStyleType)) || Assets.exists(noteStyleType))
 					{
-						if (ClientPrefs.data.cacheOnGPU)
-							frames = Paths.getSparrowAtlas(noteStyleType, null, false);
-						else
-							frames = Paths.getSparrowAtlas(noteStyleType);
-
+						frames = Paths.getSparrowAtlas(noteStyleType, null, !ClientPrefs.data.cacheOnGPU);
 						loadNoteAnims();
 					}
 					else
 					{
-						if (ClientPrefs.data.cacheOnGPU)
-							frames = Paths.getSparrowAtlas("noteSkins/NOTE_assets" + getNoteSkinPostfix(), null, false);
-						else
-							frames = Paths.getSparrowAtlas("noteSkins/NOTE_assets" + getNoteSkinPostfix());
-
+						if (PlayState.SONG.disableNoteRGB) frames = Paths.getSparrowAtlas("NOTE_assets", null, !ClientPrefs.data.cacheOnGPU);
+						else frames = Paths.getSparrowAtlas("noteSkins/NOTE_assets" + getNoteSkinPostfix(), null, !ClientPrefs.data.cacheOnGPU);
 						loadNoteAnims();
 					}
 				}

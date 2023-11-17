@@ -198,7 +198,6 @@ class ReflectionFunctions
 		var split:Array<String> = funcStr.split('.');
 		var funcToRun:Function = null;
 		var obj:Dynamic = classObj;
-		//Debug.logTrace('start: $obj');
 		if(obj == null)
 		{
 			return null;
@@ -207,11 +206,9 @@ class ReflectionFunctions
 		for (i in 0...split.length)
 		{
 			obj = LuaUtils.getVarInArray(obj, split[i].trim());
-			//Debug.logTrace(obj, split[i]);
 		}
 
 		funcToRun = cast obj;
-		//Debug.logTrace('end: $obj');
 		return funcToRun != null ? Reflect.callMethod(obj, funcToRun, args) : null;
 	}
 }

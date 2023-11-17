@@ -1225,8 +1225,6 @@ class CharacterEditorState extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
-		MusicBeatState.camBeat = FlxG.camera;
-
 		if (FlxG.keys.pressed.ALT && FlxG.keys.justPressed.FIVE){
 			var idleAnim = findAnimationByName(char.isDancing ? "danceRight" : "idle");
 			var idleOffsets = [];
@@ -1294,9 +1292,9 @@ class CharacterEditorState extends MusicBeatState
 		if(!charDropDown.dropPanel.visible) {
 			if (FlxG.keys.justPressed.ESCAPE) {
 				if(goToPlayState) {
-					MusicBeatState.switchState(new PlayState());
+					FlxG.switchState(new PlayState());
 				} else {
-					MusicBeatState.switchState(new states.editors.MasterEditorMenu());
+					FlxG.switchState(new states.editors.MasterEditorMenu());
 					FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
 				}
 				FlxG.mouse.visible = false;

@@ -4,16 +4,12 @@ import backend.WeekData;
 import backend.Highscore;
 
 import flixel.input.keyboard.FlxKey;
-import flixel.addons.transition.FlxTransitionableState;
-import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.graphics.frames.FlxFrame;
 import flixel.group.FlxGroup;
 import flixel.input.gamepad.FlxGamepad;
 import tjson.TJSON as Json;
 
 import openfl.Assets;
-import openfl.display.Bitmap;
-import openfl.display.BitmapData;
 
 import shaders.ColorSwap;
 
@@ -23,7 +19,14 @@ import states.MainMenuState;
 
 import sys.thread.Mutex;
 import flixel.graphics.FlxGraphic;
-import openfl.display.FPS;
+import flixel.util.FlxGradient;
+import flixel.effects.particles.FlxEmitter;
+
+import flixel.addons.transition.FlxTransitionSprite.GraphicTransTileDiamond;
+import flixel.addons.transition.FlxTransitionableState;
+import flixel.addons.transition.TransitionData;
+import flixel.math.FlxPoint;
+import flixel.math.FlxRect;
 
 typedef TitleData =
 {
@@ -75,15 +78,24 @@ class TitleState extends MusicBeatState
 
 	public static var updateVersion:String = '';
 
-	public static var checkedSpecs:Bool = false;
-
 	public static var internetConnection:Bool = false; // If the user is connected to internet.
 
 	var bg:FlxSprite;
 
+	var grayGrad:FlxSprite = null;
+	var	whiteGrad:FlxSprite = null;
+
 	override public function create():Void
 	{
 		Paths.clearStoredMemory();
+		
+		grayGrad = FlxGradient.createGradientFlxSprite(FlxG.width, 400, [0x0, FlxColor.WHITE]);
+		grayGrad.x += 0;
+		grayGrad.flipY = true;
+		grayGrad.y -= 200;
+		whiteGrad = FlxGradient.createGradientFlxSprite(FlxG.width, 400, [0x0, FlxColor.WHITE]);
+		whiteGrad.x += 0;
+		whiteGrad.y += 570;
 
 		#if LUA_ALLOWED
 		Mods.pushGlobalMods();
@@ -105,7 +117,7 @@ class TitleState extends MusicBeatState
 
 		Highscore.load();
 		
-		FlxG.worldBounds.set(0, 0);
+		//FlxG.worldBounds.set(0, 0);
 
 		Assets.cache.enabled = true;
 
@@ -158,12 +170,58 @@ class TitleState extends MusicBeatState
 		// bg.updateHitbox();
 		add(bg);
 
+		var particlesUP = new FlxTypedGroup<FlxEmitter>(),
+			particlesDOWN = new FlxTypedGroup<FlxEmitter>();
+
+		for (i in 0...6)
+		{
+			var emitter:FlxEmitter = new FlxEmitter(-1000, 1500);
+			emitter.launchMode = FlxEmitterMode.SQUARE;
+			emitter.velocity.set(-50, -150, 50, -750, -100, 0, 100, -100);
+			emitter.scale.set(0.75, 0.75, 3, 3, 0.75, 0.75, 1.5, 1.5);
+			emitter.drag.set(0, 0, 0, 0, 5, 5, 10, 10);
+			emitter.width = 3500;
+			emitter.alpha.set(1, 1, 0, 0);
+			emitter.lifespan.set(3, 5);
+			emitter.loadParticles(Paths.image('Particles/Particle' + i, 'shared'), 500, 16, true);
+			particlesUP.add(emitter);
+
+			var emitter:FlxEmitter = new FlxEmitter(-1000, -1500);
+			emitter.launchMode = FlxEmitterMode.SQUARE;
+			emitter.velocity.set(50, 150, 50, 750, 100, 0, -100, 100);
+			emitter.scale.set(0.75, 0.75, 3, 3, 0.75, 0.75, 1.5, 1.5);
+			emitter.drag.set(0, 0, 0, 0, 5, 5, 10, 10);
+			emitter.width = 3500;
+			emitter.alpha.set(1, 1, 0, 0);
+			emitter.lifespan.set(3, 5);
+			emitter.loadParticles(Paths.image('Particles/Particle' + i, 'shared'), 500, -16, true);
+			particlesDOWN.add(emitter);
+		}
+
+		if (particlesUP != null) {
+			particlesUP.forEach(function(emitter:FlxEmitter) {
+				if (!emitter.emitting)
+					emitter.start(false, FlxG.random.float(0.1, 0.2), 100000);
+			});
+		}
+
+		if (particlesDOWN != null) {
+			particlesDOWN.forEach(function(emitter:FlxEmitter) {
+				if (!emitter.emitting)
+					emitter.start(false, FlxG.random.float(0.1, 0.2), 100000);
+			});
+		}
+
+		add(particlesUP);
+		add(particlesDOWN);
+
 		logoBl = new FlxSprite(titleJSON.titlex, titleJSON.titley);
 		logoBl.frames = Paths.getSparrowAtlas('logoBumpin');
 		logoBl.antialiasing = ClientPrefs.data.antialiasing;
 
 		logoBl.animation.addByPrefix('bump', 'logo bumpin', 24, false);
 		logoBl.animation.play('bump');
+		logoBl.scale.set(0.98, 0.98);
 		logoBl.updateHitbox();
 		// logoBl.screenCenter();
 		// logoBl.color = FlxColor.BLACK;
@@ -275,15 +333,15 @@ class TitleState extends MusicBeatState
 		super.create();
 
 		#if FREEPLAY
-		MusicBeatState.switchState(new FreeplayState());
+		FlxG.switchState(new FreeplayState());
 		#elseif CHARTING
-		MusicBeatState.switchState(new ChartingState());
+		FlxG.switchState(new ChartingState());
 		#else
 		if(FlxG.save.data.flashing == null && !FlashingState.leftState) 
 		{
 			FlxTransitionableState.skipNextTransIn = true;
 			FlxTransitionableState.skipNextTransOut = true;
-			MusicBeatState.switchState(new FlashingState());
+			FlxG.switchState(new FlashingState());
 		}else{
 			if (!initialized)
 			{
@@ -308,6 +366,9 @@ class TitleState extends MusicBeatState
 	{
 		persistentUpdate = true;
 
+		add(whiteGrad);
+		add(grayGrad);
+
 		add(gfDance);
 		add(logoBl);
 		add(titleText);
@@ -316,6 +377,20 @@ class TitleState extends MusicBeatState
 			startIntro();
 		else
 		{
+			/*var diamond:FlxGraphic = FlxGraphic.fromClass(GraphicTransTileDiamond);
+			diamond.persist = true;
+			diamond.destroyOnNoUse = false;
+
+			var tileData:TransitionTileData = {asset: diamond, width: 32, height: 32};
+
+			FlxTransitionableState.defaultTransIn = new TransitionData(TILES, FlxColor.BLACK, 1, new FlxPoint(-1, -3), tileData,
+				new FlxRect(-200, -200, FlxG.width * 1.4, FlxG.height * 1.4));
+			FlxTransitionableState.defaultTransOut = new TransitionData(TILES, FlxColor.BLACK, 0.7, new FlxPoint(-1, -3),
+			tileData, new FlxRect(-200, -200, FlxG.width * 1.4, FlxG.height * 1.4));
+
+			transIn = FlxTransitionableState.defaultTransIn;
+			transOut = FlxTransitionableState.defaultTransOut;*/
+
 			if(FlxG.save.data != null && FlxG.save.data.fullscreen)
 			{
 				FlxG.fullscreen = FlxG.save.data.fullscreen;
@@ -425,9 +500,9 @@ class TitleState extends MusicBeatState
 			new FlxTimer().start(1, function(tmr:FlxTimer)
 			{
 				if (mustUpdate) {
-					MusicBeatState.switchState(new OutdatedState());
+					FlxG.switchState(new OutdatedState());
 				} else {
-					MusicBeatState.switchState(new MainMenuState());
+					FlxG.switchState(new MainMenuState());
 				}
 				closedState = true;
 			});
@@ -465,7 +540,7 @@ class TitleState extends MusicBeatState
 								function(twn:FlxTween) {
 									FlxTransitionableState.skipNextTransIn = true;
 									FlxTransitionableState.skipNextTransOut = true;
-									MusicBeatState.switchState(new TitleState());
+									FlxG.switchState(new TitleState());
 								}
 							});
 							FlxG.sound.music.fadeOut();
@@ -536,7 +611,9 @@ class TitleState extends MusicBeatState
 		{
 			for (i in 0...textArray.length)
 			{
-				var money:Alphabet = new Alphabet(0, 0, textArray[i], true);
+				if (textArray.length > 0 && textArray != null)
+				{
+					var money:Alphabet = new Alphabet(0, 0, textArray[i], true);
 					if (mainColorString.contains("#"))
 						money.color = FlxColor.fromString(mainColorString);
 					else if (mainColorString.contains("random"))
@@ -547,6 +624,7 @@ class TitleState extends MusicBeatState
 						credGroup.add(money);
 						textGroup.add(money);
 					}
+				}
 			}
 		}
 	}
@@ -605,11 +683,32 @@ class TitleState extends MusicBeatState
 			ease: FlxEase.quadOut
 		});
 
+		FlxTween.tween(whiteGrad, {"pixels.height": 400, alpha: 0.7}, Conductor.crochet / 1900, {
+			onComplete: function(flx:FlxTween)
+			{
+				@:privateAccess {
+					whiteGrad.pixels.height = 0;
+				}
+				whiteGrad.alpha = 0;
+			}
+		});
+		FlxTween.tween(grayGrad, {"pixels.height": 400, alpha: 0.7}, Conductor.crochet / 1900, {
+			onComplete: function(flx:FlxTween)
+			{
+				@:privateAccess { 
+					grayGrad.pixels.height = 0;
+				}
+				grayGrad.alpha = 0;
+			}
+		});
+
 		if (initialized)
 			FlxG.camera.angle = 0;
 
+		sickBeats++;
+
 		if(!closedState) {
-			switch (curBeat)
+			switch (sickBeats)
 			{
 				case 1:
 					if (ClientPrefs.data.SCEWatermark) createCoolText(['Sick Coders Engine by'], 40, "#6497B1");

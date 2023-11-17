@@ -85,7 +85,7 @@ class SaveVariables {
 	public var safeFrames:Float = 10;
 	public var discordRPC:Bool = true;
 
-	public var hudStyle:String = 'Psych';
+	public var hudStyle:String = 'PSYCH';
 	public var quantNotes:Bool = false;
 
 	public var gjUser:String = "";
@@ -146,6 +146,9 @@ class SaveVariables {
 
 	public var noteSplashes:Bool = true;
 	public var noteSplashesOP:Bool = true;
+
+	public var characters:Bool = true;
+	public var background:Bool = true;
 
 	public function new()
 	{

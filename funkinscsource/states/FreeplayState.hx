@@ -86,8 +86,8 @@ class FreeplayState extends MusicBeatState
 
 	override function create()
 	{
-		//Paths.clearStoredMemory();
-		//Paths.clearUnusedMemory();
+		Paths.clearStoredMemory();
+		Paths.clearUnusedMemory();
 		
 		persistentUpdate = true;
 		PlayState.isStoryMode = false;
@@ -279,7 +279,7 @@ class FreeplayState extends MusicBeatState
 		updateTexts();
 		super.create();
 
-		if (!FlxG.sound.music.playing && !MainMenuState.freakyPlaying)
+		if (!FlxG.sound.music.playing && !MainMenuState.freakyPlaying && !resetSong)
 		{
 			playSong();
 		}
@@ -548,9 +548,9 @@ class FreeplayState extends MusicBeatState
 				rate = 3;
 				lastRate = rate;
 			}
-			else if (rate < 0.5)
+			else if (rate < 0.1)
 			{
-				rate = 0.5;
+				rate = 0.1;
 				lastRate = rate;
 			}
 
@@ -645,7 +645,7 @@ class FreeplayState extends MusicBeatState
 		{
 			if (!PlayingPlayStateSong)
 			{
-				persistentUpdate = false;
+				FlxG.switchState(new MainMenuState());
 				if(colorTween != null) {
 					colorTween.cancel();
 				}
@@ -653,7 +653,6 @@ class FreeplayState extends MusicBeatState
 				MainMenuState.freakyPlaying = true;
 				Conductor.bpm = 102.0;
 				FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
-				MusicBeatState.switchState(new MainMenuState());
 			}
 			else
 			{
@@ -756,12 +755,13 @@ class FreeplayState extends MusicBeatState
 	}
 
 	var alreadyPlayingSong:Bool = false;
+	var resetSong:Bool = false;
 
 	private function playSong():Void
 	{
 		try
 		{
-			if (instPlaying == curSelected && PlayingPlayStateSong)
+			if (instPlaying == curSelected && PlayingPlayStateSong && !resetSong)
 			{
 				if (paused)
 				{
@@ -835,11 +835,11 @@ class FreeplayState extends MusicBeatState
 
 				inst.onComplete = function()
 				{
-					if (!paused)
-						playSong();
+					resetSong = true;
+					playSong();
 				}
 
-				downText.text = "Press SPACE to Pause / Press ESCAPE to Exit";
+				downText.text = "Press SPACE to Pause / Press ESCAPE to Exit the Music Player";
 				downText.x = -200;
 			}
 		}

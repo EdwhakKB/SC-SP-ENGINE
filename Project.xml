@@ -196,9 +196,6 @@
 	<!--Allow working memory greater than 1 Gig-->
 	<!--<haxedef name="HXCPP_GC_BIG_BLOCKS" />-->
 	
-	<!-- Show debug traces for hxCodec -->
-	<haxedef name="HXC_DEBUG_TRACE" if="debug" />
-	
 	<!--Disable the Flixel core debugger. Automatically gets set whenever you compile in release mode!-->
 	<haxedef name="FLX_NO_DEBUG" unless="debug" />
 
@@ -213,7 +210,9 @@
 	<!-- No deprecation warnings. -->
 	<haxedef name="no-deprecation-warnings"/>
 
-	<!-- <haxedef name="queue_experimental_optimization"/> -->
+	<!--<haxedef name="HXCPP_GC_GENERATIONAL"/>-->
+
+	<haxedef name="queue_experimental_optimization"/>
 
 	<!-- <error value="Targets besides desktop are not supported" unless="desktop" />-->
 

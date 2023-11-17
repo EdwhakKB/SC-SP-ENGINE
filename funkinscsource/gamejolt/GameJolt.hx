@@ -1,18 +1,14 @@
 package gamejolt;
 
 // GameJolt things
-import flixel.addons.ui.FlxUIState;
-import haxe.iterators.StringIterator;
 import tentools.api.FlxGameJolt as GJApi;
 
 // Login things
-import flixel.ui.FlxButton;
+import flixel.addons.ui.FlxInputText;
+import flixel.addons.ui.FlxButtonPlus;
 import flixel.text.FlxText;
-import flixel.FlxSubState;
-import flixel.addons.ui.FlxUIInputText;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.util.FlxColor;
-import lime.system.System;
 import flixel.FlxSprite;
 import flixel.ui.FlxBar;
 
@@ -27,9 +23,6 @@ import openfl.text.TextFormat;
 import openfl.Lib;
 import flixel.FlxG;
 import openfl.display.Sprite;
-
-import flixel.addons.ui.FlxInputText;
-import flixel.addons.ui.FlxButtonPlus;
 
 import objects.Alphabet;
 
@@ -205,7 +198,7 @@ class GameJoltLogin extends MusicBeatState
             GameJoltAPI.connect();
             GameJoltAPI.authDaUser(ClientPrefs.data.gjUser, ClientPrefs.data.gjToken);
             ClientPrefs.saveSettings();
-            MusicBeatState.switchState(new options.OptionsState());
+            FlxG.switchState(new options.OptionsState());
         }, "Log Out & Close", 200, 60);
         logOutBox.color = FlxColor.RED /*FlxColor.fromRGB(255,134,61)*/ ;
 
@@ -214,7 +207,7 @@ class GameJoltLogin extends MusicBeatState
            FlxG.save.flush();
             FlxG.sound.play(Paths.sound('confirmMenu'), 0.2, false, null, true);
             FlxG.save.flush();
-            MusicBeatState.switchState(new options.OptionsState());
+            FlxG.switchState(new options.OptionsState());
             ClientPrefs.saveSettings();
         }, "Not Right Now", 200, 60);
 
@@ -300,7 +293,7 @@ class GameJoltLogin extends MusicBeatState
         {
             FlxG.save.flush();
             FlxG.mouse.visible = false;
-            MusicBeatState.switchState(new options.OptionsState());
+            FlxG.switchState(new options.OptionsState());
             ClientPrefs.saveSettings();
         }
 

@@ -2,23 +2,13 @@ package modcharting;
 
 
 import flixel.util.FlxTimer.FlxTimerManager;
-import flixel.math.FlxMath;
 import flixel.tweens.FlxTween;
-import flixel.tweens.FlxEase;
-import flixel.graphics.FlxGraphic;
-import flixel.util.FlxColor;
-import flixel.FlxStrip;
-import flixel.graphics.tile.FlxDrawTrianglesItem.DrawData;
 import openfl.geom.Vector3D;
-import flixel.util.FlxSpriteUtil;
-import flixel.graphics.frames.FlxFrame;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.FlxSprite;
 
-import flixel.FlxG;
 import modcharting.Modifier;
 import managers.*;
-import flixel.system.FlxAssets.FlxShader;
 
 #if LEATHER
 import states.PlayState;
@@ -135,7 +125,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
     {
         strum.x = strumData.x;
         strum.y = strumData.y;
-        //strum.z = strumData.z;
+        strum.z = strumData.z;
         strum.angle = strumData.angle;
         strum.alpha = strumData.alpha;
         strum.scale.x = strumData.scaleX;
@@ -229,7 +219,10 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
     }
     private function getLane(noteIndex:Int)
     {
-        return (notes.members[noteIndex].mustPress ? notes.members[noteIndex].noteData+NoteMovement.keyCount : notes.members[noteIndex].noteData);
+        if (!ClientPrefs.getGameplaySetting('opponent'))
+            return (notes.members[noteIndex].mustPress ? notes.members[noteIndex].noteData+NoteMovement.keyCount : notes.members[noteIndex].noteData);
+        else
+            return (notes.members[noteIndex].mustPress ? notes.members[noteIndex].noteData : notes.members[noteIndex].noteData+NoteMovement.keyCount);
     }
     private function getNoteDist(noteIndex:Int)
     {
@@ -262,7 +255,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
                 var sustainTimeThingy:Float = 0;
 
                 //just causes too many issues lol, might fix it at some point
-                /*if (notes.members[i].animation.curAnim.name.endsWith('end') && ClientPrefs.downScroll)
+                /*if (notes.members[i].isHoldEnd && ClientPrefs.downScroll)
                 {
                     if (noteDist > 0)
                         sustainTimeThingy = (NoteMovement.getFakeCrochet()/4)/2; //fix stretched sustain ends (downscroll)

@@ -8,7 +8,6 @@ import flixel.system.debug.watch.Tracker.TrackerProfile;
 import flixel.util.FlxStringUtil;
 import haxe.Log;
 import haxe.PosInfos;
-import backend.Song.SwagSong;
 
 /**
  * Hey you, developer!

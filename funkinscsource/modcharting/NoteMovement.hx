@@ -1,10 +1,5 @@
 package modcharting;
 
-import flixel.math.FlxMath;
-import flixel.group.FlxGroup.FlxTypedGroup;
-import flixel.FlxSprite;
-import flixel.FlxG;
-
 #if LEATHER
 import states.PlayState;
 import game.Note;
@@ -34,6 +29,7 @@ class NoteMovement
     #if LEATHER
     public static var leatherEngineOffsetStuff:Map<String, Float> = [];
     #end
+
     public static function getDefaultStrumPos(game:PlayState)
     {
         defaultStrumX = []; //reset
@@ -42,8 +38,16 @@ class NoteMovement
         defaultSkewY = []; 
         defaultScale = [];
         arrowSizes = [];
-        keyCount = #if (LEATHER || KADE) PlayState.strumLineNotes.length-PlayState.playerStrums.length #else game.strumLineNotes.length-game.playerStrums.length #end; //base game doesnt have opponent strums as group
-        playerKeyCount = #if (LEATHER || KADE) PlayState.playerStrums.length #else game.playerStrums.length #end;
+        if (ClientPrefs.getGameplaySetting('opponent'))
+        {
+            keyCount = #if (LEATHER || KADE) PlayState.strumLineNotes.length-PlayState.opponentStrums.length #else game.strumLineNotes.length-game.opponentStrums.length #end; //base game doesnt have opponent strums as group
+            playerKeyCount = #if (LEATHER || KADE) PlayState.opponentStrums.length #else game.opponentStrums.length #end;
+        }
+        else
+        {
+            keyCount = #if (LEATHER || KADE) PlayState.strumLineNotes.length-PlayState.playerStrums.length #else game.strumLineNotes.length-game.playerStrums.length #end; //base game doesnt have opponent strums as group
+            playerKeyCount = #if (LEATHER || KADE) PlayState.playerStrums.length #else game.playerStrums.length #end;
+        }
 
         for (i in #if (LEATHER || KADE) 0...PlayState.strumLineNotes.members.length #else 0...game.strumLineNotes.members.length #end)
         {
@@ -80,8 +84,16 @@ class NoteMovement
         defaultSkewY = [];
         defaultScale = [];
         arrowSizes = [];
-        keyCount = game.strumLineNotes.length-game.playerStrums.length; //base game doesnt have opponent strums as group
-        playerKeyCount = game.playerStrums.length;
+        if (ClientPrefs.getGameplaySetting('opponent'))
+        {
+            keyCount =  game.strumLineNotes.length-game.opponentStrums.length; //base game doesnt have opponent strums as group
+            playerKeyCount = game.opponentStrums.length;
+        }
+        else
+        {
+            keyCount = game.strumLineNotes.length-game.playerStrums.length; //base game doesnt have opponent strums as group
+            playerKeyCount = game.playerStrums.length;
+        }
 
         for (i in 0...game.strumLineNotes.members.length)
         {

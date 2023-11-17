@@ -53,6 +53,7 @@ class ModchartFile
     public var scriptListen:Bool = false;
     public var customModifiers:Map<String, CustomModifierScript> = new Map<String, CustomModifierScript>();
     public var hasDifficultyModchart:Bool = false; //so it loads false as default!
+    public var hasForcedNoModchartDiff:Bool = false;
     
     public function new(renderer:PlayfieldRenderer)
     {
@@ -74,7 +75,6 @@ class ModchartFile
         var filePath = null;
 
         var folderShit:String = "";
-
         
         var moddyFile:String = Paths.json('songs/' + Paths.formatToSongPath(folder) + '/modchart-' + difficulty.toLowerCase());
         var moddyFile2:String = Paths.json('songs/' + Paths.formatToSongPath(folder) + '/modchart');
@@ -83,6 +83,11 @@ class ModchartFile
         var moddyFileMods:String = Paths.modsJson('songs/' + Paths.formatToSongPath(folder) + '/modchart-' + difficulty.toLowerCase());
         var moddyFileMods2:String = Paths.modsJson('songs/' + Paths.formatToSongPath(folder) + '/modchart');
         #end
+
+        if (difficulty == 'normal')
+        {
+            difficulty = '';
+        }
 
         #if PSYCH
         try 
@@ -216,7 +221,7 @@ class ModchartFile
                         folderShit = filePath.replace("modchart.json", "customMods/");
                     #end
 
-                    Debug.logInfo('${difficulty} Mochart Has No FolderShit Found In Mods! loading modchart.json');
+                    Debug.logInfo('${difficulty} Modchart Has No FolderShit Found In Mods! loading modchart.json');
                 }
                 #end
 
@@ -243,7 +248,7 @@ class ModchartFile
                         folderShit = filePath.replace("modchart.json", "customMods/");
                     #end
 
-                    Debug.logInfo('${difficulty} Mochart Has No FolderShit Found! loading modchart.json');
+                    Debug.logInfo('${difficulty} Modchart Has No FolderShit Found! loading modchart.json');
                 }
             }
             catch(e:Dynamic)

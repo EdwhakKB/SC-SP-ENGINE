@@ -4,19 +4,18 @@ package;
 #if android
 import android.content.Context;
 #end
+import flixel.FlxG;
+import flixel.system.scaleModes.*;
 import flixel.graphics.FlxGraphic;
 import flixel.FlxGame;
-import flixel.FlxState;
 import haxe.io.Path;
 import openfl.Assets;
 import openfl.Lib;
-import openfl.display.FPS;
+import debug.FPSCounter;
 import openfl.display.Sprite;
 import openfl.events.Event;
 import openfl.display.StageScaleMode;
 import lime.app.Application;
-import states.TitleState;
-import flixel.FlxSprite;
 
 //crash handler stuff
 #if CRASH_HANDLER
@@ -24,15 +23,12 @@ import openfl.events.UncaughtErrorEvent;
 import haxe.CallStack;
 import haxe.io.Path;
 #end
+
+//State things
 import gamejolt.GameJolt.GJToastManager;
 import gamejolt.*;
-import flixel.FlxG;
-import flixel.system.scaleModes.RatioScaleMode;
-import lime.app.Application;
 import backend.Debug;
-import flixel.input.keyboard.FlxKey;
-
-import flixel.system.scaleModes.*;
+import states.TitleState;
 
 class Main extends Sprite
 {
@@ -47,7 +43,7 @@ class Main extends Sprite
 	};
 
 	public static var focused:Bool = true;
-	public static var fpsVar:FPS;
+	public static var fpsVar:FPSCounter;
 
 	public static var appName:String = ''; // Application name.
 
@@ -160,7 +156,6 @@ class Main extends Sprite
 					lime.utils.Assets.cache.image.remove(key);
 					openfl.Assets.cache.removeBitmapData(key);
 					FlxG.bitmap._cache.remove(key);
-					//obj.destroy(); //breaks the game lol
 				}
 			}
 

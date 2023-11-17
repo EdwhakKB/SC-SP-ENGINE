@@ -1,18 +1,15 @@
 package backend;
 
+import flixel.FlxSprite;
 import flixel.system.FlxAssets.FlxShader;
-import openfl.display.BlendMode;
-import openfl.display.BitmapDataChannel;
 import flixel.math.FlxPoint;
-import openfl.display.BitmapData;
 import flixel.math.FlxMath;
-import backend.Conductor;
 import flixel.util.FlxColor;
 import flixel.text.FlxText;
-import flixel.addons.display.FlxPieDial;
-import states.PlayState;
-import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup;
+
+import backend.Conductor;
+import states.PlayState;
 
 using flixel.util.FlxSpriteUtil;
 

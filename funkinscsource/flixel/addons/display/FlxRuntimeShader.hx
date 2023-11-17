@@ -38,7 +38,7 @@ using StringTools;
  * @see https://github.com/openfl/openfl/blob/develop/src/openfl/utils/_internal/ShaderMacro.hx
  * @see https://dixonary.co.uk/blog/shadertoy
  */
-class FlxRuntimeShader extends FlxShader
+class FlxRuntimeShader extends #if !(flixel_addons >= "3.2.1") FlxShader #else FlxGraphicsShader #end
 {
 	#if !(flixel_addons >= "3.2.1")
 	#if FLX_DRAW_QUADS

@@ -1,7 +1,6 @@
 package psychlua;
 
 import openfl.utils.Assets;
-import openfl.display.BitmapData;
 import flixel.FlxObject;
 
 import objects.Note;
@@ -9,8 +8,6 @@ import objects.Character;
 import objects.HealthIcon;
 
 import psychlua.LuaUtils;
-import psychlua.LuaUtils.LuaTweenOptions;
-
 import psychlua.ModchartIcon;
 
 import flixel.math.FlxRect;
@@ -19,7 +16,7 @@ import lime.app.Application;
 import shaders.ColorSwapOld;
 
 import flixel.util.FlxAxes;
-import openfl.filters.BitmapFilter;
+
 import openfl.filters.ShaderFilter;
 import shaders.custom.CustomShader;
 
@@ -213,7 +210,7 @@ class SupportBETAFunctions
         });
 
 		funk.set("characterZoom", function(id:String, zoomAmount:Float) {
-			if(PlayState.instance.modchartCharacters.exists(id)) {
+			if(PlayState.instance.modchartCharacters.exists(id) && ClientPrefs.data.characters) {
 				var spr:Character = PlayState.instance.modchartCharacters.get(id);
 				spr.setZoom(zoomAmount);
 			}
@@ -411,7 +408,7 @@ class SupportBETAFunctions
 		//masking!
 		funk.set("addClipRect", function(obj:String, x:Float, y:Float, width:Float, height:Float) {
 			var split:Array<String> = obj.split('.');
-			var object:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
+			var object:Dynamic = LuaUtils.getObjectDirectly(split[0]);
 			if(split.length > 1) {
 				object = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length-1]);
 			}

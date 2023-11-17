@@ -1,12 +1,13 @@
 package;
 
-import backend.MusicBeatState;
+import states.MusicBeatState;
 import states.TitleState;
 #if (cpp && windows)
 import cpp.CPPInterface;
 #end
-import openfl.display.FPS;
+import debug.FPSCounter;
 import openfl.Lib;
+import flixel.graphics.FlxGraphic;
 
 class Init extends MusicBeatState
 {
@@ -14,7 +15,7 @@ class Init extends MusicBeatState
 	override function create()
 	{
 		#if !mobile
-		Main.fpsVar = new FPS(10, 3, 0xFFFFFF);
+		Main.fpsVar = new FPSCounter(10, 3, 0xFFFFFF);
 		Lib.current.stage.addChild(Main.fpsVar);
 		#end
 		#if !(flixel >= "5.4.0")
@@ -24,6 +25,8 @@ class Init extends MusicBeatState
 		FlxG.keys.preventDefaultKeys = [TAB];
 
 		FlxG.autoPause = false;
+
+		FlxGraphic.defaultPersist = true;
 
 		FlxG.save.bind('funkin', CoolUtil.getSavePath());
 
@@ -61,6 +64,6 @@ class Init extends MusicBeatState
 		cpp.NativeGc.run(true);
 		#end
 
-		MusicBeatState.switchState(new TitleState());
+		FlxG.switchState(new TitleState());
 	}
 }

@@ -2,7 +2,6 @@ package backend;
 
 import tjson.TJSON as Json;
 import lime.utils.Assets;
-import backend.Debug;
 
 import backend.Section;
 import objects.Note;
@@ -173,23 +172,6 @@ class Song
 			rawJson = rawJson.substr(0, rawJson.length - 1);
 			// LOL GOING THROUGH THE BULLSHIT TO CLEAN IDK WHATS STRANGE
 		}
-
-		// FIX THE CASTING ON WINDOWS/NATIVE
-		// Windows???
-		// Debug.logTrace(songData);
-
-		// Debug.logTrace('LOADED FROM JSON: ' + songData.notes);
-		/* 
-			for (i in 0...songData.notes.length)
-			{
-				Debug.logTrace('LOADED FROM JSON: ' + songData.notes[i].sectionNotes);
-				// songData.notes[i].sectionNotes = songData.notes[i].sectionNotes
-			}
-
-			daNotes = songData.notes;
-			daSong = songData.song;
-			daBpm = songData.bpm; 
-		*/
 
 		var songJson:Dynamic = parseJSONshit(rawJson);
 		if(songJson.arrowSkin == '' || songJson.arrowSkin == "" || songJson.arrowSkin == null) songJson.arrowSkin = "noteSkins/NOTE_assets" + Note.getNoteSkinPostfix();

@@ -1,12 +1,9 @@
 package substates;
 
 import flixel.*;
-import flixel.FlxSubState;
-import flixel.addons.ui.FlxUIButton;
 import flixel.addons.ui.FlxUIPopup;
 import flixel.ui.FlxButton;
 
-import openfl.display.BitmapData;
 import openfl.geom.Rectangle;
 
 /**

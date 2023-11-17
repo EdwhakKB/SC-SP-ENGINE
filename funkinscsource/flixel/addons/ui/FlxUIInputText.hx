@@ -1,5 +1,6 @@
 package flixel.addons.ui;
 
+#if (flixel < "5.3.0") 
 import flixel.addons.ui.interfaces.IFlxUIWidget;
 import flixel.addons.ui.interfaces.IHasParams;
 import flixel.addons.ui.interfaces.IResizable;
@@ -55,3 +56,4 @@ class FlxUIInputText extends FlxInputText implements IResizable implements IFlxU
 		}
 	}
 }
+#end

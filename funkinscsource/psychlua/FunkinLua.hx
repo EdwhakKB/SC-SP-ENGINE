@@ -5,18 +5,12 @@ import backend.WeekData;
 import backend.Highscore;
 import backend.Song;
 
-import openfl.Lib;
 import openfl.utils.Assets;
-import openfl.display.BitmapData;
 import flixel.FlxBasic;
 import flixel.FlxObject;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.addons.display.FlxBackdrop;
 import flixel.addons.effects.FlxSkewedSprite;
-
-#if (!flash && sys)
-import flixel.addons.display.FlxRuntimeShader;
-#end
 
 import cutscenes.DialogueBoxPsych;
 
@@ -24,7 +18,6 @@ import objects.StrumArrow;
 import objects.Note;
 import objects.NoteSplash;
 import objects.Character;
-import objects.HealthIcon;
 
 import states.MainMenuState;
 import states.StoryMenuState;
@@ -38,27 +31,22 @@ import psychlua.LuaUtils.LuaTweenOptions;
 #if SScript
 import psychlua.HScript;
 #end
-import psychlua.DebugLuaText;
 import psychlua.ModchartSprite;
 import psychlua.ModchartIcon;
 
-import modcharting.ModchartFuncs;
-import modcharting.ModchartEditorState;
-
-import flixel.math.FlxRect;
-import lime.app.Application;
 import haxe.PosInfos;
 
 import shaders.ColorSwapOld;
 
 import flixel.util.FlxAxes;
 import openfl.filters.BitmapFilter;
-import openfl.filters.ShaderFilter;
 import shaders.custom.CustomShader;
 
 #if ((flixel == "5.3.1" || flixel >= "4.11.0" && flixel <= "5.0.0") && parallaxlt)
 import flixel_5_3_1.ParallaxSprite; // flixel 5 render pipeline
 #end
+
+import tjson.TJSON as Json;
 
 typedef LuaCamera =
 {
@@ -80,6 +68,7 @@ class FunkinLua {
 	#end
 	public var camTarget:FlxCamera;
 	public var scriptName:String = '';
+	public var modFolder:String = null;
 	public var isStageLua:Bool = false;
 	public var closed:Bool = false;
 
@@ -119,10 +108,15 @@ class FunkinLua {
 		//LuaL.dostring(lua, CLENSE);
 
 		this.preloading = preloading;
+		this.scriptName = scriptName.trim();
 
 		var game:PlayState = PlayState.instance;
 		if (!isStageLua) game.luaArray.push(this);
 		else game.Stage.luaArray.push(this);
+
+		var myFolder:Array<String> = this.scriptName.split('/');
+		if(myFolder[0] + '/' == Paths.mods() && (Mods.currentModDirectory == myFolder[1] || Mods.getGlobalMods().contains(myFolder[1]))) //is inside mods folder
+			this.modFolder = myFolder[1];
 
 		// Lua shit
 		set('Function_StopLua', Function_StopLua);
@@ -197,7 +191,7 @@ class FunkinLua {
 		// Gameplay settings
 		set('healthGainMult', game.healthGain);
 		set('healthLossMult', game.healthLoss);
-		set('playbackRate', game.playbackRate);
+		#if FLX_PITCH set('playbackRate', game.playbackRate); #end
 		set('guitarHeroSustains', game.guitarHeroSustains);
 		set('instakillOnMiss', game.instakillOnMiss);
 		set('botPlay', game.cpuControlled);
@@ -683,7 +677,7 @@ class FunkinLua {
 				PlayState.SONG = Song.loadFromJson(poop, name);
 				PlayState.storyDifficulty = difficultyNum;
 				game.persistentUpdate = false;
-				MusicBeatState.switchState(new PlayState());
+				FlxG.switchState(new PlayState());
 	
 				if (game.inst != null){
 					game.inst.pause();
@@ -1117,14 +1111,11 @@ class FunkinLua {
 				}
 	
 				PlayState.cancelMusicFadeTween();
-				CustomFadeTransition.nextCamera = game.mainCam;
-				if(FlxTransitionableState.skipNextTransIn)
-					CustomFadeTransition.nextCamera = null;
 	
 				if(PlayState.isStoryMode)
-					MusicBeatState.switchState(new StoryMenuState());
+					FlxG.switchState(new StoryMenuState());
 				else
-					MusicBeatState.switchState(new FreeplayState());
+					FlxG.switchState(new FreeplayState());
 				
 				#if desktop DiscordClient.resetClientID(); #end
 	
@@ -1417,7 +1408,7 @@ class FunkinLua {
 			set("playActorAnimation", function(obj:String,anim:String,force:Bool = false,reverse:Bool = false, ?frame:Int = 0) {
 				var char:Character = LuaUtils.getObjectDirectly(obj);
 	
-				if (char != null && Std.isOfType(char, Character)){ //what am I doing? of course it'll be a character
+				if (char != null && Std.isOfType(char, Character) && ClientPrefs.data.characters){ //what am I doing? of course it'll be a character
 					char.playAnim(anim, force, reverse, frame);
 					return;
 				} 
@@ -1461,7 +1452,7 @@ class FunkinLua {
 								luaObj.offset.set(0, 0);
 						}
 	
-						if(Std.isOfType(luaObj, Character))
+						if(Std.isOfType(luaObj, Character) && ClientPrefs.data.characters)
 						{
 							//convert luaObj to Character
 							var obj:Dynamic = luaObj;
@@ -1474,7 +1465,7 @@ class FunkinLua {
 					if(spr != null) {
 						if(spr.animation.getByName(name) != null)
 						{
-							if(Std.isOfType(spr, Character))
+							if(Std.isOfType(spr, Character) && ClientPrefs.data.characters)
 							{
 								//convert spr to Character
 								var obj:Dynamic = spr;
@@ -1493,7 +1484,7 @@ class FunkinLua {
 				if(spr != null) {
 					if(spr.animation.getByName(name) != null)
 					{
-						if(Std.isOfType(spr, Character))
+						if(Std.isOfType(spr, Character) && ClientPrefs.data.characters)
 						{
 							//convert spr to Character
 							var obj:Dynamic = spr;
@@ -1940,10 +1931,10 @@ class FunkinLua {
 				}
 				return false;
 			});
-			set("startVideo", function(videoFile:String) {
+			set("startVideo", function(videoFile:String, type:String = 'mp4') {
 				#if VIDEOS_ALLOWED
-				if(FileSystem.exists(Paths.video(videoFile))) {
-					game.startVideo(videoFile);
+				if(FileSystem.exists(Paths.video(videoFile, type))) {
+					game.startVideo(videoFile, type);
 					return true;
 				} else {
 					luaTrace('startVideo: Video file not found: ' + videoFile, false, false, FlxColor.RED);
@@ -2057,6 +2048,7 @@ class FunkinLua {
 					}
 				}
 			});
+			#if FLX_PITCH
 			set("getSoundPitch", function(tag:String) {
 				if(tag != null && tag.length > 0 && game.modchartSounds.exists(tag)) {
 					return game.modchartSounds.get(tag).pitch;
@@ -2074,6 +2066,68 @@ class FunkinLua {
 					}
 				}
 			});
+			#end
+
+			// mod settings
+			addLocalCallback("getModSetting", function(saveTag:String, ?modName:String = null) {
+				if(modName == null)
+				{
+					if(this.modFolder == null)
+					{
+						luaTrace('getModSetting: Argument #2 is null and script is not inside a packed Mod folder!', false, false, FlxColor.RED);
+						return null;
+					} 
+					modName = this.modFolder;
+				}
+
+				if(FlxG.save.data.modSettings == null) FlxG.save.data.modSettings = new Map<String, Dynamic>();
+
+				var settings:Map<String, Dynamic> = FlxG.save.data.modSettings.get(modName);
+				var path:String = Paths.mods('$modName/data/settings.json');
+				if(FileSystem.exists(path))
+				{
+					if(settings == null || !settings.exists(saveTag))
+					{
+						if(settings == null) settings = new Map<String, Dynamic>();
+						var data:String = File.getContent(path);
+						try
+						{
+							luaTrace('getModSetting: Trying to find default value for "$saveTag" in Mod: "$modName"');
+							var parsedJson:Dynamic = Json.parse(data);
+							for (i in 0...parsedJson.length)
+							{
+								var sub:Dynamic = parsedJson[i];
+								if(sub != null && sub.save != null && sub.value != null && !settings.exists(sub.save))
+								{
+									luaTrace('getModSetting: Found unsaved value "${sub.save}" in Mod: "$modName"');
+									settings.set(sub.save, sub.value);
+								}
+							}
+							FlxG.save.data.modSettings.set(modName, settings);
+						}
+						catch(e:Dynamic)
+						{
+							var errorTitle = 'Mod name: ' + Mods.currentModDirectory;
+							var errorMsg = 'An error occurred: $e';
+							#if windows
+							lime.app.Application.current.window.alert(errorMsg, errorTitle);
+							#end
+							trace('$errorTitle - $errorMsg');
+						}
+					}
+				}
+				else
+				{
+					FlxG.save.data.modSettings.remove(modName);
+					luaTrace('getModSetting: $path could not be found!', false, false, FlxColor.RED);
+					return null;
+				}
+
+				if(settings.exists(saveTag)) return settings.get(saveTag);
+				luaTrace('getModSetting: "$saveTag" could not be found inside $modName\'s settings!', false, false, FlxColor.RED);
+				return null;
+			});
+			//
 	
 			set("debugPrint", function(text:Dynamic = '', color:String = 'WHITE') PlayState.instance.addTextToDebug(text, CoolUtil.colorFromString(color)));
 	
@@ -2162,7 +2216,7 @@ class FunkinLua {
 			});
 	
 			set("stopIdle", function(id:String, bool:Bool) {
-				if (game.modchartCharacters.exists(id))
+				if (game.modchartCharacters.exists(id) && ClientPrefs.data.characters)
 				{
 					game.modchartCharacters.get(id).stopIdle = bool;
 					return;
@@ -2171,12 +2225,17 @@ class FunkinLua {
 			});
 	
 			set("characterDance", function(character:String) {
-				if(game.modchartCharacters.exists(character)) {
+				if(game.modchartCharacters.exists(character) && ClientPrefs.data.characters) {
 					var spr:Character = game.modchartCharacters.get(character);
 					spr.dance();
 				}
 				else
 					LuaUtils.getObjectDirectly(character).dance();
+			});
+
+			set("initBackgroundOverlayVideo", function(vidPath:String, type:String, layInFront:Bool)
+			{
+				game.backgroundOverlayVideo(vidPath, type, layInFront);
 			});
 			
 			addLocalCallback("close", function() {
@@ -2199,7 +2258,13 @@ class FunkinLua {
 		}
 
 		try{
-			var result:Dynamic = LuaL.dofile(lua, scriptName);
+			var isString:Bool = !FileSystem.exists(scriptName);
+			var result:Dynamic = null;
+			if(!isString)
+				result = LuaL.dofile(lua, scriptName);
+			else
+				result = LuaL.dostring(lua, scriptName);
+
 			var resultStr:String = Lua.tostring(lua, result);
 			if(resultStr != null && result != 0) {
 				Debug.logInfo(resultStr);
@@ -2222,6 +2287,7 @@ class FunkinLua {
 				}
 				return;
 			}
+			if(isString) scriptName = 'unknown';
 		} catch(e:Dynamic) {
 			Debug.logInfo(e);
 			return;

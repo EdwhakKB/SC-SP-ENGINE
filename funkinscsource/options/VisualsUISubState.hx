@@ -105,7 +105,7 @@ class VisualsUISubState extends BaseOptionsMenu
 			"What HUD you like more??.",
 			'hudStyle',
 			'string',
-			['PSYCH', 'GLOW_KADE', 'HITMANS']);
+			['PSYCH', 'GLOW_KADE', 'HITMANS', 'CLASSIC']);
 		addOption(option);
 		
 		var option:Option = new Option('Time Bar:',
@@ -244,10 +244,13 @@ class VisualsUISubState extends BaseOptionsMenu
 		{
 			var note:StrumArrow = notes.members[i];
 			if(notesTween[i] != null) notesTween[i].cancel();
-			if(curSelected == noteOptionID)
+			if(curSelected == noteOptionID){
 				notesTween[i] = FlxTween.tween(note, {y: ClientPrefs.data.downScroll ? 420 : noteY}, Math.abs(note.y / (200 + noteY)) / 3, {ease: FlxEase.quadInOut});
-			else
-				notesTween[i] = FlxTween.tween(note, {y: ClientPrefs.data.downScroll ? 760 : -200}, Math.abs(note.y / (200 + noteY)) / 3, {ease: FlxEase.quadInOut});
+			 	note.visible = true;
+			}else{
+				notesTween[i] = FlxTween.tween(note, {y: ClientPrefs.data.downScroll ? 760 : -200}, Math.abs(note.y / (200 + noteY)) / 3, {ease: FlxEase.quadInOut}); 
+				note.visible = false;
+			}
 		}
 	}
 

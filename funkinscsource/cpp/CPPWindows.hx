@@ -81,16 +81,6 @@ class CPPWindows
 		return alpha;
 	}
 
-	@:functionCode("
-		unsigned long long allocatedRAM = 0;
-		GetPhysicallyInstalledSystemMemory(&allocatedRAM);
-		return (allocatedRAM / 1024);
-	")
-	public static function obtainRAM():UInt64
-	{
-		return 0;
-	}
-
 	// ! https://github.com/brightfyregit/Indie-Cross-Public/blob/master/source/SpecsDetector.hx#L87-L102
 	public static function messageBox(msg:ConstCharStar = null, title:ConstCharStar = null, ?handler:Null<Int->Void>)
 	{
