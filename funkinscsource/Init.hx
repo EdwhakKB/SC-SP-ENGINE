@@ -15,8 +15,11 @@ class Init extends MusicBeatState
 	override function create()
 	{
 		#if !mobile
-		Main.fpsVar = new FPSCounter(10, 3, 0xFFFFFF);
-		Lib.current.stage.addChild(Main.fpsVar);
+		if (fpsVar == null)
+		{
+			Main.fpsVar = new FPSCounter(10, 3, 0xFFFFFF);
+			Lib.current.stage.addChild(Main.fpsVar);
+		}
 		#end
 		#if !(flixel >= "5.4.0")
 		FlxG.fixedTimestep = false;
