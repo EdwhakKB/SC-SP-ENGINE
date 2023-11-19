@@ -1154,6 +1154,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
 
                        /* var isNotePixel:Bool = (sustainNote.texture.contains('pixel') || sustainNote.noteSkin.contains('pixel') || oldNote.texture.contains('pixel') || oldNote.noteSkin.contains('pixel'));
 						if (isNotePixel) {
+							oldNote.containsPixelTexture = true;
 							sustainNote.containsPixelTexture = true;
 						}
 						sustainNote.correctionOffset = swagNote.height / 2;
