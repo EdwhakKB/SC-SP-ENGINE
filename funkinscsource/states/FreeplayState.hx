@@ -40,7 +40,6 @@ class FreeplayState extends MusicBeatState
 
 	var scoreBG:FlxSprite;
 	var scoreText:CoolText;
-	var previewtext:CoolText;
 	var helpText:CoolText;
 	var opponentText:CoolText;
 	var diffText:CoolText;
@@ -228,14 +227,6 @@ class FreeplayState extends MusicBeatState
 
 		diffText.antialiasing = ClientPrefs.data.antialiasing;
 		add(diffText);
-
-		previewtext = new CoolText(scoreText.x, scoreText.y + 156, 23, 23, Paths.bitmapFont('fonts/vcr'));
-		previewtext.text = "Preview Rate: < " + FlxMath.roundDecimal(rate, 2) + "x >";
-		previewtext.autoSize = true;
-
-		previewtext.antialiasing = ClientPrefs.data.antialiasing;
-
-		add(previewtext);
 
 		helpText = new CoolText(scoreText.x, scoreText.y + 190, 18, 18, Paths.bitmapFont('fonts/vcr'));
 		helpText.autoSize = true;
@@ -651,8 +642,6 @@ class FreeplayState extends MusicBeatState
 				changeDiff();
 		}
 
-		previewtext.alpha = 1;
-
 		if (!MainMenuState.freakyPlaying)
 		{
 			if (inst != null)
@@ -759,7 +748,7 @@ class FreeplayState extends MusicBeatState
 							if (e.text != songs[curSelected].songName)
 							{
 		
-								for (i in [scoreBG, scoreText, previewtext, helpText, opponentText, diffText, comboText])
+								for (i in [scoreBG, scoreText, helpText, opponentText, diffText, comboText])
 								{
 									FlxTween.tween(i, {alpha: 0}, llll / 1000);
 								}
@@ -1028,7 +1017,6 @@ class FreeplayState extends MusicBeatState
 		if (PlayingPlayStateSong)
 		{
 			helpText.visible = false;
-			previewtext.visible = false;
 			songLength.visible = true;
 
 			scoreBG.visible = false;
@@ -1061,7 +1049,6 @@ class FreeplayState extends MusicBeatState
 		else
 		{
 			helpText.visible = true;
-			previewtext.visible = true;
 			songLength.visible = false;
 
 			scoreBG.visible = true;

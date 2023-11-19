@@ -232,6 +232,8 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
        //Misc Modifiers
        InvertModifier, FlipModifier, JumpModifier,
        StrumAngleModifier, EaseXModifier,
+       //Extra Modifiers
+       StaticModifierX,
     ];
     public static var easeList:Array<String> = [
         "backIn",
@@ -1105,7 +1107,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
 
 
                 #if (PSYCH && PSYCHVERSION == 0.7)
-                    var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote);
+                    var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, false, PlayState.SONG.arrowSkin);
                     swagNote.sustainLength = songNotes[2];
                     swagNote.mustPress = gottaHitNote;
                     swagNote.gfNote = (section.gfSection && (songNotes[1]<4));
@@ -1125,19 +1127,30 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
 
                 swagNote.scrollFactor.set();
 
-                var susLength:Float = swagNote.sustainLength;
+                #if (PSYCH && PSYCHVERSION == 0.7)
+                if (swagNote.texture.contains('pixel') || swagNote.noteSkin.contains('pixel')){
+					swagNote.containsPixelTexture = true;
+				}
+                #end
 
-                susLength = susLength / Conductor.stepCrochet;
+                if (ClientPrefs.getGameplaySetting('sustainnotesactive')) swagNote.sustainLength = songNotes[2] / playbackSpeed;
+				else swagNote.sustainLength = 0;
+
+                var susLength:Float = swagNote.sustainLength;
+                var anotherCrochet:Float = Conductor.crochet;
+				var anotherStepCrochet:Float = anotherCrochet / 4;
+				var susLength:Float = swagNote.sustainLength;
+
+				susLength = susLength / anotherStepCrochet;
                 unspawnNotes.push(swagNote);
 
-                var floorSus:Int = Math.floor(susLength);
-                if(floorSus > 0) {
-                    for (susNote in 0...floorSus+1)
-                    {
+                if(susLength > 0) {
+					for (susNote in 0...Std.int(Math.max(susLength, 2)))
+					{
                         oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
 
                         #if PSYCH 
-                        var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote) + (Conductor.stepCrochet / FlxMath.roundDecimal(PlayState.SONG.speed, 2)), daNoteData, oldNote, true);
+                        var sustainNote:Note = new Note(daStrumTime + (anotherStepCrochet * susNote), daNoteData, oldNote, true, PlayState.SONG.arrowSkin);
                         sustainNote.mustPress = gottaHitNote;
                         #else 
                         var sustainNote:Note = new Note(daStrumTime + (Std.int(Conductor.stepCrochet) * susNote) + Std.int(Conductor.stepCrochet), daNoteData, oldNote, true, 0, songNotes[4], null, [0], gottaHitNote);
@@ -1152,7 +1165,8 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
                         sustainNote.scrollFactor.set();
                         unspawnNotes.push(sustainNote);
 
-                       /* var isNotePixel:Bool = (sustainNote.texture.contains('pixel') || sustainNote.noteSkin.contains('pixel') || oldNote.texture.contains('pixel') || oldNote.noteSkin.contains('pixel'));
+                        #if (PSYCH && PSYCHVERSION == 0.7)
+                        var isNotePixel:Bool = (sustainNote.texture.contains('pixel') || sustainNote.noteSkin.contains('pixel') || oldNote.texture.contains('pixel') || oldNote.noteSkin.contains('pixel'));
 						if (isNotePixel) {
 							oldNote.containsPixelTexture = true;
 							sustainNote.containsPixelTexture = true;
@@ -1173,10 +1187,31 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
 						{
 							oldNote.scale.y /= playbackSpeed;
 							oldNote.updateHitbox();
-						}*/
+						}
+                        #end
+
+                        if (sustainNote.mustPress) sustainNote.x += FlxG.width / 2; // general offset
+                        else if(ClientPrefs.data.middleScroll)
+                        {
+                            sustainNote.x += 310;
+                            if(daNoteData > 1) //Up and Right
+                                sustainNote.x += FlxG.width / 2 + 25;
+                        }
                     }
                 }
+
+                if (swagNote.mustPress)
+                {
+                    swagNote.x += FlxG.width / 2; // general offset
+                }
+                else if(ClientPrefs.data.middleScroll)
+                {
+                    swagNote.x += 310;
+                    if(daNoteData > 1) //Up and Right
+                        swagNote.x += FlxG.width / 2 + 25;
+                }
             }
+
             daBeats += 1;
         }
 
@@ -1200,6 +1235,15 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
         #else
         usedKeyCount = 4;
         #end
+
+        var strumLineX:Float = ClientPrefs.data.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X;
+
+		var TRUE_STRUM_X:Float = strumLineX;
+
+		if (PlayState.SONG.arrowSkin.contains('pixel'))
+		{
+			(ClientPrefs.data.middleScroll ? TRUE_STRUM_X += 3 : TRUE_STRUM_X += 2);
+		}
 
         for (i in 0...usedKeyCount)
         {
@@ -1238,7 +1282,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
 			babyArrow.x += 100 - ((usedKeyCount - 4) * 16) + (usedKeyCount >= 10 ? 30 : 0);
 			babyArrow.x += ((FlxG.width / 2) * player);
             #elseif (PSYCH && PSYCHVERSION == 0.7)
-                var babyArrow:StrumArrow = new StrumArrow(ClientPrefs.data.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X, strumLine.y, i, player, PlayState.isPixelStage ? 'pixel' : 'normal');
+                var babyArrow:StrumArrow = new StrumArrow(TRUE_STRUM_X, strumLine.y, i, player, PlayState.isPixelStage ? 'pixel' : 'normal');
                 babyArrow.downScroll = ClientPrefs.data.downScroll;
                 babyArrow.alpha = targetAlpha;
             #elseif (PSYCH && PSYCHVERSION != 0.7)

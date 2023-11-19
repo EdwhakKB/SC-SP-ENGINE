@@ -465,7 +465,7 @@ class Note extends FlxSkewedSprite
 					}
 					else
 					{
-						if (PlayState.SONG.disableNoteRGB)
+						if (PlayState.SONG != null && PlayState.SONG.disableNoteRGB)
 						{
 							if(isSustainNote) {
 								var graphic = Paths.image('pixelUI/NOTE_assetsENDS', null, !ClientPrefs.data.cacheOnGPU);
@@ -501,7 +501,7 @@ class Note extends FlxSkewedSprite
 					}
 					else
 					{
-						if (PlayState.SONG.disableNoteRGB) frames = Paths.getSparrowAtlas("NOTE_assets", null, !ClientPrefs.data.cacheOnGPU);
+						if (PlayState.SONG != null && PlayState.SONG.disableNoteRGB) frames = Paths.getSparrowAtlas("NOTE_assets", null, !ClientPrefs.data.cacheOnGPU);
 						else frames = Paths.getSparrowAtlas("noteSkins/NOTE_assets" + getNoteSkinPostfix(), null, !ClientPrefs.data.cacheOnGPU);
 						loadNoteAnims();
 					}

@@ -131,7 +131,7 @@ class StrumArrow extends FlxSkewedSprite
 						}
 						else
 						{
-							if (PlayState.SONG.disableNoteRGB)
+							if (PlayState.SONG != null && PlayState.SONG.disableNoteRGB)
 							{
 								loadGraphic(Paths.image('pixelUI/NOTE_assets'));
 								width = width / 4;
@@ -161,7 +161,7 @@ class StrumArrow extends FlxSkewedSprite
 						}
 						else
 						{
-							if (PlayState.SONG.disableNoteRGB)
+							if (PlayState.SONG != null && PlayState.SONG.disableNoteRGB)
 							{
 								frames = Paths.getSparrowAtlas('NOTE_assets', null, !ClientPrefs.data.cacheOnGPU);
 							}else{

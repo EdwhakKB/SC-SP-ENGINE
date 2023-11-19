@@ -842,8 +842,8 @@ class LuaUtils
 		var charX:Float = PlayState.instance.gf.positionArray[0];
 		var charY:Float = PlayState.instance.gf.positionArray[1];
 
-		PlayState.instance.gf.x = PlayState.instance.Stage.gfXOffset + PlayState.instance.GF_X + PlayState.instance.gf.positionArray[0];
-		PlayState.instance.gf.y = PlayState.instance.Stage.gfYOffset + PlayState.instance.GF_Y + PlayState.instance.gf.positionArray[1];
+		PlayState.instance.gf.x = PlayState.instance.Stage.gfXOffset + charX + PlayState.instance.GF_X;
+		PlayState.instance.gf.y = PlayState.instance.Stage.gfYOffset + charY + PlayState.instance.GF_Y;
 		PlayState.instance.gf.scrollFactor.set(0.95, 0.95);
 		PlayState.instance.addObject(PlayState.instance.gf);
 
@@ -877,14 +877,10 @@ class LuaUtils
 		
 		PlayState.instance.mom.x = PlayState.instance.Stage.momXOffset + charX + PlayState.instance.MOM_X;
 		PlayState.instance.mom.y = PlayState.instance.Stage.momYOffset + charY + PlayState.instance.MOM_Y;
-		PlayState.instance.addObject(PlayState.instance.dad);
+		PlayState.instance.addObject(PlayState.instance.mom);
 
-		//PlayState.instance.iconP2.changeIcon(PlayState.instance.dad.healthIcon);
-			
-		//PlayState.instance.reloadHealthBarColors();
-
-		if (PlayState.instance.dad.animOffsets.exists(animationName) && playAnimationBeforeSwitch)
-			PlayState.instance.dad.playAnim(animationName, true, false, animationFrame);
+		if (PlayState.instance.mom.animOffsets.exists(animationName) && playAnimationBeforeSwitch)
+			PlayState.instance.mom.playAnim(animationName, true, false, animationFrame);
 
 		PlayState.instance.startCharacterScripts(PlayState.instance.mom.curCharacter);
 	}

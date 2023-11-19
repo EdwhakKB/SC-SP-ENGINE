@@ -246,18 +246,19 @@ class ResultsScreenKadeSubstate extends substates.MusicBeatSubstate
 	}
 
 	var frames = 0;
+	var fadingMusic = false;
 
 	override function update(elapsed:Float)
 	{
-		if (music != null && PlayState.inResults)
-			if (music.volume < 0.8)
-				music.volume += 0.04 * elapsed;
+		if (music != null && PlayState.inResults && !fadingMusic)
+			if (music.volume < 0.8) music.volume += 0.04 * elapsed;
 
 		// keybinds
 
 		if ((controls.ACCEPT || FlxG.mouse.pressed) && PlayState.inResults)
 		{
-			if (music != null)
+			if (music != null){
+				fadingMusic = true;
 				music.fadeOut(0.3, 0, { 
 					onComplete ->
 					{
@@ -280,11 +281,14 @@ class ResultsScreenKadeSubstate extends substates.MusicBeatSubstate
 						}
 					}
 				});
+			}
 		}
 
 		if (FlxG.keys.justPressed.H && PlayState.inResults)
 		{
 			if (music != null)
+			{
+				fadingMusic = true;
 				music.fadeOut(0.3, 0, {
 					onComplete ->
 					{
@@ -297,6 +301,7 @@ class ResultsScreenKadeSubstate extends substates.MusicBeatSubstate
 						FlxG.switchState(new PlayState());
 					}
 				});
+			}
 		}
 
 		super.update(elapsed);

@@ -666,27 +666,29 @@ class Stage extends MusicBeatState
 
 	public var stageCameraSpeed:Float = 1;
 
-	public function setupWeekDir(stage:String)
+	public function setupWeekDir(stage:String, stageDir:String)
 	{
 		var directory:String = 'shared';
-		var weekDir:String = StageData.forceNextDirectory;
-		StageData.forceNextDirectory = null;
+		var weekDir:String = stageDir;
+		stageDir = null;
 
 		if(weekDir != null && weekDir.length > 0 && weekDir != '') directory = weekDir;
 
+		Debug.logInfo('directory: $directory');
 		Paths.setCurrentLevel(directory);
 	}
 
 	public function loadStageJson(stage:String, ?stageChanged:Bool = false)
 	{
 		var stageData:StageFile = StageData.getStageFile(stage);
+		var stageDir:String = '';
 		if(stageData == null) { //Stage couldn't be found, create a dummy stage for preventing a crash
 			stageData = StageData.dummy();
 			Debug.logInfo('stage failed to have .json or .json didn\'t load properly, loading stage.json....');
 		}
+		stageDir = stageData.directory;
 
-		if (stageChanged)
-			setupWeekDir(stage);
+		if (stageChanged) setupWeekDir(stage, stageDir);
 
 		camZoom = stageData.defaultZoom;
 		
