@@ -165,7 +165,7 @@ class StrumArrow extends FlxSkewedSprite
 							{
 								frames = Paths.getSparrowAtlas('NOTE_assets', null, !ClientPrefs.data.cacheOnGPU);
 							}else{
-								frames = Paths.getSparrowAtlas('noteSkins/NOTE_assets' + Note.getNoteSkinPostfix());
+								frames = Paths.getSparrowAtlas('noteSkins/NOTE_assets' + Note.getNoteSkinPostfix(), null, !ClientPrefs.data.cacheOnGPU);
 							}
 							addAnims();
 						}

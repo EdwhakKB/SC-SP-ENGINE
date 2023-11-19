@@ -71,6 +71,8 @@ class EditorPlaySubState extends MusicBeatSubstate
 
 	var guitarHeroSustains:Bool = false;
 
+	var opponentMode:Bool = false;
+
 	public function new(playbackRate:Float)
 	{
 		super();
@@ -83,6 +85,8 @@ class EditorPlaySubState extends MusicBeatSubstate
 		Conductor.songPosition -= startOffset;
 		startOffset = Conductor.crochet;
 		timerToStart = startOffset;
+
+		opponentMode = ClientPrefs.getGameplaySetting('opponent');
 		
 		/* borrowed from PlayState */
 		if (FlxG.sound.music != null)
@@ -340,10 +344,10 @@ class EditorPlaySubState extends MusicBeatSubstate
 				var daNoteData:Int = Std.int(songNotes[1] % 4);
 				var gottaHitNote:Bool = section.mustHitSection;
 
-				if (songNotes[1] > 3)
-				{
+				if (songNotes[1] > 3 && !opponentMode)
 					gottaHitNote = !section.mustHitSection;
-				}
+				else if (songNotes[1] <= 3 && opponentMode)
+					gottaHitNote = !section.mustHitSection;
 
 				var oldNote:Note;
 				if (unspawnNotes.length > 0)
@@ -360,18 +364,24 @@ class EditorPlaySubState extends MusicBeatSubstate
 
 				swagNote.scrollFactor.set();
 
+				if (swagNote.texture.contains('pixel') || swagNote.noteSkin.contains('pixel')){
+					swagNote.containsPixelTexture = true;
+				}
+
+				var anotherCrochet:Float = Conductor.crochet;
+				var anotherStepCrochet:Float = anotherCrochet / 4;
 				var susLength:Float = swagNote.sustainLength;
 
-				susLength = susLength / Conductor.stepCrochet;
+				susLength = susLength / anotherStepCrochet;
+
 				unspawnNotes.push(swagNote);
 
-				var floorSus:Int = Math.floor(susLength);
-				if(floorSus > 0) {
-					for (susNote in 0...floorSus+1)
+				if(susLength > 0) {
+					for (susNote in 0...Std.int(Math.max(susLength, 2)))
 					{
 						oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
 
-						var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote), daNoteData, oldNote, true, PlayState.SONG.arrowSkin, this);
+						var sustainNote:Note = new Note(daStrumTime + (anotherStepCrochet * susNote), daNoteData, oldNote, true, PlayState.SONG.arrowSkin, this);
 						sustainNote.mustPress = gottaHitNote;
 						//sustainNote.gfNote = (section.gfSection && (songNotes[1]<4));
 						sustainNote.noteType = swagNote.noteType;
@@ -380,8 +390,13 @@ class EditorPlaySubState extends MusicBeatSubstate
 						unspawnNotes.push(sustainNote);
 						swagNote.tail.push(sustainNote);
 						
+						var isNotePixel:Bool = (sustainNote.texture.contains('pixel') || sustainNote.noteSkin.contains('pixel') || oldNote.texture.contains('pixel') || oldNote.noteSkin.contains('pixel'));
+						if (isNotePixel) {
+							oldNote.containsPixelTexture = true;
+							sustainNote.containsPixelTexture = true;
+						}
 						sustainNote.correctionOffset = swagNote.height / 2;
-						if(!PlayState.isPixelStage)
+						if(!isNotePixel)
 						{
 							if(oldNote.isSustainNote)
 							{
@@ -433,6 +448,14 @@ class EditorPlaySubState extends MusicBeatSubstate
 	{
 		var strumLineX:Float = ClientPrefs.data.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X;
 		var strumLineY:Float = ClientPrefs.data.downScroll ? (FlxG.height - 150) : 50;
+
+		var TRUE_STRUM_X:Float = strumLineX;
+
+		if (PlayState.SONG.arrowSkin.contains('pixel'))
+		{
+			(ClientPrefs.data.middleScroll ? TRUE_STRUM_X += 3 : TRUE_STRUM_X += 2);
+		}
+
 		for (i in 0...4)
 		{
 			// FlxG.log.add(i);
@@ -442,12 +465,14 @@ class EditorPlaySubState extends MusicBeatSubstate
 				if(ClientPrefs.data.middleScroll) targetAlpha = 0.35;
 			}
 
-			var babyArrow:StrumArrow = new StrumArrow(strumLineX, strumLineY, i, player, PlayState.SONG.arrowSkin);
+			var babyArrow:StrumArrow = new StrumArrow(TRUE_STRUM_X, strumLineY, i, player, PlayState.SONG.arrowSkin);
 			babyArrow.downScroll = ClientPrefs.data.downScroll;
 			babyArrow.alpha = targetAlpha;
 
 			if (player == 1)
-				playerStrums.add(babyArrow);
+				if (opponentMode && !ClientPrefs.data.middleScroll)
+					opponentStrums.add(babyArrow);
+				else playerStrums.add(babyArrow);
 			else
 			{
 				if(ClientPrefs.data.middleScroll)
@@ -457,7 +482,9 @@ class EditorPlaySubState extends MusicBeatSubstate
 						babyArrow.x += FlxG.width / 2 + 25;
 					}
 				}
-				opponentStrums.add(babyArrow);
+				if (opponentMode && !ClientPrefs.data.middleScroll)
+					playerStrums.add(babyArrow);
+				else opponentStrums.add(babyArrow);
 			}
 
 			strumLineNotes.add(babyArrow);

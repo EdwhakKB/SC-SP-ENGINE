@@ -388,7 +388,7 @@ class CharacterEditorState extends MusicBeatState
 				0
 			],
 			"sing_duration": 6.1,
-			"noteSkin": "noteSkins/NOTE_asssets".
+			"noteSkin": "noteSkins/NOTE_asssets",
 			"scale": 1
 		}';
 

@@ -15,7 +15,7 @@ class Init extends MusicBeatState
 	override function create()
 	{
 		#if !mobile
-		if (fpsVar == null)
+		if (Main.fpsVar == null)
 		{
 			Main.fpsVar = new FPSCounter(10, 3, 0xFFFFFF);
 			Lib.current.stage.addChild(Main.fpsVar);

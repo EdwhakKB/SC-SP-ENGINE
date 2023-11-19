@@ -1054,6 +1054,17 @@ class SupportBETAFunctions
             }
         });
 
+		funk.set("getShaderProperty", function(shaderName:String, prop:String) {
+            if (!ClientPrefs.data.shaders)
+                return;
+            var shad = FunkinLua.lua_Shaders.get(shaderName);
+
+            if(shad != null)
+            {
+				Reflect.getProperty(shad, prop);
+            }
+        });
+
         funk.set("tweenShaderProperty", function(shaderName:String, prop:String, value:Dynamic, time:Float, easeStr:String = "linear") {
             if (!ClientPrefs.data.shaders)
                 return;

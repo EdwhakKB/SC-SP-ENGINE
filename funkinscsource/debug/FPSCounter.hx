@@ -6,6 +6,8 @@ import openfl.text.TextFormat;
 import flixel.FlxG;
 import openfl.Lib;
 import openfl.system.System;
+import haxe.Int64;
+import flixel.util.FlxStringUtil;
 
 #if cpp
 import cpp.vm.Gc;
@@ -27,9 +29,9 @@ class FPSCounter extends TextField
 	/**
 		The current memory usage.
 	**/
-	public var memoryMegas:Float = 0;
+	public var memoryMegas:Dynamic = 0;
 
-	public var taskMemoryMegas:Float = 0;
+	public var taskMemoryMegas:Dynamic = 0;
 
 	public var memoryUsage:String = '';
 
@@ -88,13 +90,12 @@ class FPSCounter extends TextField
 	public dynamic function updateText():Void
 	{
 		//setup the date
-		if (ClientPrefs.data.dateDisplay)
-			DateSetup.initDate();
+		if (ClientPrefs.data.dateDisplay) DateSetup.initDate();
 
 		text = "FPS: ";
 
-		memoryMegas = MemoryUtil.currentMemUsage();
-		if (taskMemoryMegas < memoryMegas) taskMemoryMegas = memoryMegas;
+		memoryMegas = Int64.make(0, System.totalMemory);
+		taskMemoryMegas = Int64.make(0, MemoryUtil.getMemoryfromProcess());
 
 		var stateText:String = '\nState: ${Type.getClassName(Type.getClass(FlxG.state))}';
 		var substateText:String = '\nSubState: ${Type.getClassName(Type.getClass(FlxG.state.subState))}';
@@ -148,7 +149,7 @@ class MemoryUtil
 	#end
 
 	#if html5
-	static function getJSMemory():Int
+	static function getJSMemory():Float
 	{
 		return js.Syntax.code("window.performance.memory.usedJSHeapSize");
 	}

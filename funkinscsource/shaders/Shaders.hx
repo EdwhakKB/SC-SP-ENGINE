@@ -2138,7 +2138,6 @@ class VCRDistortionEffect2 extends ShaderEffectNew //the one used for tails doll
 
 class VCRDistortionShader2 extends FlxFixedShader // https://www.shadertoy.com/view/ldjGzV and https://www.shadertoy.com/view/Ms23DR and https://www.shadertoy.com/view/MsXGD4 and https://www.shadertoy.com/view/Xtccz4
 {
-
   @:glFragmentSource('
     #pragma header
 
@@ -2471,13 +2470,7 @@ class FishEyeNewShader extends FlxFixedShader // https://www.shadertoy.com/view/
 	}
 }
 
-
-typedef GlitchNewJSON =
-{
-	var presets:Array<Array<Float>>;
-}
-
-class GlitchNewShader extends FlxFixedShader // https://www.shadertoy.com/view/XtyXzW
+/*class GlitchNewShader extends FlxShader // https://www.shadertoy.com/view/XtyXzW
 {
 	// Linux crashes due to GL_NV_non_square_matrices
 	// and I haven't found a way to set version to 130
@@ -2763,12 +2756,11 @@ class GlitchNewShader extends FlxFixedShader // https://www.shadertoy.com/view/X
 	}
 	')
 
-	var json:GlitchNewJSON = null;
 	public var preset(default, set):Int = 0;
 
 	function set_preset(value:Int):Int
 	{
-		var presetData:Array<Float> = json.presets[value];
+		var presetData:Array<Float> = [0.4, 0.4];
 		data.prob.value = [0.25 - (presetData[0] / 8)];
 		data.intensityChromatic.value = [presetData[1]];
 		return value;
@@ -2778,13 +2770,10 @@ class GlitchNewShader extends FlxFixedShader // https://www.shadertoy.com/view/X
 	{
 		super();
 
-		var jsonTxt:String = Assets.getText(Paths.json('shader/glitchnew'));
-		json = cast Json.parse(jsonTxt);
-
 		data.time.value = [0];
 		this.preset = preset;
 	}
-}
+}*/
 
 class InvertNewShader extends FlxFixedShader
 {
@@ -3312,7 +3301,7 @@ class IndividualGlitchesShader extends FlxShader
     }
 }
 
-class GlitchedEffect extends ShaderEffectNew
+/*class GlitchedEffect extends ShaderEffectNew
 {
     public var shader:GlitchedShader = new GlitchedShader();
 
@@ -3636,7 +3625,7 @@ class GlitchedShader extends GraphicsShader
     {
         super();
     }
-}
+}*/
 
 class DesaturationRGB extends ShaderEffectNew
 {
@@ -3868,7 +3857,7 @@ class RedAberrationShader extends FlxGraphicsShader
     }
 }
 
-class VignetteGlitch extends ShaderEffectNew
+/*class VignetteGlitch extends ShaderEffectNew
 {
     public var shader:VignetteGlitchShader = new VignetteGlitchShader();
 
@@ -4146,7 +4135,7 @@ class VignetteGlitchShader extends GraphicsShader
     {
         super();
     }
-}
+}*/
 
 class GameBoyEffect extends ShaderEffectNew
 {

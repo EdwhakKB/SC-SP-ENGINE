@@ -440,11 +440,11 @@ class Note extends FlxSkewedSprite
 					if(FileSystem.exists(Paths.modsImages('notes/' + noteStyleType)) || FileSystem.exists(Paths.getSharedPath('images/notes/' + noteStyleType)) || Assets.exists('notes/' + noteStyleType))
 					{
 						if(isSustainNote) {
-							var graphic = Paths.image(noteStyleType != "" ?  'notes/' + noteStyleType + 'ENDS' : ('pixelUI/' + skinPixel + 'ENDS' + skinPostfix));
+							var graphic = Paths.image(noteStyleType != "" ?  'notes/' + noteStyleType + 'ENDS' : ('pixelUI/' + skinPixel + 'ENDS' + skinPostfix), null, !ClientPrefs.data.cacheOnGPU);
 							loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
 							originalHeight = graphic.height / 2;
 						} else {
-							var graphic = Paths.image(noteStyleType != "" ? 'notes/' + noteStyleType : ('pixelUI/' + skinPixel + skinPostfix));
+							var graphic = Paths.image(noteStyleType != "" ? 'notes/' + noteStyleType : ('pixelUI/' + skinPixel + skinPostfix), null, !ClientPrefs.data.cacheOnGPU);
 							loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
 						}
 
@@ -453,11 +453,11 @@ class Note extends FlxSkewedSprite
 					else if(FileSystem.exists(Paths.modsImages(noteStyleType)) || FileSystem.exists(Paths.getSharedPath('images/' + noteStyleType)) || Assets.exists(noteStyleType))
 					{
 						if(isSustainNote) {
-							var graphic = Paths.image(noteStyleType != "" ?  noteStyleType + 'ENDS' : ('pixelUI/' + skinPixel + 'ENDS' + skinPostfix));
+							var graphic = Paths.image(noteStyleType != "" ?  noteStyleType + 'ENDS' : ('pixelUI/' + skinPixel + 'ENDS' + skinPostfix), null, !ClientPrefs.data.cacheOnGPU);
 							loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
 							originalHeight = graphic.height / 2;
 						} else {
-							var graphic = Paths.image(noteStyleType != "" ? noteStyleType : ('pixelUI/' + skinPixel + skinPostfix));
+							var graphic = Paths.image(noteStyleType != "" ? noteStyleType : ('pixelUI/' + skinPixel + skinPostfix), null, !ClientPrefs.data.cacheOnGPU);
 							loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
 						}
 
@@ -468,20 +468,20 @@ class Note extends FlxSkewedSprite
 						if (PlayState.SONG.disableNoteRGB)
 						{
 							if(isSustainNote) {
-								var graphic = Paths.image('pixelUI/NOTE_assetsENDS');
+								var graphic = Paths.image('pixelUI/NOTE_assetsENDS', null, !ClientPrefs.data.cacheOnGPU);
 								loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
 								originalHeight = graphic.height / 2;
 							} else {
-								var graphic = Paths.image('pixelUI/NOTE_assets');
+								var graphic = Paths.image('pixelUI/NOTE_assets', null, !ClientPrefs.data.cacheOnGPU);
 								loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
 							}
 						}else{
 							if(isSustainNote) {
-								var graphic = Paths.image('pixelUI/noteSkins/NOTE_assets' + 'ENDS' + getNoteSkinPostfix());
+								var graphic = Paths.image('pixelUI/noteSkins/NOTE_assets' + 'ENDS' + getNoteSkinPostfix(), null, !ClientPrefs.data.cacheOnGPU);
 								loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
 								originalHeight = graphic.height / 2;
 							} else {
-								var graphic = Paths.image('pixelUI/noteSkins/NOTE_assets' + getNoteSkinPostfix());
+								var graphic = Paths.image('pixelUI/noteSkins/NOTE_assets' + getNoteSkinPostfix(), null, !ClientPrefs.data.cacheOnGPU);
 								loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
 							}
 						}

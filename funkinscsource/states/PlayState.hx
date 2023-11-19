@@ -582,6 +582,8 @@ class PlayState extends MusicBeatState
 			camNoteStuff.zoom = camHUD.zoom;
 		}
 
+		//camGame.setFilters([new ShaderFilter(new shaders.GlitchNewShader())]);
+
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 		grpNoteSplashesCPU = new FlxTypedGroup<NoteSplash>();
 
@@ -1028,7 +1030,8 @@ class PlayState extends MusicBeatState
 		if (ClientPrefs.data.breakTimer)
 		{
 			var noteTimer:backend.NoteTimer = new backend.NoteTimer(this);
-			uiGroup.add(noteTimer);
+			noteTimer.camera = camStuff;
+			add(noteTimer);
 		}
 
 		strumLineNotes.camera = grpNoteSplashes.camera = grpNoteSplashesCPU.camera = notes.camera = usesHUD ? camHUD : camNoteStuff;
@@ -1192,7 +1195,7 @@ class PlayState extends MusicBeatState
 	public var stopCountDown:Bool = false;
 
 	private function round(num:Float, numDecimalPlaces:Int){
-		var mult = 10^numDecimalPlaces;
+		var mult = 10^(numDecimalPlaces > 0 ? numDecimalPlaces : 0);
 		return Math.floor(num * mult + 0.5) / mult;
 	}
 
@@ -1200,13 +1203,14 @@ class PlayState extends MusicBeatState
 	{
 		var bpmChanges = Conductor.bpmChangeMap;
 		var strumTime:Float = 0;
-		var currentBPM = PlayState.SONG.bpm;
+		var currentBPM:Float = PlayState.SONG.bpm;
+		var newTime:Float = 0;
 		if (ClientPrefs.data.quantNotes && !PlayState.SONG.disableNoteRGB)
 		{
 			for (note in unspawnNotes) 
 			{
 				strumTime = note.strumTime;
-				var newTime = strumTime;
+				newTime = strumTime;
 				for (i in 1...bpmChanges.length)
 					if (strumTime > bpmChanges[i].songTime){
 						currentBPM = bpmChanges[i].bpm;
