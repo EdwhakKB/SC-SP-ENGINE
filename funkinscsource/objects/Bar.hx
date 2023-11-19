@@ -51,8 +51,7 @@ class Bar extends FlxSpriteGroup
 		add(leftBar); 
 		add(rightBar);
 		add(bg);
-		if (ClientPrefs.data.hudStyle == 'GLOW_KADE')
-			add(overlaySprite);
+		if (ClientPrefs.data.hudStyle == 'GLOW_KADE') add(overlaySprite);
 		regenerateClips();
 	}
 
