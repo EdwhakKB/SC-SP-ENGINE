@@ -155,6 +155,10 @@ class GameOverSubstate extends MusicBeatSubstate
 		{
 			Conductor.songPosition = FlxG.sound.music.time;
 		}
+		
+		FlxG.sound.music.onComplete = function(){
+			endBullShit();
+		}
 		PlayState.instance.callOnScripts('onUpdatePost', [elapsed]);
 	}
 

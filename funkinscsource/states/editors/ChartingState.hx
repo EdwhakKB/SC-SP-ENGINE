@@ -3163,6 +3163,7 @@ class ChartingState extends MusicBeatState
 
 	function updateGrid():Void
 	{
+
 		curRenderedNotes.forEachAlive(function(spr:Note) spr.destroy());
 		curRenderedNotes.clear();
 		curRenderedSustains.forEachAlive(function(spr:FlxSprite) spr.destroy());
