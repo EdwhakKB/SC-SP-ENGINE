@@ -47,6 +47,7 @@ import flixel_5_3_1.ParallaxSprite; // flixel 5 render pipeline
 #end
 
 import tjson.TJSON as Json;
+import lime.app.Application;
 
 typedef LuaCamera =
 {
@@ -135,8 +136,7 @@ class FunkinLua {
 		set('scrollSpeed', PlayState.SONG.speed);
 		set('crochet', Conductor.crochet);
 		set('stepCrochet', Conductor.stepCrochet);
-		if (game.inst != null) set('songLength', game.inst.length);
-		else set('songLength', FlxG.sound.music.length);
+		set('songLength', game.inst != null ? game.inst.length : FlxG.sound.music.length);
 		set('songName', PlayState.SONG.songId);
 		set('songPath', Paths.formatToSongPath(PlayState.SONG.songId));
 		set('startedCountdown', false);
@@ -199,7 +199,7 @@ class FunkinLua {
 		set('modchart', game.notITGMod);
 		set('opponent', game.opponentMode);
 		set('showCaseMode', game.showCaseMode);
-		set('HoldsActive', game.holdsActive);
+		set('holdsActive', game.holdsActive);
 
 		for (i in 0...4) {
 			set('defaultPlayerStrumX' + i, 0);
@@ -249,6 +249,7 @@ class FunkinLua {
 		set('splashSkinPostfix', NoteSplash.getSplashSkinPostfix());
 		set('splashAlpha', ClientPrefs.data.splashAlpha);
 
+		//Some more song stuff
 		set('songPos', Conductor.songPosition);
 		set('hudZoom', game.camHUD.zoom);
 		set('cameraZoom', FlxG.camera.zoom);
@@ -869,6 +870,20 @@ class FunkinLua {
 					}));
 				}
 			});
+			set("noteTweenAlpha", function(tag:String, note:Int, value:Dynamic, duration:Float, ease:String) {
+				LuaUtils.cancelTween(tag);
+				if(note < 0) note = 0;
+				var testicle:StrumArrow = game.strumLineNotes.members[note % game.strumLineNotes.length];
+	
+				if(testicle != null) {
+					game.modchartTweens.set(tag, FlxTween.tween(testicle, {alpha: value}, duration, {ease: LuaUtils.getTweenEaseByString(ease),
+						onComplete: function(twn:FlxTween) {
+							game.callOnLuas('onTweenCompleted', [tag]);
+							game.modchartTweens.remove(tag);
+						}
+					}));
+				}
+			});
 			set("noteTweenDirection", function(tag:String, note:Int, value:Dynamic, duration:Float, ease:String) {
 				LuaUtils.cancelTween(tag);
 				if(note < 0) note = 0;
@@ -883,7 +898,6 @@ class FunkinLua {
 					}));
 				}
 			});
-	
 			set("noteTweenSkewX", function(tag:String, note:Int, value:Dynamic, duration:Float, ease:String) {
 				LuaUtils.cancelTween(tag);
 				if(note < 0) note = 0;
@@ -898,7 +912,6 @@ class FunkinLua {
 					}));
 				}
 			});
-	
 			set("noteTweenSkewY", function(tag:String, note:Int, value:Dynamic, duration:Float, ease:String) {
 				LuaUtils.cancelTween(tag);
 				if(note < 0) note = 0;
@@ -943,34 +956,6 @@ class FunkinLua {
 						released = FlxG.mouse.justReleasedRight;
 				}
 				return released;
-			});
-			set("noteTweenAngle", function(tag:String, note:Int, value:Dynamic, duration:Float, ease:String) {
-				LuaUtils.cancelTween(tag);
-				if(note < 0) note = 0;
-				var testicle:StrumArrow = game.strumLineNotes.members[note % game.strumLineNotes.length];
-	
-				if(testicle != null) {
-					game.modchartTweens.set(tag, FlxTween.tween(testicle, {angle: value}, duration, {ease: LuaUtils.getTweenEaseByString(ease),
-						onComplete: function(twn:FlxTween) {
-							game.callOnLuas('onTweenCompleted', [tag]);
-							game.modchartTweens.remove(tag);
-						}
-					}));
-				}
-			});
-			set("noteTweenAlpha", function(tag:String, note:Int, value:Dynamic, duration:Float, ease:String) {
-				LuaUtils.cancelTween(tag);
-				if(note < 0) note = 0;
-				var testicle:StrumArrow = game.strumLineNotes.members[note % game.strumLineNotes.length];
-	
-				if(testicle != null) {
-					game.modchartTweens.set(tag, FlxTween.tween(testicle, {alpha: value}, duration, {ease: LuaUtils.getTweenEaseByString(ease),
-						onComplete: function(twn:FlxTween) {
-							game.callOnLuas('onTweenCompleted', [tag]);
-							game.modchartTweens.remove(tag);
-						}
-					}));
-				}
 			});
 	
 			set("cancelTween", function(tag:String) {
@@ -2133,6 +2118,7 @@ class FunkinLua {
 	
 			//New Stuff
 			set("doFunction", LuaUtils.doFunction);
+
 			set("changeDadCharacter", LuaUtils.changeDadCharacter);
 			set("changeBoyfriendCharacter", LuaUtils.changeBoyfriendCharacter);
 			set("changeGFCharacter", LuaUtils.changeGFCharacter);
@@ -2254,22 +2240,20 @@ class FunkinLua {
 			CustomSubstate.implement(this);
 			ShaderFunctions.implement(this);
 			DeprecatedFunctions.implement(this);
-			#if modchartingTools if (!isStageLua && PlayState.SONG.notITG && game.notITGMod) ModchartFuncs.implement(this); #end
+			#if modchartingTools if (game != null && PlayState.SONG != null && !isStageLua && PlayState.SONG.notITG && game.notITGMod) ModchartFuncs.implement(this); #end
 		}
 
 		try{
 			var isString:Bool = !FileSystem.exists(scriptName);
 			var result:Dynamic = null;
-			if(!isString)
-				result = LuaL.dofile(lua, scriptName);
-			else
-				result = LuaL.dostring(lua, scriptName);
+			if(!isString) result = LuaL.dofile(lua, scriptName);
+			else result = LuaL.dostring(lua, scriptName);
 
 			var resultStr:String = Lua.tostring(lua, result);
 			if(resultStr != null && result != 0) {
 				Debug.logInfo(resultStr);
 				#if windows
-				lime.app.Application.current.window.alert(resultStr, 'Error on lua script!');
+				Application.current.window.alert(resultStr, 'Error on lua script!');
 				#else
 				luaTrace('$scriptName\n$resultStr', true, false, FlxColor.RED);
 				#end
@@ -2289,6 +2273,7 @@ class FunkinLua {
 			}
 			if(isString) scriptName = 'unknown';
 		} catch(e:Dynamic) {
+			Application.current.window.alert('Failed to catch error on script and error on loading script!', 'Error on loading...');
 			Debug.logInfo(e);
 			return;
 		}

@@ -40,6 +40,7 @@ import states.StoryMenuState;
 import states.FreeplayState;
 import states.editors.ChartingState;
 import states.editors.CharacterEditorState;
+import states.editors.StageKadeEditorState;
 
 import substates.PauseSubState;
 import substates.GameOverSubstate;
@@ -683,10 +684,7 @@ class PlayState extends MusicBeatState
 
 		if (SONG.player4 == '' || SONG.player4 == "" || SONG.player4 == null || SONG.player4.length < 1)
 		{
-			mom.alpha = 0;
-			remove(mom);
-			mom.destroy();
-			mom = null;
+			mom.alpha = 0.0001;
 		}
 
 		boyfriend = new Character(BF_X, BF_Y, SONG.player1, true);
@@ -2594,7 +2592,7 @@ class PlayState extends MusicBeatState
 			if (tween)
 			{
 				babyArrow.alpha = 0;
-				createTween(babyArrow, {alpha: targetAlpha}, 1, {ease: FlxEase.circOut, startDelay: 0.01 + (0.2 * babyArrow.ID)});
+				createTween(babyArrow, {alpha: targetAlpha}, 0.85, {ease: FlxEase.circOut, startDelay: 0.02 + (0.2 * babyArrow.ID)});
 			}
 			else babyArrow.alpha = targetAlpha;
 
@@ -3035,6 +3033,7 @@ class PlayState extends MusicBeatState
 			#if modchartingTools
 			if (controls.justPressed('debug_3') && !endingSong && !inCutscene && allowedEnter && !chartingMode) openModchartEditor(true);
 			#end
+			if (controls.justPressed('debug_4') && !endingSong && !inCutscene && allowedEnter && songStarted) openKadeStageEditor(true);
 			
 			if (startedCountdown && !paused)
 				Conductor.songPosition += FlxG.elapsed * 1000 * playbackRate;
@@ -3699,6 +3698,35 @@ class PlayState extends MusicBeatState
 		}
 	}
 	#end
+
+	public function openKadeStageEditor(openedOnce:Bool = false):Void
+	{
+		paused = true;
+		if (openedOnce)
+			cancelMusicFadeTween();
+		new FlxTimer().start(0.3, function(tmr:FlxTimer)
+		{
+			for (bg in Stage.toAdd)
+			{
+				remove(bg);
+			}
+			for (array in Stage.layInFront)
+			{
+				for (bg in array)
+					remove(bg);
+			}
+			for (group in Stage.swagGroup)
+			{
+				remove(group);
+			}
+			remove(boyfriend);
+			remove(dad);
+			remove(gf);
+			remove(mom);
+		});
+		StageKadeEditorState.Stage = Stage;
+		FlxG.switchState(new StageKadeEditorState(Stage.curStage, gf.curCharacter, boyfriend.curCharacter, dad.curCharacter, mom.curCharacter));
+	}
 
 	public var isDead:Bool = false; //Don't mess with this on Lua!!!
 	function doDeathCheck(?skipHealthCheck:Bool = false) {

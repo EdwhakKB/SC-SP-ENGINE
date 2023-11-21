@@ -137,18 +137,18 @@ class MusicBeatState extends #if modchartingTools modcharting.ModchartMusicBeatS
         return finishedTransOut;
     }
 
-    function fadeIn()
+    public function fadeIn()
     {
         subStateRecv(this, new IndieDiamondTransSubState(0.5, true, function() { closeSubState(); }));
     }
 
-    function fadeOut(finishCallback:()->Void)
+    public function fadeOut(finishCallback:()->Void)
     {
         trace("trans out");
         subStateRecv(this, new IndieDiamondTransSubState(0.5, false, finishCallback));
     }
 
-    function subStateRecv(from:FlxState, state:FlxSubState)
+ 	public function subStateRecv(from:FlxState, state:FlxSubState)
     {
         if (from.subState == null)
             from.openSubState(state);

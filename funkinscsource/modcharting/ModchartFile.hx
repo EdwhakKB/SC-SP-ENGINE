@@ -84,11 +84,6 @@ class ModchartFile
         var moddyFileMods2:String = Paths.modsJson('songs/' + Paths.formatToSongPath(folder) + '/modchart');
         #end
 
-        if (difficulty == 'normal')
-        {
-            difficulty = '';
-        }
-
         #if PSYCH
         try 
         {

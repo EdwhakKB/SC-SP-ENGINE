@@ -36,7 +36,7 @@ import objects.StrumArrow;
 import objects.HealthIcon;
 import objects.AttachedSprite;
 import objects.Character;
-//import substates.Prompt;
+import substates.Prompt;
 import flixel.FlxSubState;
 
 #if sys
@@ -213,13 +213,9 @@ class ChartingState extends MusicBeatState
 
 	public static var mustCleanMem:Bool = false;
 	override function create()
-	{
-		if (mustCleanMem)
-		{
-			Paths.clearStoredMemory();
-			Paths.clearUnusedMemory();
-			mustCleanMem = false;
-		}
+	{	
+		Paths.clearStoredMemory();
+		Paths.clearUnusedMemory();
 		
 		if (PlayState.SONG != null)
 			_song = PlayState.SONG;
@@ -469,11 +465,6 @@ class ChartingState extends MusicBeatState
 
 		var reloadSongJson:FlxButton = new FlxButton(reloadSong.x, saveButton.y + 30, "Reload JSON", function()
 		{
-			/*openSubState(new Prompt('This action will clear current progress.\n\nProceed?', 0, function() {
-				loadJson(_song.songId.toLowerCase());
-			},
-			null, ignoreWarnings));*/
-
 			loadJson(_song.songId.toLowerCase());
 		});
 
@@ -510,19 +501,12 @@ class ChartingState extends MusicBeatState
 
 		var clear_events:FlxButton = new FlxButton(200, 310, 'Clear events', function()
 			{
-				//openSubState(new Prompt('This action will clear current progress.\n\nProceed?', 0, clearEvents, null,ignoreWarnings));
 				clearEvents();
 			});
 		clear_events.color = FlxColor.RED;
 		clear_events.label.color = FlxColor.WHITE;
 
 		var clear_notes:FlxButton = new FlxButton(200, clear_events.y + 30, 'Clear notes', function() {
-				/*openSubState(new Prompt('This action will clear current progress.\n\nProceed?', 0, function(){for (sec in 0..._song.notes.length) {
-					_song.notes[sec].sectionNotes = [];
-				}
-				updateGrid();
-			}, null,ignoreWarnings));*/
-
 			for (sec in 0..._song.notes.length) _song.notes[sec].sectionNotes = [];
 			updateGrid();
 		});
@@ -676,12 +660,6 @@ class ChartingState extends MusicBeatState
 		difficultyDropDown = new FlxUIDropDownMenu(stageDropDown.x, stageDropDown.y + 40, FlxUIDropDownMenu.makeStrIdLabelArray(availableDifficultiesTexts, true), function(pressed:String)
 		{	
 			var curSelected:Int = Std.parseInt(pressed);
-			/*openSubState(new Prompt('This action will clear current progress.\n\nProceed?', 0, function(){
-				PlayState.storyDifficulty = availableDifficulties[curSelected];
-				PlayState.changedDifficulty = true;
-				loadJson(_song.songId.toLowerCase());
-			}, null,ignoreWarnings));*/
-
 			PlayState.storyDifficulty = availableDifficulties[curSelected];
 			PlayState.changedDifficulty = true;
 			loadJson(_song.songId.toLowerCase());
@@ -1342,18 +1320,6 @@ class ChartingState extends MusicBeatState
 
 		UI_box2.addGroup(tab_group_event);
 	}
-
-	/*function addEventTextUI()
-	{
-		var tab_group_eventText = new FlxUI(null, UI_box2);
-		tab_group_eventText.name = 'Events-Explained';
-
-		if (descText != null)
-			if (descText.text != "")
-				tab_group_eventText.add(descText);
-
-		UI_box2.addGroup(tab_group_eventText);
-	}*/
 
 	function addTipsUI()
 	{
@@ -2670,6 +2636,7 @@ class ChartingState extends MusicBeatState
 	var columns:Int = 9;
 	function reloadGridLayer() {
 		gridLayer.clear();
+
 		gridBG = FlxGridOverlay.create(1, 1, columns, Std.int(getSectionBeats() * 4 * zoomList[curZoom]));
 		gridBG.antialiasing = false;
 		gridBG.scale.set(GRID_SIZE, GRID_SIZE);

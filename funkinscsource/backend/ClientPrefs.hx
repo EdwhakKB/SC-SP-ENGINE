@@ -195,6 +195,7 @@ class ClientPrefs {
 		'debug_1'		=> [SEVEN],
 		'debug_2'		=> [EIGHT],
 		'debug_3'		=> [SIX],
+		'debug_4'		=> [FIVE],
 
 		'space'		=> [SPACE]
 	];

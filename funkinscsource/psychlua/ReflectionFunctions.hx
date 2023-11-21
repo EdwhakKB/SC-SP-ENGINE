@@ -5,6 +5,7 @@ import haxe.Constraints;
 
 import substates.GameOverSubstate;
 import objects.Character;
+import lime.app.Application;
 
 //
 // Functions that use a high amount of Reflections, which are somewhat CPU intensive
@@ -16,29 +17,43 @@ class ReflectionFunctions
 	public static function implement(funk:FunkinLua)
 	{
 		funk.set("getProperty", function(variable:String, ?allowMaps:Bool = false) {
-			var split:Array<String> = variable.split('.');
-			if (Stage.instance.swagBacks.exists(split[0])){
-				return Stage.instance.getProperty(variable);
+			try{
+				var split:Array<String> = variable.split('.');
+				if (Stage.instance.swagBacks.exists(split[0])){
+					return Stage.instance.getProperty(variable);
+				}
+				if(split.length > 1)
+					return LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split, true, true, allowMaps), split[split.length-1], allowMaps);
+				return LuaUtils.getVarInArray(LuaUtils.getTargetInstance(), variable, allowMaps);
 			}
-			if(split.length > 1)
-				return LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split, true, true, allowMaps), split[split.length-1], allowMaps);
-			return LuaUtils.getVarInArray(LuaUtils.getTargetInstance(), variable, allowMaps);
+			catch(e)
+			{
+				Application.current.window.alert("Unknown 'Get' Variable: " + variable, "Variable Not Found");
+			}
+			return false;
 		});
 		funk.set("setProperty", function(variable:String, value:Dynamic, allowMaps:Bool = false) {
-			var split:Array<String> = variable.split('.');
-			if (Stage.instance.swagBacks.exists(split[0])){
-				Stage.instance.setProperty(variable, value);
+			try {
+				var split:Array<String> = variable.split('.');
+				if (Stage.instance.swagBacks.exists(split[0])){
+					Stage.instance.setProperty(variable, value);
+					return true;
+				}
+				if(split.length > 1) {
+					if (Std.isOfType(LuaUtils.getObjectDirectly(split[0]), Character) && split[split.length-1] == 'color')
+						LuaUtils.setVarInArray(LuaUtils.getPropertyLoop(split), 'doMissThing', "false");
+	
+					LuaUtils.setVarInArray(LuaUtils.getPropertyLoop(split, true, true, allowMaps), split[split.length-1], value, allowMaps);
+					return true;
+				}
+				LuaUtils.setVarInArray(LuaUtils.getTargetInstance(), variable, value, allowMaps);
 				return true;
 			}
-			if(split.length > 1) {
-				if (Std.isOfType(LuaUtils.getObjectDirectly(split[0]), Character) && split[split.length-1] == 'color')
-					LuaUtils.setVarInArray(LuaUtils.getPropertyLoop(split), 'doMissThing', "false");
-
-				LuaUtils.setVarInArray(LuaUtils.getPropertyLoop(split, true, true, allowMaps), split[split.length-1], value, allowMaps);
-				return true;
+			catch(e)
+			{
+				Application.current.window.alert("Unknown 'Set' Variable: " + variable, "Variable Not Found");
 			}
-			LuaUtils.setVarInArray(LuaUtils.getTargetInstance(), variable, value, allowMaps);
-			return true;
+			return false;
 		});
 		funk.set("getPropertyFromClass", function(classVar:String, variable:String, ?allowMaps:Bool = false) {
 			var myClass:Dynamic = Type.resolveClass(classVar);

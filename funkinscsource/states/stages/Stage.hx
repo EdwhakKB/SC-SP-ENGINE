@@ -147,10 +147,8 @@ class Stage extends MusicBeatState
 		if (!ClientPrefs.data.background)
 			return;
 
-		if (inPlayState){
-			songLowercase = PlayState.SONG.songId.toLowerCase();
-			loadStageJson(daStage, stageChanged);
-		}
+		if (inPlayState) songLowercase = PlayState.SONG.songId.toLowerCase();
+		loadStageJson(daStage, stageChanged);
 
 		switch (daStage)
 		{
@@ -691,7 +689,7 @@ class Stage extends MusicBeatState
 		if (stageChanged) setupWeekDir(stage, stageDir);
 
 		camZoom = stageData.defaultZoom;
-		
+			
 		if (stageData.ratingSkin != null)
 		{
 			stageUIPrefixShit = stageData.ratingSkin[0];
@@ -723,8 +721,6 @@ class Stage extends MusicBeatState
 			stageCameraMoveXYVar1 = stageData.cameraXYMovement[0];
 			stageCameraMoveXYVar2 = stageData.cameraXYMovement[1];
 		}
-
-		//stageHas3rdIntroAsset = stageData.has3rdIntroAsset;
 
 		PlayState.stageUI = "normal";
 		if (stageData.stageUI != null && stageData.stageUI.trim().length > 0)

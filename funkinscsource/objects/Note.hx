@@ -97,18 +97,18 @@ class Note extends FlxSkewedSprite
 	public var eventLength:Int = 0;
 	public var eventVal1:String = '';
 	public var eventVal2:String = '';
-	public var eventVal3:String = '';
-	public var eventVal4:String = '';
-	public var eventVal5:String = '';
-	public var eventVal6:String = '';
-	public var eventVal7:String = '';
-	public var eventVal8:String = '';
-	public var eventVal9:String = '';
-	public var eventVal10:String = '';
-	public var eventVal11:String = '';
-	public var eventVal12:String = '';
-	public var eventVal13:String = '';
-	public var eventVal14:String = '';
+	public var eventVal3:String = null;
+	public var eventVal4:String = null;
+	public var eventVal5:String = null;
+	public var eventVal6:String = null;
+	public var eventVal7:String = null;
+	public var eventVal8:String = null;
+	public var eventVal9:String = null;
+	public var eventVal10:String = null;
+	public var eventVal11:String = null;
+	public var eventVal12:String = null;
+	public var eventVal13:String = null;
+	public var eventVal14:String = null;
 
 	public var rgbShader:RGBShaderReference;
 
