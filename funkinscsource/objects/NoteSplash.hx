@@ -2,18 +2,8 @@ package objects;
 
 import shaders.RGBPalette;
 import flixel.system.FlxAssets.FlxShader;
-import flixel.graphics.frames.FlxFrame;
-import lime.utils.Assets as OpenFLAssets;
-import shaders.FlxFixedShader;
 import flixel.addons.effects.FlxSkewedSprite;
-
-import flash.geom.ColorTransform;
 import flixel.FlxG;
-import flixel.FlxSprite;
-import flixel.graphics.FlxGraphic;
-import flixel.graphics.frames.FlxAtlasFrames;
-import flixel.graphics.tile.FlxDrawTrianglesItem.DrawData;
-import openfl.Vector;
 
 typedef NoteSplashConfig = {
 	anim:String,
@@ -36,21 +26,43 @@ class NoteSplash extends FlxSkewedSprite
 
 	public static var containedPixelTexture:Bool = false;
 
-	public function new(x:Float = 0, y:Float = 0) {
+	public var opponentSplashes:Bool = false;
+
+	public function new(x:Float = 0, y:Float = 0, ?opponentSplashes:Bool = false) {
 		super(x, y);
+		this.opponentSplashes = opponentSplashes;
 
 		var skin:String = null;
-		if (PlayState.instance != null){
-			string1NoteSkin = "noteSplashes-" + PlayState.instance.bfStrumStyle;
-			string2NoteSkin = "notes/noteSplashes-" + PlayState.instance.bfStrumStyle;
+		if (!opponentSplashes)
+		{
+			if (PlayState.instance != null){
+				string1NoteSkin = "noteSplashes-" + PlayState.instance.bfStrumStyle;
+				string2NoteSkin = "notes/noteSplashes-" + PlayState.instance.bfStrumStyle;
+			}
+
+			if (FileSystem.exists(Paths.modsImages(string1NoteSkin)) || FileSystem.exists(Paths.getSharedPath('images/$string1NoteSkin.png')))
+				skin = "noteSplashes-"+ PlayState.instance.bfStrumStyle;
+			else if (FileSystem.exists(Paths.modsImages('notes/$string2NoteSkin')) || FileSystem.exists(Paths.getSharedPath('images/notes/$string2NoteSkin.png')))
+				skin = "notes/noteSplashes-" + PlayState.instance.bfStrumStyle;
+			else{
+				if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) skin = PlayState.SONG.splashSkin;
+				else skin = defaultNoteSplash + getSplashSkinPostfix();
+			}
 		}
-		if (FileSystem.exists(Paths.modsImages(string1NoteSkin)) || FileSystem.exists(Paths.getSharedPath('images/$string1NoteSkin.png')))
-			skin = "noteSplashes-"+ PlayState.instance.bfStrumStyle;
-		else if (FileSystem.exists(Paths.modsImages('notes/$string2NoteSkin')) || FileSystem.exists(Paths.getSharedPath('images/notes/$string2NoteSkin.png')))
-			skin = "notes/noteSplashes-" + PlayState.instance.bfStrumStyle;
-		else{
-			if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) skin = PlayState.SONG.splashSkin;
-			else skin = defaultNoteSplash + getSplashSkinPostfix();
+		else
+		{
+			if (PlayState.instance != null){
+				string1NoteSkin = "noteSplashes-" + PlayState.instance.dadStrumStyle;
+				string2NoteSkin = "notes/noteSplashes-" + PlayState.instance.dadStrumStyle;
+			}
+			if (FileSystem.exists(Paths.modsImages(string1NoteSkin)) || FileSystem.exists(Paths.getSharedPath('images/$string1NoteSkin.png')))
+				skin = "noteSplashes-"+ PlayState.instance.dadStrumStyle;
+			else if (FileSystem.exists(Paths.modsImages('notes/$string2NoteSkin')) || FileSystem.exists(Paths.getSharedPath('images/notes/$string2NoteSkin.png')))
+				skin = "notes/noteSplashes-" + PlayState.instance.dadStrumStyle;
+			else{
+				if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) skin = PlayState.SONG.splashSkin;
+				else skin = defaultNoteSplash + getSplashSkinPostfix();
+			}
 		}
 
 		if (_textureLoaded.contains('pixel') || skin.contains('pixel'))
@@ -71,34 +83,52 @@ class NoteSplash extends FlxSkewedSprite
 	}
 
 	var maxAnims:Int = 2;
-	public function setupNoteSplash(x:Float, y:Float, direction:Int = 0, ?note:Note = null) {
+	public function setupNoteSplash(x:Float, y:Float, direction:Int = 0, ?note:Note = null, ?opponentSplashes:Bool = false) {
 		setPosition(x - Note.swagWidth * 0.95, y - Note.swagWidth);
 		aliveTime = 0;
 
 		var texture:String = null;
-		if (PlayState.instance != null){
-			string1NoteSkin = "noteSplashes-" + PlayState.instance.bfStrumStyle;
-			string2NoteSkin = "notes/noteSplashes-" + PlayState.instance.bfStrumStyle;
+		if (!opponentSplashes)
+		{
+			if (PlayState.instance != null){
+				string1NoteSkin = "noteSplashes-" + PlayState.instance.bfStrumStyle;
+				string2NoteSkin = "notes/noteSplashes-" + PlayState.instance.bfStrumStyle;
+			}
+			if (FileSystem.exists(Paths.modsImages(string1NoteSkin)) || FileSystem.exists(Paths.getSharedPath('images/$string1NoteSkin.png')))
+				texture = "noteSplashes-"+ PlayState.instance.bfStrumStyle;
+			else if (FileSystem.exists(Paths.modsImages('notes/$string2NoteSkin')) || FileSystem.exists(Paths.getSharedPath('images/notes/$string2NoteSkin.png')))
+				texture = "notes/noteSplashes-" + PlayState.instance.bfStrumStyle;
+			else
+			{
+				if(note != null && note.noteSplashData.texture != null) texture = note.noteSplashData.texture;
+				else if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) texture = PlayState.SONG.splashSkin;
+				else texture = defaultNoteSplash + getSplashSkinPostfix();
+			}
 		}
-		if (FileSystem.exists(Paths.modsImages(string1NoteSkin)) || FileSystem.exists(Paths.getSharedPath('images/$string1NoteSkin.png')))
-			texture = "noteSplashes-"+ PlayState.instance.bfStrumStyle;
-		else if (FileSystem.exists(Paths.modsImages('notes/$string2NoteSkin')) || FileSystem.exists(Paths.getSharedPath('images/notes/$string2NoteSkin.png')))
-			texture = "notes/noteSplashes-" + PlayState.instance.bfStrumStyle;
 		else
 		{
-			if(note != null && note.noteSplashData.texture != null) texture = note.noteSplashData.texture;
-			else if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) texture = PlayState.SONG.splashSkin;
-			else texture = defaultNoteSplash + getSplashSkinPostfix();
+			if (PlayState.instance != null){
+				string1NoteSkin = "noteSplashes-" + PlayState.instance.dadStrumStyle;
+				string2NoteSkin = "notes/noteSplashes-" + PlayState.instance.dadStrumStyle;
+			}
+			if (FileSystem.exists(Paths.modsImages(string1NoteSkin)) || FileSystem.exists(Paths.getSharedPath('images/$string1NoteSkin.png')))
+				texture = "noteSplashes-"+ PlayState.instance.dadStrumStyle;
+			else if (FileSystem.exists(Paths.modsImages('notes/$string2NoteSkin')) || FileSystem.exists(Paths.getSharedPath('images/notes/$string2NoteSkin.png')))
+				texture = "notes/noteSplashes-" + PlayState.instance.dadStrumStyle;
+			else
+			{
+				if(note != null && note.noteSplashData.texture != null) texture = note.noteSplashData.texture;
+				else if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) texture = PlayState.SONG.splashSkin;
+				else texture = defaultNoteSplash + getSplashSkinPostfix();
+			}
 		}
 
 		if (_textureLoaded.contains('pixel') || texture.contains('pixel'))
 			containedPixelTexture = true;
 		
 		var config:NoteSplashConfig = null;
-		if(_textureLoaded != texture)
-			config = loadAnims(texture);
-		else
-			config = precacheConfig(_configLoaded);
+		if(_textureLoaded != texture) config = loadAnims(texture);
+		else config = precacheConfig(_configLoaded);
 
 		var tempShader:RGBPalette = null;
 		if((note == null || note.noteSplashData.useRGBShader) && (PlayState.SONG == null || !PlayState.SONG.disableNoteRGB))
@@ -114,11 +144,10 @@ class NoteSplash extends FlxSkewedSprite
 			else tempShader = Note.globalRgbShaders[direction];
 		}
 	
-		if (!ClientPrefs.data.splashAlphaAsStrumAlpha)
-			alpha = ClientPrefs.data.splashAlpha;
+		if (!ClientPrefs.data.splashAlphaAsStrumAlpha) alpha = ClientPrefs.data.splashAlpha;
 		if(note != null) alpha = note.noteSplashData.a;
 		rgbShader.copyValues(tempShader);
-		rgbShader.containsPixel = containedPixelTexture;
+		rgbShader.containsPixel = (containedPixelTexture || PlayState.isPixelStage);
 
 		if(note != null) antialiasing = note.noteSplashData.antialiasing;
 		if(texture.contains('pixel') || _textureLoaded.contains('pixel') || !ClientPrefs.data.antialiasing) antialiasing = false;
@@ -273,7 +302,7 @@ class PixelSplashShaderRef {
 	}
 }
 
-class PixelSplashShader extends FlxFixedShader
+class PixelSplashShader extends FlxShader
 {
 	@:glFragmentHeader('
 		#pragma header

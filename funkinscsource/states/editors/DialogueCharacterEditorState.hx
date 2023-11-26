@@ -478,7 +478,6 @@ class DialogueCharacterEditorState extends MusicBeatState
 	var lastTab:String = 'Character';
 	var transitioning:Bool = false;
 	override function update(elapsed:Float) {
-		MusicBeatState.camBeat = FlxG.camera;
 		if(transitioning) {
 			super.update(elapsed);
 			return;
@@ -651,7 +650,7 @@ class DialogueCharacterEditorState extends MusicBeatState
 			}
 
 			if(FlxG.keys.justPressed.ESCAPE) {
-				MusicBeatState.switchState(new states.editors.MasterEditorMenu());
+				FlxG.switchState(new states.editors.MasterEditorMenu());
 				FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"), 1);
 				transitioning = true;
 			}

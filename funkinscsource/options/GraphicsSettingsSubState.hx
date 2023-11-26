@@ -25,6 +25,18 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 			'bool'); //Variable type
 		addOption(option);
 
+		var option:Option = new Option('Background', //Name
+			'If checked, enables the stage to load.', //Description
+			'background', //Save data variable name
+			'bool'); //Variable type
+		addOption(option);
+
+		var option:Option = new Option('Characters', //Name
+			'If checked, enables the characters functions, changing, visible.', //Description
+			'characters', //Save data variable name
+			'bool'); //Variable type
+		addOption(option);
+
 		var option:Option = new Option('Anti-Aliasing',
 			'If unchecked, disables anti-aliasing, increases performance\nat the cost of sharper visuals.',
 			'antialiasing',
@@ -52,8 +64,8 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 			'int');
 		addOption(option);
 
-		option.minValue = 60;
-		option.maxValue = 240;
+		option.minValue = 30;
+		option.maxValue = 1000;
 		option.displayFormat = '%v FPS';
 		option.onChange = onChangeFramerate;
 		#end

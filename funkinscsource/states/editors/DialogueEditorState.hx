@@ -333,7 +333,7 @@ class DialogueEditorState extends MusicBeatState
 				reloadText(false);
 			}
 			if(FlxG.keys.justPressed.ESCAPE) {
-				MusicBeatState.switchState(new states.editors.MasterEditorMenu());
+				FlxG.switchState(new states.editors.MasterEditorMenu());
 				FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"), 1);
 				transitioning = true;
 			}

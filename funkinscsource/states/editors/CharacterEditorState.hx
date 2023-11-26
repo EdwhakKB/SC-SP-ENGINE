@@ -253,6 +253,24 @@ class CharacterEditorState extends MusicBeatState
 		Paths.setCurrentLevel(lastLevel);
 	}
 
+	function fixTheDamnOffsets()
+	{
+		for (i in 0...char.animationsArray.length)
+		{
+			if (char.animOffsets.get(char.animationsArray[i].anim) != null)
+			{
+				var daOffset = char.animOffsets.get(char.animationsArray[i].anim);
+				char.animationsArray[i].offsets = [Std.int(daOffset[0]), Std.int(daOffset[1])];
+			}
+
+			if (char.animPlayerOffsets.get(char.animationsArray[i].anim) != null)
+			{
+				var daPlayerOffset = char.animPlayerOffsets.get(char.animationsArray[i].anim);
+				char.animationsArray[i].playerOffsets = [Std.int(daPlayerOffset[0]), Std.int(daPlayerOffset[1])];
+			}	
+		}
+	}
+
 	/*var animationInputText:FlxUIInputText;
 	function addOffsetsUI() {
 		var tab_group = new FlxUI(null, UI_box);
@@ -320,6 +338,10 @@ class CharacterEditorState extends MusicBeatState
 						0,
 						0
 					],
+					"playerOffsets": [
+						0,
+						0
+					],
 					"fps": 24,
 					"anim": "idle",
 					"indices": [],
@@ -327,6 +349,10 @@ class CharacterEditorState extends MusicBeatState
 				},
 				{
 					"offsets": [
+						0,
+						0
+					],
+					"playerOffsets": [
 						0,
 						0
 					],
@@ -341,6 +367,10 @@ class CharacterEditorState extends MusicBeatState
 						0,
 						0
 					],
+					"playerOffsets": [
+						0,
+						0
+					],
 					"indices": [],
 					"fps": 24,
 					"anim": "singDOWN",
@@ -352,6 +382,10 @@ class CharacterEditorState extends MusicBeatState
 						0,
 						0
 					],
+					"playerOffsets": [
+						0,
+						0
+					],
 					"indices": [],
 					"fps": 24,
 					"anim": "singUP",
@@ -360,6 +394,10 @@ class CharacterEditorState extends MusicBeatState
 				},
 				{
 					"offsets": [
+						0,
+						0
+					],
+					"playerOffsets": [
 						0,
 						0
 					],
@@ -376,6 +414,10 @@ class CharacterEditorState extends MusicBeatState
 				0,
 				0
 			],
+			"playerposition": [
+				0,
+				0
+			],
 			"healthicon": "face",
 			"flip_x": false,
 			"healthbar_colors": [
@@ -387,8 +429,11 @@ class CharacterEditorState extends MusicBeatState
 				0,
 				0
 			],
-			"sing_duration": 6.1,
-			"noteSkin": "noteSkins/NOTE_asssets".
+			"player_camera_position": [
+				0,
+				0
+			],
+			"sing_duration": 4,
 			"scale": 1
 		}';
 
@@ -451,10 +496,8 @@ class CharacterEditorState extends MusicBeatState
 				character.cameraPosition = parsedJson.camera_position;
 				character.playerCameraPosition = parsedJson.player_camera_position;
 
-				if (parsedJson.AtlasType != null)
-					character.characterAtlasType = parsedJson.AtlasType;
-				else
-					character.characterAtlasType = "SparrowAtlas";
+				if (parsedJson.AtlasType != null) character.characterAtlasType = parsedJson.AtlasType;
+				else character.characterAtlasType = "SparrowAtlas";
 
 				character.imageFile = parsedJson.image;
 				character.jsonScale = parsedJson.scale;
@@ -1044,6 +1087,19 @@ class CharacterEditorState extends MusicBeatState
 		charLayer.add(ghostChar);
 		charLayer.add(char);
 
+
+		var offset = new CharacterOffsets(daAnim, false);
+		char.positionArray[0] = offset.daOffsetArray[0];
+		char.positionArray[1] = offset.daOffsetArray[1];
+
+		var daOffset = new CharacterOffsets(daAnim, true);
+		char.playerPositionArray[0] = daOffset.daOffsetArray[0];
+
+		if (daOffset.hasOffsets)
+			char.playerPositionArray[1] = daOffset.daOffsetArray[1] + 350;
+
+		fixTheDamnOffsets();
+
 		char.setPosition(char.positionArray[0] + OFFSET_X + 100, char.positionArray[1]);
 
 		/* THIS FUNCTION WAS USED TO PUT THE .TXT OFFSETS INTO THE .JSON
@@ -1225,8 +1281,6 @@ class CharacterEditorState extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
-		MusicBeatState.camBeat = FlxG.camera;
-
 		if (FlxG.keys.pressed.ALT && FlxG.keys.justPressed.FIVE){
 			var idleAnim = findAnimationByName(char.isDancing ? "danceRight" : "idle");
 			var idleOffsets = [];
@@ -1294,9 +1348,9 @@ class CharacterEditorState extends MusicBeatState
 		if(!charDropDown.dropPanel.visible) {
 			if (FlxG.keys.justPressed.ESCAPE) {
 				if(goToPlayState) {
-					MusicBeatState.switchState(new PlayState());
+					FlxG.switchState(new PlayState());
 				} else {
-					MusicBeatState.switchState(new states.editors.MasterEditorMenu());
+					FlxG.switchState(new states.editors.MasterEditorMenu());
 					FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
 				}
 				FlxG.mouse.visible = false;

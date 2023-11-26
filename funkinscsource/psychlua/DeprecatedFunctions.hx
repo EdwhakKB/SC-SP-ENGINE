@@ -30,19 +30,19 @@ class DeprecatedFunctions
 			FunkinLua.luaTrace("characterPlayAnim is deprecated! Use playAnim instead", false, true);
 			switch(character.toLowerCase()) {
 				case 'dad':
-					if(PlayState.instance.dad.animOffsets.exists(anim))
+					if(PlayState.instance.dad.animOffsets.exists(anim) && ClientPrefs.data.characters)
 						PlayState.instance.dad.playAnim(anim, forced);
 				case 'gf' | 'girlfriend':
-					if(PlayState.instance.gf != null && PlayState.instance.gf.animOffsets.exists(anim))
+					if(PlayState.instance.gf != null && PlayState.instance.gf.animOffsets.exists(anim) && ClientPrefs.data.characters)
 						PlayState.instance.gf.playAnim(anim, forced);
 				default:
-					if(PlayState.instance.modchartCharacters.exists(character)) {
+					if(PlayState.instance.modchartCharacters.exists(character) && ClientPrefs.data.characters) {
 						var spr:Character = PlayState.instance.modchartCharacters.get(character);
 
 						if(spr.animOffsets.exists(anim))
 							spr.playAnim(anim, forced);
 					}
-					else if(PlayState.instance.boyfriend.animOffsets.exists(anim))
+					else if(PlayState.instance.boyfriend.animOffsets.exists(anim) && ClientPrefs.data.characters)
 						PlayState.instance.boyfriend.playAnim(anim, forced);
 			}
 		});

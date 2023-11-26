@@ -4,7 +4,9 @@ import flixel.FlxBasic;
 import objects.Character;
 import psychlua.FunkinLua;
 import psychlua.CustomSubstate;
+#if SScript
 import tea.SScript;
+#end
 
 using StringTools;
 

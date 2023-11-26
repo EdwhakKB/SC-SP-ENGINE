@@ -2,7 +2,6 @@ package backend;
 
 import tjson.TJSON as Json;
 import lime.utils.Assets;
-import backend.Debug;
 
 import backend.Section;
 import objects.Note;
@@ -123,7 +122,7 @@ class Song
 					var note:Array<Dynamic> = notes[i];
 					if(note[1] < 0)
 					{					      //StrumTime /EventName,         V1,   V2,     V3,      V4,      V5,      V6,      V7,      V8,       V9,       V10,      V11,      V12,      V13,      V14
-						songJson.events.push([note[0], [[note[2], note[3], note[4], note[5], note[6], note[7], note[8], note[9], note[10], note[11], note[12], note[13], note[14], note[15], note[16]]]]);
+						songJson.events.push([note[0], [[note[2], note[3], note[4]]]]);
 						notes.remove(note);
 						len = notes.length;
 					}
@@ -173,23 +172,6 @@ class Song
 			rawJson = rawJson.substr(0, rawJson.length - 1);
 			// LOL GOING THROUGH THE BULLSHIT TO CLEAN IDK WHATS STRANGE
 		}
-
-		// FIX THE CASTING ON WINDOWS/NATIVE
-		// Windows???
-		// Debug.logTrace(songData);
-
-		// Debug.logTrace('LOADED FROM JSON: ' + songData.notes);
-		/* 
-			for (i in 0...songData.notes.length)
-			{
-				Debug.logTrace('LOADED FROM JSON: ' + songData.notes[i].sectionNotes);
-				// songData.notes[i].sectionNotes = songData.notes[i].sectionNotes
-			}
-
-			daNotes = songData.notes;
-			daSong = songData.song;
-			daBpm = songData.bpm; 
-		*/
 
 		var songJson:Dynamic = parseJSONshit(rawJson);
 		if(songJson.arrowSkin == '' || songJson.arrowSkin == "" || songJson.arrowSkin == null) songJson.arrowSkin = "noteSkins/NOTE_assets" + Note.getNoteSkinPostfix();

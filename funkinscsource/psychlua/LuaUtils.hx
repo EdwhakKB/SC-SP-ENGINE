@@ -11,7 +11,7 @@ import shaders.Shaders;
 
 import substates.GameOverSubstate;
 import psychlua.FunkinLua;
-#if (flixel >= "5.3.0")
+#if ((flixel == "5.3.1" || flixel >= "4.11.0" && flixel <= "5.0.0") && parallaxlt)
 import flixel_5_3_1.ParallaxSprite;
 #end
 import flixel.addons.display.FlxBackdrop;
@@ -371,7 +371,7 @@ class LuaUtils
 		#end
 	}
 
-	#if (flixel >= "5.3.0")
+	#if ((flixel == "5.3.1" || flixel >= "4.11.0" && flixel <= "5.0.0") && parallaxlt)
 	public static function resetSpriteTag(tag:String, isParallax:Bool = false) {
 		#if LUA_ALLOWED
 		if(!PlayState.instance.modchartSprites.exists(tag) && !Stage.instance.swagBacks.exists(tag) || !PlayState.instance.modchartParallax.exists(tag)) {
@@ -635,6 +635,7 @@ class LuaUtils
 
 	public static function makeLuaCharacter(tag:String, character:String, isPlayer:Bool = false, flipped:Bool = false)
 	{
+		if (!ClientPrefs.data.characters) return;
 		tag = tag.replace('.', '');
 
 		var animationName:String = "no way anyone have an anim name this big";
@@ -700,7 +701,7 @@ class LuaUtils
 	//Blantados Code!
 
 	public static function changeGFCharacter(id:String, x:Float, y:Float)
-	{		
+	{
 		changeGFAuto(id);
 		PlayState.instance.gf.x = x;
 		PlayState.instance.gf.y = y;
@@ -750,7 +751,8 @@ class LuaUtils
 
 	//trying to do some auto stuff so i don't have to set manual x and y values
 	public static function changeBFAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false, ?playAnimationBeforeSwitch:Bool = false)
-	{	
+	{
+		if (!ClientPrefs.data.characters) return;
 		var animationName:String = "no way anyone have an anim name this big";
 		var animationFrame:Int = 0;						
 		if (PlayState.instance.boyfriend.animation.curAnim.name.startsWith('sing') && playAnimationBeforeSwitch)
@@ -791,6 +793,7 @@ class LuaUtils
 
 	public static function changeDadAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false, ?playAnimationBeforeSwitch:Bool = false)
 	{	
+		if (!ClientPrefs.data.characters) return;
 		var animationName:String = "no way anyone have an anim name this big";
 		var animationFrame:Int = 0;						
 		if (PlayState.instance.dad.animation.curAnim.name.startsWith('sing') && playAnimationBeforeSwitch)
@@ -828,7 +831,8 @@ class LuaUtils
 	}
 
 	public static function changeGFAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false, ?playAnimationBeforeSwitch:Bool = false)
-	{		
+	{
+		if (!ClientPrefs.data.characters) return;
 		PlayState.instance.gf.resetAnimationVars();
 
 		PlayState.instance.removeObject(PlayState.instance.gf);
@@ -838,8 +842,8 @@ class LuaUtils
 		var charX:Float = PlayState.instance.gf.positionArray[0];
 		var charY:Float = PlayState.instance.gf.positionArray[1];
 
-		PlayState.instance.gf.x = PlayState.instance.Stage.gfXOffset + PlayState.instance.GF_X + PlayState.instance.gf.positionArray[0];
-		PlayState.instance.gf.y = PlayState.instance.Stage.gfYOffset + PlayState.instance.GF_Y + PlayState.instance.gf.positionArray[1];
+		PlayState.instance.gf.x = PlayState.instance.Stage.gfXOffset + charX + PlayState.instance.GF_X;
+		PlayState.instance.gf.y = PlayState.instance.Stage.gfYOffset + charY + PlayState.instance.GF_Y;
 		PlayState.instance.gf.scrollFactor.set(0.95, 0.95);
 		PlayState.instance.addObject(PlayState.instance.gf);
 
@@ -847,7 +851,8 @@ class LuaUtils
 	}
 
 	public static function changeMomAuto(id:String, ?flipped:Bool = false, ?dontDestroy:Bool = false, ?playAnimationBeforeSwitch:Bool = false)
-	{	
+	{
+		if (!ClientPrefs.data.characters) return;
 		var animationName:String = "no way anyone have an anim name this big";
 		var animationFrame:Int = 0;						
 		if (PlayState.instance.mom.animation.curAnim.name.startsWith('sing') && playAnimationBeforeSwitch)
@@ -872,14 +877,10 @@ class LuaUtils
 		
 		PlayState.instance.mom.x = PlayState.instance.Stage.momXOffset + charX + PlayState.instance.MOM_X;
 		PlayState.instance.mom.y = PlayState.instance.Stage.momYOffset + charY + PlayState.instance.MOM_Y;
-		PlayState.instance.addObject(PlayState.instance.dad);
+		PlayState.instance.addObject(PlayState.instance.mom);
 
-		//PlayState.instance.iconP2.changeIcon(PlayState.instance.dad.healthIcon);
-			
-		//PlayState.instance.reloadHealthBarColors();
-
-		if (PlayState.instance.dad.animOffsets.exists(animationName) && playAnimationBeforeSwitch)
-			PlayState.instance.dad.playAnim(animationName, true, false, animationFrame);
+		if (PlayState.instance.mom.animOffsets.exists(animationName) && playAnimationBeforeSwitch)
+			PlayState.instance.mom.playAnim(animationName, true, false, animationFrame);
 
 		PlayState.instance.startCharacterScripts(PlayState.instance.mom.curCharacter);
 	}
@@ -924,8 +925,13 @@ class LuaUtils
 		switch(id)
 		{
 			case 'boyfriend' | 'bf':
-				@:privateAccess
 				return PlayState.instance.boyfriend;
+			case 'dad':
+				return PlayState.instance.dad;
+			case 'mom':
+				return PlayState.instance.mom;
+			case 'gf':
+				return PlayState.instance.gf;
 		}
 
 		if (id.contains('stage-'))

@@ -23,7 +23,7 @@ import flash.media.Sound;
 
 import tjson.TJSON as Json;
 
-import openfl.display3D.textures.Texture; // GPU STUFF
+//import openfl.display3D.textures.Texture; // GPU STUFF
 import flixel.graphics.frames.FlxBitmapFont;
 import flixel.graphics.frames.FlxFramesCollection;
 #if cpp
@@ -65,6 +65,14 @@ class Paths
 			// if it is not currently contained within the used local assets
 			if (!localTrackedAssets.contains(key) && !dumpExclusions.contains(key)) {
 				// get rid of it
+
+				if (currentTrackedTextures.exists(key)) {
+					var texture:Null<RectangleTexture> = currentTrackedTextures.get(key);
+					texture.dispose();
+					texture = null;
+					currentTrackedTextures.remove(key);
+				}
+
 				var obj = cast(currentTrackedAssets.get(key), FlxGraphic);
 				@:privateAccess
 				if (obj != null)
@@ -107,11 +115,20 @@ class Paths
 	}
 
 	public static function runGC()
+	{
+		#if cpp
+		cpp.vm.Gc.run(false);
+
+		cpp.vm.Gc.compact();
+		#else
 		System.gc();
+		#end
+	}
 
 	// define the locally tracked assets
 	public static var localTrackedAssets:Array<String> = [];
-	public static function clearStoredMemory(?cleanUnused:Bool = false) {
+	public static function clearStoredMemory() 
+	{
 		// clear anything not in the tracked assets list
 		var counterAssets:Int = 0;
 
@@ -170,7 +187,11 @@ class Paths
 
 		// flags everything to be cleared out next unused memory clear
 		localTrackedAssets = [];
-		openfl.Assets.cache.clear("songs");
+		var pathsToCheck:Array<String> = ['songs', "shared:assets/shared/data/characters", "mods", "assets/stages"];
+
+		for (i in 0...pathsToCheck.length){
+			openfl.Assets.cache.clear(pathsToCheck[i]);
+		}
 
 		runGC();
 	}
@@ -229,7 +250,7 @@ class Paths
 		try
 		{
 			#if MODS_ALLOWED
-			rawJson = mods(key); // that's because modsJson is for data/ and not other things lmao.
+			rawJson = modsJson(key).trim(); // that's because modsJson is for data/ and not other things lmao.
 			#else
 			rawJson = OpenFlAssets.getText(Paths.json(key, library)).trim();
 			#end
@@ -270,6 +291,11 @@ class Paths
 	inline public static function getSharedPath(file:String = ''):String
 	{
 		return 'assets/shared/$file';
+	}
+
+	inline public static function getPathOriginal(file:String = ''):String
+	{
+		return 'assets/$file';
 	}
 
 	inline static public function bitmapFont(key:String, ?library:String):FlxBitmapFont
@@ -327,15 +353,15 @@ class Paths
 		return getPath('$key.css', TEXT, library);
 	}
 
-	static public function video(key:String):String
+	static public function video(key:String, type:String = VIDEO_EXT):String
 	{
 		#if MODS_ALLOWED
-		var file:String = modsVideo(key);
+		var file:String = modsVideo(key, type);
 		if(FileSystem.exists(file)) {
 			return file;
 		}
 		#end
-		return 'assets/videos/$key.$VIDEO_EXT';
+		return 'assets/videos/$key.$type';
 	}
 
 	static public function sound(key:String, ?library:String):Sound
@@ -462,6 +488,7 @@ class Paths
 		return null;
 	}
 
+	public static var currentTrackedTextures:Map<String, RectangleTexture> = [];
 	static public function cacheBitmap(file:String, ?bitmap:BitmapData = null, ?allowGPU:Bool = true)
 	{
 		if(bitmap == null)
@@ -486,6 +513,8 @@ class Paths
 			bitmap.lock();
 			var texture:RectangleTexture = FlxG.stage.context3D.createRectangleTexture(bitmap.width, bitmap.height, BGRA, true);
 			texture.uploadFromBitmapData(bitmap);
+			currentTrackedTextures.set(file, texture);
+
 			bitmap.image.data = null;
 			bitmap.dispose();
 			bitmap.disposeImage();
@@ -494,7 +523,7 @@ class Paths
 			bitmap = BitmapData.fromTexture(texture);
 			bitmap.unlock();
 		}
-		var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(bitmap, false, file, false);
+		var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(bitmap, false, file);
 		newGraphic.persist = true;
 		newGraphic.destroyOnNoUse = false;
 		currentTrackedAssets.set(file, newGraphic);
@@ -712,8 +741,8 @@ class Paths
 		return modFolders('data/' + key + '.json');
 	}
 
-	inline static public function modsVideo(key:String):String {
-		return modFolders('videos/' + key + '.' + VIDEO_EXT);
+	inline static public function modsVideo(key:String, type:String = VIDEO_EXT):String {
+		return modFolders('videos/' + key + '.' + type);
 	}
 
 	inline static public function modsSounds(path:String, key:String):String {

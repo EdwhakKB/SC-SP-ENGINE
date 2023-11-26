@@ -1,14 +1,6 @@
 package objects;
 
-import flixel.FlxG;
-import flixel.FlxSprite;
-import flixel.animation.FlxBaseAnimation;
-import flixel.graphics.frames.FlxAtlasFrames;
-import flixel.util.FlxColor;
-import lime.app.Application;
 import states.PlayState;
-
-using StringTools;
 
 //bcuz god damn it. those offset things in playstate take up a bunch of space
 

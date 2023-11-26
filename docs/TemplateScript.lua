@@ -1,5 +1,9 @@
 -- Lua stuff
 
+function start()
+	-- start of createing all things for gameplay
+end
+
 function onCreate()
 	-- triggered when the lua file is started, some variables weren't created yet
 end
@@ -12,7 +16,6 @@ function onDestroy()
 	-- triggered when the lua file is ended (Song fade out finished)
 end
 
-
 -- Gameplay/Song interactions
 function onBeatHit()
 	-- triggered 4 times per section
@@ -20,6 +23,22 @@ end
 
 function onStepHit()
 	-- triggered 16 times per section
+end
+
+function onSectionHit()
+	--triggered 1 time per section (16 steps or 4 beats)
+end
+
+function stepHit()
+	-- triggered 4 times per section
+end
+
+function beatHit()
+	-- triggered 16 times per section
+end
+
+function sectionHit()
+	--triggered 1 time per section (16 steps or 4 beats)
 end
 
 function onUpdate(elapsed)
@@ -44,8 +63,20 @@ function onCountdownTick(counter)
 	-- counter = 4 -> Nothing happens lol, tho it is triggered at the same time as onSongStart i think
 end
 
+function preUpdateSocre(miss)
+	--miss = if player missed
+end
+
+function onUpdateScore(miss)
+	--miss = if player missed
+end
+
 function onSongStart()
 	-- Inst and Vocals start playing, songPosition = 0
+end
+
+function onSongGenerated()
+	-- when song generates
 end
 
 function onEndSong()
@@ -77,7 +108,6 @@ function onGameOverConfirm(retry)
 	-- If you've pressed Esc, value "retry" will be false
 end
 
-
 -- Dialogue (When a dialogue is finished, it calls startCountdown again)
 function onNextDialogue(line)
 	-- triggered when the next dialogue line starts, dialogue line starts with 1
@@ -86,7 +116,6 @@ end
 function onSkipDialogue(line)
 	-- triggered when you press Enter and skip a dialogue line that was still being typed, dialogue line starts with 1
 end
-
 
 -- Note miss/hit
 function goodNoteHit(id, direction, noteType, isSustainNote)
@@ -111,7 +140,6 @@ function noteMiss(id, direction, noteType, isSustainNote)
 	-- Player missed a note by letting it go offscreen
 end
 
-
 -- Other function hooks
 function onRecalculateRating()
 	-- return Function_Stop if you want to do your own rating calculation,
@@ -129,6 +157,7 @@ function onMoveCamera(focus)
 end
 
 
+-- There are 14 values for each not 2 anymore!
 -- Event notes hooks
 function onEvent(name, value1, value2)
 	-- event note triggered
@@ -150,6 +179,9 @@ function eventEarlyTrigger(name)
 	-- write your shit under this line, the new return value will override the ones hardcoded on the engine
 end
 
+function onEventPushed(name)
+	-- Works like a preloader for events such for "Change Character"
+end
 
 -- Tween/Timer hooks
 function onTweenCompleted(tag)
@@ -160,4 +192,97 @@ function onTimerCompleted(tag, loops, loopsLeft)
 	-- A loop from a timer you called has been completed, value "tag" is it's tag
 	-- loops = how many loops it will have done when it ends completely
 	-- loopsLeft = how many are remaining
+end
+
+--SCE extra Doc functions or Functions not mentioned originally
+function onStrumNote(membersIndex, playerNumber, ID)
+	--membersIndex of the strums
+	--plyaerNumber of what strum number "playerNumber ? 0 : 1" -- haxe form
+	--ID number ID of strum as in noteData
+end
+
+function onFocus()
+	--function when focused on game
+end
+
+function onFocusPost()
+	--function when focused on game but post
+end
+
+function onFocusLost()
+	--function when un-focused on game
+end
+
+function onFocusLostPost()
+	--function when un-focused on game but post
+end
+
+function update()
+	--function like onUpdate but for kade comp and when started song!
+end
+
+function playerOneTurn()
+	--Turn on musthitsection
+end
+
+function playerTwoTurn()
+	--Turn when not on musthitsection
+end
+
+function playerThreeTurn()
+	--Turn on gf's section
+end
+
+function playerFourTurn()
+	--Turn on player4hitsection
+end
+
+function onMoveCamera(character)
+	--On Character Bro
+end
+
+function onCameraMovement(char, usesNoteData, isOP, isGF, note, intensity1, intensity2)
+	--Char = character 
+	--usesNoteData is the character null with frames / has not frames so uses notes to move camera
+	--isOP = is Dad the character
+	--isGF = is the character GF
+	--note = noteData
+	--intensity1 = the first intensity used for XY of the cameraFollow
+	--intensity2 - the second intensity used for XY of the cameraFollow 
+end
+
+function onGhostTap(key)
+	--key = key as int for tapped key
+end
+
+function onKeyPress(key)
+	--key = key as int form pressed
+end
+
+function onKeyRelease(key)
+	--key = key as int for released key
+end
+
+function playerOneMissPress(direction, time)
+	--direction as int 0-3 for acting as noteData
+	--time = songPosition in time form
+end
+
+--All these functions work like opponentNoteHit/goodNoteHit
+function dadPreNoteHit(noteData, isSus, noteType, dType)
+end
+
+function dadNoteHit(noteData, isSus, noteType, dType)
+end
+
+function playerTwoSing(noteData, time)
+end
+
+function bfPreNoteHit(noteData, isSus, noteType, dType)
+end
+
+function bfNoteHit(noteData, isSus, noteType, dType)
+end
+
+function playerOneSing(noteData, time)
 end

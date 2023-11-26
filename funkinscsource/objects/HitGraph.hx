@@ -1,17 +1,10 @@
 package objects;
 
 import backend.Rating;
-import backend.ClientPrefs;
-import openfl.display.Bitmap;
-import openfl.display.BitmapData;
 import openfl.text.TextFieldAutoSize;
-import flixel.system.FlxAssets;
 import openfl.text.TextFormat;
-import flash.display.Graphics;
-import flash.display.Shape;
 import openfl.display.Sprite;
 import flash.text.TextField;
-import flash.text.TextFormatAlign;
 import flixel.util.FlxDestroyUtil;
 
 typedef HitNote =

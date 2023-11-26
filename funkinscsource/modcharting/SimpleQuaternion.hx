@@ -33,8 +33,6 @@ class SimpleQuaternion
     }
     public static function transformVector(v:Vector3D, q:Quaternion) : Vector3D
     {
-        
-
         return v;
     }
     public static function normalize(q:Quaternion) : Quaternion
@@ -44,7 +42,6 @@ class SimpleQuaternion
         q.x = q.x / length;
         q.y = q.y / length;
         q.z = q.z / length;
-
         return q;
     }
     public static function conjugate(q:Quaternion) : Quaternion
@@ -60,12 +57,10 @@ class SimpleQuaternion
         var y = q1.x * q2.y + q1.y * q2.x + q1.z * q2.w - q1.w * q2.z;
         var z = q1.x * q2.z - q1.y * q2.w + q1.z * q2.x + q1.w * q2.y;
         var w = q1.x * q2.w + q1.y * q2.z - q1.z * q2.y + q1.w * q2.x;
-
         q1.x = x;
         q1.y = y;
         q1.z = z;
         q1.w = w;
-
         return q1;
     }
 }

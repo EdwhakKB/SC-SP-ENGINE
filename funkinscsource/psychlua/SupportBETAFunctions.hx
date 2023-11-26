@@ -1,7 +1,6 @@
 package psychlua;
 
 import openfl.utils.Assets;
-import openfl.display.BitmapData;
 import flixel.FlxObject;
 
 import objects.Note;
@@ -9,8 +8,6 @@ import objects.Character;
 import objects.HealthIcon;
 
 import psychlua.LuaUtils;
-import psychlua.LuaUtils.LuaTweenOptions;
-
 import psychlua.ModchartIcon;
 
 import flixel.math.FlxRect;
@@ -19,7 +16,7 @@ import lime.app.Application;
 import shaders.ColorSwapOld;
 
 import flixel.util.FlxAxes;
-import openfl.filters.BitmapFilter;
+
 import openfl.filters.ShaderFilter;
 import shaders.custom.CustomShader;
 
@@ -69,7 +66,7 @@ class SupportBETAFunctions
 			else LuaUtils.getActorByName(id).visible = visible;	
 		});
 
-		funk.set("setActorY", function(y:Int,id:String, ?bg:Bool = false) {
+		funk.set("setActorY", function(y:Int,id:String) {
 			LuaUtils.getActorByName(id).y = y;	
 		});
 
@@ -104,29 +101,23 @@ class SupportBETAFunctions
 		{
 			LuaUtils.getActorByName(id).flipX = flip;
 		});
-		
 
 		funk.set("setActorFlipY", function(flip:Bool, id:String)
 		{
 			LuaUtils.getActorByName(id).flipY = flip;
 		});
 
-		
         funk.set("setActorColorRGB", function(id:String, color:String) {
             var actor:FlxSprite = LuaUtils.getActorByName(id);
-
             var colors = color.split(',');
             var red = Std.parseInt(colors[0]);
             var green = Std.parseInt(colors[1]);
             var blue = Std.parseInt(colors[2]);
-
-            if(actor != null)
-                Reflect.setProperty(actor, "color", FlxColor.fromRGB(red,green,blue));
+            if(actor != null) Reflect.setProperty(actor, "color", FlxColor.fromRGB(red,green,blue));
         });
 
 		funk.set("setActorScroll", function(x:Float,y:Float,id:String) {
             var actor = LuaUtils.getActorByName(id);
-
             if(LuaUtils.getActorByName(id) != null)
             {
                 actor.scrollFactor.set(x,y);
@@ -142,7 +133,6 @@ class SupportBETAFunctions
 
 		funk.set("setActorLayer", function(id:String, layer:Int) {
             var actor = LuaUtils.getActorByName(id);
-            
             if(actor != null)
             {
                 PlayState.instance.remove(actor);
@@ -168,10 +158,8 @@ class SupportBETAFunctions
 		});
 
 		funk.set("getActorX", function (id:String, ?bg:Bool = false) {
-			if (bg)
-				return PlayState.instance.Stage.swagBacks[id].x;
-			else
-				return LuaUtils.getActorByName(id).x;
+			if (bg) return PlayState.instance.Stage.swagBacks[id].x;
+			else return LuaUtils.getActorByName(id).x;
 		});
 
 		funk.set("getCameraZoom", function (id:String) {
@@ -179,55 +167,43 @@ class SupportBETAFunctions
 		});
 
 		funk.set("getActorY", function (id:String, ?bg:Bool = false) {
-			if (bg)
-				return PlayState.instance.Stage.swagBacks[id].y;
-			else
-				return LuaUtils.getActorByName(id).y;
+			if (bg) return PlayState.instance.Stage.swagBacks[id].y;
+			else return LuaUtils.getActorByName(id).y;
 		});
 
 		funk.set("getActorXMidpoint", function (id:String, ?graphic:Bool = false) {
 			var shit:Dynamic = LuaUtils.getObjectDirectly(id);
-
-			if (graphic)
-				return shit.getGraphicMidpoint().x;
-
+			if (graphic) return shit.getGraphicMidpoint().x;
 			return shit.getMidpoint().x;
 		});
 
 		funk.set("getActorYMidpoint", function (id:String, ?graphic:Bool = false) {
 			var shit:Dynamic = LuaUtils.getObjectDirectly(id);
-
-			if (graphic)
-				return shit.getGraphicMidpoint().y;
-
+			if (graphic) return shit.getGraphicMidpoint().y;
 			return shit.getMidpoint().y;
 		});
 
 		funk.set("getActorLayer", function(id:String) {
             var actor = LuaUtils.getActorByName(id);
-
-            if(actor != null)
-                return PlayState.instance.members.indexOf(actor);
-            else
-                return -1;
+            if(actor != null) return PlayState.instance.members.indexOf(actor);
+            else return -1;
         });
 
 		funk.set("characterZoom", function(id:String, zoomAmount:Float) {
-			if(PlayState.instance.modchartCharacters.exists(id)) {
+			if(PlayState.instance.modchartCharacters.exists(id) && ClientPrefs.data.characters) {
 				var spr:Character = PlayState.instance.modchartCharacters.get(id);
 				spr.setZoom(zoomAmount);
 			}
-			else
-				LuaUtils.getActorByName(id).setZoom(zoomAmount);
+			else LuaUtils.getActorByName(id).setZoom(zoomAmount);
 		});
 
-		funk.set("tweenColor", function(vars:String, duration:Float, initColor:FlxColor, finalColor:FlxColor, ?tag:String) {
+		funk.set("tweenColor", function(vars:String, duration:Float, initColor:FlxColor, finalColor:FlxColor, ease:String, ?tag:String) {
 			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
-
 			if (tag == null){tag = vars+'TweenCol';}
 			var penisExam:Dynamic = LuaUtils.tweenPrepare(tag, vars);
 			if(penisExam != null) {
 				PlayState.instance.modchartTweens.set(tag, FlxTween.color(penisExam, duration, initColor, finalColor, {
+					ease: LuaUtils.getTweenEaseByString(ease),
 					onComplete: function(twn:FlxTween) {
 						PlayState.instance.callOnLuas('onTweenCompleted', [tag]);
 						PlayState.instance.modchartTweens.remove(tag);
@@ -239,11 +215,12 @@ class SupportBETAFunctions
 		});
 
 		//and then one that's more akin to psych which has tags first as to not mess up the original
-		funk.set("doTweenColor2", function(tag:String, vars:String, duration:Float, initColor:FlxColor, finalColor:FlxColor) {
+		funk.set("doTweenColor2", function(tag:String, vars:String, duration:Float, initColor:FlxColor, finalColor:FlxColor, ease:String, ?tag:String) {
 			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
 			var penisExam:Dynamic = LuaUtils.tweenPrepare(tag, vars);
 			if(penisExam != null) {
 				PlayState.instance.modchartTweens.set(tag, FlxTween.color(penisExam, duration, initColor, finalColor, {
+					ease: LuaUtils.getTweenEaseByString(ease),
 					onComplete: function(twn:FlxTween) {
 						PlayState.instance.callOnLuas('onTweenCompleted', [tag]);
 						PlayState.instance.modchartTweens.remove(tag);
@@ -259,7 +236,6 @@ class SupportBETAFunctions
 		});
 
 		//tweens
-			
 		funk.set("tweenCameraPos", function(toX:Int, toY:Int, time:Float, onComplete:String) {
 			FlxTween.tween(FlxG.camera, {x: toX, y: toY}, time, {ease: FlxEase.linear, onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {funk.call(onComplete,["camera"]);}}});
 		});
@@ -411,7 +387,7 @@ class SupportBETAFunctions
 		//masking!
 		funk.set("addClipRect", function(obj:String, x:Float, y:Float, width:Float, height:Float) {
 			var split:Array<String> = obj.split('.');
-			var object:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
+			var object:Dynamic = LuaUtils.getObjectDirectly(split[0]);
 			if(split.length > 1) {
 				object = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length-1]);
 			}
@@ -821,7 +797,7 @@ class SupportBETAFunctions
 			PlayState.instance.Stage.swagBacks[id].swapDanceType();
 		});
 
-		funk.set("getStageXOffsets", function (char:String, value:String) {
+		funk.set("getStageOffsets", function (char:String, value:String) {
 			switch (char)
 			{
 				case 'boyfriend' | 'bf':
@@ -952,39 +928,48 @@ class SupportBETAFunctions
 		});
 
 		funk.set("playStrumAnim", function(isDad:Bool, id:Int, time:Float = 0) {
-			if (!ClientPrefs.data.LightUpStrumsOP && isDad)
-				return;
-
-			if (time > 0)
-				PlayState.instance.strumPlayAnim(isDad, id, time / 1000 / PlayState.instance.playbackRate);	
-			else
-				PlayState.instance.strumPlayAnim(isDad, id, Conductor.stepCrochet * 1.25 / 1000 / PlayState.instance.playbackRate);
+			if (!ClientPrefs.data.LightUpStrumsOP && isDad) return;
+			if (time > 0) PlayState.instance.strumPlayAnim(isDad, id, time / 1000 / PlayState.instance.playbackRate);	
+			else PlayState.instance.strumPlayAnim(isDad, id, Conductor.stepCrochet * 1.25 / 1000 / PlayState.instance.playbackRate);
 		});
 
 		// shader bullshit
+		funk.set("setActorWaveCircleShader", function(id:String, ?speed:Float = 3, ?frequency:Float = 10, ?amplitude:Float = 0.25) {
+			if (LuaUtils.getObjectDirectly(id, false) != null)
+			{
 
-		funk.set("setActor3DShader", function(id:String, ?speed:Float = 3, ?frequency:Float = 10, ?amplitude:Float = 0.25) {
-            var actor = LuaUtils.getActorByName(id);
-
-            if(actor != null)
-            {
-                var funnyShader:shaders.Shaders.ThreeDEffectNew = new shaders.Shaders.ThreeDEffectNew();
+				var funnyShader:shaders.Shaders.WaveCircleEffect = new shaders.Shaders.WaveCircleEffect();
                 funnyShader.waveSpeed = speed;
                 funnyShader.waveFrequency = frequency;
                 funnyShader.waveAmplitude = amplitude;
                 FunkinLua.lua_Shaders.set(id, funnyShader);
                 
-                actor.shader = funnyShader.shader;
+				LuaUtils.getObjectDirectly(id, false).shader = funnyShader.shader;
+			}
+
+            if(LuaUtils.getActorByName(id) != null)
+            {
+                var funnyShader:shaders.Shaders.WaveCircleEffect = new shaders.Shaders.WaveCircleEffect();
+                funnyShader.waveSpeed = speed;
+                funnyShader.waveFrequency = frequency;
+                funnyShader.waveAmplitude = amplitude;
+                FunkinLua.lua_Shaders.set(id, funnyShader);
+                
+                LuaUtils.getActorByName(id).shader = funnyShader.shader;
             }
         });
         
         funk.set("setActorNoShader", function(id:String) {
-            var actor = LuaUtils.getActorByName(id);
+			if (LuaUtils.getObjectDirectly(id, false) != null)
+			{
+				FunkinLua.lua_Shaders.remove(id);
+                LuaUtils.getObjectDirectly(id, false).shader = null;
+			}
 
-            if(actor != null)
+            if(LuaUtils.getActorByName(id) != null)
             {
                 FunkinLua.lua_Shaders.remove(id);
-                actor.shader = null;
+                LuaUtils.getActorByName(id).shader = null;
             }
         });
 
@@ -1008,18 +993,28 @@ class SupportBETAFunctions
         funk.set("setActorShader", function(actorStr:String, shaderName:String) {
             if (!ClientPrefs.data.shaders)
                 return;
-
+			
             var shad = FunkinLua.lua_Shaders.get(shaderName);
-            var actor = LuaUtils.getActorByName(actorStr);
-            
+			var actor = LuaUtils.getActorByName(actorStr);
+			var spr:FlxSprite = PlayState.instance.getLuaObject(actorStr);
+	
+			if(spr==null){
+				var split:Array<String> = actorStr.split('.');
+				spr = LuaUtils.getObjectDirectly(split[0]);
+				if(split.length > 1) {
+					spr = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length-1]);
+				}
+			}
 
-            if(actor != null && shad != null)
-            {
-                actor.shader = Reflect.getProperty(shad, 'shader'); //use reflect to workaround compiler errors
-
-                //trace('added shader '+shaderName+" to " + actorStr);
-
-            }
+			if (shad != null)
+			{
+				if (spr != null)
+					spr.shader = Reflect.getProperty(shad, 'shader');
+				if (actor != null)
+					actor.shader = Reflect.getProperty(shad, 'shader');
+				
+				if (actor == null && spr == null) Debug.logInfo('Actor and spr are both null!');
+			}
         });
 
         funk.set("setShaderProperty", function(shaderName:String, prop:String, value:Dynamic) {
@@ -1030,6 +1025,17 @@ class SupportBETAFunctions
             if(shad != null)
             {
 				Reflect.setProperty(shad, prop, value);
+            }
+        });
+
+		funk.set("getShaderProperty", function(shaderName:String, prop:String) {
+            if (!ClientPrefs.data.shaders)
+                return;
+            var shad = FunkinLua.lua_Shaders.get(shaderName);
+
+            if(shad != null)
+            {
+				Reflect.getProperty(shad, prop);
             }
         });
 
@@ -1094,11 +1100,17 @@ class SupportBETAFunctions
 
 		funk.set("setActorCustomShader", function(id:String, actor:String){
 			var funnyCustomShader:CustomShader = FunkinLua.lua_Custom_Shaders.get(id);
-			LuaUtils.getActorByName(actor).shader = funnyCustomShader;
+			if (LuaUtils.getActorByName(actor) != null)
+				LuaUtils.getActorByName(actor).shader = funnyCustomShader;
+			if (LuaUtils.getObjectDirectly(actor, false) != null)
+				LuaUtils.getObjectDirectly(actor, false).shader = funnyCustomShader;
 		});
 
 		funk.set("setActorNoCustomShader", function(actor:String){
-			LuaUtils.getActorByName(actor).shader = null;
+			if (LuaUtils.getActorByName(actor) != null)
+				LuaUtils.getActorByName(actor).shader = null;
+			if (LuaUtils.getObjectDirectly(actor, false) != null)
+				LuaUtils.getObjectDirectly(actor, false).shader = null;
 		});
 
 		funk.set("setCameraCustomShader", function(id:String, camera:String){
@@ -1147,7 +1159,7 @@ class SupportBETAFunctions
 		});
 
 		//Custom shader made by me (glowsoony)
-		funk.set("TweenCustomShaderProperty", function(shaderName:String, prop:String, value:Dynamic, time:Float, easeStr:String = "linear") {
+		funk.set("tweenCustomShaderProperty", function(shaderName:String, prop:String, value:Dynamic, time:Float, easeStr:String = "linear") {
             if (!ClientPrefs.data.shaders)
                 return;
             var shad = FunkinLua.lua_Custom_Shaders.get(shaderName);

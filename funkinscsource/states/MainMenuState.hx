@@ -65,6 +65,7 @@ class MainMenuState extends MusicBeatState
 		bg = new FlxSprite(0, 0).loadGraphic(Paths.image('menuBG'));
 		bg.antialiasing = ClientPrefs.data.antialiasing;
 		bg.scrollFactor.set();
+		bg.alpha = 0.5;
 		//bg.setGraphicSize(FlxG.width * 2, FlxG.height * 2);
 		bg.updateHitbox();
 		bg.screenCenter();
@@ -76,6 +77,7 @@ class MainMenuState extends MusicBeatState
 		magenta = new FlxSprite(0, 0).loadGraphic(Paths.image('menuDesat'));
 		magenta.antialiasing = ClientPrefs.data.antialiasing;
 		magenta.scrollFactor.set();
+		magenta.alpha = 0.5;
 		//magenta.setGraphicSize(Std.int(bg.width * 4), Std.int(bg.height * 4));
 		//magenta.setGraphicSize(FlxG.width * 2, FlxG.height * 2);
 		magenta.updateHitbox();
@@ -253,7 +255,7 @@ class MainMenuState extends MusicBeatState
 			{
 				selectedSomethin = true;
 				FlxG.sound.play(Paths.sound('cancelMenu'));
-				MusicBeatState.switchState(new TitleState());
+				FlxG.switchState(new TitleState());
 			}
 
 			if (controls.ACCEPT || (FlxG.mouse.overlaps(menuItems, FlxG.camera) && FlxG.mouse.pressed))
@@ -290,22 +292,22 @@ class MainMenuState extends MusicBeatState
 								switch (daChoice)
 								{
 									case 'story_mode':
-										MusicBeatState.switchState(new StoryMenuState());
+										FlxG.switchState(new StoryMenuState());
 									case 'freeplay':
 										if(FlxG.save.data.freeplayWarn == null && !WarnFreeplay.leftState) 
-											MusicBeatState.switchState(new WarnFreeplay());
+											FlxG.switchState(new WarnFreeplay());
 										else
-											MusicBeatState.switchState(new FreeplayState());
+											FlxG.switchState(new FreeplayState());
 									#if MODS_ALLOWED
 									case 'mods':
-										MusicBeatState.switchState(new ModsMenuState());
+										FlxG.switchState(new ModsMenuState());
 									#end
 									case 'awards':
-										MusicBeatState.switchState(new AchievementsMenuState());
+										FlxG.switchState(new AchievementsMenuState());
 									case 'credits':
-										MusicBeatState.switchState(new CreditsState());
+										FlxG.switchState(new CreditsState());
 									case 'options':
-										MusicBeatState.switchState(new OptionsState());
+										FlxG.switchState(new OptionsState());
 										OptionsState.onPlayState = false;
 										if (PlayState.SONG != null)
 										{
@@ -322,7 +324,7 @@ class MainMenuState extends MusicBeatState
 			else if (controls.justPressed('debug_1'))
 			{
 				selectedSomethin = true;
-				MusicBeatState.switchState(new MasterEditorMenu());
+				FlxG.switchState(new MasterEditorMenu());
 			}
 			#end
 		}
@@ -341,6 +343,13 @@ class MainMenuState extends MusicBeatState
 		bg.scale.set(1.06,1.06);
 		bg.updateHitbox();
 		bg.offset.set();
+
+		FlxTween.tween(bg, {alpha: 0.7}, Conductor.crochet / 1900, {
+			onComplete: function(flxT:FlxTween)
+			{
+				FlxTween.tween(bg, {alpha: 0.4}, Conductor.crochet / 1900);
+			}
+		});
 	}
 
 	function changeItem(huh:Int = 0)

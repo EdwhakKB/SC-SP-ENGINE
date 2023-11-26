@@ -24,7 +24,7 @@ class MiscSettingsSubState extends BaseOptionsMenu
 		addOption(option);
 		option.onChange = onChangeFPSCounter;
 
-		var option:Option = new Option('Memeory Display',
+		var option:Option = new Option('Memory Display',
 			'If unchecked, Memory is displayed in counter.',
 			'memoryDisplay',
 			'bool');

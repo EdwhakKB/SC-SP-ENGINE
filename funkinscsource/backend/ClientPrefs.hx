@@ -39,6 +39,16 @@ class SaveVariables {
 		[0xFF71E300, 0xFFF6FFE6, 0xFF003100],
 		[0xFFFF884E, 0xFFFFFAF5, 0xFF6C0000]
 	];
+	public var arrowRGBQuantize:Array<Array<FlxColor>> = [
+		[0xFFFF0000, 0xFFFFFFFF, 0xFF7F0000],
+		[0xFF0000FF, 0xFFFFFFFF, 0xFF00007F],
+		[0xFF800080, 0xFFFFFFFF, 0xFF400040],
+		[0xFF00FF00, 0xFFFFFFFF, 0xFF007F00],
+		[0xFFFFFF00, 0xFFFFFFFF, 0xFF7F7F00],
+		[0xFF00FFDD, 0xFFFFFFFF, 0xFF018573],
+		[0xFFFF00FF, 0xFFFFFFFF, 0xFF8A018A],
+		[0xFFFF7300, 0xFFFFFFFF, 0xFF883D00]
+	];
 
 	public var ghostTapping:Bool = true;
 	public var timeBarType:String = 'Time Left';
@@ -85,7 +95,7 @@ class SaveVariables {
 	public var safeFrames:Float = 10;
 	public var discordRPC:Bool = true;
 
-	public var hudStyle:String = 'Psych';
+	public var hudStyle:String = 'PSYCH';
 	public var quantNotes:Bool = false;
 
 	public var gjUser:String = "";
@@ -147,6 +157,9 @@ class SaveVariables {
 	public var noteSplashes:Bool = true;
 	public var noteSplashesOP:Bool = true;
 
+	public var characters:Bool = true;
+	public var background:Bool = true;
+
 	public function new()
 	{
 		//Why does haxe needs this again?
@@ -182,6 +195,7 @@ class ClientPrefs {
 		'debug_1'		=> [SEVEN],
 		'debug_2'		=> [EIGHT],
 		'debug_3'		=> [SIX],
+		'debug_4'		=> [FIVE],
 
 		'space'		=> [SPACE]
 	];

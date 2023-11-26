@@ -131,10 +131,18 @@ class StrumArrow extends FlxSkewedSprite
 						}
 						else
 						{
-							loadGraphic(Paths.image('pixelUI/noteSkins/NOTE_assets' + Note.getNoteSkinPostfix()));
-							width = width / 4;
-							height = height / 5;
-							loadGraphic(Paths.image('pixelUI/noteSkins/NOTE_assets' + Note.getNoteSkinPostfix()), true, Math.floor(width), Math.floor(height));
+							if (PlayState.SONG != null && PlayState.SONG.disableNoteRGB)
+							{
+								loadGraphic(Paths.image('pixelUI/NOTE_assets'));
+								width = width / 4;
+								height = height / 5;
+								loadGraphic(Paths.image('pixelUI/NOTE_assets'), true, Math.floor(width), Math.floor(height));
+							}else{
+								loadGraphic(Paths.image('pixelUI/noteSkins/NOTE_assets' + Note.getNoteSkinPostfix()));
+								width = width / 4;
+								height = height / 5;
+								loadGraphic(Paths.image('pixelUI/noteSkins/NOTE_assets' + Note.getNoteSkinPostfix()), true, Math.floor(width), Math.floor(height));
+							}
 
 							addAnims(true);
 						}
@@ -143,29 +151,22 @@ class StrumArrow extends FlxSkewedSprite
 					{
 						if (FileSystem.exists(Paths.modsImages('notes/' + style)) || FileSystem.exists(Paths.getSharedPath('images/notes/' + style)) || Assets.exists('notes/' + style))
 						{
-							if (ClientPrefs.data.cacheOnGPU)
-								frames = Paths.getSparrowAtlas('notes/' + style, null, false);
-							else
-								frames = Paths.getSparrowAtlas('notes/' + style);
-
+							frames = Paths.getSparrowAtlas('notes/' + style, null, !ClientPrefs.data.cacheOnGPU);
 							addAnims();
 						}
 						else if (FileSystem.exists(Paths.modsImages(style)) || FileSystem.exists(Paths.getSharedPath('images/' + style)) || Assets.exists(style))
 						{
-							if (ClientPrefs.data.cacheOnGPU)
-								frames = Paths.getSparrowAtlas(style, null, false);
-							else
-								frames = Paths.getSparrowAtlas(style);
-
+							frames = Paths.getSparrowAtlas(style, null, !ClientPrefs.data.cacheOnGPU);
 							addAnims();
 						}
 						else
 						{
-							if (ClientPrefs.data.cacheOnGPU)
-								frames = Paths.getSparrowAtlas('noteSkins/NOTE_assets' + Note.getNoteSkinPostfix(), null, false);
-							else
-								frames = Paths.getSparrowAtlas('noteSkins/NOTE_assets' + Note.getNoteSkinPostfix());
-
+							if (PlayState.SONG != null && PlayState.SONG.disableNoteRGB)
+							{
+								frames = Paths.getSparrowAtlas('NOTE_assets', null, !ClientPrefs.data.cacheOnGPU);
+							}else{
+								frames = Paths.getSparrowAtlas('noteSkins/NOTE_assets' + Note.getNoteSkinPostfix(), null, !ClientPrefs.data.cacheOnGPU);
+							}
 							addAnims();
 						}
 					}

@@ -167,6 +167,7 @@ class StoryMenuState extends MusicBeatState
 		txtTracklist.alignment = CENTER;
 		txtTracklist.font = rankText.font;
 		txtTracklist.color = 0xFFe55777;
+		txtTracklist.antialiasing = ClientPrefs.data.antialiasing;
 		add(txtTracklist);
 		// add(rankText);
 		add(scoreText);
@@ -250,7 +251,6 @@ class StoryMenuState extends MusicBeatState
 				selectWeek();
 			}
 		}
-
 		
 		if (FlxG.mouse.overlaps(rightArrow)) {
 			if (FlxG.mouse.justPressed) {
@@ -281,7 +281,7 @@ class StoryMenuState extends MusicBeatState
 			FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			movedBack = true;
-			MusicBeatState.switchState(new MainMenuState());
+			FlxG.switchState(new MainMenuState());
 		}
 
 		super.update(elapsed);
@@ -479,7 +479,8 @@ class StoryMenuState extends MusicBeatState
 		}
 
 		txtTracklist.text = txtTracklist.text.toUpperCase();
-
+		for (i in 0...stringThing.length)
+			txtTracklist.color = FlxColor.fromRGB(leWeek.songs[i][2][0], leWeek.songs[i][2][1], leWeek.songs[i][2][2]);
 		txtTracklist.screenCenter(X);
 		txtTracklist.x -= FlxG.width * 0.35;
 

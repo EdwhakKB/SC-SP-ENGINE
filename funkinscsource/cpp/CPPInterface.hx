@@ -33,15 +33,8 @@ class CPPInterface
 	}
 	#end
 
-	#if windows
-	public static function getRam():UInt64
+	public static function getRAM():UInt64
 	{
-		return CPPWindows.obtainRAM();
+		return GetRAMSys.obtainRAM();
 	}
-	#elseif linux
-	public static function getRam():UInt64
-	{
-		return CPPLinux.obtainRAM();
-	}
-	#end
 }

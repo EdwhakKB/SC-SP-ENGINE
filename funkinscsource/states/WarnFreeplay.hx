@@ -12,7 +12,7 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
 import flixel.math.FlxMath;
 
-class WarnFreeplay extends backend.MusicBeatState
+class WarnFreeplay extends states.MusicBeatState
 {
 	var warnText:FlxText;
 	var txtSine:Float = 0;
@@ -54,7 +54,7 @@ class WarnFreeplay extends backend.MusicBeatState
 				FlxG.sound.play(Paths.sound('confirmMenu'));
 				FlxFlicker.flicker(warnText, 1, 0.1, false, true, function(flk:FlxFlicker) {
 					new FlxTimer().start(0.5, function (tmr:FlxTimer) {
-						MusicBeatState.switchState(new states.FreeplayState());
+						FlxG.switchState(new states.FreeplayState());
 					});
 				});
 			} else {
@@ -63,7 +63,7 @@ class WarnFreeplay extends backend.MusicBeatState
 				FlxG.sound.play(Paths.sound('cancelMenu'));
 				FlxTween.tween(warnText, {alpha: 0}, 1, {
 					onComplete: function (twn:FlxTween) {
-						MusicBeatState.switchState(new states.MainMenuState());
+						FlxG.switchState(new states.MainMenuState());
 					}
 				});
 			}

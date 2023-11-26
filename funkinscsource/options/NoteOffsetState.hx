@@ -51,7 +51,6 @@ class NoteOffsetState extends MusicBeatState
 		FlxG.cameras.add(camOther, false);
 
 		FlxG.cameras.setDefaultDrawTarget(camGame, true);
-		CustomFadeTransition.nextCamera = camOther;
 		FlxG.camera.scroll.set(120, 130);
 
 		persistentUpdate = true;
@@ -83,18 +82,25 @@ class NoteOffsetState extends MusicBeatState
 		coolText.screenCenter();
 		coolText.x = FlxG.width * 0.35;
 
-		var swagOrSick:String = '';
+		var ratingChecked:String = '';
 
-		switch (FlxG.random.int(0, 1))
+		switch (FlxG.random.int(0, 4))
 		{
 			case 0:
-				swagOrSick = 'sick';
+				ratingChecked = 'swag';
 			case 1:
-				swagOrSick = 'swag';
-
+				ratingChecked = 'sick';
+			case 2:
+				ratingChecked = 'good';
+			case 3:
+				ratingChecked = 'bad';
+			case 4:
+				ratingChecked = 'shit';
 		}
 
-		rating = new FlxSprite().loadGraphic(Paths.image(swagOrSick));
+		rating = new FlxSprite().loadGraphic(Paths.image(ratingChecked));
+		if (rating.graphic == null)
+			rating = new FlxSprite().loadGraphic(Paths.image('missingRating'));
 		rating.cameras = [camHUD];
 		rating.antialiasing = ClientPrefs.data.antialiasing;
 		rating.setGraphicSize(Std.int(rating.width * 0.7));
@@ -422,8 +428,7 @@ class NoteOffsetState extends MusicBeatState
 			if(beatTween != null) beatTween.cancel();
 
 			persistentUpdate = false;
-			CustomFadeTransition.nextCamera = camOther;
-			MusicBeatState.switchState(new options.OptionsState());
+			FlxG.switchState(new options.OptionsState());
 			if(OptionsState.onPlayState)
 			{
 				if(ClientPrefs.data.pauseMusic != 'None')
