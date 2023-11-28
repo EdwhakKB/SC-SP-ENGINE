@@ -156,12 +156,18 @@ class GameOverSubstate extends MusicBeatSubstate
 			Conductor.songPosition = FlxG.sound.music.time;
 		}
 
-		FlxG.sound.music.onComplete = function(){
+		FlxG.sound.music.onComplete = function()
+		{
+			timesMusicRepeated += 1;
+		}
+		if (!isEnding && timesMusicRepeated > 2) //Really? you let the music repeat 2 times now?
+		{
 			endBullshit();
 		}
 		PlayState.instance.callOnScripts('onUpdatePost', [elapsed]);
 	}
 
+	var timesMusicRepeated:Int = 0;
 	var isEnding:Bool = false;
 
 	function coolStartDeath(?volume:Float = 1):Void

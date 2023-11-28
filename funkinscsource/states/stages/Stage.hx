@@ -26,6 +26,7 @@ import psychlua.FunkinLua;
 import backend.StageData;
 import openfl.Assets;
 import states.PlayState;
+import psychlua.HScript;
 
 enum HenchmenKillState
 {
@@ -124,8 +125,15 @@ class Stage extends MusicBeatState
 
 	public var isCustomStage:Bool = false;
 	public var isLuaStage:Bool = false;
+	public var isHxStage:Bool = false;
 
 	public var luaArray:Array<FunkinLua> = [];
+
+	#if HSCRIPT_ALLOWED
+	public var hscriptArray:Array<HScript> = [];
+	public var instancesExclude:Array<String> = [];
+	#end
+
 	public var preloading:Bool = false;
 
 	public function new(daStage:String, startsPlayState:Bool = false, ?preloading:Bool = false)
@@ -619,8 +627,9 @@ class Stage extends MusicBeatState
 					}
 
 					isLuaStage = true;
+					isHxStage = true;
 					PlayState.instance.startLuasNamed('stages/' + daStage + '.lua', true, preloading);
-					PlayState.instance.startHScriptsNamed('stages/' + daStage + '.hx');
+					PlayState.instance.startHScriptsNamed('stages/' + daStage + '.hx', true);
 				}
 		}
 	}
@@ -879,8 +888,8 @@ class Stage extends MusicBeatState
 				}
 		}
 
-		if (isCustomStage && !preloading && isLuaStage)
-			callOnLuas('onUpdate', [elapsed]);
+		if (isCustomStage && !preloading)
+			callOnScripts('onUpdate', [elapsed]);
 	}
 
 	override function stepHit()
@@ -1266,6 +1275,17 @@ class Stage extends MusicBeatState
 		object.destroy(); 
 	}
 
+	public function callOnScripts(funcToCall:String, args:Array<Dynamic> = null, ignoreStops = false, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
+		var returnVal:Dynamic = psychlua.FunkinLua.Function_Continue;
+		if(args == null) args = [];
+		if(exclusions == null) exclusions = [];
+		if(excludeValues == null) excludeValues = [psychlua.FunkinLua.Function_Continue];
+
+		var result:Dynamic = callOnLuas(funcToCall, args, ignoreStops, exclusions, excludeValues);
+		if(result == null || excludeValues.contains(result)) result = callOnHScript(funcToCall, args, ignoreStops, exclusions, excludeValues);
+		return result;
+	}
+
 	public function callOnLuas(funcToCall:String, args:Array<Dynamic> = null, ignoreStops = false, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
 		var returnVal:Dynamic = FunkinLua.Function_Continue;
 		#if LUA_ALLOWED	
@@ -1301,6 +1321,62 @@ class Stage extends MusicBeatState
 		return returnVal;
 	}
 
+	public function callOnHScript(funcToCall:String, args:Array<Dynamic> = null, ignoreStops:Bool = false, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
+		var returnVal:Dynamic = psychlua.FunkinLua.Function_Continue;
+
+		#if HSCRIPT_ALLOWED
+		if(exclusions == null) exclusions = new Array();
+		if(excludeValues == null) excludeValues = new Array();
+		excludeValues.push(psychlua.FunkinLua.Function_Continue);
+
+		var len:Int = luaArray.length;
+		if (len < 1)
+			return returnVal;
+		for(i in 0...len)
+		{
+			var script:HScript = hscriptArray[i];
+			if(script == null || !script.active || !script.exists(funcToCall) || exclusions.contains(script.origin))
+				continue;
+
+			var myValue:Dynamic = null;
+			try
+			{
+				var callValue = script.call(funcToCall, args);
+				if(!callValue.succeeded)
+				{
+					var e = callValue.exceptions[0];
+					if(e != null)
+					{
+						var len:Int = e.message.indexOf('\n') + 1;
+						if(len <= 0) len = e.message.length;
+						FunkinLua.luaTrace('ERROR (${script.origin}: ${callValue.calledFunction}) - ' + e.message.substr(0, len), true, false, FlxColor.RED);
+					}
+				}
+				else
+				{
+					myValue = callValue.returnValue;
+					if((myValue == FunkinLua.Function_StopHScript || myValue == FunkinLua.Function_StopAll) && !excludeValues.contains(myValue) && !ignoreStops)
+					{
+						returnVal = myValue;
+						break;
+					}
+
+					if(myValue != null && !excludeValues.contains(myValue))
+						returnVal = myValue;
+				}
+			}
+		}
+		#end
+
+		return returnVal;
+	}
+
+	public function setOnScripts(variable:String, arg:Dynamic, exclusions:Array<String> = null) {
+		if(exclusions == null) exclusions = [];
+		setOnLuas(variable, arg, exclusions);
+		setOnHScript(variable, arg, exclusions);
+	}
+
 	public function setOnLuas(variable:String, arg:Dynamic, exclusions:Array<String> = null) {
 		#if LUA_ALLOWED
 		if(exclusions == null) exclusions = [];
@@ -1313,6 +1389,28 @@ class Stage extends MusicBeatState
 		#end
 	}
 
+	public function setOnHScript(variable:String, arg:Dynamic, exclusions:Array<String> = null) {
+		#if HSCRIPT_ALLOWED
+		if(exclusions == null) exclusions = [];
+		for (script in hscriptArray) {
+			if(exclusions.contains(script.origin))
+				continue;
+
+			if(!instancesExclude.contains(variable))
+				instancesExclude.push(variable);
+
+			script.set(variable, arg);
+		}
+		#end
+	}
+
+	public function getOnScripts(variable:String, arg:String, exclusions:Array<String> = null)
+	{
+		if(exclusions == null) exclusions = [];
+		getOnLuas(variable, arg, exclusions);
+		getOnHScript(variable, exclusions);
+	}
+
 	public function getOnLuas(variable:String, arg:String, exclusions:Array<String> = null)
 	{
 		#if LUA_ALLOWED
@@ -1322,6 +1420,19 @@ class Stage extends MusicBeatState
 				continue;
 
 			script.get(variable, arg);
+		}
+		#end
+	}
+
+	public function getOnHScript(variable:String, exclusions:Array<String> = null)
+	{
+		#if HSCRIPT_ALLOWED
+		if(exclusions == null) exclusions = [];
+		for (script in hscriptArray) {
+			if(exclusions.contains(script.origin))
+				continue;
+
+			script.get(variable);
 		}
 		#end
 	}
@@ -1360,7 +1471,7 @@ class Stage extends MusicBeatState
 		return null;
 	}
 
-	public function setGraphicSize(name:String, val:Float = 1, ?val2:Float = 1)
+	public function setGraphicSize(name:String, val:Float = 1, ?updateHitBox:Bool = true)
 	{
 		//because this is different apparently
 
@@ -1369,7 +1480,7 @@ class Stage extends MusicBeatState
 			var shit = swagBacks.get(name);
 
 			shit.setGraphicSize(Std.int(shit.width * val));
-			shit.updateHitbox(); 
+			if (updateHitBox) shit.updateHitbox(); 
 		}
 	}
 

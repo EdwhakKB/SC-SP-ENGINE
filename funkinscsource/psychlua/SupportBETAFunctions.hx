@@ -1039,7 +1039,7 @@ class SupportBETAFunctions
             }
         });
 
-        funk.set("tweenShaderProperty", function(shaderName:String, prop:String, value:Dynamic, time:Float, easeStr:String = "linear") {
+        funk.set("tweenShaderProperty", function(tag:String, shaderName:String, prop:String, value:Dynamic, time:Float, easeStr:String = "linear") {
             if (!ClientPrefs.data.shaders)
                 return;
             var shad = FunkinLua.lua_Shaders.get(shaderName);
@@ -1049,12 +1049,19 @@ class SupportBETAFunctions
             {
                 var startVal = Reflect.getProperty(shad, prop);
 
-                PlayState.tweenManager.num(startVal, value, time, {onUpdate: function(tween:FlxTween){
-					var ting = FlxMath.lerp(startVal,value, ease(tween.percent));
-                    Reflect.setProperty(shad, prop, ting);
-				}, ease: ease, onComplete: function(tween:FlxTween) {
-					Reflect.setProperty(shad, prop, value);
-				}});
+                PlayState.instance.modchartTweens.set(tag, 
+					PlayState.tweenManager.num(startVal, value, time, {
+					ease: ease,
+					onUpdate: function(tween:FlxTween) {
+						var ting = FlxMath.lerp(startVal,value, ease(tween.percent));
+                    	Reflect.setProperty(shad, prop, ting);
+					}, 
+					onComplete: function(tween:FlxTween) {
+						Reflect.setProperty(shad, prop, value);
+						PlayState.instance.callOnLuas('onTweenCompleted', [tag]);
+						PlayState.instance.modchartTweens.remove(tag);
+					}})
+				);
                 //trace('set shader prop');
             }
         });

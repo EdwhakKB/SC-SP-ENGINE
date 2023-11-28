@@ -32,9 +32,10 @@ class PauseSubState extends MusicBeatSubstate
 
 	public static var songName:String = '';
 
+	var music:FlxSound = PlayState.instance.inst;
+
 	var settings = {
 		music: ClientPrefs.data.pauseMusic,
-
 		optionTweenTime: 0.1,
 		selectTweenTime: 0.25
 	};
@@ -243,8 +244,8 @@ class PauseSubState extends MusicBeatSubstate
 						curTime += 45000 * elapsed * (controls.UI_LEFT ? -1 : 1);
 					}
 
-					if(curTime >= PlayState.instance.inst.length) curTime -= PlayState.instance.inst.length;
-					else if(curTime < 0) curTime += PlayState.instance.inst.length;
+					if(curTime >= music.length) curTime -= music.length;
+					else if(curTime < 0) curTime += music.length;
 					updateSkipTimeText();
 				}
 		}
@@ -260,8 +261,7 @@ class PauseSubState extends MusicBeatSubstate
 						PlayState.SONG = Song.loadFromJson(poop, name);
 						PlayState.storyDifficulty = curSelected;
 						FlxG.resetState();
-						//FlxG.sound.music.volume = 0;
-						PlayState.instance.inst.volume = 0;
+						music.volume = 0;
 						PlayState.changedDifficulty = true;
 						PlayState.chartingMode = false;
 						PlayState.modchartMode = false;
@@ -329,7 +329,7 @@ class PauseSubState extends MusicBeatSubstate
 				case 'Skip Time':
 					if(curTime < Conductor.songPosition)
 					{
-						PlayState.instance.startOnTime = curTime;
+						PlayState.startOnTime = curTime;
 						restartSong(true);
 					}
 					else
@@ -355,7 +355,7 @@ class PauseSubState extends MusicBeatSubstate
 				case 'Options':
 					PlayState.instance.paused = true; // For lua
 					PlayState.instance.vocals.volume = 0;
-					PlayState.instance.inst.volume = 0;
+					music.volume = 0;
 					FlxG.switchState(new OptionsState());
 					stoppedUpdatingMusic = true;
 					pauseMusic.volume = 0;
@@ -596,6 +596,6 @@ class PauseSubState extends MusicBeatSubstate
 
 	function updateSkipTimeText()
 	{
-		skipTimeText.text = FlxStringUtil.formatTime(Math.max(0, Math.floor(curTime / 1000)), false) + ' / ' + FlxStringUtil.formatTime(Math.max(0, Math.floor(PlayState.instance.inst.length / 1000)), false);
+		skipTimeText.text = FlxStringUtil.formatTime(Math.max(0, Math.floor(curTime / 1000)), false) + ' / ' + FlxStringUtil.formatTime(Math.max(0, Math.floor(music.length / 1000)), false);
 	}
 }

@@ -19,7 +19,14 @@ class DeprecatedFunctions
 
 		funk.set("objectPlayAnimation", function(obj:String, name:String, forced:Bool = false, ?startFrame:Int = 0) {
 			FunkinLua.luaTrace("objectPlayAnimation is deprecated! Use playAnim instead", false, true);
-			var spr:Dynamic = (PlayState.instance.getLuaObject(obj,false) != null ? PlayState.instance.getLuaObject(obj,false) : Reflect.getProperty(LuaUtils.getTargetInstance(), obj));
+			var spr:FlxSprite = Reflect.getProperty(LuaUtils.getTargetInstance(), obj);
+
+			if(PlayState.instance.getLuaObject(obj,false) != null) {
+				spr = PlayState.instance.getLuaObject(obj,false);
+				spr.animation.play(name, forced, false, startFrame);
+				return true;
+			}
+
 			if(spr != null) {
 				spr.animation.play(name, forced, false, startFrame);
 				return true;

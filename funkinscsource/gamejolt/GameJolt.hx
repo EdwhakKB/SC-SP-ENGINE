@@ -281,8 +281,7 @@ class GameJoltLogin extends MusicBeatState
         }
         ClientPrefs.toggleVolumeKeys(true);
 
-        if (FlxG.sound.music != null)
-            Conductor.songPosition = FlxG.sound.music.time;
+        if (FlxG.sound.music != null) Conductor.songPosition = FlxG.sound.music.time;
 
         if (!FlxG.sound.music.playing)
         {
@@ -371,8 +370,8 @@ class GJToastManager extends Sprite
                     FlxTween.tween(child, {y: (i + 1) * -child.height}, LEAVE_TIME, {ease: FlxEase.quadOut, startDelay: DISPLAY_TIME,
                         onComplete: function(tween:FlxTween)
                         {
-                            cast(child, Toast).removeChildren();
-                            removeChild(child);
+                            //cast(child, Toast).removeChildren();
+                            //removeChild(child);
                         }
                     });
                 }
@@ -388,8 +387,8 @@ class GJToastManager extends Sprite
             FlxTween.tween(child, {y: (i + 1) * -child.height}, LEAVE_TIME, {ease: FlxEase.quadOut,
                 onComplete: function(tween:FlxTween)
                 {
-                    cast(child, Toast).removeChildren();
-                    removeChild(child);
+                    //cast(child, Toast).removeChildren();
+                    //removeChild(child);
                 }
             });
         }
@@ -414,8 +413,8 @@ class GJToastManager extends Sprite
                         FlxTween.tween(child, {y: (i + 1) * -child.height}, LEAVE_TIME, {ease: FlxEase.quadOut, startDelay: DISPLAY_TIME,
                             onComplete: function(tween:FlxTween)
                             {
-                                cast(child, Toast).removeChildren();
-                                removeChild(child);
+                               // cast(child, Toast).removeChildren();
+                                //removeChild(child);
                             }
                         });
                     }
@@ -431,8 +430,8 @@ class GJToastManager extends Sprite
                 FlxTween.tween(child, {y: (i + 1) * -child.height}, LEAVE_TIME, {ease: FlxEase.quadOut, startDelay: DISPLAY_TIME - (elapsedSec - ENTER_TIME),
                     onComplete: function(tween:FlxTween)
                     {
-                        cast(child, Toast).removeChildren();
-                        removeChild(child);
+                        //cast(child, Toast).removeChildren();
+                        //removeChild(child);
                     }
                 });
             }
@@ -445,8 +444,8 @@ class GJToastManager extends Sprite
                 FlxTween.tween(child, {y: (i + 1) * -child.height}, LEAVE_TIME -  (elapsedSec - ENTER_TIME - DISPLAY_TIME), {ease: FlxEase.quadOut,
                     onComplete: function(tween:FlxTween)
                     {
-                        cast(child, Toast).removeChildren();
-                        removeChild(child);
+                        //cast(child, Toast).removeChildren();
+                        //removeChild(child);
                     }
                 });
             }
@@ -481,14 +480,11 @@ class Toast extends Sprite
         var iconBmp = FlxG.bitmap.add(Paths.image(iconPath));
         iconBmp.persist = true;
         
-        if(iconPath != null)
-        {
-            icon = new Bitmap(iconBmp.bitmap);
-            icon.width = 100;
-            icon.height = 100;
-            icon.x = 10;
-            icon.y = 10;
-        }
+        icon = new Bitmap(iconBmp.bitmap);
+        icon.width = 100;
+        icon.height = 100;
+        icon.x = 10;
+        icon.y = 10;
 
         title = new TextField();
         title.text = titleText.toUpperCase();
@@ -515,7 +511,7 @@ class Toast extends Sprite
         }
 
         addChild(back);
-        if(iconPath!=null){addChild(icon);}
+        addChild(icon);
         addChild(title);
         addChild(desc);
 

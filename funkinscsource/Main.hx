@@ -121,6 +121,8 @@ class Main extends Sprite
 		#if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
 		addChild(new FlxGame(game.width, game.height, Init, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
 
+		FlxG.sound.volume = 0.5;
+
 		#if !mobile
 		Lib.current.stage.align = "tl";
 		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
@@ -144,9 +146,7 @@ class Main extends Sprite
 		FlxGraphic.defaultPersist = false;
 		FlxG.signals.preStateSwitch.add(function()
 		{
-
 			//i tihnk i finally fixed it
-
 			@:privateAccess
 			for (key in FlxG.bitmap._cache.keys())
 			{

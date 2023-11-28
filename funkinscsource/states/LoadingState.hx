@@ -79,18 +79,18 @@ class AsyncAssetPreloader
 			audio.push(Paths.voices(PlayState.SONG.songId));
 			#end
 
-			var characters:Array<String> = Mods.mergeAllTextsNamed('data/songs/${PlayState.SONG.songId.toLowerCase()}/preload.txt', Paths.getSharedPath());
-			for (character in characters)
+			var charactersString:Array<String> = Mods.mergeAllTextsNamed('data/songs/${PlayState.SONG.songId.toLowerCase()}/preload.txt', Paths.getSharedPath());
+			for (i in 0...characters.length) 
 			{
-				if(character.trim().length > 0)
-					characters.push(character);
+				var data:Array<String> = characters[i].split(' ');
+				characters.push(data[0]);
 			}
 
 			var stages:Array<String> = Mods.mergeAllTextsNamed('data/songs/${PlayState.SONG.songId.toLowerCase()}/preload-stage.txt', Paths.getSharedPath());
-			for (stage in stages)
+			for (i in 0...stages.length) 
 			{
-				if(stage.trim().length > 0)
-					stages.push(stage);
+				var data:Array<String> = stages[i].split(' ');
+				stages.push(data[0]);
 			}
 
 			// if(PlayState.SONG.events.length > 0)
@@ -325,24 +325,7 @@ class LoadingState extends MusicBeatState
 		{
 			loadingBar.visible = false;
 
-			var WAIT_TIME:Float = 1.0;
-
-			if (Type.getClass(target) == PlayState)
-			{
-				if (FileSystem.exists(Paths.txt('songs/' + PlayState.SONG.song.toLowerCase()  + "/preload")))
-				{
-					var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt('songs/' + PlayState.SONG.song.toLowerCase()  + "/preload"));
-					for (i in 0...characters.length)
-						WAIT_TIME += 1;
-				}
-			
-				if (FileSystem.exists(Paths.txt('songs/' + PlayState.SONG.song.toLowerCase()  + "/preload-stage")))
-				{
-					var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt('songs/' + PlayState.SONG.song.toLowerCase()  + "/preload-stage"));
-					for (i in 0...characters.length)
-						WAIT_TIME += 1;
-				}
-			}
+			final WAIT_TIME:Float = 1.0;
 
 			initSongsManifest().onComplete
 			(
@@ -359,11 +342,6 @@ class LoadingState extends MusicBeatState
 						checkLibrary('week_assets');
 					}
 
-					if (Type.getClass(target) == PlayState)
-					{
-						cacheStuff();
-					}
-	
 					var fadeTime = 0.5;
 					FlxG.camera.fade(FlxG.camera.bgColor, fadeTime, true);
 					new FlxTimer().start(fadeTime + WAIT_TIME, function(_) introComplete());
@@ -506,41 +484,6 @@ class LoadingState extends MusicBeatState
 	}
 	#end*/
 
-	public function cacheStuff()
-	{ 
-		if (FileSystem.exists(Paths.txt('songs/' + PlayState.SONG.song.toLowerCase()  + "/preload")))
-		{
-			var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt('songs/' + PlayState.SONG.song.toLowerCase()  + "/preload"));
-			for (i in 0...characters.length)
-			{
-				var data:Array<String> = characters[i].split(' ');
-				var character = new objects.Character(0, 0, data[0]);
-
-				var luaFile:String = 'data/characters/' + data[0];
-
-				if (FileSystem.exists(Paths.modFolders('data/characters/'+data[0]+'.lua')) || FileSystem.exists(FileSystem.absolutePath("assets/shared/"+luaFile+'.lua')))
-					states.PlayState.startCharScripts.push(data[0]);
-
-				Debug.logInfo('found ' + data[0]);
-			}
-		}   
-		
-		if (FileSystem.exists(Paths.txt('songs/' + PlayState.SONG.song.toLowerCase()  + "/preload-stage")))
-		{
-			var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt('songs/' + PlayState.SONG.song.toLowerCase()  + "/preload-stage"));
-
-			for (i in 0...characters.length)
-			{
-				var data:Array<String> = characters[i].split(' ');
-				new Stage(data[0], true);
-				Stage.instance.setupStageProperties(data[0], false, true);
-				trace ('stages are ' + data[0]);
-			}
-
-			states.PlayState.curStage = states.PlayState.SONG.stage;
-		}
-	}
-	
 	override function destroy()
 	{
 		super.destroy();
