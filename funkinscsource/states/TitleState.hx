@@ -87,7 +87,7 @@ class TitleState extends MusicBeatState
 
 	override public function create():Void
 	{
-		Paths.clearStoredMemory();
+		Paths.clearUnusedMemory();
 		
 		grayGrad = FlxGradient.createGradientFlxSprite(FlxG.width, 400, [0x0, FlxColor.WHITE]);
 		grayGrad.x += 0;
@@ -105,9 +105,7 @@ class TitleState extends MusicBeatState
 		curWacky = FlxG.random.getObject(getIntroTextShit());
 
 		checkInternetConnection();
-
-		if (internetConnection)
-			getBuildVer();
+		if (internetConnection) getBuildVer();
 
 		if (Main.checkGJKeysAndId())
 		{
@@ -403,8 +401,6 @@ class TitleState extends MusicBeatState
 			add(credGroup);
 			add(ngSpr);
 		}
-
-		Paths.clearUnusedMemory();
 		// credGroup.add(credTextShit);
 	}
 
@@ -577,8 +573,7 @@ class TitleState extends MusicBeatState
 	
 	function getBuildVer():Void
 	{
-		#if CHECK_FOR_UPDATES
-		if (ClientPrefs.checkForUpdates && !closedState)
+		if (ClientPrefs.data.checkForUpdates && !closedState)
 		{
 			Debug.logInfo('checking for update');
 			var http = new haxe.Http("https://raw.githubusercontent.com/EdwhakKB/SC-SP-ENGINE/main/gitVersion.txt");
@@ -602,7 +597,6 @@ class TitleState extends MusicBeatState
 
 			http.request();
 		}
-		#end
 	}
 
 	function createCoolText(textArray:Array<String>, ?offset:Float = 0, ?mainColorString:String = "#FFFFFF")

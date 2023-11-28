@@ -357,16 +357,14 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
         bg.setGraphicSize(Std.int(FlxG.width), Std.int(FlxG.height));
         add(bg);
 
-        if (PlayState.isPixelStage)
+        if (PlayState.isPixelStage) //Skew Kills Pixel Notes (How are you going to stretch already pixelated bit by bit notes?)
         {
             modifierList.remove(SkewModifier);
             modifierList.remove(SkewXModifier);
             modifierList.remove(SkewYModifier);
         }
 
-		if (PlayState.SONG == null)
-			PlayState.SONG = Song.loadFromJson('tutorial');
-
+		if (PlayState.SONG == null) PlayState.SONG = Song.loadFromJson('tutorial');
 		Conductor.mapBPMChanges(PlayState.SONG);
 		Conductor.bpm = PlayState.SONG.bpm;
 

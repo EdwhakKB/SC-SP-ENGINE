@@ -15,22 +15,27 @@ using StringTools;
 class HScript extends SScript
 {
 	public var parentLua:FunkinLua;
+	public var isHxStage:Bool = false;
 	
-	public static function initHaxeModule(parent:FunkinLua, ?varsToBring:Any = null)
+	public static function initHaxeModule(parent:FunkinLua)
 	{
 		if(parent.hscript == null)
 		{
 			var times:Float = Date.now().getTime();
 			Debug.logTrace('initialized sscript interp successfully: ${parent.scriptName} (${Std.int(Date.now().getTime() - times)}ms)');
-			parent.hscript = new HScript(parent, null, varsToBring);
+			parent.hscript = new HScript(parent);
 		}
 	}
 
 	public static function initHaxeModuleCode(parent:FunkinLua, code:String, ?varsToBring:Any = null)
 	{
-		initHaxeModule(parent, varsToBring);
 		var hs:HScript = try parent.hscript catch (e) null;
-		if(hs != null)
+		if(hs == null)
+		{
+			trace('initializing haxe interp for: ${parent.scriptName}');
+			parent.hscript = new HScript(parent, code, varsToBring);
+		}
+		else
 		{
 			#if (SScript > "6.1.80")
 			hs.doString(code);
@@ -40,14 +45,7 @@ class HScript extends SScript
 			@:privateAccess
 			if(hs.parsingException != null)
 			{
-				var e:String = hs.parsingException.message;
-				if (!e.contains(hs.origin)) e = '${hs.origin}: $e';
-				FunkinLua.luaTrace('ERROR ON LOADING - $e', FlxColor.RED);
-				#if (SScript > "6.1.80" || SScript != "6.1.80")
-				hs.destroy();
-				#else
-				hs.kill();
-				#end
+				PlayState.instance.addTextToDebug('ERROR ON LOADING (${hs.origin}): ${hs.parsingException.message}', FlxColor.RED);
 			}
 		}
 	}
@@ -154,7 +152,7 @@ class HScript extends SScript
 				if(libPackage.length > 0)
 					str = libPackage + '.';
 
-				set(libName, resolveClassOrEnum(str + libName));
+				set(libName, Type.resolveClass(str + libName));
 			}
 			catch (e:Dynamic) {
 				var msg:String = e.message;
@@ -170,8 +168,7 @@ class HScript extends SScript
 		set('parentLua', parentLua);
 		set('this', this);
 		set('game', PlayState.instance);
-		if (PlayState.instance != null)
-			setSpecialObject(PlayState.instance, false, PlayState.instance.instancesExclude);
+		if (PlayState.instance != null) setSpecialObject(PlayState.instance, false, PlayState.instance.instancesExclude);
 		set('buildTarget', FunkinLua.getBuildTarget());
 		set('customSubstate', CustomSubstate.instance);
 		set('customSubstateName', CustomSubstate.name);
@@ -182,22 +179,21 @@ class HScript extends SScript
 		set('Function_StopHScript', FunkinLua.Function_StopHScript);
 		set('Function_StopAll', FunkinLua.Function_StopAll);
 
-		if (Stage.instance != null){
+		if (Stage.instance != null && isHxStage){
 			set('hideLastBG', function(hid:Bool){ 
 				Stage.instance.hideLastBG = hid;
 			});
-			set('layerInFront', function(layer:Int = 0, id:Dynamic) Stage.instance.layInFront[layer].push(id));
-			set('toAdd', function(id:Dynamic) Stage.instance.toAdd.push(id));
-			set('setSwagBack', function(id:String, sprite:Dynamic) Stage.instance.swagBacks.set(id, sprite));
-			set('getSwagBack', function(id:String) Stage.instance.swagBacks.get(id));
-			set('setSlowBacks', function(id:Dynamic, sprite:Array<FlxSprite>) Stage.instance.slowBacks.set(id, sprite));
-			set('getSlowBacks', function(id:Dynamic) Stage.instance.slowBacks.get(id));
-			set('setSwagGroup', function(id:String, group:FlxTypedGroup<Dynamic>) Stage.instance.swagGroup.set(id, group));
-			set('getSwagGroup', function(id:String) Stage.instance.swagGroup.get(id));
-			set('animatedBacks', function(id:FlxSprite) Stage.instance.animatedBacks.push(id));
-			set('animatedBacks2', function(id:FlxSprite) Stage.instance.animatedBacks2.push(id));
-
-			set('useSwagBack', function(id:String) Stage.instance.swagBacks[id]);
+			set('layerInFront', function(layer:Int = 0, id:Dynamic) return Stage.instance.layInFront[layer].push(id));
+			set('toAdd', function(id:Dynamic) return Stage.instance.toAdd.push(id));
+			set('setSwagBack', function(id:String, sprite:Dynamic) return Stage.instance.swagBacks.set(id, sprite));
+			set('getSwagBack', function(id:String) return Stage.instance.swagBacks.get(id));
+			set('setSlowBacks', function(id:Dynamic, sprite:Array<FlxSprite>) return Stage.instance.slowBacks.set(id, sprite));
+			set('getSlowBacks', function(id:Dynamic) return Stage.instance.slowBacks.get(id));
+			set('setSwagGroup', function(id:String, group:FlxTypedGroup<Dynamic>) return Stage.instance.swagGroup.set(id, group));
+			set('getSwagGroup', function(id:String) return Stage.instance.swagGroup.get(id));
+			set('animatedBacks', function(id:FlxSprite) return Stage.instance.animatedBacks.push(id));
+			set('animatedBacks2', function(id:FlxSprite) return Stage.instance.animatedBacks2.push(id));
+			set('useSwagBack', function(id:String) return Stage.instance.swagBacks[id]);
 		}
 		set('add', function(obj:FlxBasic) PlayState.instance.add(obj));
 		set('addBehindGF', function(obj:FlxBasic) PlayState.instance.addBehindGF(obj));
@@ -261,17 +257,8 @@ class HScript extends SScript
 		#if LUA_ALLOWED
 		funk.addLocalCallback("runHaxeCode", function(codeToRun:String, ?varsToBring:Any = null, ?funcToRun:String = null, ?funcArgs:Array<Dynamic> = null):Dynamic {
 			#if SScript
-			var retVal:TeaCall = null;
-			initHaxeModuleCode(funk, codeToRun);
-			if(varsToBring != null)
-			{
-				for (key in Reflect.fields(varsToBring))
-				{
-					//Debug.logTrace('Key $key: ' + Reflect.field(varsToBring, key));
-					funk.hscript.set(key, Reflect.field(varsToBring, key));
-				}
-			}
-			retVal = funk.hscript.executeCode(funcToRun, funcArgs);
+			initHaxeModuleCode(funk, codeToRun, varsToBring);
+			var retVal:TeaCall = funk.hscript.executeCode(funcToRun, funcArgs);
 			if (retVal != null)
 			{
 				if(retVal.succeeded)
@@ -280,7 +267,7 @@ class HScript extends SScript
 				var e = retVal.exceptions[0];
 				var calledFunc:String = if(funk.hscript.origin == funk.lastCalledFunction) funcToRun else funk.lastCalledFunction;
 				if (e != null)
-					FunkinLua.luaTrace('ERROR (${calledFunc}) - $e', false, false, FlxColor.RED);
+					FunkinLua.luaTrace(funk.hscript.origin + ":" + calledFunc + " - " + e, false, false, FlxColor.RED);
 				return null;
 			}
 			else if (funk.hscript.returnValue != null)
@@ -288,9 +275,8 @@ class HScript extends SScript
 				return funk.hscript.returnValue;
 			}
 			#else
-			FunkinLua.luaTrace(origin + ": runHaxeCode: HScript isn't supported on this platform!", false, false, FlxColor.RED);
+			FunkinLua.luaTrace("runHaxeCode: HScript isn't supported on this platform!", false, false, FlxColor.RED);
 			#end
-
 			return null;
 		});
 		
@@ -301,29 +287,31 @@ class HScript extends SScript
 			{
 				var e = callValue.exceptions[0];
 				if (e != null)
-					FunkinLua.luaTrace('ERROR (${callValue.calledFunction}) - $e', false, false, FlxColor.RED);
+					FunkinLua.luaTrace('ERROR (${funk.hscript.origin}: ${callValue.calledFunction}) - ' + e.message.substr(0, e.message.indexOf('\n')), false, false, FlxColor.RED);
 				return null;
 			}
 			else
 				return callValue.returnValue;
 			#else
-			FunkinLua.luaTrace(origin + ": runHaxeFunction: HScript isn't supported on this platform!", false, false, FlxColor.RED);
+			FunkinLua.luaTrace("runHaxeFunction: HScript isn't supported on this platform!", false, false, FlxColor.RED);
 			#end
 		});
 		// This function is unnecessary because import already exists in SScript as a native feature
 		funk.addLocalCallback("addHaxeLibrary", function(libName:String, ?libPackage:String = '') {
+			#if SScript
 			var str:String = '';
 			if(libPackage.length > 0)
 				str = libPackage + '.';
 			else if(libName == null)
 				libName = '';
 
-			var c:Dynamic = funk.hscript.resolveClassOrEnum(str + libName);
+			var c:Dynamic = Type.resolveClass(str + libName);
+			if (c == null)
+				c = Type.resolveEnum(str + libName);
 
 			if (c != null)
 				SScript.globalVariables[libName] = c;
 
-			#if SScript
 			if (funk.hscript != null)
 			{
 				try {
@@ -331,7 +319,7 @@ class HScript extends SScript
 						funk.hscript.set(libName, c);
 				}
 				catch (e:Dynamic) {
-					FunkinLua.luaTrace('ERROR (${funk.lastCalledFunction}) - $e', false, false, FlxColor.RED);
+					FunkinLua.luaTrace(funk.hscript.origin + ":" + funk.lastCalledFunction + " - " + e, false, false, FlxColor.RED);
 				}
 			}
 			#else
@@ -339,13 +327,6 @@ class HScript extends SScript
 			#end
 		});
 		#end
-	}
-
-	function resolveClassOrEnum(name:String):Dynamic {
-		var c:Dynamic = Type.resolveClass(name);
-		if (c == null)
-			c = Type.resolveEnum(name);
-		return c;
 	}
 
 	#if (SScript > "6.1.80" || SScript != "6.1.80")
@@ -370,6 +351,7 @@ class HScript extends SScript
 class HScript extends SScript
 {
 	public var parentLua:FunkinLua;
+	public var isHxStage:Bool = false;
 	
 	public static function initHaxeModule(parent:FunkinLua)
 	{
@@ -521,6 +503,23 @@ class HScript extends SScript
 		set('Function_StopLua', FunkinLua.Function_StopLua); //doesnt do much cuz HScript has a lower priority than Lua
 		set('Function_StopHScript', FunkinLua.Function_StopHScript);
 		set('Function_StopAll', FunkinLua.Function_StopAll);
+
+		if (Stage.instance != null && isHxStage){
+			set('hideLastBG', function(hid:Bool){ 
+				Stage.instance.hideLastBG = hid;
+			});
+			set('layerInFront', function(layer:Int = 0, id:Dynamic) return Stage.instance.layInFront[layer].push(id));
+			set('toAdd', function(id:Dynamic) return Stage.instance.toAdd.push(id));
+			set('setSwagBack', function(id:String, sprite:Dynamic) return Stage.instance.swagBacks.set(id, sprite));
+			set('getSwagBack', function(id:String) return Stage.instance.swagBacks.get(id));
+			set('setSlowBacks', function(id:Dynamic, sprite:Array<FlxSprite>) return Stage.instance.slowBacks.set(id, sprite));
+			set('getSlowBacks', function(id:Dynamic) return Stage.instance.slowBacks.get(id));
+			set('setSwagGroup', function(id:String, group:FlxTypedGroup<Dynamic>) return Stage.instance.swagGroup.set(id, group));
+			set('getSwagGroup', function(id:String) return Stage.instance.swagGroup.get(id));
+			set('animatedBacks', function(id:FlxSprite) return Stage.instance.animatedBacks.push(id));
+			set('animatedBacks2', function(id:FlxSprite) return Stage.instance.animatedBacks2.push(id));
+			set('useSwagBack', function(id:String) return Stage.instance.swagBacks[id]);
+		}
 		
 		set('add', function(obj:FlxBasic) PlayState.instance.add(obj));
 		set('addBehindGF', function(obj:FlxBasic) PlayState.instance.addBehindGF(obj));

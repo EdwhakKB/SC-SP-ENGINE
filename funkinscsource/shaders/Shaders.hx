@@ -1577,21 +1577,30 @@ class RayMarchEffect extends ShaderEffectNew
 	public var y:Float = 0;
     public var z:Float = 0;
     public var zoom:Float = -2;
+
+    //Now you can customize these things for the shader! (NOW CAN CHANGE HOW MANY "windows" OR DISTANCE IS VISIBLE WHICH MAKES IT A BETTER SHADER)!
+    public var addedMAX_STEPS:Float = 0;
+    public var addedMAX_DIST:Float = 0;
+    public var addedSURF_DIST:Float = 0;
+
     public function new(){
-        shader.iResolution.value = [1280,720];
+        shader.iResolution.value = [FlxG.width, FlxG.height];
         shader.rotation.value = [0, 0, 0];
         shader.zoom.value = [zoom];
+
+        shader.addedMAX_STEPS.value = [addedMAX_STEPS];
+        shader.addedMAX_DIST.value = [addedMAX_DIST];
+        shader.addedSURF_DIST.value = [addedSURF_DIST];
     }
   
     override public function update(elapsed:Float){
-        shader.iResolution.value = [1280,720];
-        
+        shader.iResolution.value = [FlxG.width, FlxG.height];
         shader.rotation.value = [x*FlxAngle.TO_RAD, y*FlxAngle.TO_RAD, z*FlxAngle.TO_RAD];
         shader.zoom.value = [zoom];
-    }
-
-    public function setPoint(){
         
+        shader.addedMAX_STEPS.value = [addedMAX_STEPS];
+        shader.addedMAX_DIST.value = [addedMAX_DIST];
+        shader.addedSURF_DIST.value = [addedSURF_DIST];
     }
 }
 
@@ -1622,6 +1631,10 @@ class RayMarchShader extends FlxFixedShader
     uniform vec3 rotation;
     uniform vec3 iResolution;
     uniform float zoom;
+
+    uniform float addedMAX_STEPS = 0;
+    uniform float addedMAX_DIST = 0;
+    uniform float addedSURF_DIST = 0;
 
     // Rotation matrix around the X axis.
     mat3 rotateX(float theta) {
@@ -1681,11 +1694,11 @@ class RayMarchShader extends FlxFixedShader
     float RayMarch(vec3 ro, vec3 rd) {
         float dO=0.;
         
-        for(int i=0; i<MAX_STEPS; i++) {
+        for(int i=0; i<MAX_STEPS+addedMAX_STEPS; i++) {
             vec3 p = ro + rd*dO;
             float dS = GetDist(p);
             dO += dS;
-            if(dO>MAX_DIST || abs(dS)<SURF_DIST) break;
+            if(dO>MAX_DIST+addedMAX_DIST || abs(dS)<SURF_DIST+addedSURF_DIST) break;
         }
         
         return dO;
@@ -1737,7 +1750,7 @@ class RayMarchShader extends FlxFixedShader
     
         float d = RayMarch(ro, rd);
 
-        if(d<MAX_DIST) {
+        if(d<MAX_DIST+addedMAX_DIST) {
             vec3 p = ro + rd * d;
             uv = vec2(p.x,p.y) * 0.5;
             uv += center; //move coords from top left to center
@@ -3346,7 +3359,7 @@ class IndividualGlitchesShader extends FlxShader
 }
 
 class GlitchedShader extends GraphicsShader
-{
+{   
     @:glFragmentSource('
         // https://www.shadertoy.com/view/XtyXzW
 
@@ -4451,102 +4464,6 @@ class GocpShader extends FlxShader
     }
 }
 
-class ZoomBlur extends ShaderEffectNew
-{
-    public var shader:ZoomBlurShader = new ZoomBlurShader();
-    public var iTime:Float = 0;
-
-    public function new()
-    {
-        shader.iTime.value = [0];
-    }
-
-    override public function update(elapsed:Float)
-    {
-        iTime += elapsed;
-        shader.iTime.value = [iTime];
-    }
-}
-
-class ZoomBlurShader extends FlxRuntimeShader
-{
-    @:glFragmentSource('
-    #pragma header
-    vec2 uv = openfl_TextureCoordv.xy;
-    vec2 fragCoord = openfl_TextureCoordv*openfl_TextureSize;
-    vec2 iResolution = openfl_TextureSize;
-    #define iChannel0 bitmap
-    #define texture flixel_texture2D
-    #define fragColor gl_FragColor
-    #define mainImage main
-    
-    uniform float iTime;
-    
-    //modified zoom blur from http://transitions.glsl.io/transition/b86b90161503a0023231
-    const float strength = 0.3;
-    const float PI = 3.141592653589793;
-    
-    float Linear_ease(in float begin, in float change, in float duration, in float time) {
-        return change * time / duration + begin;
-    }
-    
-    float Exponential_easeInOut(in float begin, in float change, in float duration, in float time) {
-        if (time == 0.0)
-            return begin;
-        else if (time == duration)
-            return begin + change;
-        time = time / (duration / 2.0);
-        if (time < 1.0)
-            return change / 2.0 * pow(2.0, 10.0 * (time - 1.0)) + begin;
-        return change / 2.0 * (-pow(2.0, -10.0 * (time - 1.0)) + 2.0) + begin;
-    }
-    
-    float Sinusoidal_easeInOut(in float begin, in float change, in float duration, in float time) {
-        return -change / 2.0 * (cos(PI * time / duration) - 1.0) + begin;
-    }
-    
-    float random(in vec3 scale, in float seed) {
-        return fract(sin(dot(gl_FragCoord.xyz + seed, scale)) * 43758.5453 + seed);
-    }
-    
-    vec3 crossFade(in vec2 uv, in float dissolve) {
-        return mix(texture(iChannel0, uv).rgb, texture(iChannel1, uv).rgb, dissolve);
-    }
-    
-    void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
-        vec2 texCoord = fragCoord.xy / iResolution.xy;
-        float progress = sin(iTime*0.5) * 0.5 + 0.5;
-        // Linear interpolate center across center half of the image
-        vec2 center = vec2(Linear_ease(0.5, 0.0, 1.0, progress),0.5);
-        float dissolve = Exponential_easeInOut(0.0, 1.0, 1.0, progress);
-    
-        // Mirrored sinusoidal loop. 0->strength then strength->0
-        float strength = Sinusoidal_easeInOut(0.0, strength, 0.5, progress);
-    
-        vec3 color = vec3(0.0);
-        float total = 0.0;
-        vec2 toCenter = center - texCoord;
-    
-        /* randomize the lookup values to hide the fixed number of samples */
-        float offset = random(vec3(12.9898, 78.233, 151.7182), 0.0)*0.5;
-    
-        for (float t = 0.0; t <= 20.0; t++) {
-            float percent = (t + offset) / 20.0;
-            float weight = 1.0 * (percent - percent * percent);
-            color += crossFade(texCoord + toCenter * percent * strength, dissolve) * weight;
-            total += weight;
-        }
-    
-        fragColor = vec4(color / total, 1.0);
-    }
-    ')
-
-    public function new()
-    {
-        super();
-    }
-}
-
 class TypeVCREffect extends ShaderEffectNew
 {
     public var shader:TypeVCRShader = new TypeVCRShader();
@@ -4635,130 +4552,65 @@ class TypeVCRShader extends FlxShader
     }
 }
 
-class LightingRayEffect extends ShaderEffectNew
+class HeatWaveEffect extends ShaderEffectNew
 {
-    public var shader:LightingRayShader = new LightingRayShader();
-    public var iTime:Float = 0.0;
+    public var shader:HeatWaveShader = new HeatWaveShader();
+    public var iTime:Float = 0;
+    public var strength:Float = 0;
+    public var speed:Float = 0;
 
     public function new()
     {
-        shader.iTime.value = [0.0];
+        shader.time.value = [0];
+        shader.strength.value = [strength];
+        shader.speed.value = [speed];
     }
 
-    override public function update(elapsed:Float)
+    override public function update(elapsed:Float):Void
     {
         iTime += elapsed;
-        shader.iTime.value = [iTime];
+        shader.time.value = [iTime];
+        shader.strength.value = [strength];
+        shader.speed.value = [speed];
     }
 }
 
-class LightingRayShader extends FlxGraphicsShader
+class HeatWaveShader extends FlxShader
 {
     @:glFragmentSource('
-    // Automatically converted with https://github.com/TheLeerName/ShadertoyToFlixel
-
     #pragma header
+
+    uniform float time;
+    uniform float strength;
+    uniform float speed;
     
-    #define round(a) floor(a + 0.5)
-    #define iResolution vec3(openfl_TextureSize, 0.)
-    uniform float iTime;
-    #define iChannel0 bitmap
-    uniform sampler2D iChannel1;
-    uniform sampler2D iChannel2;
-    uniform sampler2D iChannel3;
-    #define texture flixel_texture2D
-    
-    // third argument fix
-    vec4 flixel_texture2D(sampler2D bitmap, vec2 coord, float bias) {
-        vec4 color = texture2D(bitmap, coord, bias);
-        if (!hasTransform)
-        {
-            return color;
-        }
-        if (color.a == 0.0)
-        {
-            return vec4(0.0, 0.0, 0.0, 0.0);
-        }
-        if (!hasColorTransform)
-        {
-            return color * openfl_Alphav;
-        }
-        color = vec4(color.rgb / color.a, color.a);
-        mat4 colorMultiplier = mat4(0);
-        colorMultiplier[0][0] = openfl_ColorMultiplierv.x;
-        colorMultiplier[1][1] = openfl_ColorMultiplierv.y;
-        colorMultiplier[2][2] = openfl_ColorMultiplierv.z;
-        colorMultiplier[3][3] = openfl_ColorMultiplierv.w;
-        color = clamp(openfl_ColorOffsetv + (color * colorMultiplier), 0.0, 1.0);
-        if (color.a > 0.0)
-        {
-            return vec4(color.rgb * color.a * openfl_Alphav, color.a * openfl_Alphav);
-        }
-        return vec4(0.0, 0.0, 0.0, 0.0);
-    }
-    
-    // variables which is empty, they need just to avoid crashing shader
-    uniform float iTimeDelta;
-    uniform float iFrameRate;
-    uniform int iFrame;
-    #define iChannelTime float[4](iTime, 0., 0., 0.)
-    #define iChannelResolution vec3[4](iResolution, vec3(0.), vec3(0.), vec3(0.))
-    uniform vec4 iMouse;
-    uniform vec4 iDate;
-    
-    float rayStrength(vec2 raySource, vec2 rayRefDirection, vec2 coord, float seedA, float seedB, float speed)
-    {
-        vec2 sourceToCoord = coord - raySource;
-        float cosAngle = dot(normalize(sourceToCoord), rayRefDirection);
-        
-        return clamp(
-            (0.45 + 0.15 * sin(cosAngle * seedA + iTime * speed)) +
-            (0.3 + 0.2 * cos(-cosAngle * seedB + iTime * speed)),
-            0.0, 1.0) *
-            clamp((iResolution.x - length(sourceToCoord)) / iResolution.x, 0.5, 1.0);
-    }
-    
-    void mainImage( out vec4 fragColor, in vec2 fragCoord )
-    {
-        vec2 uv = fragCoord.xy / iResolution.xy;
-        uv.y = 1.0 - uv.y;
-        vec2 coord = vec2(fragCoord.x, iResolution.y - fragCoord.y);
-        
-        
-        // Set the parameters of the sun rays
-        vec2 rayPos1 = vec2(iResolution.x * 0.7, iResolution.y * -0.4);
-        vec2 rayRefDir1 = normalize(vec2(1.0, -0.116));
-        float raySeedA1 = 36.2214;
-        float raySeedB1 = 21.11349;
-        float raySpeed1 = 1.5;
-        
-        vec2 rayPos2 = vec2(iResolution.x * 0.8, iResolution.y * -0.6);
-        vec2 rayRefDir2 = normalize(vec2(1.0, 0.241));
-        const float raySeedA2 = 22.39910;
-        const float raySeedB2 = 18.0234;
-        const float raySpeed2 = 1.1;
-        
-        // Calculate the colour of the sun rays on the current fragment
-        vec4 rays1 =
-            vec4(1.0, 1.0, 1.0, 1.0) *
-            rayStrength(rayPos1, rayRefDir1, coord, raySeedA1, raySeedB1, raySpeed1);
-         
-        vec4 rays2 =
-            vec4(1.0, 1.0, 1.0, 1.0) *
-            rayStrength(rayPos2, rayRefDir2, coord, raySeedA2, raySeedB2, raySpeed2);
-        
-        fragColor = rays1 * 0.5 + rays2 * 0.4;
-        
-        // Attenuate brightness towards the bottom, simulating light-loss due to depth.
-        // Give the whole thing a blue-green tinge as well.
-        float brightness = 1.0 - (coord.y / iResolution.y);
-        fragColor.x *= 0.1 + (brightness * 0.8);
-        fragColor.y *= 0.3 + (brightness * 0.6);
-        fragColor.z *= 0.5 + (brightness * 0.5);
+    float rand(vec2 n) { return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453);}
+    float noise(vec2 n) {
+    const vec2 d = vec2(0.0, 1.0);
+    vec2 b = floor(n), f = smoothstep(vec2(0.0), vec2(1.0), fract(n));
+    return mix(mix(rand(b), rand(b + d.yx), f.x), mix(rand(b + d.xy), rand(b + d.yy), f.x), f.y);
     }
     
     void main() {
-        mainImage(gl_FragColor, openfl_TextureCoordv*openfl_TextureSize);
+        vec2 p_m = openfl_TextureCoordv.xy;
+        vec2 p_d = p_m;
+    
+        p_d.y = 1.0-p_d.y;
+        p_d.t += (time * 0.1) * speed;
+    
+        p_d = mod(p_d, 1.0);
+        vec4 dst_map_val = vec4(noise(p_d * vec2(50)));
+        
+        vec2 dst_offset = dst_map_val.xy;
+        dst_offset -= vec2(.5,.5);
+        dst_offset *= 2.;
+        dst_offset *= (0.01 * strength);
+        
+        //reduce effect towards Y top
+        dst_offset *= (1. - p_m.t);
+        
+        vec2 dist_tex_coord = p_m.st + dst_offset;
+        gl_FragColor = flixel_texture2D(bitmap, dist_tex_coord); 
     }
     ')
 

@@ -146,8 +146,8 @@ class NoteSplash extends FlxSkewedSprite
 	
 		if (!ClientPrefs.data.splashAlphaAsStrumAlpha) alpha = ClientPrefs.data.splashAlpha;
 		if(note != null) alpha = note.noteSplashData.a;
-		rgbShader.copyValues(tempShader);
 		rgbShader.containsPixel = (containedPixelTexture || PlayState.isPixelStage);
+		rgbShader.copyValues(tempShader);
 
 		if(note != null) antialiasing = note.noteSplashData.antialiasing;
 		if(texture.contains('pixel') || _textureLoaded.contains('pixel') || !ClientPrefs.data.antialiasing) antialiasing = false;
@@ -266,7 +266,6 @@ class NoteSplash extends FlxSkewedSprite
 
 class PixelSplashShaderRef {
 	public var shader:PixelSplashShader = new PixelSplashShader();
-
 	public var containsPixel:Bool = false;
 
 	public function copyValues(tempShader:RGBPalette)
@@ -284,6 +283,10 @@ class PixelSplashShaderRef {
 				shader.b.value[i] = tempShader.shader.b.value[i];
 			}
 			shader.mult.value[0] = tempShader.shader.mult.value[0];
+
+			var pixel:Float = 1;
+			if(containsPixel) pixel = PlayState.daPixelZoom;
+			shader.uBlocksize.value = [pixel, pixel];
 		}
 		else shader.mult.value[0] = 0.0;
 	}

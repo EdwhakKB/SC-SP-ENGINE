@@ -76,9 +76,6 @@
 	
 	<define name="HAXE_EXTENSION" if="HSCRIPT_ALLOWED" />
 
-	<!-- DONT ENABLE THIS -->
-	<define name="CHECK_FOR_UPDATES" if="desktop officialBuild"/>
-
 	<!-- Assets -->
 	<assets path="assets/fonts" />
 	<assets path="assets/art" />

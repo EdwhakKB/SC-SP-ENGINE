@@ -79,9 +79,7 @@ class StrumArrow extends FlxSkewedSprite
 		}
 		scrollFactor.set();
 
-		if (texture.contains('pixel') || style.contains('pixel') || daStyle.contains('pixel'))
-			containsPixelTexture = true;
-
+		if (texture.contains('pixel') || style.contains('pixel') || daStyle.contains('pixel')) containsPixelTexture = true;
 		loadNoteAnims(style != "" ? style : skin, true);
 	}
 

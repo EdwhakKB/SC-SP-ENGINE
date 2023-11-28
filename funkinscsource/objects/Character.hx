@@ -71,7 +71,8 @@ class Character extends FlxSprite
 	public var originalFlipX:Bool = false;
 	public var healthColorArray:Array<Int> = [255, 0, 0];
 
-	public var iconColor:String;
+	public var iconColor:String; //New icon color change!
+	public var iconColorFormated:String; //Original icon color change!
 
 	public var flipMode:Bool = false;
 
@@ -88,6 +89,9 @@ class Character extends FlxSprite
 
 	public var curColor:FlxColor;
 	public var doMissThing:Bool = false;
+	public var charNotPlaying:Bool = false; // detect when no frames exist that the character has no use
+
+	public var isCustomCharacter:Bool = false; //Check if the character is maybe external or like custom or lua character
 
 	public function new(x:Float, y:Float, ?character:String = 'bf', ?isPlayer:Bool = false)
 	{
@@ -105,11 +109,13 @@ class Character extends FlxSprite
 		animDanced = new Map<String, Bool>();
 
 		curCharacter = character;
+		healthIcon = character;
 		this.isPlayer = isPlayer;
 
 		idleSuffix = "";
 
-		iconColor = isPlayer ? '#66FF33' : '#FF0000';
+		iconColor = isPlayer ? 'FF66FF33' : 'FFFF0000';
+		iconColorFormated = isPlayer ? '#66FF33' : '#FF0000';
 
 		noteSkinStyleOfCharacter = 'noteSkins/NOTE_assets';
 
@@ -134,9 +140,10 @@ class Character extends FlxSprite
 
 				// Load the data from JSON and cast it to a struct we can easily read.
 				var characterPath:String = 'data/characters/' + curCharacter + '.json';
+				var path:String = '';
 
 				#if MODS_ALLOWED
-				var path:String = Paths.modFolders(characterPath);
+				path = Paths.modFolders(characterPath);
 				if (!FileSystem.exists(path))
 				{
 					path = Paths.getSharedPath(characterPath);
@@ -144,12 +151,12 @@ class Character extends FlxSprite
 
 				if (!FileSystem.exists(path))
 				#else
-				var path:String = Paths.getSharedPath(characterPath);
+				path = Paths.getSharedPath(characterPath);
 				if (!Assets.exists(path))
 				#end
 				{
-					path = Paths.getSharedPath('data/characters/' + DEFAULT_CHARACTER +
-						'.json'); // If a character couldn't be found, change him to BF just to prevent a crash
+					path = Paths.getSharedPath('data/characters/' + DEFAULT_CHARACTER + '.json');
+					// If a character couldn't be found, change him to BF just to prevent a crash
 				}
 
 				#if MODS_ALLOWED
@@ -213,12 +220,10 @@ class Character extends FlxSprite
 
 				imageFile = json.image;
 
-				if (PlayState.SONG != null) noteSkin = (json.noteSkin != "" ? json.noteSkin : PlayState.SONG.arrowSkin);
-				else noteSkin = (json.noteSkin != "" ? json.noteSkin : noteSkinStyleOfCharacter);
+				if (PlayState.SONG != null) noteSkin = (json.noteSkin != null ? json.noteSkin : PlayState.SONG.arrowSkin);
+				else noteSkin = (json.noteSkin != null ? json.noteSkin : noteSkinStyleOfCharacter);
 
-				if (json.isPlayerChar){
-					isPsychPlayer = json.isPlayerChar;
-				}
+				if (json.isPlayerChar) isPsychPlayer = json.isPlayerChar;
 
 				if (json.scale != 1)
 				{
@@ -246,12 +251,13 @@ class Character extends FlxSprite
 				colorPreString = FlxColor.fromRGB(healthColorArray[0], healthColorArray[1], healthColorArray[2]);
 				colorPreCut = colorPreString.toHexString();
 	
-				iconColor = '0x' + colorPreCut.substring(2);
+				iconColor = colorPreCut.substring(2);
+				iconColorFormated = '0x' + colorPreCut.substring(2);
 
 				// I HATE YOU SO MUCH! -- code by me, glowsoony
-				if (iconColor.contains('0xFF') || iconColor.contains('#') || iconColor.contains('0x')){
-					var newIconColorFormat:String = iconColor.replace('#', '').replace('0xFF', '').replace('0x', '');
-					iconColor = '#' + newIconColorFormat;
+				if (iconColorFormated.contains('0xFF') || iconColorFormated.contains('#') || iconColorFormated.contains('0x')){
+					var newIconColorFormat:String = iconColorFormated.replace('#', '').replace('0xFF', '').replace('0x', '');
+					iconColorFormated = '#' + newIconColorFormat;
 				}
 
 				noAntialiasing = (json.no_antialiasing == true);
@@ -296,12 +302,22 @@ class Character extends FlxSprite
 				}
 				else
 				{
-					quickAnimAdd('idle', 'BF idle dance');
-					Debug.logInfo('Something went wrong with the animations!');
+					//quickAnimAdd('idle', 'BF idle dance');
+					Debug.logInfo("Character has no Frames!");
+					charNotPlaying = true;
 				}
 
 				json.startingAnim != null ? playAnim(json.startingAnim) : (animOffsets.exists('danceRight') ? playAnim('danceRight') : playAnim('idle'));
 		}
+
+		if (charNotPlaying) //Leave the character without any animations and ability to dance!
+		{
+			stoppedDancing = true;
+			stoppedUpdatingCharacter = true;
+			nonanimated = true;
+			stopIdle = true;
+		}
+
 		originalFlipX = flipX;
 
 		if(animation.getByName('danceLeft') != null && animation.getByName('danceRight') != null) if (!isDancing) isDancing = true;
@@ -339,7 +355,7 @@ class Character extends FlxSprite
 	
 	override function update(elapsed:Float)
 	{
-		if (!debugMode && animation.curAnim != null)
+		if (!debugMode && animation.curAnim != null && !stoppedUpdatingCharacter)
 		{
 			if (heyTimer > 0)
 			{
@@ -395,10 +411,10 @@ class Character extends FlxSprite
 				}
 			}
 
-			if (isPlayer)
+			if (isPlayer && !isCustomCharacter)
 			{
 				if (animation.curAnim.name.startsWith('sing')) holdTimer += elapsed;
-				else if (isPlayer) holdTimer = 0;	
+				else holdTimer = 0;	
 			}
 
 			if (!debugMode)
@@ -421,14 +437,14 @@ class Character extends FlxSprite
 
 	public var danced:Bool = false;
 	public var stoppedDancing:Bool = false;
+	public var stoppedUpdatingCharacter:Bool = false;
 
 	/**
 	 * FOR GF DANCING SHIT
 	 */
 	public function dance(forced:Bool = false, altAnim:Bool = false)
 	{
-		if (stoppedDancing) return;
-		if (!debugMode && !skipDance && !specialAnim && !nonanimated && !stopIdle)
+		if (!debugMode && !stoppedDancing && (!skipDance && !specialAnim && !nonanimated && !stopIdle))
 		{
 			if (animation.curAnim != null)
 			{
@@ -544,7 +560,7 @@ class Character extends FlxSprite
 
 	public function resetAnimationVars()
 	{
-		for (i in ['flipMode', 'stopIdle', 'skipDance', 'nonanimated', 'specialAnim', 'doMissThing', 'stunned'])
+		for (i in ['flipMode', 'stopIdle', 'skipDance', 'nonanimated', 'specialAnim', 'doMissThing', 'stunned', 'stoppedDancing', 'stoppedUpdatingCharacter', 'charNotPlaying'])
 		{
 			Reflect.setProperty(this, i, false);
 		}

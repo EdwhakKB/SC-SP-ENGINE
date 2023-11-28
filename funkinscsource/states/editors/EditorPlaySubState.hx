@@ -935,7 +935,10 @@ class EditorPlaySubState extends MusicBeatSubstate
 				}
 			}
 		}
+		decreaseCombo(daNote.noteData);
+	}
 
+	function decreaseCombo(direction:Int):Void {
 		// score and data
 		songMisses++;
 		totalPlayed++;

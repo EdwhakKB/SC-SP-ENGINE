@@ -15,6 +15,7 @@ import flixel.addons.ui.FlxUIDropDownMenu;
 import flixel.addons.ui.FlxUINumericStepper;
 import flixel.addons.ui.FlxUISlider;
 import flixel.addons.ui.FlxUITabMenu;
+import flixel.addons.ui.FlxUIButton;
 import flixel.group.FlxGroup;
 import flixel.math.FlxPoint;
 import flixel.ui.FlxButton;
@@ -212,6 +213,8 @@ class ChartingState extends MusicBeatState
 	public var player2:Character;
 
 	public static var mustCleanMem:Bool = false;
+
+	var hasUnsavedChanges = false; //Copies modcharteditor's way of telling if something changed!
 	override function create()
 	{	
 		Paths.clearStoredMemory();
@@ -502,12 +505,14 @@ class ChartingState extends MusicBeatState
 		var clear_events:FlxButton = new FlxButton(200, 310, 'Clear events', function()
 			{
 				clearEvents();
+				hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 			});
 		clear_events.color = FlxColor.RED;
 		clear_events.label.color = FlxColor.WHITE;
 
 		var clear_notes:FlxButton = new FlxButton(200, clear_events.y + 30, 'Clear notes', function() {
 			for (sec in 0..._song.notes.length) _song.notes[sec].sectionNotes = [];
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 			updateGrid();
 		});
 		clear_notes.color = FlxColor.RED;
@@ -559,6 +564,7 @@ class ChartingState extends MusicBeatState
 		var player1DropDown = new FlxUIDropDownMenu(10, stepperSpeed.y + 45, FlxUIDropDownMenu.makeStrIdLabelArray(characters, true), function(character:String)
 		{
 			_song.player1 = characters[Std.parseInt(character)];
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 			updateHeads();
 		});
 		player1DropDown.selectedLabel = _song.player1;
@@ -567,6 +573,7 @@ class ChartingState extends MusicBeatState
 		var gfVersionDropDown = new FlxUIDropDownMenu(player1DropDown.x, player1DropDown.y + 40, FlxUIDropDownMenu.makeStrIdLabelArray(characters, true), function(character:String)
 		{
 			_song.gfVersion = characters[Std.parseInt(character)];
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 			updateHeads();
 		});
 		gfVersionDropDown.selectedLabel = _song.gfVersion;
@@ -575,6 +582,7 @@ class ChartingState extends MusicBeatState
 		var player2DropDown = new FlxUIDropDownMenu(player1DropDown.x, gfVersionDropDown.y + 40, FlxUIDropDownMenu.makeStrIdLabelArray(characters, true), function(character:String)
 		{
 			_song.player2 = characters[Std.parseInt(character)];
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 			updateHeads();
 		});
 		player2DropDown.selectedLabel = _song.player2;
@@ -583,6 +591,7 @@ class ChartingState extends MusicBeatState
 		var player4DropDown = new FlxUIDropDownMenu(player1DropDown.x, player2DropDown.y + 40, FlxUIDropDownMenu.makeStrIdLabelArray(characters, true), function(character:String)
 		{
 			_song.player4 = characters[Std.parseInt(character)];
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 			updateHeads();
 		});
 		player4DropDown.selectedLabel = _song.player4;
@@ -627,6 +636,7 @@ class ChartingState extends MusicBeatState
 		stageDropDown = new FlxUIDropDownMenu(player1DropDown.x + 140, player1DropDown.y, FlxUIDropDownMenu.makeStrIdLabelArray(stages, true), function(character:String)
 		{
 			_song.stage = stages[Std.parseInt(character)];
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 		});
 		stageDropDown.selectedLabel = _song.stage;
 		blockPressWhileScrolling.push(stageDropDown);
@@ -805,7 +815,9 @@ class ChartingState extends MusicBeatState
 					for (i in 0...event[1].length)
 					{
 						var eventToPush:Array<Dynamic> = event[1][i];
-						copiedEventArray.push([eventToPush[0], eventToPush[1], eventToPush[2]]);
+						copiedEventArray.push([eventToPush[0], eventToPush[1], eventToPush[2], eventToPush[3], eventToPush[4], eventToPush[5], eventToPush[6], eventToPush[7], eventToPush[8], eventToPush[9],
+							eventToPush[10], eventToPush[11], eventToPush[12], eventToPush[13], eventToPush[14]
+						]);
 					}
 					notesCopied.push([strumTime, -1, copiedEventArray]);
 				}
@@ -854,6 +866,7 @@ class ChartingState extends MusicBeatState
 					}
 				}
 			}
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 			updateGrid();
 		});
 
@@ -878,6 +891,7 @@ class ChartingState extends MusicBeatState
 					--i;
 				}
 			}
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 			updateGrid();
 			updateNoteUI();
 		});
@@ -898,6 +912,7 @@ class ChartingState extends MusicBeatState
 				_song.notes[curSec].sectionNotes[i] = note;
 			}
 			updateGrid();
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 		});
 
 		var stepperCopy:FlxUINumericStepper = null;
@@ -928,11 +943,14 @@ class ChartingState extends MusicBeatState
 					for (i in 0...event[1].length)
 					{
 						var eventToPush:Array<Dynamic> = event[1][i];
-						copiedEventArray.push([eventToPush[0], eventToPush[1], eventToPush[2]]);
+						copiedEventArray.push([eventToPush[0], eventToPush[1], eventToPush[2], eventToPush[3], eventToPush[4], eventToPush[5], eventToPush[6], eventToPush[7], eventToPush[8], eventToPush[9],
+							eventToPush[10], eventToPush[11], eventToPush[12], eventToPush[13], eventToPush[14]
+						]);
 					}
 					_song.events.push([strumTime, copiedEventArray]);
 				}
 			}
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 			updateGrid();
 		});
 		copyLastButton.setGraphicSize(80, 30);
@@ -961,7 +979,7 @@ class ChartingState extends MusicBeatState
 			_song.notes[curSec].sectionNotes.push(i);
 
 			}
-
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 			updateGrid();
 		});
 		var mirrorButton:FlxButton = new FlxButton(duetButton.x + 100, duetButton.y, "Mirror Notes", function()
@@ -982,7 +1000,7 @@ class ChartingState extends MusicBeatState
 			//_song.notes[curSec].sectionNotes.push(i);
 
 			}
-
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 			updateGrid();
 		});
 
@@ -1588,6 +1606,7 @@ class ChartingState extends MusicBeatState
 		check_disableNoteRGB.callback = function()
 		{
 			_song.disableNoteRGB = check_disableNoteRGB.checked;
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 			updateGrid();
 			//Debug.logTrace('CHECKED!');
 		};
@@ -1597,6 +1616,7 @@ class ChartingState extends MusicBeatState
 		check_disableNoteQuant.callback = function()
 		{
 			_song.disableNoteQuant = check_disableNoteQuant.checked;
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 			updateGrid();
 			//Debug.logTrace('CHECKED!');
 		};
@@ -1610,6 +1630,7 @@ class ChartingState extends MusicBeatState
 
 		var reloadNotesButton:FlxButton = new FlxButton(noteSplashesInputText.x + 5, noteSplashesInputText.y + 20, 'Change Notes', function() {
 			_song.arrowSkin = noteSkinInputText.text;
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 			updateGrid();
 		});
 		//
@@ -1619,6 +1640,7 @@ class ChartingState extends MusicBeatState
 		notITGModchart.callback = function()
 		{
 			_song.notITG = notITGModchart.checked;
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 			//Debug.logInfo('CHECKED!');
 		};
 		
@@ -1627,6 +1649,7 @@ class ChartingState extends MusicBeatState
 		usingHUD.callback = function()
 		{
 			_song.usesHUD = usingHUD.checked;
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 			//Debug.logInfo('CHECKED!');
 		};
 
@@ -1635,6 +1658,7 @@ class ChartingState extends MusicBeatState
 		noIntroSkipping.callback = function()
 		{
 			_song.noIntroSkip = noIntroSkipping.checked;
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 			//Debug.logInfo('CHECKED!');
 		};
 
@@ -1643,6 +1667,7 @@ class ChartingState extends MusicBeatState
 		forceRightScroll.callback = function()
 		{
 			_song.rightScroll = forceRightScroll.checked;
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 		};
 
 		var forceMiddleScroll = new FlxUICheckBox(reloadNotesButton.x + 160, reloadNotesButton.y - 110, null, null, "Forced MiddleScroll", 100);
@@ -1650,6 +1675,7 @@ class ChartingState extends MusicBeatState
 		forceMiddleScroll.callback = function()
 		{
 			_song.middleScroll = forceMiddleScroll.checked;
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 		};
 
 		tab_group_data.add(gameOverCharacterInputText);
@@ -1681,11 +1707,7 @@ class ChartingState extends MusicBeatState
 
 	function loadSong():Void
 	{
-		if (FlxG.sound.music != null)
-		{
-			FlxG.sound.music.stop();
-			// vocals.stop();
-		}
+		if (FlxG.sound.music != null) FlxG.sound.music.stop();
 
 		var file:Dynamic = null;
 		#if (SBETA == 0.1)
@@ -1794,32 +1816,35 @@ class ChartingState extends MusicBeatState
 			{
 				case 'Must hit section':
 					_song.notes[curSec].mustHitSection = check.checked;
-
+					hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 					updateGrid();
 					updateHeads();
 
 				case 'GF section':
 					_song.notes[curSec].gfSection = check.checked;
-
+					hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 					updateGrid();
 					updateHeads();
 
 				case "Player 4 Section":
 					_song.notes[curSec].player4Section = check.checked;
-
+					hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 					updateGrid();
 					updateHeads();
 
 				case 'Change BPM':
 					_song.notes[curSec].changeBPM = check.checked;
+					hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 					FlxG.log.add('changed bpm shit');
 				case "Alt Animation":
 					_song.notes[curSec].altAnim = check.checked;
-	
+					hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 				case "CPU Alternate Animation":
 					_song.notes[curSec].CPUAltAnim = check.checked;
+					hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 				case "Player Alternate Animation":
 					_song.notes[curSec].playerAltAnim = check.checked;
+					hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 			}
 		}
 		else if (id == FlxUINumericStepper.CHANGE_EVENT && (sender is FlxUINumericStepper))
@@ -1830,13 +1855,16 @@ class ChartingState extends MusicBeatState
 			switch(wname)
 			{
 				case 'section_beats':
+					hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 					_song.notes[curSec].sectionBeats = nums.value;
 					reloadGridLayer();
 
 				case 'song_speed':
+					hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 					_song.speed = nums.value;
 
 				case 'song_bpm':
+					hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 					_song.bpm = nums.value;
 					Conductor.mapBPMChanges(_song);
 					Conductor.bpm = nums.value;
@@ -1846,20 +1874,25 @@ class ChartingState extends MusicBeatState
 				case 'note_susLength':
 					if(curSelectedNote != null && curSelectedNote[2] != null) {
 						curSelectedNote[2] = nums.value;
+						hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 						updateGrid();
 					}
 
 				case 'section_bpm':
+					hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 					_song.notes[curSec].bpm = nums.value;
 					updateGrid();
 
 				case 'inst_volume':
+					hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 					FlxG.sound.music.volume = nums.value;
 
 				case 'voices_volume':
+					hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 					vocals.volume = nums.value;
 
 				case 'section_dtype':
+					hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 					_song.notes[curSec].dType = Std.int(nums.value);
 					updateSectionUI();
 					updateGrid();
@@ -1868,21 +1901,27 @@ class ChartingState extends MusicBeatState
 		else if(id == FlxUIInputText.CHANGE_EVENT && (sender is FlxUIInputText)) {
 			if(sender == noteSplashesInputText) {
 				_song.splashSkin = noteSplashesInputText.text;
+				hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 			}
 			else if(sender == noteSkinInputText) {
 				_song.arrowSkin = noteSkinInputText.text;
+				hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 			}
 			else if(sender == gameOverCharacterInputText) {
 				_song.gameOverChar = gameOverCharacterInputText.text;
+				hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 			}
 			else if(sender == gameOverSoundInputText) {
 				_song.gameOverSound = gameOverSoundInputText.text;
+				hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 			}
 			else if(sender == gameOverLoopInputText) {
 				_song.gameOverLoop = gameOverLoopInputText.text;
+				hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 			}
 			else if(sender == gameOverEndInputText) {
 				_song.gameOverEnd = gameOverEndInputText.text;
+				hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 			}
 			else if(curSelectedNote != null)
 			{
@@ -1890,6 +1929,7 @@ class ChartingState extends MusicBeatState
 					if(curSelectedNote[1][curEventSelected] != null)
 					{
 						curSelectedNote[1][curEventSelected][1] = value1InputText.text;
+						hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 						updateGrid();
 					}
 				}
@@ -1897,6 +1937,7 @@ class ChartingState extends MusicBeatState
 					if(curSelectedNote[1][curEventSelected] != null)
 					{
 						curSelectedNote[1][curEventSelected][2] = value2InputText.text;
+						hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 						updateGrid();
 					}
 				}
@@ -1910,6 +1951,7 @@ class ChartingState extends MusicBeatState
 					if(curSelectedNote[1][curEventSelected] != null)
 					{
 						curSelectedNote[1][curEventSelected][3] = value3InputText.text;
+						hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 						updateGrid();
 					}
 				}
@@ -1917,6 +1959,7 @@ class ChartingState extends MusicBeatState
 					if(curSelectedNote[1][curEventSelected] != null)
 					{
 						curSelectedNote[1][curEventSelected][4] = value4InputText.text;
+						hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 						updateGrid();
 					}
 				}
@@ -1924,6 +1967,7 @@ class ChartingState extends MusicBeatState
 					if(curSelectedNote[1][curEventSelected] != null)
 					{
 						curSelectedNote[1][curEventSelected][5] = value5InputText.text;
+						hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 						updateGrid();
 					}
 				}
@@ -1931,6 +1975,7 @@ class ChartingState extends MusicBeatState
 					if(curSelectedNote[1][curEventSelected] != null)
 					{
 						curSelectedNote[1][curEventSelected][6] = value6InputText.text;
+						hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 						updateGrid();
 					}
 				}
@@ -1938,6 +1983,7 @@ class ChartingState extends MusicBeatState
 					if(curSelectedNote[1][curEventSelected] != null)
 					{
 						curSelectedNote[1][curEventSelected][7] = value7InputText.text;
+						hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 						updateGrid();
 					}
 				}
@@ -1945,6 +1991,7 @@ class ChartingState extends MusicBeatState
 					if(curSelectedNote[1][curEventSelected] != null)
 					{
 						curSelectedNote[1][curEventSelected][8] = value8InputText.text;
+						hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 						updateGrid();
 					}
 				}
@@ -1952,6 +1999,7 @@ class ChartingState extends MusicBeatState
 					if(curSelectedNote[1][curEventSelected] != null)
 					{
 						curSelectedNote[1][curEventSelected][9] = value9InputText.text;
+						hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 						updateGrid();
 					}
 				}
@@ -1959,6 +2007,7 @@ class ChartingState extends MusicBeatState
 					if(curSelectedNote[1][curEventSelected] != null)
 					{
 						curSelectedNote[1][curEventSelected][10] = value10InputText.text;
+						hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 						updateGrid();
 					}
 				}
@@ -1966,6 +2015,7 @@ class ChartingState extends MusicBeatState
 					if(curSelectedNote[1][curEventSelected] != null)
 					{
 						curSelectedNote[1][curEventSelected][11] = value11InputText.text;
+						hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 						updateGrid();
 					}
 				}
@@ -1973,6 +2023,7 @@ class ChartingState extends MusicBeatState
 					if(curSelectedNote[1][curEventSelected] != null)
 					{
 						curSelectedNote[1][curEventSelected][12] = value12InputText.text;
+						hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 						updateGrid();
 					}
 				}
@@ -1980,6 +2031,7 @@ class ChartingState extends MusicBeatState
 					if(curSelectedNote[1][curEventSelected] != null)
 					{
 						curSelectedNote[1][curEventSelected][13] = value13InputText.text;
+						hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 						updateGrid();
 					}
 				}
@@ -1987,6 +2039,7 @@ class ChartingState extends MusicBeatState
 					if(curSelectedNote[1][curEventSelected] != null)
 					{
 						curSelectedNote[1][curEventSelected][14] = value14InputText.text;
+						hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 						updateGrid();
 					}
 				}
@@ -2169,7 +2222,17 @@ class ChartingState extends MusicBeatState
 			}
 			if (FlxG.keys.justPressed.ENTER)
 			{
-				startSong();
+				var exitFunc = function()
+				{
+					startSong();
+				};
+				if (hasUnsavedChanges)
+				{
+					persistentUpdate = false;
+					openSubState(new ChartEditorExitSubstate(exitFunc));
+				}
+				else
+					exitFunc();
 			}
 
 			if(curSelectedNote != null && curSelectedNote[1] > -1) {
@@ -2936,6 +2999,8 @@ class ChartingState extends MusicBeatState
 			}
 		}
 
+		hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
+
 		updateNoteUI();
 		updateGrid();
 	}
@@ -3130,7 +3195,6 @@ class ChartingState extends MusicBeatState
 
 	function updateGrid():Void
 	{
-
 		curRenderedNotes.forEachAlive(function(spr:Note) spr.destroy());
 		curRenderedNotes.clear();
 		curRenderedSustains.forEachAlive(function(spr:FlxSprite) spr.destroy());
@@ -3431,6 +3495,8 @@ class ChartingState extends MusicBeatState
 		}
 
 		updateGrid();
+
+		hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 	}
 
 	public function doANoteThing(cs, d, style){
@@ -3459,14 +3525,16 @@ class ChartingState extends MusicBeatState
 			_song.notes[daSection].sectionNotes = [];
 		}
 
+		hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
+
 		updateGrid();
 	}
 
 	private function addNote(strum:Null<Float> = null, data:Null<Int> = null, type:Null<Int> = null):Void
 	{
-		//curUndoIndex++;
-		//var newsong = _song.notes;
-		//	undos.push(newsong);
+		curUndoIndex++;
+		var newsong = _song.notes;
+		undos.push(newsong);
 		var noteStrum = getStrumTime(dummyArrow.y * (getSectionBeats() / 4), false) + sectionStartTime();
 		var noteData = Math.floor((FlxG.mouse.x - GRID_SIZE) / GRID_SIZE);
 		var noteSus = 0;
@@ -3515,21 +3583,23 @@ class ChartingState extends MusicBeatState
 
 		updateGrid();
 		updateNoteUI();
+
+		hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 	}
 
 	// will figure this out l8r
 	function redo()
 	{
-		//_song = redos[curRedoIndex];
+		_song = redos[curRedoIndex];
 	}
 
 	function undo()
 	{
-		//redos.push(_song);
+		redos.push(_song);
 		undos.pop();
-		//_song.notes = undos[undos.length - 1];
-		///Debug.logTrace(_song.notes);
-		//updateGrid();
+		_song.notes = undos[undos.length - 1];
+		Debug.logTrace(_song.notes);
+		updateGrid();
 	}
 
 	function getStrumTime(yPos:Float, doZoomCalc:Bool = true):Float
@@ -3734,4 +3804,59 @@ class AttachedFlxText extends FlxText
 			alpha = sprTracker.alpha;
 		}
 	}
+}
+
+class ChartEditorExitSubstate extends MusicBeatSubstate
+{
+    var exitFunc:Void->Void;
+    override public function new(funcOnExit:Void->Void)
+    {
+        exitFunc = funcOnExit;
+        super();
+    }
+    
+    override public function create()
+    {
+        super.create();
+
+        var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+		bg.alpha = 0;
+		bg.scrollFactor.set();
+		bg.scale.set(1.2, 1.2);
+		add(bg);
+        FlxTween.tween(bg, {alpha: 0.6}, 0.4, {ease: FlxEase.quartInOut});
+
+
+        var warning:FlxText = new FlxText(0, 0, 0, 'You have unsaved changes!\nAre you sure you want to exit?', 48);
+        warning.alignment = CENTER;
+        warning.screenCenter();
+        warning.y -= 150;
+        add(warning);
+
+        var goBackButton:FlxUIButton = new FlxUIButton(0, 500, 'Go Back', function()
+        {
+            close();
+        });
+        goBackButton.scale.set(2.5, 2.5);
+        goBackButton.updateHitbox();
+        goBackButton.label.size = 12;
+        goBackButton.autoCenterLabel();
+        goBackButton.x = (FlxG.width*0.3)-(goBackButton.width*0.5);
+        add(goBackButton);
+        
+        var exit:FlxUIButton = new FlxUIButton(0, 500, 'Exit without saving', function()
+        {
+            exitFunc();
+        });
+        exit.scale.set(2.5, 2.5);
+        exit.updateHitbox();
+        exit.label.size = 12;
+        exit.label.fieldWidth = exit.width;
+        exit.autoCenterLabel();
+        
+        exit.x = (FlxG.width*0.7)-(exit.width*0.5);
+        add(exit);
+
+        cameras = [FlxG.cameras.list[FlxG.cameras.list.length-1]];
+    }
 }

@@ -220,6 +220,10 @@ class LuaUtils
 
 	public static function getObjectDirectly(objectName:String, ?checkForTextsToo:Bool = true, ?allowMaps:Bool = false):Dynamic
 	{
+		if (objectName == 'dadGroup' || objectName == 'boyfriendGroup' || objectName == 'gfGroup' || objectName == 'momGroup'){
+			objectName = objectName.substring(0, objectName.length-5); //because we don't use character groups
+		}
+
 		switch(objectName)
 		{
 			case 'this' | 'instance' | 'game':
@@ -257,7 +261,13 @@ class LuaUtils
 	
 	public static inline function getTargetInstance()
 	{
-		return PlayState.instance.isDead ? GameOverSubstate.instance : PlayState.instance;
+		var instance:Dynamic = Stage.instance;
+
+		if (PlayState.instance != null){
+			return PlayState.instance.isDead ? GameOverSubstate.instance : PlayState.instance;
+		}
+
+		return instance;
 	}
 
 	public static inline function getLowestCharacterPlacement():Character
@@ -653,6 +663,7 @@ class LuaUtils
 		resetCharacterTag(tag);
 		var leSprite:Character = new Character(0, 0, character, isPlayer);
 		leSprite.flipMode = flipped;
+		leSprite.isCustomCharacter = true;
 		PlayState.instance.modchartCharacters.set(tag, leSprite); //yes
 		var shit:Character = PlayState.instance.modchartCharacters.get(tag);
 		getTargetInstance().add(shit);

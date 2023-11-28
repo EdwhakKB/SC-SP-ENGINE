@@ -790,8 +790,7 @@ class FreeplayState extends MusicBeatState
 			}
 		}
 
-		if (canSelectSong)
-			updateTexts(elapsed);
+		if (canSelectSong) updateTexts(elapsed);
 		super.update(elapsed);
 		menuScript.callFunc('onUpdatePost', [elapsed]);
 	}
@@ -840,10 +839,8 @@ class FreeplayState extends MusicBeatState
 					PlayState.SONG = Song.loadFromJson(poop, songs[curSelected].songName.toLowerCase());
 					curInstPlayingtxt = instPlayingtxt = songs[curSelected].songName.toLowerCase();
 	
-					for (i in 0...iconArray.length)
-						iconArray[i].animation.curAnim.curFrame = 0;
-					if (iconArray[curSelected].hasWinning)
-						iconArray[curSelected].animation.curAnim.curFrame = 2;
+					for (i in 0...iconArray.length) iconArray[i].animation.curAnim.curFrame = 0;
+					if (iconArray[curSelected].hasWinning) iconArray[curSelected].animation.curAnim.curFrame = 2;
 	
 					var songPath:String = null;
 	
@@ -920,7 +917,7 @@ class FreeplayState extends MusicBeatState
 		}
 		catch (e)
 		{
-			Debug.logError(e);
+			Debug.logTrace('ERROR! $e');
 		}
 	}
 
@@ -1109,7 +1106,7 @@ class FreeplayState extends MusicBeatState
             LoadingState.loadAndSwitchState(new ChartingState());
         }else{
 			//restore this functionality
-			LoadingState.loadAndSwitchState(new PlayState());
+			LoadingState.loadAndSwitchState(new ThingsToLoad());
 		}
 	}
 
@@ -1272,7 +1269,6 @@ class FreeplayState extends MusicBeatState
 		super.stepHit();
 	}
 
-	var bouncedOnce:Bool = false;
 	override function beatHit()
 	{
 		menuScript.callFunc('onBeatHit', [curBeat]);
@@ -1286,17 +1282,14 @@ class FreeplayState extends MusicBeatState
 			iconArray[i].scale.set(1.2, 1.2);
 			iconArray[i].updateHitbox();
 
-			if (bouncedOnce){
-				iconArray[i].angle = 40;
-				FlxTween.tween(iconArray[i], {angle: 0}, 0.2, {ease: FlxEase.circOut});
-
-				bouncedOnce = false;
-			}else{
-				iconArray[i].angle = -20;
-				FlxTween.tween(iconArray[i], {angle: 0}, 0.2, {ease: FlxEase.circOut});
-
-				bouncedOnce = true;
+			curBeat % 2 == 0 ? {
+				var reverse = iconArray[curSelected].animation.curAnim.curFrame > 0 ? 1 : -1;
+				FlxTween.angle(iconArray[i], 15 * reverse, 0, Conductor.crochet / 1300 / playbackRate, {ease: FlxEase.quadOut});
 			}
+			: {
+				var reverse = iconArray[curSelected].animation.curAnim.curFrame > 0 ? -1 : 1;
+				FlxTween.angle(iconArray[i], 15 * reverse, 0, Conductor.crochet / 1300 / playbackRate, {ease: FlxEase.quadOut});
+			};
 		}
 	}
 
