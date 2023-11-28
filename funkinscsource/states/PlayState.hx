@@ -450,7 +450,7 @@ class PlayState extends MusicBeatState
 
 	public var Stage:Stage = null;
 
-	public var alreadyPreloaded:Bool = false;
+	public static var alreadyPreloaded:Bool = false;
 
 	override public function create()
 	{
@@ -700,7 +700,7 @@ class PlayState extends MusicBeatState
 
 		if (FileSystem.exists(Paths.txt(someSongStuff + "/preload")))
 		{
-			alreadyPreloaded = true;
+			PlayState.alreadyPreloaded = true;
 			var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt(someSongStuff + "/preload"));
 
 			for (i in 0...characters.length) // whoops. still need to load the luas
@@ -2708,7 +2708,7 @@ class PlayState extends MusicBeatState
 			if (finishTimer != null && !finishTimer.finished) finishTimer.active = true;
 			if (songSpeedTween != null) songSpeedTween.active = true;
 
-			var chars:Array<Character> = [boyfriend, gf, dad];
+			var chars:Array<Character> = [boyfriend, gf, dad, mom];
 			for (char in chars)
 				if(char != null && char.colorTween != null)
 					char.colorTween.active = true;
@@ -2850,7 +2850,7 @@ class PlayState extends MusicBeatState
 
 	public var paused:Bool = false;
 	public var canReset:Bool = true;
-	var startedCountdown:Bool = false;
+	public var startedCountdown:Bool = false;
 	public var canPause:Bool = false;
 
 	public var cameraTargeted:String;
@@ -3040,12 +3040,7 @@ class PlayState extends MusicBeatState
 			}
 
 			var iconOffset:Int = 26;
-			if (healthBar.bounds.max != null) {
-				if (health > healthBar.bounds.max) health = healthBar.bounds.max;
-			} else {
-				// Old system for safety?? idk
-				if (health > 2) health = 2;
-			}
+			health = FlxMath.bound(health, 0, (healthBar.bounds.max != null ? healthBar.bounds.max : 2));
 
 			if (whichHud == 'HITMANS') { iconP1.x = (FlxG.width - 160); iconP2.x = (0); }
 			else
