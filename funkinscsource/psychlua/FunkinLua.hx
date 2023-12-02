@@ -1098,7 +1098,7 @@ class FunkinLua {
 				}
 	
 				PlayState.cancelMusicFadeTween();
-	
+
 				if(PlayState.isStoryMode) FlxG.switchState(new StoryMenuState());
 				else FlxG.switchState(new FreeplayState());
 				
@@ -2189,13 +2189,13 @@ class FunkinLua {
 				LuaUtils.makeLuaCharacter(tag, character, shit.isPlayer, shit.flipMode);
 			});
 	
-			set("stopIdle", function(id:String, bool:Bool) {
+			set("stopIdle", function(id:String, stopped:Bool) {
 				if (game.modchartCharacters.exists(id) && ClientPrefs.data.characters)
 				{
-					game.modchartCharacters.get(id).stopIdle = bool;
+					game.modchartCharacters.get(id).stopIdle = stopped;
 					return;
 				}
-				LuaUtils.getActorByName(id).stopIdle = bool;
+				LuaUtils.getActorByName(id).stopIdle = stopped;
 			});
 	
 			set("characterDance", function(character:String) {

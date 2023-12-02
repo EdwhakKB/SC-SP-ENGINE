@@ -102,6 +102,8 @@ class TitleState extends MusicBeatState
 		#end
 		Mods.loadTopMod();
 
+		if (ClientPrefs.data.clearFolderOnStart) Debug.clearLogsFolder();
+
 		curWacky = FlxG.random.getObject(getIntroTextShit());
 
 		checkInternetConnection();

@@ -98,10 +98,9 @@ class GameOverSubstate extends MusicBeatSubstate
 			PlayState.modchartMode = false;
 
 			Mods.loadTopMod();
-			if (PlayState.isStoryMode)
-				FlxG.switchState(new StoryMenuState());
-			else
-				FlxG.switchState(new FreeplayState());
+		
+			if (PlayState.isStoryMode) FlxG.switchState(new StoryMenuState());
+			else FlxG.switchState(new FreeplayState());
 
 			FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
 			PlayState.instance.callOnScripts('onGameOverConfirm', [false]);
@@ -187,7 +186,7 @@ class GameOverSubstate extends MusicBeatSubstate
 			{
 				FlxG.camera.fade(FlxColor.BLACK, 2, false, function()
 				{
-					FlxG.resetState();
+					LoadingState.loadAndSwitchState(new states.ThingsToLoad());
 				});
 			});
 			PlayState.instance.callOnScripts('onGameOverConfirm', [true]);

@@ -654,8 +654,11 @@ class FreeplayState extends MusicBeatState
 				if (!paused) vocals.pitch = playbackRate;
 			}
 
-			Conductor.mapBPMChanges(PlayState.SONG);
-			Conductor.bpm = PlayState.SONG.bpm;
+			if (PlayState.SONG != null && PlayingPlayStateSong)
+			{
+				Conductor.mapBPMChanges(PlayState.SONG);
+				Conductor.bpm = PlayState.SONG.bpm;
+			}
 		}
 
 		if (controls.BACK || completed && exit)

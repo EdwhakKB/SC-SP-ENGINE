@@ -40,15 +40,37 @@ class SaveVariables {
 		[0xFFFF884E, 0xFFFFFAF5, 0xFF6C0000]
 	];
 	public var arrowRGBQuantize:Array<Array<FlxColor>> = [
-		[0xFFFF0000, 0xFFFFFFFF, 0xFF7F0000],
-		[0xFF0000FF, 0xFFFFFFFF, 0xFF00007F],
-		[0xFF800080, 0xFFFFFFFF, 0xFF400040],
-		[0xFF00FF00, 0xFFFFFFFF, 0xFF007F00],
-		[0xFFFFFF00, 0xFFFFFFFF, 0xFF7F7F00],
-		[0xFF00FFDD, 0xFFFFFFFF, 0xFF018573],
-		[0xFFFF00FF, 0xFFFFFFFF, 0xFF8A018A],
-		[0xFFFF7300, 0xFFFFFFFF, 0xFF883D00]
+		[0xFFFF0000, 0xFFFFFFFF, 0xFF7F0000], //4th step
+		[0xFF0000FF, 0xFFFFFFFF, 0xFF00007F], //8th step
+		[0xFF800080, 0xFFFFFFFF, 0xFF400040], //12th step
+		[0xFF00FF00, 0xFFFFFFFF, 0xFF007F00], //16th step
+		[0xFFFFFF00, 0xFFFFFFFF, 0xFF7F7F00], //24th step
+		[0xFF00FFDD, 0xFFFFFFFF, 0xFF018573], //32nd step
+		[0xFFFF00FF, 0xFFFFFFFF, 0xFF8A018A], //48th step
+		[0xFFFF7300, 0xFFFFFFFF, 0xFF883D00] //64th step
 	];
+	/*public var arrowRGBQuantizeALLSTEPS:Array<Array<FlxColor>> = [ //Smth
+		[0xFFFF0000, 0xFFFFFFFF, 0xFF7F0000], //4th step
+		[0xFF0000FF, 0xFFFFFFFF, 0xFF00007F], //8th step
+		[0xFF800080, 0xFFFFFFFF, 0xFF400040], //12th step
+		[0xFFFFFF00, 0xFFFFFFFF, 0xFF7F7F00], //16th step
+		[0xFFFF00FF, 0xFFFFFFFF, 0xFF8A018A], //24th step
+		[0xFFFF7300, 0xFFFFFFFF, 0xFF883D00], //32nd step
+		[0xFF00FFDD, 0xFFFFFFFF, 0xFF018573], //48th step
+		[0xFF00FF00, 0xFFFFFFFF, 0xFF007F00], //64th step
+		[0xFFFD9B9B, 0xFFFFFFFF, 0xFFBD7676], //96th step`
+		[0xFFBE97FC, 0xFFFFFFFF, 0xFF67518C], //128th step
+		[0xFF97FC9E, 0xFFFFFFFF, 0xFF558D59], //192th step
+		[0xFFB6490B, 0xFFFFFFFF, 0xFF5F2808], //256th step
+		[0xA5316D75, 0xFFFFFFFF, 0xA8245054], //384th step
+		[0xFF0B0994, 0xFFFFFFFF, 0xFF070658], //512th step
+		[0xFFA6A6A6, 0xFFFFFFFF, 0xFF6A6969], //768th step
+		[0xFF2DAD91, 0xFFFFFFFF, 0xFF14715D], //1024th step
+		[0xFF000000, 0xFFFFFFFF, 0xFF000000], //1536th step
+		[0xFFB4AB00, 0xFFFFFFFF, 0xFF525213], //2048th step
+		[0xFFE7E38D, 0xFFFFFFFF, 0xFF949466], //3072nd step
+		[0xFF1E7444, 0xFFFFFFFF, 0xFF144D21] //6144th step
+	];*/
 
 	public var ghostTapping:Bool = true;
 	public var timeBarType:String = 'Time Left';
@@ -159,6 +181,8 @@ class SaveVariables {
 
 	public var characters:Bool = true;
 	public var background:Bool = true;
+
+	public var clearFolderOnStart:Bool = false;
 
 	public function new()
 	{

@@ -288,12 +288,18 @@ class GameJoltLogin extends MusicBeatState
             FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
         }
 
-        if (FlxG.keys.justPressed.ESCAPE && !gameJoltInputText[0].hasFocus && !gameJoltInputText[1].hasFocus)
+        for (i in 0...gameJoltInputText.length)
         {
-            FlxG.save.flush();
-            FlxG.mouse.visible = false;
-            FlxG.switchState(new options.OptionsState());
-            ClientPrefs.saveSettings();
+            if (!gameJoltInputText[i].hasFocus)
+            {
+                if (FlxG.keys.justPressed.ESCAPE)
+                {
+                    FlxG.save.flush();
+                    FlxG.mouse.visible = false;
+                    FlxG.switchState(new options.OptionsState());
+                    ClientPrefs.saveSettings();
+                }
+            }
         }
 
         super.update(elapsed);

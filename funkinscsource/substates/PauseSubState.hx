@@ -357,6 +357,7 @@ class PauseSubState extends MusicBeatSubstate
 					PlayState.instance.vocals.volume = 0;
 					music.volume = 0;
 					FlxG.switchState(new OptionsState());
+
 					stoppedUpdatingMusic = true;
 					pauseMusic.volume = 0;
 					pauseMusic.destroy();
@@ -376,11 +377,10 @@ class PauseSubState extends MusicBeatSubstate
 					PlayState.seenCutscene = false;
 
 					Mods.loadTopMod();
-					if(PlayState.isStoryMode) {
-						FlxG.switchState(new StoryMenuState());
-					} else {
-						FlxG.switchState(new FreeplayState());
-					}
+
+					if(PlayState.isStoryMode) FlxG.switchState(new StoryMenuState());
+					else FlxG.switchState(new FreeplayState());
+
 					PlayState.cancelMusicFadeTween();
 					FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
 					PlayState.changedDifficulty = false;

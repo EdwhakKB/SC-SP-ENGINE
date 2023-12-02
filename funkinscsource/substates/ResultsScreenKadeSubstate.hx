@@ -267,18 +267,15 @@ class ResultsScreenKadeSubstate extends substates.MusicBeatSubstate
 						music.destroy();
 						PlayState.chartingMode = false;
 						PlayState.modchartMode = false;
-			
+
 						if (PlayState.isStoryMode)
 						{
-							FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "ke_freakyMenu" : "freakyMenu"));
+							FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
 							Conductor.bpm = 102;
-							FlxG.switchState(new StoryMenuState());
 						}
-						else
-						{
-							Conductor.bpm = 102;
-							FlxG.switchState(new FreeplayState());
-						}
+						
+						if (PlayState.isStoryMode) FlxG.switchState(new StoryMenuState());
+						else FlxG.switchState(new FreeplayState());
 					}
 				});
 			}
@@ -298,7 +295,7 @@ class ResultsScreenKadeSubstate extends substates.MusicBeatSubstate
 	
 						PlayState.isStoryMode = false;
 						PlayState.storyDifficulty = PlayState.storyDifficulty;
-						FlxG.switchState(new PlayState());
+						LoadingState.loadAndSwitchState(new PlayState());
 					}
 				});
 			}

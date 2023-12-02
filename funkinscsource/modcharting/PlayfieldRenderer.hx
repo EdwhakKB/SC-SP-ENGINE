@@ -255,13 +255,11 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
                 var sustainTimeThingy:Float = 0;
 
                 //just causes too many issues lol, might fix it at some point
-                /*if (notes.members[i].isHoldEnd && ClientPrefs.downScroll)
+                if (notes.members[i].isHoldEnd)
                 {
-                    if (noteDist > 0)
-                        sustainTimeThingy = (NoteMovement.getFakeCrochet()/4)/2; //fix stretched sustain ends (downscroll)
-                    //else 
-                        //sustainTimeThingy = (-NoteMovement.getFakeCrochet()/4)/songSpeed;
-                }*/
+                    if (noteDist > 0) sustainTimeThingy = (ModchartUtil.getFakeCrochet()/4)/2; //fix stretched sustain ends
+                    else sustainTimeThingy = (-ModchartUtil.getFakeCrochet()/4)/songSpeed;
+                }
                     
                 var curPos = getNoteCurPos(i, sustainTimeThingy);
                 curPos = modifierTable.applyCurPosMods(lane, curPos, pf);

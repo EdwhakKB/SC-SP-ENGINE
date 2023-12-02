@@ -28,6 +28,10 @@ import openfl.Assets;
 import states.PlayState;
 import psychlua.HScript;
 
+#if SScript
+import tea.SScript;
+#end
+
 enum HenchmenKillState
 {
 	WAIT;
@@ -288,7 +292,6 @@ class Stage extends MusicBeatState
 					var skyBG:BGSprite = new BGSprite('limo/limoSunset', -120, -50, 0.1, 0.1);
 					swagBacks['skyBG'] = skyBG;
 					toAdd.push(skyBG);
-
 
 					limoMetalPole = new BGSprite('gore/metalPole', -500, 220, 0.4, 0.4);
 					swagBacks['limoMetalPole'] = limoMetalPole; 
@@ -1274,6 +1277,96 @@ class Stage extends MusicBeatState
 	{ 
 		object.destroy(); 
 	}
+
+	#if HSCRIPT_ALLOWED
+	public function initHScript(file:String)
+	{
+		try
+		{
+			var times:Float = Date.now().getTime();
+			var newScript:HScript = new HScript(null, file, null, true);
+			#if (SScript > "6.1.80" || SScript != "6.1.80")
+			@:privateAccess
+			if(newScript.parsingExceptions != null && newScript.parsingExceptions.length > 0)
+			{
+				@:privateAccess
+				for (e in newScript.parsingExceptions)
+					if(e != null)
+						PlayState.instance.addTextToDebug('ERROR ON LOADING ($file): ${e.message.substr(0, e.message.indexOf('\n'))}', FlxColor.RED);
+				newScript.destroy();
+				return;
+			}
+			#else
+			if(newScript.parsingException != null)
+			{
+				var e = newScript.parsingException.message;
+				if (!e.contains(newScript.origin)) e = '${newScript.origin}: $e';
+				HScript.hscriptTrace('ERROR ON LOADING - $e', FlxColor.RED);
+				newScript.kill();
+				return;
+			}
+			#end
+
+			hscriptArray.push(newScript);
+			if(newScript.exists('onCreate'))
+			{
+				var callValue = newScript.call('onCreate');
+				if(!callValue.succeeded)
+				{
+					for (e in callValue.exceptions)
+					{
+						#if (SScript > "6.1.80" || SScript != "6.1.80")
+						if (e != null)
+						{
+							var len:Int = e.message.indexOf('\n') + 1;
+							if(len <= 0) len = e.message.length;
+								PlayState.instance.addTextToDebug('ERROR ($file: onCreate) - ${e.message.substr(0, len)}', FlxColor.RED);
+						}
+						#else
+						if (e != null) {
+							var e:String = e.toString();
+							if (!e.contains(newScript.origin)) e = '${newScript.origin}: $e';
+							HScript.hscriptTrace('ERROR (onCreate) - $e', FlxColor.RED);
+						}
+						#end
+					}
+					#if (SScript > "6.1.80" || SScript != "6.1.80")
+					newScript.destroy();
+					#else
+					newScript.kill();
+					#end
+					hscriptArray.remove(newScript);
+					return;
+				}
+			}
+
+			Debug.logInfo('initialized sscript interp successfully: $file (${Std.int(Date.now().getTime() - times)}ms)');
+		}
+		catch(e)
+		{
+			var newScript:HScript = cast (SScript.global.get(file), HScript);
+			#if (SScript >= "6.1.80")
+			var e:String = e.toString();
+			if (!e.contains(newScript.origin)) e = '${newScript.origin}: $e';
+			HScript.hscriptTrace('ERROR - $e', FlxColor.RED);
+			#else
+			var len:Int = e.message.indexOf('\n') + 1;
+			if(len <= 0) len = e.message.length;
+			PlayState.instance.addTextToDebug('ERROR ($file) - ' + e.message.substr(0, len), FlxColor.RED);
+			#end
+
+			if(newScript != null)
+			{
+				#if (SScript > "6.1.80" || SScript != "6.1.80")
+				newScript.destroy();
+				#else
+				newScript.kill();
+				#end
+				hscriptArray.remove(newScript);
+			}
+		}
+	}
+	#end
 
 	public function callOnScripts(funcToCall:String, args:Array<Dynamic> = null, ignoreStops = false, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
 		var returnVal:Dynamic = psychlua.FunkinLua.Function_Continue;

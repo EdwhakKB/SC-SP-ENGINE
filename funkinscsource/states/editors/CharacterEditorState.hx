@@ -1347,9 +1347,8 @@ class CharacterEditorState extends MusicBeatState
 
 		if(!charDropDown.dropPanel.visible) {
 			if (FlxG.keys.justPressed.ESCAPE) {
-				if(goToPlayState) {
-					FlxG.switchState(new PlayState());
-				} else {
+				if(goToPlayState) FlxG.switchState(new PlayState());
+				else {
 					FlxG.switchState(new states.editors.MasterEditorMenu());
 					FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
 				}

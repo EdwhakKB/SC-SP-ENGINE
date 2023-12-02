@@ -369,11 +369,6 @@ class Note extends FlxSkewedSprite
 		if(postfix == null) postfix = '';
 
 		var skin:String = noteStyle + postfix;
-		if(noteStyle.length < 1) {
-			skin = PlayState.SONG != null ? PlayState.SONG.arrowSkin : null;
-			if(skin == null || skin.length < 1) skin = defaultNoteSkin + postfix;
-		}
-
 		var animName:String = null;
 		if(animation.curAnim != null) animName = animation.curAnim.name;
 

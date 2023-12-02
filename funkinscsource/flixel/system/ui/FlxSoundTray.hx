@@ -96,58 +96,24 @@ class FlxSoundTray extends Sprite
 
         
         //january = 0, febuary = 1, march = 2, april = 3, may = 4, june = 5, july = 6, august = 7, september = 8, october = 9, november = 10, december = 11
-		var realMonthDate:String = '';
+		var realMonthDate:Array<String> = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
 		var Month = Date.now();
+		var trueMonth:Int = Std.parseInt(realMonthDate[Month.getMonth()]);
 
-		switch (Month.getMonth())
-		{
-			case 0:
-				realMonthDate = '1';
-			case 1:
-				realMonthDate = '2';
-			case 2:
-				realMonthDate = '3';
-			case 3:
-				realMonthDate = '4';
-			case 4:
-				realMonthDate = '5';
-			case 5:
-				realMonthDate = '6';
-			case 6:
-				realMonthDate = '7';
-			case 7:
-				realMonthDate = '8';
-			case 8:
-				realMonthDate = '9';
-			case 9:
-				realMonthDate = '10';
-			case 10:
-				realMonthDate = '11';
-			case 11:
-				realMonthDate = '12';
-		}
-
-        var isValen = (Std.parseInt(realMonthDate) == 2);
-        var isPride = (Std.parseInt(realMonthDate) == 6);
-        var isHollow = (Std.parseInt(realMonthDate) == 10);
-        var isChris = (Std.parseInt(realMonthDate) == 12);
+        var isValen = (trueMonth == 2);
+        var isPride = (trueMonth == 6);
+        var isHollow = (trueMonth == 10);
+        var isChris = (trueMonth == 12);
         var isAnyColoredMonth = (isChris || isHollow || isPride || isValen);
 
-        if (isValen)
-            volumeColors = [0xFFFF0000, 0xFFFF69B4, 0xFFFF0000, 0xFFFF69B4, 0xFFFF0000, 0xFFFF69B4, 0xFFFF0000, 0xFFFF69B4, 0xFFFF0000, 0xFFFF69B4];
-        else if (isPride)
-            volumeColors = [0xFFFF0000, 0xFFFFA500, 0xFFFFFF00, 0xFF90EE90, 0xFF00FF00, 0xFFADD8E6, 0xFF0000FF, 0xFF00008B, 0xFF800080, 0xFFFFC0CB];
-        else if (isHollow)
-            volumeColors = [0xFFFFA500, 0xFF000000, 0xFFFFA500, 0xFF000000, 0xFFFFA500, 0xFF000000, 0xFFFFA500, 0xFF000000, 0xFFFFA500, 0xFF000000];
-        else if (isChris)
-            volumeColors = [0xFFFF0000, 0xFFFFFFFF, 0xFFFF0000, 0xFFFFFFFF, 0xFFFF0000, 0xFFFFFFFF, 0xFFFF0000, 0xFFFFFFFF, 0xFFFF0000, 0xFFFFFFFF];
+        if (isValen) volumeColors = [0xFFFF0000, 0xFFFF69B4, 0xFFFF0000, 0xFFFF69B4, 0xFFFF0000, 0xFFFF69B4, 0xFFFF0000, 0xFFFF69B4, 0xFFFF0000, 0xFFFF69B4];
+        else if (isPride) volumeColors = [0xFFFF0000, 0xFFFFA500, 0xFFFFFF00, 0xFF90EE90, 0xFF00FF00, 0xFFADD8E6, 0xFF0000FF, 0xFF00008B, 0xFF800080, 0xFFFFC0CB];
+        else if (isHollow) volumeColors = [0xFFFFA500, 0xFF000000, 0xFFFFA500, 0xFF000000, 0xFFFFA500, 0xFF000000, 0xFFFFA500, 0xFF000000, 0xFFFFA500, 0xFF000000];
+        else if (isChris) volumeColors = [0xFFFF0000, 0xFFFFFFFF, 0xFFFF0000, 0xFFFFFFFF, 0xFFFF0000, 0xFFFFFFFF, 0xFFFF0000, 0xFFFFFFFF, 0xFFFF0000, 0xFFFFFFFF];
 
 		for (i in 0...10)
 		{
-            if (!isAnyColoredMonth)
-                tmp = new Bitmap(new BitmapData(4, i + 1, false, FlxColor.WHITE));
-            else
-                tmp = new Bitmap(new BitmapData(4, i + 1, false, volumeColors[i]));
+        	tmp = new Bitmap(new BitmapData(4, i + 1, false, isAnyColoredMonth ? volumeColors[i] : FlxColor.WHITE));
 			tmp.x = bx;
 			tmp.y = by;
 			addChild(tmp);

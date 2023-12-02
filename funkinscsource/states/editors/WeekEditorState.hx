@@ -134,7 +134,6 @@ class WeekEditorState extends MusicBeatState
 		
 		var freeplayButton:FlxButton = new FlxButton(0, 650, "Freeplay", function() {
 			FlxG.switchState(new WeekEditorFreeplayState(weekFile));
-			
 		});
 		freeplayButton.screenCenter(X);
 		add(freeplayButton);
@@ -642,8 +641,7 @@ class WeekEditorFreeplayState extends MusicBeatState
 		add(loadWeekButton);
 		
 		var storyModeButton:FlxButton = new FlxButton(0, 685, "Story Mode", function() {
-			FlxG.switchState(new WeekEditorState(weekFile));
-			
+			FlxG.switchState(new WeekEditorFreeplayState(weekFile));
 		});
 		storyModeButton.screenCenter(X);
 		add(storyModeButton);
