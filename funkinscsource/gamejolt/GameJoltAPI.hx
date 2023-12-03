@@ -98,7 +98,7 @@ class GameJoltAPI // Connects to tentools.api.FlxGameJolt
                         if(loginArg)
                         {
                             GameJoltLogin.login=true;
-                            FlxG.switchState(new GameJoltLogin());
+                            MusicBeatState.switchState(new GameJoltLogin());
                         }
                     }
                 else 
@@ -106,11 +106,11 @@ class GameJoltAPI // Connects to tentools.api.FlxGameJolt
                         if(loginArg)
                         {
                             GameJoltLogin.login=true;
-                            FlxG.switchState(new GameJoltLogin());
+                            MusicBeatState.switchState(new GameJoltLogin());
                         }
                         Main.gjToastManager.createToast(GameJoltInfo.imagePath, "Not signed in!\nSign in to save GameJolt Trophies and Leaderboard Scores!", "", false);
                         Debug.logInfo("User login failure!");
-                        // FlxG.switchState(new GameJoltLogin());
+                        // MusicBeatState.switchState(new GameJoltLogin());
                     }
             });
         }

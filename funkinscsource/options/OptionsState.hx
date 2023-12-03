@@ -20,7 +20,7 @@ class OptionsState extends MusicBeatState
 			case 'Visuals and UI': openSubState(new options.VisualsUISubState());
 			case 'Gameplay': openSubState(new options.GameplaySettingsSubState());
 			case 'Misc': openSubState(new options.MiscSettingsSubState());
-			case 'Adjust Delay and Combo':  FlxG.switchState(new options.NoteOffsetState());
+			case 'Adjust Delay and Combo':  MusicBeatState.switchState(new options.NoteOffsetState());
 			case 'Game Jolt Login': LoadingState.loadAndSwitchState(new gamejolt.GameJolt.GameJoltLogin());
 		}
 	}
@@ -126,7 +126,7 @@ class OptionsState extends MusicBeatState
 				FlxG.sound.music.volume = 0;
 			}
 			else {
-				FlxG.switchState(new MainMenuState());
+				MusicBeatState.switchState(new MainMenuState());
 			}
 		}
 		else if (controls.ACCEPT) openSelectedSubstate(options[curSelected]);

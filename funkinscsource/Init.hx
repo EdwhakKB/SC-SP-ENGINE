@@ -67,6 +67,6 @@ class Init extends MusicBeatState
 		cpp.NativeGc.run(true);
 		#end
 
-		FlxG.switchState(new TitleState());
+		MusicBeatState.switchState(new TitleState());
 	}
 }

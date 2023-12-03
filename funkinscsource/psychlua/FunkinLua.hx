@@ -668,7 +668,7 @@ class FunkinLua {
 				PlayState.SONG = Song.loadFromJson(poop, name);
 				PlayState.storyDifficulty = difficultyNum;
 				game.persistentUpdate = false;
-				FlxG.switchState(new PlayState());
+				MusicBeatState.switchState(new PlayState());
 	
 				if (game.inst != null){
 					game.inst.pause();
@@ -1097,10 +1097,14 @@ class FunkinLua {
 					FlxTransitionableState.skipNextTransOut = true;
 				}
 	
-				PlayState.cancelMusicFadeTween();
+				//PlayState.cancelMusicFadeTween();
 
-				if(PlayState.isStoryMode) FlxG.switchState(new StoryMenuState());
-				else FlxG.switchState(new FreeplayState());
+				IndieDiamondTransSubState.nextCamera = game.camOther;
+				if(FlxTransitionableState.skipNextTransIn)
+					IndieDiamondTransSubState.nextCamera = null;
+
+				if(PlayState.isStoryMode) MusicBeatState.switchState(new StoryMenuState());
+				else MusicBeatState.switchState(new FreeplayState());
 				
 				#if desktop DiscordClient.resetClientID(); #end
 	

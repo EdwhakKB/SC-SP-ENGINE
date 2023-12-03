@@ -226,7 +226,9 @@ class PlayState extends MusicBeatState
 
 	public var judgementCounter:FlxText;
 
+	public var healthSet:Bool = false;
 	public var health:Float = 1;
+	public var maxHealth:Float = 2;
 	public var combo:Int = 0;
 
 	public var healthBar:Bar;
@@ -583,6 +585,7 @@ class PlayState extends MusicBeatState
 		grpNoteSplashesCPU = new FlxTypedGroup<NoteSplash>();
 
 		FlxG.cameras.setDefaultDrawTarget(camGame, true);
+		IndieDiamondTransSubState.nextCamera = mainCam;
 
 		persistentUpdate = true;
 		persistentDraw = true;
@@ -622,7 +625,7 @@ class PlayState extends MusicBeatState
 		#end
 
 		Stage = new Stage(SONG.stage, true);
-		Stage.setupStageProperties(SONG.stage, true, false);
+		Stage.setupStageProperties(SONG.stage, true, true);
 		curStage = Stage.curStage;
 		defaultCamZoom = Stage.camZoom;
 		cameraMoveXYVar1 = Stage.stageCameraMoveXYVar1;
@@ -725,9 +728,6 @@ class PlayState extends MusicBeatState
 			cacheCharacter(PlayState.SONG.player1, true);
 			if (gf != null) cacheCharacter(PlayState.SONG.gfVersion);
 			if (mom != null) cacheCharacter(PlayState.SONG.player4);
-
-			preloadStage = new Stage(SONG.stage, true);
-			preloadStage.setupStageProperties(SONG.stage, true, false);
 		}
 
 		if (boyfriend.deadChar != null) GameOverSubstate.characterName = boyfriend.deadChar;
@@ -1204,6 +1204,7 @@ class PlayState extends MusicBeatState
 
 		Paths.clearUnusedMemory();
 	
+		IndieDiamondTransSubState.nextCamera = mainCam;
 		if(eventNotes.length < 1) checkEventNote();
 
 		if(timeToStart > 0){						
@@ -1402,12 +1403,12 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	public function addTextToDebug(text:String, color:FlxColor) {
+	public function addTextToDebug(text:String, color:FlxColor, ?timeTaken:Float = 6) {
 		#if LUA_ALLOWED
 		var newText:DebugLuaText = luaDebugGroup.recycle(DebugLuaText);
 		newText.text = text;
 		newText.color = color;
-		newText.disableTime = 6;
+		newText.disableTime = timeTaken;
 		newText.alpha = 1;
 		newText.setPosition(10, 8 - newText.height);
 
@@ -2519,15 +2520,11 @@ class PlayState extends MusicBeatState
 		switch (player)
 		{
 			case 1:
-				if (!opponentMode)
-					bfStrumStyle = style;
-				else
-					dadStrumStyle = style;
+				if (opponentMode && !ClientPrefs.data.middleScroll) dadStrumStyle = style;
+				else bfStrumStyle = style;
 			case 0:
-				if (opponentMode)
-					bfStrumStyle = style;
-				else
-					dadStrumStyle = style;
+				if (opponentMode && !ClientPrefs.data.middleScroll) bfStrumStyle = style;
+				else dadStrumStyle = style;
 		}
 
 		if (SONG.middleScroll && !ClientPrefs.data.middleScroll){
@@ -3017,7 +3014,7 @@ class PlayState extends MusicBeatState
 			}
 
 			var iconOffset:Int = 26;
-			health = FlxMath.bound(health, 0, (healthBar.bounds.max != null ? healthBar.bounds.max : 2));
+			health = (healthSet ? FlxMath.bound(health, 0, 1) : FlxMath.bound(health, 0, (healthBar.bounds.max != null ? healthBar.bounds.max : (health > maxHealth ? maxHealth : health))));
 
 			if (whichHud == 'HITMANS') { iconP1.x = (FlxG.width - 160); iconP2.x = (0); }
 			else
@@ -3468,6 +3465,7 @@ class PlayState extends MusicBeatState
 			setOnScripts('cameraY', camFollow.y);
 			setOnScripts('botPlay', cpuControlled);
 			callOnScripts('onUpdatePost', [elapsed]);
+			callOnScripts('updatePost', [elapsed]);
 
 			if (finishedSetUpQuantStuff)
 			{
@@ -3492,46 +3490,51 @@ class PlayState extends MusicBeatState
 		{
 			if (icons[i].animationStopped) return;
 			if (icons[i].animatedIcon) {
-				if (percent20)
+				var iconNum:Int = -1;
+				var animName:String = 'normal';
+
+				if (percent20 && ((!opponentMode && icons[0].hasLosingAnimated) || (opponentMode && icons[1].hasLosingAnimated)))
 				{
-					if (!opponentMode) icons[0].animation.play('losing');
-					else icons[1].animation.play('losing');
+					iconNum = opponentMode ? 1 : 0; 
+					animName = 'loss';
 		
 				}
 				else if (percent80 && ((!opponentMode && icons[0].hasWinningAnimated) || (opponentMode && icons[1].hasWinningAnimated)))
 				{
-					if (!opponentMode) icons[0].animation.play('winning');
-					else icons[1].animation.play('winning');
+					iconNum = opponentMode ? 1 : 0; 
+					animName = 'win';
 				}
 				else
 				{
-					if (!opponentMode) icons[0].animation.play('neutral');
-					else icons[1].animation.play('neutral');
-		
+					iconNum = opponentMode ? 1 : 0; 
+					animName = 'normal';
 				}
 				
-				if (percent80)
+				if (percent80 && ((!opponentMode && icons[0].hasLosingAnimated) || (opponentMode && icons[1].hasLosingAnimated)))
 				{
-					if (!opponentMode) icons[1].animation.play('losing');
-					else icons[0].animation.play('losing');
+					iconNum = opponentMode ? 0 : 1; 
+					animName = 'loss';
 				}
-				else if ((percent20 && !opponentMode && icons[1].hasWinningAnimated) || (percent20 && opponentMode && icons[0].hasWinningAnimated))
+				else if (percent20 && ((!opponentMode && icons[1].hasWinningAnimated) || (opponentMode && icons[0].hasWinningAnimated)))
 				{
-					if (!opponentMode) icons[1].animation.play('winning');
-					else icons[0].animation.play('winning');
+					iconNum = opponentMode ? 0 : 1; 
+					animName = 'win';
 				}
 				else
 				{
-					if (!opponentMode) icons[1].animation.play('neutral');
-					else icons[0].animation.play('neutral');
+					iconNum = opponentMode ? 0 : 1; 
+					animName = 'normal';
+				}
+
+				if (icons[iconNum].animation.curAnim.finished || (animName != icons[iconNum].animation.curAnim.name))
+				{
+					icons[iconNum].playAnim(animName, true);
 				}
 			}else{
-				
 				if (percent20)
 				{
 					if (!opponentMode) icons[0].animation.curAnim.curFrame = 1;
 					else icons[1].animation.curAnim.curFrame = 1;
-		
 				}
 				else if (percent80 && ((!opponentMode && icons[0].hasWinning) || (opponentMode && icons[1].hasWinning)))
 				{
@@ -3549,7 +3552,7 @@ class PlayState extends MusicBeatState
 					if (!opponentMode) icons[1].animation.curAnim.curFrame = 1;
 					else icons[0].animation.curAnim.curFrame = 1;
 				}
-				else if ((percent20 && !opponentMode && icons[1].hasWinning) || (percent20 && opponentMode && icons[0].hasWinning))
+				else if (percent20 && ((!opponentMode && icons[1].hasWinning) || (opponentMode && icons[0].hasWinning)))
 				{
 					if (!opponentMode) icons[1].animation.curAnim.curFrame = 2;
 					else icons[0].animation.curAnim.curFrame = 2;
@@ -3659,7 +3662,7 @@ class PlayState extends MusicBeatState
 			DiscordClient.resetClientID();
 			#end
 			
-			FlxG.switchState(new ChartingState());
+			MusicBeatState.switchState(new ChartingState());
 
 			return true;
 		}
@@ -3673,7 +3676,7 @@ class PlayState extends MusicBeatState
 		if (openedOnce)
 			cancelMusicFadeTween();
 		#if desktop DiscordClient.resetClientID(); #end
-		FlxG.switchState(new CharacterEditorState(SONG.player2));
+		MusicBeatState.switchState(new CharacterEditorState(SONG.player2));
 		return true;
 	}
 
@@ -3692,7 +3695,7 @@ class PlayState extends MusicBeatState
 			DiscordClient.changePresence("Modchart Editor", null, null, true);
 			DiscordClient.resetClientID();
 			#end
-			FlxG.switchState(new modcharting.ModchartEditorState());
+			MusicBeatState.switchState(new modcharting.ModchartEditorState());
 			modchartMode = true;
 			chartingMode = false;
 	
@@ -3733,7 +3736,7 @@ class PlayState extends MusicBeatState
 		});
 		StageKadeEditorState.Stage = Stage;
 
-		FlxG.switchState(new StageKadeEditorState(Stage.curStage, gf.curCharacter, boyfriend.curCharacter, dad.curCharacter, mom.curCharacter));
+		MusicBeatState.switchState(new StageKadeEditorState(Stage.curStage, gf.curCharacter, boyfriend.curCharacter, dad.curCharacter, mom.curCharacter));
 	}
 
 	public var isDead:Bool = false; //Don't mess with this on Lua!!!
@@ -3773,7 +3776,7 @@ class PlayState extends MusicBeatState
 				}
 				else openSubState(new GameOverSubstate(boyfriend.getScreenPosition().x - boyfriend.positionArray[0], boyfriend.getScreenPosition().y - boyfriend.positionArray[1], camFollow.x, camFollow.y));
 
-				// FlxG.switchState(new GameOverState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
+				// MusicBeatState.switchState(new GameOverState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
 
 				#if desktop
 				// Game Over doesn't get his own variable because it's only used here
@@ -4134,7 +4137,7 @@ class PlayState extends MusicBeatState
 				}
 				catch(e:Dynamic)
 				{
-					#if (SScript <= "6.1.80")
+					#if (SScript >= "6.1.80")
 					HScript.hscriptTrace('ERROR ("Set Property" Event) - $e', FlxColor.RED);
 					#else
 					var len:Int = e.message.indexOf('\n') + 1;
@@ -4190,6 +4193,8 @@ class PlayState extends MusicBeatState
 				else if (value2 == 'true')
 					forceChangeOnTarget = true;
 				cameraTargeted = value1;
+			default: 
+				addTextToDebug('Event $eventName does not exist!, check if the .lua or .hx, or even source for this event.', FlxColor.RED);
 		}
 		
 		Stage.eventCalled(eventName, value1, value2, strumTime, value3, value4, value5, value6, value7, value8, 
@@ -4525,6 +4530,10 @@ class PlayState extends MusicBeatState
 						}
 					}
 
+					if(FlxTransitionableState.skipNextTransIn) {
+						IndieDiamondTransSubState.nextCamera = null;
+					}
+
 					if (ClientPrefs.data.resultsScreenType == 'KADE')
 					{
 						openSubState(subStates[0]);
@@ -4535,7 +4544,7 @@ class PlayState extends MusicBeatState
 						Mods.loadTopMod();
 						FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
 						#if desktop DiscordClient.resetClientID(); #end
-						FlxG.switchState(new StoryMenuState());
+						MusicBeatState.switchState(new StoryMenuState());
 					}
 
 					if(!practiceMode && !cpuControlled) {
@@ -4589,6 +4598,10 @@ class PlayState extends MusicBeatState
 				persistentUpdate = false;
 				paused = true;
 
+				if(FlxTransitionableState.skipNextTransIn) {
+					IndieDiamondTransSubState.nextCamera = null;
+				}
+
 				if (ClientPrefs.data.resultsScreenType == 'KADE')
 				{
 					openSubState(subStates[0]);
@@ -4599,7 +4612,7 @@ class PlayState extends MusicBeatState
 					Debug.logTrace('WENT BACK TO FREEPLAY??');
 					Mods.loadTopMod();
 					#if desktop DiscordClient.resetClientID(); #end
-					FlxG.switchState(new FreeplayState());
+					MusicBeatState.switchState(new FreeplayState());
 					FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
 					changedDifficulty = false;
 				}
@@ -6425,8 +6438,8 @@ class PlayState extends MusicBeatState
 	{
 		if (Stage != null && Stage.isCustomStage)
 		{
-			Stage.setOnLuas(variable, arg, exclusions);
-			Stage.setOnHScript(variable, arg, exclusions);	
+			if (Stage.isLuaStage) Stage.setOnLuas(variable, arg, exclusions);
+			if (Stage.isHxStage) Stage.setOnHScript(variable, arg, exclusions);	
 		}
 
 		if(exclusions == null) exclusions = [];
@@ -6471,8 +6484,8 @@ class PlayState extends MusicBeatState
 	{
 		if (Stage != null && Stage.isCustomStage)
 		{
-			Stage.getOnLuas(variable, arg, exclusions);	
-			Stage.getOnHScript(variable, exclusions);	
+			if (Stage.isLuaStage) Stage.getOnLuas(variable, arg, exclusions);	
+			if (Stage.isHxStage) Stage.getOnHScript(variable, exclusions);	
 		}
 
 		if(exclusions == null) exclusions = [];

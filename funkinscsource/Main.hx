@@ -374,7 +374,7 @@ class Main extends Sprite
 	
 			if (focusMusicTween != null)
 				focusMusicTween.cancel();
-			focusMusicTween = FlxTween.tween(FlxG.sound, {volume: newVol}, 2);
+			focusMusicTween = FlxTween.tween(FlxG.sound, {volume: newVol}, 0.5);
 		}
 	}
 
@@ -390,7 +390,7 @@ class Main extends Sprite
 			if (focusMusicTween != null)
 				focusMusicTween.cancel();
 	
-			focusMusicTween = FlxTween.tween(FlxG.sound, {volume: oldVol}, 2);
+			focusMusicTween = FlxTween.tween(FlxG.sound, {volume: oldVol}, 0.5);
 		}
 	}
 }

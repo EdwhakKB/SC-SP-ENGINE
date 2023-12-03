@@ -87,7 +87,10 @@ class StrumArrow extends FlxSkewedSprite
 	{
 		var lastAnim:String = null;
 		if(animation.curAnim != null) lastAnim = animation.curAnim.name;
-		if(PlayState.instance != null) PlayState.instance.bfStrumStyle = style;
+		if(PlayState.instance != null) {
+			PlayState.instance.bfStrumStyle = style; 
+			PlayState.instance.dadStrumStyle = style; 
+		}
 
 		loadNoteAnims(style);
 		updateHitbox();

@@ -63,27 +63,15 @@ class MusicBeatState extends #if modchartingTools modcharting.ModchartMusicBeatS
 		destroySubStates = false;
 		FlxG.mouse.enabled = true;
 		FlxG.mouse.visible = true;
+		var skip:Bool = FlxTransitionableState.skipNextTransOut;
 		#if MODS_ALLOWED Mods.updatedOnState = false; #end
 
 		super.create();
-
-		if (disableNextTransIn)
-		{
-			enableTransIn = false;
-			disableNextTransIn = false;
+		if(!skip) {
+			openSubState(new IndieDiamondTransSubState(0.7, true));
+			IndieDiamondTransSubState.finishCallback = function() closeSubState();
 		}
-        
-		if (disableNextTransOut)
-		{
-			enableTransOut = false;
-			disableNextTransOut = false;
-		}
-        
-		if (enableTransIn)
-		{
-			trace("transIn");
-			fadeIn();
-		}
+		FlxTransitionableState.skipNextTransOut = false;
 		timePassedOnState = 0;
 	}
 
@@ -116,7 +104,7 @@ class MusicBeatState extends #if modchartingTools modcharting.ModchartMusicBeatS
 		super.update(elapsed);
 	}
 
-	override function switchTo(state:FlxState):Bool
+	/*override function switchTo(state:FlxState):Bool
     {
         if (!finishedTransOut && !transOutRequested)
         {
@@ -130,22 +118,23 @@ class MusicBeatState extends #if modchartingTools modcharting.ModchartMusicBeatS
 
                 transOutRequested = true;
             }
-            else
-                return true;
+            else return true;
         }
 
         return finishedTransOut;
-    }
+    }*/
 
-    public function fadeIn()
+    /*public function fadeIn()
     {
-        subStateRecv(this, new IndieDiamondTransSubState(0.5, true, function() { closeSubState(); }));
+        subStateRecv(this, new IndieDiamondTransSubState(0.7, true));
+		IndieDiamondTransSubState.finishCallback = function() closeSubState();
     }
 
-    public function fadeOut(finishCallback:()->Void)
+    public function fadeOut(finishCallback:Void->Void)
     {
         trace("trans out");
-        subStateRecv(this, new IndieDiamondTransSubState(0.5, false, finishCallback));
+        subStateRecv(this, new IndieDiamondTransSubState(0.6, false));
+		IndieDiamondTransSubState.finishCallback = finishCallBack;
     }
 
  	public function subStateRecv(from:FlxState, state:FlxSubState)
@@ -154,7 +143,7 @@ class MusicBeatState extends #if modchartingTools modcharting.ModchartMusicBeatS
             from.openSubState(state);
         else
             subStateRecv(from.subState, state);
-    }
+    }*/
 
 	var trackedBPMChanges:Int = 0;
 	/**
@@ -280,8 +269,9 @@ class MusicBeatState extends #if modchartingTools modcharting.ModchartMusicBeatS
 		if(nextState == null)
 			nextState = FlxG.state;
 
-		if(nextState == FlxG.state) FlxG.resetState();
-		else FlxG.switchState(nextState);
+		FlxG.state.openSubState(new IndieDiamondTransSubState(0.6, false));
+		if(nextState == FlxG.state) IndieDiamondTransSubState.finishCallback = function() FlxG.resetState();
+		else IndieDiamondTransSubState.finishCallback = function() FlxG.switchState(nextState);
 	}
 
 	public static function getState():MusicBeatState {

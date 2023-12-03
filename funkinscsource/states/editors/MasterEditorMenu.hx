@@ -96,7 +96,7 @@ class MasterEditorMenu extends MusicBeatState
 		}
 		#end
 
-		if (controls.BACK) FlxG.switchState(new MainMenuState());
+		if (controls.BACK) MusicBeatState.switchState(new MainMenuState());
 		if (controls.ACCEPT)
 		{
 			switch(options[curSelected]) {
@@ -105,15 +105,15 @@ class MasterEditorMenu extends MusicBeatState
 				case 'Character Editor':
 					LoadingState.loadAndSwitchState(new CharacterEditorState(Character.DEFAULT_CHARACTER, false));
 				case 'Week Editor':
-					FlxG.switchState(new WeekEditorState());
+					MusicBeatState.switchState(new WeekEditorState());
 				case 'Menu Character Editor':
-					FlxG.switchState(new MenuCharacterEditorState());
+					MusicBeatState.switchState(new MenuCharacterEditorState());
 				case 'Dialogue Editor':
 					LoadingState.loadAndSwitchState(new DialogueEditorState(), false);
 				case 'Dialogue Portrait Editor':
 					LoadingState.loadAndSwitchState(new DialogueCharacterEditorState(), false);
 				case 'Note Splash Debug':
-					FlxG.switchState(new NoteSplashDebugState());
+					MusicBeatState.switchState(new NoteSplashDebugState());
 			}
 			FlxG.sound.music.volume = 0;
 		}

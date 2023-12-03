@@ -810,13 +810,14 @@ class Stage extends MusicBeatState
 				}
 			case 'limo':
 				if(!ClientPrefs.data.lowQuality) {
-					grpLimoParticles.forEach(function(spr:BGSprite) {
-						if(spr.animation.curAnim.finished) {
-							spr.kill();
-							grpLimoParticles.remove(spr, true);
-							spr.destroy();
-						}
-					});
+					if (grpLimoParticles != null)
+						grpLimoParticles.forEach(function(spr:BGSprite) {
+							if(spr.animation.curAnim.finished) {
+								spr.kill();
+								grpLimoParticles.remove(spr, true);
+								spr.destroy();
+							}
+						});
 		
 					switch(limoKillingState) {
 						case KILLING:

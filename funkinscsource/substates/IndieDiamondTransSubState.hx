@@ -9,33 +9,27 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import shaders.IndieDiamondTransShader;
 
-class IndieDiamondTransSubState extends FlxSubState
+class IndieDiamondTransSubState extends MusicBeatSubstate
 {
     var shader:IndieDiamondTransShader;
     var rect:FlxSprite;
     var tween:FlxTween;
     
-    var finishCallback:() -> Void;
+    public static var finishCallback:Void->Void;
     var duration:Float;
 
-    var fi:Bool = true;
+    public static var fadeInState:Bool = true;
 
-    public function new(duration:Float = 1.0, fadeIn:Bool = true, finishCallback:() -> Void = null)
+    public static var nextCamera:FlxCamera;
+
+    public function new(duration:Float = 1.0, fadeInState:Bool = true)
     {
         super();
         
         this.duration = duration;
-        this.finishCallback = finishCallback;
-        this.fi = fadeIn;
-    }
-
-    override public function create()
-    {
-        super.create();
-
-        camera = new FlxCamera();
-        camera.bgColor = FlxColor.TRANSPARENT;
-        FlxG.cameras.add(camera, false);
+        var zoom:Float = FlxMath.bound(FlxG.camera.zoom, 0.05, 1);
+		var width:Int = Std.int(FlxG.width / zoom);
+		var height:Int = Std.int(FlxG.height / zoom);
 
         shader = new IndieDiamondTransShader();
 
@@ -43,39 +37,29 @@ class IndieDiamondTransSubState extends FlxSubState
         shader.reverse.value = [false];
 
         rect = new FlxSprite(0, 0);
-        rect.makeGraphic(1, 1, 0xFF000000);
-        rect.scale.set(FlxG.width, FlxG.height);
-        rect.origin.set();
+        rect.makeGraphic(width, height, 0xFF000000);
+        rect.scrollFactor.set();
         rect.shader = shader;
         rect.visible = false;
-        if (camera != null) rect.cameras = [camera];
+        rect.updateHitbox();
+        if (nextCamera != null) rect.cameras = [nextCamera];
         add(rect);
 
-        if (fi)
-            fadeIn();
-        else
-            fadeOut();
+        if (fadeInState) fadeIn();
+        else fadeOut();
 
-		closeCallback = _closeCallback;
+        nextCamera = null;
     }
 
     function __fade(from:Float, to:Float, reverse:Bool)
-    {
-        trace("fade initiated");
-        
+    {    
         rect.visible = true;
         shader.progress.value = [from];
         shader.reverse.value = [reverse];
 
         tween = FlxTween.num(from, to, duration, {ease: FlxEase.linear, onComplete: function(_)
         {
-            trace("finished");
-            if (finishCallback != null)
-            {
-                rect.destroy();
-                shader = null;
-                camera = null;
-                trace("with callback");
+            if (finishCallback != null) {
                 finishCallback();
             }
         }}, function(num:Float)
@@ -94,9 +78,13 @@ class IndieDiamondTransSubState extends FlxSubState
         __fade(0.0, 1.0, false);
     }
 
-    function _closeCallback()
+    override function destroy()
     {
         if (tween != null)
+        {
+            finishCallback();
             tween.cancel();
+        }
+        super.destroy();
     }
 }

@@ -219,10 +219,9 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
     }
     private function getLane(noteIndex:Int)
     {
-        if (!ClientPrefs.getGameplaySetting('opponent'))
-            return (notes.members[noteIndex].mustPress ? notes.members[noteIndex].noteData+NoteMovement.keyCount : notes.members[noteIndex].noteData);
-        else
+        if (ClientPrefs.getGameplaySetting('opponent') && !ClientPrefs.data.middleScroll)
             return (notes.members[noteIndex].mustPress ? notes.members[noteIndex].noteData : notes.members[noteIndex].noteData+NoteMovement.keyCount);
+        else return (notes.members[noteIndex].mustPress ? notes.members[noteIndex].noteData+NoteMovement.keyCount : notes.members[noteIndex].noteData);
     }
     private function getNoteDist(noteIndex:Int)
     {

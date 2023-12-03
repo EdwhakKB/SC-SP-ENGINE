@@ -274,8 +274,8 @@ class ResultsScreenKadeSubstate extends substates.MusicBeatSubstate
 							Conductor.bpm = 102;
 						}
 						
-						if (PlayState.isStoryMode) FlxG.switchState(new StoryMenuState());
-						else FlxG.switchState(new FreeplayState());
+						if (PlayState.isStoryMode) MusicBeatState.switchState(new StoryMenuState());
+						else MusicBeatState.switchState(new FreeplayState());
 					}
 				});
 			}

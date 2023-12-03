@@ -54,7 +54,7 @@ class WarnFreeplay extends states.MusicBeatState
 				FlxG.sound.play(Paths.sound('confirmMenu'));
 				FlxFlicker.flicker(warnText, 1, 0.1, false, true, function(flk:FlxFlicker) {
 					new FlxTimer().start(0.5, function (tmr:FlxTimer) {
-						FlxG.switchState(new states.FreeplayState());
+						MusicBeatState.switchState(new states.FreeplayState());
 					});
 				});
 			} else {
@@ -63,7 +63,7 @@ class WarnFreeplay extends states.MusicBeatState
 				FlxG.sound.play(Paths.sound('cancelMenu'));
 				FlxTween.tween(warnText, {alpha: 0}, 1, {
 					onComplete: function (twn:FlxTween) {
-						FlxG.switchState(new states.MainMenuState());
+						MusicBeatState.switchState(new states.MainMenuState());
 					}
 				});
 			}

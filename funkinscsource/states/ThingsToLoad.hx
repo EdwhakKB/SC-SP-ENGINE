@@ -90,6 +90,7 @@ class ThingsToLoad extends MusicBeatState
 
         if (FileSystem.exists(Paths.txt(songLowercase  + "/preload")))
         {
+            trace('Preloading Characters!');
             PlayState.alreadyPreloaded = true;
             var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt(songLowercase  + "/preload"));
             for (i in 0...characters.length)
@@ -109,6 +110,7 @@ class ThingsToLoad extends MusicBeatState
         
         if (FileSystem.exists(Paths.txt(songLowercase + "/preload-stage")))
         {
+            PlayState.alreadyPreloaded = true;
             var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt(songLowercase + "/preload-stage"));
 
             for (i in 0...characters.length)

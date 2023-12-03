@@ -2251,7 +2251,7 @@ class ChartingState extends MusicBeatState
 				autosaveSong();
 
 				PlayState.chartingMode = false;
-				FlxG.switchState(new states.editors.MasterEditorMenu());
+				MusicBeatState.switchState(new states.editors.MasterEditorMenu());
 				FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
 				FlxG.mouse.visible = false;
 				songStarted = true;
