@@ -812,14 +812,10 @@ class SupportBETAFunctions
 		funk.set("cacheCharacter", function(characterType:Int = 0, character:String = 'bf'){
 			switch (characterType)
 			{
-				case 0:
-					PlayState.instance.cacheBoyfriendCharacter(character);
-				case 1:
-					PlayState.instance.cacheDadCharacter(character);
+				case 0 | 1 | 3:
+					PlayState.instance.cacheCharacter(character);
 				case 2:
-					PlayState.instance.cacheGirlfriendCharacter(character);
-				case 3:
-					PlayState.instance.cacheMomCharacter(character);
+					PlayState.instance.cacheCharacter(character, true);
 			}
 		});
 

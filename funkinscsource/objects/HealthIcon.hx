@@ -2,14 +2,17 @@ package objects;
 
 class HealthIcon extends FlxSprite
 {
-	private var isOldIcon:Bool = false;
-	private var isPlayer:Bool = false;
-	private var char:String = '';
-	private var iconOffset:Array<Float> = [0, 0];
+	public var animOffsets:Map<String, Array<Dynamic>>;
+
+	public var isOldIcon:Bool = false;
+	public var isPlayer:Bool = false;
+	public var char:String = '';
+	public var iconOffset:Array<Float> = [0, 0];
 
 	public var sprTracker:FlxSprite;
 	public var hasWinning:Bool = true;
 	public var hasWinningAnimated:Bool = false;
+	public var hasLosingAnimated:Bool = true;
 	
 	public var alreadySized:Bool = true;
 	public var findAutoMaticSize:Bool = false;
@@ -23,19 +26,25 @@ class HealthIcon extends FlxSprite
 	public var animationStopped:Bool = false;
 	public var iconStoppedBop:Bool = false;
 
+	public var animationsForAnimated:Array<String> = ['normal', 'loss', 'win'];
+	public var iconOffsetsAnimated:Array<Array<Float>> = [[0, 0], [0, 0], [0, 0]];
+	public var offsetX:Float = 0;
+	public var offsetY:Float = 0;
+
 	public function new(char:String = 'bf', isPlayer:Bool = false, ?allowGPU:Bool = true)
 	{
 		super();
+		animOffsets = new Map<String, Array<Dynamic>>();
 		isOldIcon = (char == 'bf-old');
 		this.isPlayer = isPlayer;
 		changeIcon(char, allowGPU);
-		scrollFactor.set();
+		scrollFactor.set(0.5, 0.5);
 	}
 
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
-		if (sprTracker != null) setPosition(sprTracker.x + sprTracker.width + 12, sprTracker.y - 30);
+		if (sprTracker != null) setPosition(sprTracker.x + sprTracker.width + 12 + offsetX, sprTracker.y - 30 + offsetY);
 	}
 
 	public function changeIcon(char:String, ?allowGPU:Bool = true) {
@@ -43,18 +52,39 @@ class HealthIcon extends FlxSprite
 		if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-' + char; //Older versions of psych engine's support
 		if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-face'; //Prevents crash from missing icon
 
+		var frameName:String = name;
+		if (frameName.contains('.png')) frameName = frameName.substring(0, frameName.length-4);
+
+		var file:String = Paths.xml(frameName);
+		
+		#if MODS_ALLOWED
+		if (FileSystem.exists(Paths.modsXml(frameName)) || FileSystem.exists(file)) 
+		#else
+		if (OpenFlAssets.exists(file)) 
+		#end
+		{
+			Debug.logInfo('Accepted Animated Icon!');
+			animatedIcon = true;
+		}
+
 		// now with winning icon support
 		if (animatedIcon)
 		{
 			frames = Paths.getSparrowAtlas(name, allowGPU);
-
-			if (this.animation.curAnim.name.contains('win')) hasWinningAnimated = true;
-			else hasWinningAnimated = false;
 			updateHitbox();
 	
-			animation.addByPrefix('neutral', 'neutral', 30, true);
-			animation.addByPrefix('losing', 'losing', 30, true);
-			if (hasWinningAnimated) animation.addByPrefix('winning', 'winning', 30, true);
+			animation.addByPrefix('normal', animationsForAnimated[0], 24, true, isPlayer);
+			animation.addByPrefix('loss', animationsForAnimated[1], 24, true, isPlayer);
+			animation.addByPrefix('win', animationsForAnimated[2], 24, true, isPlayer);
+
+			if (animation.getByName('loss') != null) hasLosingAnimated = true;
+			if (animation.getByName('win') != null) hasWinningAnimated = true;
+
+			addOffset('normal', iconOffsetsAnimated[0][0], iconOffsetsAnimated[0][1]);
+			if (hasLosingAnimated) addOffset('loss', iconOffsetsAnimated[1][0], iconOffsetsAnimated[1][1]);
+			if (hasWinningAnimated) addOffset('win', iconOffsetsAnimated[2][0], iconOffsetsAnimated[2][1]);
+
+			playAnim('normal', true);
 		}
 		else
 		{
@@ -92,10 +122,10 @@ class HealthIcon extends FlxSprite
 			var animArray:Array<Int> = [];
 	
 			if (hasWinning) animArray = [0, 1, 2];
-			else if (!hasWinning)
+			else
 			{
 				if (defaultSize) animArray = [0, 1];
-				else animArray = [0];
+				else animArray = [0, 0, 0];
 			}
 	
 			animation.add(char, animArray, 0, false, isPlayer);
@@ -111,11 +141,35 @@ class HealthIcon extends FlxSprite
 	override function updateHitbox()
 	{
 		super.updateHitbox();
-		offset.x = iconOffset[0];
-		offset.y = iconOffset[1];
+		if (!animatedIcon)
+		{
+			offset.x = iconOffset[0];
+			offset.y = iconOffset[1];
+		}
 		width = Math.abs(scale.x) * frameWidth;
 		height = Math.abs(scale.y) * frameHeight;
 		centerOrigin();
+	}
+
+	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
+	{
+		animation.play(AnimName, Force, Reversed, Frame);
+
+		var daOffset = animOffsets.get(AnimName);
+
+		if (animOffsets.exists(AnimName))
+		{
+			offset.set(daOffset[0], daOffset[1]);
+		}
+		else
+		{
+			offset.set(0, 0);
+		}
+	}
+
+	public function addOffset(name:String, x:Float = 0, y:Float = 0)
+	{
+		animOffsets[name] = [x, y];
 	}
 
 	public function getCharacter():String {

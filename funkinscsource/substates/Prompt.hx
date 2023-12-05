@@ -89,7 +89,7 @@ class Prompt extends MusicBeatSubstate
 		textshit.scrollFactor.set();
 		}
 	}
-	override public function update(elapsed:Float):Void 
+	/*override public function update(elapsed:Float):Void 
 	{
 		super.update(elapsed);
 		
@@ -124,7 +124,7 @@ class Prompt extends MusicBeatSubstate
 		}
 		
 		}
-	}
+	}*/
 	
 	
 	function makeSelectorGraphic(panel:FlxSprite,w,h,color:FlxColor)

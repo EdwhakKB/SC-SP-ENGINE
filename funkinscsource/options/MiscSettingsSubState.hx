@@ -68,6 +68,11 @@ class MiscSettingsSubState extends BaseOptionsMenu
 			['NONE', 'KADE']);
 		addOption(option);
 
+		var option:Option = new Option('Clear Logs Folder On TitleState',
+			"Clear the 'logs' folder",
+			'clearFolderOnStart',
+			'bool');
+		addOption(option);
 		super();
 	}
 

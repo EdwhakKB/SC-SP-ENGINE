@@ -76,6 +76,11 @@ class PauseSubState extends MusicBeatSubstate
 		}
 		difficultyChoices.push('BACK');
 
+		if (pauseMusic != null || FlxG.sound.music == null)
+		{
+			FlxG.sound.music = null;
+			pauseMusic = null;
+		}
 
 		pauseMusic = new FlxSound();
 		if(songName != null) {
@@ -260,7 +265,7 @@ class PauseSubState extends MusicBeatSubstate
 						var poop = Highscore.formatSong(name, curSelected);
 						PlayState.SONG = Song.loadFromJson(poop, name);
 						PlayState.storyDifficulty = curSelected;
-						FlxG.resetState();
+						MusicBeatState.resetState();
 						music.volume = 0;
 						PlayState.changedDifficulty = true;
 						PlayState.chartingMode = false;
@@ -300,11 +305,12 @@ class PauseSubState extends MusicBeatSubstate
 									PlayState.instance.modchartTimers.remove('hmmm'); 
 									pauseMusic.volume = 0;
 									pauseMusic.destroy();
+									FlxG.sound.music = null;
+									pauseMusic = null;
 									close();	
 								}
 						}
 					}, 5);
-					pauseMusic.volume = 0;
 					inCountDown = true;
 					menuItems = [];
 					deleteSkipTimeText();
@@ -356,7 +362,8 @@ class PauseSubState extends MusicBeatSubstate
 					PlayState.instance.paused = true; // For lua
 					PlayState.instance.vocals.volume = 0;
 					music.volume = 0;
-					FlxG.switchState(new OptionsState());
+					MusicBeatState.switchState(new OptionsState());
+
 					stoppedUpdatingMusic = true;
 					pauseMusic.volume = 0;
 					pauseMusic.destroy();
@@ -376,11 +383,10 @@ class PauseSubState extends MusicBeatSubstate
 					PlayState.seenCutscene = false;
 
 					Mods.loadTopMod();
-					if(PlayState.isStoryMode) {
-						FlxG.switchState(new StoryMenuState());
-					} else {
-						FlxG.switchState(new FreeplayState());
-					}
+
+					if(PlayState.isStoryMode) MusicBeatState.switchState(new StoryMenuState());
+					else MusicBeatState.switchState(new FreeplayState());
+
 					PlayState.cancelMusicFadeTween();
 					FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
 					PlayState.changedDifficulty = false;
@@ -506,7 +512,7 @@ class PauseSubState extends MusicBeatSubstate
 			FlxTransitionableState.skipNextTransIn = true;
 			FlxTransitionableState.skipNextTransOut = true;
 		}
-		FlxG.resetState();
+		MusicBeatState.resetState();
 	}
 
 	override function destroy()

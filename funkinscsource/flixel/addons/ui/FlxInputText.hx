@@ -1,6 +1,5 @@
 package flixel.addons.ui;
 
-#if (flixel < "5.3.0") 
 import lime.system.Clipboard;
 import flash.errors.Error;
 import flash.events.KeyboardEvent;
@@ -1079,4 +1078,3 @@ class FlxInputText extends FlxText
 		return backgroundColor;
 	}
 }
-#end

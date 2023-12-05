@@ -2483,7 +2483,7 @@ class FishEyeNewShader extends FlxFixedShader // https://www.shadertoy.com/view/
 	}
 }
 
-/*class GlitchNewShader extends FlxShader // https://www.shadertoy.com/view/XtyXzW
+class GlitchNewShader extends FlxShader // https://www.shadertoy.com/view/XtyXzW
 {
 	// Linux crashes due to GL_NV_non_square_matrices
 	// and I haven't found a way to set version to 130
@@ -2769,24 +2769,52 @@ class FishEyeNewShader extends FlxFixedShader // https://www.shadertoy.com/view/
 	}
 	')
 
-	public var preset(default, set):Int = 0;
-
-	function set_preset(value:Int):Int
+	public function new()
 	{
-		var presetData:Array<Float> = [0.4, 0.4];
-		data.prob.value = [0.25 - (presetData[0] / 8)];
-		data.intensityChromatic.value = [presetData[1]];
+		super();
+	}
+}
+
+class GlitchNewEffect extends ShaderEffectNew
+{
+    public var shader:GlitchNewShader = new GlitchNewShader();
+
+    public var prob(default, set):Float = 0;
+    public var intensityChromatic(default, set):Float = 0;
+
+    public function new()
+    {
+        shader.time.value = [0];
+    }
+
+    override public function update(elapsed:Float)
+    {
+        shader.prob.value = [prob];
+        shader.intensityChromatic.value = [intensityChromatic];
+    }
+
+    /*function set_preset(value:Int):Int
+    {
+        var presetData:Array<Float> = [0.4, 0.4];
+		shader.prob.value = [0.25 - (presetData[0] / 8)];
+		shader.intensityChromatic.value = [presetData[1]];
+        return value;   
+    }*/
+
+	function set_prob(value:Float):Float
+	{
+        prob = value;
+        shader.prob.value = [prob];
 		return value;
 	}
 
-	public function new(preset:Int = 0)
-	{
-		super();
-
-		data.time.value = [0];
-		this.preset = preset;
-	}
-}*/
+    function set_intensityChromatic(value:Float):Float
+    {
+        intensityChromatic = value;
+        shader.intensityChromatic.value = [intensityChromatic];
+        return value;
+    }
+}
 
 class InvertNewShader extends FlxFixedShader
 {
@@ -3314,7 +3342,7 @@ class IndividualGlitchesShader extends FlxShader
     }
 }
 
-/*class GlitchedEffect extends ShaderEffectNew
+class GlitchedEffect extends ShaderEffectNew
 {
     public var shader:GlitchedShader = new GlitchedShader();
 
@@ -3638,7 +3666,7 @@ class GlitchedShader extends GraphicsShader
     {
         super();
     }
-}*/
+}
 
 class DesaturationRGB extends ShaderEffectNew
 {

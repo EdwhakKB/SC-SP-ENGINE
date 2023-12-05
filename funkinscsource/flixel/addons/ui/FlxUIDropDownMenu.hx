@@ -1,6 +1,5 @@
 package flixel.addons.ui;
 
-#if (flixel < "5.3.0") 
 import flash.geom.Rectangle;
 import flixel.addons.ui.interfaces.IFlxUIClickable;
 import flixel.addons.ui.interfaces.IFlxUIWidget;
@@ -627,4 +626,3 @@ enum FlxUIDropDownMenuDropDirection
 	Down;
 	Up;
 }
-#end

@@ -56,12 +56,13 @@ class HScript extends SScript
 	}
 
 	public var origin:String;
-	override public function new(?parent:FunkinLua, ?file:String, ?varsToBring:Any = null)
+	override public function new(?parent:FunkinLua, ?file:String, ?varsToBring:Any = null, ?isHxStage:Bool = false)
 	{
 		if (file == null)
 			file = '';
 
 		this.varsToBring = varsToBring;
+		this.isHxStage = isHxStage;
 
 		super(file, false, false);
 		parentLua = parent;
@@ -179,7 +180,7 @@ class HScript extends SScript
 		set('Function_StopHScript', FunkinLua.Function_StopHScript);
 		set('Function_StopAll', FunkinLua.Function_StopAll);
 
-		if (Stage.instance != null && isHxStage){
+		if (isHxStage){
 			set('hideLastBG', function(hid:Bool){ 
 				Stage.instance.hideLastBG = hid;
 			});
@@ -376,12 +377,13 @@ class HScript extends SScript
 	}
 
 	public var origin:String;
-	override public function new(?parent:FunkinLua, ?file:String, ?varsToBring:Any = null)
+	override public function new(?parent:FunkinLua, ?file:String, ?varsToBring:Any = null, ?isHxStage:Bool = false)
 	{
 		if (file == null)
 			file = '';
 
 		this.varsToBring = varsToBring;
+		this.isHxStage = isHxStage;
 	
 		super(file, false, false);
 		parentLua = parent;
@@ -504,7 +506,7 @@ class HScript extends SScript
 		set('Function_StopHScript', FunkinLua.Function_StopHScript);
 		set('Function_StopAll', FunkinLua.Function_StopAll);
 
-		if (Stage.instance != null && isHxStage){
+		if (isHxStage){
 			set('hideLastBG', function(hid:Bool){ 
 				Stage.instance.hideLastBG = hid;
 			});

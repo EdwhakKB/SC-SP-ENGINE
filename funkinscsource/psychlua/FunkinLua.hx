@@ -668,7 +668,7 @@ class FunkinLua {
 				PlayState.SONG = Song.loadFromJson(poop, name);
 				PlayState.storyDifficulty = difficultyNum;
 				game.persistentUpdate = false;
-				FlxG.switchState(new PlayState());
+				MusicBeatState.switchState(new PlayState());
 	
 				if (game.inst != null){
 					game.inst.pause();
@@ -1097,10 +1097,14 @@ class FunkinLua {
 					FlxTransitionableState.skipNextTransOut = true;
 				}
 	
-				PlayState.cancelMusicFadeTween();
-	
-				if(PlayState.isStoryMode) FlxG.switchState(new StoryMenuState());
-				else FlxG.switchState(new FreeplayState());
+				//PlayState.cancelMusicFadeTween();
+
+				IndieDiamondTransSubState.nextCamera = game.camOther;
+				if(FlxTransitionableState.skipNextTransIn)
+					IndieDiamondTransSubState.nextCamera = null;
+
+				if(PlayState.isStoryMode) MusicBeatState.switchState(new StoryMenuState());
+				else MusicBeatState.switchState(new FreeplayState());
 				
 				#if desktop DiscordClient.resetClientID(); #end
 	
@@ -1175,12 +1179,10 @@ class FunkinLua {
 				}
 			});
 			set("cameraSetTarget", function(target:String) {
-				var isDad:Bool = false;
-				if(target == 'dad') {
-					isDad = true;
-				}
-				game.cameraTargeted = isDad ? 'dad' : 'bf';
-				return isDad;
+				game.cameraTargeted = target;
+			});
+			set('getCameraTarget', function() { 
+				return game.cameraTargeted; 
 			});
 			set("cameraShake", function(camera:String, intensity:Float, duration:Float) {
 				LuaUtils.cameraFromString(camera).shake(intensity, duration);
@@ -2189,13 +2191,13 @@ class FunkinLua {
 				LuaUtils.makeLuaCharacter(tag, character, shit.isPlayer, shit.flipMode);
 			});
 	
-			set("stopIdle", function(id:String, bool:Bool) {
+			set("stopIdle", function(id:String, stopped:Bool) {
 				if (game.modchartCharacters.exists(id) && ClientPrefs.data.characters)
 				{
-					game.modchartCharacters.get(id).stopIdle = bool;
+					game.modchartCharacters.get(id).stopIdle = stopped;
 					return;
 				}
-				LuaUtils.getActorByName(id).stopIdle = bool;
+				LuaUtils.getActorByName(id).stopIdle = stopped;
 			});
 	
 			set("characterDance", function(character:String) {

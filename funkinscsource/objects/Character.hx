@@ -96,7 +96,6 @@ class Character extends FlxSprite
 	public function new(x:Float, y:Float, ?character:String = 'bf', ?isPlayer:Bool = false)
 	{
 		super(x, y);
-
 		loadCharacter(character, isPlayer);
 	}
 
@@ -321,10 +320,8 @@ class Character extends FlxSprite
 		originalFlipX = flipX;
 
 		if(animation.getByName('danceLeft') != null && animation.getByName('danceRight') != null) if (!isDancing) isDancing = true;
-
-		if (animOffsets.exists('singLEFTmiss') || animOffsets.exists('singDOWNmiss') || animOffsets.exists('singUPmiss') || animOffsets.exists('singRIGHTmiss'))
+		if(animOffsets.exists('singLEFTmiss') || animOffsets.exists('singDOWNmiss') || animOffsets.exists('singUPmiss') || animOffsets.exists('singRIGHTmiss'))
 			hasMissAnimations = true;
-
 		if(animation.getByName('singUPmiss') == null) doMissThing = true; //if for some reason you only have an up miss, why?
 		
 		dance();
@@ -363,7 +360,7 @@ class Character extends FlxSprite
 				heyTimer -= elapsed * rate;
 				if (heyTimer <= 0)
 				{
-					if (specialAnim && animation.curAnim.name == 'hey' || animation.curAnim.name == 'cheer')
+					if (specialAnim && (animation.curAnim.name == 'hey' || animation.curAnim.name == 'cheer'))
 					{
 						specialAnim = false;
 						dance();
@@ -404,10 +401,13 @@ class Character extends FlxSprite
 				if (animation.curAnim.name.startsWith('sing')) holdTimer += elapsed;
 				else holdTimer = 0;
 	
-				if (!isPlayer && holdTimer >= Conductor.stepCrochet * singDuration * (0.001 #if FLX_PITCH / (FlxG.sound.music != null ? FlxG.sound.music.pitch : (PlayState.instance != null ? PlayState.instance.inst.pitch : 1) #end)))
+				if (!ClientPrefs.getGameplaySetting('opponent') || ClientPrefs.getGameplaySetting('opponent') && isCustomCharacter)
 				{
-					dance();
-					holdTimer = 0;
+					if (!isPlayer && holdTimer >= Conductor.stepCrochet * singDuration * (0.001 #if FLX_PITCH / (FlxG.sound.music != null ? FlxG.sound.music.pitch : (PlayState.instance != null ? PlayState.instance.inst.pitch : 1) #end)))
+					{
+						dance();
+						holdTimer = 0;
+					}
 				}
 			}
 

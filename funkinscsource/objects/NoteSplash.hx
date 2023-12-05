@@ -28,6 +28,8 @@ class NoteSplash extends FlxSkewedSprite
 
 	public var opponentSplashes:Bool = false;
 
+	public var styleChoice:String = '';
+
 	public function new(x:Float = 0, y:Float = 0, ?opponentSplashes:Bool = false) {
 		super(x, y);
 		this.opponentSplashes = opponentSplashes;
@@ -36,14 +38,17 @@ class NoteSplash extends FlxSkewedSprite
 		if (!opponentSplashes)
 		{
 			if (PlayState.instance != null){
-				string1NoteSkin = "noteSplashes-" + PlayState.instance.bfStrumStyle;
-				string2NoteSkin = "notes/noteSplashes-" + PlayState.instance.bfStrumStyle;
+				if (ClientPrefs.getGameplaySetting('opponent') && !ClientPrefs.data.middleScroll) styleChoice = PlayState.instance.dadStrumStyle;
+				else styleChoice = PlayState.instance.bfStrumStyle;
+				
+				string1NoteSkin = "noteSplashes-"+ styleChoice;
+				string2NoteSkin = "notes/noteSplashes-"+ styleChoice;
 			}
 
 			if (FileSystem.exists(Paths.modsImages(string1NoteSkin)) || FileSystem.exists(Paths.getSharedPath('images/$string1NoteSkin.png')))
-				skin = "noteSplashes-"+ PlayState.instance.bfStrumStyle;
+				skin = "noteSplashes-" + styleChoice;
 			else if (FileSystem.exists(Paths.modsImages('notes/$string2NoteSkin')) || FileSystem.exists(Paths.getSharedPath('images/notes/$string2NoteSkin.png')))
-				skin = "notes/noteSplashes-" + PlayState.instance.bfStrumStyle;
+				skin = "notes/noteSplashes-"+ styleChoice;
 			else{
 				if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) skin = PlayState.SONG.splashSkin;
 				else skin = defaultNoteSplash + getSplashSkinPostfix();
@@ -52,13 +57,16 @@ class NoteSplash extends FlxSkewedSprite
 		else
 		{
 			if (PlayState.instance != null){
-				string1NoteSkin = "noteSplashes-" + PlayState.instance.dadStrumStyle;
-				string2NoteSkin = "notes/noteSplashes-" + PlayState.instance.dadStrumStyle;
+				if (ClientPrefs.getGameplaySetting('opponent') && !ClientPrefs.data.middleScroll) styleChoice = PlayState.instance.bfStrumStyle;
+				else styleChoice = PlayState.instance.dadStrumStyle;
+
+				string1NoteSkin = "noteSplashes-"+ styleChoice;
+				string2NoteSkin = "notes/noteSplashes-"+ styleChoice;
 			}
 			if (FileSystem.exists(Paths.modsImages(string1NoteSkin)) || FileSystem.exists(Paths.getSharedPath('images/$string1NoteSkin.png')))
-				skin = "noteSplashes-"+ PlayState.instance.dadStrumStyle;
+				skin = "noteSplashes-" + styleChoice;
 			else if (FileSystem.exists(Paths.modsImages('notes/$string2NoteSkin')) || FileSystem.exists(Paths.getSharedPath('images/notes/$string2NoteSkin.png')))
-				skin = "notes/noteSplashes-" + PlayState.instance.dadStrumStyle;
+				skin = "notes/noteSplashes-"+ styleChoice;
 			else{
 				if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) skin = PlayState.SONG.splashSkin;
 				else skin = defaultNoteSplash + getSplashSkinPostfix();
@@ -91,13 +99,16 @@ class NoteSplash extends FlxSkewedSprite
 		if (!opponentSplashes)
 		{
 			if (PlayState.instance != null){
-				string1NoteSkin = "noteSplashes-" + PlayState.instance.bfStrumStyle;
-				string2NoteSkin = "notes/noteSplashes-" + PlayState.instance.bfStrumStyle;
+				if (ClientPrefs.getGameplaySetting('opponent') && !ClientPrefs.data.middleScroll) styleChoice = PlayState.instance.dadStrumStyle;
+				else styleChoice = PlayState.instance.bfStrumStyle;
+
+				string1NoteSkin = "noteSplashes-" + styleChoice;
+				string2NoteSkin = "notes/noteSplashes-" + styleChoice;
 			}
 			if (FileSystem.exists(Paths.modsImages(string1NoteSkin)) || FileSystem.exists(Paths.getSharedPath('images/$string1NoteSkin.png')))
-				texture = "noteSplashes-"+ PlayState.instance.bfStrumStyle;
+				texture = "noteSplashes-" + styleChoice;
 			else if (FileSystem.exists(Paths.modsImages('notes/$string2NoteSkin')) || FileSystem.exists(Paths.getSharedPath('images/notes/$string2NoteSkin.png')))
-				texture = "notes/noteSplashes-" + PlayState.instance.bfStrumStyle;
+				texture = "notes/noteSplashes-" + styleChoice;
 			else
 			{
 				if(note != null && note.noteSplashData.texture != null) texture = note.noteSplashData.texture;
@@ -108,13 +119,16 @@ class NoteSplash extends FlxSkewedSprite
 		else
 		{
 			if (PlayState.instance != null){
-				string1NoteSkin = "noteSplashes-" + PlayState.instance.dadStrumStyle;
-				string2NoteSkin = "notes/noteSplashes-" + PlayState.instance.dadStrumStyle;
+				if (ClientPrefs.getGameplaySetting('opponent') && !ClientPrefs.data.middleScroll) styleChoice = PlayState.instance.bfStrumStyle;
+				else styleChoice = PlayState.instance.dadStrumStyle;
+
+				string1NoteSkin = "noteSplashes-" + styleChoice;
+				string2NoteSkin = "notes/noteSplashes-" + styleChoice;
 			}
 			if (FileSystem.exists(Paths.modsImages(string1NoteSkin)) || FileSystem.exists(Paths.getSharedPath('images/$string1NoteSkin.png')))
-				texture = "noteSplashes-"+ PlayState.instance.dadStrumStyle;
+				texture = "noteSplashes-" + styleChoice;
 			else if (FileSystem.exists(Paths.modsImages('notes/$string2NoteSkin')) || FileSystem.exists(Paths.getSharedPath('images/notes/$string2NoteSkin.png')))
-				texture = "notes/noteSplashes-" + PlayState.instance.dadStrumStyle;
+				texture = "notes/noteSplashes-" + styleChoice;
 			else
 			{
 				if(note != null && note.noteSplashData.texture != null) texture = note.noteSplashData.texture;

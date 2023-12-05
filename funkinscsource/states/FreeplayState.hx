@@ -654,15 +654,18 @@ class FreeplayState extends MusicBeatState
 				if (!paused) vocals.pitch = playbackRate;
 			}
 
-			Conductor.mapBPMChanges(PlayState.SONG);
-			Conductor.bpm = PlayState.SONG.bpm;
+			if (PlayState.SONG != null && PlayingPlayStateSong)
+			{
+				Conductor.mapBPMChanges(PlayState.SONG);
+				Conductor.bpm = PlayState.SONG.bpm;
+			}
 		}
 
 		if (controls.BACK || completed && exit)
 		{
 			if (!PlayingPlayStateSong)
 			{
-				FlxG.switchState(new MainMenuState());
+				MusicBeatState.switchState(new MainMenuState());
 				if(colorTween != null) {
 					colorTween.cancel();
 				}
@@ -849,7 +852,7 @@ class FreeplayState extends MusicBeatState
 					if (PlayState.SONG.needsVoices) 
 					{
 						#if (SBETA == 0.1)
-						vocals = new FlxSound().loadEmbedded(Paths.voices((PlayState.SONG.instrumentalPrefix != null ? PlayState.SONG.instrumentalPrefix : ''), songPath, (PlayState.SONG.instrumentalSuffix != null ? PlayState.SONG.instrumentalSuffix : '')));
+						vocals = new FlxSound().loadEmbedded(Paths.voices((PlayState.SONG.vocalsPrefix != null ? PlayState.SONG.vocalsPrefix : ''), songPath, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : '')));
 						#else
 						vocals = new FlxSound().loadEmbedded(Paths.voices(songPath));
 						#end

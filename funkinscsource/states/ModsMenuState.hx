@@ -322,10 +322,12 @@ class ModsMenuState extends MusicBeatState
 			FlxG.sound.play(Paths.sound('cancelMenu'));
 			if(waitingToRestart)
 			{
-				//FlxG.switchState(new TitleState());
-				TitleState.initialized = false;
-				TitleState.closedState = false;
-				FlxG.sound.music.fadeOut(0.3);
+				//MusicBeatState.switchState(new TitleState());
+				TitleState.skippedIntro = false;
+				TitleState.updateVersion = null;
+				FlxG.sound.music.fadeOut(0.3, onComplete -> {
+					FlxG.sound.music = null;
+				});
 				if(FreeplayState.vocals != null)
 				{
 					FreeplayState.vocals.fadeOut(0.3);
@@ -333,8 +335,8 @@ class ModsMenuState extends MusicBeatState
 				}
 				FlxG.camera.fade(FlxColor.BLACK, 0.5, false, FlxG.resetGame, false);
 			}
-			else FlxG.switchState(new MainMenuState());
-
+			else MusicBeatState.switchState(new MainMenuState());
+			
 			persistentUpdate = false;
 			FlxG.mouse.visible = false;
 			return;
@@ -781,7 +783,7 @@ class ModsMenuState extends MusicBeatState
 		FlxTransitionableState.skipNextTransIn = true;
 		FlxTransitionableState.skipNextTransOut = true;
 		var curMod:ModItem = modsGroup.members[curSelectedMod];
-		FlxG.switchState(new ModsMenuState(curMod != null ? curMod.folder : null));
+		MusicBeatState.switchState(new ModsMenuState(curMod != null ? curMod.folder : null));
 	}
 	
 	function saveTxt()

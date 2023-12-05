@@ -233,7 +233,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
        InvertModifier, FlipModifier, JumpModifier,
        StrumAngleModifier, EaseXModifier,
        //Extra Modifiers
-       StaticModifierX,
+       ShakeNotesWIModifierX,
     ];
     public static var easeList:Array<String> = [
         "backIn",
@@ -1048,7 +1048,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
         FlxG.sound.list.add(vocals);
 
         #if (SBETA == 0.1)
-        inst = new FlxSound().loadEmbedded(Paths.inst((PlayState.SONG.instrumentalPrefix != null ? PlayState.SONG.instrumentalPrefix : ''), PlayState.SONG.songId, (PlayState.SONG.instrumentalSuffix != null ? PlayState.SONG.instrumentalSuffix : '')));
+        inst = new FlxSound().loadEmbedded(Paths.inst((PlayState.SONG.instrumentalPrefix != null ? PlayState.SONG.instrumentalPrefix : ''), PlayState.SONG.songId, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : '')));
         #else
         inst = new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.songId));
         #end

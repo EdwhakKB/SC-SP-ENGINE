@@ -261,7 +261,7 @@ class ChartingState extends MusicBeatState
 		#end
 
 		vortex = FlxG.save.data.chart_vortex;
-		//ignoreWarnings = FlxG.save.data.ignoreWarnings;
+		ignoreWarnings = FlxG.save.data.ignoreWarnings;
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
 		bg.antialiasing = ClientPrefs.data.antialiasing;
 		bg.scrollFactor.set();
@@ -458,6 +458,7 @@ class ChartingState extends MusicBeatState
 		var saveButton:FlxButton = new FlxButton(110, 8, "Save", function()
 		{
 			saveLevel();
+			hasUnsavedChanges = false;
 		});
 
 		var reloadSong:FlxButton = new FlxButton(saveButton.x + 90, saveButton.y, "Reload Audio", function()
@@ -468,7 +469,10 @@ class ChartingState extends MusicBeatState
 
 		var reloadSongJson:FlxButton = new FlxButton(reloadSong.x, saveButton.y + 30, "Reload JSON", function()
 		{
-			loadJson(_song.songId.toLowerCase());
+			openSubState(new Prompt('This action will clear current progress.\n\nProceed?', 0, function() {
+				loadJson(_song.songId.toLowerCase());
+			},
+			null, ignoreWarnings));
 		});
 
 		var loadAutosaveBtn:FlxButton = new FlxButton(reloadSongJson.x, reloadSongJson.y + 30, 'Load Autosave', function()
@@ -504,14 +508,18 @@ class ChartingState extends MusicBeatState
 
 		var clear_events:FlxButton = new FlxButton(200, 310, 'Clear events', function()
 			{
-				clearEvents();
+				openSubState(new Prompt('This action will clear current progress.\n\nProceed?', 0, clearEvents, null,ignoreWarnings));
 				hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 			});
 		clear_events.color = FlxColor.RED;
 		clear_events.label.color = FlxColor.WHITE;
 
 		var clear_notes:FlxButton = new FlxButton(200, clear_events.y + 30, 'Clear notes', function() {
-			for (sec in 0..._song.notes.length) _song.notes[sec].sectionNotes = [];
+			openSubState(new Prompt('This action will clear current progress.\n\nProceed?', 0, function(){for (sec in 0..._song.notes.length) {
+				_song.notes[sec].sectionNotes = [];
+			}
+				updateGrid();
+			}, null,ignoreWarnings));
 			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 			updateGrid();
 		});
@@ -670,9 +678,11 @@ class ChartingState extends MusicBeatState
 		difficultyDropDown = new FlxUIDropDownMenu(stageDropDown.x, stageDropDown.y + 40, FlxUIDropDownMenu.makeStrIdLabelArray(availableDifficultiesTexts, true), function(pressed:String)
 		{	
 			var curSelected:Int = Std.parseInt(pressed);
-			PlayState.storyDifficulty = availableDifficulties[curSelected];
-			PlayState.changedDifficulty = true;
-			loadJson(_song.songId.toLowerCase());
+			openSubState(new Prompt('This action will clear current progress.\n\nProceed?', 0, function(){
+				PlayState.storyDifficulty = availableDifficulties[curSelected];
+				PlayState.changedDifficulty = true;
+				loadJson(_song.songId.toLowerCase());
+			}, null,ignoreWarnings));
 		});		
 		difficultyDropDown.selectedLabel = Difficulty.list[PlayState.storyDifficulty];
 		blockPressWhileScrolling.push(difficultyDropDown);
@@ -1475,7 +1485,7 @@ class ChartingState extends MusicBeatState
 			reloadGridLayer();
 		};
 
-		/*check_warnings = new FlxUICheckBox(10, 120, null, null, "Ignore Progress Warnings", 100);
+		check_warnings = new FlxUICheckBox(10, 120, null, null, "Ignore Progress Warnings", 100);
 		if (FlxG.save.data.ignoreWarnings == null) FlxG.save.data.ignoreWarnings = false;
 		check_warnings.checked = FlxG.save.data.ignoreWarnings;
 
@@ -1483,7 +1493,7 @@ class ChartingState extends MusicBeatState
 		{
 			FlxG.save.data.ignoreWarnings = check_warnings.checked;
 			ignoreWarnings = FlxG.save.data.ignoreWarnings;
-		};*/
+		};
 
 		check_mute_vocals = new FlxUICheckBox(check_mute_inst.x + 120, check_mute_inst.y, null, null, "Mute Vocals (in editor)", 100);
 		check_mute_vocals.checked = false;
@@ -1570,7 +1580,7 @@ class ChartingState extends MusicBeatState
 		tab_group_chart.add(check_mute_vocals);
 		tab_group_chart.add(check_vortex);
 		tab_group_chart.add(mouseScrollingQuant);
-		//tab_group_chart.add(check_warnings);
+		tab_group_chart.add(check_warnings);
 		tab_group_chart.add(playSoundBf);
 		tab_group_chart.add(playSoundDad);
 		UI_box.addGroup(tab_group_chart);
@@ -1746,11 +1756,14 @@ class ChartingState extends MusicBeatState
 	{
 		if(playtesting)
 		{
-			FlxG.sound.music.pause();
-			FlxG.sound.music.time = playtestingTime;
-			FlxG.sound.music.onComplete = playtestingOnComplete;
-			if (instVolume != null) FlxG.sound.music.volume = instVolume.value;
-			if (check_mute_inst != null && check_mute_inst.checked) FlxG.sound.music.volume = 0;
+			if (FlxG.sound.music != null)
+			{
+				FlxG.sound.music.pause();
+				FlxG.sound.music.time = playtestingTime;
+				FlxG.sound.music.onComplete = playtestingOnComplete;
+				if (instVolume != null) FlxG.sound.music.volume = instVolume.value;
+				if (check_mute_inst != null && check_mute_inst.checked) FlxG.sound.music.volume = 0;
+			}
 
 			if(vocals != null)
 			{
@@ -2251,7 +2264,7 @@ class ChartingState extends MusicBeatState
 				autosaveSong();
 
 				PlayState.chartingMode = false;
-				FlxG.switchState(new states.editors.MasterEditorMenu());
+				MusicBeatState.switchState(new states.editors.MasterEditorMenu());
 				FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
 				FlxG.mouse.visible = false;
 				songStarted = true;

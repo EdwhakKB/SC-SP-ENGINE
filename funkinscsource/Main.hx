@@ -27,7 +27,7 @@ import haxe.io.Path;
 //State things
 import gamejolt.GameJolt.GJToastManager;
 import gamejolt.*;
-import backend.Debug;
+import flixel.input.keyboard.FlxKey;
 import states.TitleState;
 
 class Main extends Sprite
@@ -51,12 +51,9 @@ class Main extends Sprite
 
 	public static var gjToastManager:GJToastManager;
 
-	// You can pretty much ignore everything from here on - your code should go in your states.
-
-	public static function main():Void
-	{
-		Lib.current.addChild(new Main());
-	}
+	public static var muteKeys:Array<FlxKey> = [FlxKey.ZERO];
+	public static var volumeDownKeys:Array<FlxKey> = [FlxKey.NUMPADMINUS, FlxKey.MINUS];
+	public static var volumeUpKeys:Array<FlxKey> = [FlxKey.NUMPADPLUS, FlxKey.PLUS];
 
 	public function new()
 	{
@@ -69,23 +66,6 @@ class Main extends Sprite
 		Sys.setCwd(lime.system.System.applicationStorageDirectory);
 		#end
 
-		if (stage != null)
-		{
-			init();
-		}
-		else
-		{
-			addEventListener(Event.ADDED_TO_STAGE, init);
-		}
-	}
-
-	private function init(?E:Event):Void
-	{
-		if (hasEventListener(Event.ADDED_TO_STAGE))
-		{
-			removeEventListener(Event.ADDED_TO_STAGE, init);
-		}
-
 		setupGame();
 	}
 
@@ -94,31 +74,7 @@ class Main extends Sprite
 
 	public static var focusMusicTween:FlxTween;
 
-	private function setupGame():Void
-	{
-		var stageWidth:Int = Lib.current.stage.stageWidth;
-		var stageHeight:Int = Lib.current.stage.stageHeight;
-
-		if (game.zoom == -1.0)
-		{
-			var ratioX:Float = stageWidth / game.width;
-			var ratioY:Float = stageHeight / game.height;
-			game.zoom = Math.min(ratioX, ratioY);
-			game.width = Math.ceil(stageWidth / game.zoom);
-			game.height = Math.ceil(stageHeight / game.zoom);
-		}
-
-		// Run this first so we can see logs.
-		Debug.onInitProgram();
-	
-		#if LUA_ALLOWED llua.Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(psychlua.CallbackHandler.call)); #end
-
-		game.framerate = Application.current.window.displayMode.refreshRate;
-		Application.current.window.setIcon(lime.utils.Assets.getImage('assets/art/iconOG.png'));
-
-		Controls.instance = new Controls();
-		ClientPrefs.loadDefaultKeys();
-		#if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
+	private function setupGame():Void {
 		addChild(new FlxGame(game.width, game.height, Init, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
 
 		FlxG.sound.volume = 0.5;
@@ -134,11 +90,6 @@ class Main extends Sprite
 
 		gameContainer = this;
 
-		#if html5
-		FlxG.autoPause = false;
-		FlxG.mouse.visible = false;
-		#end
-
 		#if !(flixel >= "5.4.0")
 		FlxG.fixedTimestep = false;
 		#end
@@ -146,24 +97,6 @@ class Main extends Sprite
 		FlxGraphic.defaultPersist = false;
 		FlxG.signals.preStateSwitch.add(function()
 		{
-			//i tihnk i finally fixed it
-			@:privateAccess
-			for (key in FlxG.bitmap._cache.keys())
-			{
-				var obj = FlxG.bitmap._cache.get(key);
-				if (obj != null)
-				{
-					lime.utils.Assets.cache.image.remove(key);
-					openfl.Assets.cache.removeBitmapData(key);
-					FlxG.bitmap._cache.remove(key);
-				}
-			}
-
-			//idk if this helps because it looks like just clearing it does the same thing
-			for (k => f in lime.utils.Assets.cache.font)
-				lime.utils.Assets.cache.font.remove(k);
-			for (k => s in lime.utils.Assets.cache.audio)
-				lime.utils.Assets.cache.audio.remove(k);
 
 			lime.utils.Assets.cache.clear();
 
@@ -190,9 +123,6 @@ class Main extends Sprite
 			openfl.system.System.gc();	
 			#end
 		});
-
-		// Finish up loading debug tools.
-		Debug.onGameStart();
 
 		#if CRASH_HANDLER
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
@@ -374,7 +304,7 @@ class Main extends Sprite
 	
 			if (focusMusicTween != null)
 				focusMusicTween.cancel();
-			focusMusicTween = FlxTween.tween(FlxG.sound, {volume: newVol}, 2);
+			focusMusicTween = FlxTween.tween(FlxG.sound, {volume: newVol}, 0.5);
 		}
 	}
 
@@ -390,7 +320,7 @@ class Main extends Sprite
 			if (focusMusicTween != null)
 				focusMusicTween.cancel();
 	
-			focusMusicTween = FlxTween.tween(FlxG.sound, {volume: oldVol}, 2);
+			focusMusicTween = FlxTween.tween(FlxG.sound, {volume: oldVol}, 0.5);
 		}
 	}
 }

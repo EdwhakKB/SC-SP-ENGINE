@@ -38,7 +38,7 @@ class NoteMovement
         defaultSkewY = []; 
         defaultScale = [];
         arrowSizes = [];
-        if (ClientPrefs.getGameplaySetting('opponent'))
+        if (ClientPrefs.getGameplaySetting('opponent') && !ClientPrefs.data.middleScroll)
         {
             keyCount = #if (LEATHER || KADE) PlayState.strumLineNotes.length-PlayState.opponentStrums.length #else game.strumLineNotes.length-game.opponentStrums.length #end; //base game doesnt have opponent strums as group
             playerKeyCount = #if (LEATHER || KADE) PlayState.opponentStrums.length #else game.opponentStrums.length #end;
@@ -84,7 +84,7 @@ class NoteMovement
         defaultSkewY = [];
         defaultScale = [];
         arrowSizes = [];
-        if (ClientPrefs.getGameplaySetting('opponent'))
+        if (ClientPrefs.getGameplaySetting('opponent') && !ClientPrefs.data.middleScroll)
         {
             keyCount =  game.strumLineNotes.length-game.opponentStrums.length; //base game doesnt have opponent strums as group
             playerKeyCount = game.opponentStrums.length;

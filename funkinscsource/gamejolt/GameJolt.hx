@@ -198,7 +198,7 @@ class GameJoltLogin extends MusicBeatState
             GameJoltAPI.connect();
             GameJoltAPI.authDaUser(ClientPrefs.data.gjUser, ClientPrefs.data.gjToken);
             ClientPrefs.saveSettings();
-            FlxG.switchState(new options.OptionsState());
+            MusicBeatState.switchState(new options.OptionsState());
         }, "Log Out & Close", 200, 60);
         logOutBox.color = FlxColor.RED /*FlxColor.fromRGB(255,134,61)*/ ;
 
@@ -207,7 +207,7 @@ class GameJoltLogin extends MusicBeatState
            FlxG.save.flush();
             FlxG.sound.play(Paths.sound('confirmMenu'), 0.2, false, null, true);
             FlxG.save.flush();
-            FlxG.switchState(new options.OptionsState());
+            MusicBeatState.switchState(new options.OptionsState());
             ClientPrefs.saveSettings();
         }, "Not Right Now", 200, 60);
 
@@ -288,12 +288,18 @@ class GameJoltLogin extends MusicBeatState
             FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
         }
 
-        if (FlxG.keys.justPressed.ESCAPE && !gameJoltInputText[0].hasFocus && !gameJoltInputText[1].hasFocus)
+        for (i in 0...gameJoltInputText.length)
         {
-            FlxG.save.flush();
-            FlxG.mouse.visible = false;
-            FlxG.switchState(new options.OptionsState());
-            ClientPrefs.saveSettings();
+            if (!gameJoltInputText[i].hasFocus)
+            {
+                if (FlxG.keys.justPressed.ESCAPE)
+                {
+                    FlxG.save.flush();
+                    FlxG.mouse.visible = false;
+                    MusicBeatState.switchState(new options.OptionsState());
+                    ClientPrefs.saveSettings();
+                }
+            }
         }
 
         super.update(elapsed);
