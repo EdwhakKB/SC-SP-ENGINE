@@ -69,7 +69,6 @@ class MusicBeatState extends #if modchartingTools modcharting.ModchartMusicBeatS
 		super.create();
 		if(!skip) {
 			openSubState(new IndieDiamondTransSubState(0.7, true));
-			IndieDiamondTransSubState.finishCallback = function() closeSubState();
 		}
 		FlxTransitionableState.skipNextTransOut = false;
 		timePassedOnState = 0;
@@ -103,47 +102,6 @@ class MusicBeatState extends #if modchartingTools modcharting.ModchartMusicBeatS
 
 		super.update(elapsed);
 	}
-
-	/*override function switchTo(state:FlxState):Bool
-    {
-        if (!finishedTransOut && !transOutRequested)
-        {
-            if (enableTransOut)
-            {   
-                fadeOut(function()
-                {
-                    finishedTransOut = true;
-                    FlxG.switchState(state);
-                });
-
-                transOutRequested = true;
-            }
-            else return true;
-        }
-
-        return finishedTransOut;
-    }*/
-
-    /*public function fadeIn()
-    {
-        subStateRecv(this, new IndieDiamondTransSubState(0.7, true));
-		IndieDiamondTransSubState.finishCallback = function() closeSubState();
-    }
-
-    public function fadeOut(finishCallback:Void->Void)
-    {
-        trace("trans out");
-        subStateRecv(this, new IndieDiamondTransSubState(0.6, false));
-		IndieDiamondTransSubState.finishCallback = finishCallBack;
-    }
-
- 	public function subStateRecv(from:FlxState, state:FlxSubState)
-    {
-        if (from.subState == null)
-            from.openSubState(state);
-        else
-            subStateRecv(from.subState, state);
-    }*/
 
 	var trackedBPMChanges:Int = 0;
 	/**

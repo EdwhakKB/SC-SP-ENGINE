@@ -104,8 +104,6 @@ class Paths
 
 					currentTrackedAssets.remove(key);
 					counter++;
-					Debug.logTrace('Cleared $key form RAM');
-					Debug.logTrace('Cleared and removed $counter assets.');
 				}
 			}
 		}
@@ -164,8 +162,6 @@ class Paths
 				obj.destroy();
 				obj = null;
 				counterAssets++;
-				Debug.logTrace('Cleared $key from RAM');
-				Debug.logTrace('Cleared and removed $counterAssets cached assets.');
 			}
 		}
 
@@ -180,8 +176,6 @@ class Paths
 				OpenFlAssets.cache.removeSound(key);
 				currentTrackedSounds.remove(key);
 				counterSound++;
-				Debug.logTrace('Cleared $key from RAM');
-				Debug.logTrace('Cleared and removed $counterSound cached sounds.');
 			}
 		}
 

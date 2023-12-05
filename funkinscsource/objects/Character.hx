@@ -401,7 +401,7 @@ class Character extends FlxSprite
 				if (animation.curAnim.name.startsWith('sing')) holdTimer += elapsed;
 				else holdTimer = 0;
 	
-				if (!ClientPrefs.getGameplaySetting('opponent'))
+				if (!ClientPrefs.getGameplaySetting('opponent') || ClientPrefs.getGameplaySetting('opponent') && isCustomCharacter)
 				{
 					if (!isPlayer && holdTimer >= Conductor.stepCrochet * singDuration * (0.001 #if FLX_PITCH / (FlxG.sound.music != null ? FlxG.sound.music.pitch : (PlayState.instance != null ? PlayState.instance.inst.pitch : 1) #end)))
 					{

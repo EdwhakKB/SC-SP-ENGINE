@@ -17,7 +17,7 @@ import flixel.addons.display.FlxGridOverlay;
 
 class MainMenuState extends MusicBeatState {
 	public static final psychEngineVersion:String = '0.7.2'; //This is also used for Discord RPC
-	public static var SCEVersion:String = '0.0.1'; //This is also used for Discord RPC
+	public static var SCEVersion:String = '0.1.3'; //This is also used for Discord RPC
 	public static var curSelected:Int = 0;
 
 	var menuItems:FlxTypedGroup<FlxSprite>;
@@ -224,7 +224,7 @@ class MainMenuState extends MusicBeatState {
 				}
 			}
 
-			if (controls.BACK && !TitleState.closedState)
+			if (controls.BACK)
 			{
 				selectedSomethin = true;
 				FlxG.sound.play(Paths.sound('cancelMenu'));

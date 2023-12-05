@@ -1179,12 +1179,10 @@ class FunkinLua {
 				}
 			});
 			set("cameraSetTarget", function(target:String) {
-				var isDad:Bool = false;
-				if(target == 'dad') {
-					isDad = true;
-				}
-				game.cameraTargeted = isDad ? 'dad' : 'bf';
-				return isDad;
+				game.cameraTargeted = target;
+			});
+			set('getCameraTarget', function() { 
+				return game.cameraTargeted; 
 			});
 			set("cameraShake", function(camera:String, intensity:Float, duration:Float) {
 				LuaUtils.cameraFromString(camera).shake(intensity, duration);

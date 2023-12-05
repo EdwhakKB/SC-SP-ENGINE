@@ -76,6 +76,11 @@ class PauseSubState extends MusicBeatSubstate
 		}
 		difficultyChoices.push('BACK');
 
+		if (pauseMusic != null || FlxG.sound.music == null)
+		{
+			FlxG.sound.music = null;
+			pauseMusic = null;
+		}
 
 		pauseMusic = new FlxSound();
 		if(songName != null) {
@@ -300,11 +305,12 @@ class PauseSubState extends MusicBeatSubstate
 									PlayState.instance.modchartTimers.remove('hmmm'); 
 									pauseMusic.volume = 0;
 									pauseMusic.destroy();
+									FlxG.sound.music = null;
+									pauseMusic = null;
 									close();	
 								}
 						}
 					}, 5);
-					pauseMusic.volume = 0;
 					inCountDown = true;
 					menuItems = [];
 					deleteSkipTimeText();

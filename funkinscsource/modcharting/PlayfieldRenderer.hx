@@ -59,6 +59,7 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
     public var modchart:ModchartFile;
     public var inEditor:Bool = false;
     public var editorPaused:Bool = false;
+    public var pauseTweens:Bool = false;
 
     public var speed:Float = 1.0;
 
@@ -102,8 +103,11 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
     override function update(elapsed:Float) 
     {
         eventManager.update(elapsed);
-        tweenManager.update(elapsed); //should be automatically paused when you pause in game
-        timerManager.update(elapsed);
+        if (!pauseTweens)
+        {
+            tweenManager.update(elapsed); //should be automatically paused when you pause in game
+            timerManager.update(elapsed);
+        }
         super.update(elapsed);
     }
 

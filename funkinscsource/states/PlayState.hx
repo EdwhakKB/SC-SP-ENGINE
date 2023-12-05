@@ -576,10 +576,7 @@ class PlayState extends MusicBeatState
 		// Main Camera
 		FlxG.cameras.add(mainCam, false);
 
-		if (!usesHUD)
-		{
-			camNoteStuff.zoom = camHUD.zoom;
-		}
+		camNoteStuff.zoom = !usesHUD ? camHUD.zoom : 1;
 
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 		grpNoteSplashesCPU = new FlxTypedGroup<NoteSplash>();
@@ -1763,8 +1760,10 @@ class PlayState extends MusicBeatState
 			if(ret != FunkinLua.Function_Stop) {
 				var skippedAhead = false;
 				if (skipCountdown || startOnTime > 0) skippedAhead = true;
-				setupArrowStuff(0, arrowSetupStuffDAD);
-				setupArrowStuff(1, arrowSetupStuffBF);
+
+				var nonMiddleScrollAndOM = (opponentMode && !ClientPrefs.data.middleScroll);
+				setupArrowStuff(0, nonMiddleScrollAndOM ? arrowSetupStuffBF : arrowSetupStuffDAD);
+				setupArrowStuff(1, nonMiddleScrollAndOM ? arrowSetupStuffDAD : arrowSetupStuffBF);
 				updateDefaultPos();
 				if (!arrowsAppeared){
 					appearStrumArrows(skippedAhead ? false : ((!isStoryMode || storyPlaylist.length >= 3 || SONG.songId == 'tutorial') && !skipArrowStartTween));
@@ -2645,6 +2644,13 @@ class PlayState extends MusicBeatState
 			}
 			#end
 
+			#if modchartingTools
+			if (SONG.notITG && notITGMod)
+			{
+				if (playfieldRenderer != null) playfieldRenderer.pauseTweens = true;
+			}
+			#end
+
 			if (inst != null && !alreadyEndedSong)
 			{
 				inst.pause();
@@ -2686,6 +2692,13 @@ class PlayState extends MusicBeatState
 					if (vid.alive)
 						vid.bitmap.resume();
 				}
+			}
+			#end
+
+			#if modchartingTools
+			if (SONG.notITG && notITGMod)
+			{
+				if (playfieldRenderer != null) playfieldRenderer.pauseTweens = false;
 			}
 			#end
 
@@ -4194,7 +4207,7 @@ class PlayState extends MusicBeatState
 					forceChangeOnTarget = true;
 				cameraTargeted = value1;
 			default: 
-				addTextToDebug('Event $eventName does not exist!, check if the .lua or .hx, or even source for this event.', FlxColor.RED);
+				//addTextToDebug('Event $eventName does not exist!, check if the .lua or .hx, or even source for this event.', FlxColor.RED);
 		}
 		
 		Stage.eventCalled(eventName, value1, value2, strumTime, value3, value4, value5, value6, value7, value8, 
@@ -5340,9 +5353,7 @@ class PlayState extends MusicBeatState
 				boyfriend.animation.curAnim.name.startsWith('sing') && 
 				!boyfriend.animation.curAnim.name.endsWith('miss')
 			);
-
-			if (bfConditions)
-				boyfriend.dance(forcedToIdle);
+			if (bfConditions) boyfriend.dance(forcedToIdle);
 		}
 		else
 		{
@@ -5359,19 +5370,9 @@ class PlayState extends MusicBeatState
 				!dad.animation.curAnim.name.endsWith('miss')
 			);
 	
-			if (opponentMode)
-			{
-				if (dadConditions)
-				{
-					dad.dance(forcedToIdle);
-				}
-			}else{
-				if (bfConditions)
-				{
-					boyfriend.dance(forcedToIdle);
-				}
-			}
-	
+			if (opponentMode) if (dadConditions) dad.dance(forcedToIdle);
+			else if (bfConditions) boyfriend.dance(forcedToIdle);
+
 			for (value in modchartCharacters.keys())
 			{
 				daChar = modchartCharacters.get(value);
@@ -5525,8 +5526,7 @@ class PlayState extends MusicBeatState
 			{
 				if (char == boyfriend)
 				{
-					if (playBF)
-						boyfriend.playAnim(animToPlay, true);
+					if (playBF) boyfriend.playAnim(animToPlay, true);
 				}else if (char == dad){
 					dad.playAnim(animToPlay, true);
 				}else if (char == mom){
@@ -5906,9 +5906,9 @@ class PlayState extends MusicBeatState
 		Note.globalRgbShaders = [];
 		backend.NoteTypesConfig.clearNoteTypesData();
 		cleanManagers();
-		instance = null;
 		Stage.destroy();
 		Stage = null;
+		instance = null;
 		super.destroy();
 	}
 
@@ -6342,7 +6342,7 @@ class PlayState extends MusicBeatState
 	public function callOnLuas(funcToCall:String, args:Array<Dynamic> = null, ignoreStops = false, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
 		var returnVal:Dynamic = FunkinLua.Function_Continue;
 		#if LUA_ALLOWED
-		var stageExclusions:Array<String> = ["onCreatePost", "onUpdate"];
+		var stageExclusions:Array<String> = ["onUpdate"];
 
 		if (Stage != null && Stage.isCustomStage && Stage.isLuaStage && !(stageExclusions.contains(funcToCall)))
 			Stage.callOnLuas(funcToCall, args);
@@ -6383,7 +6383,7 @@ class PlayState extends MusicBeatState
 		var returnVal:Dynamic = psychlua.FunkinLua.Function_Continue;
 
 		#if HSCRIPT_ALLOWED
-		var stageExclusions:Array<String> = ["onCreatePost", "onUpdate"];
+		var stageExclusions:Array<String> = ["onUpdate"];
 
 		if (Stage != null && Stage.isCustomStage && Stage.isHxStage && !(stageExclusions.contains(funcToCall)))
 			Stage.callOnHScript(funcToCall, args);
@@ -6392,13 +6392,13 @@ class PlayState extends MusicBeatState
 		if(excludeValues == null) excludeValues = new Array();
 		excludeValues.push(psychlua.FunkinLua.Function_Continue);
 
-		var len:Int = luaArray.length;
+		var len:Int = hscriptArray.length;
 		if (len < 1)
 			return returnVal;
 		for(i in 0...len)
 		{
 			var script:HScript = hscriptArray[i];
-			if(script == null || !script.active || !script.exists(funcToCall) || exclusions.contains(script.origin))
+			if(script == null || !script.exists(funcToCall) || exclusions.contains(script.origin))
 				continue;
 
 			var myValue:Dynamic = null;
@@ -6527,6 +6527,9 @@ class PlayState extends MusicBeatState
 
 	public function searchLuaVar(variable:String, arg:String, result:Bool) {
 		#if LUA_ALLOWED
+		if (Stage != null && Stage.isCustomStage && Stage.isLuaStage)
+			Stage.searchLuaVar(variable, arg, result);
+
 		for (script in luaArray)
 		{
 			if (script.get(variable, arg) == result){
@@ -6540,6 +6543,9 @@ class PlayState extends MusicBeatState
 	public function getLuaNewVar(name:String, type:String):Dynamic
 	{
 		#if LUA_ALLOWED
+		if (Stage != null && Stage.isCustomStage && Stage.isLuaStage)
+			Stage.getLuaNewVar(name, type);
+
 		var luaVar:Dynamic = null;
 
 		// we prioritize modchart cuz frick you

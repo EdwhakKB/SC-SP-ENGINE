@@ -1459,26 +1459,26 @@ class CosecantZModifier extends Modifier
     }
 }
 
-class StaticModifierX extends Modifier
+class ShakeNotesWIModifierX extends Modifier
 {
     override function setupSubValues()
     {
         subValues.set('speed', new ModifierSubValue(1.0));
-        subValues.set('distance', new ModifierSubValue(1.0));
+        //subValues.set('distance', new ModifierSubValue(1.0));
     }
     override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
     {
         noteData.x += FlxMath.fastSin(500)+currentValue * (Math.cos(Conductor.songPosition * 4*0.2) + ((lane%NoteMovement.keyCount)*0.2) - 0.002)
-        * (Math.sin(100 - (120 * subValues.get('speed').value * 0.4))) * (BeatXModifier.getShift(noteData, lane, curPos, pf) / 2);
+        * (Math.sin(100 - (120 * subValues.get('speed').value * 0.4))) /** (BeatXModifier.getShift(noteData, lane, curPos, pf) / 2)*/;
     }
     override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
     {
         noteMath(noteData, lane, 0, pf);
     }
-    override function curPosMath(lane:Int, curPos:Float, pf:Int)
+   /* override function curPosMath(lane:Int, curPos:Float, pf:Int)
     {
         return curPos * (FlxMath.fastSin(102) * subValues.get('distance').value) * 0.2;
-    }
+    }*/
 }
 
 class MoveNotesXModifier extends Modifier

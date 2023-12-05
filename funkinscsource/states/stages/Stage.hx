@@ -22,11 +22,15 @@ import cutscenes.DialogueBox;
 import openfl.utils.Assets as OpenFlAssets;
 
 import flixel.addons.display.FlxBackdrop;
-import psychlua.FunkinLua;
 import backend.StageData;
 import openfl.Assets;
 import states.PlayState;
+
+#if LUA_ALLOWED
+import psychlua.FunkinLua;
 import psychlua.HScript;
+import psychlua.LuaUtils;
+#end
 
 #if SScript
 import tea.SScript;
@@ -1423,13 +1427,13 @@ class Stage extends MusicBeatState
 		if(excludeValues == null) excludeValues = new Array();
 		excludeValues.push(psychlua.FunkinLua.Function_Continue);
 
-		var len:Int = luaArray.length;
+		var len:Int = hscriptArray.length;
 		if (len < 1)
 			return returnVal;
 		for(i in 0...len)
 		{
 			var script:HScript = hscriptArray[i];
-			if(script == null || !script.active || !script.exists(funcToCall) || exclusions.contains(script.origin))
+			if(script == null || !script.exists(funcToCall) || exclusions.contains(script.origin))
 				continue;
 
 			var myValue:Dynamic = null;
@@ -1489,7 +1493,7 @@ class Stage extends MusicBeatState
 		for (script in hscriptArray) {
 			if(exclusions.contains(script.origin))
 				continue;
-
+			
 			if(!instancesExclude.contains(variable))
 				instancesExclude.push(variable);
 
@@ -2271,6 +2275,33 @@ class Stage extends MusicBeatState
 	override function destroy()
 	{
 		super.destroy();
+
+		#if LUA_ALLOWED
+		for (i in 0...luaArray.length) {
+			var lua:FunkinLua = luaArray[0];
+			lua.call('onDestroy', []);
+			lua.stop();
+		}
+		luaArray = [];
+		FunkinLua.customFunctions.clear();
+		LuaUtils.killShaders();
+		#end
+
+		#if HSCRIPT_ALLOWED
+		for (script in hscriptArray)
+			if(script != null)
+			{
+				script.call('onDestroy');
+				#if (SScript > "6.1.80" || SScript != "6.1.80")
+				script.destroy();
+				#else
+				script.kill();
+				#end
+			}
+		while (hscriptArray.length > 0)
+			hscriptArray.pop();
+		#end
+
 		for (sprite in swagBacks.keys())
 		{
 			if (swagBacks[sprite] != null)

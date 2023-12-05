@@ -73,7 +73,8 @@ class CreditsState extends MusicBeatState
 			['Extra SCE Stuff'],
 			['Blantados',			'blantados',		"Progammer of BETADCIU and code used from this engine to SCE!",	 'https://github.com/Blantados',		 '64B3FE'],
 			['Bolo Vevo',			'', 				"Most code for things gotten from this man's kade!",			 'https://github.com/BoloVEVO',			 'C7B1AB'],
-			['Itz-Miles',			'miles', 			"Code for parallaxLT!",			 						 'https://github.com/Itz-Miles',		 'CC875E']
+			['Itz-Miles',			'miles', 			"Code for parallaxLT!",			 						 'https://github.com/Itz-Miles',		 'CC875E'],
+			['Haone', 				'', 				"Extra Function code for Chart editor.",				 'https://github.com/haoneRG',			 '879AD9']
 		];
 		
 		for(i in defaultList) {

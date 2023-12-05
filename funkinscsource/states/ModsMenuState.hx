@@ -323,8 +323,8 @@ class ModsMenuState extends MusicBeatState
 			if(waitingToRestart)
 			{
 				//MusicBeatState.switchState(new TitleState());
-				TitleState.initialized = false;
-				TitleState.closedState = false;
+				TitleState.skippedIntro = false;
+				TitleState.updateVersion = null;
 				FlxG.sound.music.fadeOut(0.3, onComplete -> {
 					FlxG.sound.music = null;
 				});

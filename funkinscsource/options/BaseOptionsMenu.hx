@@ -35,7 +35,6 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		bg = new FlxSprite().loadGraphic(Paths.image('stageBackForStates'));
 		bg.screenCenter();
 		bg.antialiasing = ClientPrefs.data.antialiasing;
-		bg.setGraphicSize(FlxG.width + 200, FlxG.height + 200);
 		add(bg);
 
 		// avoids lagspikes while scrolling through menus!
@@ -94,8 +93,6 @@ class BaseOptionsMenu extends MusicBeatSubstate
 
 		changeSelection();
 		reloadCheckboxes();
-
-		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
 	}
 
 	public function addOption(option:Option) {
