@@ -75,6 +75,8 @@ class TitleState extends MusicBeatState
 
 	var grayGrad:FlxSprite = null;
 	var	whiteGrad:FlxSprite = null;
+	var grayGrad2:FlxSprite = null;
+	var whiteGrad2:FlxSprite = null;
 
 	var internetConnection:Bool = false;
 
@@ -97,6 +99,16 @@ class TitleState extends MusicBeatState
 		whiteGrad = FlxGradient.createGradientFlxSprite(FlxG.width, 400, [0x0, FlxColor.WHITE]);
 		whiteGrad.x += 0;
 		whiteGrad.y += 570;
+
+		grayGrad2 = FlxGradient.createGradientFlxSprite(FlxG.width, 400, [0x0, FlxColor.WHITE]);
+		grayGrad2.y += 0;
+		grayGrad2.x -= 570;
+		grayGrad2.angle = 90;
+		whiteGrad2 = FlxGradient.createGradientFlxSprite(FlxG.width, 400, [0x0, FlxColor.WHITE]);
+		whiteGrad2.x += 570;
+		whiteGrad2.angle = -90;
+		whiteGrad2.y += 0;
+
 
 		checkInternetConnection();
 		if (internetConnection) getBuildVer();
@@ -125,6 +137,43 @@ class TitleState extends MusicBeatState
 		}
 
 		Conductor.bpm = titleJson.bpm;
+
+		FlxTween.tween(whiteGrad2, {"pixels.height": 400, alpha: 0.7}, Conductor.crochet / 1900, {
+			onComplete: function(flx:FlxTween)
+			{
+				@:privateAccess {
+					whiteGrad2.pixels.height = 0;
+				}
+				whiteGrad2.alpha = 0;
+			}
+		});
+		FlxTween.tween(grayGrad, {"pixels.height": 400, alpha: 0.7}, Conductor.crochet / 1900, {
+			onComplete: function(flx:FlxTween)
+			{
+				@:privateAccess { 
+					grayGrad.pixels.height = 0;
+				}
+				grayGrad.alpha = 0;
+			}
+		});	
+		FlxTween.tween(whiteGrad, {"pixels.height": 400, alpha: 0.7}, Conductor.crochet / 1900, {
+			onComplete: function(flx:FlxTween)
+			{
+				@:privateAccess {
+					whiteGrad.pixels.height = 0;
+				}
+				whiteGrad.alpha = 0;
+			}
+		});
+		FlxTween.tween(grayGrad2, {"pixels.height": 400, alpha: 0.7}, Conductor.crochet / 1900, {
+			onComplete: function(flx:FlxTween)
+			{
+				@:privateAccess {
+					grayGrad2.pixels.height = 0;
+				}
+				grayGrad2.alpha = 0;
+			}
+		});
 
 		if (titleJson.backgroundSprite != null && titleJson.backgroundSprite.length > 0 && titleJson.backgroundSprite != "none") {
 			final bg:FlxSprite = new FlxSprite(0, 0, Paths.image(titleJson.backgroundSprite));
@@ -180,7 +229,9 @@ class TitleState extends MusicBeatState
 		add(particlesDOWN);
 
 		add(whiteGrad);
+		add(whiteGrad2);
 		add(grayGrad);
+		add(grayGrad2);
 
 		if (ClientPrefs.data.shaders) colourSwap = new ColorSwap();
 
@@ -421,8 +472,8 @@ class TitleState extends MusicBeatState
 			ease: FlxEase.quadOut
 		});
 
-		if (!skippedIntro) gradsUpdate(curBeat % 2 == 0 ? 'up' : 'down');
-		else gradsUpdate('both');
+		if (!skippedIntro) gradsUpdate(curBeat % 2 == 0 ? (FlxG.random.bool(50) ? 'left' : 'up') : (FlxG.random.bool(50) ? 'right' : 'down'));
+		else gradsUpdate('all');
 		if (!skippedIntro) {
 			switch (curBeat) {
 				case 2:
@@ -494,8 +545,41 @@ class TitleState extends MusicBeatState
 				}
 			});
 		}
+		else if (direction == 'left')
+		{
+			FlxTween.tween(whiteGrad2, {"pixels.height": 400, alpha: 0.7}, Conductor.crochet / 1900, {
+				onComplete: function(flx:FlxTween)
+				{
+					@:privateAccess {
+						whiteGrad2.pixels.height = 0;
+					}
+					whiteGrad2.alpha = 0;
+				}
+			});
+		}
+		else if (direction == 'right')
+		{
+			FlxTween.tween(grayGrad2, {"pixels.height": 400, alpha: 0.7}, Conductor.crochet / 1900, {
+				onComplete: function(flx:FlxTween)
+				{
+					@:privateAccess {
+						grayGrad2.pixels.height = 0;
+					}
+					grayGrad2.alpha = 0;
+				}
+			});
+		}
 		else
 		{
+			FlxTween.tween(whiteGrad2, {"pixels.height": 400, alpha: 0.7}, Conductor.crochet / 1900, {
+				onComplete: function(flx:FlxTween)
+				{
+					@:privateAccess {
+						whiteGrad2.pixels.height = 0;
+					}
+					whiteGrad2.alpha = 0;
+				}
+			});
 			FlxTween.tween(grayGrad, {"pixels.height": 400, alpha: 0.7}, Conductor.crochet / 1900, {
 				onComplete: function(flx:FlxTween)
 				{
@@ -505,7 +589,6 @@ class TitleState extends MusicBeatState
 					grayGrad.alpha = 0;
 				}
 			});	
-
 			FlxTween.tween(whiteGrad, {"pixels.height": 400, alpha: 0.7}, Conductor.crochet / 1900, {
 				onComplete: function(flx:FlxTween)
 				{
@@ -513,6 +596,15 @@ class TitleState extends MusicBeatState
 						whiteGrad.pixels.height = 0;
 					}
 					whiteGrad.alpha = 0;
+				}
+			});
+			FlxTween.tween(grayGrad2, {"pixels.height": 400, alpha: 0.7}, Conductor.crochet / 1900, {
+				onComplete: function(flx:FlxTween)
+				{
+					@:privateAccess {
+						grayGrad2.pixels.height = 0;
+					}
+					grayGrad2.alpha = 0;
 				}
 			});
 		}

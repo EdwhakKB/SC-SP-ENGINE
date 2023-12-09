@@ -2157,7 +2157,6 @@ class FunkinLua {
 				var shit:ModchartIcon = game.modchartIcons.get(tag);
 				game.uiGroup.add(shit);
 				shit.camera = game.camHUD;
-				//LuaUtils.getTargetInstance().add(shit);
 			});
 	
 			set("changeAddedIcon", function(tag:String, character:String){
@@ -2174,7 +2173,6 @@ class FunkinLua {
 				var shit:ModchartIcon = game.modchartIcons.get(tag);
 				game.uiGroup.add(shit);
 				shit.camera = game.camHUD;
-				//LuaUtils.getTargetInstance().add(shit);
 			});
 			
 			set("changeLuaIcon", function(tag:String, character:String){

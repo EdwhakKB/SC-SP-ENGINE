@@ -536,7 +536,7 @@ class Note extends FlxSkewedSprite
 			isPixel = false;
 			if (isSustainNote)
 			{
-				animation.addByPrefix('purpleholdend', 'pruple end hold', 24, true); // this fixes some retarded typo from the original note .FLA
+				attemptToAddAnimationByPrefix('purpleholdend', 'pruple end hold', 24, true); // this fixes some retarded typo from the original note .FLA
 				animation.addByPrefix(colArray[noteData] + 'holdend', colArray[noteData] + ' hold end', 24, true);
 				animation.addByPrefix(colArray[noteData] + 'hold', colArray[noteData] + ' hold piece', 24, true);
 			}
@@ -551,6 +551,16 @@ class Note extends FlxSkewedSprite
 				centerOrigin();
 			}
 		}
+	}
+
+	function attemptToAddAnimationByPrefix(name:String, prefix:String, framerate:Int = 24, doLoop:Bool = true)
+	{
+		var animFrames = [];
+		@:privateAccess
+		animation.findByPrefix(animFrames, prefix); // adds valid frames to animFrames
+		if(animFrames.length < 1) return;
+
+		animation.addByPrefix(name, prefix, framerate, doLoop);
 	}
 
 	override function update(elapsed:Float)
