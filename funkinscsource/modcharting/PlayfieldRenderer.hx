@@ -256,13 +256,6 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
                 noteDist = modifierTable.applyNoteDistMods(noteDist, lane, pf);
 
                 var sustainTimeThingy:Float = 0;
-
-                //just causes too many issues lol, might fix it at some point
-                if (notes.members[i].isHoldEnd)
-                {
-                    if (noteDist > 0) sustainTimeThingy = (ModchartUtil.getFakeCrochet()/4)/2; //fix stretched sustain ends
-                    else sustainTimeThingy = (-ModchartUtil.getFakeCrochet()/4)/songSpeed;
-                }
                     
                 var curPos = getNoteCurPos(i, sustainTimeThingy);
                 curPos = modifierTable.applyCurPosMods(lane, curPos, pf);

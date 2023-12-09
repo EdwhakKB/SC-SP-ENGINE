@@ -294,11 +294,6 @@ class ChartingState extends MusicBeatState
 		leftIcon.setPosition(GRID_SIZE + 10, -100);
 		rightIcon.setPosition(GRID_SIZE * 5.2, -100);
 
-		var rightCommand:FlxSprite = null,
-			leftCommand:FlxUIInputText = null,
-			upCommand:Array<Float> = [0, 0, 0],
-			downCommand:Bool = false;
-
 		curRenderedSustains = new FlxTypedGroup<FlxSprite>();
 		curRenderedNotes = new FlxTypedGroup<Note>();
 		curRenderedNoteType = new FlxTypedGroup<FlxText>();
@@ -388,6 +383,7 @@ class ChartingState extends MusicBeatState
 
 		var startHere:FlxButton = new FlxButton(UI_box2.x, UI_box2.y - 30, 'Start Here', function()
 		{
+			FlxG.save.data.oldTimeSection = curSection; 
 			PlayState.timeToStart = Conductor.songPosition;
 			startSong();
 		});
@@ -422,6 +418,8 @@ class ChartingState extends MusicBeatState
 		add(zoomTxt);
 
 		updateGrid();
+
+		changeSection(FlxG.save.data.oldTimeSection, false);
 		super.create();
 	}
 
@@ -2244,8 +2242,7 @@ class ChartingState extends MusicBeatState
 					persistentUpdate = false;
 					openSubState(new ChartEditorExitSubstate(exitFunc));
 				}
-				else
-					exitFunc();
+				else exitFunc();
 			}
 
 			if(curSelectedNote != null && curSelectedNote[1] > -1) {

@@ -76,14 +76,20 @@ class FPSCounter extends TextField
 			deltaTimeout = 0.0;
 			return;
 		}
-		var now:Float = haxe.Timer.stamp();
-		times.push(now);
-		while (times[0] < now - 1000)
+		currentTime += deltaTime;
+		times.push(currentTime);
+		while (times[0] < currentTime - 1000)
 			times.shift();
+
+		var currentCount = times.length;
+		currentFPS = Math.round((currentCount + cacheCount) / 2);
+		if (currentFPS > ClientPrefs.data.framerate) currentFPS = ClientPrefs.data.framerate;
+
 
 		currentFPS = currentFPS < FlxG.drawFramerate ? times.length : FlxG.drawFramerate;
 
 		updateText();
+		cacheCount = currentCount;
 		deltaTimeout += deltaTime;
 	}
 
@@ -101,10 +107,9 @@ class FPSCounter extends TextField
 		var substateText:String = '\nSubState: ${Type.getClassName(Type.getClass(FlxG.state.subState))}';
 
 		textColor = 0xFFFFFFFF;
-		if (currentFPS < FlxG.drawFramerate * 0.5)
-		{
+		if (currentFPS <= ClientPrefs.data.framerate / 2)
 			textColor = 0xFFFF0000;
-		}
+
 
 		text = 'FPS: $currentFPS'
 		+ (ClientPrefs.data.memoryDisplay ? '\nMemory: ${CoolUtil.getSizeString(memoryMegas)} (${CoolUtil.getSizeString(taskMemoryMegas)})' : '')
