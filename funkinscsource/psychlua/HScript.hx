@@ -365,7 +365,7 @@ class HScript extends SScript
 		#end
 	}
 
-	public static function initHaxeModuleCode(parent:FunkinLua, code:String, ?varsToBring:Any = null)
+	public static function initHaxeModuleCode(parent:FunkinLua, code:String, ?varToBring:Any = null)
 	{
 		#if (SScript >= "3.0.0")
 		if(parent.hscript == null)
@@ -377,12 +377,12 @@ class HScript extends SScript
 	}
 
 	public var origin:String;
-	override public function new(?parent:FunkinLua, ?file:String, ?varsToBring:Any = null, ?isHxStage:Bool = false)
+	override public function new(?parent:FunkinLua, ?file:String, ?varToBring:Any = null, ?isHxStage:Bool = false)
 	{
 		if (file == null)
 			file = '';
 
-		this.varsToBring = varsToBring;
+		this.varToBring = varToBring;
 		this.isHxStage = isHxStage;
 	
 		super(file, false, false);
@@ -410,7 +410,6 @@ class HScript extends SScript
 		set('FlxTween', flixel.tweens.FlxTween);
 		set('FlxEase', flixel.tweens.FlxEase);
 		set('FlxColor', CustomFlxColor);
-		set('Countdown', backend.BaseStage.Countdown);
 		set('PlayState', PlayState);
 		set('Paths', Paths);
 		set('Conductor', Conductor);
@@ -530,16 +529,16 @@ class HScript extends SScript
 		set('insert', function(pos:Int, obj:FlxBasic) PlayState.instance.insert(pos, obj));
 		set('remove', function(obj:FlxBasic, splice:Bool = false) PlayState.instance.remove(obj, splice));
 
-		if(varsToBring != null)
+		if(varToBring != null)
 		{
-			for (key in Reflect.fields(varsToBring))
+			for (key in Reflect.fields(varToBring))
 			{
 				key = key.trim();
-				var value = Reflect.field(varsToBring, key);
+				var value = Reflect.field(varToBring, key);
 				//trace('Key $key: $value');
-				set(key, Reflect.field(varsToBring, key));
+				set(key, Reflect.field(varToBring, key));
 			}
-			varsToBring = null;
+			varToBring = null;
 		}
 		#end
 	}
