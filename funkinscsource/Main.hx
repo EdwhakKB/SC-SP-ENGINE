@@ -97,6 +97,27 @@ class Main extends Sprite
 		FlxGraphic.defaultPersist = false;
 		FlxG.signals.preStateSwitch.add(function()
 		{
+			if (Type.getClass(FlxG.state) != TitleState) //Resetting title state makes this unstable so we make it only for other states!
+			{
+				//i tihnk i finally fixed it
+				@:privateAccess
+				for (key in FlxG.bitmap._cache.keys())
+				{
+					var obj = FlxG.bitmap._cache.get(key);
+					if (obj != null)
+					{
+						lime.utils.Assets.cache.image.remove(key);
+						openfl.Assets.cache.removeBitmapData(key);
+						FlxG.bitmap._cache.remove(key);
+					}
+				}
+
+				//idk if this helps because it looks like just clearing it does the same thing
+				for (k => f in lime.utils.Assets.cache.font)
+					lime.utils.Assets.cache.font.remove(k);
+				for (k => s in lime.utils.Assets.cache.audio)
+					lime.utils.Assets.cache.audio.remove(k);
+			}
 
 			lime.utils.Assets.cache.clear();
 
@@ -194,6 +215,7 @@ class Main extends Sprite
 		updateScreenBeforeCrash(FlxG.fullscreen);
 
 		var errMsg:String = "Call Stack:\n";
+		var errMsgPrint:String = "";
 		var path:String;
 		var callStack:Array<StackItem> = CallStack.exceptionStack(true);
 		var dateNow:String = Date.now().toString();
@@ -210,6 +232,7 @@ class Main extends Sprite
 			{
 				case FilePos(s, file, line, column):
 					errMsg += file + " (line " + line + ")\n";
+					errMsgPrint += file + ":" + line + "\n"; // if you Ctrl+Mouse Click its go to the line. -Luis
 				default:
 					Sys.println(stackItem);
 			}
@@ -232,6 +255,7 @@ class Main extends Sprite
 		File.saveContent(path, errMsg + "\n");
 
 		Sys.println(errMsg);
+		Sys.println(errMsgPrint + '\n' + e.error);
 		Sys.println("Crash dump saved in " + Path.normalize(path));
 
 		var crashDialoguePath:String = "SCE-CrashDialog";

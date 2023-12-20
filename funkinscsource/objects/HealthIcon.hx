@@ -38,7 +38,7 @@ class HealthIcon extends FlxSprite
 		isOldIcon = (char == 'bf-old');
 		this.isPlayer = isPlayer;
 		changeIcon(char, allowGPU);
-		scrollFactor.set(0.5, 0.5);
+		scrollFactor.set();
 	}
 
 	override function update(elapsed:Float)
@@ -63,7 +63,6 @@ class HealthIcon extends FlxSprite
 		if (OpenFlAssets.exists(file)) 
 		#end
 		{
-			Debug.logInfo('Accepted Animated Icon!');
 			animatedIcon = true;
 		}
 

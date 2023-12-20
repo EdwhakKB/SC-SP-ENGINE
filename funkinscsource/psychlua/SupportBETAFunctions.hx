@@ -810,13 +810,7 @@ class SupportBETAFunctions
 		});
 
 		funk.set("cacheCharacter", function(characterType:Int = 0, character:String = 'bf'){
-			switch (characterType)
-			{
-				case 0 | 1 | 3:
-					PlayState.instance.cacheCharacter(character);
-				case 2:
-					PlayState.instance.cacheCharacter(character, true);
-			}
+			PlayState.instance.cacheCharacter(character, characterType);
 		});
 
 		//change individual values

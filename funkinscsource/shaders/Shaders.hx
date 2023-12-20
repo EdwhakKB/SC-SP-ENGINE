@@ -2291,7 +2291,7 @@ class ThreeDEffect extends ShaderEffectNew{
         shader.xrot.value = [xrot];
         shader.yrot.value = [yrot];
         shader.zrot.value = [zrot];
-        shader.dept.value = [depth];
+        shader.depth.value = [depth];
     }
 
     override public function update(elapsed:Float)
@@ -2299,7 +2299,7 @@ class ThreeDEffect extends ShaderEffectNew{
         shader.xrot.value = [xrot];
         shader.yrot.value = [yrot];
         shader.zrot.value = [zrot];
-        shader.dept.value = [depth];
+        shader.depth.value = [depth];
     }
 
     function set_xrot(x:Float):Float
@@ -2326,7 +2326,7 @@ class ThreeDEffect extends ShaderEffectNew{
     function set_depth(d:Float):Float
     {
         depth = d;
-        shader.dept.value = [depth];
+        shader.depth.value = [depth];
         return d;
     }
 }
@@ -2334,13 +2334,16 @@ class ThreeDEffect extends ShaderEffectNew{
 //               -naether
 
 class ThreeDShader extends FlxFixedShader{
-	@:glFragmentSource('
+    @:glFragmentSource('
 	#pragma header
+    //fixed by edwhak
+    //i just defined and fixed some PI math and fragColor fixed for notes
+    #define PI 3.14159265
 	uniform float xrot = 0.0;
 	uniform float yrot = 0.0;
 	uniform float zrot = 0.0;
-	uniform float dept = 0.0;
-	float alph = 0;
+	uniform float depth = 0.0;
+
 float plane( in vec3 norm, in vec3 po, in vec3 ro, in vec3 rd ) {
     float de = dot(norm, rd);
     de = sign(de)*max( abs(de), 0.001);
@@ -2374,7 +2377,7 @@ vec2 raytraceTexturedQuad(in vec3 rayOrigin, in vec3 rayDirection, in vec3 quadC
 }
 
 void main() {
-	vec4 texColor = texture2D(bitmap, openfl_TextureCoordv);
+    vec4 texColor = texture2D(bitmap, openfl_TextureCoordv);
     //Screen UV goes from 0 - 1 along each axis
     vec2 screenUV = openfl_TextureCoordv;
     vec2 p = (2.0 * screenUV) - 1.0;
@@ -2386,22 +2389,15 @@ void main() {
     dir /= length(dir);
     
     //Define the plane
-    vec3 planePosition = vec3(0.0, 0.0, dept);
-    vec3 planeRotation = vec3(xrot, yrot, zrot);//this the shit you needa change
+    vec3 planePosition = vec3(0.0, 0.0, depth+0.5);
+    vec3 planeRotation = vec3(xrot, PI+yrot, zrot);//this the shit you needa change
     vec2 planeDimension = vec2(-screenAspect, 1.0);
     
     vec2 uv = raytraceTexturedQuad(vec3(0), dir, planePosition, planeRotation, planeDimension);
 	
     //If we hit the rectangle, sample the texture
-    if (abs(uv.x - 0.5) < 0.5 && abs(uv.y - 0.5) < 0.5) {
-		
-		vec3 tex = flixel_texture2D(bitmap, uv).xyz;
-		float bitch = 1.0;
-		if (tex.z == 0.0){
-			bitch = 0.0;
-		}
-		
-	  gl_FragColor = vec4(flixel_texture2D(bitmap, uv).xyz, bitch);
+    if(abs(uv.x - 0.5) < 0.5 && abs(uv.y - 0.5) < 0.5) {
+	  gl_FragColor = vec4(flixel_texture2D(bitmap, uv));
     }
 }
 
@@ -2411,6 +2407,7 @@ void main() {
 	public function new(){
 		super();
 	}
+	
 	
 }
 
@@ -4639,6 +4636,1025 @@ class HeatWaveShader extends FlxShader
         
         vec2 dist_tex_coord = p_m.st + dst_offset;
         gl_FragColor = flixel_texture2D(bitmap, dist_tex_coord); 
+    }
+    ')
+
+    public function new()
+    {
+        super();
+    }
+}
+
+//More changed shaders added!
+class ChromaticPincush extends ShaderEffectNew //No Vars Used!
+{
+    public var shader:ChromaticPincushShader = new ChromaticPincushShader();
+}
+
+class ChromaticPincushShader extends FlxShader
+{
+    @:glFragmentSource('
+    #pragma header
+    // Thanks to NickWest and gonz84 for the shaders I combined together!
+    // Those shaders being "Chromatic Abberation" and "pincushion single axis"
+    
+    vec2 uv = openfl_TextureCoordv.xy;
+    
+    void main(void)
+    {
+            vec2 st = uv - 0.5;
+            float theta = atan(st.x, st.y);
+             float radius = sqrt(dot(st, st));
+            radius *= 1.0 + -0.5 * pow(radius, 2.0);
+            
+            
+            vec4 col;
+            col.r = texture2D(bitmap, vec2(0.5 + sin(theta) * radius+((uv.x+0.5)/500),uv.y)).r;
+            col.g = texture2D(bitmap, vec2(0.5 + sin(theta) * radius,uv.y)).g;
+            col.b = texture2D(bitmap, vec2(0.5 + sin(theta) * radius-((uv.x+0.5)/500),uv.y)).b;
+            col.a = texture2D(bitmap, vec2(0.5 + sin(theta) * radius-((uv.x+0.5)/500),uv.y)).a;
+        
+        gl_FragColor = col;
+    }
+    ')
+
+    public function new()
+    {
+        super();
+    }
+}
+
+class SquishyEffect extends ShaderEffectNew
+{
+    public var shader:SquishyShader = new SquishyShader();
+    var iTime:Float = 0.0;
+
+    public function new()
+    {
+        shader.iTime.value = [0];
+    }
+
+    override public function update(elapsed:Float)
+    {
+        iTime += elapsed;
+        shader.iTime.value = [iTime];
+    }
+
+}
+
+class SquishyShader extends FlxShader
+{
+    @:glFragmentSource('
+    #pragma header
+    vec2 uv = openfl_TextureCoordv.xy;
+    vec2 fragCoord = openfl_TextureCoordv*openfl_TextureSize;
+    vec2 iResolution = openfl_TextureSize;
+    uniform float iTime;
+    #define iChannel0 bitmap
+    #define texture flixel_texture2D
+    #define fragColor gl_FragColor
+    #define mainImage main
+    
+    float NoiseSeed;
+    float randomFloat(){
+      NoiseSeed = sin(NoiseSeed) * 5;
+      return fract(NoiseSeed);
+    }
+    
+    float SCurve (float value, float amount, float correction) {
+    
+        float curve = 1.0; 
+    
+        if (value < 0.5)
+        {
+    
+            curve = pow(value, amount) * pow(2.0, amount) * 0.2; 
+        }
+            
+        else
+        { 	
+            curve = 1.0 - pow(1.0 - value, amount) * pow(2.0, amount) * 0.5; 
+        }
+    
+        return pow(curve, correction);
+    }
+    
+    
+    
+    
+    //ACES tonemapping from: https://www.shadertoy.com/view/wl2SDt
+    vec3 ACESFilm(vec3 x)
+    {
+        float a = 2.51;
+        float b = 0.03;
+        float c = 2.43;
+        float d = 0.59;
+        float e = 0.14;
+        return (x*(a*x+b))/(x*(c*x+d)+e);
+    }
+    
+    
+    
+    
+    //Chromatic Abberation from: https://www.shadertoy.com/view/XlKczz
+    vec3 chromaticAbberation(sampler2D tex, vec2 uv, float amount)
+    {
+        float aberrationAmount = amount/5.0;
+           vec2 distFromCenter = uv - 0.5;
+    
+        // stronger aberration near the edges by raising to power 3
+        vec2 aberrated = aberrationAmount * pow(distFromCenter, vec2(3.0, 3.0));
+        
+        vec3 color = vec3(0.0);
+        
+        for (int i = 1; i <= 8; i++)
+        {
+            float weight = 1.0 / pow(2.0, float(i));
+            color.r += texture(tex, uv - float(i) * aberrated).r * weight;
+            color.b += texture(tex, uv + float(i) * aberrated).b * weight;
+        }
+        
+        color.g = texture(tex, uv).g * 0.9961; // 0.9961 = weight(1)+weight(2)+...+weight(8);
+        
+        return color;
+    }
+    
+    
+    
+    
+    //film grain from: https://www.shadertoy.com/view/wl2SDt
+    vec3 filmGrain()
+    {
+        return vec3(0.9 + randomFloat()*0.15);
+    }
+    
+    
+    
+    
+    //Sigmoid Contrast from: https://www.shadertoy.com/view/MlXGRf
+    vec3 contrast(vec3 color)
+    {
+        return vec3(SCurve(color.r, 3.0, 1.0), 
+                    SCurve(color.g, 4.0, 0.7), 
+                    SCurve(color.b, 2.6, 0.6)
+                   );
+    }
+    
+    
+    
+    
+    //anamorphic-ish flares from: https://www.shadertoy.com/view/MlsfRl
+    vec3 flares(sampler2D tex, vec2 uv, float threshold, float intensity, float stretch, float brightness)
+    {
+        threshold = 1.0 - threshold;
+        
+        vec3 hdr = texture(tex, uv).rgb;
+        hdr = vec3(floor(threshold+pow(hdr.r, 1.0)));
+        
+        float d = intensity; //50.;
+        float c = intensity*stretch; //10.;
+        
+        
+        //horizontal
+        for (float i=c; i>-1.0; i--)
+        {
+            float texL = texture(tex, uv+vec2(i/d, 0.0)).r;
+            float texR = texture(tex, uv-vec2(i/d, 0.0)).r;
+            hdr += floor(threshold+pow(max(texL,texR), 4.0))*(1.0-i/c);
+        }
+        
+        //vertical
+        for (float i=c/2.0; i>-1.0; i--)
+        {
+            float texU = texture(tex, uv+vec2(0.0, i/d)).r;
+            float texD = texture(tex, uv-vec2(0.0, i/d)).r;
+            hdr += floor(threshold+pow(max(texU,texD), 10.0))*(0.5-i/c) * 0.25;
+        }
+        
+        hdr *= vec3(0.5,0.4,1.0); //tint
+        
+        return hdr*brightness;
+    }
+    
+    
+    
+    
+    //glow from: https://www.shadertoy.com/view/XslGDr (unused but useful)
+    vec3 samplef(vec2 tc, vec3 color)
+    {
+        return pow(color, vec3(1, 1, 1));
+    }
+    
+    vec3 highlights(vec3 pixel, float thres)
+    {
+        float val = (pixel.x + pixel.y + pixel.z) / 3.0;
+        return pixel * smoothstep(thres - 0.1, thres + 0.1, val);
+    }
+    
+    vec3 hsample(vec3 color, vec2 tc)
+    {
+        return highlights(samplef(tc, color), 0.6);
+    }
+    
+    vec3 blur(vec3 col, vec2 tc, float offs)
+    {
+        vec4 xoffs = offs * vec4(-2.0, -1.0, 1.0, 2.0) / iResolution.x;
+        vec4 yoffs = offs * vec4(-2.0, -1.0, 1.0, 2.0) / iResolution.y;
+        
+        vec3 color = vec3(0.0, 0.0, 0.0);
+        color += hsample(col, tc + vec2(xoffs.x, yoffs.x)) * 0.00366;
+        color += hsample(col, tc + vec2(xoffs.y, yoffs.x)) * 0.01465;
+        color += hsample(col, tc + vec2(    0.0, yoffs.x)) * 0.02564;
+        color += hsample(col, tc + vec2(xoffs.z, yoffs.x)) * 0.01465;
+        color += hsample(col, tc + vec2(xoffs.w, yoffs.x)) * 0.00366;
+        
+        color += hsample(col, tc + vec2(xoffs.x, yoffs.y)) * 0.01465;
+        color += hsample(col, tc + vec2(xoffs.y, yoffs.y)) * 0.05861;
+        color += hsample(col, tc + vec2(    0.0, yoffs.y)) * 0.09524;
+        color += hsample(col, tc + vec2(xoffs.z, yoffs.y)) * 0.05861;
+        color += hsample(col, tc + vec2(xoffs.w, yoffs.y)) * 0.01465;
+        
+        color += hsample(col, tc + vec2(xoffs.x, 0.0)) * 0;
+        color += hsample(col, tc + vec2(xoffs.y, 0.0)) * 0;
+        color += hsample(col, tc + vec2(    0.0, 0.0)) * 0;
+        color += hsample(col, tc + vec2(xoffs.z, 0.0)) * 0;
+        color += hsample(col, tc + vec2(xoffs.w, 0.0)) * 0;
+        
+        color += hsample(col, tc + vec2(xoffs.x, yoffs.z)) * 0.01465;
+        color += hsample(col, tc + vec2(xoffs.y, yoffs.z)) * 0.05861;
+        color += hsample(col, tc + vec2(    0.0, yoffs.z)) * 0.09524;
+        color += hsample(col, tc + vec2(xoffs.z, yoffs.z)) * 0.05861;
+        color += hsample(col, tc + vec2(xoffs.w, yoffs.z)) * 0.01465;
+        
+        color += hsample(col, tc + vec2(xoffs.x, yoffs.w)) * 0;
+        color += hsample(col, tc + vec2(xoffs.y, yoffs.w)) * 0;
+        color += hsample(col, tc + vec2(    0.0, yoffs.w)) * 0;
+        color += hsample(col, tc + vec2(xoffs.z, yoffs.w)) * 0;
+        color += hsample(col, tc + vec2(xoffs.w, yoffs.w)) * 0;
+    
+        return color;
+    }
+    
+    vec3 glow(vec3 col, vec2 uv)
+    {
+        vec3 color = blur(col, uv, 1.0);
+        color += blur(col, uv, 1.0);
+        color += blur(col, uv, 1.0);
+        color += blur(col, uv, 1.0);
+        color /= 1.0;
+        
+        color += samplef(uv, col);
+        
+        return color;
+    }
+    
+    
+    
+    
+    //margins from: https://www.shadertoy.com/view/wl2SDt
+    vec3 margins(vec3 color, vec2 uv, float marginSize)
+    {
+        if(uv.y < marginSize || uv.y > 1.0-marginSize)
+        {
+            return vec3(0.0);
+        }else{
+            return color;
+        }
+    }
+    
+    
+    
+    
+    void mainImage() {
+        
+        vec2 uv = fragCoord.xy/iResolution.xy;
+        
+        vec3 color = texture(iChannel0, uv).xyz;
+        
+        
+        //chromatic abberation
+        color = chromaticAbberation(iChannel0, uv, 0.5);
+        
+        
+        //film grain
+        color *= filmGrain();
+        
+        
+        //ACES Tonemapping
+          color = ACESFilm(color);
+        
+        
+        //contrast
+        color = contrast(color) * 0.5;
+        
+        
+        //flare
+        color += flares(iChannel0, uv, 0.5, 50.0, 0.2, 0.06);
+        
+        
+        //margins
+        color = margins(color, uv, 0.1);
+        
+        
+        //output
+        fragColor = vec4(color,texture(iChannel0,uv).a);
+    }
+    ')
+
+    public function new()
+    {
+        super();
+    }
+}
+
+class Desaturate extends ShaderEffectNew
+{
+    public var shader:DesaturateShader = new DesaturateShader();
+    var iTime:Float = 0.0;
+
+    public function new()
+    {
+        shader.iTime.value = [0];
+    }
+
+    override public function update(elapsed:Float)
+    {
+        iTime += elapsed;
+        shader.iTime.value = [iTime];
+    }
+
+}
+
+class DesaturateShader extends FlxShader
+{
+    @:glFragmentSource('
+    #pragma header
+    vec2 uv = openfl_TextureCoordv.xy;
+    vec2 fragCoord = openfl_TextureCoordv*openfl_TextureSize;
+    vec2 iResolution = openfl_TextureSize;
+    uniform float iTime;
+    #define iChannel0 bitmap
+    #define texture flixel_texture2D
+    #define fragColor gl_FragColor
+    #define mainImage main
+    
+    void mainImage()
+    {
+        vec2 p = fragCoord.xy/iResolution.xy;
+        
+        vec4 col = texture(iChannel0, p);
+    
+        col = vec4( (col.r+col.g+col.b)/3. );
+    
+        fragColor = col;
+    }
+    
+    // https://www.shadertoy.com/view/dssXRl
+    ')
+
+    public function new()
+    {
+        super();
+    }
+}
+
+class MonitorEffect extends ShaderEffectNew
+{
+    public var shader:MonitorShader = new MonitorShader();
+}
+
+class MonitorShader extends FlxShader
+{
+    @:glFragmentSource('
+    #pragma header
+
+    float zoom = 1.1;
+    void main()
+    {
+        vec2 uv = openfl_TextureCoordv;
+        uv = (uv-.5)*2.;
+        uv *= zoom;
+        
+        uv.x *= 1. + pow(abs(uv.y/2.),3.);
+        uv.y *= 1. + pow(abs(uv.x/2.),3.);
+        uv = (uv + 1.)*.5;
+        
+        vec4 tex = vec4( 
+            texture2D(bitmap, uv+.0020).r,
+            texture2D(bitmap, uv+.000).g,
+            texture2D(bitmap, uv+.002).b, 
+            1.0
+        );
+        
+        tex *= smoothstep(uv.x,uv.x+0.01,1.)*smoothstep(uv.y,uv.y+0.01,1.)*smoothstep(0,0.,uv.x)*smoothstep(0,0.,uv.y);
+        
+        float avg = (tex.r+tex.g+tex.b)/5.;
+        gl_FragColor = tex + pow(avg,5.);
+    }
+    ')
+
+    public function new()
+    {
+        super();
+    }
+}
+
+class VCRNoGlitch extends ShaderEffectNew
+{
+    public var shader:VCRNoGlitchShader = new VCRNoGlitchShader();
+    var iTime:Float = 0.0;
+
+    public function new()
+    {
+        shader.iTime.value = [0];
+    }
+
+    override public function update(elapsed:Float)
+    {
+        iTime += elapsed;
+        shader.iTime.value = [iTime];
+    }
+}
+
+class VCRNoGlitchShader extends FlxShader
+{
+    @:glFragmentSource('
+    #pragma header
+
+    uniform float iTime;
+   // uniform sampler2D noiseTex;
+    uniform vec3 iResolution;
+
+    float onOff(float a, float b, float c)
+    {
+        return step(c, sin(iTime + a*cos(iTime*b)));
+    }
+
+    float ramp(float y, float start, float end)
+    {
+        float inside = step(start,y) - step(end,y);
+        float fact = (y-start)/(end-start)*inside;
+        return (1.-fact) * inside;
+
+    }
+
+    vec4 getVideo(vec2 uv)
+      {
+        vec2 look = uv;
+            float window = 1./(1.+20.*(look.y-mod(iTime/4.,1.))*(look.y-mod(iTime/4.,1.)));
+            look.x = look.x + (sin(look.y*10. + iTime)/50.*onOff(4.,4.,.3)*(1.+cos(iTime*80.))*window)*(0*2);
+            float vShift = 1*onOff(2.,3.,.9)*(sin(iTime)*sin(iTime*20.) +
+                                                 (1 + 0.1*sin(iTime*200.)*cos(iTime)));
+            look.y = mod(look.y + vShift*0, 0.);
+        
+        vec4 video = flixel_texture2D(bitmap,look);
+
+        return video;
+      }
+
+    vec2 screenDistort(vec2 uv)
+    {
+        uv = (uv - 0.5) * 2.0;
+        uv *= 1.1;
+        uv.x *= 1.0 + pow((abs(uv.y) / 2.0), 3.0);
+        uv.y *= 1.0 + pow((abs(uv.x) / 2.0), 3.0);
+        uv  = (uv / 2.0) + 0.5;
+        uv =  uv *0.92 + 0.04;
+        return uv;
+      
+        return uv;
+    }
+    float random(vec2 uv)
+    {
+        return fract(sin(dot(uv, vec2(15.5151, 42.2561))) * 12341.14122 * sin(iTime * 0.3));
+    }
+    float noise(vec2 uv)
+    {
+        vec2 i = floor(uv);
+        vec2 f = fract(uv);
+
+        float a = random(i);
+        float b = random(i + vec2(1.,0.));
+        float c = random(i + vec2(0., 1.));
+        float d = random(i + vec2(1.));
+
+        vec2 u = smoothstep(0., 1., f);
+
+        return mix(a,b, u.x) + (c - a) * u.y * (1. - u.x) + (d - b) * u.x * u.y;
+
+    }
+
+
+    vec2 scandistort(vec2 uv) {
+        float scan1 = clamp(cos(uv.y * 1 + iTime), 1.0, 1.0);
+        float scan2 = clamp(cos(uv.y * 1 + iTime + 1.0) * 10.0, 1.0, 1.0) ;
+        float amount = scan1 * scan2 * uv.x;
+
+        //uv.x -= 0.05 * mix(flixel_texture2D(noiseTex, vec2(uv.x, amount)).r * amount, amount, 2);
+
+        return uv;
+
+    }
+    void main()
+    {
+        vec2 uv = openfl_TextureCoordv;
+      vec2 curUV = screenDistort(uv);
+        uv = scandistort(curUV);
+        vec4 video = getVideo(uv);
+      float vigAmt = 1;
+      float x =  0.;
+
+
+      video.r = getVideo(vec2(x+uv.x+0.001,uv.y+0.001)).x+0.05;
+      video.b = getVideo(vec2(x+uv.x+0.000,uv.y-0.002)).y+0.05;
+      video.b = getVideo(vec2(x+uv.x-0.002,uv.y+0.000)).z+0.05;
+      video.r += 0.08*getVideo(0.75*vec2(x+0.025, -0.027)+vec2(uv.x+0.001,uv.y+0.001)).x;
+      video.g += 0.05*getVideo(0.75*vec2(x+-0.022, -0.02)+vec2(uv.x+0.000,uv.y-0.002)).y;
+      video.b += 0.08*getVideo(0.75*vec2(x+-0.02, -0.018)+vec2(uv.x-0.002,uv.y+0.000)).z;
+
+      video = clamp(video*0.6+0.4*video*video*1.0,0.0,1.0);
+          vigAmt = 3.+.3*sin(iTime + 5.*cos(iTime*5.));
+
+        float vignette = (1.-vigAmt*(uv.y-.5)*(uv.y-.5))*(1.-vigAmt*(uv.x-.5)*(uv.x-.5));
+
+         video *= vignette;
+
+
+      gl_FragColor = mix(video,vec4(noise(uv * 75.)),.05);
+
+      if(curUV.x<0 || curUV.x>1 || curUV.y<0 || curUV.y>1){
+        gl_FragColor = vec4(1,0,1,0);
+      }
+
+    }
+    ')
+
+    public function new()
+    {
+        super();
+    }
+}
+
+class ChromaticRadialBlur extends ShaderEffectNew
+{
+    public var shader:ChromaticRadialBlurShader = new ChromaticRadialBlurShader();
+}
+
+class ChromaticRadialBlurShader extends FlxShader
+{
+    @:glFragmentSource('
+    #pragma header
+
+    /*
+        Transverse Chromatic Aberration
+    
+        Based on https://github.com/FlexMonkey/Filterpedia/blob/7a0d4a7070894eb77b9d1831f689f9d8765c12ca/Filterpedia/customFilters/TransverseChromaticAberration.swift
+    
+        Simon Gladman | http://flexmonkey.blogspot.co.uk | September 2017
+    */
+    
+    int sampleCount = 10;
+    float blur = 0.10; 
+    float falloff = 3.0; 
+    
+    // use iChannel0 for video, iChannel1 for test grid
+    #define INPUT bitmap
+    
+    void main(void)
+    {
+        vec2 destCoord = openfl_TextureCoordv.xy;
+    
+        vec2 direction = normalize(destCoord - 0.5); 
+        vec2 velocity = direction * blur * pow(length(destCoord - 0.5), falloff);
+        float inverseSampleCount = 1.0 / float(sampleCount); 
+        
+        mat3x2 increments = mat3x2(velocity * 1.0 * inverseSampleCount,
+                                   velocity * 2.0 * inverseSampleCount,
+                                   velocity * 4.0 * inverseSampleCount);
+    
+        vec4 accumulator = vec4(0);
+        mat3x2 offsets = mat3x2(0); 
+        
+        for (int i = 0; i < sampleCount; i++) {
+            accumulator.r += texture2D(INPUT, destCoord + offsets[0]).r; 
+            accumulator.g += texture2D(INPUT, destCoord + offsets[1]).g; 
+            accumulator.b += texture2D(INPUT, destCoord + offsets[2]).b; 
+            accumulator.a += (texture2D(INPUT, destCoord + offsets[0]).a + texture2D(INPUT, destCoord + offsets[1]).a + texture2D(INPUT, destCoord + offsets[2]).a)/3.0; 
+            
+            offsets -= increments;
+        }
+    
+        gl_FragColor = vec4(accumulator / float(sampleCount));
+    }
+    ')
+
+    public function new()
+    {
+        super();
+    }
+}
+
+class Vcr extends ShaderEffectNew
+{
+    public var shader:VcrShader = new VcrShader();
+    var iTime:Float = 0.0;
+
+    public function new()
+    {
+        shader.iTime.value = [0];
+    }
+
+    override public function update(elapsed:Float)
+    {
+        iTime += elapsed;
+        shader.iTime.value = [iTime];
+    }
+}
+
+class VcrShader extends FlxShader
+{
+    @:glFragmentSource('
+    #pragma header
+
+    uniform float iTime;
+   // uniform sampler2D noiseTex;
+    uniform vec3 iResolution;
+
+    float onOff(float a, float b, float c)
+    {
+        return step(c, sin(iTime + a*cos(iTime*b)));
+    }
+
+    float ramp(float y, float start, float end)
+    {
+        float inside = step(start,y) - step(end,y);
+        float fact = (y-start)/(end-start)*inside;
+        return (1.-fact) * inside;
+
+    }
+
+    vec4 getVideo(vec2 uv)
+      {
+        vec2 look = uv;
+            float window = 1./(1.+20.*(look.y-mod(iTime/4.,1.))*(look.y-mod(iTime/4.,1.)));
+            look.x = look.x + (sin(look.y*10. + iTime)/50.*onOff(4.,4.,.3)*(1.+cos(iTime*80.))*window)*(0.2*2);
+            float vShift = 0.4*onOff(2.,3.,.9)*(sin(iTime)*sin(iTime*20.) +
+                                                 (0.5 + 0.1*sin(iTime*200.)*cos(iTime)));
+            look.y = mod(look.y + vShift*0.2, 1.);
+        
+        vec4 video = flixel_texture2D(bitmap,look);
+
+        return video;
+      }
+
+    vec2 screenDistort(vec2 uv)
+    {
+        uv = (uv - 0.5) * 2.0;
+        uv *= 1.1;
+        uv.x *= 1.0 + pow((abs(uv.y) / 5.0), 2.0);
+        uv.y *= 1.0 + pow((abs(uv.x) / 4.0), 2.0);
+        uv  = (uv / 2.0) + 0.5;
+        uv =  uv *0.92 + 0.04;
+        return uv;
+      
+        return uv;
+    }
+    float random(vec2 uv)
+    {
+        return fract(sin(dot(uv, vec2(15.5151, 42.2561))) * 12341.14122 * sin(iTime * 0.03));
+    }
+    float noise(vec2 uv)
+    {
+        vec2 i = floor(uv);
+        vec2 f = fract(uv);
+
+        float a = random(i);
+        float b = random(i + vec2(1.,0.));
+        float c = random(i + vec2(0., 1.));
+        float d = random(i + vec2(1.));
+
+        vec2 u = smoothstep(0., 1., f);
+
+        return mix(a,b, u.x) + (c - a) * u.y * (1. - u.x) + (d - b) * u.x * u.y;
+
+    }
+
+
+    vec2 scandistort(vec2 uv) {
+        float scan1 = clamp(cos(uv.y * 2.0 + iTime), 0.0, 1.0);
+        float scan2 = clamp(cos(uv.y * 2.0 + iTime + 4.0) * 10.0, 0.0, 1.0) ;
+        float amount = scan1 * scan2 * uv.x;
+
+        //uv.x -= 0.05 * mix(flixel_texture2D(noiseTex, vec2(uv.x, amount)).r * amount, amount, 0.9);
+
+        return uv;
+
+    }
+    void main()
+    {
+        vec2 uv = openfl_TextureCoordv;
+      vec2 curUV = screenDistort(uv);
+        uv = scandistort(curUV);
+        vec4 video = getVideo(uv);
+      float vigAmt = 1.0;
+      float x =  0.;
+
+
+      video.r = getVideo(vec2(x+uv.x+0.001,uv.y+0.001)).x+0.05;
+      video.g = getVideo(vec2(x+uv.x+0.000,uv.y-0.002)).y+0.05;
+      video.b = getVideo(vec2(x+uv.x-0.002,uv.y+0.000)).z+0.05;
+      video.r += 0.08*getVideo(0.75*vec2(x+0.025, -0.027)+vec2(uv.x+0.001,uv.y+0.001)).x;
+      video.g += 0.05*getVideo(0.75*vec2(x+-0.022, -0.02)+vec2(uv.x+0.000,uv.y-0.002)).y;
+      video.b += 0.08*getVideo(0.75*vec2(x+-0.02, -0.018)+vec2(uv.x-0.002,uv.y+0.000)).z;
+
+      video = clamp(video*0.6+0.4*video*video*1.0,0.0,1.0);
+          vigAmt = 3.+.3*sin(iTime + 5.*cos(iTime*5.));
+
+        float vignette = (1.-vigAmt*(uv.y-.5)*(uv.y-.5))*(1.-vigAmt*(uv.x-.5)*(uv.x-.5));
+
+         video *= vignette;
+
+
+      gl_FragColor = mix(video,vec4(noise(uv * 300.)),.05);
+
+      if(curUV.x<0 || curUV.x>1 || curUV.y<0 || curUV.y>1){
+        gl_FragColor = vec4(0,0,0,0);
+      }
+
+    }
+    ')
+
+    public function new()
+    {
+        super();
+    }
+}
+
+class InvertEffect extends ShaderEffectNew
+{
+    public var shader:InvertShader = new InvertShader();
+}
+
+class InvertShader extends FlxShader
+{
+    @:glFragmentSource('
+    #pragma header
+
+    vec2 uv = openfl_TextureCoordv.xy;
+    
+    void main(void)
+    {
+        vec4 tex = texture2D(bitmap, uv);
+        tex.r = 1.0-tex.r;
+        tex.g = 1.0-tex.g;
+        tex.b = 1.0-tex.b;
+    
+        gl_FragColor = vec4(tex.r, tex.g, tex.b, tex.a);
+    }
+    ')
+
+    public function new()
+    {
+        super();
+    }
+}
+
+class VcrWithGlitch extends ShaderEffectNew
+{
+    public var shader:VcrWithGlitchShader = new VcrWithGlitchShader();
+    var iTime:Float = 0.0;
+
+    public function new()
+    {
+        shader.iTime.value = [0];
+    }
+
+    override public function update(elapsed:Float)
+    {
+        iTime += elapsed;
+        shader.iTime.value = [iTime];
+    }
+}
+
+class VcrWithGlitchShader extends FlxShader
+{
+    @:glFragmentSource('
+    #pragma header
+
+    uniform float iTime;
+   // uniform sampler2D noiseTex;
+    uniform vec3 iResolution;
+
+    float onOff(float a, float b, float c)
+    {
+        return step(c, sin(iTime + a*cos(iTime*b)));
+    }
+
+    float ramp(float y, float start, float end)
+    {
+        float inside = step(start,y) - step(end,y);
+        float fact = (y-start)/(end-start)*inside;
+        return (1.-fact) * inside;
+
+    }
+
+    vec4 getVideo(vec2 uv)
+      {
+        vec2 look = uv;
+            float window = 1./(1.+20.*(look.y-mod(iTime/4.,1.))*(look.y-mod(iTime/4.,1.)));
+            look.x = look.x + (sin(look.y*10. + iTime)/50.*onOff(4.,4.,.3)*(1.+cos(iTime*80.))*window)*(0.1*2);
+            float vShift = 0.4*onOff(2.,3.,.9)*(sin(iTime)*sin(iTime*20.) +
+                                                 (0.5 + 0.1*sin(iTime*200.)*cos(iTime)));
+            look.y = mod(look.y + vShift*0.1, 1.);
+        
+        vec4 video = flixel_texture2D(bitmap,look);
+
+        return video;
+      }
+
+    vec2 screenDistort(vec2 uv)
+    {
+        uv = (uv - 0.5) * 2.0;
+        uv *= 1.1;
+        uv.x *= 1.0 + pow((abs(uv.y) / 5.0), 2.0);
+        uv.y *= 1.0 + pow((abs(uv.x) / 4.0), 2.0);
+        uv  = (uv / 2.0) + 0.5;
+        uv =  uv *0.92 + 0.04;
+        return uv;
+      
+        return uv;
+    }
+    float random(vec2 uv)
+    {
+        return fract(sin(dot(uv, vec2(15.5151, 42.2561))) * 12341.14122 * sin(iTime * 0.03));
+    }
+    float noise(vec2 uv)
+    {
+        vec2 i = floor(uv);
+        vec2 f = fract(uv);
+
+        float a = random(i);
+        float b = random(i + vec2(1.,0.));
+        float c = random(i + vec2(0., 1.));
+        float d = random(i + vec2(1.));
+
+        vec2 u = smoothstep(0., 1., f);
+
+        return mix(a,b, u.x) + (c - a) * u.y * (1. - u.x) + (d - b) * u.x * u.y;
+
+    }
+
+
+    vec2 scandistort(vec2 uv) {
+        float scan1 = clamp(cos(uv.y * 2.0 + iTime), 0.0, 1.0);
+        float scan2 = clamp(cos(uv.y * 2.0 + iTime + 4.0) * 10.0, 0.0, 1.0) ;
+        float amount = scan1 * scan2 * uv.x;
+
+        //uv.x -= 0.05 * mix(flixel_texture2D(noiseTex, vec2(uv.x, amount)).r * amount, amount, 0.9);
+
+        return uv;
+
+    }
+    void main()
+    {
+        vec2 uv = openfl_TextureCoordv;
+      vec2 curUV = screenDistort(uv);
+        uv = scandistort(curUV);
+        vec4 video = getVideo(uv);
+      float vigAmt = 1.0;
+      float x =  0.;
+
+
+      video.r = getVideo(vec2(x+uv.x+0.001,uv.y+0.001)).x+0.05;
+      video.g = getVideo(vec2(x+uv.x+0.000,uv.y-0.002)).y+0.05;
+      video.b = getVideo(vec2(x+uv.x-0.002,uv.y+0.000)).z+0.05;
+      video.r += 0.08*getVideo(0.75*vec2(x+0.025, -0.027)+vec2(uv.x+0.001,uv.y+0.001)).x;
+      video.g += 0.05*getVideo(0.75*vec2(x+-0.022, -0.02)+vec2(uv.x+0.000,uv.y-0.002)).y;
+      video.b += 0.08*getVideo(0.75*vec2(x+-0.02, -0.018)+vec2(uv.x-0.002,uv.y+0.000)).z;
+
+      video = clamp(video*0.6+0.4*video*video*1.0,0.0,1.0);
+          vigAmt = 3.+.3*sin(iTime + 5.*cos(iTime*5.));
+
+        float vignette = (1.-vigAmt*(uv.y-.5)*(uv.y-.5))*(1.-vigAmt*(uv.x-.5)*(uv.x-.5));
+
+         video *= vignette;
+
+
+      gl_FragColor = mix(video,vec4(noise(uv * 75.)),.05);
+
+      if(curUV.x<0 || curUV.x>1 || curUV.y<0 || curUV.y>1){
+        gl_FragColor = vec4(0,0,0,0);
+      }
+
+    }
+    ')
+
+    public function new()
+    {
+        super();
+    }
+}
+
+class RgbEffect3 extends ShaderEffectNew
+{
+    public var shader:RgbEffect3Shader = new RgbEffect3Shader();
+    var iTime:Float = 0.0;
+
+    public function new()
+    {
+        shader.iTime.value = [0];
+    }
+
+    override public function update(elapsed:Float)
+    {
+        iTime += elapsed;
+        shader.iTime.value = [iTime];
+    }
+}
+
+class RgbEffect3Shader extends FlxShader
+{
+    @:glFragmentSource('
+    #pragma header
+    vec2 uv = openfl_TextureCoordv.xy;
+    vec2 fragCoord = openfl_TextureCoordv*openfl_TextureSize;
+    vec2 iResolution = openfl_TextureSize;
+    uniform float iTime;
+    #define iChannel0 bitmap
+    #define texture flixel_texture2D
+    #define fragColor gl_FragColor
+    #define mainImage main
+    
+    void mainImage()
+    {
+        vec2 uv = fragCoord.xy / iResolution.xy;
+    
+        float amount = 0.0;
+        
+        amount = (1.0 + sin(iTime*6.0)) * 0.5;
+        amount *= 1.0 + sin(iTime*16.0) * 0.5;
+        amount *= 1.0 + sin(iTime*19.0) * 0.5;
+        amount *= 1.0 + sin(iTime*27.0) * 0.5;
+        amount = pow(amount, 3.0);
+    
+        amount *= 0.05;
+        
+        vec3 col;
+        col.r = texture( iChannel0, vec2(uv.x+amount,uv.y) ).r;
+        col.g = texture( iChannel0, uv ).g;
+        col.b = texture( iChannel0, vec2(uv.x-amount,uv.y) ).b;
+    
+        col *= (1.0 - amount * 0.5);
+        
+        fragColor = vec4(col,1.0);
+    gl_FragColor.a = flixel_texture2D(bitmap, openfl_TextureCoordv).a;
+    }
+    //https://www.shadertoy.com/view/Mds3zn
+    ')
+
+    public function new()
+    {
+        super();
+    }
+}
+
+class FlipEffect extends ShaderEffectNew
+{
+    public var shader:FlipShader = new FlipShader();
+    public var flip(default, set):Float = 0.0;
+
+    public function new()
+    {
+        shader.flip.value = [0];
+    }
+
+    override public function update(elapsed:Float)
+    {
+        shader.flip.value = [flip];
+    }
+
+    function set_flip(value:Float)
+    {
+        flip = value;
+        shader.flip.value = [flip];
+        return value;
+    }
+}
+
+class FlipShader extends FlxShader
+{
+    @:glFragmentSource('
+    #pragma header
+
+    uniform float flip = -1.0;
+
+    void main()
+    {
+        vec2 uv = openfl_TextureCoordv.xy;
+
+        uv.x = abs(uv.x + flip);
+    
+        gl_FragColor = texture2D(bitmap, uv);
     }
     ')
 

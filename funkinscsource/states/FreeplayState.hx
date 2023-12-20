@@ -748,9 +748,8 @@ class FreeplayState extends MusicBeatState
 						updateTexts(elapsed, true);
 						grpSongs.forEach(function(e:Alphabet)
 						{
-							if (e.text != songs[curSelected].songName)
+							if (e.text == songs[curSelected].songName)
 							{
-		
 								for (i in [scoreBG, scoreText, helpText, opponentText, diffText, comboText])
 								{
 									FlxTween.tween(i, {alpha: 0}, llll / 1000);
@@ -761,11 +760,11 @@ class FreeplayState extends MusicBeatState
 								if (vocals != null)
 									vocals.fadeOut(llll / 1000, 0);
 								FlxG.camera.fade(FlxColor.BLACK, llll / 1000, false, AcceptedSong, true);
+								FlxFlicker.flicker(e);
 							}
 							else
 							{
-								FlxFlicker.flicker(e);
-								Debug.logTrace(curSelected);
+								//Nothing!
 							}
 						});
 						break;

@@ -38,6 +38,7 @@ import flixel.addons.ui.FlxUINumericStepper;
 import flixel.addons.ui.FlxUISlider;
 import flixel.addons.ui.FlxUITabMenu;
 import flixel.util.FlxDestroyUtil;
+import flixel.addons.transition.FlxTransitionableState;
 
 
 #if LEATHER
@@ -233,7 +234,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
        InvertModifier, FlipModifier, JumpModifier,
        StrumAngleModifier, EaseXModifier,
        //Extra Modifiers
-       ShakeNotesWIModifierX,
+       ShakyNotesModifierX, ShakyNotesModifierY, ShakyNotesModifierZ,
     ];
     public static var easeList:Array<String> = [
         "backIn",
@@ -347,6 +348,8 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
 		FlxG.cameras.add(camHUD, false);
 
 		FlxG.cameras.setDefaultDrawTarget(camGame, true);
+
+        IndieDiamondTransSubState.nextCamera = camHUD;
 
 		persistentUpdate = true;
 		persistentDraw = true;
@@ -551,7 +554,6 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
 		}
         Conductor.songPosition = inst.time;
 
-        
         var songPosPixelPos = (((Conductor.songPosition/Conductor.stepCrochet)%4)*gridSize);
         grid.x = -curDecStep*gridSize;
         line.x = gridSize*4;
@@ -576,7 +578,6 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
                     
         }
         selectedEventBox.visible = eventIsSelected;
-
 
         var blockInput = false;
         for (i in textBlockers)
@@ -613,6 +614,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
                     inst.pause();
                     if(vocals != null) vocals.pause();
                     playfieldRenderer.editorPaused = true;
+                    playfieldRenderer.pauseTweens = true;
                 }
                 else
                 {
@@ -623,6 +625,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
                         vocals.play();
                     }
                     inst.play();
+                    playfieldRenderer.pauseTweens = false;
                     playfieldRenderer.editorPaused = false;
                     dirtyUpdateNotes = true;
                     dirtyUpdateEvents = true;
@@ -640,6 +643,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
                     vocals.pause();
                     vocals.time = inst.time;
                 }
+                playfieldRenderer.pauseTweens = true;
                 playfieldRenderer.editorPaused = true;
                 dirtyUpdateNotes = true;
                 dirtyUpdateEvents = true;
@@ -805,7 +809,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
         }
         if (dirtyUpdateEvents)
         {
-            FlxTween.globalManager.completeAll();
+            playfieldRenderer.tweenManager.completeAll();
             playfieldRenderer.eventManager.clearEvents();
             playfieldRenderer.modifierTable.resetMods();
             playfieldRenderer.modchart.loadEvents();
@@ -828,6 +832,10 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
                 FlxG.mouse.visible = false;
                 inst.stop();
                 if(vocals != null) vocals.stop();
+
+                IndieDiamondTransSubState.nextCamera = camHUD;
+				if(FlxTransitionableState.skipNextTransIn)
+					IndieDiamondTransSubState.nextCamera = null;
                 
                 #if (PSYCH && PSYCHVERSION == 0.7)
                     backend.StageData.loadDirectory(PlayState.SONG);
@@ -856,14 +864,6 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
             //trace('changed bpm to ' + curBpmChange.bpm);
             Conductor.bpm = curBpmChange.bpm;
         }
-
-
-            
-
-
-
-
-
 
         debugText.text = Std.string(FlxMath.roundDecimal(Conductor.songPosition / 1000, 2)) + " / " + Std.string(FlxMath.roundDecimal(inst.length / 1000, 2)) +
 		"\nBeat: " + Std.string(curDecBeat).substring(0,4) +

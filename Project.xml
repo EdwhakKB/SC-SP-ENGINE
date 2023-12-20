@@ -153,6 +153,8 @@
 
 	<haxelib name="hxcpp-debug-server" if="cpp"/>
 
+	<haxelib name="fnf-modcharting-tools"/>
+
 	<!-- Enables a terminal log prompt on debug builds -->
 	<haxelib name="hxcpp-debug-server" if="debug"/>
 
