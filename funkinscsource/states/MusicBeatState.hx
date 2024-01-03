@@ -6,6 +6,7 @@ import flixel.FlxState;
 import flixel.addons.transition.TransitionData;
 import flixel.addons.transition.Transition;
 import flixel.FlxSubState;
+import backend.PsychCamera;
 
 class MusicBeatState extends #if modchartingTools modcharting.ModchartMusicBeatState #else FlxUIState #end
 {
@@ -30,6 +31,9 @@ class MusicBeatState extends #if modchartingTools modcharting.ModchartMusicBeatS
     
     var transOutRequested:Bool = false;
     var finishedTransOut:Bool = false;
+
+	public static var divideCameraZoom:Bool = true;
+	public static var changedZoom:Float = 1;
 
 	private function get_controls()
 	{
@@ -58,6 +62,8 @@ class MusicBeatState extends #if modchartingTools modcharting.ModchartMusicBeatS
 		super.destroy();
 	}
 
+	var _psychCameraInitialized:Bool = false;
+
 	override function create()
 	{
 		destroySubStates = false;
@@ -65,12 +71,24 @@ class MusicBeatState extends #if modchartingTools modcharting.ModchartMusicBeatS
 		var skip:Bool = FlxTransitionableState.skipNextTransOut;
 		#if MODS_ALLOWED Mods.updatedOnState = false; #end
 
+		if(!_psychCameraInitialized) initPsychCamera();
+
 		super.create();
 		if(!skip) {
-			openSubState(new IndieDiamondTransSubState(0.7, true));
+			openSubState(new IndieDiamondTransSubState(0.7, true, FlxG.camera.zoom));
 		}
 		FlxTransitionableState.skipNextTransOut = false;
 		timePassedOnState = 0;
+	}
+
+	public function initPsychCamera():PsychCamera
+	{
+		var camera = new PsychCamera();
+		FlxG.cameras.reset(camera);
+		FlxG.cameras.setDefaultDrawTarget(camera, true);
+		_psychCameraInitialized = true;
+		//trace('initialized psych camera ' + Sys.cpuTime());
+		return camera;
 	}
 
 	public static var timePassedOnState:Float = 0;
@@ -226,7 +244,7 @@ class MusicBeatState extends #if modchartingTools modcharting.ModchartMusicBeatS
 		if(nextState == null)
 			nextState = FlxG.state;
 
-		FlxG.state.openSubState(new IndieDiamondTransSubState(0.6, false));
+		FlxG.state.openSubState(new IndieDiamondTransSubState(0.6, false, FlxG.camera.zoom));
 		if(nextState == FlxG.state) IndieDiamondTransSubState.finishCallback = function() FlxG.resetState();
 		else IndieDiamondTransSubState.finishCallback = function() FlxG.switchState(nextState);
 	}

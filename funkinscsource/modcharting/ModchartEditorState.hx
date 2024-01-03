@@ -504,6 +504,8 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
         setupEventUI();
         setupPlayfieldUI();
 
+        playfieldRenderer.pauseTweens = false;
+
 
         var hideNotes:FlxButton = new FlxButton(0, FlxG.height, 'Show/Hide Notes', function ()
         {
@@ -1031,27 +1033,31 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
         var songData = PlayState.SONG;
         Conductor.bpm = songData.bpm;
 
-        if (PlayState.SONG.needsVoices)
-        {
-            #if LEATHER 
-            vocals = new FlxSound().loadEmbedded(Paths.voices(PlayState.SONG.songId, (PlayState.SONG.specialAudioName == null ? PlayState.storyDifficultyStr.toLowerCase() : PlayState.SONG.specialAudioName)));
-            #elseif (SBETA == 0.1)
-            vocals = new FlxSound().loadEmbedded(Paths.voices((PlayState.SONG.vocalsPrefix != null ? PlayState.SONG.vocalsPrefix : ''), PlayState.SONG.songId, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : '')));
-            #else
-            vocals = new FlxSound().loadEmbedded(Paths.voices(PlayState.SONG.songId));
-            #end
+        vocals = new FlxSound();
+        try {
+            if (PlayState.SONG.needsVoices){
+                #if LEATHER 
+                vocals.loadEmbedded(Paths.voices(PlayState.SONG.songId, (PlayState.SONG.specialAudioName == null ? PlayState.storyDifficultyStr.toLowerCase() : PlayState.SONG.specialAudioName)));
+                #elseif (SBETA == 0.1)
+                vocals.loadEmbedded(Paths.voices((PlayState.SONG.vocalsPrefix != null ? PlayState.SONG.vocalsPrefix : ''), PlayState.SONG.songId, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : '')));
+                #else
+                vocals.loadEmbedded(Paths.voices(PlayState.SONG.songId));
+                #end
+            }
         }
-        else
-            vocals = new FlxSound();
-
+		catch(e:Dynamic) {}
         //vocals.pitch = playbackRate;
         FlxG.sound.list.add(vocals);
 
-        #if (SBETA == 0.1)
-        inst = new FlxSound().loadEmbedded(Paths.inst((PlayState.SONG.instrumentalPrefix != null ? PlayState.SONG.instrumentalPrefix : ''), PlayState.SONG.songId, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : '')));
-        #else
-        inst = new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.songId));
-        #end
+        inst = new FlxSound();
+        try {
+            #if (SBETA == 0.1)
+            inst.loadEmbedded(Paths.inst((PlayState.SONG.instrumentalPrefix != null ? PlayState.SONG.instrumentalPrefix : ''), PlayState.SONG.songId, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : '')));
+            #else
+            inst.loadEmbedded(Paths.inst(PlayState.SONG.songId));
+            #end
+		}
+		catch(e:Dynamic) {}
         FlxG.sound.list.add(inst);
 
         inst.onComplete = function()
@@ -1131,8 +1137,8 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
 				}
                 #end
 
-                if (ClientPrefs.getGameplaySetting('sustainnotesactive')) swagNote.sustainLength = songNotes[2] / playbackSpeed;
-				else swagNote.sustainLength = 0;
+                #if (PSYCH && PSYCHVERSION == 0.7) if (ClientPrefs.getGameplaySetting('sustainnotesactive')) swagNote.sustainLength = songNotes[2] / playbackSpeed;
+				else #end swagNote.sustainLength = 0;
 
                 var susLength:Float = swagNote.sustainLength;
                 var anotherCrochet:Float = Conductor.crochet;

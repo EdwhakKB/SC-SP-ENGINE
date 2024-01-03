@@ -31,32 +31,34 @@ typedef SwagSong =
 	var gfVersion:String;
 	var stage:String;
 	
-	var notITG:Bool;
-	var usesHUD:Bool;
-	var noIntroSkip:Bool;
+	var ?notITG:Bool;
+	var ?usesHUD:Bool;
+	var ?noIntroSkip:Bool;
 
-	var rightScroll:Bool;
-	var middleScroll:Bool;
+	var ?rightScroll:Bool;
+	var ?middleScroll:Bool;
 
-	@:optional var gameOverChar:String;
-	@:optional var gameOverSound:String;
-	@:optional var gameOverLoop:String;
-	@:optional var gameOverEnd:String;
+	var ?gameOverChar:String;
+	var ?gameOverSound:String;
+	var ?gameOverLoop:String;
+	var ?gameOverEnd:String;
 
-	@:optional var disableNoteRGB:Bool;
-	@:optional var disableNoteQuant:Bool;
+	var ?disableNoteRGB:Bool;
+	var ?disableNoteQuant:Bool;
 
-	@:optional var arrowSkin:String;
-	@:optional var splashSkin:String;
+	var ?arrowSkin:String;
+	var ?splashSkin:String;
 
-	@:optional var dadNoteStyle:String;
-	@:optional var bfNoteStyle:String;
+	var ?dadNoteStyle:String;
+	var ?bfNoteStyle:String;
 
-	@:optional var vocalsSuffix:String;
-	@:optional var instrumentalSuffix:String;
+	var ?vocalsSuffix:String;
+	var ?instrumentalSuffix:String;
 
-	@:optional var vocalsPrefix:String;
-	@:optional var instrumentalPrefix:String;
+	var ?vocalsPrefix:String;
+	var ?instrumentalPrefix:String;
+
+	var ?blockOpponentMode:Bool;
 }
 
 class Song
@@ -70,34 +72,40 @@ class Song
 	public var needsVoices:Bool = true;
 	public var speed:Float = 1;
 
-	public var gameOverChar:String;
-	public var gameOverSound:String;
-	public var gameOverLoop:String;
-	public var gameOverEnd:String;
-	public var disableNoteRGB:Bool = false;
-	public var disableNoteQuant:Bool = false;
-
 	public var player1:String = 'bf';
 	public var player2:String = 'dad';
-	public var gfVersion:String = 'gf';
 	public var player4:String = 'mom';
-	public var stage:String;
-
-	public var arrowSkin:String;
-	public var splashSkin:String;
-
-	public var dadNoteStyle:String = 'noteSkins/NOTE_assets';
-	public var bfNoteStyle:String = 'noteSkins/NOTE_assets';
+	public var gfVersion:String = 'gf';
+	public var stage:String = null;
 
 	public var notITG:Bool = false;
 	public var usesHUD:Bool = false;
 	public var noIntroSkip:Bool = false;
 
-	public var vocalsSuffix:String = '';
-	public var instrumentalSuffix:String = '';
+	public var rightScroll:Bool = false;
+	public var middleScroll:Bool = false;
 
-	public var vocalsPrefix:String = '';
-	public var instrumentalPrefix:String = '';
+	public var gameOverChar:String;
+	public var gameOverSound:String;
+	public var gameOverLoop:String;
+	public var gameOverEnd:String;
+
+	public var disableNoteRGB:Bool = false;
+	public var disableNoteQuant:Bool = false;
+
+	public var arrowSkin:String = null;
+	public var splashSkin:String = null;
+
+	public var dadNoteStyle:String = 'noteSkins/NOTE_assets';
+	public var bfNoteStyle:String = 'noteSkins/NOTE_assets';
+
+	public var vocalsSuffix:String = null;
+	public var instrumentalSuffix:String = null;
+
+	public var vocalsPrefix:String = null;
+	public var instrumentalPrefix:String = null;
+
+	public var blockOpponentMode:Bool = false;
 
 	private static function onLoadJson(songJson:Dynamic) // Convert old charts to newest format
 	{

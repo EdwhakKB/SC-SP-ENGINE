@@ -46,17 +46,35 @@ class TextFunctions
 			FunkinLua.luaTrace("setTextWidth: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
 			return false;
 		});
-		funk.set("setTextBorder", function(tag:String, size:Int, color:String) {
+		#if (flixel >= "5.4.0")
+		funk.set("setTextHeight", function(tag:String, height:Float) {
 			var obj:FlxText = LuaUtils.getTextObject(tag);
 			if(obj != null)
 			{
-				if(size > 0)
-				{
-					obj.borderStyle = OUTLINE;
+				obj.fieldHeight = height;
+				return true;
+			}
+			FunkinLua.luaTrace("setTextHeight: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			return false;
+		});
+		#end
+		funk.set("setTextAutoSize", function(tag:String, value:Bool) {
+			var obj:FlxText = LuaUtils.getTextObject(tag);
+			if(obj != null)
+			{
+				obj.autoSize = value;
+				return true;
+			}
+			FunkinLua.luaTrace("setTextAutoSize: Object " + tag + " doesn't exist!", false, false, FlxColor.RED);
+			return false;
+		});
+		funk.set("setTextBorder", function(tag:String, size:Float, color:String, ?style:String = 'outline') {
+			var obj:FlxText = LuaUtils.getTextObject(tag);
+			if(obj != null)
+			{
+				CoolUtil.setTextBorderFromString(obj, (size > 0 ? style : 'none'));
+				if(size > 0 && style.toLowerCase() != 'none')
 					obj.borderSize = size;
-				}
-				else
-					obj.borderStyle = NONE;
 				obj.borderColor = CoolUtil.colorFromString(color);
 				return true;
 			}

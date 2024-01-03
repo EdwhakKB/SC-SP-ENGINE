@@ -10,5 +10,6 @@
         "doTweenY",
         "doTweenX",
         "getSongPosition"
-    ]
+    ],
+    "C_Cpp.errorSquiggles": "enabled"
 }

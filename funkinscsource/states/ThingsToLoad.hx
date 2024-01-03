@@ -26,6 +26,10 @@ class ThingsToLoad extends MusicBeatState
     
     var character:Character;
     var Stage:Stage;
+    var lerpedPercent:Float = 0;
+    var totalLoaded:Int = 0;
+
+    var loadingBar:FlxBar;
 
 	override function create()
 	{
@@ -37,8 +41,6 @@ class ThingsToLoad extends MusicBeatState
         bg.color = FlxG.random.color();
         add(bg);
 
-        var songLowercase:String = 'songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase();
-
         PlayState.customLoaded = true;
 
         text = new FlxText(25, FlxG.height / 2 + 275,0,"Loading " + PlayState.SONG.songId.toUpperCase() +  "...");
@@ -48,30 +50,27 @@ class ThingsToLoad extends MusicBeatState
 		text.borderSize = 4;
 		text.borderStyle = FlxTextBorderStyle.OUTLINE;
 
+        lerpedPercent = 1;
+
+        loadingBar = new FlxBar(0, FlxG.height-25, LEFT_TO_RIGHT, FlxG.width, 25, this, 'lerpedPercent', 0, 1);
+		loadingBar.scrollFactor.set();
+        loadingBar.createFilledBar(FlxG.random.color(), FlxG.random.color());
+
+        var loadingBar2 = new FlxBar(0, FlxG.height / 2 - 360, LEFT_TO_RIGHT, FlxG.width, 25, this, 'lerpedPercent', 0, 1);
+		loadingBar2.scrollFactor.set();
+        loadingBar2.createFilledBar(FlxG.random.color(), FlxG.random.color());
+
         toBeDone = 0;
 
-        if (FileSystem.exists(Paths.txt(songLowercase  + "/preload" )))
-        {
-            var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt(songLowercase  + "/preload"));
-            toBeDone += characters.length;
-        }
-
-        if (FileSystem.exists(Paths.txt(songLowercase  + "/preload-stage")))
-        {
-            var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt(songLowercase  + "/preload-stage"));
-            toBeDone += characters.length;
-        }
-
         add(text);
-        
-        new FlxTimer().start(2, function(tmr:FlxTimer)
-        {
-             cache();
-        });
-       
-        trace('starting caching..');
+        add(loadingBar);
+        add(loadingBar2);
         
         // update thread
+
+        new FlxTimer().start(2, function(tmr){
+            finishCaching();
+        });
 
         sys.thread.Thread.create(() -> {
            //
@@ -84,15 +83,15 @@ class ThingsToLoad extends MusicBeatState
 
     var calledDone = false;
 
-    function cache()
+    function finishCaching()
     {
-        var songLowercase:String = 'songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase();
+        var songLowercase:String = 'songs/' + PlayState.SONG.songId.toLowerCase();
 
-        if (FileSystem.exists(Paths.txt(songLowercase  + "/preload")))
+        if (FileSystem.exists(Paths.txt(songLowercase + "/preload")))
         {
             trace('Preloading Characters!');
             PlayState.alreadyPreloaded = true;
-            var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt(songLowercase  + "/preload"));
+            var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt(songLowercase + "/preload"));
             for (i in 0...characters.length)
             {
                 var data:Array<String> = characters[i].split(' ');
@@ -100,7 +99,7 @@ class ThingsToLoad extends MusicBeatState
 
                 var luaFile:String = 'data/characters/' + data[0];
 
-                if (FileSystem.exists(Paths.modFolders('characters/'+data[0]+'.lua')) || FileSystem.exists(FileSystem.absolutePath("assets/shared/"+luaFile+'.lua')) || FileSystem.exists(Paths.lua(luaFile)))
+                if (FileSystem.exists(Paths.modFolders('data/characters/'+data[0]+'.lua')) || FileSystem.exists(FileSystem.absolutePath("assets/shared/"+luaFile+'.lua')) || FileSystem.exists(Paths.lua(luaFile)))
                     PlayState.startCharScripts.push(data[0]);
 
                 trace ('found ' + data[0]);
@@ -124,8 +123,12 @@ class ThingsToLoad extends MusicBeatState
             PlayState.curStage = PlayState.SONG.stage;
         }
 
-        Assets.cache.clear("shared:assets/shared/data/characters"); //it doesn't take that much time to read from the json anyway.
+        loadPlayState();
+    }
 
+    function loadPlayState()
+    {
+        Assets.cache.clear("shared:assets/shared/data/characters"); //it doesn't take that much time to read from the json anyway.
         LoadingState.loadAndSwitchState(new PlayState());
     }
 

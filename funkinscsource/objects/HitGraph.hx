@@ -112,7 +112,7 @@ class HitGraph extends Sprite
 	{
 		for (i in 0...history.length)
 		{
-			var x_position = (history[i].strumTime / PlayState.instance.inst.length / PlayState.instance.playbackRate) * (_width);
+			var x_position = (history[i].strumTime / FlxG.sound.music.length / PlayState.instance.playbackRate) * (_width);
 			var y_position = FlxMath.remapToRange((_height / 2) + history[i].diff, (_height / 2), (_height / 2) + Rating.timingWindows[0].timingWindow,
 				_height / 2, _height)
 				+ ((_rectHeight - _height) / 2);

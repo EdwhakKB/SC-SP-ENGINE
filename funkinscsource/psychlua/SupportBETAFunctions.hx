@@ -18,7 +18,7 @@ import shaders.ColorSwapOld;
 import flixel.util.FlxAxes;
 
 import openfl.filters.ShaderFilter;
-import shaders.custom.CustomShader;
+import codenameengine.CustomCodeShader;
 
 using StringTools;
 
@@ -928,7 +928,7 @@ class SupportBETAFunctions
 			if (LuaUtils.getObjectDirectly(id, false) != null)
 			{
 
-				var funnyShader:shaders.Shaders.WaveCircleEffect = new shaders.Shaders.WaveCircleEffect();
+				var funnyShader:shaders.FunkinSourcedShaders.WaveCircleEffect = new shaders.FunkinSourcedShaders.WaveCircleEffect();
                 funnyShader.waveSpeed = speed;
                 funnyShader.waveFrequency = frequency;
                 funnyShader.waveAmplitude = amplitude;
@@ -939,7 +939,7 @@ class SupportBETAFunctions
 
             if(LuaUtils.getActorByName(id) != null)
             {
-                var funnyShader:shaders.Shaders.WaveCircleEffect = new shaders.Shaders.WaveCircleEffect();
+                var funnyShader:shaders.FunkinSourcedShaders.WaveCircleEffect = new shaders.FunkinSourcedShaders.WaveCircleEffect();
                 funnyShader.waveSpeed = speed;
                 funnyShader.waveFrequency = frequency;
                 funnyShader.waveAmplitude = amplitude;
@@ -1029,16 +1029,15 @@ class SupportBETAFunctions
             }
         });
 
-        funk.set("tweenShaderProperty", function(tag:String, shaderName:String, prop:String, value:Dynamic, time:Float, easeStr:String = "linear") {
+        funk.set("tweenShaderProperty", function(tag:String, shaderName:String, prop:String, value:Dynamic, time:Float, easeStr:String = "linear", startVal:Null<Float> = null) {
             if (!ClientPrefs.data.shaders)
                 return;
             var shad = FunkinLua.lua_Shaders.get(shaderName);
             var ease = LuaUtils.getTweenEaseByString(easeStr);
+			if (startVal == null) var startVal = Reflect.getProperty(shad, prop);
 
             if(shad != null)
             {
-                var startVal = Reflect.getProperty(shad, prop);
-
                 PlayState.instance.modchartTweens.set(tag, 
 					PlayState.tweenManager.num(startVal, value, time, {
 					ease: ease,
@@ -1090,13 +1089,13 @@ class SupportBETAFunctions
             }
         });
 
-		funk.set("createCustomShader", function(id:String, file:String, glslVersion:Int = 120){
-			var funnyCustomShader:CustomShader = new CustomShader(Assets.getText(Paths.shaderFragment(file)));
+		funk.set("createCustomShader", function(id:String, file:String, glslVersion:String = '120'){
+			var funnyCustomShader:CustomCodeShader = new CustomCodeShader(file, glslVersion);
 			FunkinLua.lua_Custom_Shaders.set(id, funnyCustomShader);
 		});
 
 		funk.set("setActorCustomShader", function(id:String, actor:String){
-			var funnyCustomShader:CustomShader = FunkinLua.lua_Custom_Shaders.get(id);
+			var funnyCustomShader:CustomCodeShader = FunkinLua.lua_Custom_Shaders.get(id);
 			if (LuaUtils.getActorByName(actor) != null)
 				LuaUtils.getActorByName(actor).shader = funnyCustomShader;
 			if (LuaUtils.getObjectDirectly(actor, false) != null)
@@ -1111,12 +1110,12 @@ class SupportBETAFunctions
 		});
 
 		funk.set("setCameraCustomShader", function(id:String, camera:String){
-			var funnyCustomShader:CustomShader = FunkinLua.lua_Custom_Shaders.get(id);
+			var funnyCustomShader:CustomCodeShader = FunkinLua.lua_Custom_Shaders.get(id);
 			LuaUtils.cameraFromString(camera).setFilters([new ShaderFilter(funnyCustomShader)]);
 		});
 
 		funk.set("pushShaderToCamera", function(id:String, camera:String){
-			var funnyCustomShader:CustomShader = FunkinLua.lua_Custom_Shaders.get(id);
+			var funnyCustomShader:CustomCodeShader = FunkinLua.lua_Custom_Shaders.get(id);
 			@:privateAccess
 			LuaUtils.cameraFromString(camera)._filters.push(new ShaderFilter(funnyCustomShader));
 		});
@@ -1125,52 +1124,31 @@ class SupportBETAFunctions
 			LuaUtils.cameraFromString(camera).setFilters(null);
 		});
 
-		funk.set("getCustomShaderBool", function(id:String, property:String) {
-			var funnyCustomShader:CustomShader = FunkinLua.lua_Custom_Shaders.get(id);
-			return funnyCustomShader.getBool(property);
+		funk.set("getCustomShaderProperty", function(id:String, property:String) {
+			var funnyCustomShader:CustomCodeShader = FunkinLua.lua_Custom_Shaders.get(id);
+			return funnyCustomShader.get(property);
 		});
 
-		funk.set("getCustomShaderInt", function(id:String, property:String) {
-			var funnyCustomShader:CustomShader = FunkinLua.lua_Custom_Shaders.get(id);
-			return funnyCustomShader.getInt(property);
-		});
-
-		funk.set("getCustomShaderFloat", function(id:String, property:String) {
-			var funnyCustomShader:CustomShader = FunkinLua.lua_Custom_Shaders.get(id);
-			return funnyCustomShader.getFloat(property);
-		});
-
-		funk.set("setCustomShaderBool", function(id:String, property:String, value:Bool) {
-			var funnyCustomShader:CustomShader = FunkinLua.lua_Custom_Shaders.get(id);
-			funnyCustomShader.setBool(property, value);
-		});
-		
-		funk.set("setCustomShaderInt", function(id:String, property:String, value:Int) {
-			var funnyCustomShader:CustomShader = FunkinLua.lua_Custom_Shaders.get(id);
-			funnyCustomShader.setInt(property, value);
-		});
-
-		funk.set("setCustomShaderFloat", function(id:String, property:String, value:Float) {
-			var funnyCustomShader:CustomShader = FunkinLua.lua_Custom_Shaders.get(id);
-			funnyCustomShader.setFloat(property, value);
+		funk.set("setCustomShaderProperty", function(id:String, property:String, value:Dynamic) {
+			var funnyCustomShader:CustomCodeShader = FunkinLua.lua_Custom_Shaders.get(id);
+			funnyCustomShader.set(property, value);
 		});
 
 		//Custom shader made by me (glowsoony)
-		funk.set("tweenCustomShaderProperty", function(shaderName:String, prop:String, value:Dynamic, time:Float, easeStr:String = "linear") {
+		funk.set("tweenCustomShaderProperty", function(shaderName:String, prop:String, value:Dynamic, time:Float, easeStr:String = "linear", startVal:Null<Float> = null) {
             if (!ClientPrefs.data.shaders)
                 return;
-            var shad = FunkinLua.lua_Custom_Shaders.get(shaderName);
+            var shad:CustomCodeShader = FunkinLua.lua_Custom_Shaders.get(shaderName);
             var ease = LuaUtils.getTweenEaseByString(easeStr);
+			if (startVal == null) var startVal = shad.get(prop);
 
             if(shad != null)
             {
-                var startVal = Reflect.getProperty(shad, prop);
-
                 PlayState.tweenManager.num(startVal, value, time, {onUpdate: function(tween:FlxTween){
 					var ting = FlxMath.lerp(startVal,value, ease(tween.percent));
-                    Reflect.setProperty(shad, prop, ting);
+                    shad.set(prop, ting);
 				}, ease: ease, onComplete: function(tween:FlxTween) {
-					Reflect.setProperty(shad, prop, value);
+					shad.set(prop, value);
 				}});
                 //trace('set shader prop');
             }

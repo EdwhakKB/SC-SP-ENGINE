@@ -91,7 +91,7 @@ class GameJoltLogin extends MusicBeatState
     // static var trophyCheck:Bool = false;
     override function create()
     {
-        if(!login)
+        if(!FlxG.sound.music.playing)
         {
             FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"),0);
             FlxG.sound.music.fadeIn(2, 0, 0.85);
@@ -240,7 +240,7 @@ class GameJoltLogin extends MusicBeatState
 
         if(GameJoltAPI.getStatus())
         {
-            username1 = new FlxText(0, 35, 0, "Signed in with nick name of: " + GameJoltAPI.getUserInfo(true), 40);
+            username1 = new FlxText(0, 35, 0, "Signed in with nick name of: " + GameJoltAPI.getUserActive(), 40);
             username1.alignment = CENTER;
             username1.screenCenter(X);
             add(username1);
@@ -376,8 +376,8 @@ class GJToastManager extends Sprite
                     FlxTween.tween(child, {y: (i + 1) * -child.height}, LEAVE_TIME, {ease: FlxEase.quadOut, startDelay: DISPLAY_TIME,
                         onComplete: function(tween:FlxTween)
                         {
-                            //cast(child, Toast).removeChildren();
-                            //removeChild(child);
+                            cast(child, Toast).removeChildren();
+                            removeChild(child);
                         }
                     });
                 }
@@ -393,8 +393,8 @@ class GJToastManager extends Sprite
             FlxTween.tween(child, {y: (i + 1) * -child.height}, LEAVE_TIME, {ease: FlxEase.quadOut,
                 onComplete: function(tween:FlxTween)
                 {
-                    //cast(child, Toast).removeChildren();
-                    //removeChild(child);
+                    cast(child, Toast).removeChildren();
+                    removeChild(child);
                 }
             });
         }
@@ -419,8 +419,8 @@ class GJToastManager extends Sprite
                         FlxTween.tween(child, {y: (i + 1) * -child.height}, LEAVE_TIME, {ease: FlxEase.quadOut, startDelay: DISPLAY_TIME,
                             onComplete: function(tween:FlxTween)
                             {
-                               // cast(child, Toast).removeChildren();
-                                //removeChild(child);
+                               cast(child, Toast).removeChildren();
+                                removeChild(child);
                             }
                         });
                     }
@@ -436,8 +436,8 @@ class GJToastManager extends Sprite
                 FlxTween.tween(child, {y: (i + 1) * -child.height}, LEAVE_TIME, {ease: FlxEase.quadOut, startDelay: DISPLAY_TIME - (elapsedSec - ENTER_TIME),
                     onComplete: function(tween:FlxTween)
                     {
-                        //cast(child, Toast).removeChildren();
-                        //removeChild(child);
+                        cast(child, Toast).removeChildren();
+                        removeChild(child);
                     }
                 });
             }
@@ -450,8 +450,8 @@ class GJToastManager extends Sprite
                 FlxTween.tween(child, {y: (i + 1) * -child.height}, LEAVE_TIME -  (elapsedSec - ENTER_TIME - DISPLAY_TIME), {ease: FlxEase.quadOut,
                     onComplete: function(tween:FlxTween)
                     {
-                        //cast(child, Toast).removeChildren();
-                        //removeChild(child);
+                        cast(child, Toast).removeChildren();
+                        removeChild(child);
                     }
                 });
             }
@@ -475,30 +475,31 @@ class Toast extends Sprite
     var title:TextField;
     var desc:TextField;
 
-    public function new(iconPath:String, titleText:String, description:String, ?color:String = '#3848CC')
+    public function new(iconPath:Null<String>, titleText:String, description:String, ?color:String = '#3848CC')
     {
         super();
         back = new Bitmap(new BitmapData(500, 125, true, 0xFF000000));
         back.alpha = 0.9;
-        back.x = 0;
-        back.y = 0;
+        back.x = back.y = 0;
 
         var iconBmp = FlxG.bitmap.add(Paths.image(iconPath));
-        iconBmp.persist = true;
-        
-        icon = new Bitmap(iconBmp.bitmap);
-        icon.width = 100;
-        icon.height = 100;
-        icon.x = 10;
-        icon.y = 10;
+		iconBmp.persist = true;
+
+        if (iconPath != null)
+		{
+			icon = new Bitmap(iconBmp.bitmap);
+			icon.width = 100;
+			icon.height = 100;
+			icon.x = 10;
+			icon.y = 10;
+		}
 
         title = new TextField();
         title.text = titleText.toUpperCase();
         title.setTextFormat(new TextFormat(openfl.utils.Assets.getFont(GameJoltInfo.fontPath).fontName, 30, FlxColor.fromString(color), true));
         title.wordWrap = true;
         title.width = 360;
-        if(iconPath!=null){title.x = 120;}
-        else{title.x = 5;}
+        title.x = iconPath != null ? 120 : 5;
         title.y = 5;
 
         desc = new TextField();
@@ -507,17 +508,17 @@ class Toast extends Sprite
         desc.wordWrap = true;
         desc.width = 360;
         desc.height = 95;
-        if(iconPath!=null){desc.x = 120;}
-        else{desc.x = 5;}
-        desc.y = 35;
+        desc.x = iconPath != null ? 120 : 5;
+        for (number in 0...desc.length) desc.y++;
         if (titleText.length >= 25 || titleText.contains("\n"))
         {   
-            desc.y += 25;
+            desc.y -= 25;
             desc.height -= 25;
         }
 
         addChild(back);
-        addChild(icon);
+        if (iconPath != null)
+			addChild(icon);
         addChild(title);
         addChild(desc);
 

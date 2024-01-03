@@ -2,16 +2,6 @@
 	"song": {
 		"events": [
 			[
-				5625,
-				[
-					[
-						"Play Animation",
-						"singUP-alt",
-						"dad"
-					]
-				]
-			],
-			[
 				9375,
 				[
 					[
@@ -118,56 +108,6 @@
 						"Add Camera Zoom",
 						"",
 						""
-					]
-				]
-			],
-			[
-				41625,
-				[
-					[
-						"Play Animation",
-						"singUP-alt",
-						"dad"
-					]
-				]
-			],
-			[
-				49125,
-				[
-					[
-						"Play Animation",
-						"singUP-alt",
-						"dad"
-					]
-				]
-			],
-			[
-				50625,
-				[
-					[
-						"Play Animation",
-						"singUP-alt",
-						"dad"
-					]
-				]
-			],
-			[
-				50718.75,
-				[
-					[
-						"Play Animation",
-						"singUP-alt",
-						"dad"
-					]
-				]
-			],
-			[
-				77625,
-				[
-					[
-						"Play Animation",
-						"singUP-alt",
-						"dad"
 					]
 				]
 			]

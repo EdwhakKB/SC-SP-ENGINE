@@ -11,12 +11,11 @@ import options.OptionsState;
 import flixel.addons.display.FlxBackdrop;
 import flixel.addons.display.FlxGridOverlay;
 import flixel.input.mouse.FlxMouseEvent;
-import openfl.filters.ShaderFilter;
 
 class MainMenuState extends MusicBeatState
 {
-	public static final psychEngineVersion:String = '0.7.2'; // This is also used for Discord RPC
-	public static var SCEVersion:String = '0.1.3'; // This is also used for Discord RPC
+	public static final psychEngineVersion:String = '0.7.2h'; // This is also used for Discord RPC
+	public static var SCEVersion:String = '0.1.4'; // This is also used for Discord RPC
 	public static var curSelected:Int = 0;
 
 	public var menuItems:FlxTypedGroup<FlxSprite>;
@@ -120,8 +119,10 @@ class MainMenuState extends MusicBeatState
 							case 'mods':
 								MusicBeatState.switchState(new ModsMenuState());
 							#end
+							#if ACHIEVEMENTS_ALLOWED
 							case 'awards':
 								MusicBeatState.switchState(new AchievementsMenuState());
+							#end
 							case 'credits':
 								MusicBeatState.switchState(new CreditsState());
 							case 'options':
@@ -139,10 +140,7 @@ class MainMenuState extends MusicBeatState
 		}
 	}
 
-	var camGame:FlxCamera;
 	var camFollowPos:FlxObject;
-	var Shader3d:shaders.Shaders.RayMarchShader = new shaders.Shaders.RayMarchShader();
-
 	override function create()
 	{
 		PlayState.customLoaded = false;
@@ -155,14 +153,6 @@ class MainMenuState extends MusicBeatState
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Menus", null);
 		#end
-
-		camGame = new FlxCamera();
-
-		FlxG.cameras.reset(camGame);
-		FlxG.cameras.setDefaultDrawTarget(camGame, true);
-
-		camGame.setFilters([new ShaderFilter(Shader3d)]);
-		Shader3d.zoom.value = [2];
 
 		transIn = FlxTransitionableState.defaultTransIn;
 		transOut = FlxTransitionableState.defaultTransOut;
@@ -244,8 +234,6 @@ class MainMenuState extends MusicBeatState
 			FlxMouseEvent.add(menuItem, onMouseDown, onMouseUp, onMouseOver, onMouseOut);
 		}
 
-		FlxG.camera.follow(camFollowPos, null, 1);
-
 		final sceVersion:FlxText = new FlxText(12, FlxG.height - 64, 0, "SCE v" + SCEVersion, 16);
 		sceVersion.active = false;
 		sceVersion.scrollFactor.set();
@@ -284,6 +272,8 @@ class MainMenuState extends MusicBeatState
 		#end
 
 		super.create();
+
+		FlxG.camera.follow(camFollowPos, null, 9);
 	}
 
 	var selectedSomethin:Bool = false;
@@ -294,12 +284,6 @@ class MainMenuState extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
-		Shader3d.rotation.value = [
-			Math.sin(0.02) * Conductor.songPosition / 20000,
-			Math.sin(0.05) * Conductor.songPosition / 20000,
-			Math.sin(0.04) * Conductor.songPosition / 20000
-		];
-
 		if (FlxG.sound.music != null)
 		{
 			if (FlxG.sound.music.volume < 0.8)
@@ -308,11 +292,6 @@ class MainMenuState extends MusicBeatState
 			}
 			Conductor.songPosition = FlxG.sound.music.time;
 		}
-		#if (flixel >= "5.4.0")
-		FlxG.camera.followLerp = FlxMath.bound(elapsed * 9 * (FlxG.updateFramerate / 60), 0, 1);
-		#else
-		FlxG.camera.followLerp = FlxMath.bound(elapsed * 9 / (FlxG.updateFramerate / 60), 0, 1);
-		#end
 
 		var lerpVal:Float = CoolUtil.boundTo(elapsed * 7.5, 0, 1);
 		camFollowPos.setPosition(FlxMath.lerp(camFollowPos.x, camFollow.x, lerpVal), FlxMath.lerp(camFollowPos.y, camFollow.y, lerpVal));

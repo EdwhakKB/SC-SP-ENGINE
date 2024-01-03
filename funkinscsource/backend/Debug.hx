@@ -78,10 +78,12 @@ class Debug
 	 */
 	public static function logTrace(input:Dynamic, ?pos:haxe.PosInfos):Void
 	{
+		#if debug
 		if (input == null)
 			return;
 		var output = formatOutput(input, pos);
 		writeToLogFile(output, 'TRACE');
+		#end
 	}
 
 	/**
@@ -451,13 +453,15 @@ class DebugLogWriter
 		FlxG.save.data.debugLogLevel = logLevel;
 	}
 
+	//Updated DEBUG USAGE BY SLUSHI_GAME
 	/**
 	 * Output text to the log file.
 	 */
 	public function write(input:Array<Dynamic>, logLevel = 'TRACE'):Void
 	{
 		var ts = FlxStringUtil.formatTime(getTime(), true);
-		var msg = '$ts [${logLevel.rpad(' ', 5)}] ${input.join('')}';
+		var dateNow = getDate();
+		var msg = '$dateNow, $ts [${logLevel.rpad(' ', 5)}] - ${input.join('')}';
 
 		#if sys
 		if (active && file != null)
@@ -477,6 +481,17 @@ class DebugLogWriter
 			printDebug(msg);
 		}
 	}
+
+	public static function getDate()
+    {
+		var dateNow = Date.now();
+		var year = dateNow.getFullYear();
+		var mouth = dateNow.getMonth() + 1;
+		var day = dateNow.getDate();
+		var all = year + "-" + (mouth < 10 ? "0" : "") + mouth + "-" + (day < 10 ? "0" : "") + day;
+            
+        return all;
+    }
 
 	function printDebug(msg:String)
 	{

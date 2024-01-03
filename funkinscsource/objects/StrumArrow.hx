@@ -4,17 +4,9 @@ import shaders.RGBPalette;
 import shaders.RGBPalette.RGBShaderReference;
 import flixel.addons.effects.FlxSkewedSprite;
 
-import flash.geom.ColorTransform;
-import flixel.FlxSprite;
-import flixel.FlxStrip;
-import flixel.graphics.FlxGraphic;
-import flixel.graphics.frames.FlxAtlasFrames;
-import flixel.graphics.tile.FlxDrawTrianglesItem;
-import flixel.math.FlxMath;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
-import flixel.util.FlxColor;
-import openfl.Vector;
+#if (flixel >= "5.5.0")
+import backend.animation.PsychAnimationController;
+#end
 import openfl.Assets;
 
 class StrumArrow extends FlxSkewedSprite
@@ -34,7 +26,7 @@ class StrumArrow extends FlxSkewedSprite
 
 	public var z:Float = 0;
 
-	public var bgLane:FlxSprite;
+	public var bgLane:FlxSkewedSprite;
 	
 	public var texture(default, set):String = null;
 	private function set_texture(value:String):String {
@@ -44,6 +36,9 @@ class StrumArrow extends FlxSkewedSprite
 
 	public var useRGBShader:Bool = true;
 	public function new(x:Float, y:Float, leData:Int, player:Int, style:String) {
+		#if (flixel >= "5.5.0")
+		animation = PsychAnimationController(this);
+		#end
 		rgbShader = new RGBShaderReference(this, Note.initializeGlobalRGBShader(leData));
 		rgbShader.enabled = false;
 		if(PlayState.SONG != null && PlayState.SONG.disableNoteRGB) useRGBShader = false;
@@ -215,7 +210,8 @@ class StrumArrow extends FlxSkewedSprite
 	}
 
 	public function loadLane(){
-		bgLane = new FlxSprite(0, 0).makeGraphic(Std.int(Note.swagWidth), 2160);
+		bgLane = new FlxSkewedSprite();
+		bgLane.makeGraphic(Std.int(Note.swagWidth), 2160);
 		bgLane.antialiasing = FlxG.save.data.antialiasing;
 		bgLane.color = FlxColor.BLACK;
 		bgLane.visible = true;

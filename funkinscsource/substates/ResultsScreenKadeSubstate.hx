@@ -262,20 +262,23 @@ class ResultsScreenKadeSubstate extends substates.MusicBeatSubstate
 				music.fadeOut(0.3, 0, { 
 					onComplete ->
 					{
-						camResults.fade(FlxColor.BLACK, 0.5);
-						music.volume = 0;
-						music.destroy();
-						PlayState.chartingMode = false;
-						PlayState.modchartMode = false;
-
-						if (PlayState.isStoryMode)
-						{
-							FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
-							Conductor.bpm = 102;
-						}
-						
-						if (PlayState.isStoryMode) MusicBeatState.switchState(new StoryMenuState());
-						else MusicBeatState.switchState(new FreeplayState());
+						camResults.fade(FlxColor.BLACK, 0.5, false, () -> {
+							music.volume = 0;
+							music.destroy();
+							music = null;
+							PlayState.chartingMode = false;
+							PlayState.modchartMode = false;
+	
+							if (PlayState.isStoryMode)
+							{
+								FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
+								Conductor.bpm = 102;
+							}
+							close();
+							
+							if (PlayState.isStoryMode) MusicBeatState.switchState(new StoryMenuState());
+							else MusicBeatState.switchState(new FreeplayState());
+						}, true);
 					}
 				});
 			}
@@ -289,13 +292,18 @@ class ResultsScreenKadeSubstate extends substates.MusicBeatSubstate
 				music.fadeOut(0.3, 0, {
 					onComplete ->
 					{
-						camResults.fade(FlxColor.BLACK, 0.5);
-						music.volume = 0;
-						music.destroy();
-	
-						PlayState.isStoryMode = false;
-						PlayState.storyDifficulty = PlayState.storyDifficulty;
-						LoadingState.loadAndSwitchState(new PlayState());
+						camResults.fade(FlxColor.BLACK, 0.5, false, () -> {
+							music.volume = 0;
+							music.destroy();
+							music = null;
+							PlayState.chartingMode = false;
+							PlayState.modchartMode = false;
+		
+							close();
+							PlayState.isStoryMode = false;
+							PlayState.storyDifficulty = PlayState.storyDifficulty;
+							LoadingState.loadAndSwitchState(new PlayState());
+						}, true);
 					}
 				});
 			}

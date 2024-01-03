@@ -43,6 +43,7 @@
 	<set name="BUILD_DIR" value="export/32bit" if="32bits" />
 	<set name="BUILD_DIR" value="export/release-telemetry" if="telemetry" />
 	<set name="BUILD_DIR" value="export/debug-telemetry" if="debug telemetry" />
+	<set name="NO_PRECOMPILED_HEADERS" value="1"/>
 
 	<classpath name="funkinscsource" />
 
@@ -66,7 +67,7 @@
 
 	<define name="ACHIEVEMENTS_ALLOWED" />
 
-	<define name="VIDEOS_ALLOWED" if="web || windows" unless="32bits"/>
+	<define name="VIDEOS_ALLOWED" if="windows || linux || andriod" unless="32bits"/>
 
 	<define name="PSYCH_WATERMARKS"/> <!-- DELETE THIS TO REMOVE WATERMARKS/DEV NAMES ON TITLE SCREEN -->
 
@@ -75,6 +76,12 @@
 	<define name="CRASH_HANDLER" if="desktop release" />
 	
 	<define name="HAXE_EXTENSION" if="HSCRIPT_ALLOWED" />
+
+	<!--Set this to the engine you're using!-->
+	<define name="PSYCH"/>
+	<define name="PSYCHVERSION" value="0.7" />
+	<define name="modchartingTools"/>
+	<define name="SBETA" value="0.1"/> <!--set this to 0.1 for extra sides Version of the engine-->
 
 	<!-- Assets -->
 	<assets path="assets/fonts" />
@@ -92,12 +99,7 @@
 	<assets path="assets/week_assets"   library="week_assets"   rename="assets" exclude="*.ogg" if="web"/>
 	<assets path="assets/week_assets"   library="week_assets"   rename="assets" exclude="*.mp3" unless="web"/>
 
-	<section if="TITLE_SCREEN_EASTER_EGG">
-		<assets path="assets/secrets" rename="assets/shared" library="shared" exclude="*.ogg" if="web"/>
-		<assets path="assets/secrets" rename="assets/shared" library="shared" exclude="*.mp3"  unless="web"/>
-	</section>
-
-	<library name="videos"        preload="true" />
+	<library name="videos"        preload="true" if="VIDEOS_ALLOWED"/>
 	<library name="songs"         preload="true" />
 	<library name="week_assets"   preload="true" />
 
@@ -118,47 +120,43 @@
 	-->
 	<!-- _______________________________ Libraries ______________________________ -->
 
-	<haxelib name="flixel" />
+	<haxelib name="flixel" /> 
+	<haxelib name="flixel-ui" />
+	<haxelib name="flixel-addons" />
+	<haxelib name='tjson'/>
+
 	<haxedev set='webgl' if="html5"/>
 
 	<!--In case you want to use the addons package-->
-	<haxelib name="flixel-addons" />
+	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
 	<haxelib name="SScript" if="HSCRIPT_ALLOWED"/>
+	<haxelib name="hxCodec" if="VIDEOS_ALLOWED"/>
+	<haxelib name="hxdiscord_rpc" if="cpp"/>
 
-	<haxelib name='tjson'/>
-
-	<haxelib name="hxtelemetry" if="telemetry"/>
-	<haxedef name="HXCPP_TELEMETRY"  if="telemetry"/>
+	<!--if you don't need FlxAnimate for exporting or for a mod just null it-->
+	<haxelib name="flxanimate"/>
 
 	<!-- <haxelib name="HaxeGJClient" /> -->
 	<haxelib name="tentools" />
 	<haxelib name="systools" />
 	<ndll name="systools" haxelib="systools" />
 
-	<!--Set this to the engine you're using!-->
-	<define name="PSYCH"/>
-	<define name="PSYCHVERSION" value="0.7" />
-	<define name="modchartingTools"/>
-	<define name="SBETA" value="0.1"/> <!--set this to 0.1 for extra sides Version of the engine-->
-
 	<!--In case you want to use the ui package-->
-	<haxelib name="flixel-addons" />
-	<haxelib name="flixel-ui" />
-	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
-	<haxelib name="hxCodec" if="VIDEOS_ALLOWED"/>
 	<haxelib name="faxe" if='switch'/>
 	<haxelib name="parallaxlt" />
-	<!--<haxelib name="polymod"/> -->
-	<haxelib name="discord_rpc" if="desktop"/>
-
-	<haxelib name="hxcpp-debug-server" if="cpp"/>
 
 	<haxelib name="fnf-modcharting-tools"/>
 
+	<!-- Disable Discord IO Thread -->
+	<haxedef name="DISCORD_DISABLE_IO_THREAD" if="hxdiscord_rpc" />
+	<haxedef name="NO_PRECOMPILED_HEADERS" if="linux" />
+
 	<!-- Enables a terminal log prompt on debug builds -->
 	<haxelib name="hxcpp-debug-server" if="debug"/>
-
 	<haxedef name="HXC_LIBVLC_LOGGING" if="VIDEOS_ALLOWED debug" />
+	
+	<haxelib name="hxtelemetry" if="telemetry"/>
+	<haxedef name="HXCPP_TELEMETRY"  if="telemetry"/>
 
 	<!-- <haxelib name="markdown" /> -->
 	<!-- <haxelib name="HtmlParser" /> -->

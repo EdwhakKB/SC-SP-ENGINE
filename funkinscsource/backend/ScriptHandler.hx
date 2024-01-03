@@ -42,20 +42,18 @@ class ScriptHandler #if HAXE_EXTENSION extends tea.SScript #end
 	var ignoreErrors:Bool = false;
 	var hxFileName:String = '';
 
+	#if HAXE_EXTENSION
+	#if (SScript >= "6.1.80")
 	public function new(file:String, ?preset:Bool = true)
 	{
-		#if HAXE_EXTENSION
 		if (file == null)
 			return;
 		hxFileName = file;
 		trace('Running script: ' + hxFileName);
 		trace('haxe file loaded succesfully:' + hxFileName);
 		super(file, preset);
-		#end
 	}
 
-	#if (SScript >= "6.1.80")
-	#if HAXE_EXTENSION
 	override public function preset():Void
 	{
 		super.preset();
@@ -188,67 +186,7 @@ class ScriptHandler #if HAXE_EXTENSION extends tea.SScript #end
 
 		callFunc('create', []);
 	}
-	#end
-
-	public function callFunc(key:String, args:Array<Dynamic>)
-	{
-		#if HAXE_EXTENSION
-		if (this == null || interp == null)
-			return null;
-		else
-			return call(key, args);
-		#else
-		return null;
-		#end
-	}
-
-	public function setVar(key:String, value:Dynamic)
-	{
-		#if HAXE_EXTENSION
-		if (this == null || interp == null)
-			return null;
-		else
-			return set(key, value);
-		#else
-		return null;
-		#end
-	}
-
-	#if HAXE_EXTENSION
-	#if (SScript > "6.1.80" || SScript != "6.1.80")
-	override public function destroy()
-	{
-		interp = null;
-		scriptFile = null;
-
-		super.destroy();
-	}
 	#else
-	override public function kill()
-	{
-		interp = null;
-		scriptFile = null;
-
-		super.kill();
-	}
-	#end
-
-	public function varExists(key:String):Bool
-	{
-		if (this != null && interp != null)
-			return exists(key);
-		return false;
-	}
-
-	public function getVar(key:String):Dynamic
-	{
-		if (this != null && interp != null)
-			return get(key);
-		return null;
-	}
-	#end
-	#else
-	#if HAXE_EXTENSION
 	override public function preset():Void
 	{
 		super.preset();
@@ -378,6 +316,25 @@ class ScriptHandler #if HAXE_EXTENSION extends tea.SScript #end
 		callFunc('create', []);
 	}
 	#end
+	#end
+
+	#if (SScript > "6.1.80" || SScript != "6.1.80")
+	override public function destroy()
+	{
+		interp = null;
+		scriptFile = null;
+
+		super.destroy();
+	}
+	#else
+	override public function kill()
+	{
+		interp = null;
+		scriptFile = null;
+
+		super.kill();
+	}
+	#end
 
 	public function callFunc(key:String, args:Array<Dynamic>)
 	{
@@ -403,15 +360,6 @@ class ScriptHandler #if HAXE_EXTENSION extends tea.SScript #end
 		#end
 	}
 
-	#if HAXE_EXTENSION
-	override public function destroy()
-	{
-		interp = null;
-		scriptFile = null;
-
-		super.destroy();
-	}
-
 	public function varExists(key:String):Bool
 	{
 		if (this != null && interp != null)
@@ -425,6 +373,4 @@ class ScriptHandler #if HAXE_EXTENSION extends tea.SScript #end
 			return get(key);
 		return null;
 	}
-	#end
-	#end
 }

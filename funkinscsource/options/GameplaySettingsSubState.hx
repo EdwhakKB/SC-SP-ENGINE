@@ -97,10 +97,11 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		option.changeValue = 0.1;
 		addOption(option);
 
-		var option:Option = new Option('Hitsound on Strum or Key?',
+		var option:Option = new Option('Hitsound in what way',
 			'if checked, note and keys do a hitsound when pressed!, else just when notes are hit!',
-			'strumHit',
-			'bool');
+			'hitsoundType',
+			'string',
+			['None', 'Keys', 'Notes']);
 		addOption(option);
 
 		var option:Option = new Option('Hitsound Volume',
@@ -116,7 +117,7 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		option.onChange = onChangeHitsoundVolume;
 
 		var option:Option = new Option('Hitsound',
-			'Funny notes does \"Any Sound\" when you hit them."',
+			'Funny notes does \"Any Sound\" when you hit them.',
 			'hitSounds',
 			'string',
 			['None', 'quaver', 'osu', 'clap', 'camellia', 'stepmania', '21st century humor', 'vine boom', 'sexus']);

@@ -55,9 +55,27 @@ class PhillyTrain extends BGSprite
 				}
 				frameTiming = 0;
 			}
+
+			if (PlayState.finishedSong)
+			{
+				if (!tweend)
+				{
+					tweend = true;
+					FlxTween.num(sound.volume, 0, 1, {ease: flixel.tweens.FlxEase.linear}, 
+						function(num:Float)
+						{
+							sound.volume = num;
+						}
+					);
+					sound.stop();
+					sound.active = false;
+				}
+			}
 		}
 		super.update(elapsed);
 	}
+
+	var tweend:Bool = false;
 
 	public function beatHit(curBeat:Int):Void
 	{

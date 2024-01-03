@@ -1,9 +1,6 @@
 package psychlua;
 
 import flixel.FlxBasic;
-import objects.Character;
-import psychlua.FunkinLua;
-import psychlua.CustomSubstate;
 #if SScript
 import tea.SScript;
 #end
@@ -15,6 +12,7 @@ using StringTools;
 class HScript extends SScript
 {
 	public var parentLua:FunkinLua;
+	public var modFolder:String;
 	public var isHxStage:Bool = false;
 	
 	public static function initHaxeModule(parent:FunkinLua)
@@ -67,9 +65,19 @@ class HScript extends SScript
 		super(file, false, false);
 		parentLua = parent;
 		if (parent != null)
-			origin = parent.scriptName;
+		{
+			this.origin = parent.scriptName;
+			this.modFolder = parent.modFolder;
+		}
 		if (scriptFile != null && scriptFile.length > 0)
-			origin = scriptFile;
+		{
+			this.origin = scriptFile;
+			#if MODS_ALLOWED
+			var myFolder:Array<String> = scriptFile.split('/');
+			if(myFolder[0] + '/' == Paths.mods() && (Mods.currentModDirectory == myFolder[1] || Mods.getGlobalMods().contains(myFolder[1]))) //is inside mods folder
+				this.modFolder = myFolder[1];
+			#end
+		}
 		preset();
 		execute();
 	}
@@ -80,32 +88,41 @@ class HScript extends SScript
 		super.preset();
 
 		setClass(flixel.FlxG);
+		setClass(Math);
 		setClass(flixel.math.FlxMath);
 		setClass(flixel.FlxSprite);
 		setClass(flixel.FlxCamera);
+		setClass(backend.PsychCamera);
 		setClass(flixel.util.FlxTimer);
 		setClass(flixel.tweens.FlxTween);
 		setClass(flixel.tweens.FlxEase);
-		setClass(PlayState);
-		setClass(Paths);
-		setClass(Conductor);
-		setClass(ClientPrefs);
-		setClass(Achievements);
-		setClass(Character);
-		setClass(Alphabet);
+		setClass(states.PlayState);
+		setClass(backend.Paths);
+		setClass(backend.Conductor);
+		setClass(backend.ClientPrefs);
+		#if ACHIEVEMENTS_ALLOWED
+		setClass(backend.Achievements);
+		#end
+		setClass(psychlua.CustomFlxColor);
+		setClass(objects.Character);
+		setClass(objects.Alphabet);
 		setClass(objects.Note);
-		setClass(CustomSubstate);
+		setClass(psychlua.CustomSubstate);
 		#if (!flash && sys)
 		setClass(flixel.addons.display.FlxRuntimeShader);
 		#end
 		setClass(openfl.filters.ShaderFilter);
 		setClass(psychlua.FunkinLua);
-		//set('StringTools', StringTools);
+		setClass(codenameengine.CustomCodeShader);
+		setClass(states.stages.Stage);
+		#if flxanimate
+		setClass(flxanimate.FlxAnimate);
+		#end
 
 		// Functions & Variables
-		set('setVar', function(name:String, value:Dynamic)
-		{
+		set('setVar', function(name:String, value:Dynamic) {
 			PlayState.instance.variables.set(name, value);
+			return value;
 		});
 		set('getVar', function(name:String)
 		{
@@ -126,9 +143,98 @@ class HScript extends SScript
 			if(color == null) color = FlxColor.WHITE;
 			PlayState.instance.addTextToDebug(text, color);
 		});
+		set('getModSetting', function(saveTag:String, ?modName:String = null) {
+			if(modName == null)
+			{
+				if(this.modFolder == null)
+				{
+					PlayState.instance.addTextToDebug('getModSetting: Argument #2 is null and script is not inside a packed Mod folder!', FlxColor.RED);
+					return null;
+				}
+				modName = this.modFolder;
+			}
+			return LuaUtils.getModSetting(saveTag, modName);
+		});
+		// Keyboard & Gamepads
+		set('keyboardJustPressed', function(name:String) return Reflect.getProperty(FlxG.keys.justPressed, name));
+		set('keyboardPressed', function(name:String) return Reflect.getProperty(FlxG.keys.pressed, name));
+		set('keyboardReleased', function(name:String) return Reflect.getProperty(FlxG.keys.justReleased, name));
+
+		set('anyGamepadJustPressed', function(name:String) return FlxG.gamepads.anyJustPressed(name));
+		set('anyGamepadPressed', function(name:String) FlxG.gamepads.anyPressed(name));
+		set('anyGamepadReleased', function(name:String) return FlxG.gamepads.anyJustReleased(name));
+
+		set('gamepadAnalogX', function(id:Int, ?leftStick:Bool = true)
+		{
+			var controller = FlxG.gamepads.getByID(id);
+			if (controller == null) return 0.0;
+
+			return controller.getXAxis(leftStick ? LEFT_ANALOG_STICK : RIGHT_ANALOG_STICK);
+		});
+		set('gamepadAnalogY', function(id:Int, ?leftStick:Bool = true)
+		{
+			var controller = FlxG.gamepads.getByID(id);
+			if (controller == null) return 0.0;
+
+			return controller.getYAxis(leftStick ? LEFT_ANALOG_STICK : RIGHT_ANALOG_STICK);
+		});
+		set('gamepadJustPressed', function(id:Int, name:String)
+		{
+			var controller = FlxG.gamepads.getByID(id);
+			if (controller == null) return false;
+
+			return Reflect.getProperty(controller.justPressed, name) == true;
+		});
+		set('gamepadPressed', function(id:Int, name:String)
+		{
+			var controller = FlxG.gamepads.getByID(id);
+			if (controller == null) return false;
+
+			return Reflect.getProperty(controller.pressed, name) == true;
+		});
+		set('gamepadReleased', function(id:Int, name:String)
+		{
+			var controller = FlxG.gamepads.getByID(id);
+			if (controller == null) return false;
+
+			return Reflect.getProperty(controller.justReleased, name) == true;
+		});
+
+		set('keyJustPressed', function(name:String = '') {
+			name = name.toLowerCase();
+			switch(name) {
+				case 'left': return PlayState.instance.controls.NOTE_LEFT_P;
+				case 'down': return PlayState.instance.controls.NOTE_DOWN_P;
+				case 'up': return PlayState.instance.controls.NOTE_UP_P;
+				case 'right': return PlayState.instance.controls.NOTE_RIGHT_P;
+				default: return PlayState.instance.controls.justPressed(name);
+			}
+			return false;
+		});
+		set('keyPressed', function(name:String = '') {
+			name = name.toLowerCase();
+			switch(name) {
+				case 'left': return PlayState.instance.controls.NOTE_LEFT;
+				case 'down': return PlayState.instance.controls.NOTE_DOWN;
+				case 'up': return PlayState.instance.controls.NOTE_UP;
+				case 'right': return PlayState.instance.controls.NOTE_RIGHT;
+				default: return PlayState.instance.controls.pressed(name);
+			}
+			return false;
+		});
+		set('keyReleased', function(name:String = '') {
+			name = name.toLowerCase();
+			switch(name) {
+				case 'left': return PlayState.instance.controls.NOTE_LEFT_R;
+				case 'down': return PlayState.instance.controls.NOTE_DOWN_R;
+				case 'up': return PlayState.instance.controls.NOTE_UP_R;
+				case 'right': return PlayState.instance.controls.NOTE_RIGHT_R;
+				default: return PlayState.instance.controls.justReleased(name);
+			}
+			return false;
+		});
 
 		// For adding your own callbacks
-
 		// not very tested but should work
 		set('createGlobalCallback', function(name:String, func:Dynamic)
 		{
@@ -140,7 +246,7 @@ class HScript extends SScript
 			FunkinLua.customFunctions.set(name, func);
 		});
 
-		// tested
+		// this one was tested
 		set('createCallback', function(name:String, func:Dynamic, ?funk:FunkinLua = null)
 		{
 			if(parentLua != null) funk.addLocalCallback(name, func);
@@ -166,14 +272,17 @@ class HScript extends SScript
 				FunkinLua.luaTrace(msg, parentLua == null, false, FlxColor.RED);
 			}
 		});
+		set('CustomShaders', codenameengine.CustomCodeShader);
+		set('StringTools', StringTools);
 		set('parentLua', parentLua);
 		set('this', this);
 		set('game', PlayState.instance);
-		if (PlayState.instance != null) setSpecialObject(PlayState.instance, false, PlayState.instance.instancesExclude);
+		set('stage', states.stages.Stage.instance);
 		set('buildTarget', FunkinLua.getBuildTarget());
 		set('customSubstate', CustomSubstate.instance);
 		set('customSubstateName', CustomSubstate.name);
-
+		if (PlayState.instance != null)
+			setSpecialObject(PlayState.instance, false, PlayState.instance.instancesExclude);
 		set('Function_Stop', FunkinLua.Function_Stop);
 		set('Function_Continue', FunkinLua.Function_Continue);
 		set('Function_StopLua', FunkinLua.Function_StopLua); //doesnt do much cuz HScript has a lower priority than Lua
@@ -199,10 +308,9 @@ class HScript extends SScript
 		set('add', function(obj:FlxBasic) PlayState.instance.add(obj));
 		set('addBehindGF', function(obj:FlxBasic) PlayState.instance.addBehindGF(obj));
 		set('addBehindDad', function(obj:FlxBasic) PlayState.instance.addBehindDad(obj));
-		set('addBehindMom', function(obj:FlxBasic) PlayState.instance.addBehindMom(obj));
 		set('addBehindBF', function(obj:FlxBasic) PlayState.instance.addBehindBF(obj));
 		set('insert', function(pos:Int, obj:FlxBasic) PlayState.instance.insert(pos, obj));
-		set('remove', function(obj:FlxBasic, splice:Bool = false) PlayState.instance.remove(obj, splice));
+		set('remove', function(obj:FlxBasic, ?splice:Bool = false) PlayState.instance.remove(obj, splice));
 
 		if(varsToBring != null)
 		{
@@ -371,7 +479,7 @@ class HScript extends SScript
 		if(parent.hscript == null)
 		{
 			trace('initializing haxe interp for: ${parent.scriptName}');
-			parent.hscript = new HScript(parent, code, varToBring);
+			parent.hscript = new HScript(parent, code, varsToBring);
 		}
 		#end
 	}
@@ -395,7 +503,7 @@ class HScript extends SScript
 		execute();
 	}
 
-	var varToBring:Any = null;
+	var varsToBring:Any = null;
 	override function preset()
 	{
 		#if (SScript >= "3.0.0")
@@ -406,26 +514,32 @@ class HScript extends SScript
 		set('FlxMath', flixel.math.FlxMath);
 		set('FlxSprite', flixel.FlxSprite);
 		set('FlxCamera', flixel.FlxCamera);
+		set('PsychCamera', backend.PsychCamera);
 		set('FlxTimer', flixel.util.FlxTimer);
 		set('FlxTween', flixel.tweens.FlxTween);
 		set('FlxEase', flixel.tweens.FlxEase);
-		set('FlxColor', CustomFlxColor);
-		set('Countdown', backend.BaseStage.Countdown);
-		set('PlayState', PlayState);
-		set('Paths', Paths);
-		set('Conductor', Conductor);
-		set('ClientPrefs', ClientPrefs);
-		set('Achievements', Achievements);
-		set('Character', Character);
-		set('Alphabet', Alphabet);
+		set('FlxColor', psychlua.CustomFlxColor);
+		set('Countdown', states.stages.Stage.Countdown);
+		set('PlayState', states.PlayState);
+		set('Paths', backend.Paths);
+		set('Conductor', backend.Conductor);
+		set('ClientPrefs', backend.ClientPrefs);
+		#if ACHIEVEMENTS_ALLOWED
+		set('Achievements', backend.Achievements);
+		#end
+		set('Character', objects.Character);
+		set('Alphabet', objects.Alphabet);
 		set('Note', objects.Note);
-		set('CustomSubstate', CustomSubstate);
+		set('CustomSubstate', psychlua.CustomSubstate);
 		#if (!flash && sys)
 		set('FlxRuntimeShader', flixel.addons.display.FlxRuntimeShader);
 		#end
 		set('ShaderFilter', openfl.filters.ShaderFilter);
-		set('StringTools', StringTools);
 		set('FunkinLua', psychlua.FunkinLua);
+		set('Stage', states.stages.Stage);
+		#if flxanimate
+		set('FlxAnimate', FlxAnimate);
+		#end
 
 		// Functions & Variables
 		set('setVar', function(name:String, value:Dynamic)
@@ -493,13 +607,15 @@ class HScript extends SScript
 				FunkinLua.luaTrace(msg, parentLua == null, false, FlxColor.RED);
 			}
 		});
+		set('CustomShaders', codenameengine.CustomCodeShader);
 		set('parentLua', parentLua);
 		set('this', this);
 		set('game', PlayState.instance);
+		set('stage', Stage.instance);
 		set('buildTarget', FunkinLua.getBuildTarget());
 		set('customSubstate', CustomSubstate.instance);
 		set('customSubstateName', CustomSubstate.name);
-
+		set('StringTools', StringTools);
 		set('Function_Stop', FunkinLua.Function_Stop);
 		set('Function_Continue', FunkinLua.Function_Continue);
 		set('Function_StopLua', FunkinLua.Function_StopLua); //doesnt do much cuz HScript has a lower priority than Lua

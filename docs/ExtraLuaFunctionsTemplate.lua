@@ -48,7 +48,11 @@ setTextSize(tag, size)
 
 setTextWidth(tag, width)
 
-setTextBorder(tag, size, color)
+setTextHeight(tag, height) --Only able to use if version of flixel is greater than or equal to (5.4.0)
+
+setTextAutoSize(tag, bool)
+
+setTextBorder(tag, size, color, style)
 
 setTextColor(tag, color)
 

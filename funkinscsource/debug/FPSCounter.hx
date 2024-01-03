@@ -71,25 +71,18 @@ class FPSCounter extends TextField
 	@:noCompletion
 	private override function __enterFrame(deltaTime:Float):Void
 	{
+		// prevents the overlay from updating every frame, why would you need to anyways
 		if (deltaTimeout > 1000) {
-			// there's no need to update this every frame and it only causes performance losses.
 			deltaTimeout = 0.0;
 			return;
 		}
-		currentTime += deltaTime;
-		times.push(currentTime);
-		while (times[0] < currentTime - 1000)
-			times.shift();
+		final now:Float = haxe.Timer.stamp() * 1000;
+		times.push(now);
+		while (times[0] < now - 1000) times.shift();
 
-		var currentCount = times.length;
-		currentFPS = Math.round((currentCount + cacheCount) / 2);
-		if (currentFPS > ClientPrefs.data.framerate) currentFPS = ClientPrefs.data.framerate;
-
-
-		currentFPS = currentFPS < FlxG.drawFramerate ? times.length : FlxG.drawFramerate;
+		currentFPS = times.length < FlxG.updateFramerate ? times.length : FlxG.updateFramerate; //Fix The FRAMES STAYING STATIC
 
 		updateText();
-		cacheCount = currentCount;
 		deltaTimeout += deltaTime;
 	}
 
@@ -107,7 +100,7 @@ class FPSCounter extends TextField
 		var substateText:String = '\nSubState: ${Type.getClassName(Type.getClass(FlxG.state.subState))}';
 
 		textColor = 0xFFFFFFFF;
-		if (currentFPS <= ClientPrefs.data.framerate / 2)
+		if (currentFPS < FlxG.updateFramerate * 0.5)
 			textColor = 0xFFFF0000;
 
 
