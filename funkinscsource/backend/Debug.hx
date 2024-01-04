@@ -453,7 +453,7 @@ class DebugLogWriter
 		FlxG.save.data.debugLogLevel = logLevel;
 	}
 
-	//Updated DEBUG USAGE BY SLUSHI_GAME
+	//Updated DEBUG USAGE BY SLUSHI
 	/**
 	 * Output text to the log file.
 	 */
