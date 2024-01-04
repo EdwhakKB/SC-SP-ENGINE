@@ -188,11 +188,41 @@ class CoolUtil
 		so Base Psych saves won't conflict with yours
 		@BeastlyGabi
 	**/
-	inline public static function getSavePath(folder:String = 'ShadowMario'):String {
+	/*inline public static function getSavePath(folder:String = 'ShadowMario'):String {
 		@:privateAccess
 		return #if (flixel < "5.0.0") folder #else FlxG.stage.application.meta.get('company')
 			+ '/'
 			+ FlxSave.validate(FlxG.stage.application.meta.get('file')) #end;
+	}*/
+
+	/**
+		Helper Function to Fix Save Files for Flixel 5
+		-- EDIT: [November 29, 2023] --
+		this function is used to get the save path, period.
+		since newer flixel versions are being enforced anyways.
+		@crowplexus
+	**/
+	@:access(flixel.util.FlxSave.validate)
+	inline public static function getSavePath():String {
+		final company:String = FlxG.stage.application.meta.get('company');
+		#if (flixel < "5.0.0") return company; #else
+		return '${company}/${flixel.util.FlxSave.validate(FlxG.stage.application.meta.get('file'))}';
+		#end
+	}
+
+	public static function setTextBorderFromString(text:FlxText, border:String)
+	{
+		switch(border.toLowerCase().trim())
+		{
+			case 'shadow':
+				text.borderStyle = SHADOW;
+			case 'outline':
+				text.borderStyle = OUTLINE;
+			case 'outline_fast', 'outlinefast':
+				text.borderStyle = OUTLINE_FAST;
+			default:
+				text.borderStyle = NONE;
+		}
 	}
 
 	public static function returnColor(?str:String = ''):FlxColor

@@ -42,33 +42,33 @@ class CreditsState extends MusicBeatState
 			['SCE Engine Team'],
 			['Edwhak_Killbot',		'edwhak',		'Main Leader of SCE',								 'https://github.com/EdwhakKB',		 '005B16'],
 			['Glowsoony',			'',				'Leader in coding of SCE',							 'https://github.com/glowsoony',	 '89C8FF'],
-			['Slushi', 				'',				'Beta-Tester and MADE CRASH HANDLER',				 'https://github.com/Slushi-Github', '8FD9D1'],
+			['Slushi', 				'slushi',				'Beta-Tester and MADE CRASH HANDLER',				 'https://github.com/Slushi-Github', '8FD9D1'],
 			[''],
 			['Psych Engine Team'],
-			['Shadow Mario',		'shadowmario',		'Main Programmer of Psych Engine',								 'https://ko-fi.com/shadowmario',		 '444444'],
-			['Riveren',				'riveren',			'Main Artist/Animator of Psych Engine',							 'https://twitter.com/riverennn',		 '14967B'],
+			['Shadow Mario',		'shadowmario',		'Main Programmer of Psych Engine',							 'https://ko-fi.com/shadowmario',		 '444444'],
+			['Riveren',				'riveren',			'Main Artist/Animator of Psych Engine',						 'https://twitter.com/riverennn',		 '14967B'],
 			[''],
 			['Former Engine Members'],
-			['bb-panzu',			'bb',				'Ex-Programmer of Psych Engine',								 'https://twitter.com/bbsub3',			 '3E813A'],
-			['shubs',				'',					'Ex-Programmer of Psych Engine\nI don\'t support them.',		 '',									 'A1A1A1'],
+			['bb-panzu',			'bb',				'Ex-Programmer of Psych Engine',							 'https://twitter.com/bbsub3',			 '3E813A'],
+			['shubs',				'',					'Ex-Programmer of Psych Engine\nI don\'t support them.',	 '',									 'A1A1A1'],
 			[''],
 			['Engine Contributors'],
-			['CrowPlexus',			'face',				'Input System v3, Major Help and Other PRs\nTO DO: Add Icon',	 'https://twitter.com/crowplexus',		 'A1A1A1'],
-			['Keoiki',				'keoiki',			'Note Splash Animations and Latin Alphabet',					 'https://twitter.com/Keoiki_',			 'D2D2D2'],
-			['SqirraRNG',			'sqirra',			'Crash Handler and Base code for\nChart Editor\'s Waveform',	 'https://twitter.com/gedehari',		 'E1843A'],
-			['EliteMasterEric',		'mastereric',		'Runtime Shaders support',										 'https://twitter.com/EliteMasterEric',	 'FFBD40'],
-			['PolybiusProxy',		'proxy',			'.MP4 Video Loader Library (hxCodec)',							 'https://twitter.com/polybiusproxy',	 'DCD294'],
-			['Tahir K.',				'face',				'Implementing and maintaining SScript on Psych\nTO DO: Add Icon', 'https://twitter.com/tahirk618','A1A1A1'],
-			['iFlicky',				'flicky',			'Composer of Psync and Tea Time\nMade the Dialogue Sounds',		 'https://twitter.com/flicky_i',		 '9E29CF'],
-			['KadeDev',				'kade',				'Fixed some cool stuff on Chart Editor\nand other PRs',			 'https://twitter.com/kade0912',		 '64A250'],
-			['superpowers04',		'superpowers04',	'LUA JIT Fork',													 'https://twitter.com/superpowers04',	 'B957ED'],
-			['Smokey',				'smokey',			'Sprite Atlas Support',											 'https://twitter.com/Smokey_5_',		 '483D92'],
+			['CrowPlexus',			'crowplexus',		'Input System v3, Major Help and Other PRs',				 'https://twitter.com/crowplexus',		 'A1A1A1'],
+			['Keoiki',				'keoiki',			'Note Splash Animations and Latin Alphabet',				 'https://twitter.com/Keoiki_',			 'D2D2D2'],
+			['SqirraRNG',			'sqirra',			'Crash Handler and Base code for\nChart Editor\'s Waveform', 'https://twitter.com/gedehari',		 'E1843A'],
+			['EliteMasterEric',		'mastereric',		'Runtime Shaders support',									 'https://twitter.com/EliteMasterEric',	 'FFBD40'],
+			['PolybiusProxy',		'proxy',			'.MP4 Video Loader Library (hxCodec)',						 'https://twitter.com/polybiusproxy',	 'DCD294'],
+			['Tahir',				'tahir',			'Implementing & maintaining SScript and other PRs',			 'https://github.com/TahirKarabekiroglu','A04397'],
+			['iFlicky',				'flicky',			'Composer of Psync and Tea Time\nMade the Dialogue Sounds',	 'https://twitter.com/flicky_i',		 '9E29CF'],
+			['KadeDev',				'kade',				'Fixed some cool stuff on Chart Editor\nand other PRs',		 'https://twitter.com/kade0912',		 '64A250'],
+			['superpowers04',		'superpowers04',	'LUA JIT Fork',												 'https://twitter.com/superpowers04',	 'B957ED'],
+			['Smokey',				'smokey',			'Sprite Atlas Support',										 'https://twitter.com/Smokey_5_',		 '483D92'],
 			[''],
 			["Funkin' Crew"],
-			['ninjamuffin99',		'ninjamuffin99',	"Programmer of Friday Night Funkin'",							 'https://twitter.com/ninja_muffin99',	 'CF2D2D'],
-			['PhantomArcade',		'phantomarcade',	"Animator of Friday Night Funkin'",								 'https://twitter.com/PhantomArcade3K',	 'FADC45'],
-			['evilsk8r',			'evilsk8r',			"Artist of Friday Night Funkin'",								 'https://twitter.com/evilsk8r',		 '5ABD4B'],
-			['kawaisprite',			'kawaisprite',		"Composer of Friday Night Funkin'",								 'https://twitter.com/kawaisprite',		 '378FC7'],
+			['ninjamuffin99',		'ninjamuffin99',	"Programmer of Friday Night Funkin'",						 'https://twitter.com/ninja_muffin99',	 'CF2D2D'],
+			['PhantomArcade',		'phantomarcade',	"Animator of Friday Night Funkin'",							 'https://twitter.com/PhantomArcade3K',	 'FADC45'],
+			['evilsk8r',			'evilsk8r',			"Artist of Friday Night Funkin'",							 'https://twitter.com/evilsk8r',		 '5ABD4B'],
+			['kawaisprite',			'kawaisprite',		"Composer of Friday Night Funkin'",							 'https://twitter.com/kawaisprite',		 '378FC7'],
 			[''],
 			['Extra SCE Stuff'],
 			['Blantados',			'blantados',		"Progammer of BETADCIU and code used from this engine to SCE!",	 'https://github.com/Blantados',		 '64B3FE'],
@@ -202,16 +202,16 @@ class CreditsState extends MusicBeatState
 		{
 			if(!item.bold)
 			{
-				var lerpVal:Float = FlxMath.bound(elapsed * 12, 0, 1);
+				var lerpVal:Float = Math.exp(-elapsed * 12);
 				if(item.targetY == 0)
 				{
 					var lastX:Float = item.x;
 					item.screenCenter(X);
-					item.x = FlxMath.lerp(lastX, item.x - 70, lerpVal);
+					item.x = FlxMath.lerp(item.x - 70, lastX, lerpVal);
 				}
 				else
 				{
-					item.x = FlxMath.lerp(item.x, 200 + -40 * Math.abs(item.targetY), lerpVal);
+					item.x = FlxMath.lerp(200 + -40 * Math.abs(item.targetY), item.x, lerpVal);
 				}
 			}
 		}

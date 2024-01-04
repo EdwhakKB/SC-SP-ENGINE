@@ -1563,3 +1563,58 @@ class MoveNotesZModifier extends Modifier
         noteMath(noteData, lane, 0, pf);
     }
 }
+
+class GlitchedNotesXModifier extends Modifier
+{
+    override function setupSubValues()
+    {
+        subValues.set('change', new ModifierSubValue(1.0));
+    }
+    public static function funkateMath(value:Float):Float //My math -glowsoony
+    {
+        return (-Math.cos(value - 20) / Math.tan(value + 90) * Math.abs(value) * (Math.sin(value) * 9)) * value * 2.390834 * Math.tan(2) / Math.sin(value);
+    }
+    override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+    {
+        noteData.x += (((Math.sin(4) / Math.cos(1)) * (currentValue * (Conductor.songPosition*0.001*20)/FlxG.height) * Math.tan(currentValue / Math.tan(20) 
+        * (Math.sin(100) * Math.PI)) / Math.cos(20 * 3 * funkateMath(currentValue / 4) * (Conductor.songPosition*0.001*Math.cos(20))) * subValues.get('change').value)); 
+    }
+    override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
+    {
+        noteMath(noteData, lane, 0, pf);
+    }
+}
+
+class GlitchedNotesYModifier extends Modifier
+{
+    override function setupSubValues()
+    {
+        subValues.set('change', new ModifierSubValue(1.0));
+    }
+    override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+    {
+        noteData.y += (((Math.sin(4) / Math.cos(1)) * (currentValue * (Conductor.songPosition*0.001*20)/FlxG.height) * Math.tan(currentValue / Math.tan(20) 
+        * (Math.sin(100) * Math.PI)) / Math.cos(200 * 3 * GlitchedNotesXModifier.funkateMath(currentValue / 4) * (Conductor.songPosition*0.001*Math.cos(20))) * subValues.get('change').value)); 
+    }
+    override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
+    {
+        noteMath(noteData, lane, 0, pf);
+    }
+}
+
+class GlitchedNotesZModifier extends Modifier
+{
+    override function setupSubValues()
+    {
+        subValues.set('change', new ModifierSubValue(1.0));
+    }
+    override function noteMath(noteData:NotePositionData, lane:Int, curPos:Float, pf:Int)
+    {
+        noteData.z += (((Math.sin(4) / Math.cos(1)) * (currentValue * (Conductor.songPosition*0.001*20)/FlxG.height) * Math.tan(currentValue / Math.tan(20) 
+        * (Math.sin(100) * Math.PI)) / Math.cos(20 * 3 * GlitchedNotesXModifier.funkateMath(currentValue / 4) * (Conductor.songPosition*0.001*Math.cos(20))) * subValues.get('change').value)); 
+    }
+    override function strumMath(noteData:NotePositionData, lane:Int, pf:Int)
+    {
+        noteMath(noteData, lane, 0, pf);
+    }
+}

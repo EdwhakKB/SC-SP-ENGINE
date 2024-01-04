@@ -63,11 +63,6 @@ class TitleState extends MusicBeatState
 	var randomPhrase:Array<String> = [];
 
 	var textGroup:FlxSpriteGroup;
-
-	var psychSecrets:Array<String> = ['SHADOW', 'BBPANZU', 'RIVER'];
-	var easterEggName:String;
-	var easterEggNameBuffer:String = '';
-
 	var colourSwap:ColorSwap = null;
 
 	public static var updateVersion:String;
@@ -236,30 +231,10 @@ class TitleState extends MusicBeatState
 		if (ClientPrefs.data.shaders) colourSwap = new ColorSwap();
 
 		gf = new FlxSprite(titleJson.gfx, titleJson.gfy);
+		gf.frames = Paths.getSparrowAtlas('gfDanceTitle');
+		gf.animation.addByIndices('left', 'gfDance', [30, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], "", 24, false);
+		gf.animation.addByIndices('right', 'gfDance', [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29], "", 24, false);
 		gf.antialiasing = ClientPrefs.data.antialiasing;
-
-		easterEggName = FlxG.save.data.psychDevsEasterEgg;
-
-		switch(easterEggName) {
-			//case 'SHADOW':
-			//	gf.frames = Paths.getSparrowAtlas('ShadowBump');
-			//	gf.animation.addByPrefix('left', 'Shadow Title Bump', 24);
-			//	gf.animation.addByPrefix('danceRight', 'Shadow Title Bump', 24);
-			//case 'RIVER':
-			//	gf.frames = Paths.getSparrowAtlas('RiverBump');
-			//	gf.animation.addByIndices('left', 'River Title Bump', [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29], "", 24, false);
-			//	gf.animation.addByIndices('right', 'River Title Bump', [29, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], "", 24, false);
-			//case 'BBPANZU':
-			//	gf.frames = Paths.getSparrowAtlas('BBBump');
-			//	gf.animation.addByIndices('left', 'BB Title Bump', [14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27], "", 24, false);
-			//	gf.animation.addByIndices('right', 'BB Title Bump', [27, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], "", 24, false);
-
-			default:
-				gf.frames = Paths.getSparrowAtlas('gfDanceTitle');
-				gf.animation.addByIndices('left', 'gfDance', [30, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], "", 24, false);
-				gf.animation.addByIndices('right', 'gfDance', [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29], "", 24, false);
-		}
-
 		gf.animation.play('right');
 		gf.alpha = 0.0001;
 		add(gf);
@@ -323,6 +298,8 @@ class TitleState extends MusicBeatState
 
 			FlxG.sound.music.fadeIn(4, 0, 0.7);
 		} else skipIntro();
+		
+		//if (ClientPrefs.data.clearFolderOnStart) Debug.clearLogsFolder();
 
 		Paths.clearUnusedMemory();
 	}
@@ -382,29 +359,6 @@ class TitleState extends MusicBeatState
 			if(controls.UI_LEFT) colourSwap.hue -= elapsed * 0.1;
 			if(controls.UI_RIGHT) colourSwap.hue += elapsed * 0.1;
 		}
-
-		//if (FlxG.keys.firstJustPressed() != FlxKey.NONE) {
-		//	final keyPressed:FlxKey = FlxG.keys.firstJustPressed();
-		//	final keyName:String = Std.string(keyPressed);
-
-		//	easterEggNameBuffer += keyName;
-
-		//	if (easterEggNameBuffer.contains(easterEggName) && easterEggName != null) {
-		//		FlxG.save.data.psychDevsEasterEgg = null;
-		//		easterEggName = null;
-
-		//		MusicBeatState.switchState(new TitleState());
-		//	} else {
-		//		for (i in psychSecrets) {
-		//			if (easterEggNameBuffer.contains(i)) {
-		//				FlxG.save.data.psychDevsEasterEgg = i;
-		//				FlxG.save.flush();
-		//				MusicBeatState.switchState(new TitleState());
-		//				break;
-		//			}
-		//		}
-		//	}
-		//}
 	}
 
 	function startWeirdState():Void

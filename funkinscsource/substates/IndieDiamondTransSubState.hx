@@ -19,16 +19,21 @@ class IndieDiamondTransSubState extends MusicBeatSubstate
     var fadeInState:Bool = true;
 
     var rect:FlxSprite;
+    public static var placedZoom:Float;
+    public static var divideZoom:Bool = true; //Divide = true, multiple = false
 
-    public function new(duration:Float = 1.0, fadeInState:Bool = true)
+    public function new(duration:Float = 1.0, fadeInState:Bool = true, placedZoom:Float)
     {
         super();
         
         this.fadeInState = fadeInState;
+        placedZoom = FlxMath.bound(placedZoom, 0.05, 1);
 
-        var zoom:Float = FlxMath.bound(FlxG.camera.zoom, 0.05, 1);
-		var width:Int = Std.int(FlxG.width / zoom);
-		var height:Int = Std.int(FlxG.height / zoom);
+		var width:Int = 0;
+		var height:Int = 0;
+
+        width = divideZoom ? Std.int(FlxG.width / placedZoom) : Std.int(FlxG.width * placedZoom);
+        height = divideZoom ? Std.int(FlxG.height / placedZoom) :  Std.int(FlxG.height * placedZoom);
 
         shader = new IndieDiamondTransShader();
 

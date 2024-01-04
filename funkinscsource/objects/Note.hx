@@ -12,10 +12,11 @@ import objects.StrumArrow;
 import flixel.math.FlxRect;
 import flixel.addons.effects.FlxSkewedSprite;
 
-import flixel.FlxG;
-import flixel.FlxSprite;
-import flixel.util.FlxColor;
 import openfl.Assets;
+
+#if (flixel >= "5.5.0")
+import backend.animation.PsychAnimationController;
+#end
 
 using StringTools;
 
@@ -259,6 +260,10 @@ class Note extends FlxSkewedSprite
 	{
 		super();
 
+		#if (flixel >= "5.5.0")
+		animation = PsychAnimationController(this);
+		#end
+
 		antialiasing = ClientPrefs.data.antialiasing;
 		if(createdFrom == null) createdFrom = PlayState.instance;
 
@@ -321,7 +326,7 @@ class Note extends FlxSkewedSprite
 				isHoldEnd = false;
 				prevNote.animation.play(colArray[prevNote.noteData % colArray.length] + 'hold');
 
-				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.05;
+				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.05; //Because of how SCE works with sustains the value is static to 1.05 unless they break.
 				if(createdFrom != null && createdFrom.songSpeed != null) prevNote.scale.y *= createdFrom.songSpeed;
 
 				//Let's see if I might un-null it!
@@ -412,7 +417,7 @@ class Note extends FlxSkewedSprite
 	
 			if (becomePixelNote && !wasPixelNote) //fixes the scaling
 			{
-				if (getNoteSkinPostfix() != '' && getNoteSkinPostfix() == '-future') scale.y /= 1.26;
+				if (getNoteSkinPostfix().contains('future')) scale.y /= 1.26;
 				else scale.y /= 0.7;
 				scale.y *= PlayState.daPixelZoom;
 	
@@ -460,25 +465,14 @@ class Note extends FlxSkewedSprite
 					}
 					else
 					{
-						if (PlayState.SONG != null && PlayState.SONG.disableNoteRGB)
-						{
-							if(isSustainNote) {
-								var graphic = Paths.image('pixelUI/NOTE_assetsENDS', null, !ClientPrefs.data.cacheOnGPU);
-								loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
-								originalHeight = graphic.height / 2;
-							} else {
-								var graphic = Paths.image('pixelUI/NOTE_assets', null, !ClientPrefs.data.cacheOnGPU);
-								loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
-							}
-						}else{
-							if(isSustainNote) {
-								var graphic = Paths.image('pixelUI/noteSkins/NOTE_assets' + 'ENDS' + getNoteSkinPostfix(), null, !ClientPrefs.data.cacheOnGPU);
-								loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
-								originalHeight = graphic.height / 2;
-							} else {
-								var graphic = Paths.image('pixelUI/noteSkins/NOTE_assets' + getNoteSkinPostfix(), null, !ClientPrefs.data.cacheOnGPU);
-								loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
-							}
+						var noteSkinNonRGB:Bool = (PlayState.SONG != null && PlayState.SONG.disableNoteRGB);
+						if(isSustainNote) {
+							var graphic = Paths.image(noteSkinNonRGB ? 'pixelUI/NOTE_assetsENDS' : 'pixelUI/noteSkins/NOTE_assets' + 'ENDS' + getNoteSkinPostfix(), null, !ClientPrefs.data.cacheOnGPU);
+							loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
+							originalHeight = graphic.height / 2;
+						} else {
+							var graphic = Paths.image(noteSkinNonRGB ? 'pixelUI/NOTE_assets' : 'pixelUI/noteSkins/NOTE_assets' + getNoteSkinPostfix(), null, !ClientPrefs.data.cacheOnGPU);
+							loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
 						}
 						
 						loadNoteAnims(true);
@@ -496,8 +490,8 @@ class Note extends FlxSkewedSprite
 					}
 					else
 					{
-						if (PlayState.SONG != null && PlayState.SONG.disableNoteRGB) frames = Paths.getSparrowAtlas("NOTE_assets", null, !ClientPrefs.data.cacheOnGPU);
-						else frames = Paths.getSparrowAtlas("noteSkins/NOTE_assets" + getNoteSkinPostfix(), null, !ClientPrefs.data.cacheOnGPU);
+						var noteSkinNonRGB:Bool = (PlayState.SONG != null && PlayState.SONG.disableNoteRGB);
+						frames = Paths.getSparrowAtlas(noteSkinNonRGB ? "NOTE_assets" :  "noteSkins/NOTE_assets" + getNoteSkinPostfix(), null, !ClientPrefs.data.cacheOnGPU);
 						loadNoteAnims();
 					}
 				}
@@ -597,8 +591,9 @@ class Note extends FlxSkewedSprite
 
 	override public function destroy()
 	{
-		super.destroy();
+		clipRect = flixel.util.FlxDestroyUtil.put(clipRect);
 		_lastValidChecked = '';
+		super.destroy();
 	}
 
 	public function followStrumArrow(myStrum:StrumArrow, fakeCrochet:Float, songSpeed:Float = 1)
@@ -666,5 +661,16 @@ class Note extends FlxSkewedSprite
 			}
 			clipRect = swagRect;
 		}
+	}
+
+	@:noCompletion
+	override function set_clipRect(rect:FlxRect):FlxRect
+	{
+		clipRect = rect;
+
+		if (frames != null)
+			frame = frames.frames[animation.frameIndex];
+
+		return rect;
 	}
 }

@@ -30,15 +30,15 @@ class PauseSubState extends MusicBeatSubstate
 	var missingTextBG:FlxSprite;
 	var missingText:FlxText;
 
-	public static var songName:String = '';
+	public static var songName:String = null;
 
-	var music:FlxSound = PlayState.instance.inst;
+	var music:FlxSound = FlxG.sound.music;
 
 	var settings = {
-		music: ClientPrefs.data.pauseMusic,
-		optionTweenTime: 0.1,
-		selectTweenTime: 0.25
+		music: ClientPrefs.data.pauseMusic
 	};
+
+	var num:Int = 0;
 
 	public function new(x:Float, y:Float)
 	{
@@ -51,14 +51,13 @@ class PauseSubState extends MusicBeatSubstate
 		{
 			menuItemsOG.insert(2, 'Leave Charting Mode');
 		}
-		if (PlayState.modchartMode)
+		else if (PlayState.modchartMode)
 		{
 			menuItemsOG.insert(2, 'Leave ModChart Mode');
 		}
 	
 		if (PlayState.chartingMode || PlayState.modchartMode)
 		{
-			var num:Int = 0;
 			if(!PlayState.instance.startingSong)
 			{
 				num = 1;
@@ -76,21 +75,25 @@ class PauseSubState extends MusicBeatSubstate
 		}
 		difficultyChoices.push('BACK');
 
-		if (pauseMusic != null || FlxG.sound.music == null)
+		if (pauseMusic != null)
 		{
-			FlxG.sound.music = null;
 			pauseMusic = null;
 		}
 
 		pauseMusic = new FlxSound();
-		if(songName != null) {
-			pauseMusic.loadEmbedded(Paths.music(songName), true, true);
-		} else if (songName != 'None') {
-			pauseMusic.loadEmbedded(Paths.music(Paths.formatToSongPath(settings.music)), true, true);
-		}
-		pauseMusic.volume = 0;
-		pauseMusic.play(false, FlxG.random.int(0, Std.int(pauseMusic.length / 2)));
-
+		try
+		{
+			if (songName == null || songName.toLowerCase() != 'none')
+			{
+				if(songName == null)
+				{
+					var path:String = Paths.formatToSongPath(ClientPrefs.data.pauseMusic);
+					if(path.toLowerCase() != 'none')
+						pauseMusic.loadEmbedded(Paths.music(Paths.formatToSongPath(ClientPrefs.data.pauseMusic)), true, true);
+				}
+				else pauseMusic.loadEmbedded(Paths.music(songName), true, true);
+			}
+		} catch(e:Dynamic) {}
 		FlxG.sound.list.add(pauseMusic);
 
 		var bg:FlxSprite = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
@@ -198,10 +201,11 @@ class PauseSubState extends MusicBeatSubstate
 	{
 		PlayState.instance.paused = true;
 		cantUnpause -= elapsed;
-		if (!stoppedUpdatingMusic){
+		if (!stoppedUpdatingMusic){ //Reason to no put != null outside is to not confuse the game to not "stop" when intended.
 			if (pauseMusic.volume < 0.5 && pauseMusic != null)
 				pauseMusic.volume += 0.01 * elapsed;
 		}else{
+			if (pauseMusic != null)
 			pauseMusic.volume = 0;
 		}
 
@@ -303,14 +307,13 @@ class PauseSubState extends MusicBeatSubstate
 							case 0:
 								if (hmmm.finished){
 									PlayState.instance.modchartTimers.remove('hmmm'); 
-									pauseMusic.volume = 0;
-									pauseMusic.destroy();
-									FlxG.sound.music = null;
-									pauseMusic = null;
 									close();	
 								}
 						}
 					}, 5);
+					pauseMusic.volume = 0;
+					pauseMusic.destroy();
+					pauseMusic = null;
 					inCountDown = true;
 					menuItems = [];
 					deleteSkipTimeText();
@@ -347,11 +350,6 @@ class PauseSubState extends MusicBeatSubstate
 						}
 						close();
 					}
-				case 'End Song':
-					close();
-					PlayState.instance.notes.clear();
-					PlayState.instance.unspawnNotes = [];
-					PlayState.instance.finishSong(true);
 				case 'Toggle Botplay':
 					PlayState.instance.cpuControlled = !PlayState.instance.cpuControlled;
 					PlayState.changedDifficulty = true;
@@ -374,6 +372,11 @@ class PauseSubState extends MusicBeatSubstate
 						FlxTween.tween(FlxG.sound.music, {volume: 1}, 0.8);
 					}
 					OptionsState.onPlayState = true;
+				case 'End Song':
+					close();
+					PlayState.instance.notes.clear();
+					PlayState.instance.unspawnNotes = [];
+					PlayState.instance.finishSong(true);
 				case "Exit to menu":
 					stoppedUpdatingMusic = true;
 					pauseMusic.volume = 0;
@@ -461,7 +464,6 @@ class PauseSubState extends MusicBeatSubstate
 			case 1:
 				countdownGo = createCountdownSprite(introAlts[introAlts.length - 1], antialias, game.introSoundsPrefix + 'introGo' + game.introSoundsSuffix);
 			case 0:
-				
 		}
 	}
 	
@@ -505,7 +507,7 @@ class PauseSubState extends MusicBeatSubstate
 	{
 		PlayState.instance.paused = true; // For lua
 		PlayState.instance.vocals.volume = 0;
-		PlayState.instance.inst.volume = 0;
+		FlxG.sound.music.volume = 0;
 
 		if(noTrans)
 		{

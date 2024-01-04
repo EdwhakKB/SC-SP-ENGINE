@@ -228,6 +228,13 @@ class VisualsUISubState extends BaseOptionsMenu
 			'bool');
 		addOption(option);
 
+		var option:Option = new Option('Icon Movement',
+			"Do you want Icon to have some movement?",
+			'iconMovement',
+			'string',
+			['None', 'Angled']);
+		addOption(option);
+
 		super();
 		add(notes);
 	}

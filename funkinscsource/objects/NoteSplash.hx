@@ -5,10 +5,15 @@ import flixel.system.FlxAssets.FlxShader;
 import flixel.addons.effects.FlxSkewedSprite;
 import flixel.FlxG;
 
+#if (flixel >= "5.5.0")
+import backend.animation.PsychAnimationController;
+#end
+
 typedef NoteSplashConfig = {
 	anim:String,
 	minFps:Int,
 	maxFps:Int,
+	offsetCorrection:Bool,
 	offsets:Array<Array<Float>>
 }
 
@@ -32,6 +37,11 @@ class NoteSplash extends FlxSkewedSprite
 
 	public function new(x:Float = 0, y:Float = 0, ?opponentSplashes:Bool = false) {
 		super(x, y);
+
+		#if (flixel >= "5.5.0")
+		animation = PsychAnimationController(this);
+		#end
+
 		this.opponentSplashes = opponentSplashes;
 
 		var skin:String = null;
@@ -51,7 +61,7 @@ class NoteSplash extends FlxSkewedSprite
 				skin = "notes/noteSplashes-"+ styleChoice;
 			else{
 				if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) skin = PlayState.SONG.splashSkin;
-				else skin = defaultNoteSplash + getSplashSkinPostfix();
+				else skin = (PlayState.SONG != null && PlayState.SONG.disableNoteRGB) ? 'noteSplashes' : defaultNoteSplash + getSplashSkinPostfix();
 			}
 		}
 		else
@@ -69,7 +79,7 @@ class NoteSplash extends FlxSkewedSprite
 				skin = "notes/noteSplashes-"+ styleChoice;
 			else{
 				if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) skin = PlayState.SONG.splashSkin;
-				else skin = defaultNoteSplash + getSplashSkinPostfix();
+				else skin = (PlayState.SONG != null && PlayState.SONG.disableNoteRGB) ? 'noteSplashes' : defaultNoteSplash + getSplashSkinPostfix();
 			}
 		}
 
@@ -81,7 +91,7 @@ class NoteSplash extends FlxSkewedSprite
 		precacheConfig(skin);
 		_configLoaded = skin;
 		scrollFactor.set();
-		//setupNoteSplash(x, y, 0);
+		// setupNoteSplash(x, y, 0);
 	}
 
 	override function destroy()
@@ -91,6 +101,7 @@ class NoteSplash extends FlxSkewedSprite
 	}
 
 	var maxAnims:Int = 2;
+	public static var neededOffsetCorrection:Bool = false;
 	public function setupNoteSplash(x:Float, y:Float, direction:Int = 0, ?note:Note = null, ?opponentSplashes:Bool = false) {
 		setPosition(x - Note.swagWidth * 0.95, y - Note.swagWidth);
 		aliveTime = 0;
@@ -113,7 +124,7 @@ class NoteSplash extends FlxSkewedSprite
 			{
 				if(note != null && note.noteSplashData.texture != null) texture = note.noteSplashData.texture;
 				else if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) texture = PlayState.SONG.splashSkin;
-				else texture = defaultNoteSplash + getSplashSkinPostfix();
+				else texture = (PlayState.SONG != null && PlayState.SONG.disableNoteRGB) ? 'noteSplashes' : defaultNoteSplash + getSplashSkinPostfix();
 			}
 		}
 		else
@@ -133,7 +144,7 @@ class NoteSplash extends FlxSkewedSprite
 			{
 				if(note != null && note.noteSplashData.texture != null) texture = note.noteSplashData.texture;
 				else if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) texture = PlayState.SONG.splashSkin;
-				else texture = defaultNoteSplash + getSplashSkinPostfix();
+				else texture = (PlayState.SONG != null && PlayState.SONG.disableNoteRGB) ? 'noteSplashes' : defaultNoteSplash + getSplashSkinPostfix();
 			}
 		}
 
@@ -177,14 +188,20 @@ class NoteSplash extends FlxSkewedSprite
 		if(config != null)
 		{
 			var animID:Int = direction + ((animNum - 1) * Note.colArray.length);
+			var offs:Array<Float> = null;
 			//Debug.logTrace('anim: ${animation.curAnim.name}, $animID');
-			var offs:Array<Float> = config.offsets[FlxMath.wrap(animID, 0, config.offsets.length-1)];
-			offset.x += offs[0];
-			offset.y += offs[1];
+			if (config.offsets.length > 0)
+			{
+				offs = config.offsets[FlxMath.wrap(animID, 0, config.offsets.length-1)];
+				offset.x += offs[0];
+				offset.y += offs[1];
+			}
 			minFps = config.minFps;
 			maxFps = config.maxFps;
+			neededOffsetCorrection = config.offsetCorrection;
 		}
-		else
+
+		if (neededOffsetCorrection)
 		{
 			offset.x += -58;
 			offset.y += -55;
@@ -243,7 +260,7 @@ class NoteSplash extends FlxSkewedSprite
 		var configFile:Array<String> = CoolUtil.coolTextFile(path);
 		if(configFile.length < 1) return null;
 		
-		var framerates:Array<String> = configFile[1].split(' ');
+		var firstArgs:Array<String> = configFile[1].split(' ');
 		var offs:Array<Array<Float>> = [];
 		for (i in 2...configFile.length)
 		{
@@ -251,10 +268,14 @@ class NoteSplash extends FlxSkewedSprite
 			offs.push([Std.parseFloat(animOffs[0]), Std.parseFloat(animOffs[1])]);
 		}
 
+		var configString:String = firstArgs[2];
+		var configBool:Bool = configString.contains('true') ? true : false;
+
 		var config:NoteSplashConfig = {
 			anim: configFile[0],
-			minFps: Std.parseInt(framerates[0]),
-			maxFps: Std.parseInt(framerates[1]),
+			minFps: Std.parseInt(firstArgs[0]),
+			maxFps: Std.parseInt(firstArgs[1]),
+			offsetCorrection: configBool,
 			offsets: offs
 		};
 		configs.set(skin, config);
@@ -294,6 +315,7 @@ class PixelSplashShaderRef {
 		if(tempShader != null)
 			enabled = true;
 
+		//Even though the shader is not RGB make it pixelate the splashes!
 		if(enabled)
 		{
 			for (i in 0...3)
@@ -303,12 +325,12 @@ class PixelSplashShaderRef {
 				shader.b.value[i] = tempShader.shader.b.value[i];
 			}
 			shader.mult.value[0] = tempShader.shader.mult.value[0];
-
-			var pixel:Float = 1;
-			if(containsPixel) pixel = PlayState.daPixelZoom;
-			shader.uBlocksize.value = [pixel, pixel];
 		}
 		else shader.mult.value[0] = 0.0;
+
+		var pixel:Float = 1;
+		if(containsPixel) pixel = PlayState.daPixelZoom;
+		shader.uBlocksize.value = [pixel, pixel];
 	}
 
 	public function new()

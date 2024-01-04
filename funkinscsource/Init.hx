@@ -18,6 +18,7 @@ import backend.Debug;
 class Init extends FlxState
 {
 	var mouseCursor:FlxSprite;
+
 	override function create()
 	{
 		FlxTransitionableState.skipNextTransOut = true;
@@ -35,6 +36,11 @@ class Init extends FlxState
 			Main.fpsVar = new FPSCounter(10, 3, 0xFFFFFF);
 			Lib.current.stage.addChild(Main.fpsVar);
 		}
+		#end
+
+		#if linux
+		var icon = Image.fromFile("icon.png");
+		Lib.current.stage.window.setIcon(icon);
 		#end
 
 		FlxG.autoPause = false;
@@ -86,7 +92,7 @@ class Init extends FlxState
 		if (FlxG.save.data.weekCompleted != null) states.StoryMenuState.weekCompleted = FlxG.save.data.weekCompleted;
 
 		#if desktop
-		DiscordClient.start();
+		DiscordClient.prepare();
 		#end
 		
 		#if (cpp && windows)
@@ -100,8 +106,6 @@ class Init extends FlxState
 
 		// Finish up loading debug tools.
 		Debug.onGameStart();
-
-		if (ClientPrefs.data.clearFolderOnStart) Debug.clearLogsFolder();
 
 		if (Main.checkGJKeysAndId())
 		{

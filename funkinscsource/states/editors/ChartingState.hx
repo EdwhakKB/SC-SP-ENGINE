@@ -78,7 +78,7 @@ class ChartingState extends MusicBeatState
 		['Flash', "Create a flash effect over the game.\n\"Value 1: Color (in Hexidecimal)\n(ex: 000000 FFFFFF 30A0F0)\n\nValue 2: Duration (in Seconds) "],
 		['Set Cam Zoom', "Change the zoom camera \"Value 1: the zoom value\nValue 2: if blank, it will smoothly zoom regularly,\notherwise it will do an instant zoom"],
 		['Play Animation', "Plays an animation on a Character,\nonce the animation is completed,\nthe animation changes to Idle\n\nValue 1: Animation to play.\nValue 2: Character (Dad, BF, GF)"],
-		['Camera Follow Pos', "Value 1: X\nValue 2: Y\n\nThe camera won't change the follow point\nafter using this, for getting it back\nto normal, leave both values blank."],
+		['Camera Follow Pos', "Value 1: X\nValue 2: Y\n\nThe camera won't change the follow point\nafter using this, for getting it back\nto normal, leave both values blank\nValue 3: camZoom\nLeave blank for original zoom,\notherwise,\nchanges the camera zoom."],
 		['Alt Idle Animation', "Sets a specified suffix after the idle animation name.\nYou can use this to trigger 'idle-alt' if you set\nValue 2 to -alt\n\nValue 1: Character to set (Dad, BF or GF)\nValue 2: New suffix (Leave it blank to disable)"],
 		['Screen Shake', "Value 1: Camera shake\nValue 2: HUD shake\n\nEvery value works as the following example: \"1, 0.05\".\nThe first number (1) is the duration.\nThe second number (0.05) is the intensity."],
 		['Change Character', "Value 1: Character to change (Dad, BF, GF)\nValue 2: New character's name"],
@@ -251,7 +251,8 @@ class ChartingState extends MusicBeatState
 		player2 = new Character(0, 0, _song.player2);
 		player1 = new Character(0, 0, _song.player1);
 
-		FlxG.camera.zoom = 0.9;
+		IndieDiamondTransSubState.divideZoom = false;
+		IndieDiamondTransSubState.placedZoom = 1.2;
 
 		// Paths.clearMemory();
 
@@ -277,15 +278,17 @@ class ChartingState extends MusicBeatState
 
 		var eventIcon:FlxSprite = new FlxSprite(-GRID_SIZE - 5, -90).loadGraphic(Paths.image('eventArrow'));
 		eventIcon.antialiasing = ClientPrefs.data.antialiasing;
-		leftIcon = new HealthIcon(_song.player1);
-		rightIcon = new HealthIcon(_song.player2);
+		leftIcon = new HealthIcon(_song.player1, true, false);
+		rightIcon = new HealthIcon(_song.player2, true, false);
 		eventIcon.scrollFactor.set(1, 1);
 		leftIcon.scrollFactor.set(1, 1);
 		rightIcon.scrollFactor.set(1, 1);
 
 		eventIcon.setGraphicSize(30, 30);
-		leftIcon.setGraphicSize(0, 45);
-		rightIcon.setGraphicSize(0, 45);
+		if (!leftIcon.animatedIcon) leftIcon.setGraphicSize(0, 45);
+		if (!rightIcon.animatedIcon) rightIcon.setGraphicSize(0, 45);
+		if (leftIcon.animatedIcon) leftIcon.scale.set(0.5, 0.5);
+		if (rightIcon.animatedIcon) rightIcon.scale.set(0.5, 0.5);
 
 		add(eventIcon);
 		add(leftIcon);
@@ -383,7 +386,6 @@ class ChartingState extends MusicBeatState
 
 		var startHere:FlxButton = new FlxButton(UI_box2.x, UI_box2.y - 30, 'Start Here', function()
 		{
-			FlxG.save.data.oldTimeSection = curSection; 
 			PlayState.timeToStart = Conductor.songPosition;
 			startSong();
 		});
@@ -419,7 +421,6 @@ class ChartingState extends MusicBeatState
 
 		updateGrid();
 
-		changeSection(FlxG.save.data.oldTimeSection, false);
 		super.create();
 	}
 
@@ -717,7 +718,8 @@ class ChartingState extends MusicBeatState
 
 		UI_box.addGroup(tab_group_song);
 
-		FlxG.camera.follow(camPos);
+		initPsychCamera().follow(camPos, LOCKON, 999);
+		FlxG.camera.zoom = 0.9;
 	}
 
 	var stepperBeats:FlxUINumericStepper;
@@ -1162,10 +1164,9 @@ class ChartingState extends MusicBeatState
 		eventDropDown = new FlxUIDropDownMenu(20, 50, FlxUIDropDownMenu.makeStrIdLabelArray(leEvents, true), function(pressed:String) {
 			var selectedEvent:Int = Std.parseInt(pressed);
 			descText.text = eventStuff[selectedEvent][1];
-				if (curSelectedNote != null &&  eventStuff != null) {
+			if (curSelectedNote != null &&  eventStuff != null) {
 				if (curSelectedNote != null && curSelectedNote[2] == null){
-				curSelectedNote[1][curEventSelected][0] = eventStuff[selectedEvent][0];
-
+					curSelectedNote[1][curEventSelected][0] = eventStuff[selectedEvent][0];
 				}
 				updateGrid();
 			}
@@ -1455,7 +1456,7 @@ class ChartingState extends MusicBeatState
 		check_mute_inst.checked = false;
 		check_mute_inst.callback = function()
 		{
-			var vol:Float = 1;
+			var vol:Float = instVolume.value;
 
 			if (check_mute_inst.checked)
 				vol = 0;
@@ -1498,7 +1499,7 @@ class ChartingState extends MusicBeatState
 		check_mute_vocals.callback = function()
 		{
 			if(vocals != null) {
-				var vol:Float = 1;
+				var vol:Float = voicesVolume.value;
 
 				if (check_mute_vocals.checked)
 					vol = 0;
@@ -1686,6 +1687,15 @@ class ChartingState extends MusicBeatState
 			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 		};
 
+		var blockOpponentMode = new FlxUICheckBox(reloadNotesButton.x + 160, reloadNotesButton.y - 130, null, null, "Block Opponent Mode", 100);
+		blockOpponentMode.checked = _song.blockOpponentMode;
+		blockOpponentMode.callback = function()
+		{
+			_song.blockOpponentMode = blockOpponentMode.checked;
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
+			//Debug.logInfo('CHECKED!');
+		};
+
 		tab_group_data.add(gameOverCharacterInputText);
 		tab_group_data.add(gameOverSoundInputText);
 		tab_group_data.add(gameOverLoopInputText);
@@ -1700,6 +1710,7 @@ class ChartingState extends MusicBeatState
 		tab_group_data.add(forceMiddleScroll);
 		tab_group_data.add(forceRightScroll);
 		tab_group_data.add(notITGModchart);
+		tab_group_data.add(blockOpponentMode);
 		tab_group_data.add(noteSkinInputText);
 		tab_group_data.add(noteSplashesInputText);
 
@@ -1717,18 +1728,22 @@ class ChartingState extends MusicBeatState
 	{
 		if (FlxG.sound.music != null) FlxG.sound.music.stop();
 
-		var file:Dynamic = null;
-		#if (SBETA == 0.1)
-		file = Paths.voices((PlayState.SONG.vocalsPrefix != null ? PlayState.SONG.vocalsPrefix : ''), _song.songId, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : ''));
-		#else
-		file = Paths.voices(_song.song);
-		#end
 		vocals = new FlxSound();
-		if (Std.isOfType(file, Sound) || OpenFlAssets.exists(file)) {
-			vocals.loadEmbedded(file);
-			vocals.autoDestroy = false;
-			FlxG.sound.list.add(vocals);
+		try
+		{
+			var file:Dynamic = null;
+			#if (SBETA == 0.1)
+			file = Paths.voices((PlayState.SONG.vocalsPrefix != null ? PlayState.SONG.vocalsPrefix : ''), _song.songId, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : ''));
+			#else
+			file = Paths.voices(_song.song);
+			#end
+			if (Std.isOfType(file, Sound) || OpenFlAssets.exists(file)) {
+				vocals.loadEmbedded(file);
+				vocals.autoDestroy = false;
+				FlxG.sound.list.add(vocals);
+			}
 		}
+		catch(e:Dynamic){}
 		generateSong();
 		FlxG.sound.music.pause();
 		Conductor.songPosition = sectionStartTime();
@@ -2635,6 +2650,7 @@ class ChartingState extends MusicBeatState
 	}
 
 	function startSong(){
+		IndieDiamondTransSubState.placedZoom = 1.2;
 		autosaveSong();
 		songStarted = true;
 		FlxG.mouse.visible = false;
@@ -2644,6 +2660,7 @@ class ChartingState extends MusicBeatState
 
 		//if(_song.stage == null) _song.stage = stageDropDown.selectedLabel;
 		StageData.loadDirectory(_song);
+		IndieDiamondTransSubState.divideZoom = true;
 		LoadingState.loadAndSwitchState(new PlayState());
 		songStarted = true;
 	}
@@ -3839,8 +3856,9 @@ class ChartEditorExitSubstate extends MusicBeatSubstate
 
         var warning:FlxText = new FlxText(0, 0, 0, 'You have unsaved changes!\nAre you sure you want to exit?', 48);
         warning.alignment = CENTER;
-        warning.screenCenter();
-        warning.y -= 150;
+        //warning.screenCenter();
+		warning.camera = FlxG.camera;
+        warning.y -= 50;
         add(warning);
 
         var goBackButton:FlxUIButton = new FlxUIButton(0, 500, 'Go Back', function()

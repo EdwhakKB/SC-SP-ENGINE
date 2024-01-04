@@ -31,8 +31,7 @@ class EditorPlaySubState extends MusicBeatSubstate
 	var opponentStrums:FlxTypedGroup<StrumArrow>;
 	var playerStrums:FlxTypedGroup<StrumArrow>;
 	var grpNoteSplashes:FlxTypedGroup<NoteSplash>;
-
-	var arrowLanes:FlxTypedGroup<FlxSprite> = null;
+	var grpNoteSplashesCPU:FlxTypedGroup<NoteSplash>;
 	
 	var combo:Int = 0;
 	var lastRating:FlxSprite;
@@ -110,10 +109,16 @@ class EditorPlaySubState extends MusicBeatSubstate
 		add(strumLineNotes);
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 		add(grpNoteSplashes);
+		grpNoteSplashesCPU = new FlxTypedGroup<NoteSplash>();
+		add(grpNoteSplashesCPU);
 		
 		var splash:NoteSplash = new NoteSplash(100, 100);
 		grpNoteSplashes.add(splash);
 		splash.alpha = 0.000001; //cant make it invisible or it won't allow precaching
+
+		var splashCPU:NoteSplash = new NoteSplash(100, 100, true);
+		grpNoteSplashesCPU.add(splashCPU);
+		splashCPU.alpha = 0.000001;
 
 		opponentStrums = new FlxTypedGroup<StrumArrow>();
 		playerStrums = new FlxTypedGroup<StrumArrow>();
@@ -160,6 +165,16 @@ class EditorPlaySubState extends MusicBeatSubstate
 	{
 		if(controls.BACK || FlxG.keys.justPressed.ESCAPE)
 		{
+			if (inst != null)
+			{
+				inst.stop();
+				inst.destroy();
+			}
+			if (vocals != null)
+			{
+				vocals.stop();
+				vocals.destroy();
+			}
 			endSong();
 			super.update(elapsed);
 			return;
@@ -227,9 +242,9 @@ class EditorPlaySubState extends MusicBeatSubstate
 	var lastStepHit:Int = -1;
 	override function stepHit()
 	{
-		if (FlxG.sound.music.time >= -ClientPrefs.data.noteOffset)
+		if (inst.time >= -ClientPrefs.data.noteOffset)
 		{
-			if (Math.abs(FlxG.sound.music.time - (Conductor.songPosition - Conductor.offset)) > (20 * playbackRate)
+			if (Math.abs(inst.time - (Conductor.songPosition - Conductor.offset)) > (20 * playbackRate)
 				|| (PlayState.SONG.needsVoices && Math.abs(vocals.time - (Conductor.songPosition - Conductor.offset)) > (20 * playbackRate)))
 			{
 				resyncMusic();
@@ -277,17 +292,16 @@ class EditorPlaySubState extends MusicBeatSubstate
 	function startSong():Void
 	{
 		startingSong = false;
-		@:privateAccess
-		FlxG.sound.playMusic(inst._sound, 1, false);
-		FlxG.sound.music.time = startPos;
-		#if FLX_PITCH FlxG.sound.music.pitch = playbackRate; #end
-		FlxG.sound.music.onComplete = finishSong;
+		inst.time = startPos;
+		#if FLX_PITCH inst.pitch = playbackRate; #end
+		inst.onComplete = finishSong;
 		vocals.volume = 1;
+		inst.volume = 1;
 		vocals.time = startPos;
 		vocals.play();
 
 		// Song duration in a float, useful for the time left feature
-		songLength = FlxG.sound.music.length;
+		songLength = inst.length;
 	}
 
 	// Borrowed from PlayState
@@ -309,21 +323,33 @@ class EditorPlaySubState extends MusicBeatSubstate
 		Conductor.bpm = songData.bpm;
 
 		vocals = new FlxSound();
-		#if (SBETA == 0.1)
-		if (songData.needsVoices) vocals.loadEmbedded(Paths.voices((songData.vocalsPrefix != null ? songData.vocalsPrefix : ''), songData.songId, (songData.vocalsSuffix != null ? songData.vocalsSuffix : '')));
-		#else
-		if (songData.needsVoices) vocals.loadEmbedded(Paths.voices(songData.songId));
-		#end
+		try
+		{
+			if (songData.needsVoices)
+			{
+				#if (SBETA == 0.1)
+				vocals.loadEmbedded(Paths.voices((songData.vocalsPrefix != null ? songData.vocalsPrefix : ''), songData.songId, (songData.vocalsSuffix != null ? songData.vocalsSuffix : '')));
+				#else
+				vocals.loadEmbedded(Paths.voices(songData.songId));
+				#end
+			}
+		}
+		catch(e:Dynamic){}
 		vocals.volume = 0;
 
 		#if FLX_PITCH vocals.pitch = playbackRate; #end
 		FlxG.sound.list.add(vocals);
 
-		#if (SBETA == 0.1)
-		inst = new FlxSound().loadEmbedded(Paths.inst((songData.instrumentalPrefix != null ? songData.instrumentalPrefix : ''), songData.songId, (songData.instrumentalSuffix != null ? songData.instrumentalSuffix : '')));
-		#else
-		inst = new FlxSound().loadEmbedded(Paths.inst(songData.songId));
-		#end
+		inst = new FlxSound();
+		try
+		{
+			#if (SBETA == 0.1)
+			inst.loadEmbedded(Paths.inst((songData.instrumentalPrefix != null ? songData.instrumentalPrefix : ''), songData.songId, (songData.instrumentalSuffix != null ? songData.instrumentalSuffix : '')));
+			#else
+			inst.loadEmbedded(Paths.inst(songData.songId));
+			#end
+		}
+		catch(e:Dynamic){}
 		FlxG.sound.list.add(inst);
 		inst.volume = 0;
 
@@ -505,8 +531,10 @@ class EditorPlaySubState extends MusicBeatSubstate
 
 	public function endSong()
 	{
-		vocals.pause();
-		vocals.destroy();
+		if (vocals != null){
+			vocals.pause();
+			vocals.destroy();
+		}
 		if(finishTimer != null)
 		{
 			finishTimer.cancel();
@@ -550,7 +578,7 @@ class EditorPlaySubState extends MusicBeatSubstate
 		var noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition);
 		//Debug.logTrace(noteDiff, ' ' + Math.abs(note.strumTime - Conductor.songPosition));
 
-		vocals.volume = 1;
+		if (PlayState.SONG.needsVoices) vocals.volume = 1;
 		var placement:String = Std.string(combo);
 
 		var coolText:FlxText = new FlxText(0, 0, 0, placement, 32);
@@ -726,7 +754,10 @@ class EditorPlaySubState extends MusicBeatSubstate
 
 		// more accurate hit time for the ratings?
 		var lastTime:Float = Conductor.songPosition;
-		if(Conductor.songPosition >= 0) Conductor.songPosition = FlxG.sound.music.time;
+		if(Conductor.songPosition >= 0) Conductor.songPosition = inst.time;
+		
+		if (ClientPrefs.data.hitsoundType == 'Keys' && ClientPrefs.data.hitsoundVolume != 0 && ClientPrefs.data.hitSounds != "None")
+			FlxG.sound.play(Paths.sound('hitsounds/${ClientPrefs.data.hitSounds}'), ClientPrefs.data.hitsoundVolume).pitch = playbackRate;
 
 		// obtain notes that the player can hit
 		var plrInputNotes:Array<Note> = notes.members.filter(function(n:Note)
@@ -850,6 +881,7 @@ class EditorPlaySubState extends MusicBeatSubstate
 				strum.resetAnim = Conductor.stepCrochet * 1.25 / 1000 / playbackRate;
 			}
 		}
+		if (!note.noteSplashData.disabled && !note.isSustainNote && ClientPrefs.data.noteSplashesOP) spawnNoteSplashOnNote(note);
 		note.hitByOpponent = true;
 
 		if (!note.isSustainNote)
@@ -862,13 +894,13 @@ class EditorPlaySubState extends MusicBeatSubstate
 
 		note.wasGoodHit = true;
 
-		if (ClientPrefs.data.hitsoundVolume != 0 && !note.hitsoundDisabled && ClientPrefs.data.hitSounds != "None")
+		if (!note.hitsoundDisabled)
 		{
-			if (!ClientPrefs.data.strumHit)
-			{
-				var hitSound:String = note.hitsound != '' ? 'hitsounds/${ClientPrefs.data.hitSounds}' : '';
-				FlxG.sound.play(Paths.sound(hitSound),  ClientPrefs.data.hitsoundVolume);
-			}
+			var hitSound:String = note.hitsound == null ? 'emptySound' : 'hitsound';
+			if (ClientPrefs.data.hitsoundType == 'Notes' && ClientPrefs.data.hitsoundVolume != 0 && ClientPrefs.data.hitSounds != "None")
+				if (hitSound == 'emptySound') hitSound = 'hitsounds/${ClientPrefs.data.hitSounds}';
+					
+			FlxG.sound.play(Paths.sound(hitSound),  ClientPrefs.data.hitsoundVolume);
 		}
 
 		if(note.hitCausesMiss) {
@@ -890,7 +922,7 @@ class EditorPlaySubState extends MusicBeatSubstate
 
 		var spr:StrumArrow = playerStrums.members[note.noteData];
 		if(spr != null) spr.playAnim('confirm', true);
-		vocals.volume = 1;
+		if (PlayState.SONG.needsVoices) vocals.volume = 1;
 
 		if (!note.isSustainNote)
 			invalidateNote(note);
@@ -955,16 +987,26 @@ class EditorPlaySubState extends MusicBeatSubstate
 
 	function spawnNoteSplashOnNote(note:Note) {
 		if(note != null) {
-			var strum:StrumArrow = playerStrums.members[note.noteData];
+			var strum:StrumArrow = note.mustPress ? playerStrums.members[note.noteData] : opponentStrums.members[note.noteData];
 			if(strum != null)
 				spawnNoteSplash(strum.x, strum.y, note.noteData, note);
 		}
 	}
 
 	function spawnNoteSplash(x:Float, y:Float, data:Int, ?note:Note = null) {
-		var splash:NoteSplash = grpNoteSplashes.recycle(NoteSplash);
-		splash.setupNoteSplash(x, y, data, note);
-		grpNoteSplashes.add(splash);
+		var splash:NoteSplash = note.mustPress ? grpNoteSplashes.recycle(NoteSplash) : grpNoteSplashesCPU.recycle(NoteSplash);
+		splash.setupNoteSplash(x, y, data, note, !note.mustPress);
+		if (ClientPrefs.data.splashAlphaAsStrumAlpha)
+		{
+			var strumsAsSplashAlpha:Null<Float> = null;
+			var strums:FlxTypedGroup<StrumArrow> = note.mustPress ? playerStrums : opponentStrums;
+			strums.forEachAlive(function(spr:StrumArrow)
+			{
+				strumsAsSplashAlpha = spr.alpha;
+			});
+			splash.alpha = strumsAsSplashAlpha;
+		}
+		note.mustPress ? grpNoteSplashes.add(splash) : grpNoteSplashesCPU.add(splash);
 	}
 	
 	function resyncMusic():Void
@@ -973,9 +1015,9 @@ class EditorPlaySubState extends MusicBeatSubstate
 
 		vocals.pause();
 
-		FlxG.sound.music.play();
-		#if FLX_PITCH FlxG.sound.music.pitch = playbackRate; #end
-		Conductor.songPosition = FlxG.sound.music.time;
+		inst.play();
+		#if FLX_PITCH inst.pitch = playbackRate; #end
+		Conductor.songPosition = inst.time;
 		if (Conductor.songPosition <= vocals.length)
 		{
 			vocals.time = Conductor.songPosition;

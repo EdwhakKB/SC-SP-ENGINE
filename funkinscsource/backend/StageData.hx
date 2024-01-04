@@ -30,6 +30,8 @@ typedef StageFile = {
 	var introSoundsSuffix:String;
 
 	var cameraXYMovement:Array<Float>;
+
+	var ratingOffsets:Array<Array<Float>>;
 }
 
 class StageData {
@@ -60,7 +62,9 @@ class StageData {
 			introSoundsPrefix: "",
 			introSoundsSuffix: "",
 
-			cameraXYMovement: [50, 60]
+			cameraXYMovement: [50, 60],
+
+			ratingOffsets: [[0, 0], [0, 0]]
 		};
 	}
 

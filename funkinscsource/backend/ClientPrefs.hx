@@ -7,7 +7,7 @@ import flixel.input.gamepad.FlxGamepadInputID;
 import states.TitleState;
 
 // Add a variable here and it will get automatically saved
-class SaveVariables {
+@:structInit class SaveVariables {
 	public var downScroll:Bool = false;
 	public var middleScroll:Bool = false;
 	public var LightUpStrumsOP:Bool = true;
@@ -79,7 +79,7 @@ class SaveVariables {
 	public var healthBarAlpha:Float = 1;
 	public var hitsoundVolume:Float = 0;
 	public var hitSounds:String = "None";
-	public var strumHit:Bool = false;
+	public var hitsoundType:String = "None";
 	public var pauseMusic:String = 'Tea Time';
 	public var checkForUpdates:Bool = true;
 	public var comboStacking:Bool = true;
@@ -184,15 +184,12 @@ class SaveVariables {
 
 	public var clearFolderOnStart:Bool = false;
 
-	public function new()
-	{
-		//Why does haxe needs this again?
-	}
+	public var iconMovement:String = 'None';
 }
 
 class ClientPrefs {
-	public static var data:SaveVariables = null;
-	public static var defaultData:SaveVariables = null;
+	public static var data:SaveVariables = {};
+	public static var defaultData:SaveVariables = {};
 
 	//Every key has two binds, add your key bind down here and then add your control on options/ControlsSubState.hx and Controls.hx
 	public static var keyBinds:Map<String, Array<FlxKey>> = [
@@ -245,21 +242,13 @@ class ClientPrefs {
 	public static function resetKeys(controller:Null<Bool> = null) //Null = both, False = Keyboard, True = Controller
 	{
 		if(controller != true)
-		{
 			for (key in keyBinds.keys())
-			{
 				if(defaultKeys.exists(key))
 					keyBinds.set(key, defaultKeys.get(key).copy());
-			}
-		}
 		if(controller != false)
-		{
 			for (button in gamepadBinds.keys())
-			{
 				if(defaultButtons.exists(button))
 					gamepadBinds.set(button, defaultButtons.get(button).copy());
-			}
-		}
 	}
 
 	public static function clearInvalidKeys(key:String) {
@@ -292,20 +281,22 @@ class ClientPrefs {
 	}
 
 	public static function loadPrefs() {
-		if(data == null) data = new SaveVariables();
-		if(defaultData == null) defaultData = new SaveVariables();
 		#if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
 
-		for (key in Reflect.fields(data)) {
-			if (key != 'gameplaySettings' && Reflect.hasField(FlxG.save.data, key)) {
-				Debug.logTrace('loaded variable: $key');
+		for (key in Reflect.fields(data))
+			if (key != 'gameplaySettings' && Reflect.hasField(FlxG.save.data, key))
 				Reflect.setField(data, key, Reflect.field(FlxG.save.data, key));
-			}
-		}
 		
 		if(Main.fpsVar != null) {
 			Main.fpsVar.visible = data.showFPS;
 		}
+
+		#if (!html && !switch)
+		if(FlxG.save.data.framerate == null) {
+			final refreshRate:Int = FlxG.stage.application.window.displayMode.refreshRate;
+			data.framerate = Std.int(FlxMath.bound(refreshRate, 60, 240));
+		}
+		#end
 
 		if(data.framerate > FlxG.drawFramerate) {
 			FlxG.updateFramerate = data.framerate;
@@ -365,19 +356,11 @@ class ClientPrefs {
 		Main.volumeUpKeys = keyBinds.get('volume_up').copy();
 		toggleVolumeKeys(true);
 	}
-	public static function toggleVolumeKeys(turnOn:Bool) {
-		if(turnOn)
-		{
-			FlxG.sound.muteKeys = Main.muteKeys;
-			FlxG.sound.volumeDownKeys = Main.volumeDownKeys;
-			FlxG.sound.volumeUpKeys = Main.volumeUpKeys;
-		}
-		else
-		{
-			FlxG.sound.muteKeys = [];
-			FlxG.sound.volumeDownKeys = [];
-			FlxG.sound.volumeUpKeys = [];
-		}
+	public static function toggleVolumeKeys(?turnOn:Bool = true)
+	{
+		FlxG.sound.muteKeys = turnOn ? Main.muteKeys : [];
+		FlxG.sound.volumeDownKeys = turnOn ? Main.volumeDownKeys : [];
+		FlxG.sound.volumeUpKeys = turnOn ? Main.volumeUpKeys : [];
 	}
 	public static function getkeys(keyname:String, separator:String = ' | ') // for lazyness
 	{

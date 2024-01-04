@@ -18,6 +18,7 @@ import objects.StrumArrow;
 import objects.Note;
 import objects.NoteSplash;
 import objects.Character;
+import objects.HealthIcon;
 
 import states.MainMenuState;
 import states.StoryMenuState;
@@ -40,7 +41,6 @@ import shaders.ColorSwapOld;
 
 import flixel.util.FlxAxes;
 import openfl.filters.BitmapFilter;
-import shaders.custom.CustomShader;
 
 #if ((flixel == "5.3.1" || flixel >= "4.11.0" && flixel <= "5.0.0") && parallaxlt)
 import flixel_5_3_1.ParallaxSprite; // flixel 5 render pipeline
@@ -83,8 +83,8 @@ class FunkinLua {
 	public static var customFunctions:Map<String, Dynamic> = new Map<String, Dynamic>();
 
     public static var lua_Cameras:Map<String, LuaCamera> = [];
-	public static var lua_Shaders:Map<String, shaders.Shaders.ShaderEffectNew> = [];
-	public static var lua_Custom_Shaders:Map<String, shaders.custom.CustomShader> = [];
+	public static var lua_Shaders:Map<String, shaders.FunkinSourcedShaders.ShaderEffectNew> = [];
+	public static var lua_Custom_Shaders:Map<String, codenameengine.CustomCodeShader> = [];
 
 	public var preloading:Bool = false;
 
@@ -115,9 +115,11 @@ class FunkinLua {
 		if (!isStageLua) game.luaArray.push(this);
 		else game.Stage.luaArray.push(this);
 
+		#if MODS_ALLOWED
 		var myFolder:Array<String> = this.scriptName.split('/');
 		if(myFolder[0] + '/' == Paths.mods() && (Mods.currentModDirectory == myFolder[1] || Mods.getGlobalMods().contains(myFolder[1]))) //is inside mods folder
 			this.modFolder = myFolder[1];
+		#end
 
 		// Lua shit
 		set('Function_StopLua', Function_StopLua);
@@ -136,7 +138,8 @@ class FunkinLua {
 		set('scrollSpeed', PlayState.SONG.speed);
 		set('crochet', Conductor.crochet);
 		set('stepCrochet', Conductor.stepCrochet);
-		set('songLength', game.inst != null ? game.inst.length : FlxG.sound.music.length);
+		if (FlxG.sound.music != null) set('songLength', FlxG.sound.music.length);
+		else set('songLength', 0);
 		set('songName', PlayState.SONG.songId);
 		set('songPath', Paths.formatToSongPath(PlayState.SONG.songId));
 		set('startedCountdown', false);
@@ -514,6 +517,7 @@ class FunkinLua {
 	
 							return;
 						}
+					Lua.pushnil(lua);
 			});
 			set("setGlobalFromScript", function(luaFile:String, global:String, val:Dynamic) { // returns the global from a script
 				var foundScript:String = findScript(luaFile);
@@ -659,6 +663,27 @@ class FunkinLua {
 				luaTrace('removeLuaScript: Script $luaFile isn\'t running!', false, false, FlxColor.RED);
 				return false;
 			});
+			set("removeHScript", function(luaFile:String, ?ignoreAlreadyRunning:Bool = false) {
+				#if HSCRIPT_ALLOWED
+				var foundScript:String = findScript(luaFile, '.hx');
+				if(foundScript != null)
+				{
+					if(!ignoreAlreadyRunning)
+						for (script in game.hscriptArray)
+	
+							if(script.origin == foundScript)
+							{
+								trace('Closing script ' + script.origin);
+								script.destroy();
+								return true;
+							}
+				}
+				luaTrace('removeHScript: Script $luaFile isn\'t running!', false, false, FlxColor.RED);
+				return false;
+				#else
+				luaTrace("addHScript: HScript is not supported on this platform!", false, false, FlxColor.RED);
+				#end
+			});
 	
 			set("loadSong", function(?name:String = null, ?difficultyNum:Int = -1) {
 				if(name == null || name.length < 1) name = PlayState.SONG.songId;
@@ -670,11 +695,7 @@ class FunkinLua {
 				game.persistentUpdate = false;
 				MusicBeatState.switchState(new PlayState());
 	
-				if (game.inst != null){
-					game.inst.pause();
-					game.inst.volume = 0;
-				}
-				else
+				if (FlxG.sound.music != null)
 				{
 					FlxG.sound.music.pause();
 					FlxG.sound.music.volume = 0;
@@ -1181,7 +1202,7 @@ class FunkinLua {
 			set("cameraSetTarget", function(target:String) {
 				game.cameraTargeted = target;
 			});
-			set('getCameraTarget', function() { 
+			set('cameraGetTarget', function() { 
 				return game.cameraTargeted; 
 			});
 			set("cameraShake", function(camera:String, intensity:Float, duration:Float) {
@@ -1412,7 +1433,8 @@ class FunkinLua {
 				}
 				else
 				{
-					obj.animation.play(name, forced, reverse, startFrame);
+					if(obj.anim != null) obj.anim.play(name, forced, reverse, startFrame); //FlxAnimate
+					else obj.animation.play(name, forced, reverse, startFrame);
 					return true;
 				}
 				return false;
@@ -1495,7 +1517,7 @@ class FunkinLua {
 						obj.animOffsets.set(anim, x, y);	
 					}
 	
-					if (Std.isOfType(obj, Character)){
+					if (Std.isOfType(obj, Character) || Std.isOfType(obj, HealthIcon)){
 						obj.addOffset(anim, x, y);	
 					}
 					return true;
@@ -1936,7 +1958,7 @@ class FunkinLua {
 					if(game.modchartSounds.exists(tag)) {
 						game.modchartSounds.get(tag).stop();
 					}
-					game.modchartSounds.set(tag, FlxG.sound.play(Paths.sound(sound), volume, false, function() {
+					game.modchartSounds.set(tag, FlxG.sound.play(Paths.sound(sound), volume, false, null, true, function() {
 						game.modchartSounds.remove(tag);
 						game.callOnLuas('onSoundFinished', [tag]);
 					}));
@@ -1962,8 +1984,7 @@ class FunkinLua {
 			});
 			set("soundFadeIn", function(tag:String, duration:Float, fromValue:Float = 0, toValue:Float = 1) {
 				if(tag == null || tag.length < 1) {
-					if(game.inst != null)game.inst.fadeIn(duration, fromValue, toValue);
-					else if(FlxG.sound.music != null)FlxG.sound.music.fadeIn(duration, fromValue, toValue);
+					if(FlxG.sound.music != null)FlxG.sound.music.fadeIn(duration, fromValue, toValue);
 				} else if(game.modchartSounds.exists(tag)) {
 					game.modchartSounds.get(tag).fadeIn(duration, fromValue, toValue);
 				}
@@ -1971,16 +1992,14 @@ class FunkinLua {
 			});
 			set("soundFadeOut", function(tag:String, duration:Float, toValue:Float = 0) {
 				if(tag == null || tag.length < 1) {
-					if(game.inst != null) game.inst.fadeOut(duration, toValue);
-					else if(FlxG.sound.music != null)FlxG.sound.music.fadeOut(duration, toValue);
+					if(FlxG.sound.music != null)FlxG.sound.music.fadeOut(duration, toValue);
 				} else if(game.modchartSounds.exists(tag)) {
 					game.modchartSounds.get(tag).fadeOut(duration, toValue);
 				}
 			});
 			set("soundFadeCancel", function(tag:String) {
 				if(tag == null || tag.length < 1) {
-					if(game.inst.fadeTween != null) game.inst.fadeTween.cancel();
-					else if(FlxG.sound.music.fadeTween != null) FlxG.sound.music.fadeTween.cancel();
+					if(FlxG.sound.music.fadeTween != null) FlxG.sound.music.fadeTween.cancel();
 				} else if(game.modchartSounds.exists(tag)) {
 					var theSound:FlxSound = game.modchartSounds.get(tag);
 					if(theSound.fadeTween != null) {
@@ -1991,8 +2010,7 @@ class FunkinLua {
 			});
 			set("getSoundVolume", function(tag:String) {
 				if(tag == null || tag.length < 1) {
-					if(game.inst != null) return game.inst.volume;
-					else if(FlxG.sound.music != null) return FlxG.sound.music.volume;
+					if(FlxG.sound.music != null) return FlxG.sound.music.volume;
 				} else if(game.modchartSounds.exists(tag)) {
 					return game.modchartSounds.get(tag).volume;
 				}
@@ -2000,8 +2018,7 @@ class FunkinLua {
 			});
 			set("setSoundVolume", function(tag:String, value:Float) {
 				if(tag == null || tag.length < 1) {
-					if(game.inst != null) game.inst.volume = value;
-					else if(FlxG.sound.music != null) FlxG.sound.music.volume = value;
+					if(FlxG.sound.music != null) FlxG.sound.music.volume = value;
 				} else if(game.modchartSounds.exists(tag)) {
 					game.modchartSounds.get(tag).volume = value;
 				}
@@ -2044,6 +2061,7 @@ class FunkinLua {
 			#end
 
 			// mod settings
+			#if MODS_ALLOWED
 			addLocalCallback("getModSetting", function(saveTag:String, ?modName:String = null) {
 				if(modName == null)
 				{
@@ -2054,54 +2072,9 @@ class FunkinLua {
 					} 
 					modName = this.modFolder;
 				}
-
-				if(FlxG.save.data.modSettings == null) FlxG.save.data.modSettings = new Map<String, Dynamic>();
-
-				var settings:Map<String, Dynamic> = FlxG.save.data.modSettings.get(modName);
-				var path:String = Paths.mods('$modName/data/settings.json');
-				if(FileSystem.exists(path))
-				{
-					if(settings == null || !settings.exists(saveTag))
-					{
-						if(settings == null) settings = new Map<String, Dynamic>();
-						var data:String = File.getContent(path);
-						try
-						{
-							luaTrace('getModSetting: Trying to find default value for "$saveTag" in Mod: "$modName"');
-							var parsedJson:Dynamic = Json.parse(data);
-							for (i in 0...parsedJson.length)
-							{
-								var sub:Dynamic = parsedJson[i];
-								if(sub != null && sub.save != null && sub.value != null && !settings.exists(sub.save))
-								{
-									luaTrace('getModSetting: Found unsaved value "${sub.save}" in Mod: "$modName"');
-									settings.set(sub.save, sub.value);
-								}
-							}
-							FlxG.save.data.modSettings.set(modName, settings);
-						}
-						catch(e:Dynamic)
-						{
-							var errorTitle = 'Mod name: ' + Mods.currentModDirectory;
-							var errorMsg = 'An error occurred: $e';
-							#if windows
-							lime.app.Application.current.window.alert(errorMsg, errorTitle);
-							#end
-							trace('$errorTitle - $errorMsg');
-						}
-					}
-				}
-				else
-				{
-					FlxG.save.data.modSettings.remove(modName);
-					luaTrace('getModSetting: $path could not be found!', false, false, FlxColor.RED);
-					return null;
-				}
-
-				if(settings.exists(saveTag)) return settings.get(saveTag);
-				luaTrace('getModSetting: "$saveTag" could not be found inside $modName\'s settings!', false, false, FlxColor.RED);
-				return null;
+				return LuaUtils.getModSetting(saveTag, modName);
 			});
+			#end
 			//
 	
 			set("debugPrint", function(text:Dynamic = '', color:String = 'WHITE') game.addTextToDebug(text, CoolUtil.colorFromString(color)));
@@ -2150,13 +2123,7 @@ class FunkinLua {
 	
 			//wow very convenient
 			set("makeHealthIcon", function(tag:String, character:String, player:Bool = false) {
-				tag = tag.replace('.', '');
-				LuaUtils.resetIconTag(tag);
-				var leSprite:ModchartIcon = new ModchartIcon(character, player);
-				game.modchartIcons.set(tag, leSprite); //yes
-				var shit:ModchartIcon = game.modchartIcons.get(tag);
-				game.uiGroup.add(shit);
-				shit.camera = game.camHUD;
+				makeNewIcon(tag, character, player);
 			});
 	
 			set("changeAddedIcon", function(tag:String, character:String){
@@ -2165,14 +2132,8 @@ class FunkinLua {
 			});
 			
 			//because the naming is stupid
-			set("makeLuaIcon", function(tag:String, character:String, player:Bool = false) {
-				tag = tag.replace('.', '');
-				LuaUtils.resetIconTag(tag);
-				var leSprite:ModchartIcon = new ModchartIcon(character, player);
-				game.modchartIcons.set(tag, leSprite); //yes
-				var shit:ModchartIcon = game.modchartIcons.get(tag);
-				game.uiGroup.add(shit);
-				shit.camera = game.camHUD;
+			set("makeLuaIcon", function(tag:String, character:String, player:Bool = false){ 
+				makeNewIcon(tag, character, player);
 			});
 			
 			set("changeLuaIcon", function(tag:String, character:String){
@@ -2214,7 +2175,6 @@ class FunkinLua {
 			set("startCharScripts", function(name:String) {
 				game.startCharacterScripts(name);
 			});
-	
 			
 			addLocalCallback("close", function() {
 				closed = true;
@@ -2222,17 +2182,18 @@ class FunkinLua {
 				return closed;
 			});
 	
-			#if (SBETA == 0.1) SupportBETAFunctions.implement(this); #end
 			#if desktop DiscordClient.addLuaCallbacks(this); #end
-			#if SScript HScript.implement(this); #end
 			#if ACHIEVEMENTS_ALLOWED Achievements.addLuaCallbacks(this); #end
+			#if (SBETA == 0.1) SupportBETAFunctions.implement(this); #end
+			#if SScript HScript.implement(this); #end
+			#if flxanimate FlxAnimateFunctions.implement(this); #end
+			#if modchartingTools if (game != null && PlayState.SONG != null && !isStageLua && PlayState.SONG.notITG && game.notITGMod) ModchartFuncs.implement(this); #end
 			ReflectionFunctions.implement(this);
 			TextFunctions.implement(this);
 			ExtraFunctions.implement(this);
 			CustomSubstate.implement(this);
 			ShaderFunctions.implement(this);
 			DeprecatedFunctions.implement(this);
-			#if modchartingTools if (game != null && PlayState.SONG != null && !isStageLua && PlayState.SONG.notITG && game.notITGMod) ModchartFuncs.implement(this); #end
 		}
 
 		try{
@@ -2249,18 +2210,7 @@ class FunkinLua {
 				#else
 				luaTrace('$scriptName\n$resultStr', true, false, FlxColor.RED);
 				#end
-				lua = null;
-
-				if (isStageLua)
-				{
-					Stage.instance.luaArray.remove(this);
-					Stage.instance.luaArray = [];
-				}
-				else
-				{
-					game.luaArray.remove(this);
-					game.luaArray = [];
-				}
+				stop();
 				return;
 			}
 			if(isString) scriptName = 'unknown';
@@ -2274,6 +2224,17 @@ class FunkinLua {
 		if (isStageLua) Debug.logInfo('Limited usage of playstate properties inside the stage .laus or .hxs!');
 		Debug.logInfo('lua file loaded succesfully: $scriptName (${Std.int(Date.now().getTime() - times)}ms)');
 		#end
+	}
+
+	function makeNewIcon(tag:String, character:String, player:Bool = false)
+	{
+		tag = tag.replace('.', '');
+		LuaUtils.resetIconTag(tag);
+		var leSprite:ModchartIcon = new ModchartIcon(character, player);
+		PlayState.instance.modchartIcons.set(tag, leSprite); //yes
+		var shit:ModchartIcon = PlayState.instance.modchartIcons.get(tag);
+		PlayState.instance.add(shit);
+		shit.camera = PlayState.instance.camHUD;
 	}
 
 	//main
@@ -2386,7 +2347,6 @@ class FunkinLua {
 
 	public function stop() {
 		#if LUA_ALLOWED
-		PlayState.instance.luaArray.remove(this);
 		closed = true;
 
         lua_Cameras.clear();
@@ -2532,18 +2492,26 @@ class FunkinLua {
 	{
 		if(!scriptFile.endsWith(ext)) scriptFile += ext;
 		var preloadPath:String = Paths.getSharedPath(scriptFile);
+		Debug.logInfo('founded Starting Path: $preloadPath');
 		#if MODS_ALLOWED
 		var path:String = Paths.modFolders(scriptFile);
 		if(FileSystem.exists(scriptFile))
+		{
+			Debug.logInfo('founded Path: $path');
 			return scriptFile;
-		else if(FileSystem.exists(path))
+		}
+		if(FileSystem.exists(path))
+		{
+			Debug.logInfo('founded Path: $path');
 			return path;
+		}
 
 		if(FileSystem.exists(preloadPath))
 		#else
 		if(Assets.exists(preloadPath))
 		#end
 		{
+			Debug.logInfo('founded Path: $preloadPath');
 			return preloadPath;
 		}
 		return null;

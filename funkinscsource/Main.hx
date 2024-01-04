@@ -30,6 +30,13 @@ import gamejolt.*;
 import flixel.input.keyboard.FlxKey;
 import states.TitleState;
 
+#if linux
+@:cppInclude('./external/gamemode_client.h')
+@:cppFileCode('
+	#define GAMEMODE_AUTO
+')
+#end
+
 class Main extends Sprite
 {
 	public static var game = {
@@ -77,7 +84,7 @@ class Main extends Sprite
 	private function setupGame():Void {
 		addChild(new FlxGame(game.width, game.height, Init, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
 
-		FlxG.sound.volume = 0.5;
+		FlxG.sound.volume = 0.2;
 
 		#if !mobile
 		Lib.current.stage.align = "tl";
@@ -254,8 +261,8 @@ class Main extends Sprite
 
 		File.saveContent(path, errMsg + "\n");
 
+		Sys.println(errMsgPrint);
 		Sys.println(errMsg);
-		Sys.println(errMsgPrint + '\n' + e.error);
 		Sys.println("Crash dump saved in " + Path.normalize(path));
 
 		var crashDialoguePath:String = "SCE-CrashDialog";

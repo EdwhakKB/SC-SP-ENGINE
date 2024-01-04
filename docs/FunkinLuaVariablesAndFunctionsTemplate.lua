@@ -751,16 +751,8 @@ pushShaderToCamera(id, camera)
 
 setCameraNoCustomShader(shader)
 
-getCustomShaderBool(id, property)
+getCustomShaderProperty(id, property)
 
-getCustomShaderInt(id, property)
-
-getCustomShaderFloat(id, property)
-
-setCustomShaderBool(id, property, value)
-
-setCustomShaderInt(id, property, value)
-
-setCustomShaderFloat(id, property, value)
+setCustomShaderProperty(id, property, value)
 
 tweenCustomShaderProperty(shaderName, prop, value, time, easeStr)

@@ -36,6 +36,7 @@ class AsyncAssetPreloader
 	var characters:Array<String> = [];
 	var stages:Array<String> = [];
 	var audio:Array<String> = [];
+	var Stage:Stage;
 
 	var onComplete:Void->Void = null;
 
@@ -238,8 +239,8 @@ class AsyncAssetPreloader
 		for (i in stages)
 		{
 			loadedCount++;
-			new Stage(i, false);
-			Stage.instance.setupStageProperties(i, false, true);
+			Stage = new Stage(i, false);
+			Stage.setupStageProperties(i, false, true);
 			trace('loaded stages');
 		}
 	}
@@ -311,7 +312,7 @@ class LoadingState extends MusicBeatState
 		loadingText.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(loadingText);
 
-		if (!ClientPrefs.data.cacheOnGPU)
+		/*if (!ClientPrefs.data.cacheOnGPU)
 		{
 			loader = new AsyncAssetPreloader(function()
 			{
@@ -322,7 +323,7 @@ class LoadingState extends MusicBeatState
 			loader.load(true);
 		}
 		else
-		{
+		{*/
 			loadingBar.visible = false;
 
 			final WAIT_TIME:Float = 1.0;
@@ -347,7 +348,7 @@ class LoadingState extends MusicBeatState
 					new FlxTimer().start(fadeTime + WAIT_TIME, function(_) introComplete());
 				}
 			);
-		}
+		//}
 	}
 	
 	function checkLoadSong(path:String)
@@ -453,7 +454,7 @@ class LoadingState extends MusicBeatState
 		if(weekDir != null && weekDir.length > 0 && weekDir != '') directory = weekDir;
 
 		Paths.setCurrentLevel(directory);
-		Debug.logTrace('Setting asset folder to ' + directory);
+		Debug.logInfo('Setting asset folder to ' + directory);
 		/*#if NO_PRELOAD_ALL
 		var loaded:Bool = false;
 		if (PlayState.SONG != null) {
@@ -467,8 +468,9 @@ class LoadingState extends MusicBeatState
 			FlxG.sound.music.stop();
 			FlxG.sound.music.destroy();
 		}
-		if (ClientPrefs.data.cacheOnGPU) return target;
-		else return new LoadingState(target, stopMusic, directory);
+		return target;
+		// if (ClientPrefs.data.cacheOnGPU) return target;
+		// else return new LoadingState(target, stopMusic, directory);
 	}
 	
 	/*#if NO_PRELOAD_ALL
