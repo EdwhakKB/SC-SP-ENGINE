@@ -55,20 +55,20 @@ class HealthIcon extends FlxSprite
 	public var offsetX:Float = 0;
 	public var offsetY:Float = 0;
 
-	public var cantAnimate:Bool = false;
+	public var isSizedState:Bool = false;
 
 	public var losingAnimation:Bool = false;
 	public var winningAnimation:Bool = false;
 	public var normalAnimation:Bool = false;
 
-	public function new(char:String = 'bf', isPlayer:Bool = false, cantAnimate:Bool = false, ?allowGPU:Bool = true)
+	public function new(char:String = 'bf', isPlayer:Bool = false, isSizedState:Bool = false, ?allowGPU:Bool = true)
 	{
 		super();
 		animOffsets = new Map<String, Array<Dynamic>>();
 		isOldIcon = (char == 'bf-old');
 		this.isPlayer = isPlayer;
-		this.cantAnimate = cantAnimate;
-		changeIcon(char, cantAnimate, allowGPU);
+		this.isSizedState = isSizedState;
+		changeIcon(char, allowGPU);
 		scrollFactor.set();
 	}
 
@@ -78,7 +78,7 @@ class HealthIcon extends FlxSprite
 		if (sprTracker != null) setPosition(sprTracker.x + sprTracker.width + 12 + offsetX, sprTracker.y - 30 + offsetY);
 	}
 
-	public function changeIcon(char:String, cantAnimate:Bool = false, ?allowGPU:Bool = true) {
+	public function changeIcon(char:String, ?allowGPU:Bool = true) {
 		var name:String = 'icons/';
 		var iconSuffix:String = 'icon-';
 		if(!Paths.fileExists('images/' + name + char + '.png', IMAGE)) 
@@ -97,6 +97,12 @@ class HealthIcon extends FlxSprite
 		else
 		{
 			name = name + 'icon-' + char;
+		}
+
+		if (animatedIcon && isSizedState)
+		{
+			setGraphicSize(Std.int(width * 0.7));
+			updateHitbox();
 		}
 
 		var frameName:String = name;
@@ -190,19 +196,22 @@ class HealthIcon extends FlxSprite
 			return;
 		}
 
-		scale.set(1, 1);
-		updateHitbox();
-
-		if (json.scale != 1)
+		if (!isSizedState)
 		{
-			scale.set(json.scale, json.scale);
+			scale.set(1, 1);
 			updateHitbox();
-		}
 
-		if (json.graphicScale != 1)
-		{
-			setGraphicSize(Std.int(width * json.graphicScale));
-			updateHitbox();
+			if (json.scale != 1)
+			{
+				scale.set(json.scale, json.scale);
+				updateHitbox();
+			}
+
+			if (json.graphicScale != 1)
+			{
+				setGraphicSize(Std.int(width * json.graphicScale));
+				updateHitbox();
+			}
 		}
 
 		flipX = (json.flip_x != isPlayer);

@@ -362,6 +362,15 @@ class FreeplayState extends MusicBeatState
 			}
 		}
 
+		for (icon in iconArray) {
+			if (curSelected != iconArray.indexOf(icon)) {
+				if (icon.animation.curAnim != null && icon.animation.curAnim.name != 'normal')
+					icon.playAnim('normal', true);
+				continue;
+			}
+			icon.playAnim('losing', false);
+		}
+
 		var mult:Float = FlxMath.lerp(1, bg.scale.x, CoolUtil.clamp(1 - (elapsed * 9), 0, 1));
 		bg.scale.set(mult, mult);
 		bg.updateHitbox();
@@ -929,6 +938,10 @@ class FreeplayState extends MusicBeatState
 		bg.scale.set(1.06, 1.06);
 		bg.updateHitbox();
 		bg.offset.set();
+		for (icon in iconArray) {
+			if (curSelected == iconArray.indexOf(icon)) continue;
+			icon.playAnim('normal', true);
+		}
 		for (i in 0...iconArray.length)
 		{
 			iconArray[i].scale.set(1.2, 1.2);

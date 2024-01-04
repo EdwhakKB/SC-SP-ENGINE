@@ -1138,7 +1138,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
                 #end
 
                 #if (PSYCH && PSYCHVERSION == 0.7) if (ClientPrefs.getGameplaySetting('sustainnotesactive')) swagNote.sustainLength = songNotes[2] / playbackSpeed;
-				else #end swagNote.sustainLength = 0;
+				else swagNote.sustainLength = 0; #end
 
                 var susLength:Float = swagNote.sustainLength;
                 var anotherCrochet:Float = Conductor.crochet;

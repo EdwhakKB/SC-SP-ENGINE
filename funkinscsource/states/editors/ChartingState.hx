@@ -278,15 +278,17 @@ class ChartingState extends MusicBeatState
 
 		var eventIcon:FlxSprite = new FlxSprite(-GRID_SIZE - 5, -90).loadGraphic(Paths.image('eventArrow'));
 		eventIcon.antialiasing = ClientPrefs.data.antialiasing;
-		leftIcon = new HealthIcon(_song.player1, false, false);
-		rightIcon = new HealthIcon(_song.player2, false, false);
+		leftIcon = new HealthIcon(_song.player1, true, false);
+		rightIcon = new HealthIcon(_song.player2, true, false);
 		eventIcon.scrollFactor.set(1, 1);
 		leftIcon.scrollFactor.set(1, 1);
 		rightIcon.scrollFactor.set(1, 1);
 
 		eventIcon.setGraphicSize(30, 30);
-		leftIcon.setGraphicSize(0, 45);
-		rightIcon.setGraphicSize(0, 45);
+		if (!leftIcon.animatedIcon) leftIcon.setGraphicSize(0, 45);
+		if (!rightIcon.animatedIcon) rightIcon.setGraphicSize(0, 45);
+		if (leftIcon.animatedIcon) leftIcon.scale.set(0.5, 0.5);
+		if (rightIcon.animatedIcon) rightIcon.scale.set(0.5, 0.5);
 
 		add(eventIcon);
 		add(leftIcon);
@@ -384,7 +386,6 @@ class ChartingState extends MusicBeatState
 
 		var startHere:FlxButton = new FlxButton(UI_box2.x, UI_box2.y - 30, 'Start Here', function()
 		{
-			FlxG.save.data.oldTimeSection = curSection; 
 			PlayState.timeToStart = Conductor.songPosition;
 			startSong();
 		});
@@ -420,7 +421,6 @@ class ChartingState extends MusicBeatState
 
 		updateGrid();
 
-		changeSection(FlxG.save.data.oldTimeSection, false);
 		super.create();
 	}
 
@@ -1164,10 +1164,9 @@ class ChartingState extends MusicBeatState
 		eventDropDown = new FlxUIDropDownMenu(20, 50, FlxUIDropDownMenu.makeStrIdLabelArray(leEvents, true), function(pressed:String) {
 			var selectedEvent:Int = Std.parseInt(pressed);
 			descText.text = eventStuff[selectedEvent][1];
-				if (curSelectedNote != null &&  eventStuff != null) {
+			if (curSelectedNote != null &&  eventStuff != null) {
 				if (curSelectedNote != null && curSelectedNote[2] == null){
-				curSelectedNote[1][curEventSelected][0] = eventStuff[selectedEvent][0];
-
+					curSelectedNote[1][curEventSelected][0] = eventStuff[selectedEvent][0];
 				}
 				updateGrid();
 			}
