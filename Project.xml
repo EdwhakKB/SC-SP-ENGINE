@@ -143,8 +143,14 @@
 
 	<!--In case you want to use the ui package-->
 	<haxelib name="faxe" if='switch'/>
+
+	<!--Set this to the engine you're using!-->
+    <define name="PSYCH"/>
+    <define name="PSYCHVERSION" value="0.7"/>
+    <define name="modchartingTools"/>
+    <define name="SBETA" value="0.1"/> <!--set this to 0.1 for extra sides Version of the engine-->
   
-  <!--Incase you want parallaxlt-->
+  	<!--Incase you want parallaxlt-->
 	<!-- <haxelib name="parallaxlt" /> -->
 	<!--<haxelib name="polymod"/> -->
 
