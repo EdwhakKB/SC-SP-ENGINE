@@ -133,6 +133,10 @@ class HealthIcon extends FlxSprite
 		var graphic = Paths.image(icon, gpuAllowed);
 
 		if (graphic == null) graphic = Paths.image("icons/icon-face", gpuAllowed);
+		if (graphic == null) {
+			graphic = Paths.image('missingRating', gpuAllowed);
+			return;
+		}
 
 		isOneSized = (graphic.height == 150 && graphic.width == 150);
 

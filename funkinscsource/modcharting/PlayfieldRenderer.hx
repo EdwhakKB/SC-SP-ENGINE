@@ -70,7 +70,6 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
         return modifierTable.modifiers; //back compat with lua modcharts
     }
 
-
     public function new(strumGroup:FlxTypedGroup<StrumNoteType>, notes:FlxTypedGroup<Note>,instance:ModchartMusicBeatState) 
     {
         super(0,0);
@@ -103,11 +102,8 @@ class PlayfieldRenderer extends FlxSprite //extending flxsprite just so i can ed
     override function update(elapsed:Float) 
     {
         eventManager.update(elapsed);
-        if (!pauseTweens)
-        {
-            tweenManager.update(elapsed); //should be automatically paused when you pause in game
-            timerManager.update(elapsed);
-        }
+        if (!pauseTweens) tweenManager.update(elapsed); //should be automatically paused when you pause in game
+        timerManager.update(elapsed);
         super.update(elapsed);
     }
 

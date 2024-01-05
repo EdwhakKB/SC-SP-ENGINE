@@ -3766,10 +3766,9 @@ class PlayState extends MusicBeatState
 			return false;
 		else{
 			FlxG.camera.followLerp = 0;
-			persistentUpdate = false;
-			paused = true;
-			if (openedOnce)
-				cancelMusicFadeTween();
+			if (persistentUpdate != false) persistentUpdate = false;
+			FlxG.sound.music.stop();
+			vocals.stop();
 			chartingMode = true;
 			modchartMode = false;
 	
@@ -3789,8 +3788,9 @@ class PlayState extends MusicBeatState
 		FlxG.camera.followLerp = 0;
 		persistentUpdate = false;
 		paused = true;
-		if (openedOnce)
-			cancelMusicFadeTween();
+		if (persistentUpdate != false) persistentUpdate = false;
+		FlxG.sound.music.stop();
+		vocals.stop();
 		#if desktop DiscordClient.resetClientID(); #end
 		MusicBeatState.switchState(new CharacterEditorState(SONG.player2));
 		return true;
@@ -3803,10 +3803,10 @@ class PlayState extends MusicBeatState
 			return false;
 		else
 		{
-			persistentUpdate = false;
-			paused = true;
-			if (openedOnce)
-				cancelMusicFadeTween();
+			FlxG.camera.followLerp = 0;
+			if (persistentUpdate != false) persistentUpdate = false;
+			FlxG.sound.music.stop();
+			vocals.stop();
 			#if desktop
 			DiscordClient.changePresence("Modchart Editor", null, null, true);
 			DiscordClient.resetClientID();
@@ -3827,9 +3827,6 @@ class PlayState extends MusicBeatState
 
 	public function openKadeStageEditor(openedOnce:Bool = false):Void
 	{
-		paused = true;
-		if (openedOnce)
-			cancelMusicFadeTween();
 		new FlxTimer().start(0.3, function(tmr:FlxTimer)
 		{
 			for (bg in Stage.toAdd)
@@ -6120,7 +6117,7 @@ class PlayState extends MusicBeatState
 		if (generatedMusic)
 			notes.sort(FlxSort.byY, ClientPrefs.data.downScroll ? FlxSort.ASCENDING : FlxSort.DESCENDING);
 
-		// move it here to uh much more useful then just each section
+		// move it here, uh, much more useful then just each section
 		if (camZooming && FlxG.camera.zoom < maxCamZoom && ClientPrefs.data.camZooms && curBeat % camZoomingMult == 0 && continueBeatBop)
 		{
 			FlxG.camera.zoom += 0.015 * camZoomingBop;

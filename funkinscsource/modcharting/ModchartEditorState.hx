@@ -340,14 +340,11 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
     }
     override public function create()
     {
-        camGame = new FlxCamera();
+        camGame = initPsychCamera();
 		camHUD = new FlxCamera();
 		camHUD.bgColor.alpha = 0;
 
-		FlxG.cameras.reset(camGame);
 		FlxG.cameras.add(camHUD, false);
-
-		FlxG.cameras.setDefaultDrawTarget(camGame, true);
 
         IndieDiamondTransSubState.nextCamera = camHUD;
 
@@ -505,7 +502,6 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
         setupPlayfieldUI();
 
         playfieldRenderer.pauseTweens = false;
-
 
         var hideNotes:FlxButton = new FlxButton(0, FlxG.height, 'Show/Hide Notes', function ()
         {
