@@ -19,7 +19,7 @@ using StringTools;
 class ThingsToLoad extends MusicBeatState
 {
     var toBeDone = 0;
-    var done = 0;
+    var done = 1;
 
     var bg:FlxSprite;
     var text:FlxText;
@@ -30,6 +30,7 @@ class ThingsToLoad extends MusicBeatState
     var totalLoaded:Int = 0;
 
     var loadingBar:FlxBar;
+    var textExtra:String = '';
 
 	override function create()
 	{
@@ -39,11 +40,12 @@ class ThingsToLoad extends MusicBeatState
 
         bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
         bg.color = FlxG.random.color();
+        bg.alpha = FlxG.random.float(0.4, 1);
         add(bg);
 
         PlayState.customLoaded = true;
 
-        text = new FlxText(25, FlxG.height / 2 + 275,0,"Loading " + PlayState.SONG.songId.toUpperCase() +  "...");
+        text = new FlxText(25, FlxG.height / 2 + 275,0,"Loading " + PlayState.SONG.songId.toUpperCase());
         text.size = 48;
         text.alignment = FlxTextAlign.LEFT;
         text.borderColor = FlxColor.BLACK;
@@ -72,9 +74,19 @@ class ThingsToLoad extends MusicBeatState
             finishCaching();
         });
 
-        sys.thread.Thread.create(() -> {
-           //
+        sys.thread.Thread.create(() -> 
+        {
         });
+
+        new FlxTimer().start(0.2, function(tmr:FlxTimer){
+            text.text += ".";
+            new FlxTimer().start(0.4, function(tmr:FlxTimer){
+                text.text += ".";
+            });
+            new FlxTimer().start(0.6, function(tmr:FlxTimer){
+                text.text += ".";
+            });
+        }, 3);
 
         // cache thread
 
@@ -85,13 +97,23 @@ class ThingsToLoad extends MusicBeatState
 
     function finishCaching()
     {
-        var songLowercase:String = 'songs/' + PlayState.SONG.songId.toLowerCase();
+        FlxTimer.globalManager.completeAll();
+        text.text = text.text.replace('.', '').replace('Loading ', '') + " is now caching objects";
 
-        if (FileSystem.exists(Paths.txt(songLowercase + "/preload")))
-        {
-            trace('Preloading Characters!');
+        var characterString:String = '';
+        var stageString:String = '';
+
+        #if MODS_ALLOWED
+        if (FileSystem.exists(txt('data/songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase() + '/preload.txt')) || FileSystem.exists(Paths.txt('songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase() + '/preload')))
+        #else
+        if (Assets.exists(Paths.txt('songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase() + "/preload")))
+        #end
+        {   
+            Debug.logInfo('Preloading Characters!');
             PlayState.alreadyPreloaded = true;
-            var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt(songLowercase + "/preload"));
+            var characters:Array<String> = CoolUtil.coolTextFile(txt('data/songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase() + '/preload.txt'));
+            if (characters.length < 1)
+                characters = CoolUtil.coolTextFile(Paths.txt('songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase() + "/preload"));
             for (i in 0...characters.length)
             {
                 var data:Array<String> = characters[i].split(' ');
@@ -99,31 +121,44 @@ class ThingsToLoad extends MusicBeatState
 
                 var luaFile:String = 'data/characters/' + data[0];
 
+                #if MODS_ALLOWED
                 if (FileSystem.exists(Paths.modFolders('data/characters/'+data[0]+'.lua')) || FileSystem.exists(FileSystem.absolutePath("assets/shared/"+luaFile+'.lua')) || FileSystem.exists(Paths.lua(luaFile)))
+                #else
+                if (Assets.exists(Paths.lua(luaFile)))
+                #end
                     PlayState.startCharScripts.push(data[0]);
 
-                trace ('found ' + data[0]);
+                Debug.logInfo('found ' + data[0]);
                 done++;
             }
         }   
         
-        if (FileSystem.exists(Paths.txt(songLowercase + "/preload-stage")))
+        #if MODS_ALLOWED
+        if (FileSystem.exists(txt('data/songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase() + '/preload-stage.txt')) || FileSystem.exists(Paths.txt('songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase() + '/preload-stage')))
+        #else
+        if (Assets.exists(Paths.txt('songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase() + "/preload-stage")))
+        #end
         {
             PlayState.alreadyPreloaded = true;
-            var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt(songLowercase + "/preload-stage"));
-
+            var characters:Array<String> = CoolUtil.coolTextFile(txt('data/songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase() + "/preload-stage.txt"));
+            if (characters.length < 1)
+                characters = CoolUtil.coolTextFile(Paths.txt('songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase() + "/preload"));
             for (i in 0...characters.length)
             {
                 var data:Array<String> = characters[i].split(' ');
                 Stage = new Stage(data[0], true);
                 Stage.setupStageProperties(data[0], true, true);
-                trace ('stages are ' + data[0]);
+                Debug.logInfo('stages are ' + data[0]);
+                done++;
             }
 
             PlayState.curStage = PlayState.SONG.stage;
         }
 
-        loadPlayState();
+        new FlxTimer().start(done, function(tmr){
+            text.text = text.text.replace('.', '').replace(' is now caching objects', '') + " COMPLETED LOADING!";
+            loadPlayState();
+        });
     }
 
     function loadPlayState()
@@ -132,4 +167,8 @@ class ThingsToLoad extends MusicBeatState
         LoadingState.loadAndSwitchState(new PlayState());
     }
 
+    function txt(text:String)
+    {
+        return Paths.modFolders(text);
+    }
 }

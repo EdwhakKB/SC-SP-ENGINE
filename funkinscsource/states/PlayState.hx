@@ -272,6 +272,7 @@ class PlayState extends MusicBeatState
 	public var camNoteStuff:FlxCamera;
 	public var camStuff:FlxCamera;
 	public var mainCam:FlxCamera;
+	public var camPause:FlxCamera;
 
 	public var cameraSpeed:Float = 1;
 
@@ -556,6 +557,8 @@ class PlayState extends MusicBeatState
 		camStuff.bgColor.alpha = 0;
 		mainCam = new FlxCamera();
 		mainCam.bgColor.alpha = 0;
+		camPause = new FlxCamera();
+		camPause.bgColor.alpha = 0;
 
 		// Game Camera (where stage and characters are)
 
@@ -580,12 +583,15 @@ class PlayState extends MusicBeatState
 		// Main Camera
 		FlxG.cameras.add(mainCam, false);
 
+		//The final one should be more but for this one rn it's the pauseCam
+		FlxG.cameras.add(camPause, false);
+
 		camNoteStuff.zoom = !usesHUD ? camHUD.zoom : 1;
 
 		grpNoteSplashes = new FlxTypedGroup<NoteSplash>();
 		grpNoteSplashesCPU = new FlxTypedGroup<NoteSplash>();
 
-		IndieDiamondTransSubState.nextCamera = mainCam;
+		IndieDiamondTransSubState.nextCamera = camPause;
 
 		persistentUpdate = true;
 		persistentDraw = true;
@@ -703,10 +709,10 @@ class PlayState extends MusicBeatState
 		// After all characters being loaded, it makes then invisible 0.01s later so that the player won't freeze when you change characters
 		var someSongStuff:String = 'songs/' + Paths.formatToSongPath(SONG.songId).toLowerCase();
 
-		if (FileSystem.exists(Paths.txt(someSongStuff + "/preload")))
+		if (#if MODS_ALLOWED FileSystem.exists(Paths.txt(someSongStuff + "/preload")) #else Assets.exists(Paths.txt(someSongStuff + "/preload")) #end)
 		{
 			PlayState.alreadyPreloaded = true;
-			var characters:Array<String> = CoolUtil.coolTextFile2(Paths.txt(someSongStuff + "/preload"));
+			var characters:Array<String> = CoolUtil.coolTextFile(Paths.txt(someSongStuff + "/preload"));
 
 			for (i in 0...characters.length) // whoops. still need to load the luas
 			{
@@ -721,7 +727,7 @@ class PlayState extends MusicBeatState
 			startCharScripts.remove(startCharScripts[i]);
 		}
 
-		if (!alreadyPreloaded && ClientPrefs.data.cacheOnGPU)
+		if (!alreadyPreloaded)
 		{
 			cacheCharacter(PlayState.SONG.player2, 1);
 			cacheCharacter(PlayState.SONG.player1, 0);
@@ -886,7 +892,7 @@ class PlayState extends MusicBeatState
 		playerStrums.visible = false;
 		opponentStrums.visible = false;
 
-		generateSong();
+		generateSong(PlayState.SONG);
 
 		if (!songDontNeedSkip)
 		{
@@ -1201,7 +1207,7 @@ class PlayState extends MusicBeatState
 
 		Paths.clearUnusedMemory();
 	
-		IndieDiamondTransSubState.nextCamera = mainCam;
+		IndieDiamondTransSubState.nextCamera = camPause;
 		if(eventNotes.length < 1) checkEventNote();
 
 		if(timeToStart > 0){						
@@ -2171,7 +2177,7 @@ class PlayState extends MusicBeatState
 
 	public var daSection:Int = 0;
 
-	public function generateSong():Void
+	public function generateSong(songData:SwagSong):Void
 	{
 		opponentSectionNoteStyle = "";
 		playerSectionNoteStyle = "";
@@ -2186,7 +2192,6 @@ class PlayState extends MusicBeatState
 				songSpeed = ClientPrefs.getGameplaySetting('scrollspeed');
 		}
 
-		var songData = SONG;
 		Conductor.bpm = songData.bpm;
 
 		curSong = songData.songId;
@@ -2461,7 +2466,7 @@ class PlayState extends MusicBeatState
 				precacheList.set(event.value1, 'sound');
 				Paths.sound(event.value1);
 		}
-		Stage.eventPushedUnique(event);
+		if (Stage != null && !finishedSong)Stage.eventPushedUnique(event);
 	}
 
 	function eventEarlyTrigger(event:EventNote):Float {
@@ -2641,7 +2646,7 @@ class PlayState extends MusicBeatState
 
 	override function openSubState(SubState:FlxSubState)
 	{
-		Stage.openSubStateInStage(paused);
+		if (Stage != null && !finishedSong) Stage.openSubStateInStage(paused);
 		if (paused)
 		{
 			#if VIDEOS_ALLOWED
@@ -2692,7 +2697,7 @@ class PlayState extends MusicBeatState
 
 	override function closeSubState()
 	{
-		Stage.closeSubStateInStage(paused);
+		if (Stage != null && !finishedSong) Stage.closeSubStateInStage(paused);
 		if (paused)
 		{
 			#if VIDEOS_ALLOWED
@@ -2902,7 +2907,7 @@ class PlayState extends MusicBeatState
 		}
 		if (!alreadyEndedSong)
 		{
-			Stage.update(elapsed);
+			if (Stage != null && !finishedSong) Stage.update(elapsed);
 
 			for (value in modchartCharacters.keys())
 			{
@@ -3052,7 +3057,9 @@ class PlayState extends MusicBeatState
 				#if modchartingTools
 				if (controls.justPressed('debug_3')) openModchartEditor(true);
 				#end
+				#if debug
 				if (controls.justPressed('debug_4')) openKadeStageEditor(true);
+				#end
 			}
 			
 			if (startedCountdown && !paused)
@@ -3753,7 +3760,11 @@ class PlayState extends MusicBeatState
 				}
 		}
 
-		openSubState(new PauseSubState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
+		var boyfriendPos = boyfriend.getScreenPosition();
+		var pauseSubState = new PauseSubState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y);
+		openSubState(pauseSubState);
+		pauseSubState.camera = camPause;
+		boyfriendPos.put();
 
 		#if desktop
 		DiscordClient.changePresence(detailsPausedText, SONG.songId + " (" + storyDifficultyText + ")", iconP2.getCharacter());
@@ -3768,7 +3779,9 @@ class PlayState extends MusicBeatState
 			FlxG.camera.followLerp = 0;
 			if (persistentUpdate != false) persistentUpdate = false;
 			FlxG.sound.music.stop();
+			FlxG.sound.music.volume = 0;
 			vocals.stop();
+			vocals.volume = 0;
 			chartingMode = true;
 			modchartMode = false;
 	
@@ -3790,7 +3803,9 @@ class PlayState extends MusicBeatState
 		paused = true;
 		if (persistentUpdate != false) persistentUpdate = false;
 		FlxG.sound.music.stop();
+		FlxG.sound.music.volume = 0;
 		vocals.stop();
+		vocals.volume = 0;
 		#if desktop DiscordClient.resetClientID(); #end
 		MusicBeatState.switchState(new CharacterEditorState(SONG.player2));
 		return true;
@@ -3806,7 +3821,9 @@ class PlayState extends MusicBeatState
 			FlxG.camera.followLerp = 0;
 			if (persistentUpdate != false) persistentUpdate = false;
 			FlxG.sound.music.stop();
+			FlxG.sound.music.volume = 0;
 			vocals.stop();
+			vocals.volume = 0;
 			#if desktop
 			DiscordClient.changePresence("Modchart Editor", null, null, true);
 			DiscordClient.resetClientID();
@@ -4322,7 +4339,7 @@ class PlayState extends MusicBeatState
 			// 		addTextToDebug('Event $eventName does not exist!, check if the .hx, or even source for this event.', FlxColor.RED);
 		}
 		
-		Stage.eventCalled(eventName, value1, value2, strumTime, value3, value4, value5, value6, value7, value8, 
+		if (Stage != null && !finishedSong) Stage.eventCalled(eventName, value1, value2, strumTime, value3, value4, value5, value6, value7, value8, 
 			value9, value10, value11, value12, value13, value14);
 		callOnScripts('onEvent', [eventName, value1, value2, strumTime, value3, value4, value5, value6, value7, value8, 
 			value9, value10, value11, value12, value13, value14
@@ -6002,8 +6019,11 @@ class PlayState extends MusicBeatState
 		Note.globalRgbShaders = [];
 		backend.NoteTypesConfig.clearNoteTypesData();
 		cleanManagers();
-		Stage.destroy();
-		Stage = null;
+		if (Stage != null)
+		{
+			Stage.destroy();
+			Stage = null;
+		}
 		instance = null;
 		super.destroy();
 	}
@@ -6368,7 +6388,7 @@ class PlayState extends MusicBeatState
 	#end
 
 	#if HSCRIPT_ALLOWED
-	public function startHScriptsNamed(scriptFile:String, ?isStageHx:Bool = false)
+	public function startHScriptsNamed(scriptFile:String)
 	{
 		#if MODS_ALLOWED
 		var scriptToLoad:String = Paths.modFolders(scriptFile);
@@ -6382,8 +6402,7 @@ class PlayState extends MusicBeatState
 		{
 			if (SScript.global.exists(scriptToLoad)) return false;
 
-			if (isStageHx) Stage.initHScript(scriptToLoad);
-			else initHScript(scriptToLoad);
+			initHScript(scriptToLoad);
 			return true;
 		}
 		return false;
@@ -6828,10 +6847,10 @@ class PlayState extends MusicBeatState
 	public static var alreadyPushedCharacter:Array<String> = [];
 	public static var preloadedCharacters:Array<String> = [];
 
-	public function cacheCharacter(character:String, charType:Int) //Make cacheCharacter gunction not repeat already preloaded characters!
+	public function cacheCharacter(character:String, charType:Int) //Make cacheCharacter function not repeat already preloaded characters!
 	{
-		if (!alreadyPushedCharacter.contains(character)) alreadyPushedCharacter.push(character);
-		if (preloadedCharacters.contains(character)) return;
+		if (!PlayState.alreadyPushedCharacter.contains(character)) PlayState.alreadyPushedCharacter.push(character);
+		if (PlayState.preloadedCharacters.contains(character)) return;
 
 		var cacheChar:Character = null;
 		switch (charType)
@@ -6842,12 +6861,12 @@ class PlayState extends MusicBeatState
 			case 3: cacheChar = mom;
 		}
 
-		for (i in 0...alreadyPushedCharacter.length)
+		for (i in 0...PlayState.alreadyPushedCharacter.length)
 		{
-			cacheChar = new Character(0, 0, alreadyPushedCharacter[i], (charType < 1));
+			cacheChar = new Character(0, 0, PlayState.alreadyPushedCharacter[i], (charType < 1));
 			cacheChar.alpha = 0.00001;
 
-			preloadedCharacters.push(alreadyPushedCharacter[i]);
+			PlayState.preloadedCharacters.push(PlayState.alreadyPushedCharacter[i]);
 		}
 	}
 

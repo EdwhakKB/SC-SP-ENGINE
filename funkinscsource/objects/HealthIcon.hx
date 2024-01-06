@@ -1,6 +1,7 @@
 package objects;
 
 import haxe.Json as Json;
+import lime.utils.Assets;
 
 typedef IconJson = {
 	var ?name:String;
@@ -115,13 +116,16 @@ class HealthIcon extends FlxSprite
 		try
 		{
 			#if MODS_ALLOWED
-			loadIconFile(Json.parse(File.getContent(path)), frameName, name, allowGPU);
+			if (FileSystem.exists(Paths.getPath('images/$frameName.xml', TEXT, null, true)))
+				loadIconFile(Json.parse(File.getContent(path)), frameName, name, allowGPU);
 			#else
-			loadIconFile(Json.parse(Assets.getText(path)), frameName, name, allowGPU);
+			if (Assets.exists(Paths.getPath('images/$frameName.xml', TEXT, null, true)))
+				loadIconFile(Json.parse(Assets.getText(path)), frameName, name, allowGPU);
 			#end
+			else loadGraphicIcon(name, allowGPU);
 		}
 		catch(e:Dynamic){
-			loadGraphicIcon(name, allowGPU);
+			Debug.logInfo("Couldn't find image nor xml nor sprite to load!");
 		}
 
 		this.char = char;
@@ -184,18 +188,12 @@ class HealthIcon extends FlxSprite
 
 	public function loadIconFile(json:Dynamic, path:String, graphicIcon:String, gpuAllowed:Bool)
 	{
-		final findXml:String = Paths.getPath('images/$path.xml', TEXT, null, true);
+		frames = Paths.getSparrowAtlas(path, null, gpuAllowed);
 
-		#if MODS_ALLOWED
-		if (FileSystem.exists(findXml))
-			frames = Paths.getSparrowAtlas(path, null, gpuAllowed);
-		#else
-		if (Assets.exists(findXml))
-			frames = Paths.getSparrowAtlas(path, null, gpuAllowed);
-		#end
+		animatedIcon = true;
 
-		if (frames != null) animatedIcon = true;
-		else{
+		if (frames == null)
+		{
 			animatedIcon = false;
 			return;
 		}

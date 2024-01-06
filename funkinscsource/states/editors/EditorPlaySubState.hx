@@ -149,7 +149,7 @@ class EditorPlaySubState extends MusicBeatSubstate
 		add(tipText);
 		FlxG.mouse.visible = false;
 		
-		generateSong();
+		generateSong(PlayState.SONG);
 
 		FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
 		FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
@@ -305,7 +305,7 @@ class EditorPlaySubState extends MusicBeatSubstate
 	}
 
 	// Borrowed from PlayState
-	public function generateSong()
+	public function generateSong(songData:SwagSong)
 	{
 		// FlxG.log.add(ChartParser.parse());
 		songSpeed = PlayState.SONG.speed;
@@ -319,7 +319,6 @@ class EditorPlaySubState extends MusicBeatSubstate
 		}
 		noteKillOffset = Math.max(Conductor.stepCrochet, 350 / songSpeed * playbackRate);
 
-		var songData = PlayState.SONG;
 		Conductor.bpm = songData.bpm;
 
 		vocals = new FlxSound();

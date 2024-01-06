@@ -43,12 +43,14 @@ class SupportBETAFunctions
 			}			
 		});
 
-		funk.set("setActorAccelerationX", function(x:Int,id:String) {
-			LuaUtils.getActorByName(id).acceleration.x = x;
+		funk.set("setActorAccelerationX", function(x:Int, id:String, ?bg:Bool = false) {
+			if (bg) PlayState.instance.Stage.swagBacks[id].acceleration.x = x;
+			else LuaUtils.getActorByName(id).acceleration.x = x;
 		});
 		
-		funk.set("setActorDragX", function(x:Int,id:String) {
-			LuaUtils.getActorByName(id).drag.x = x;
+		funk.set("setActorDragX", function(x:Int, id:String, ?bg:Bool = false) {
+			if (bg) PlayState.instance.Stage.swagBacks[id].drag.x = x;
+			else LuaUtils.getActorByName(id).drag.x = x;
 		});
 		
 		funk.set("setActorVelocityX", function(x:Int,id:String, ?bg:Bool = false) {
@@ -66,24 +68,28 @@ class SupportBETAFunctions
 			else LuaUtils.getActorByName(id).visible = visible;	
 		});
 
-		funk.set("setActorY", function(y:Int,id:String) {
+		funk.set("setActorY", function(y:Int, id:String, ?bg:Bool = false) {
 			LuaUtils.getActorByName(id).y = y;	
 		});
 
-		funk.set("setActorAccelerationY", function(y:Int,id:String) {
-			LuaUtils.getActorByName(id).acceleration.y = y;
+		funk.set("setActorAccelerationY", function(y:Int, id:String, ?bg:Bool = false) {
+			if (bg) PlayState.instance.Stage.swagBacks[id].acceleration.y = y;
+			else LuaUtils.getActorByName(id).acceleration.y = y;
 		});
 		
-		funk.set("setActorDragY", function(y:Int,id:String) {
-			LuaUtils.getActorByName(id).drag.y = y;
+		funk.set("setActorDragY", function(y:Int, id:String, ?bg:Bool = false) {
+			if (bg) PlayState.instance.Stage.swagBacks[id].drag.y = y;
+			else LuaUtils.getActorByName(id).drag.y = y;
 		});
 		
-		funk.set("setActorVelocityY", function(y:Int,id:String) {
-			LuaUtils.getActorByName(id).velocity.y = y;
+		funk.set("setActorVelocityY", function(y:Int, id:String, ?bg:Bool = false) {
+			if (bg) PlayState.instance.Stage.swagBacks[id].velocity.y = y;
+			else LuaUtils.getActorByName(id).velocity.y = y;
 		});
 		
-		funk.set("setActorAngle", function(angle:Int,id:String) {
-			LuaUtils.getActorByName(id).angle = angle;
+		funk.set("setActorAngle", function(angle:Int, id:String, ?bg:Bool = false) {
+			if (bg) PlayState.instance.Stage.swagBacks[id].angle = angle;
+			else LuaUtils.getActorByName(id).angle = angle;
 		});
 
 		funk.set("setActorScale", function(scale:Float,id:String) {

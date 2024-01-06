@@ -653,8 +653,8 @@ class Stage extends MusicBeatState
 
 					isLuaStage = true;
 					isHxStage = true;
-					PlayState.instance.startLuasNamed('stages/' + daStage + '.lua', true, preloading);
-					PlayState.instance.startHScriptsNamed('stages/' + daStage + '.hx', true);
+					startLuasNamed('stages/' + daStage + '.lua', true, preloading);
+					startHScriptsNamed('stages/' + daStage + '.hx', true);
 				}
 		}
 	}
@@ -1347,7 +1347,51 @@ class Stage extends MusicBeatState
 		object.destroy(); 
 	}
 
+	#if LUA_ALLOWED
+	public function startLuasNamed(luaFile:String, ?isStageLua:Bool = false, ?preloading:Bool = false)
+	{
+		#if MODS_ALLOWED
+		var luaToLoad:String = Paths.modFolders(luaFile);
+		if(!FileSystem.exists(luaToLoad))
+			luaToLoad = Paths.getSharedPath(luaFile);
+		
+		if(FileSystem.exists(luaToLoad))
+		#elseif sys
+		var luaToLoad:String = Paths.getSharedPath(luaFile);
+		if(OpenFlAssets.exists(luaToLoad))
+		#end
+		{
+			for (script in luaArray)
+				if(script.scriptName == luaToLoad) return false;
+	
+			new FunkinLua(luaToLoad, isStageLua, preloading);
+			return true;
+		}
+		return false;
+	}
+	#end
+
 	#if HSCRIPT_ALLOWED
+	public function startHScriptsNamed(scriptFile:String, ?isStageHx:Bool = false)
+	{
+		#if MODS_ALLOWED
+		var scriptToLoad:String = Paths.modFolders(scriptFile);
+		if(!FileSystem.exists(scriptToLoad))
+			scriptToLoad = Paths.getSharedPath(scriptFile);
+		#else
+		var scriptToLoad:String = Paths.getSharedPath(scriptFile);
+		#end
+
+		if(FileSystem.exists(scriptToLoad))
+		{
+			if (SScript.global.exists(scriptToLoad)) return false;
+
+			initHScript(scriptToLoad);
+			return true;
+		}
+		return false;
+	}
+
 	public function initHScript(file:String)
 	{
 		try
