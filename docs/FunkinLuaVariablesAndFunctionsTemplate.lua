@@ -1,143 +1,164 @@
 --Variables
 --Variable, Type, Set Value (What is contains by default or what is set by default), Desc
-[
-	--Lua Stuff
-	['Function_StopLua', "Dynamic", "##PSYCHLUA_FUNCTIONSTOPLUA", "Stops Lua"],
-	['Function_StopHScript', "Dynamic", "##PSYCHLUA_FUNCTIONSTOPHSCRIPT", "Stops HScript"],
-	['Function_StopAll', "Dynamic", "##PSYCHLUA_FUNCTIONSTOPALL", "Stops Everything"],
-	['Function_Stop', "Dynamic", "##PSYCHLUA_FUNCTIONSTOP" "Function to Stop"],
-	['Function_Continue', "Dynamic", "##PSYCHLUA_FUNCTIONCONTINUE", "Function to Continue"],
-	['luaDebugMode', "Boolean", "false", "uses DebugMode?"],
-	['luaDeprecatedWarnings', "Boolean", "true", "uses DeprecatedWarnings?"],
-	['inChartEditor', "Boolean", "false", "in Chart Editor?"],
-	['inModchartEditor', "Boolean", "false", "in Modchart Editor?"],
 
-	--Song/Week Stuff
-	['curBpm', "Float", "100", "Conductor Bpm"], -- Conductor.bpm
-	['bpm', "Float", "0", "PlayState's SONG Bpm"], --PlayState.SONG.bpm
-	['scrollSpeed', "Float", "1", "PlayState's SONG Speed"], --PlayState.SONG.speed
-	['crochet', "Float", "((60) / bpm) * 1000", "Beats in miliseconds"], -- Grabs 60 and divides it by bpm but multiplies by 1000
-	['stepCrochet', "Float", "crochet / 4", "Steps in miliseconds"], --Grabs crochet and divides by 4
-	['songLength', "Float", "music.length", "music's Length"], --inst.length when playstate or if not then FlxG.sound.music.length;
-	['songName', "String", "Song Id", "Song's name"], --Grabs PlayState.SONG.songId;
-	['songPath', "String", "Song's path", "Song's formated path"], --Grabs Paths.formatToSongPath(PlayState.SONG.songId);
-	['startedCountDown', "Boolean", "false", "if count down has started"],
-	['curStage', "String", "stage", "PlayState's SONG Stage"], --Grabs PlayState.SONG.stage;
+--Lua Stuff
+	local LuaStuff = {
+		'Function_StopLua', "Dynamic", "##PSYCHLUA_FUNCTIONSTOPLUA", "Stops Lua",
+		'Function_StopHScript', "Dynamic", "##PSYCHLUA_FUNCTIONSTOPHSCRIPT", "Stops HScript",
+		'Function_StopAll', "Dynamic", "##PSYCHLUA_FUNCTIONSTOPALL", "Stops Everything",
+		'Function_Stop', "Dynamic", "##PSYCHLUA_FUNCTIONSTOP" "Function to Stop",
+		'Function_Continue', "Dynamic", "##PSYCHLUA_FUNCTIONCONTINUE", "Function to Continue",
+		'luaDebugMode', "Boolean", "false", "uses DebugMode?",
+		'luaDeprecatedWarnings', "Boolean", "true", "uses DeprecatedWarnings?",
+		'inChartEditor', "Boolean", "false", "in Chart Editor?",
+		'inModchartEditor', "Boolean", "false", "in Modchart Editor?"
+	}
 
-	['isStoryMode', "Boolean", "false", "PlayState is in storyMode"], --Grabs PlayState.isStoryMode;
-	['difficulty', "Int", "0", "PlayState's story difficulty"], --Grabs PlayState.storyDifficutly;
+--Song/Week Stuff
+	local SongWeekStuff = {
+		'curBpm', "Float", "100", "Conductor Bpm", -- Conductor.bpm
+		'bpm', "Float", "0", "PlayState's SONG Bpm", --PlayState.SONG.bpm
+		'scrollSpeed', "Float", "1", "PlayState's SONG Speed", --PlayState.SONG.speed
+		'crochet', "Float", "((60) / bpm) * 1000", "Beats in miliseconds", -- Grabs 60 and divides it by bpm but multiplies by 1000
+		'stepCrochet', "Float", "crochet / 4", "Steps in miliseconds", --Grabs crochet and divides by 4
+		'songLength', "Float", "music.length", "music's Length", --inst.length when playstate or if not then FlxG.sound.music.length;
+		'songName', "String", "Song Id", "Song's name", --Grabs PlayState.SONG.songId;
+		'songPath', "String", "Song's path", "Song's formated path", --Grabs Paths.formatToSongPath(PlayState.SONG.songId);
+		'startedCountDown', "Boolean", "false", "if count down has started",
+		'curStage', "String", "stage", "PlayState's SONG Stage", --Grabs PlayState.SONG.stage;
 
-	['difficultyName', "String", "Difficulty Name", "Song's difficulty in string form"], --Grabs Difficulty.getString();
-	['difficultyPath', "String", "Difficulty Path", "Song's difficulyt path name"], --Grabs Paths.formathToSongPath(Difficulty.getString());
-	['weekRaw', "Int", "Story Week", "Story week number"], --Grabs PlayState.storyWeek;
-	['week', "Int", "weekList from storyWeek", "Song's name"], --Grabs WeekData.weekList[PlayState.storyWeeek];
-	['seenCutscene', "Boolean", "fale", "If cutscene has been seen"], --Grabs PlayState.seenCutscene;
-	['hasVocals', "Boolean", "Song's need for vocals", "PlayState Song's needsVoices"], --Grabs PlayState.SONG.needsVoices;
+		'isStoryMode', "Boolean", "false", "PlayState is in storyMode", --Grabs PlayState.isStoryMode;
+		'difficulty', "Int", "0", "PlayState's story difficulty", --Grabs PlayState.storyDifficutly;
 
-	--Camera Pos
-	['cameraX', "Int", "0", "Camera's X Pos"],
-	['cameraY', "Int", "0", "Camera's Y Pos"],
+		'difficultyName', "String", "Difficulty Name", "Song's difficulty in string form", --Grabs Difficulty.getString();
+		'difficultyPath', "String", "Difficulty Path", "Song's difficulyt path name", --Grabs Paths.formathToSongPath(Difficulty.getString());
+		'weekRaw', "Int", "Story Week", "Story week number", --Grabs PlayState.storyWeek;
+		'week', "Int", "weekList from storyWeek", "Song's name", --Grabs WeekData.weekList[PlayState.storyWeeek];
+		'seenCutscene', "Boolean", "fale", "If cutscene has been seen", --Grabs PlayState.seenCutscene;
+		'hasVocals', "Boolean", "Song's need for vocals", "PlayState Song's needsVoices", --Grabs PlayState.SONG.needsVoices;
+	}
 
-	--Screen Stuff
-	['screenWidth', "Int", "1280", "Screen's width"], --Grabs FlxG.width;
-	['screenHeight', "Int", "720", "Screen's height"], --Grabs FlxG.width;
+--Camera Pos
+	local CameraPos = {
+		'cameraX', "Int", "0", "Camera's X Pos",
+		'cameraY', "Int", "0", "Camera's Y Pos",
+	}
 
-	--PlayState cringe ass nae nae bullcrap
-	['curSection', "Int", "0", "Every Section"],
-	['curStep', "Int", "0", "Every Step"],
-	['curBeat', "Int", "0", "Every Beat"],
-	['curDecStep', "Float", "0", "Every Decimal Step"],
-	['curDecBeat', "Float", "0", "Every Decimal Beat"],
+--Screen Stuff
+	local ScreenStuff = {
+		'screenWidth', "Int", "1280", "Screen's width", --Grabs FlxG.width;
+		'screenHeight', "Int", "720", "Screen's height", --Grabs FlxG.width;
+	}
 
-	['score', "Int", "0", "Total Score"],
-	['misses', "Int", "0", "Total Misses"],
-	['hits', "Int", "0", "Total Hits"],
-	['combo', "Int", "0", "Total Combo"],
+--PlayState cringe ass nae nae bullcrap
+	local PlayStateVars = {
+		'curSection', "Int", "0", "Every Section",
+		'curStep', "Int", "0", "Every Step",
+		'curBeat', "Int", "0", "Every Beat",
+		'curDecStep', "Float", "0", "Every Decimal Step",
+		'curDecBeat', "Float", "0", "Every Decimal Beat",
 
-	['rating', "Float", "0", "Total Rating"],
-	['ratingName', "String", "", "Rating's Name's"],
-	['version', "String", "psychEngineVersion", "Psych Engine's Version"], --Grabs MainMenuState.psychEngineVersion.trim();
-	['SCEversion', "String", "SCEEngineVersion", "SCE's Engine Version"], --Grabs MainMenuState.SCEVersion.trim();
+		'score', "Int", "0", "Total Score",
+		'misses', "Int", "0", "Total Misses",
+		'hits', "Int", "0", "Total Hits",
+		'combo', "Int", "0", "Total Combo",
 
-	['inGameOver', "Boolean", "false", "is in gameOver"],
-	['mustHitSection', "Boolean", "false", "is musthitsection"],
-	['altAnim', "Boolean", "false", "turn on/off altAnim"],
-	['playerAltAnim', "Boolean", "false", "is player's AltAnim section?"],
-	['CPUAltAnim', "Boolean", "false", "is cpu's AltAnim section?"],
-	['gfSection', "Boolean", "false", "is gf's section?"],
-	['player4Section', "Boolean", "false", "is player4's section?"],
-	['playDadSing', "Boolean", "true", "PlayState dad sing's?"],
-	['playBFSing', "Boolean", "true", "PlayState boyfriend sing's?"],
+		'rating', "Float", "0", "Total Rating",
+		'ratingName', "String", "", "Rating's Name's",
+		'version', "String", "psychEngineVersion", "Psych Engine's Version", --Grabs MainMenuState.psychEngineVersion.trim();
+		'SCEversion', "String", "SCEEngineVersion", "SCE's Engine Version", --Grabs MainMenuState.SCEVersion.trim();
 
-	--Gameplay Settings
-	['healthGainMult', "Float", "1", "Health gain amount"], --Grabs game.healthGain;
-	['healthLossMult', "Float", "1", "Health loss amount"], --Grabs game.healthLoss;
-	['playbackRate', "Float", "1", "Song playback rate"], --Grabs game.playbackRate;
-	['guitarHeroSustains', "Boolean", "true", "Hero Sustains"], --Grabs game.guitarHeroSustains;
-	['instakillOnMiss', "Boolean", "false", "Killed on miss"], --Grabs game.instakillOnMiss;
-	['botplay', "Boolean", "false", "Bot plays for you"], --Grabs game.cpuControlled;
-	['practice', "Boolean", "false", "Practice the game"], --Grabs game.practiceMode;
-	['modchart', "Boolean", "true", "Active Modcharts"], --Grabs game.notITG;
-	['opponent', "Boolean", "false", "Play as opponent"], --Grabs game.opponentMode;
-	['showCaseMode', "Boolean", "false", "Show case the gameplay"], --Grabs game.showCaseMode;
-	['holdsActive', "Boolean", "true", "Long notes are active"], --Grabs game.holdsActive;
+		'inGameOver', "Boolean", "false", "is in gameOver",
+		'mustHitSection', "Boolean", "false", "is musthitsection",
+		'altAnim', "Boolean", "false", "turn on/off altAnim",
+		'playerAltAnim', "Boolean", "false", "is player's AltAnim section?",
+		'CPUAltAnim', "Boolean", "false", "is cpu's AltAnim section?",
+		'gfSection', "Boolean", "false", "is gf's section?",
+		'player4Section', "Boolean", "false", "is player4's section?",
+		'playDadSing', "Boolean", "true", "PlayState dad sing's?",
+		'playBFSing', "Boolean", "true", "PlayState boyfriend sing's?",
+	}
 
+--Gameplay Settings
+	local gameplaySettings = {
+		'healthGainMult', "Float", "1", "Health gain amount", --Grabs game.healthGain;
+		'healthLossMult', "Float", "1", "Health loss amount", --Grabs game.healthLoss;
+		'playbackRate', "Float", "1", "Song playback rate", --Grabs game.playbackRate;
+		'guitarHeroSustains', "Boolean", "true", "Hero Sustains", --Grabs game.guitarHeroSustains;
+		'instakillOnMiss', "Boolean", "false", "Killed on miss", --Grabs game.instakillOnMiss;
+		'botplay', "Boolean", "false", "Bot plays for you", --Grabs game.cpuControlled;
+		'practice', "Boolean", "false", "Practice the game", --Grabs game.practiceMode;
+		'modchart', "Boolean", "true", "Active Modcharts", --Grabs game.notITG;
+		'opponent', "Boolean", "false", "Play as opponent", --Grabs game.opponentMode;
+		'showCaseMode', "Boolean", "false", "Show case the gameplay", --Grabs game.showCaseMode;
+		'holdsActive', "Boolean", "true", "Long notes are active", --Grabs game.holdsActive;
+	}
+
+--Sturms
 	for i = 0, 4 do
-		['defaultPlayerStrumX'..i, "Float", "0", "Default Player X Strum Number"..i],
-		['defaultPlayerStrumY'..i, "Float", "0", "Default Player Y Strum Number"..i],
-		['defaultOpponentStrumX'..i, "Float", "0", "Default Opponent X Strum Number"..i],
-		['defaultOpponentStrumY'..i, "Float", "0", "Default Opponent Y Strum Number"..i],
+		local defaultPlayerStrumsX = {'defaultPlayerStrumX'..i, "Float", "0", "Default Player X Strum Number"..i}
+		local defaultPlayerStrumsY = {'defaultPlayerStrumY'..i, "Float", "0", "Default Player Y Strum Number"..i}
+		local defaultOpponentStrumsX = {'defaultOpponentStrumX'..i, "Float", "0", "Default Opponent X Strum Number"..i}
+		local defaultOpponentStrumsY = {'defaultOpponentStrumY'..i, "Float", "0", "Default Opponent Y Strum Number"..i}
 	end
 
-	--Default character positions woooo
-	['defaultBoyfriendX', "Float", "770", "Default boyfriend X pos"], --Grabs game.BF_X;
-	['defaultBoyfriendY', "Float", "450", "Default boyfriend Y pos"], --Grabs game.BF_Y;
-	['defaultOpponentX', "Float", "100", "Default opponent X pos"], --Grabs game.DAD_X;
-	['defaultOpponentY', "Float", "100", "Default opponent Y pos"], --Grabs game.DAD_Y;
-	['defaultGirlfriendX', "Float", "400", "Default girlfriend X pos"], --Grabs game.GF_X;
-	['defaultGirlfriendY', "Float", "130", "Default girlfriend Y pos"], --Grabs game.GF_Y;
-	['defaultMomX', "Float", "100", "Default opponent2 X pos"], --Grabs game.MOM_X;
-	['defaultMomY', "Float", "100", "Default opponent2 Y pos"], --Grabs game.MOM_Y;
+--Default character positions woooo
+	local characterPos = { 
+		'defaultBoyfriendX', "Float", "770", "Default boyfriend X pos", --Grabs game.BF_X;
+		'defaultBoyfriendY', "Float", "450", "Default boyfriend Y pos", --Grabs game.BF_Y;
+		'defaultOpponentX', "Float", "100", "Default opponent X pos", --Grabs game.DAD_X;
+		'defaultOpponentY', "Float", "100", "Default opponent Y pos", --Grabs game.DAD_Y;
+		'defaultGirlfriendX', "Float", "400", "Default girlfriend X pos", --Grabs game.GF_X;
+		'defaultGirlfriendY', "Float", "130", "Default girlfriend Y pos", --Grabs game.GF_Y;
+		'defaultMomX', "Float", "100", "Default opponent2 X pos", --Grabs game.MOM_X;
+		'defaultMomY', "Float", "100", "Default opponent2 Y pos", --Grabs game.MOM_Y;
+	}
 
-	--Character Shit
-	['boyfriendName', "String", "boyfriend", "PlayState's SONG Player 1"], --Grabs PlayState.SONG.player1;
-	['dadName', "String", "dad", "PlayState's SONG Player 2"], --Grabs PlayState.SONG.player2;
-	['gfName', "String", "gf", "PlayState's SONG gfVersion"], --Grabs PlayState.SONG.gfVersion;
-	['momName', "String", "mom", "PlayState's SONG Player 4"], --Grabs PlayState.SONG.player4;
+--Character Shit
+	local characterShit = {
+		'boyfriendName', "String", "boyfriend", "PlayState's SONG Player 1", --Grabs PlayState.SONG.player1;
+		'dadName', "String", "dad", "PlayState's SONG Player 2", --Grabs PlayState.SONG.player2;
+		'gfName', "String", "gf", "PlayState's SONG gfVersion", --Grabs PlayState.SONG.gfVersion;
+		'momName', "String", "mom", "PlayState's SONG Player 4", --Grabs PlayState.SONG.player4;
+	}
 
-	--Some settings, no jokes
-	['downscroll', "Boolean", "false", "Scroll Type"], --Grabs ClientPrefs.data.downScroll;
-	['middlescroll', "Boolean", "false", "Scroll Center"], --Grabs ClientPrefs.data.middleScroll;
-	['framerate', "Int", "60", "Framerate of the game"], --Grabs ClientPrefs.data.framerate;
-	['ghostTapping', "Boolean", "true", "Not miss on touching key's without notes present"], --Grabs ClientPrefs.data.ghostTapping;
-	['hideHud', "Boolean", "false", "Hides Hud"], --Grabs ClientPrefs.data.hideHud;
-	['timeBarType', "String", "Time Left", "Types of the time bar"], --Grabs ClientPrefs.data.timeBarType;
-	['scoreZoom', "Boolean", "true", "A zoom takes place on the scoreText"], --Grabs ClientPrefs.data.scoreZoom;
-	['cameraZoomOnBeat', "Boolean", "true", "Allows zooms on beat in the cameras"], --Grabs ClientPrefs.data.camZooms;
-	['flashingLights', "Boolean", "true", "Allow Flashes of cameras"], --Grabs ClientPrefs.data.flashing;
-	['noteOffset', "Int", "0", "A Offset for notes"], --Grabs ClientPrefs.data.noteOffset;
-	['healthBarAlpha', "Float", "1", "Health bar's alpha"], --Grabs ClientPrefs.data.healthBarAlpha;
-	['noResetButton', "Boolean", "false", "Disables reset button 'R'"], --Grabs ClientPrefs.data.noReset;
-	['lowQuality', "Boolean", "false", "Makes the game lowQuality"], --Grabs ClientPrefs.data.lowQuality;
-	['shadersEnabled', "Boolean", "true", "Scroll Type"], --Grabs ClientPrefs.data.shaders;
-	['scriptName', "String", "Unknown", "The Script's Name"], --Grabs ScriptName;
-	['currentModDirectory', "String", "", "The current mod directory found"], --Grabs Mods.currentModDirectory;
+--Some settings, no jokes
+	local settings = {
+		'downscroll', "Boolean", "false", "Scroll Type", --Grabs ClientPrefs.data.downScroll;
+		'middlescroll', "Boolean", "false", "Scroll Center", --Grabs ClientPrefs.data.middleScroll;
+		'framerate', "Int", "60", "Framerate of the game", --Grabs ClientPrefs.data.framerate;
+		'ghostTapping', "Boolean", "true", "Not miss on touching key's without notes present", --Grabs ClientPrefs.data.ghostTapping;
+		'hideHud', "Boolean", "false", "Hides Hud", --Grabs ClientPrefs.data.hideHud;
+		'timeBarType', "String", "Time Left", "Types of the time bar", --Grabs ClientPrefs.data.timeBarType;
+		'scoreZoom', "Boolean", "true", "A zoom takes place on the scoreText", --Grabs ClientPrefs.data.scoreZoom;
+		'cameraZoomOnBeat', "Boolean", "true", "Allows zooms on beat in the cameras", --Grabs ClientPrefs.data.camZooms;
+		'flashingLights', "Boolean", "true", "Allow Flashes of cameras", --Grabs ClientPrefs.data.flashing;
+		'noteOffset', "Int", "0", "A Offset for notes", --Grabs ClientPrefs.data.noteOffset;
+		'healthBarAlpha', "Float", "1", "Health bar's alpha", --Grabs ClientPrefs.data.healthBarAlpha;
+		'noResetButton', "Boolean", "false", "Disables reset button 'R'", --Grabs ClientPrefs.data.noReset;
+		'lowQuality', "Boolean", "false", "Makes the game lowQuality", --Grabs ClientPrefs.data.lowQuality;
+		'shadersEnabled', "Boolean", "true", "Scroll Type", --Grabs ClientPrefs.data.shaders;
+		'scriptName', "String", "Unknown", "The Script's Name", --Grabs ScriptName;
+		'currentModDirectory', "String", "", "The current mod directory found", --Grabs Mods.currentModDirectory;
+	}
 
-	-- NoteSkin/Splash
-	['noteSkin', "String", "", "The Noteskin of the notes"], --Grabs ClientPrefs.data.noteSkin;
-	['noteSkinPostfix', "String", "", "The Postfix of the noteSkin"], --Grabs Note.getNoteSkinPostfix();
-	['splashSkin', "String", "", "The splashSkin of the splashes"], --Grabs ClientPrefs.data.splashSkin;
-	['splashSkinPostfix', "String", "", "The Postfix of the noteSkin"], --Grabs NoteSplash.getSplashSkinPostfix();
-	['splashSkinPostfix', "String", "", "The Postfix of the noteSkin"], --Grabs NoteSplash.getSplashSkinPostfix();
-	['splashAlpha', "Float", "0.6", "The Alpha of the splashes"], --Grabs ClientPrefs.data.splashAlpha;
+-- NoteSkin/Splash
+	local noteSkinSplashStuff = {
+		'noteSkin', "String", "", "The Noteskin of the notes", --Grabs ClientPrefs.data.noteSkin;
+		'noteSkinPostfix', "String", "", "The Postfix of the noteSkin", --Grabs Note.getNoteSkinPostfix();
+		'splashSkin', "String", "", "The splashSkin of the splashes", --Grabs ClientPrefs.data.splashSkin;
+		'splashSkinPostfix', "String", "", "The Postfix of the noteSkin", --Grabs NoteSplash.getSplashSkinPostfix();
+		'splashSkinPostfix', "String", "", "The Postfix of the noteSkin", --Grabs NoteSplash.getSplashSkinPostfix();
+		'splashAlpha', "Float", "0.6", "The Alpha of the splashes", --Grabs ClientPrefs.data.splashAlpha;
+	}
 
-	--Some more song stuff
-	['songPos', "Float", "0", "The current song pos"], --Grabs Conductor.songPosition
-	['hudZoom', "Float", "1", "The hud's zoom"], --Grabs game.camHUD.zoom;
-	['cameraZoom', "Float", "1", "The camera's zoom"], --Grabs FlxG.camera.zoom;
-
-	['buildTarget', "String", "", "The main target for building"], --Grabs getBuildTarget();
-]
+--Some more song stuff
+	local songStuff = {
+		'songPos', "Float", "0", "The current song pos", --Grabs Conductor.songPosition
+		'hudZoom', "Float", "1", "The hud's zoom", --Grabs game.camHUD.zoom;
+		'cameraZoom', "Float", "1", "The camera's zoom", --Grabs FlxG.camera.zoom;
+		'buildTarget', "String", "", "The main target for building" --Grabs getBuildTarget();
+	}
 
 --FunkinLua Functions--
 getRunningScripts()

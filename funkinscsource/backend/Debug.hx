@@ -453,7 +453,7 @@ class DebugLogWriter
 		FlxG.save.data.debugLogLevel = logLevel;
 	}
 
-	//Updated DEBUG USAGE BY SLUSHI_GAME
+	//Updated DEBUG USAGE BY SLUSHI
 	/**
 	 * Output text to the log file.
 	 */
@@ -461,7 +461,7 @@ class DebugLogWriter
 	{
 		var ts = FlxStringUtil.formatTime(getTime(), true);
 		var dateNow = getDate();
-		var msg = '$dateNow, $ts [${logLevel.rpad(' ', 5)}] - ${input.join('')}';
+		var msg = '$dateNow, $ts [${logLevel.rpad('', 5)}] - ${input.join('')}';
 
 		#if sys
 		if (active && file != null)
