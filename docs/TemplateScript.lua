@@ -117,6 +117,15 @@ function onSkipDialogue(line)
 	-- triggered when you press Enter and skip a dialogue line that was still being typed, dialogue line starts with 1
 end
 
+function goodNoteHitPre(id, direction, noteType, isSustainNote)
+	-- Function called when you hit a note (***after*** note hit calculations)
+	-- Values work the same as goodNoteHit
+end
+function opponentNoteHitPre(id, direction, noteType, isSustainNote)
+	-- Works the same as goodNoteHitPost, but for Opponent's notes being hit
+	-- Values work the same as goodNoteHit
+end
+
 -- Note miss/hit
 function goodNoteHit(id, direction, noteType, isSustainNote)
 	-- Function called when you hit a note (***before*** note hit calculations)
@@ -128,15 +137,6 @@ end
 
 function opponentNoteHit(id, direction, noteType, isSustainNote)
 	-- Works the same as goodNoteHit, but for Opponent's notes being hit
-end
-
-function goodNoteHitPost(id, direction, noteType, isSustainNote)
-	-- Function called when you hit a note (***after*** note hit calculations)
-	-- Values work the same as goodNoteHit
-end
-function opponentNoteHitPost(id, direction, noteType, isSustainNote)
-	-- Works the same as goodNoteHitPost, but for Opponent's notes being hit
-	-- Values work the same as goodNoteHit
 end
 
 function noteMissPress(direction)
@@ -277,11 +277,14 @@ function playerOneMissPress(direction, time)
 	--time = songPosition in time form
 end
 
---All these functions work like opponentNoteHit/goodNoteHit
+--All these functions work like opponentNoteHit/goodNoteHit --Except the (noteData, time) ones, type work with just songPosition time and noteData!
 function dadPreNoteHit(noteData, isSus, noteType, dType)
 end
 
 function dadNoteHit(noteData, isSus, noteType, dType)
+end
+
+function playerTwoPreSing(noteData, time)
 end
 
 function playerTwoSing(noteData, time)
@@ -291,6 +294,9 @@ function bfPreNoteHit(noteData, isSus, noteType, dType)
 end
 
 function bfNoteHit(noteData, isSus, noteType, dType)
+end
+
+function playerOnePreSing(noteData, time)
 end
 
 function playerOneSing(noteData, time)

@@ -72,7 +72,7 @@ class AsyncAssetPreloader
 			characters.push(PlayState.SONG.gfVersion);
 			characters.push(PlayState.SONG.player4);
 	
-			#if (SBETA == 0.1)
+			#if SCEFEATURES_ALLOWED
 			audio.push(Paths.inst((PlayState.SONG.instrumentalPrefix != null ? PlayState.SONG.instrumentalPrefix : ''), PlayState.SONG.songId, (PlayState.SONG.instrumentalSuffix != null ? PlayState.SONG.instrumentalSuffix : '')));
 			audio.push(Paths.voices((PlayState.SONG.vocalsPrefix != null ? PlayState.SONG.vocalsPrefix : ''), PlayState.SONG.songId, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : '')));
 			#else
@@ -286,7 +286,7 @@ class LoadingState extends MusicBeatState
 		var startedString:String = (PlayState.SONG != null ? "Loading " + PlayState.SONG.songId + "..." : "Loading " + Type.getClass(target) + "...");
 		PlayState.customLoaded = true;
 		//FlxG.worldBounds.set(0, 0);
-		#if desktop
+		#if DISCORD_ALLOWED
 		DiscordClient.changePresence(startedString, null, null, true);
 		DiscordClient.resetClientID();
 		#end
@@ -410,7 +410,7 @@ class LoadingState extends MusicBeatState
 	
 	function onLoad()
 	{
-		#if desktop
+		#if DISCORD_ALLOWED
 		DiscordClient.resetClientID();
 		#end
 
@@ -424,7 +424,7 @@ class LoadingState extends MusicBeatState
 	
 	static function getSongPath()
 	{
-		#if (SBETA == 0.1)
+		#if SCEFEATURES_ALLOWED
 		return Paths.inst((PlayState.SONG.instrumentalPrefix != null ? PlayState.SONG.instrumentalPrefix : ''), PlayState.SONG.songId, (PlayState.SONG.instrumentalSuffix != null ? PlayState.SONG.instrumentalSuffix : ''));
 		#else
 		return Paths.inst(PlayState.SONG.songId);
@@ -433,7 +433,7 @@ class LoadingState extends MusicBeatState
 	
 	static function getVocalPath()
 	{
-		#if (SBETA == 0.1)
+		#if SCEFEATURES_ALLOWED
 		return Paths.voices((PlayState.SONG.vocalsPrefix != null ? PlayState.SONG.vocalsPrefix : ''), PlayState.SONG.songId, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : ''));
 		#else
 		return Paths.voices(PlayState.SONG.songId);

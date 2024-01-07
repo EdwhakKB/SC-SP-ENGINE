@@ -26,9 +26,10 @@ import openfl.Assets;
 import states.PlayState;
 
 #if LUA_ALLOWED
-import psychlua.FunkinLua;
-import psychlua.HScript;
+import psychlua.*;
+#else
 import psychlua.LuaUtils;
+import psychlua.HScript;
 #end
 
 #if SScript
@@ -137,7 +138,7 @@ class Stage extends MusicBeatState
 	public var isLuaStage:Bool = false;
 	public var isHxStage:Bool = false;
 
-	public var luaArray:Array<FunkinLua> = [];
+	#if LUA_ALLOWED public var luaArray:Array<FunkinLua> = []; #end
 
 	#if HSCRIPT_ALLOWED
 	public var hscriptArray:Array<HScript> = [];
@@ -704,6 +705,8 @@ class Stage extends MusicBeatState
 	public var stageRatingOffsetXOpponent:Float = 0;
 	public var stageRatingOffsetYOpponent:Float = 0;
 
+	public var stageIntroSpriteScales:Array<Array<Float>> = null;
+	
 	public function setupWeekDir(stage:String, stageDir:String)
 	{
 		var directory:String = 'shared';
@@ -736,25 +739,25 @@ class Stage extends MusicBeatState
 			stageUISuffixShit = stageData.ratingSkin[1];
 		}
 
-		if (stageData.countDownAssets != null)
-			stageIntroAssets = stageData.countDownAssets;
+		if (stageData.countDownAssets != null) stageIntroAssets = stageData.countDownAssets;
 
 		if (stageData.introSoundsSuffix != "")
 		{
 			stageIntroSoundsSuffix = stageData.introSoundsSuffix;
 		}
-		else
-		{
-			if (stageData.isPixelStage) stageIntroSoundsSuffix = '-pixel';
-			else stageIntroSoundsSuffix = '';
-		}
+		else stageIntroSoundsSuffix = stageData.isPixelStage ? '-pixel' : '';
 
 		if (stageData.introSoundsPrefix != "")
 		{
 			stageIntroSoundsPrefix = stageData.introSoundsPrefix;
 		}
-		else
-			stageIntroSoundsPrefix = '';
+		else stageIntroSoundsPrefix = '';
+
+		if (stageData.introSpriteScales != null)
+		{
+			stageIntroSpriteScales = stageData.introSpriteScales;
+		}
+		else stageIntroSpriteScales = stageData.isPixelStage ? [[6, 6], [6, 6], [6, 6], [6, 6]] : [[1, 1], [1, 1], [1, 1], [1, 1]];
 	
 		if (stageData.cameraXYMovement != null)
 		{
@@ -806,7 +809,7 @@ class Stage extends MusicBeatState
 			stageCameraSpeed = stageData.camera_speed;
 
 		boyfriendCameraOffset = stageData.camera_boyfriend;
-		if(boyfriendCameraOffset == null) //Fucks sake should have done it since the start :rolling_eyes:
+		if(boyfriendCameraOffset == null) //Fucks sake should have done it since the start
 			boyfriendCameraOffset = [0, 0];
 
 		opponentCameraOffset = stageData.camera_opponent;
@@ -1482,10 +1485,10 @@ class Stage extends MusicBeatState
 	#end
 
 	public function callOnScripts(funcToCall:String, args:Array<Dynamic> = null, ignoreStops = false, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
-		var returnVal:Dynamic = psychlua.FunkinLua.Function_Continue;
+		var returnVal:Dynamic = LuaUtils.Function_Continue;
 		if(args == null) args = [];
 		if(exclusions == null) exclusions = [];
-		if(excludeValues == null) excludeValues = [psychlua.FunkinLua.Function_Continue];
+		if(excludeValues == null) excludeValues = [LuaUtils.Function_Continue];
 
 		var result:Dynamic = callOnLuas(funcToCall, args, ignoreStops, exclusions, excludeValues);
 		if(result == null || excludeValues.contains(result)) result = callOnHScript(funcToCall, args, ignoreStops, exclusions, excludeValues);
@@ -1493,11 +1496,11 @@ class Stage extends MusicBeatState
 	}
 
 	public function callOnLuas(funcToCall:String, args:Array<Dynamic> = null, ignoreStops = false, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
-		var returnVal:Dynamic = FunkinLua.Function_Continue;
+		var returnVal:Dynamic = LuaUtils.Function_Continue;
 		#if LUA_ALLOWED
 		if(args == null) args = [];
 		if(exclusions == null) exclusions = [];
-		if(excludeValues == null) excludeValues = [FunkinLua.Function_Continue];
+		if(excludeValues == null) excludeValues = [LuaUtils.Function_Continue];
 
 		var arr:Array<FunkinLua> = [];
 		for (script in luaArray)
@@ -1512,7 +1515,7 @@ class Stage extends MusicBeatState
 				continue;
 
 			var myValue:Dynamic = script.call(funcToCall, args);
-			if((myValue == FunkinLua.Function_StopLua || myValue == FunkinLua.Function_StopAll) && !excludeValues.contains(myValue) && !ignoreStops)
+			if((myValue == LuaUtils.Function_StopLua || myValue == LuaUtils.Function_StopAll) && !excludeValues.contains(myValue) && !ignoreStops)
 			{
 				returnVal = myValue;
 				break;
@@ -1532,12 +1535,12 @@ class Stage extends MusicBeatState
 	}
 
 	public function callOnHScript(funcToCall:String, args:Array<Dynamic> = null, ignoreStops:Bool = false, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
-		var returnVal:Dynamic = psychlua.FunkinLua.Function_Continue;
+		var returnVal:Dynamic = LuaUtils.Function_Continue;
 
 		#if HSCRIPT_ALLOWED
 		if(exclusions == null) exclusions = new Array();
 		if(excludeValues == null) excludeValues = new Array();
-		excludeValues.push(psychlua.FunkinLua.Function_Continue);
+		excludeValues.push(LuaUtils.Function_Continue);
 
 		var len:Int = hscriptArray.length;
 		if (len < 1)
@@ -1559,13 +1562,13 @@ class Stage extends MusicBeatState
 					{
 						var len:Int = e.message.indexOf('\n') + 1;
 						if(len <= 0) len = e.message.length;
-						FunkinLua.luaTrace('ERROR (${script.origin}: ${callValue.calledFunction}) - ' + e.message.substr(0, len), true, false, FlxColor.RED);
+						PlayState.instance.addTextToDebug('ERROR (${script.origin}: ${callValue.calledFunction}) - ' + e.message.substr(0, len), FlxColor.RED);
 					}
 				}
 				else
 				{
 					myValue = callValue.returnValue;
-					if((myValue == FunkinLua.Function_StopHScript || myValue == FunkinLua.Function_StopAll) && !excludeValues.contains(myValue) && !ignoreStops)
+					if((myValue == LuaUtils.Function_StopHScript || myValue == LuaUtils.Function_StopAll) && !excludeValues.contains(myValue) && !ignoreStops)
 					{
 						returnVal = myValue;
 						break;

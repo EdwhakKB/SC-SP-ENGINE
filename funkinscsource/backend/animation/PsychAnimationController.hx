@@ -1,4 +1,3 @@
-
 package backend.animation;
 
 import flixel.animation.FlxAnimationController;

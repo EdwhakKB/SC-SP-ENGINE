@@ -94,7 +94,7 @@ class FreeplayState extends MusicBeatState
 		PlayState.isStoryMode = false;
 		WeekData.reloadWeekFiles(false);
 
-		#if desktop
+		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Menus", null);
 		#end
@@ -581,7 +581,7 @@ class FreeplayState extends MusicBeatState
 						break;
 					}
 
-				#if (MODS_ALLOWED && cpp)
+				#if (MODS_ALLOWED && DISCORD_ALLOWED)
 				DiscordClient.loadModRPC();
 				#end
 			}
@@ -654,7 +654,7 @@ class FreeplayState extends MusicBeatState
 					{
 						if (PlayState.SONG.needsVoices) 
 						{
-							#if (SBETA == 0.1)
+							#if SCEFEATURES_ALLOWED
 							vocals = new FlxSound().loadEmbedded(Paths.voices((PlayState.SONG.vocalsPrefix != null ? PlayState.SONG.vocalsPrefix : ''), songPath, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : '')));
 							#else
 							vocals = new FlxSound().loadEmbedded(Paths.voices(songPath));
@@ -671,7 +671,7 @@ class FreeplayState extends MusicBeatState
 	
 					try
 					{
-						#if (SBETA == 0.1)
+						#if SCEFEATURES_ALLOWED
 						inst = new FlxSound().loadEmbedded(Paths.inst((PlayState.SONG.instrumentalPrefix != null ? PlayState.SONG.instrumentalPrefix : ''), songPath, (PlayState.SONG.instrumentalSuffix != null ? PlayState.SONG.instrumentalSuffix : '')));
 						#else
 						inst = new FlxSound().loadEmbedded(Paths.inst(songPath));

@@ -282,7 +282,9 @@ class Main extends Sprite
 			Application.current.window.alert(errMsg, "Oh no... SC Engine has crashed!");
 		}
 
+		#if DISCORD_ALLOWED
 		DiscordClient.shutdown();
+		#end
 		Sys.exit(1);
 	}
 	#end

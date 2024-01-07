@@ -39,6 +39,7 @@ import objects.AttachedSprite;
 import objects.Character;
 import substates.Prompt;
 import flixel.FlxSubState;
+import flixel.FlxCamera;
 
 #if sys
 import flash.media.Sound;
@@ -75,7 +76,7 @@ class ChartingState extends MusicBeatState
 		['Add Camera Zoom', "Used on MILF on that one \"hard\" part\nValue 1: Camera zoom add (Default: 0.015)\nValue 2: UI zoom add (Default: 0.03)\nLeave the values blank if you want to use Default."],
 		['BG Freaks Expression', "Should be used only in \"school\" Stage!"],
 		['Trigger BG Ghouls', "Should be used only in \"schoolEvil\" Stage!"],
-		['Flash', "Create a flash effect over the game.\n\"Value 1: Color (in Hexidecimal)\n(ex: 000000 FFFFFF 30A0F0)\n\nValue 2: Duration (in Seconds) "],
+		['Flash', "Create a flash effect over the game.\n\"Value 1: Color (in Hexidecimal)\n(ex: 000000 FFFFFF 30A0F0)\n\nValue 2: Duration (in Seconds)\n\nValue 3: Camera "],
 		['Set Cam Zoom', "Change the zoom camera \"Value 1: the zoom value\nValue 2: if blank, it will smoothly zoom regularly,\notherwise it will do an instant zoom"],
 		['Play Animation', "Plays an animation on a Character,\nonce the animation is completed,\nthe animation changes to Idle\n\nValue 1: Animation to play.\nValue 2: Character (Dad, BF, GF)"],
 		['Camera Follow Pos', "Value 1: X\nValue 2: Y\n\nThe camera won't change the follow point\nafter using this, for getting it back\nto normal, leave both values blank\nValue 3: camZoom\nLeave blank for original zoom,\notherwise,\nchanges the camera zoom."],
@@ -214,6 +215,9 @@ class ChartingState extends MusicBeatState
 
 	public static var mustCleanMem:Bool = false;
 
+	var camHUD:FlxCamera;
+	var camGame:FlxCamera;
+
 	var hasUnsavedChanges = false; //Copies modcharteditor's way of telling if something changed!
 	override function create()
 	{	
@@ -248,6 +252,12 @@ class ChartingState extends MusicBeatState
 			PlayState.SONG = _song;
 		}
 
+		camGame = initPsychCamera();
+		camHUD = new FlxCamera();
+		camHUD.bgColor.alpha = 0;
+
+		FlxG.cameras.add(camHUD, false);
+
 		player2 = new Character(0, 0, _song.player2);
 		player1 = new Character(0, 0, _song.player1);
 
@@ -256,7 +266,7 @@ class ChartingState extends MusicBeatState
 
 		// Paths.clearMemory();
 
-		#if desktop
+		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("Chart Editor", _song.songId);
 		#end
@@ -278,8 +288,9 @@ class ChartingState extends MusicBeatState
 
 		var eventIcon:FlxSprite = new FlxSprite(-GRID_SIZE - 5, -90).loadGraphic(Paths.image('eventArrow'));
 		eventIcon.antialiasing = ClientPrefs.data.antialiasing;
-		leftIcon = new HealthIcon(_song.player1, true, false);
-		rightIcon = new HealthIcon(_song.player2, true, false);
+
+		leftIcon = new HealthIcon(_song.player1, false, true, true);
+		rightIcon = new HealthIcon(_song.player2, false, true, true);
 		eventIcon.scrollFactor.set(1, 1);
 		leftIcon.scrollFactor.set(1, 1);
 		rightIcon.scrollFactor.set(1, 1);
@@ -718,8 +729,8 @@ class ChartingState extends MusicBeatState
 
 		UI_box.addGroup(tab_group_song);
 
-		initPsychCamera().follow(camPos, LOCKON, 999);
-		FlxG.camera.zoom = 0.9;
+		camGame.follow(camPos, LOCKON, 999);
+		camGame.zoom = 0.9;
 	}
 
 	var stepperBeats:FlxUINumericStepper;
@@ -1732,7 +1743,7 @@ class ChartingState extends MusicBeatState
 		try
 		{
 			var file:Dynamic = null;
-			#if (SBETA == 0.1)
+			#if SCEFEATURES_ALLOWED
 			file = Paths.voices((PlayState.SONG.vocalsPrefix != null ? PlayState.SONG.vocalsPrefix : ''), _song.songId, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : ''));
 			#else
 			file = Paths.voices(_song.song);
@@ -1786,7 +1797,7 @@ class ChartingState extends MusicBeatState
 				if (check_mute_vocals != null && check_mute_vocals.checked) vocals.volume = 0;
 			}
 
-			#if desktop
+			#if DISCORD_ALLOWED
 			// Updating Discord Rich Presence
 			DiscordClient.changePresence("Chart Editor", StringTools.replace(_song.songId, '-', ' '));
 			#end
@@ -1795,7 +1806,7 @@ class ChartingState extends MusicBeatState
 	}
 
 	function generateSong() {
-		#if (SBETA == 0.1)
+		#if SCEFEATURES_ALLOWED
 		FlxG.sound.playMusic(Paths.inst((PlayState.SONG.instrumentalPrefix != null ? PlayState.SONG.instrumentalPrefix : ''), _song.song, (PlayState.SONG.instrumentalSuffix != null ? PlayState.SONG.instrumentalSuffix : '')), 1);
 		#else
 		FlxG.sound.playMusic(Paths.inst(_song.song));
@@ -2255,7 +2266,9 @@ class ChartingState extends MusicBeatState
 				if (hasUnsavedChanges)
 				{
 					persistentUpdate = false;
-					openSubState(new ChartEditorExitSubstate(exitFunc));
+					var exitSubState = new ChartEditorExitSubstate(exitFunc);
+					openSubState(exitSubState);
+					exitSubState.camera = camHUD;
 				}
 				else exitFunc();
 			}
@@ -3735,7 +3748,7 @@ class ChartingState extends MusicBeatState
 		if ((data != null) && (data.length > 0))
 		{
 			_file = new FileReference();
-			_file.addEventListener(Event.COMPLETE, onSaveComplete);
+			_file.addEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, onSaveComplete);
 			_file.addEventListener(Event.CANCEL, onSaveCancel);
 			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
 			_file.save(data.trim(), Paths.formatToSongPath(_song.songId) + ".json");
@@ -3762,7 +3775,7 @@ class ChartingState extends MusicBeatState
 		if ((data != null) && (data.length > 0))
 		{
 			_file = new FileReference();
-			_file.addEventListener(Event.COMPLETE, onSaveComplete);
+			_file.addEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, onSaveComplete);
 			_file.addEventListener(Event.CANCEL, onSaveCancel);
 			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
 			_file.save(data.trim(), "events.json");
@@ -3771,7 +3784,7 @@ class ChartingState extends MusicBeatState
 
 	function onSaveComplete(_):Void
 	{
-		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+		_file.removeEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, onSaveComplete);
 		_file.removeEventListener(Event.CANCEL, onSaveCancel);
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
 		_file = null;
@@ -3783,7 +3796,7 @@ class ChartingState extends MusicBeatState
 	 */
 	function onSaveCancel(_):Void
 	{
-		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+		_file.removeEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, onSaveComplete);
 		_file.removeEventListener(Event.CANCEL, onSaveCancel);
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
 		_file = null;
@@ -3794,7 +3807,7 @@ class ChartingState extends MusicBeatState
 	 */
 	function onSaveError(_):Void
 	{
-		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+		_file.removeEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, onSaveComplete);
 		_file.removeEventListener(Event.CANCEL, onSaveCancel);
 		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
 		_file = null;
@@ -3856,9 +3869,8 @@ class ChartEditorExitSubstate extends MusicBeatSubstate
 
         var warning:FlxText = new FlxText(0, 0, 0, 'You have unsaved changes!\nAre you sure you want to exit?', 48);
         warning.alignment = CENTER;
-        //warning.screenCenter();
-		warning.camera = FlxG.camera;
-        warning.y -= 50;
+        warning.screenCenter();
+        //warning.y += 50;
         add(warning);
 
         var goBackButton:FlxUIButton = new FlxUIButton(0, 500, 'Go Back', function()

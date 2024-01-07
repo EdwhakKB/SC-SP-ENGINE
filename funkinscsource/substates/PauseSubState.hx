@@ -381,7 +381,7 @@ class PauseSubState extends MusicBeatSubstate
 					stoppedUpdatingMusic = true;
 					pauseMusic.volume = 0;
 					pauseMusic.destroy();
-					#if desktop DiscordClient.resetClientID(); #end
+					#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
 					PlayState.deathCounter = 0;
 					PlayState.seenCutscene = false;
 
@@ -452,29 +452,44 @@ class PauseSubState extends MusicBeatSubstate
 
 		CDANumber -= 1;
 
+		var introArrays0:Array<Float> = [];
+		var introArrays1:Array<Float> = [];
+		var introArrays2:Array<Float> = [];
+		var introArrays3:Array<Float> = [];
+		if (game.Stage.stageIntroSpriteScales != null)
+		{
+			introArrays0 = game.Stage.stageIntroSpriteScales[0];
+			introArrays1 = game.Stage.stageIntroSpriteScales[1];
+			introArrays2 = game.Stage.stageIntroSpriteScales[2];
+			introArrays3 = game.Stage.stageIntroSpriteScales[3];
+		}
+
 		switch (CDANumber)
 		{
 			case 4:
 				var isNotNull = (introAlts.length > 3 ? introAlts[0] : "missingRating");
-				getReady = createCountdownSprite(isNotNull, antialias, game.introSoundsPrefix + 'intro3' + game.introSoundsSuffix);
+				getReady = createCountdownSprite(isNotNull, antialias, game.introSoundsPrefix + 'intro3' + game.introSoundsSuffix, introArrays0);
 			case 3:
-				countdownReady = createCountdownSprite(introAlts[introAlts.length - 3], antialias, game.introSoundsPrefix + 'intro2' + game.introSoundsSuffix);
+				countdownReady = createCountdownSprite(introAlts[introAlts.length - 3], antialias, game.introSoundsPrefix + 'intro2' + game.introSoundsSuffix, introArrays1);
 			case 2:
-				countdownSet = createCountdownSprite(introAlts[introAlts.length - 2], antialias, game.introSoundsPrefix + 'intro1' + game.introSoundsSuffix);
+				countdownSet = createCountdownSprite(introAlts[introAlts.length - 2], antialias, game.introSoundsPrefix + 'intro1' + game.introSoundsSuffix, introArrays2);
 			case 1:
-				countdownGo = createCountdownSprite(introAlts[introAlts.length - 1], antialias, game.introSoundsPrefix + 'introGo' + game.introSoundsSuffix);
+				countdownGo = createCountdownSprite(introAlts[introAlts.length - 1], antialias, game.introSoundsPrefix + 'introGo' + game.introSoundsSuffix, introArrays3);
 			case 0:
 		}
 	}
 	
-	inline private function createCountdownSprite(image:String, antialias:Bool, soundName:String):FlxSprite
+	inline private function createCountdownSprite(image:String, antialias:Bool, soundName:String, scale:Array<Float> = null):FlxSprite
 	{
 		var spr:FlxSprite = new FlxSprite(-100).loadGraphic(Paths.image(image));
 		spr.scrollFactor.set();
 		spr.updateHitbox();
 
-		if (image.contains("-pixel"))
+		if (image.contains("-pixel") && scale == null)
 			spr.setGraphicSize(Std.int(spr.width * PlayState.daPixelZoom));
+		
+		if (scale != null)
+			spr.scale.set(scale[0], scale[1]);
 
 		spr.screenCenter();
 		spr.antialiasing = antialias;

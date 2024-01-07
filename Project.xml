@@ -47,41 +47,58 @@
 
 	<classpath name="funkinscsource" />
 
+	<!-- PSYCH && SCE CUSTOMIZATION -->
+
 	<!-- Defines whether the Discord client should be enabled. Only works on desktop. -->
 	<define name="FEATURE_DISCORD" if="desktop" />
+
 	<!-- Defines whether the file system can be read/written directly. Does not work in browser. -->
 	<define name="FEATURE_FILESYSTEM"  if="desktop"/>
+
 	<!-- Defines whether the Thread class can be used. -->
 	<define name="FEATURE_MULTITHREADING" if="cpp" />
+
 	<!-- Defines whether the mp4 videos should be enabled. -->
 	<define name="FEATURE_MP4VIDEOS" unless="32bits"/>
-	
-	<!-- PSYCH ENGINE CUSTOMIZATION -->
+
+	<!-- Defines whether if the mods are allowed. -->
 	<define name="MODS_ALLOWED" if="desktop" />
 
+	<!-- Defines whether if lua is allowed. -->
 	<define name="LUA_ALLOWED" if="desktop" />
 
+	<!-- Defines whether if hscript is allowed. -->
 	<define name="HSCRIPT_ALLOWED" if="desktop"/>
 
-	<define name="SCRIPTS_ALLOWED" if="desktop" />
-
+	<!-- Defines whether the if the achievements are allowed. -->
 	<define name="ACHIEVEMENTS_ALLOWED" />
 
+	<!-- Defines whether the if discord is allowed. -->
+	<define name="DISCORD_ALLOWED" />
+
+	<!-- Defines whether if videos are allowed. -->
 	<define name="VIDEOS_ALLOWED" if="windows || linux || android" unless="32bits"/>
 
-	<define name="PSYCH_WATERMARKS"/> <!-- DELETE THIS TO REMOVE WATERMARKS/DEV NAMES ON TITLE SCREEN -->
-
-	<define name="TITLE_SCREEN_EASTER_EGG" if="officialBuild"/> <!-- DELETE THE if="officialBuild" for enabling this on an unofficial build -->
-
+	<!-- Defines whether if the crashhandler can be used. -->
 	<define name="CRASH_HANDLER" if="desktop release" />
 	
+	<!-- Defines whether if the scripthandler has access to SScript -->
 	<define name="HAXE_EXTENSION" if="HSCRIPT_ALLOWED" />
 
-	<!--Set this to the engine you're using!-->
+	<!-- Defines whether the engine should check for updates or not. -->
+	<define name="CHECK_FOR_UPDATES" if="desktop"/>
+
+	<!-- Defines the engine you're using! -->
 	<define name="PSYCH"/>
+
+	<!-- Defines what version of the engine. -->
 	<define name="PSYCHVERSION" value="0.7" />
+
+	<!-- Defines the modcharting Tools. -->
 	<define name="modchartingTools"/>
-	<define name="SBETA" value="0.1"/> <!--set this to 0.1 for extra sides Version of the engine-->
+
+	<!-- Defines whether the engine should have extra features -->
+	<define name="SCEFEATURES_ALLOWED"/> <!-- set this to 0.1 for extra sides Version of the engine. -->
 
 	<!-- Assets -->
 	<assets path="assets/fonts" />
@@ -103,7 +120,6 @@
 	<library name="songs"         preload="true" />
 	<library name="week_assets"   preload="true" />
 
-	<define name="CHECK_FOR_UPDATES" if="desktop officialBuild"/>
 	
 	<section if="MODS_ALLOWED">
 		<assets path='example_mods' rename='mods' embed='false'/>
@@ -131,30 +147,24 @@
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
 	<haxelib name="SScript" if="HSCRIPT_ALLOWED"/>
 	<haxelib name="hxCodec" if="VIDEOS_ALLOWED"/>
-	<haxelib name="hxdiscord_rpc" if="cpp"/>
+	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>
 
 	<!--if you don't need FlxAnimate for exporting or for a mod just null it-->
 	<haxelib name="flxanimate"/>
 
 	<!-- <haxelib name="HaxeGJClient" /> -->
+	<!-- GameJolt Stuff -->
 	<haxelib name="tentools" />
 	<haxelib name="systools" />
 	<ndll name="systools" haxelib="systools" />
 
 	<!--In case you want to use the ui package-->
 	<haxelib name="faxe" if='switch'/>
-
-	<!--Set this to the engine you're using!-->
-    <define name="PSYCH"/>
-    <define name="PSYCHVERSION" value="0.7"/>
-    <define name="modchartingTools"/>
-    <define name="SBETA" value="0.1"/> <!--set this to 0.1 for extra sides Version of the engine-->
   
   	<!--Incase you want parallaxlt-->
 	<!-- <haxelib name="parallaxlt" /> -->
-	<!--<haxelib name="polymod"/> -->
 
-	<haxelib name="fnf-modcharting-tools"/>
+	<!-- <haxelib name="fnf-modcharting-tools"/> -->
 
 	<!-- Disable Discord IO Thread -->
 	<haxedef name="DISCORD_DISABLE_IO_THREAD" if="hxdiscord_rpc" />

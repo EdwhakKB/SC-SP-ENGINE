@@ -50,7 +50,7 @@
 		'screenHeight', "Int", "720", "Screen's height", --Grabs FlxG.width;
 	}
 
---PlayState cringe ass nae nae bullcrap
+--PlayState variables
 	local PlayStateVars = {
 		'curSection', "Int", "0", "Every Section",
 		'curStep', "Int", "0", "Every Step",
@@ -102,7 +102,7 @@
 		local defaultOpponentStrumsY = {'defaultOpponentStrumY'..i, "Float", "0", "Default Opponent Y Strum Number"..i}
 	end
 
---Default character positions woooo
+--Default character
 	local characterPos = { 
 		'defaultBoyfriendX', "Float", "770", "Default boyfriend X pos", --Grabs game.BF_X;
 		'defaultBoyfriendY', "Float", "450", "Default boyfriend Y pos", --Grabs game.BF_Y;
@@ -114,7 +114,7 @@
 		'defaultMomY', "Float", "100", "Default opponent2 Y pos", --Grabs game.MOM_Y;
 	}
 
---Character Shit
+--Character shit
 	local characterShit = {
 		'boyfriendName', "String", "boyfriend", "PlayState's SONG Player 1", --Grabs PlayState.SONG.player1;
 		'dadName', "String", "dad", "PlayState's SONG Player 2", --Grabs PlayState.SONG.player2;
@@ -122,7 +122,7 @@
 		'momName', "String", "mom", "PlayState's SONG Player 4", --Grabs PlayState.SONG.player4;
 	}
 
---Some settings, no jokes
+-- Other settings
 	local settings = {
 		'downscroll', "Boolean", "false", "Scroll Type", --Grabs ClientPrefs.data.downScroll;
 		'middlescroll', "Boolean", "false", "Scroll Center", --Grabs ClientPrefs.data.middleScroll;

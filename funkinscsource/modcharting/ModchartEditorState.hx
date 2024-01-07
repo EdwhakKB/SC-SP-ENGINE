@@ -1034,7 +1034,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
             if (PlayState.SONG.needsVoices){
                 #if LEATHER 
                 vocals.loadEmbedded(Paths.voices(PlayState.SONG.songId, (PlayState.SONG.specialAudioName == null ? PlayState.storyDifficultyStr.toLowerCase() : PlayState.SONG.specialAudioName)));
-                #elseif (SBETA == 0.1)
+                #elseif SCEFEATURES_ALLOWED
                 vocals.loadEmbedded(Paths.voices((PlayState.SONG.vocalsPrefix != null ? PlayState.SONG.vocalsPrefix : ''), PlayState.SONG.songId, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : '')));
                 #else
                 vocals.loadEmbedded(Paths.voices(PlayState.SONG.songId));
@@ -1047,7 +1047,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
 
         inst = new FlxSound();
         try {
-            #if (SBETA == 0.1)
+            #if SCEFEATURES_ALLOWED
             inst.loadEmbedded(Paths.inst((PlayState.SONG.instrumentalPrefix != null ? PlayState.SONG.instrumentalPrefix : ''), PlayState.SONG.songId, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : '')));
             #else
             inst.loadEmbedded(Paths.inst(PlayState.SONG.songId));
@@ -2347,7 +2347,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
 		if ((data != null) && (data.length > 0))
         {
             _file = new FileReference();
-            _file.addEventListener(openfl.events.Event.COMPLETE, onSaveComplete);
+            _file.addEventListener(#if desktop openfl.events.Event.SELECT #else openfl.events.Event.COMPLETE #end, onSaveComplete);
             _file.addEventListener(openfl.events.Event.CANCEL, onSaveCancel);
             _file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
             _file.save(data.trim(), "modchart.json");
@@ -2359,7 +2359,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
     }
     function onSaveComplete(_):Void
     {
-        _file.removeEventListener(openfl.events.Event.COMPLETE, onSaveComplete);
+        _file.removeEventListener(#if desktop openfl.events.Event.SELECT #else openfl.events.Event.COMPLETE #end, onSaveComplete);
         _file.removeEventListener(openfl.events.Event.CANCEL, onSaveCancel);
         _file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
         _file = null;
@@ -2370,7 +2370,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
      */
     function onSaveCancel(_):Void
     {
-        _file.removeEventListener(openfl.events.Event.COMPLETE, onSaveComplete);
+        _file.removeEventListener(#if desktop openfl.events.Event.SELECT #else openfl.events.Event.COMPLETE #end, onSaveComplete);
         _file.removeEventListener(openfl.events.Event.CANCEL, onSaveCancel);
         _file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
         _file = null;
@@ -2381,7 +2381,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
      */
     function onSaveError(_):Void
     {
-        _file.removeEventListener(openfl.events.Event.COMPLETE, onSaveComplete);
+        _file.removeEventListener(#if desktop openfl.events.Event.SELECT #else openfl.events.Event.COMPLETE #end, onSaveComplete);
         _file.removeEventListener(openfl.events.Event.CANCEL, onSaveCancel);
         _file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
         _file = null;

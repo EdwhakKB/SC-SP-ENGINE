@@ -79,7 +79,7 @@ class StoryMenuState extends MusicBeatState
 		grpLocks = new FlxTypedGroup<FlxSprite>();
 		add(grpLocks);
 
-		#if desktop
+		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Menus", null);
 		#end
@@ -350,12 +350,11 @@ class StoryMenuState extends MusicBeatState
 				LoadingState.loadAndSwitchState(new ThingsToLoad(), true);
 			});
 			
-			#if (MODS_ALLOWED && cpp)
+			#if (MODS_ALLOWED && DISCORD_ALLOWED)
 			DiscordClient.loadModRPC();
 			#end
-		} else {
-			FlxG.sound.play(Paths.sound('cancelMenu'));
 		}
+		else FlxG.sound.play(Paths.sound('cancelMenu'));
 	}
 
 	var tweenDifficulty:FlxTween;

@@ -101,7 +101,7 @@ class ResultsScreenKadeSubstate extends substates.MusicBeatSubstate
         //FlxCamera.defaultCameras = [camResults];
 		FlxG.cameras.setDefaultDrawTarget(camResults, true);
 
-		#if (SBETA == 0.1)
+		#if SCEFEATURES_ALLOWED
 		music = new FlxSound().loadEmbedded(Paths.inst((PlayState.SONG.instrumentalPrefix != null ? PlayState.SONG.instrumentalPrefix : ''), PlayState.SONG.songId, (PlayState.SONG.instrumentalSuffix != null ? PlayState.SONG.instrumentalSuffix : '')), true, true);
 		#else
 		music = new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.songId), true, true);
