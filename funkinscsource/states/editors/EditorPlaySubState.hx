@@ -154,7 +154,7 @@ class EditorPlaySubState extends MusicBeatSubstate
 		FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
 		FlxG.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyRelease);
 		
-		#if desktop
+		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence (with Time Left)
 		DiscordClient.changePresence('Playtesting on Chart Editor', PlayState.SONG.songId, null, true, songLength);
 		#end
@@ -326,7 +326,7 @@ class EditorPlaySubState extends MusicBeatSubstate
 		{
 			if (songData.needsVoices)
 			{
-				#if (SBETA == 0.1)
+				#if SCEFEATURES_ALLOWED
 				vocals.loadEmbedded(Paths.voices((songData.vocalsPrefix != null ? songData.vocalsPrefix : ''), songData.songId, (songData.vocalsSuffix != null ? songData.vocalsSuffix : '')));
 				#else
 				vocals.loadEmbedded(Paths.voices(songData.songId));
@@ -342,7 +342,7 @@ class EditorPlaySubState extends MusicBeatSubstate
 		inst = new FlxSound();
 		try
 		{
-			#if (SBETA == 0.1)
+			#if SCEFEATURES_ALLOWED
 			inst.loadEmbedded(Paths.inst((songData.instrumentalPrefix != null ? songData.instrumentalPrefix : ''), songData.songId, (songData.instrumentalSuffix != null ? songData.instrumentalSuffix : '')));
 			#else
 			inst.loadEmbedded(Paths.inst(songData.songId));

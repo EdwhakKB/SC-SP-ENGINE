@@ -18,14 +18,15 @@ import flixel.util.*;
 import lime.app.Application;
 import openfl.display.GraphicsShader;
 import openfl.filters.ShaderFilter;
-import backend.Discord.DiscordClient as Discord;
 import backend.*;
 import flixel.*;
 import states.*;
 import substates.*;
 import objects.*;
 import shaders.*;
+#if LUA_ALLOWED
 import psychlua.*;
+#end
 
 using StringTools;
 #end
@@ -135,7 +136,9 @@ class ScriptHandler #if HAXE_EXTENSION extends tea.SScript #end
 		setClass(objects.NoteSplash);
 		setClass(objects.StrumArrow);
 		setClass(backend.Paths);
+		#if LUA_ALLOWED
 		setClass(psychlua.FunkinLua);
+		#end
 		setClass(backend.Achievements);
 		setClass(backend.ClientPrefs);
 		setClass(shaders.ColorSwap);
@@ -180,7 +183,7 @@ class ScriptHandler #if HAXE_EXTENSION extends tea.SScript #end
 			call("postStateSwitch", []);
 		});
 
-		set('buildTarget', FunkinLua.getBuildTarget());
+		set('buildTarget', LuaUtils.getBuildTarget());
 
 		set('sys', #if sys true #else false #end);
 
@@ -265,7 +268,9 @@ class ScriptHandler #if HAXE_EXTENSION extends tea.SScript #end
 		set('NoteSplash', objects.NoteSplash);
 		set('StrumArrow', objects.StrumArrow);
 		set('Paths', backend.Paths);
+		#if LUA_ALLOWED
 		set('FunkinLua', psychlua.FunkinLua);
+		#end
 		set('Achievements', backend.Achievements);
 		set('ClientPrefs', backend.ClientPrefs);
 		set('ColorSwap', shaders.ColorSwap);
@@ -309,7 +314,7 @@ class ScriptHandler #if HAXE_EXTENSION extends tea.SScript #end
 			call("postStateSwitch", []);
 		});
 
-		set('buildTarget', FunkinLua.getBuildTarget());
+		set('buildTarget', LuaUtils.getBuildTarget());
 
 		set('sys', #if sys true #else false #end);
 

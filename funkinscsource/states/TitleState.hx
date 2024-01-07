@@ -104,7 +104,6 @@ class TitleState extends MusicBeatState
 		whiteGrad2.angle = -90;
 		whiteGrad2.y += 0;
 
-
 		checkInternetConnection();
 		if (internetConnection) getBuildVer();
 		

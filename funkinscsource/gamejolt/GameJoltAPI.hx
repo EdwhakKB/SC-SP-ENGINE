@@ -73,10 +73,10 @@ class GameJoltAPI // Connects to tentools.api.FlxGameJolt
 
 		GJApi.init(Std.int(GJKeys.id), Std.string(GJKeys.key), function(data:Bool)
 		{
-			#if debug
-			var daDesc:String = "If you are a developer, check GJKeys.hx\nMake sure the id and key are formatted correctly!";
-			Main.gjToastManager.createToast(GameJoltInfo.imagePath, 'Game${!data ? " not" : ""} authenticated!', !data ? daDesc : "Success!");
-			#end
+			// #if debug
+			// var daDesc:String = "If you are a developer, check GJKeys.hx\nMake sure the id and key are formatted correctly!";
+			// Main.gjToastManager.createToast(GameJoltInfo.imagePath, 'Game${!data ? " not" : ""} authenticated!', !data ? daDesc : "Success!");
+			// #end
 		});
 	}
 

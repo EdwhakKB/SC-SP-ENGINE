@@ -1,4 +1,5 @@
 
+#if LUA_ALLOWED
 package psychlua;
 
 import backend.WeekData;
@@ -64,9 +65,7 @@ class FunkinLua {
 	public static var Function_StopHScript:Dynamic = "##PSYCHLUA_FUNCTIONSTOPHSCRIPT";
 	public static var Function_StopAll:Dynamic = "##PSYCHLUA_FUNCTIONSTOPALL";
 
-	#if LUA_ALLOWED
 	public var lua:State = null;
-	#end
 	public var camTarget:FlxCamera;
 	public var scriptName:String = '';
 	public var modFolder:String = null;
@@ -75,7 +74,7 @@ class FunkinLua {
 
 	public static var instance:FunkinLua = null;
 
-	#if SScript
+	#if HSCRIPT_ALLOWED
 	public var hscript:HScript = null;
 	#end
 	
@@ -89,7 +88,6 @@ class FunkinLua {
 	public var preloading:Bool = false;
 
 	public function new(scriptName:String, ?isStageLua:Bool = false, ?preloading:Bool = false) {
-		#if LUA_ALLOWED
 		var times:Float = Date.now().getTime();
 		var game:PlayState = PlayState.instance;
 
@@ -122,11 +120,11 @@ class FunkinLua {
 		#end
 
 		// Lua shit
-		set('Function_StopLua', Function_StopLua);
-		set('Function_StopHScript', Function_StopHScript);
-		set('Function_StopAll', Function_StopAll);
-		set('Function_Stop', Function_Stop);
-		set('Function_Continue', Function_Continue);
+		set('Function_StopLua', LuaUtils.Function_StopLua);
+		set('Function_StopHScript', LuaUtils.Function_StopHScript);
+		set('Function_StopAll', LuaUtils.Function_StopAll);
+		set('Function_Stop', LuaUtils.Function_Stop);
+		set('Function_Continue', LuaUtils.Function_Continue);
 		set('luaDebugMode', false);
 		set('luaDeprecatedWarnings', true);
 		set('inChartEditor', false);
@@ -163,7 +161,7 @@ class FunkinLua {
 		set('screenWidth', FlxG.width);
 		set('screenHeight', FlxG.height);
 
-		// PlayState cringe ass nae nae bullcrap
+		// PlayState variables
 		set('curSection', 0);
 		set('curBeat', 0);
 		set('curStep', 0);
@@ -194,7 +192,13 @@ class FunkinLua {
 		// Gameplay settings
 		set('healthGainMult', game.healthGain);
 		set('healthLossMult', game.healthLoss);
-		#if FLX_PITCH set('playbackRate', game.playbackRate); #end
+
+		#if FLX_PITCH
+		set('playbackRate', game.playbackRate);
+		#else
+		set('playbackRate', 1);
+		#end
+
 		set('guitarHeroSustains', game.guitarHeroSustains);
 		set('instakillOnMiss', game.instakillOnMiss);
 		set('botPlay', game.cpuControlled);
@@ -211,7 +215,7 @@ class FunkinLua {
 			set('defaultOpponentStrumY' + i, 0);
 		}
 
-		// Default character positions woooo
+		// Default character
 		set('defaultBoyfriendX', game.BF_X);
 		set('defaultBoyfriendY', game.BF_Y);
 		set('defaultOpponentX', game.DAD_X);
@@ -227,7 +231,7 @@ class FunkinLua {
 		set('gfName', PlayState.SONG.gfVersion);
 		set('momName', PlayState.SONG.player4);
 
-		// Some settings, no jokes
+		// Other settings
 		set('downscroll', ClientPrefs.data.downScroll);
 		set('middlescroll', ClientPrefs.data.middleScroll);
 		set('framerate', ClientPrefs.data.framerate);
@@ -258,7 +262,7 @@ class FunkinLua {
 		set('cameraZoom', FlxG.camera.zoom);
 
 		// build target (windows, mac, linux, etc.)
-		set('buildTarget', getBuildTarget());
+		set('buildTarget',  LuaUtils.getBuildTarget());
 		
 		if (preloading) //only the necessary functions for preloading are included
 		{
@@ -1127,7 +1131,7 @@ class FunkinLua {
 				if(PlayState.isStoryMode) MusicBeatState.switchState(new StoryMenuState());
 				else MusicBeatState.switchState(new FreeplayState());
 				
-				#if desktop DiscordClient.resetClientID(); #end
+				#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
 	
 				FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
 				PlayState.changedDifficulty = false;
@@ -2182,10 +2186,10 @@ class FunkinLua {
 				return closed;
 			});
 	
-			#if desktop DiscordClient.addLuaCallbacks(this); #end
+			#if DISCORD_ALLOWED DiscordClient.addLuaCallbacks(this); #end
 			#if ACHIEVEMENTS_ALLOWED Achievements.addLuaCallbacks(this); #end
-			#if (SBETA == 0.1) SupportBETAFunctions.implement(this); #end
-			#if SScript HScript.implement(this); #end
+			#if SCEFEATURES_ALLOWED SupportBETAFunctions.implement(this); #end
+			#if HSCRIPT_ALLOWED HScript.implement(this); #end
 			#if flxanimate FlxAnimateFunctions.implement(this); #end
 			#if modchartingTools if (game != null && PlayState.SONG != null && !isStageLua && PlayState.SONG.notITG && game.notITGMod) ModchartFuncs.implement(this); #end
 			ReflectionFunctions.implement(this);
@@ -2223,7 +2227,6 @@ class FunkinLua {
 
 		if (isStageLua) Debug.logInfo('Limited usage of playstate properties inside the stage .laus or .hxs!');
 		Debug.logInfo('lua file loaded succesfully: $scriptName (${Std.int(Date.now().getTime() - times)}ms)');
-		#end
 	}
 
 	function makeNewIcon(tag:String, character:String, player:Bool = false)
@@ -2242,12 +2245,12 @@ class FunkinLua {
 	public static var lastCalledScript:FunkinLua = null;
 	public function call(func:String, args:Array<Dynamic>):Dynamic {
 		#if LUA_ALLOWED
-		if(closed) return Function_Continue;
+		if(closed) return LuaUtils.Function_Continue;
 
 		lastCalledFunction = func;
 		lastCalledScript = this;
 		try {
-			if(lua == null) return Function_Continue;
+			if(lua == null) return LuaUtils.Function_Continue;
 
 			Lua.getglobal(lua, func);
 			var type:Int = Lua.type(lua, -1);
@@ -2257,7 +2260,7 @@ class FunkinLua {
 					luaTrace("ERROR (" + func + "): attempt to call a " + LuaUtils.typeToString(type) + " value", false, false, FlxColor.RED);
 
 				Lua.pop(lua, 1);
-				return Function_Continue;
+				return LuaUtils.Function_Continue;
 			}
 
 			for (arg in args) Convert.toLua(lua, arg);
@@ -2267,12 +2270,12 @@ class FunkinLua {
 			if (status != Lua.LUA_OK) {
 				var error:String = getErrorMessage(status);
 				luaTrace("ERROR (" + func + "): " + error, false, false, FlxColor.RED);
-				return Function_Continue;
+				return LuaUtils.Function_Continue;
 			}
 
 			// If successful, pass and then return the result.
 			var result:Dynamic = cast Convert.fromLua(lua, -1);
-			if (result == null) result = Function_Continue;
+			if (result == null) result = LuaUtils.Function_Continue;
 
 			Lua.pop(lua, 1);
 			if(closed) stop();
@@ -2282,10 +2285,9 @@ class FunkinLua {
 			Debug.logTrace(e);
 		}
 		#end
-		return Function_Continue;
+		return LuaUtils.Function_Continue;
 	}
 
-	#if LUA_ALLOWED
 	public function convert(v:Any, type:String):Dynamic {
 		if(Std.isOfType(v, String) && type != null) {
 			var v:String = v;
@@ -2329,10 +2331,8 @@ class FunkinLua {
 			return v;
 		}
 	}
-	#end
 	
 	public function set(variable:String, data:Dynamic) {
-		#if LUA_ALLOWED
 		if(lua == null) return;
 
 		if (Type.typeof(data) == TFunction) {
@@ -2342,11 +2342,9 @@ class FunkinLua {
 
 		Convert.toLua(lua, data);
 		Lua.setglobal(lua, variable);
-		#end
 	}
 
 	public function stop() {
-		#if LUA_ALLOWED
 		closed = true;
 
         lua_Cameras.clear();
@@ -2368,10 +2366,8 @@ class FunkinLua {
 			hscript = null;
 		}
 		#end
-		#end
 	}
 
-	#if LUA_ALLOWED
 	public function get(var_name:String, type:Dynamic):Dynamic
 	{
 		var result:Any = null;
@@ -2387,45 +2383,9 @@ class FunkinLua {
 			return result;
 		}
 	}
-	#end
-
-	//clone functions
-	public static function getBuildTarget():String
-	{
-		#if windows
-		return 'windows';
-		#elseif linux
-		return 'linux';
-		#elseif mac
-		return 'mac';
-		#elseif hl
-		return 'hashlink';
-		#elseif (html5 || emscripten || nodejs || electron)
-		return 'browser';
-		#elseif webos
-		return 'webos';
-		#elseif air
-		return 'air';
-		#elseif flash
-		return 'flash';
-		#elseif android
-		return 'android';
-		#elseif ios
-		return 'ios';
-		#elseif iphonesim
-		return 'iphonesimulator';
-		#elseif switch
-		return 'switch';
-		#elseif neko
-		return 'neko';
-		#else
-		return 'unknown';
-		#end
-	}
 
 	function oldTweenFunction(tag:String, vars:String, tweenValue:Any, duration:Float, ease:String, funcName:String)
 	{
-		#if LUA_ALLOWED
 		var target:Dynamic = LuaUtils.tweenPrepare(tag, vars);
 		if(target != null) {
 			PlayState.instance.modchartTweens.set(tag, FlxTween.tween(target, tweenValue, duration, {ease: LuaUtils.getTweenEaseByString(ease),
@@ -2437,12 +2397,10 @@ class FunkinLua {
 		} else {
 			luaTrace('$funcName: Couldnt find object: $vars', false, false, FlxColor.RED);
 		}
-		#end
 	}
 
 	function oldTweenNumFunction(tag:String, vars:String, toValue:Float, duration:Float, ease:String, funcName:String)
 	{
-		#if LUA_ALLOWED
 		var target:Dynamic = LuaUtils.tweenPrepare(tag, vars);
 		if(target != null) {
 			PlayState.instance.modchartTweens.set(tag, FlxTween.num(target, toValue, duration, {ease: LuaUtils.getTweenEaseByString(ease),
@@ -2454,11 +2412,9 @@ class FunkinLua {
 		} else {
 			luaTrace('$funcName: Couldnt find object: $vars', false, false, FlxColor.RED);
 		}
-		#end
 	}
 	
 	public static function luaTrace(text:String, ignoreCheck:Bool = false, deprecated:Bool = false, color:FlxColor = FlxColor.WHITE) {
-		#if LUA_ALLOWED
 		if(ignoreCheck || getBool('luaDebugMode')) {
 			if(deprecated && !getBool('luaDeprecatedWarnings')) {
 				return;
@@ -2466,10 +2422,8 @@ class FunkinLua {
 			PlayState.instance.addTextToDebug(text, color);
 			Debug.logTrace(text);
 		}
-		#end
 	}
 	
-	#if LUA_ALLOWED
 	public static function getBool(variable:String) {
 		if(lastCalledScript == null) return false;
 
@@ -2486,7 +2440,6 @@ class FunkinLua {
 		}
 		return (result == 'true');
 	}
-	#end
 
 	function findScript(scriptFile:String, ext:String = '.lua')
 	{
@@ -2518,7 +2471,6 @@ class FunkinLua {
 	}
 
 	public function getErrorMessage(status:Int):String {
-		#if LUA_ALLOWED
 		var v:String = Lua.tostring(lua, -1);
 		Lua.pop(lua, 1);
 
@@ -2533,21 +2485,19 @@ class FunkinLua {
 		}
 
 		return v;
-		#end
 		return null;
 	}
 
 	public function addLocalCallback(name:String, myFunction:Dynamic)
 	{
-		#if LUA_ALLOWED
 		callbacks.set(name, myFunction);
 		Lua_helper.add_callback(lua, name, null); //just so that it gets called
-		#end
 	}
 	
 	#if (MODS_ALLOWED && !flash && sys)
 	public var runtimeShaders:Map<String, Array<String>> = new Map<String, Array<String>>();
 	#end
+
 	public function initLuaShader(name:String, ?glslVersion:Int = 120)
 	{
 		if(!ClientPrefs.data.shaders) return false;
@@ -2602,3 +2552,4 @@ class FunkinLua {
 		return false;
 	}
 }
+#end

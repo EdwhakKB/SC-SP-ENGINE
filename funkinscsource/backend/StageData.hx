@@ -32,6 +32,8 @@ typedef StageFile = {
 	var cameraXYMovement:Array<Float>;
 
 	var ratingOffsets:Array<Array<Float>>;
+
+	var introSpriteScales:Array<Array<Float>>;
 }
 
 class StageData {
@@ -64,7 +66,9 @@ class StageData {
 
 			cameraXYMovement: [50, 60],
 
-			ratingOffsets: [[0, 0], [0, 0]]
+			ratingOffsets: [[0, 0], [0, 0]],
+
+			introSpriteScales: [[1, 1], [1, 1], [1, 1], [1, 1]]
 		};
 	}
 

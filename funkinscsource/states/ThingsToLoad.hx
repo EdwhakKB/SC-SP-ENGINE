@@ -71,6 +71,8 @@ class ThingsToLoad extends MusicBeatState
         // update thread
 
         new FlxTimer().start(2, function(tmr){
+            FlxTimer.globalManager.completeAll();
+            text.text = text.text.replace('.', '').replace('Loading ', '') + " is now caching objects";
             finishCaching();
         });
 
@@ -97,9 +99,6 @@ class ThingsToLoad extends MusicBeatState
 
     function finishCaching()
     {
-        FlxTimer.globalManager.completeAll();
-        text.text = text.text.replace('.', '').replace('Loading ', '') + " is now caching objects";
-
         var characterString:String = '';
         var stageString:String = '';
 
@@ -133,7 +132,7 @@ class ThingsToLoad extends MusicBeatState
             }
         }   
         
-        #if MODS_ALLOWED
+        /*#if MODS_ALLOWED
         if (FileSystem.exists(txt('data/songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase() + '/preload-stage.txt')) || FileSystem.exists(Paths.txt('songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase() + '/preload-stage')))
         #else
         if (Assets.exists(Paths.txt('songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase() + "/preload-stage")))
@@ -153,9 +152,9 @@ class ThingsToLoad extends MusicBeatState
             }
 
             PlayState.curStage = PlayState.SONG.stage;
-        }
+        }*/
 
-        new FlxTimer().start(done, function(tmr){
+        new FlxTimer().start(done/20, function(tmr){
             text.text = text.text.replace('.', '').replace(' is now caching objects', '') + " COMPLETED LOADING!";
             loadPlayState();
         });

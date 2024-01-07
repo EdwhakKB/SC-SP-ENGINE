@@ -91,7 +91,7 @@ class Init extends FlxState
 
 		if (FlxG.save.data.weekCompleted != null) states.StoryMenuState.weekCompleted = FlxG.save.data.weekCompleted;
 
-		#if desktop
+		#if DISCORD_ALLOWED
 		DiscordClient.prepare();
 		#end
 		

@@ -373,7 +373,7 @@ class Paths
 		return file;
 	}
 
-	#if (SBETA == 0.1)
+	#if SCEFEATURES_ALLOWED
 	inline static public function voices(?prefix:String = '', song:String, ?suffix:String = ''):Any
 	{
 		var songKey:String = '${formatToSongPath(song)}/${prefix}Voices${suffix}';
@@ -713,7 +713,8 @@ class Paths
 			var folder:String = '';
 			if(path == 'songs') folder = 'songs:';
 
-			currentTrackedSounds.set(gottenPath, OpenFlAssets.getSound(folder + getPath('$path/$key.$SOUND_EXT', SOUND, library)));
+			var retKey:String = (path != null) ? '$path/$key' : key;
+			currentTrackedSounds.set(gottenPath, OpenFlAssets.getSound(folder + getPath('$retKey.$SOUND_EXT', SOUND, library)));
 		}
 		#end
 		localTrackedAssets.push(gottenPath);

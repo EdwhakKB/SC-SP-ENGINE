@@ -218,10 +218,10 @@ class Debug
 	public static function onGameStart()
 	{
 		// Add the mouse position to the debug Watch window.
-		//FlxG.watch.addMouse();
+		FlxG.watch.addMouse();
 
-		//defineTrackerProfiles();
-		//defineConsoleCommands();
+		defineTrackerProfiles();
+		defineConsoleCommands();
 
 		// Now we can remember the log level.
 		if (FlxG.save.data.debugLogLevel == null)

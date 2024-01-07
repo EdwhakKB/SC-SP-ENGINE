@@ -1,5 +1,6 @@
 package psychlua;
 
+#if LUA_ALLOWED
 class CallbackHandler
 {
 	public static inline function call(l:State, fname:String):Int
@@ -58,3 +59,4 @@ class CallbackHandler
 		return 0;
 	}
 }
+#end
