@@ -76,7 +76,7 @@ class ChartingState extends MusicBeatState
 		['Add Camera Zoom', "Used on MILF on that one \"hard\" part\nValue 1: Camera zoom add (Default: 0.015)\nValue 2: UI zoom add (Default: 0.03)\nLeave the values blank if you want to use Default."],
 		['BG Freaks Expression', "Should be used only in \"school\" Stage!"],
 		['Trigger BG Ghouls', "Should be used only in \"schoolEvil\" Stage!"],
-		['Flash', "Create a flash effect over the game.\n\"Value 1: Color (in Hexidecimal)\n(ex: 000000 FFFFFF 30A0F0)\n\nValue 2: Duration (in Seconds) "],
+		['Flash', "Create a flash effect over the game.\n\"Value 1: Color (in Hexidecimal)\n(ex: 000000 FFFFFF 30A0F0)\n\nValue 2: Duration (in Seconds)\n\nValue 3: Camera "],
 		['Set Cam Zoom', "Change the zoom camera \"Value 1: the zoom value\nValue 2: if blank, it will smoothly zoom regularly,\notherwise it will do an instant zoom"],
 		['Play Animation', "Plays an animation on a Character,\nonce the animation is completed,\nthe animation changes to Idle\n\nValue 1: Animation to play.\nValue 2: Character (Dad, BF, GF)"],
 		['Camera Follow Pos', "Value 1: X\nValue 2: Y\n\nThe camera won't change the follow point\nafter using this, for getting it back\nto normal, leave both values blank\nValue 3: camZoom\nLeave blank for original zoom,\notherwise,\nchanges the camera zoom."],

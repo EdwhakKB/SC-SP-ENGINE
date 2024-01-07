@@ -5,10 +5,6 @@ import flixel.system.FlxAssets.FlxShader;
 import flixel.addons.effects.FlxSkewedSprite;
 import flixel.FlxG;
 
-#if (flixel >= "5.5.0")
-import backend.animation.PsychAnimationController;
-#end
-
 typedef NoteSplashConfig = {
 	anim:String,
 	minFps:Int,
@@ -39,7 +35,7 @@ class NoteSplash extends FlxSkewedSprite
 		super(x, y);
 
 		#if (flixel >= "5.5.0")
-		animation = PsychAnimationController(this);
+		animation = new backend.animation.PsychAnimationController(this);
 		#end
 
 		this.opponentSplashes = opponentSplashes;

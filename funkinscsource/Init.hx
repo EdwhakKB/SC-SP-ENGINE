@@ -39,7 +39,7 @@ class Init extends FlxState
 		#end
 
 		#if linux
-		var icon = Image.fromFile("icon.png");
+		var icon = lime.graphics.Image.fromFile("icon.png");
 		Lib.current.stage.window.setIcon(icon);
 		#end
 

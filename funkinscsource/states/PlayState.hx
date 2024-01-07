@@ -1842,10 +1842,10 @@ class PlayState extends MusicBeatState
 						}
 					}
 
-					var introArrays0:Array<Float> = [];
-					var introArrays1:Array<Float> = [];
-					var introArrays2:Array<Float> = [];
-					var introArrays3:Array<Float> = [];
+					var introArrays0:Array<Float> = null;
+					var introArrays1:Array<Float> = null;
+					var introArrays2:Array<Float> = null;
+					var introArrays3:Array<Float> = null;
 					if (Stage.stageIntroSpriteScales != null)
 					{
 						introArrays0 = Stage.stageIntroSpriteScales[0];
@@ -1903,17 +1903,17 @@ class PlayState extends MusicBeatState
 		return false;
 	}
 
-	inline private function createCountdownSprite(image:String, antialias:Bool, soundName:String, scale:Array<Float>):FlxSprite
+	inline private function createCountdownSprite(image:String, antialias:Bool, soundName:String, scale:Array<Float> = null):FlxSprite
 	{
 		var spr:FlxSprite = new FlxSprite(-100).loadGraphic(Paths.image(image));
 		spr.cameras = [camHUD];
 		spr.scrollFactor.set();
 		spr.updateHitbox();
 
-		if (image.contains("-pixel") && scale.length < 1)
+		if (image.contains("-pixel") && scale == null)
 			spr.setGraphicSize(Std.int(spr.width * daPixelZoom));
 		
-		if (scale.length > 0)
+		if (scale != null)
 			spr.scale.set(scale[0], scale[1]);
 
 		spr.screenCenter();
@@ -2878,7 +2878,7 @@ class PlayState extends MusicBeatState
 				}
 
 				reserveVids = [];
-				#if (hxcodec >= "3.0.0")
+				#if (hxCodec >= "3.0.0")
 				daVideoGroup.members[vidIndex].play(Paths.video('${PlayState.SONG.songId}/${vidSource}', type));
 				#else
 				daVideoGroup.members[vidIndex].playVideo(Paths.video('${PlayState.SONG.songId}/${vidSource}', type));
@@ -4103,7 +4103,25 @@ class PlayState extends MusicBeatState
 				var color:FlxColor = Std.parseInt(val);
 				var time:Float = Std.parseFloat(value2);
 				if(!ClientPrefs.data.flashing) color.alphaFloat = 0.5;
-				FlxG.camera.flash(color, time, null, true);
+				switch (value3)
+				{
+					case 'camhud', 'camHUD', 'hud':
+						camHUD.flash(color, time, null, true);
+					case 'camhud2', 'camHUD2', 'hud2':
+						camHUD2.flash(color, time, null, true);
+					case 'camother', 'camOther', 'other':
+						camOther.flash(color, time, null, true);
+					case 'camnotestuff', 'camNoteStuff', 'notestuff':
+						camNoteStuff.flash(color, time, null, true);
+					case 'camvideo', 'camVideo', 'video':
+						camVideo.flash(color, time, null, true);
+					case 'camstuff', 'camStuff', 'stuff':
+						camStuff.flash(color, time, null, true);
+					case 'maincam', 'mainCam', 'main':
+						mainCam.flash(color, time, null, true);
+					default:
+						camGame.flash(color, time, null, true);
+				}
 
 			case 'Play Animation':
 				var char:Character = dad;

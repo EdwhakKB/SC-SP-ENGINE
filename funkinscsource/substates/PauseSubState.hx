@@ -479,16 +479,16 @@ class PauseSubState extends MusicBeatSubstate
 		}
 	}
 	
-	inline private function createCountdownSprite(image:String, antialias:Bool, soundName:String, scale:Array<Float>):FlxSprite
+	inline private function createCountdownSprite(image:String, antialias:Bool, soundName:String, scale:Array<Float> = null):FlxSprite
 	{
 		var spr:FlxSprite = new FlxSprite(-100).loadGraphic(Paths.image(image));
 		spr.scrollFactor.set();
 		spr.updateHitbox();
 
-		if (image.contains("-pixel") && scale.length < 1)
+		if (image.contains("-pixel") && scale == null)
 			spr.setGraphicSize(Std.int(spr.width * PlayState.daPixelZoom));
 		
-		if (scale.length > 0)
+		if (scale != null)
 			spr.scale.set(scale[0], scale[1]);
 
 		spr.screenCenter();

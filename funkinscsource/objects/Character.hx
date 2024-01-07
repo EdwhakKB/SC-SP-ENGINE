@@ -9,10 +9,6 @@ import states.stages.objects.TankmenBG;
 import backend.Song;
 import backend.Section;
 
-#if (flixel >= "5.5.0")
-import backend.animation.PsychAnimationController;
-#end
-
 class Character extends FlxSprite
 {
 	public static var DEFAULT_CHARACTER:String = 'bf'; // In case a character is missing, it will use BF on its place
@@ -95,7 +91,7 @@ class Character extends FlxSprite
 	{
 		super(x, y);
 		#if (flixel >= "5.5.0")
-		animation = PsychAnimationController(this);
+		animation = new backend.animation.PsychAnimationController(this);
 		#end
 
 		loadCharacter(character, isPlayer);

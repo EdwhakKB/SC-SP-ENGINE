@@ -745,11 +745,7 @@ class Stage extends MusicBeatState
 		{
 			stageIntroSoundsSuffix = stageData.introSoundsSuffix;
 		}
-		else
-		{
-			if (stageData.isPixelStage) stageIntroSoundsSuffix = '-pixel';
-			else stageIntroSoundsSuffix = '';
-		}
+		else stageIntroSoundsSuffix = stageData.isPixelStage ? '-pixel' : '';
 
 		if (stageData.introSoundsPrefix != "")
 		{
@@ -761,7 +757,7 @@ class Stage extends MusicBeatState
 		{
 			stageIntroSpriteScales = stageData.introSpriteScales;
 		}
-		else stageIntroSpriteScales = [[1, 1], [1, 1], [1, 1], [1, 1]];
+		else stageIntroSpriteScales = stageData.isPixelStage ? [[6, 6], [6, 6], [6, 6], [6, 6]] : [[1, 1], [1, 1], [1, 1], [1, 1]];
 	
 		if (stageData.cameraXYMovement != null)
 		{

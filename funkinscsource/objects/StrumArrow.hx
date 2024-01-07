@@ -4,9 +4,6 @@ import shaders.RGBPalette;
 import shaders.RGBPalette.RGBShaderReference;
 import flixel.addons.effects.FlxSkewedSprite;
 
-#if (flixel >= "5.5.0")
-import backend.animation.PsychAnimationController;
-#end
 import openfl.Assets;
 
 class StrumArrow extends FlxSkewedSprite
@@ -37,7 +34,7 @@ class StrumArrow extends FlxSkewedSprite
 	public var useRGBShader:Bool = true;
 	public function new(x:Float, y:Float, leData:Int, player:Int, style:String) {
 		#if (flixel >= "5.5.0")
-		animation = PsychAnimationController(this);
+		animation = new backend.animation.PsychAnimationController(this);
 		#end
 		rgbShader = new RGBShaderReference(this, Note.initializeGlobalRGBShader(leData));
 		rgbShader.enabled = false;

@@ -14,10 +14,6 @@ import flixel.addons.effects.FlxSkewedSprite;
 
 import openfl.Assets;
 
-#if (flixel >= "5.5.0")
-import backend.animation.PsychAnimationController;
-#end
-
 using StringTools;
 
 typedef EventNote = {
@@ -261,7 +257,7 @@ class Note extends FlxSkewedSprite
 		super();
 
 		#if (flixel >= "5.5.0")
-		animation = PsychAnimationController(this);
+		animation = new backend.animation.PsychAnimationController(this);
 		#end
 
 		antialiasing = ClientPrefs.data.antialiasing;
