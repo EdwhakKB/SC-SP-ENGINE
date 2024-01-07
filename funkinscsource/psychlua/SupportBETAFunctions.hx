@@ -1040,15 +1040,16 @@ class SupportBETAFunctions
                 return;
             var shad = FunkinLua.lua_Shaders.get(shaderName);
             var ease = LuaUtils.getTweenEaseByString(easeStr);
-			if (startVal == null) var startVal = Reflect.getProperty(shad, prop);
+			var startValue:Null<Float> = startVal;
+			if (startValue == null) startValue = Reflect.getProperty(shad, prop);
 
             if(shad != null)
             {
                 PlayState.instance.modchartTweens.set(tag, 
-					PlayState.tweenManager.num(startVal, value, time, {
+					PlayState.tweenManager.num(startValue, value, time, {
 					ease: ease,
 					onUpdate: function(tween:FlxTween) {
-						var ting = FlxMath.lerp(startVal,value, ease(tween.percent));
+						var ting = FlxMath.lerp(startValue, value, ease(tween.percent));
                     	Reflect.setProperty(shad, prop, ting);
 					}, 
 					onComplete: function(tween:FlxTween) {
@@ -1141,21 +1142,28 @@ class SupportBETAFunctions
 		});
 
 		//Custom shader made by me (glowsoony)
-		funk.set("tweenCustomShaderProperty", function(shaderName:String, prop:String, value:Dynamic, time:Float, easeStr:String = "linear", startVal:Null<Float> = null) {
+		funk.set("tweenCustomShaderProperty", function(tag:String, shaderName:String, prop:String, value:Dynamic, time:Float, easeStr:String = "linear", startVal:Null<Float> = null) {
             if (!ClientPrefs.data.shaders)
                 return;
             var shad:CustomCodeShader = FunkinLua.lua_Custom_Shaders.get(shaderName);
             var ease = LuaUtils.getTweenEaseByString(easeStr);
-			if (startVal == null) var startVal = shad.get(prop);
+			var startValue:Null<Float> = startVal;
+			if (startValue == null) startValue = shad.get(prop);
 
             if(shad != null)
             {
-                PlayState.tweenManager.num(startVal, value, time, {onUpdate: function(tween:FlxTween){
-					var ting = FlxMath.lerp(startVal,value, ease(tween.percent));
-                    shad.set(prop, ting);
-				}, ease: ease, onComplete: function(tween:FlxTween) {
-					shad.set(prop, value);
-				}});
+				PlayState.instance.modchartTweens.set(tag, 
+					PlayState.tweenManager.num(startValue, value, time, {
+					onUpdate: function(tween:FlxTween){
+						var ting = FlxMath.lerp(startValue, value, ease(tween.percent));
+                    	shad.set(prop, ting);
+					}, ease: ease, 
+					onComplete: function(tween:FlxTween) {
+						shad.set(prop, value);
+						PlayState.instance.callOnLuas('onTweenCompleted', [tag]);
+						PlayState.instance.modchartTweens.remove(tag);
+					}})
+				);
                 //trace('set shader prop');
             }
         });
