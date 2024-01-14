@@ -430,11 +430,7 @@ class Stage extends MusicBeatState
 					//Winter Horrorland cutscene
 					if (PlayState.isStoryMode && !PlayState.seenCutscene)
 					{
-						switch(songLowercase)
-						{
-							case 'winter-horrorland':
-								setStartCallback(winterHorrorlandCutscene);
-						}
+						setStartCallback(winterHorrorlandCutscene);
 					}
 				}
 			case 'school': //Week 6 - Senpai, Roses
@@ -741,13 +737,13 @@ class Stage extends MusicBeatState
 
 		if (stageData.countDownAssets != null) stageIntroAssets = stageData.countDownAssets;
 
-		if (stageData.introSoundsSuffix != "")
+		if (stageData.introSoundsSuffix != null)
 		{
 			stageIntroSoundsSuffix = stageData.introSoundsSuffix;
 		}
 		else stageIntroSoundsSuffix = stageData.isPixelStage ? '-pixel' : '';
 
-		if (stageData.introSoundsPrefix != "")
+		if (stageData.introSoundsPrefix != null)
 		{
 			stageIntroSoundsPrefix = stageData.introSoundsPrefix;
 		}
@@ -949,7 +945,7 @@ class Stage extends MusicBeatState
 				{
 					if (!array.contains(bg))
 					{
-						var tween = PlayState.instance.createTween(bg, {alpha: 0}, tweenDuration, {
+						var tween = FlxTween.tween(bg, {alpha: 0}, tweenDuration, {
 							onComplete: function(tween:FlxTween):Void
 							{
 								bg.visible = false;
@@ -960,7 +956,7 @@ class Stage extends MusicBeatState
 				for (bg in array)
 				{
 					bg.visible = true;
-					PlayState.instance.createTween(bg, {alpha: 1}, tweenDuration);
+					FlxTween.tween(bg, {alpha: 1}, tweenDuration);
 				}
 			}
 			else
@@ -975,6 +971,8 @@ class Stage extends MusicBeatState
 	var lightningOffset:Int = 8;
 	override function beatHit()
 	{
+		super.beatHit();
+
 		if (!ClientPrefs.data.lowQuality && ClientPrefs.data.background && animatedBacks.length > 0)
 		{
 			for (bg in animatedBacks)
@@ -1026,7 +1024,6 @@ class Stage extends MusicBeatState
 					everyoneDance();
 			}
 		}
-		super.beatHit();
 	}
 
 	override function sectionHit()
@@ -1874,7 +1871,7 @@ class Stage extends MusicBeatState
 
 		fastCar.velocity.x = (FlxG.random.int(170, 220) / FlxG.elapsed) * 3;
 		fastCarCanDrive = false;
-		carTimer = PlayState.instance.createTimer(2, function(tmr:FlxTimer)
+		carTimer = new FlxTimer().start(2, function(tmr:FlxTimer)
 		{
 			resetFastCar();
 			carTimer = null;
@@ -1916,13 +1913,13 @@ class Stage extends MusicBeatState
 			var blackShit:FlxSprite = new FlxSprite(-FlxG.width * FlxG.camera.zoom,
 				-FlxG.height * FlxG.camera.zoom).makeGraphic(FlxG.width * 3, FlxG.height * 3, FlxColor.BLACK);
 			blackShit.scrollFactor.set();
-			add(blackShit);
+			PlayState.instance.add(blackShit);
 			PlayState.instance.camHUD.visible = false;
 
 			PlayState.instance.inCutscene = true;
 			PlayState.instance.canPause = false;
 
-			PlayState.instance.createTimer(1.5, function(tmr:FlxTimer) {
+			new FlxTimer().start(1.5, function(tmr:FlxTimer) {
 				endSong();
 			});
 		}
@@ -1941,7 +1938,7 @@ class Stage extends MusicBeatState
 		// blackout at the start
 		var blackScreen:FlxSprite = new FlxSprite().makeGraphic(Std.int(FlxG.width * 2), Std.int(FlxG.height * 2), FlxColor.BLACK);
 		blackScreen.scrollFactor.set();
-		add(blackScreen);
+		PlayState.instance.add(blackScreen);
 
 		FlxTween.tween(blackScreen, {alpha: 0}, 0.7, {
 			ease: FlxEase.linear,
@@ -1951,7 +1948,7 @@ class Stage extends MusicBeatState
 		});
 
 		// zoom out
-		PlayState.instance.createTimer(0.8, function(tmr:FlxTimer)
+		new FlxTimer().start(0.8, function(tmr:FlxTimer)
 		{
 			PlayState.instance.camHUD.visible = true;
 			FlxTween.tween(FlxG.camera, {zoom: PlayState.instance.defaultCamZoom}, 2.5, {

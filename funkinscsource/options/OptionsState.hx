@@ -40,6 +40,8 @@ class OptionsState extends MusicBeatState
 		DiscordClient.changePresence("Options Menu", null);
 		#end
 
+		Conductor.bpm = 128.0;
+
 		final yScroll:Float = Math.max(0.25 - (0.05 * (options.length - 5)), 0.1);
 		bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
 		bg.color = 0xFF98f0f8;

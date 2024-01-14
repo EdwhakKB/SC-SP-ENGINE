@@ -138,13 +138,14 @@ class FlxSoundTray extends Sprite
 		}
 		else if (y > -height)
 		{
-			y -= (MS / 1000) * FlxG.height * 2;
+			y -= (MS / 1000) * FlxG.height * 0.5;
 
 			if (y <= -height)
 			{
 				visible = false;
 				active = false;
 
+				#if FLX_SAVE
 				// Save sound preferences
 				if (FlxG.save.isBound)
 				{
@@ -152,6 +153,7 @@ class FlxSoundTray extends Sprite
 					FlxG.save.data.volume = FlxG.sound.volume;
 					FlxG.save.flush();
 				}
+				#end
 			}
 		}
 	}

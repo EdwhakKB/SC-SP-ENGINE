@@ -37,11 +37,7 @@ import states.LoadingState;
 import flixel.addons.effects.FlxSkewedSprite;
 
 //Flixel
-#if (flixel >= "5.3.0")
 import flixel.sound.FlxSound;
-#else
-import flixel.system.FlxSound;
-#end
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxCamera;
@@ -61,7 +57,7 @@ import flxanimate.*;
 import animateatlas.AtlasFrameMaker;
 #end
 
-#if modchartingTools
+#if SCEModchartingTools
 import modcharting.*;
 #end
 

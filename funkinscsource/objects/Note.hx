@@ -52,7 +52,7 @@ class Note extends FlxSkewedSprite
 	public static var globalRgbShaders:Array<RGBPalette> = [];
 	public static var instance:Note = null;
 
-	#if modchartingTools
+	#if SCEModchartingTools
 	public var mesh:modcharting.SustainStrip;
 	public var z:Float = 0;
 	#end

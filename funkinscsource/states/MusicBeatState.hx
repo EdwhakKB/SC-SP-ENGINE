@@ -8,7 +8,7 @@ import flixel.addons.transition.Transition;
 import flixel.FlxSubState;
 import backend.PsychCamera;
 
-class MusicBeatState extends #if modchartingTools modcharting.ModchartMusicBeatState #else FlxUIState #end
+class MusicBeatState extends #if SCEModchartingTools modcharting.ModchartMusicBeatState #else FlxUIState #end
 {
 	private var curSection:Int = 0;
 	private var stepsToDo:Int = 0;
@@ -75,7 +75,7 @@ class MusicBeatState extends #if modchartingTools modcharting.ModchartMusicBeatS
 
 		super.create();
 		if(!skip) {
-			openSubState(new IndieDiamondTransSubState(0.7, true, FlxG.camera.zoom));
+			openSubState(new IndieDiamondTransSubState(0.6, true, FlxG.camera.zoom));
 		}
 		FlxTransitionableState.skipNextTransOut = false;
 		timePassedOnState = 0;

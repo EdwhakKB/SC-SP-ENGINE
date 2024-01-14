@@ -86,6 +86,7 @@ class MusicPlayer extends FlxGroup
 
 		if (!playingMusic)
 		{
+			Conductor.songPosition = -5000 / Conductor.songPosition;
 			return;
 		}
 
@@ -114,6 +115,8 @@ class MusicPlayer extends FlxGroup
 			FreeplayState.inst.time = curTime;
 			if (FreeplayState.vocals != null)
 				FreeplayState.vocals.time = curTime;
+			if (FreeplayState.opponentVocals != null)
+				FreeplayState.opponentVocals.time = curTime;
 		}
 		if (instance.controls.UI_RIGHT_P)
 		{
@@ -131,6 +134,8 @@ class MusicPlayer extends FlxGroup
 			FreeplayState.inst.time = curTime;
 			if (FreeplayState.vocals != null)
 				FreeplayState.vocals.time = curTime;
+			if (FreeplayState.opponentVocals != null)
+				FreeplayState.opponentVocals.time = curTime;
 		}
 	
 		updateTimeTxt();
@@ -150,7 +155,8 @@ class MusicPlayer extends FlxGroup
 			FreeplayState.inst.time = curTime;
 			if (FreeplayState.vocals != null)
 				FreeplayState.vocals.time = curTime;
-
+			if (FreeplayState.opponentVocals != null)
+				FreeplayState.opponentVocals.time = curTime;
 			updateTimeTxt();
 		}
 
@@ -159,6 +165,8 @@ class MusicPlayer extends FlxGroup
 			FreeplayState.inst.time = curTime;
 			if (FreeplayState.vocals != null)
 				FreeplayState.vocals.time = curTime;
+			if (FreeplayState.opponentVocals != null)
+				FreeplayState.opponentVocals.time = curTime;
 
 			if (wasPlaying)
 			{
@@ -199,6 +207,16 @@ class MusicPlayer extends FlxGroup
 				pauseOrResume(true);
 			}
 		}
+		if (FreeplayState.opponentVocals != null && FreeplayState.inst.time > 5)
+		{
+			var difference:Float = Math.abs(FreeplayState.inst.time - FreeplayState.opponentVocals.time);
+			if (difference >= 5 && !paused)
+			{
+				pauseOrResume();
+				FreeplayState.opponentVocals.time = FreeplayState.inst.time;
+				pauseOrResume(true);
+			}
+		}
 		updatePlaybackTxt();
 	
 		if (instance.controls.RESET)
@@ -209,6 +227,8 @@ class MusicPlayer extends FlxGroup
 			FreeplayState.inst.time = 0;
 			if (FreeplayState.vocals != null)
 				FreeplayState.vocals.time = 0;
+			if (FreeplayState.opponentVocals != null)
+				FreeplayState.opponentVocals.time = 0;
 
 			updateTimeTxt();
 		}
@@ -222,6 +242,9 @@ class MusicPlayer extends FlxGroup
 
 			if (FreeplayState.vocals != null)
 				FreeplayState.vocals.resume();
+
+			if (FreeplayState.opponentVocals != null)
+				FreeplayState.opponentVocals.resume();
 		}
 		else 
 		{
@@ -229,6 +252,9 @@ class MusicPlayer extends FlxGroup
 
 			if (FreeplayState.vocals != null)
 				FreeplayState.vocals.pause();
+
+			if (FreeplayState.opponentVocals != null)
+				FreeplayState.opponentVocals.pause();
 		}
 		positionSong();
 	}
@@ -348,6 +374,8 @@ class MusicPlayer extends FlxGroup
 		FreeplayState.inst.pitch = playbackRate;
 		if (FreeplayState.vocals != null)
 			FreeplayState.vocals.pitch = playbackRate;
+		if (FreeplayState.opponentVocals != null)
+			FreeplayState.opponentVocals.pitch = playbackRate;
 	}
 
 	function get_playing():Bool 

@@ -16,11 +16,7 @@ import haxe.io.Path;
 
 import flixel.ui.FlxBar;
 import flixel.util.FlxColor;
-#if (flixel >= "5.3.0")
 import flixel.sound.FlxSound;
-#else
-import flixel.system.FlxSound;
-#end
 import flixel.text.FlxText;
 
 import flixel.addons.transition.FlxTransitionableState;
@@ -386,15 +382,6 @@ class LoadingState extends MusicBeatState
 		{
 			FlxG.camera.zoom = 1.125;
 			FlxTween.tween(FlxG.camera, {zoom: 1}, 1.2);
-		}
-
-		if (Type.getClass(target) == PlayState)
-		{
-			if (FlxG.keys.justPressed.SHIFT)
-			{
-				//persistentUpdate = false;
-				LoadingState.loadAndSwitchState(new states.editors.ChartingState());
-			}
 		}
 
 		if (loader != null)
