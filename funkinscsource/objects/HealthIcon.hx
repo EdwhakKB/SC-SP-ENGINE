@@ -3,27 +3,6 @@ package objects;
 import haxe.Json as Json;
 import lime.utils.Assets;
 
-typedef IconJson = {
-	var ?name:String;
-	var image:String;
-	var ?startingAnim:String;
-	var animations:Array<IconAnimations>;
-	var ?scale:Float;
-	var ?graphicScale:Float;
-	var ?no_antialiasing:Bool;
-}
-
-
-typedef IconAnimations = {
-	var name:String;
-	var anim:String;
-	var ?fps:Int;
-	var ?offsets:Array<Int>;
-	var ?loop:Bool;
-	var ?indices:Array<Int>;
-	var ?flipY:Bool;
-}
-
 class HealthIcon extends FlxSprite
 {
 	public var animOffsets:Map<String, Array<Dynamic>>;
@@ -136,6 +115,7 @@ class HealthIcon extends FlxSprite
 		if (animatedIcon) return;
 		var graphic = Paths.image(icon, gpuAllowed);
 
+		//If null once it turns into icon-face, but it that fails, fully stop working!
 		if (graphic == null) graphic = Paths.image("icons/icon-face", gpuAllowed);
 		if (graphic == null) {
 			graphic = Paths.image('missingRating', gpuAllowed);
@@ -218,7 +198,7 @@ class HealthIcon extends FlxSprite
 
 		flipX = (json.flip_x != isPlayer);
 
-		var noAntialiasing = (json.no_antialiasing == true);
+		final noAntialiasing = (json.no_antialiasing == true);
 		antialiasing = ClientPrefs.data.antialiasing ? !noAntialiasing && !char.endsWith('-pixel') : false;
 
 		// animations
@@ -263,8 +243,8 @@ class HealthIcon extends FlxSprite
 			offset.y = iconOffset[1];
 			width = Math.abs(scale.x) * frameWidth;
 			height = Math.abs(scale.y) * frameHeight;
+			centerOrigin();
 		}
-		centerOrigin();
 	}
 
 	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
@@ -287,4 +267,24 @@ class HealthIcon extends FlxSprite
 	public function getCharacter():String {
 		return char;
 	}
+}
+
+typedef IconJson = {
+	var ?name:String;
+	var image:String;
+	var ?startingAnim:String;
+	var animations:Array<IconAnimations>;
+	var ?scale:Float;
+	var ?graphicScale:Float;
+	var ?no_antialiasing:Bool;
+}
+
+typedef IconAnimations = {
+	var name:String;
+	var anim:String;
+	var ?fps:Int;
+	var ?offsets:Array<Int>;
+	var ?loop:Bool;
+	var ?indices:Array<Int>;
+	var ?flipY:Bool;
 }

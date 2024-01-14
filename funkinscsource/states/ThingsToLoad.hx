@@ -26,21 +26,19 @@ class ThingsToLoad extends MusicBeatState
     
     var character:Character;
     var Stage:Stage;
-    var lerpedPercent:Float = 0;
-    var totalLoaded:Int = 0;
 
     var loadingBar:FlxBar;
-    var textExtra:String = '';
 
 	override function create()
 	{
         persistentUpdate = true;
+        persistentDraw = true;
         FlxG.mouse.visible = false;
        // FlxG.worldBounds.set(0,0);
 
         bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
         bg.color = FlxG.random.color();
-        bg.alpha = FlxG.random.float(0.4, 1);
+        bg.alpha = FlxG.random.float(0.2, 1);
         add(bg);
 
         PlayState.customLoaded = true;
@@ -51,8 +49,6 @@ class ThingsToLoad extends MusicBeatState
         text.borderColor = FlxColor.BLACK;
 		text.borderSize = 4;
 		text.borderStyle = FlxTextBorderStyle.OUTLINE;
-
-        lerpedPercent = 1;
 
         loadingBar = new FlxBar(0, FlxG.height-25, LEFT_TO_RIGHT, FlxG.width, 25, this, 'lerpedPercent', 0, 1);
 		loadingBar.scrollFactor.set();
@@ -67,19 +63,12 @@ class ThingsToLoad extends MusicBeatState
         add(text);
         add(loadingBar);
         add(loadingBar2);
-        
-        // update thread
 
         new FlxTimer().start(2, function(tmr){
             FlxTimer.globalManager.completeAll();
             text.text = text.text.replace('.', '').replace('Loading ', '') + " is now caching objects";
             finishCaching();
         });
-
-        sys.thread.Thread.create(() -> 
-        {
-        });
-
         new FlxTimer().start(0.2, function(tmr:FlxTimer){
             text.text += ".";
             new FlxTimer().start(0.4, function(tmr:FlxTimer){
@@ -90,12 +79,8 @@ class ThingsToLoad extends MusicBeatState
             });
         }, 3);
 
-        // cache thread
-
         super.create();
     }
-
-    var calledDone = false;
 
     function finishCaching()
     {

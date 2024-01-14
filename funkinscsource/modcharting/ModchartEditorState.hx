@@ -22,11 +22,7 @@ import flixel.util.FlxColor;
 import flixel.math.FlxMath;
 import flixel.FlxSprite;
 import flixel.util.FlxSort;
-#if (flixel >= "5.3.0")
 import flixel.sound.FlxSound;
-#else
-import flixel.system.FlxSound;
-#end
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.FlxCamera;
 import flixel.FlxG;
@@ -307,6 +303,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
 	public var unspawnNotes:Array<Note> = [];
     public var loadedNotes:Array<Note> = []; //stored notes from the chart that unspawnNotes can copy from
     public var vocals:FlxSound;
+    public var opponentVocals:FlxSound;
     var generatedMusic:Bool = false;
     
 
@@ -345,8 +342,6 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
 		camHUD.bgColor.alpha = 0;
 
 		FlxG.cameras.add(camHUD, false);
-
-        IndieDiamondTransSubState.nextCamera = camHUD;
 
 		persistentUpdate = true;
 		persistentDraw = true;
@@ -611,6 +606,9 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
                 {
                     inst.pause();
                     if(vocals != null) vocals.pause();
+                    #if SCEFEATURES_ALLOWED
+                    if(opponentVocals != null) opponentVocals.pause();
+                    #end
                     playfieldRenderer.editorPaused = true;
                     playfieldRenderer.pauseTweens = true;
                 }
@@ -622,6 +620,15 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
                         vocals.time = inst.time;
                         vocals.play();
                     }
+                    #if SCEFEATURES_ALLOWED
+                    if (opponentVocals != null)
+                    {
+                        opponentVocals.play();
+                        opponentVocals.pause();
+                        opponentVocals.time = inst.time;
+                        opponentVocals.play();
+                    }
+                    #end
                     inst.play();
                     playfieldRenderer.pauseTweens = false;
                     playfieldRenderer.editorPaused = false;
@@ -636,11 +643,19 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
             {
                 inst.pause();
                 if(vocals != null) vocals.pause();
+                #if SCEFEATURES_ALLOWED if(opponentVocals != null) opponentVocals.pause(); #end
                 inst.time += (FlxG.mouse.wheel * Conductor.stepCrochet*0.8*shiftThing);
                 if(vocals != null) {
                     vocals.pause();
                     vocals.time = inst.time;
                 }
+                #if SCEFEATURES_ALLOWED
+                if (opponentVocals != null)
+                {
+                    opponentVocals.pause();
+                    opponentVocals.time = inst.time;
+                }
+                #end
                 playfieldRenderer.pauseTweens = true;
                 playfieldRenderer.editorPaused = true;
                 dirtyUpdateNotes = true;
@@ -651,6 +666,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
             {
                 inst.pause();
                 if(vocals != null) vocals.pause();
+                #if SCEFEATURES_ALLOWED if(opponentVocals != null) opponentVocals.pause(); #end
                 inst.time += (Conductor.crochet*4*shiftThing);
                 dirtyUpdateNotes = true;
                 dirtyUpdateEvents = true;
@@ -659,6 +675,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
             {
                 inst.pause();
                 if(vocals != null) vocals.pause();
+                #if SCEFEATURES_ALLOWED if(opponentVocals != null) opponentVocals.pause(); #end
                 inst.time -= (Conductor.crochet*4*shiftThing);
                 dirtyUpdateNotes = true;
                 dirtyUpdateEvents = true;
@@ -691,6 +708,9 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
         #if FLX_PITCH
         inst.pitch = playbackSpeed;
         vocals.pitch = playbackSpeed;
+        #if SCEFEATURES_ALLOWED
+        if (opponentVocals != null) opponentVocals.pitch = playbackSpeed;
+        #end
         #end
         
 
@@ -830,11 +850,8 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
                 FlxG.mouse.visible = false;
                 inst.stop();
                 if(vocals != null) vocals.stop();
+                if(opponentVocals != null) opponentVocals.stop(); 
 
-                IndieDiamondTransSubState.nextCamera = camHUD;
-				if(FlxTransitionableState.skipNextTransIn)
-					IndieDiamondTransSubState.nextCamera = null;
-                
                 #if (PSYCH && PSYCHVERSION == 0.7)
                     backend.StageData.loadDirectory(PlayState.SONG);
                 #elseif (PSYCH && PSYCHVERSION != 0.7)
@@ -1025,25 +1042,48 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
 
     public function generateSong(songData:SwagSong):Void
     {
-
         var songData = PlayState.SONG;
         Conductor.bpm = songData.bpm;
 
+        #if SCEFEATURES_ALLOWED
+        var boyfriendVocals:String = loadCharacterFile(PlayState.SONG.player1).vocals_file;
+		var dadVocals:String = loadCharacterFile(PlayState.SONG.player2).vocals_file;
+        #end
+
         vocals = new FlxSound();
+        opponentVocals = new FlxSound();
         try {
             if (PlayState.SONG.needsVoices){
                 #if LEATHER 
                 vocals.loadEmbedded(Paths.voices(PlayState.SONG.songId, (PlayState.SONG.specialAudioName == null ? PlayState.storyDifficultyStr.toLowerCase() : PlayState.SONG.specialAudioName)));
-                #elseif SCEFEATURES_ALLOWED
-                vocals.loadEmbedded(Paths.voices((PlayState.SONG.vocalsPrefix != null ? PlayState.SONG.vocalsPrefix : ''), PlayState.SONG.songId, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : '')));
+                #elseif (PSYCH && !SCEModchartingTools)
+                vocals.loadEmbedded(Paths.voices(PlayState.SONG.song));
+                #end
+
+                #if SCEModchartingTools
+                #if SCEFEATURES_ALLOWED
+                var normalVocals = Paths.voices((PlayState.SONG.vocalsPrefix != null ? PlayState.SONG.vocalsPrefix : ''), songData.song, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : ''));
+				var playerVocals = Paths.voices((PlayState.SONG.vocalsPrefix != null ? PlayState.SONG.vocalsPrefix : ''), songData.song, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : ''), (boyfriendVocals == null || boyfriendVocals.length < 1) ? '' : boyfriendVocals);
+				vocals.loadEmbedded(playerVocals != null ? playerVocals : normalVocals);
+
+                var oppVocals = Paths.voices((PlayState.SONG.vocalsPrefix != null ? PlayState.SONG.vocalsPrefix : ''), songData.song, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : ''), (dadVocals == null || dadVocals.length < 1) ? '' : dadVocals);
+                if(oppVocals != null) opponentVocals.loadEmbedded(oppVocals);
                 #else
-                vocals.loadEmbedded(Paths.voices(PlayState.SONG.songId));
+                var normalVocals = Paths.voices(songData.song);
+				var playerVocals = Paths.voices(songData.song, (boyfriendVocals == null || boyfriendVocals.length < 1) ? '' : boyfriendVocals);
+				vocals.loadEmbedded(playerVocals != null ? playerVocals : normalVocals);
+
+                var oppVocals = Paths.voices(songData.song, (dadVocals == null || dadVocals.length < 1) ? '' : dadVocals);
+                if(oppVocals != null) opponentVocals.loadEmbedded(oppVocals);
+                #end
                 #end
             }
         }
 		catch(e:Dynamic) {}
-        //vocals.pitch = playbackRate;
+
         FlxG.sound.list.add(vocals);
+        //vocals.pitch = playbackRate;
+        FlxG.sound.list.add(opponentVocals);
 
         inst = new FlxSound();
         try {
@@ -1064,6 +1104,13 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
                 vocals.pause();
                 vocals.time = 0;
             }
+            #if SCEFEATURES_ALLOWED
+            if(opponentVocals != null)
+            {
+                opponentVocals.pause();
+                opponentVocals.time = 0;
+            }
+            #end
         };
 
         notes = new FlxTypedGroup<Note>();
@@ -1127,30 +1174,27 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
 
                 swagNote.scrollFactor.set();
 
-                #if (PSYCH && PSYCHVERSION == 0.7)
+                #if SCEFEATURES_ALLOWED
                 if (swagNote.texture.contains('pixel') || swagNote.noteSkin.contains('pixel')){
 					swagNote.containsPixelTexture = true;
 				}
                 #end
 
-                #if (PSYCH && PSYCHVERSION == 0.7) if (ClientPrefs.getGameplaySetting('sustainnotesactive')) swagNote.sustainLength = songNotes[2] / playbackSpeed;
+                #if SCEFEATURES_ALLOWED if (ClientPrefs.getGameplaySetting('sustainnotesactive')) swagNote.sustainLength = songNotes[2] / playbackSpeed;
 				else swagNote.sustainLength = 0; #end
 
-                var susLength:Float = swagNote.sustainLength;
-                var anotherCrochet:Float = Conductor.crochet;
-				var anotherStepCrochet:Float = anotherCrochet / 4;
-				var susLength:Float = swagNote.sustainLength;
-
-				susLength = susLength / anotherStepCrochet;
                 unspawnNotes.push(swagNote);
 
-                if(susLength > 0) {
-					for (susNote in 0...Std.int(Math.max(susLength, 2)))
-					{
-                        oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
+                final susLength:Float = swagNote.sustainLength / Conductor.stepCrochet;
+				final floorSus:Int = Math.floor(susLength);
 
-                        #if PSYCH 
-                        var sustainNote:Note = new Note(daStrumTime + (anotherStepCrochet * susNote), daNoteData, oldNote, true, PlayState.SONG.arrowSkin);
+				if(floorSus > 0) {
+					for (susNote in 0...floorSus + 1)
+					{
+						oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
+
+                        #if PSYCH
+						var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote), daNoteData, oldNote, true, PlayState.SONG.arrowSkin);
                         sustainNote.mustPress = gottaHitNote;
                         #else 
                         var sustainNote:Note = new Note(daStrumTime + (Std.int(Conductor.stepCrochet) * susNote) + Std.int(Conductor.stepCrochet), daNoteData, oldNote, true, 0, songNotes[4], null, [0], gottaHitNote);
@@ -1166,11 +1210,13 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
                         unspawnNotes.push(sustainNote);
 
                         #if (PSYCH && PSYCHVERSION == 0.7)
+                        #if SCEFEATURES_ALLOWED
                         var isNotePixel:Bool = (sustainNote.texture.contains('pixel') || sustainNote.noteSkin.contains('pixel') || oldNote.texture.contains('pixel') || oldNote.noteSkin.contains('pixel'));
 						if (isNotePixel) {
 							oldNote.containsPixelTexture = true;
 							sustainNote.containsPixelTexture = true;
 						}
+                        #end
 						sustainNote.correctionOffset = swagNote.height / 2;
 						if(!isNotePixel)
 						{
@@ -1328,7 +1374,32 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
         }
     }
     
+    #if SCEFEATURES_ALLOWED
+    function loadCharacterFile(char:String):objects.Character.CharacterFile {
+		var characterPath:String = 'data/characters/' + char + '.json';
+		#if MODS_ALLOWED
+		var path:String = Paths.modFolders(characterPath);
+		if (!FileSystem.exists(path)) {
+			path = Paths.getSharedPath(characterPath);
+		}
 
+		if (!FileSystem.exists(path))
+		#else
+		var path:String = Paths.getSharedPath(characterPath);
+		if (!OpenFlAssets.exists(path))
+		#end
+		{
+			path = Paths.getSharedPath('data/characters/' + objects.Character.DEFAULT_CHARACTER + '.json'); //If a character couldn't be found, change him to BF just to prevent a crash
+		}
+
+		#if MODS_ALLOWED
+		var rawJson = File.getContent(path);
+		#else
+		var rawJson = OpenFlAssets.getText(path);
+		#end
+		return cast Json.parse(rawJson);
+	}
+    #end
 
     public static function createGrid(CellWidth:Int, CellHeight:Int, Width:Int, Height:Int):BitmapData
     {
@@ -1359,9 +1430,6 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
                     lastColor = Color1;
                 else if (timesFilled % 2 == 1)
                     lastColor = Color2;
-                // else 
-                //     lastColor = Color3;
-
                 grid.fillRect(new Rectangle(x, y, CellWidth, CellHeight), lastColor);
                 // grid.unlock();
                 timesFilled++;
@@ -1438,9 +1506,6 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
                     targetLaneStepper.value = currentModifier[MOD_LANE];
             }   
         });
-
-
-
 
         var refreshModifiers:FlxButton = new FlxButton(25+modifierDropDown.width+10, modifierDropDown.y, 'Refresh Modifiers', function ()
         {
@@ -1867,8 +1932,6 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
         centerXToObject(repeatCheckbox, repeatBeatGapStepper);
         centerXToObject(repeatCheckbox, repeatCountStepper);
 
-
-
         eventModInputText = new FlxUIInputText(25, 50, 160, '', 8);
         eventModInputText.callback = function(str:String, str2:String)
         {
@@ -2089,11 +2152,6 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
         tab_group.add(makeLabel(eventModInputText, 0, -15, "Event Mod"));
         tab_group.add(makeLabel(subModDropDown, 0, -15, "Sub Mods"));
 
-
-
-
-
-
         addUI(tab_group, "subModDropDown", subModDropDown, 'Sub Mods', 'Drop down for sub mods on the currently selected modifier, not all mods have them.');
         addUI(tab_group, "eventModifierDropDown", eventModifierDropDown, 'Stored Modifiers', 'Drop down for stored modifiers.');
         addUI(tab_group, "eventTypeDropDown", eventTypeDropDown, 'Event Type', 'Drop down to swtich the event type, currently there is only "set" and "ease", "set" makes the event happen instantly, and "ease" has a time and an ease function to smoothly change the modifiers.');
@@ -2218,7 +2276,6 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
         playfieldCountStepper = new FlxUINumericStepper(25, 50, 1, 1, 1, 100, 0);
         playfieldCountStepper.value = playfieldRenderer.modchart.data.playfields;
         
-
         tab_group.add(playfieldCountStepper);
         tab_group.add(makeLabel(playfieldCountStepper, 0, -15, "Playfield Count"));
         tab_group.add(makeLabel(playfieldCountStepper, 55, 25, "Don't add too many or the game will lag!!!"));
@@ -2245,6 +2302,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
 		songSlider.callback = function(fuck:Float)
 		{
 			vocals.time = inst.time;
+            #if SCEFEATURES_ALLOWED if (opponentVocals != null) opponentVocals.time = inst.time; #end
 			Conductor.songPosition = inst.time;
             dirtyUpdateEvents = true;
             dirtyUpdateNotes = true;
@@ -2261,18 +2319,25 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
 
 			inst.volume = vol;
 		};
-        var check_mute_vocals = new FlxUICheckBox(check_mute_inst.x + 120, check_mute_inst.y, null, null, "Mute Vocals (in editor)", 100);
+        var check_mute_vocals = new FlxUICheckBox(check_mute_inst.x + 120, check_mute_inst.y, null, null, "Mute Main Vocals (in editor)", 100);
 		check_mute_vocals.checked = false;
 		check_mute_vocals.callback = function()
 		{
-			if(vocals != null) {
-				var vol:Float = 1;
+			var vol:Float = 1;
+			if (check_mute_vocals.checked)
+				vol = 0;
 
-				if (check_mute_vocals.checked)
-					vol = 0;
+			if (vocals != null) vocals.volume = vol;
+		};
+        var check_mute_opponent_vocals = new FlxUICheckBox(check_mute_inst.x + 120, check_mute_inst.y + 40, null, null, "Mute Opp. Vocals (in editor)", 100);
+		check_mute_opponent_vocals.checked = false;
+		check_mute_opponent_vocals.callback = function()
+		{
+			var vol:Float = 1;
+			if (check_mute_opponent_vocals.checked)
+				vol = 0;
 
-				vocals.volume = vol;
-			}
+			if (opponentVocals != null) opponentVocals.volume = vol;
 		};
 
 
@@ -2293,6 +2358,7 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
 
         tab_group.add(check_mute_inst);
         tab_group.add(check_mute_vocals);
+        tab_group.add(check_mute_opponent_vocals);
 
         UI_box.addGroup(tab_group);
     }
@@ -2317,9 +2383,6 @@ class ModchartEditorState extends #if (PSYCH && PSYCHVERSION == 0.7) states.Musi
 
         tab_group.add(ui);
     }
-    
-
-
     function centerXToObject(obj1:FlxSprite, obj2:FlxSprite) //snap second obj to first
     {
         obj2.x = obj1.x + (obj1.width/2) - (obj2.width/2);

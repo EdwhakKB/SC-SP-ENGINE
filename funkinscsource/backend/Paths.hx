@@ -374,9 +374,10 @@ class Paths
 	}
 
 	#if SCEFEATURES_ALLOWED
-	inline static public function voices(?prefix:String = '', song:String, ?suffix:String = ''):Any
+	inline static public function voices(?prefix:String = '', song:String, ?suffix:String = '', ?postfix:String = null):Any
 	{
 		var songKey:String = '${formatToSongPath(song)}/${prefix}Voices${suffix}';
+		if(postfix != null) songKey += '-' + postfix;
 		var voices = returnSound(null, songKey, 'songs');
 		return voices;
 	}
@@ -388,9 +389,10 @@ class Paths
 		return inst;
 	}
 	#else
-	inline static public function voices(song:String):Any
+	inline static public function voices(song:String, ?postfix:String = null):Any
 	{
 		var songKey:String = '${formatToSongPath(song)}/Voices';
+		if(postfix != null) songKey += '-' + postfix;
 		var voices = returnSound(null, songKey, 'songs');
 		return voices;
 	}
@@ -402,41 +404,17 @@ class Paths
 		return inst;
 	}
 	#end
-	static public function songEvents(song:String, ?difficulty:String):String
+
+	inline static public function scriptsForHandler(key:String, defaultPlace:String = null):String
 	{
-		song = song.toLowerCase();
-		if (difficulty != null) difficulty = difficulty.toLowerCase();
+		if (defaultPlace == null) defaultPlace = 'classes';
 
 		#if MODS_ALLOWED
-		if (difficulty != null && difficulty != '' && difficulty != 'normal') 
-			if (FileSystem.exists(modFolders('data/songs/' + song + 'events-$difficulty.json')))
-				return modFolders('data/songs/' + song + 'events-$difficulty.json');
-		else 
-			if (FileSystem.exists(modFolders('data/songs/' + song + 'events.json')))
-				return modFolders('data/songs/' + song + 'events.json');
+		if (FileSystem.exists(modFolders('$defaultPlace/$key.hx')))
+			return modFolders('$defaultPlace/$key.hx');
 		#end
-
-		if(difficulty != null && difficulty != '' && difficulty != 'normal')
-		{
-			if(Assets.exists(json('songs/' + song+ '/events-$difficulty')))
-				return json('songs/' + song + '/events-$difficulty');
-		}else{
-			if(Assets.exists(json('songs/' + song + '/events')))
-				return json('songs/' + song + '/events');
-		}
-
-		Debug.logInfo('File for events-$difficulty.json not found! or File for events.json not found!');
-		return null;
-	}
-
-	inline static public function Script(key:String):String
-	{
-		#if MODS_ALLOWED
-		if (FileSystem.exists(modFolders('classes/$key.hx')))
-			return modFolders('classes/$key.hx');
-		#end
-		if (FileSystem.exists(getSharedPath('classes/$key.hx')))
-			return getSharedPath('classes/$key.hx');
+		if (FileSystem.exists(getSharedPath('$defaultPlace/$key.hx')))
+			return getSharedPath('$defaultPlace/$key.hx');
 
 		Debug.logTrace('File for script $key.hx not found!');
 		return null;
@@ -597,6 +575,18 @@ class Paths
 			return FlxAtlasFrames.fromSparrow(imageLoaded, myXml);
 			#end
 		}
+		else
+		{
+			var myJson:Dynamic = getPath('images/$key.json', TEXT, library, true);
+			if(OpenFlAssets.exists(myJson) #if MODS_ALLOWED || (FileSystem.exists(myJson) && (useMod = true)) #end )
+			{
+				#if MODS_ALLOWED
+				return FlxAtlasFrames.fromTexturePackerJson(imageLoaded, (useMod ? File.getContent(myJson) : myJson));
+				#else
+				return FlxAtlasFrames.fromTexturePackerJson(imageLoaded, myJson);
+				#end
+			}
+		}
 		return getPackerAtlas(key, library);
 	}
 
@@ -651,7 +641,22 @@ class Paths
 		#if MODS_ALLOWED
 		var jsonExists:Bool = false;
 		
-		var json:String = modsJsonImage(key);
+		var json:String = modsImagesJson(key);
+		if(FileSystem.exists(json)) jsonExists = true;
+
+		return FlxAtlasFrames.fromTexturePackerJson(imageLoaded, (jsonExists ? File.getContent(json) : getPath('images/$key.json', library)));
+		#else
+		return FlxAtlasFrames.fromTexturePackerJson(imageLoaded, getPath('images/$key.json', library));
+		#end
+	}
+
+	inline static public function getAsepriteAtlas(key:String, ?library:String = null, ?allowGPU:Bool = true):FlxAtlasFrames
+	{
+		var imageLoaded:FlxGraphic = image(key, library, allowGPU);
+		#if MODS_ALLOWED
+		var jsonExists:Bool = false;
+
+		var json:String = modsImagesJson(key);
 		if(FileSystem.exists(json)) jsonExists = true;
 
 		return FlxAtlasFrames.fromTexturePackerJson(imageLoaded, (jsonExists ? File.getContent(json) : getPath('images/$key.json', library)));
@@ -706,17 +711,15 @@ class Paths
 		gottenPath = gottenPath.substring(gottenPath.indexOf(':') + 1, gottenPath.length);
 		// Debug.logTrace(gottenPath);
 		if(!currentTrackedSounds.exists(gottenPath))
-		#if MODS_ALLOWED
-			currentTrackedSounds.set(gottenPath, Sound.fromFile('./' + gottenPath));
-		#else
 		{
 			var folder:String = '';
 			if(path == 'songs') folder = 'songs:';
 
 			var retKey:String = (path != null) ? '$path/$key' : key;
-			currentTrackedSounds.set(gottenPath, OpenFlAssets.getSound(folder + getPath('$retKey.$SOUND_EXT', SOUND, library)));
+			retKey = ((path == 'songs') ? 'songs:' : '') + getPath('$retKey.$SOUND_EXT', SOUND, library);
+			if(OpenFlAssets.exists(retKey, SOUND))
+				currentTrackedSounds.set(gottenPath, OpenFlAssets.getSound(retKey));
 		}
-		#end
 		localTrackedAssets.push(gottenPath);
 		return currentTrackedSounds.get(gottenPath);
 	}
@@ -754,8 +757,7 @@ class Paths
 		return modFolders('images/' + key + '.txt');
 	}
 
-	inline static public function modsJsonImage(key:String):String
-	{
+	inline static public function modsImagesJson(key:String) {
 		return modFolders('images/' + key + '.json');
 	}
 
@@ -791,7 +793,7 @@ class Paths
 	#end
 
 	#if flxanimate
-	public static function loadAnimateAtlas(spr:FlxAnimate, folderOrImg:Dynamic, spriteJson:Dynamic = null, animationJson:Dynamic = null)
+	public static function loadAnimateAtlas(spr:flxanimate.FlxAnimate, folderOrImg:Dynamic, spriteJson:Dynamic = null, animationJson:Dynamic = null)
 	{
 		var changedAnimJson = false;
 		var changedAtlasJson = false;

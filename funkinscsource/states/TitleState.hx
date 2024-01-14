@@ -17,7 +17,6 @@ import states.StoryMenuState;
 import states.OutdatedState;
 import states.MainMenuState;
 
-import sys.thread.Mutex;
 import flixel.graphics.FlxGraphic;
 import flixel.util.FlxGradient;
 import flixel.effects.particles.FlxEmitter;
@@ -110,10 +109,6 @@ class TitleState extends MusicBeatState
 		//FlxG.worldBounds.set(0, 0);
 
 		Assets.cache.enabled = true;
-
-		#if FEATURE_MULTITHREADING
-		if (backend.MasterObjectLoader.mutex == null) backend.MasterObjectLoader.mutex = new Mutex();
-		#end
 
 		ClientPrefs.data.SCEWatermark = ClientPrefs.data.SCEWatermark;
 

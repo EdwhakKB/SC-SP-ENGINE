@@ -157,6 +157,8 @@ class MainMenuState extends MusicBeatState
 		transIn = FlxTransitionableState.defaultTransIn;
 		transOut = FlxTransitionableState.defaultTransOut;
 
+		Conductor.bpm = 128.0;
+
 		persistentUpdate = persistentDraw = true;
 
 		FlxG.mouse.visible = true;

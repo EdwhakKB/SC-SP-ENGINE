@@ -136,8 +136,7 @@ class FunkinLua {
 		set('scrollSpeed', PlayState.SONG.speed);
 		set('crochet', Conductor.crochet);
 		set('stepCrochet', Conductor.stepCrochet);
-		if (FlxG.sound.music != null) set('songLength', FlxG.sound.music.length);
-		else set('songLength', 0);
+		set('songLength', 0);
 		set('songName', PlayState.SONG.songId);
 		set('songPath', Paths.formatToSongPath(PlayState.SONG.songId));
 		set('startedCountdown', false);
@@ -373,6 +372,7 @@ class FunkinLua {
 				var toExclude:Array<Int> = [];
 				for (i in 0...excludeArray.length)
 				{
+					if (exclude == '') break;
 					toExclude.push(Std.parseInt(excludeArray[i].trim()));
 				}
 				return FlxG.random.int(min, max, toExclude);
@@ -382,6 +382,7 @@ class FunkinLua {
 				var toExclude:Array<Float> = [];
 				for (i in 0...excludeArray.length)
 				{
+					if (exclude == '') break;
 					toExclude.push(Std.parseFloat(excludeArray[i].trim()));
 				}
 				return FlxG.random.float(min, max, toExclude);
@@ -678,6 +679,7 @@ class FunkinLua {
 							if(script.origin == foundScript)
 							{
 								trace('Closing script ' + script.origin);
+								game.hscriptArray.remove(script);
 								script.destroy();
 								return true;
 							}
@@ -1121,12 +1123,6 @@ class FunkinLua {
 					FlxTransitionableState.skipNextTransIn = true;
 					FlxTransitionableState.skipNextTransOut = true;
 				}
-	
-				//PlayState.cancelMusicFadeTween();
-
-				IndieDiamondTransSubState.nextCamera = game.camOther;
-				if(FlxTransitionableState.skipNextTransIn)
-					IndieDiamondTransSubState.nextCamera = null;
 
 				if(PlayState.isStoryMode) MusicBeatState.switchState(new StoryMenuState());
 				else MusicBeatState.switchState(new FreeplayState());
@@ -2191,7 +2187,7 @@ class FunkinLua {
 			#if SCEFEATURES_ALLOWED SupportBETAFunctions.implement(this); #end
 			#if HSCRIPT_ALLOWED HScript.implement(this); #end
 			#if flxanimate FlxAnimateFunctions.implement(this); #end
-			#if modchartingTools if (game != null && PlayState.SONG != null && !isStageLua && PlayState.SONG.notITG && game.notITGMod) ModchartFuncs.implement(this); #end
+			#if SCEModchartingTools if (game != null && PlayState.SONG != null && !isStageLua && PlayState.SONG.notITG && game.notITGMod) ModchartFuncs.implement(this); #end
 			ReflectionFunctions.implement(this);
 			TextFunctions.implement(this);
 			ExtraFunctions.implement(this);

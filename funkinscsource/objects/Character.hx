@@ -28,7 +28,6 @@ class Character extends FlxSprite
 	public var isPlayer:Bool = false;
 	public var curCharacter:String = DEFAULT_CHARACTER;
 
-	public var colorTween:FlxTween;
 	public var holdTimer:Float = 0;
 	public var heyTimer:Float = 0;
 	public var specialAnim:Bool = false;
@@ -60,6 +59,7 @@ class Character extends FlxSprite
 	public var playerCameraPosition:Array<Float> = [0, 0];
 
 	public var hasMissAnimations:Bool = false;
+	public var vocalsFile:String = '';
 
 	// Used on Character Editor
 	public var imageFile:String = '';
@@ -147,6 +147,8 @@ class Character extends FlxSprite
 				{
 					path = Paths.getSharedPath('data/characters/' + DEFAULT_CHARACTER + '.json');
 					// If a character couldn't be found, change him to BF just to prevent a crash
+					color = FlxColor.BLACK;
+					alpha = 0.6;
 				}
 
 				try
@@ -299,6 +301,7 @@ class Character extends FlxSprite
 		flipX = (json.flip_x != isPlayer);
 		deadChar = (deadChar != null ? json.deadChar : '');
 		healthColorArray = (json.healthbar_colors != null && json.healthbar_colors.length > 2) ? json.healthbar_colors : [161, 161, 161];
+		vocalsFile = (json.vocals_file != null ? json.vocals_file : '');
 
 		colorPreString = FlxColor.fromRGB(healthColorArray[0], healthColorArray[1], healthColorArray[2]);
 		colorPreCut = colorPreString.toHexString();
@@ -821,6 +824,12 @@ typedef CharacterFile =
 	 * @default "noteSkins/NOTE_assets"
 	 */
 	var ?noteSkin:String;
+
+	/**
+	 * Whether the character has a vocals file for the game to change to.
+	 * @default 'Player'
+	 */
+	var vocals_file:String;
 }
 
 typedef AnimArray =

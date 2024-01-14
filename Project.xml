@@ -94,8 +94,8 @@
 	<!-- Defines what version of the engine. -->
 	<define name="PSYCHVERSION" value="0.7" />
 
-	<!-- Defines the modcharting Tools. -->
-	<define name="modchartingTools"/>
+	<!-- Defines the SCE's version of modcharting Tools. -->
+	<define name="SCEModchartingTools"/>
 
 	<!-- Defines whether the engine should have extra features -->
 	<define name="SCEFEATURES_ALLOWED"/> <!-- set this to 0.1 for extra sides Version of the engine. -->
@@ -164,7 +164,7 @@
   	<!--Incase you want parallaxlt-->
 	<!-- <haxelib name="parallaxlt" /> -->
 
-	<!-- <haxelib name="fnf-modcharting-tools"/> -->
+	<haxelib name="fnf-modcharting-tools"/>
 
 	<!-- Disable Discord IO Thread -->
 	<haxedef name="DISCORD_DISABLE_IO_THREAD" if="hxdiscord_rpc" />

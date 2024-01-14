@@ -45,14 +45,22 @@ class FreeplayState extends MusicBeatState
 	public var helpText:CoolText;
 	public var opponentText:CoolText;
 	public var diffText:CoolText;
+	public var comboText:CoolText;
+	public var downText:CoolText;
+
+	public var leText:String = "";
+
 	var lerpScore:Int = 0;
 	var lerpRating:Float = 0;
 	var intendedScore:Int = 0;
 	var intendedRating:Float = 0;
 	var letter:String;
-	public var combo:String = 'N/A';
-	public var comboText:CoolText;
-	public var downText:CoolText;
+	var combo:String = 'N/A';
+
+	var missingTextBG:FlxSprite;
+	var missingText:FlxText;
+
+	var opponentMode:Bool = false;
 
 	private var grpSongs:FlxTypedGroup<Alphabet>;
 	private var curPlaying:Bool = false;
@@ -72,18 +80,10 @@ class FreeplayState extends MusicBeatState
 	var bg:FlxSprite;
 	var intendedColor:Int;
 	var colorTween:FlxTween;
-
-	var missingTextBG:FlxSprite;
-	var missingText:FlxText;
-
-	var opponentMode:Bool = false;
-
-	public var menuScript:ScriptHandler;
-
 	var grid:FlxBackdrop;
-	public var leText:String = "";
-
 	var player:MusicPlayer;
+
+	public var freeplayScript:ScriptHandler;
 
 	override function create()
 	{
@@ -99,15 +99,15 @@ class FreeplayState extends MusicBeatState
 		DiscordClient.changePresence("In the Menus", null);
 		#end
 
-		menuScript = new ScriptHandler(Paths.Script('FreeplayState'));
+		freeplayScript = new ScriptHandler(Paths.scriptsForHandler('FreeplayState'));
 
-		menuScript.setVar('FreeplayState', this);
-		menuScript.setVar('add', add);
-		menuScript.setVar('insert', insert);
-		menuScript.setVar('members', members);
-		menuScript.setVar('remove', remove);
+		freeplayScript.setVar('FreeplayState', this);
+		freeplayScript.setVar('add', add);
+		freeplayScript.setVar('insert', insert);
+		freeplayScript.setVar('members', members);
+		freeplayScript.setVar('remove', remove);
 
-		menuScript.callFunc('onCreate', []);
+		freeplayScript.callFunc('onCreate', []);
 
 		for (i in 0...WeekData.weeksList.length) {
 			if(weekIsLocked(WeekData.weeksList[i])) continue;
@@ -271,12 +271,12 @@ class FreeplayState extends MusicBeatState
 		{
 			playSong();
 		}
-		menuScript.callFunc('onCreatePost', []);
+		freeplayScript.callFunc('onCreatePost', []);
 	}
 
 	override function closeSubState() 
 	{
-		menuScript.callFunc('onCloseSubState', []);
+		freeplayScript.callFunc('onCloseSubState', []);
 		changeSelection(0, false);
 		persistentUpdate = true;
 		super.closeSubState();
@@ -293,6 +293,7 @@ class FreeplayState extends MusicBeatState
 	}
 	var instPlaying:Int = -1;
 	public static var vocals:FlxSound = null;
+	public static var opponentVocals:FlxSound = null;
 	var holdTime:Float = 0;
 
 	public var instPlayingtxt:String = "N/A"; // its not really a text but who cares?
@@ -306,7 +307,7 @@ class FreeplayState extends MusicBeatState
 	var completed:Bool = false;
 	override function update(elapsed:Float)
 	{
-		menuScript.callFunc('onUpdate', [elapsed]);
+		freeplayScript.callFunc('onUpdate', [elapsed]);
 
 		if (inst != null)
 		{
@@ -324,18 +325,20 @@ class FreeplayState extends MusicBeatState
 			}
 		}
 
+		if (opponentVocals != null)
+		{
+			if (opponentVocals.volume < 0.7)
+			{
+				opponentVocals.volume += 0.5 * FlxG.elapsed;
+			}
+		}
+
 		lerpScore = Math.floor(FlxMath.lerp(intendedScore, lerpScore, Math.exp(-elapsed * 24)));
 		lerpRating = FlxMath.lerp(intendedRating, lerpRating, Math.exp(-elapsed * 12));
 
 		if (player != null && player.playingMusic)
 		{
 			grid.velocity.set(-90 * player.playbackRate, 90 * player.playbackRate);
-
-			for (i in 0...iconArray.length)
-			{
-				iconArray[i].scale.set(1, 1);
-				iconArray[i].updateHitbox();
-			}
 
 			var bpmRatio = Conductor.bpm / 100;
 			if (ClientPrefs.data.camZooms)
@@ -369,6 +372,12 @@ class FreeplayState extends MusicBeatState
 				continue;
 			}
 			icon.playAnim('losing', false);
+
+			if (!player.playingMusic)
+			{
+				icon.scale.set(1, 1);
+				icon.updateHitbox();
+			}
 		}
 
 		var mult:Float = FlxMath.lerp(1, bg.scale.x, CoolUtil.clamp(1 - (elapsed * 9), 0, 1));
@@ -526,6 +535,13 @@ class FreeplayState extends MusicBeatState
 					vocals.time = 0;
 					vocals = null;
 				}
+				
+				if (opponentVocals != null){
+					opponentVocals.stop();
+					opponentVocals.volume = 0;
+					opponentVocals.time = 0;
+					opponentVocals = null;
+				}
 			}
 		}
 
@@ -570,6 +586,8 @@ class FreeplayState extends MusicBeatState
 									inst.fadeOut(llll / 1000, 0);
 								if (vocals != null)
 									vocals.fadeOut(llll / 1000, 0);
+								if (opponentVocals != null)
+									opponentVocals.fadeOut(llll / 1000, 0);
 								FlxG.camera.fade(FlxColor.BLACK, llll / 1000, false, AcceptedSong, true);
 								FlxFlicker.flicker(e);
 							}
@@ -605,7 +623,7 @@ class FreeplayState extends MusicBeatState
 
 		if (canSelectSong) updateTexts(elapsed);
 		super.update(elapsed);
-		menuScript.callFunc('onUpdatePost', [elapsed]);
+		freeplayScript.callFunc('onUpdatePost', [elapsed]);
 	}
 
 	var alreadyPlayingSong:Bool = false;
@@ -626,12 +644,13 @@ class FreeplayState extends MusicBeatState
 					MainMenuState.freakyPlaying = false;
 				if (FlxG.sound.music != null){
 					FlxG.sound.music.stop();
-					FlxG.sound.music.destroy();
 				}
 				if (inst != null)
 					inst.stop();
 				if (vocals != null)
 					vocals.stop();
+				if (opponentVocals != null)
+					opponentVocals.stop();
 				if (instPlaying != curSelected)
 				{
 					instPlaying = -1;
@@ -650,14 +669,22 @@ class FreeplayState extends MusicBeatState
 	
 					songPath = PlayState.SONG.songId;
 
+					var boyfriendVocals:String = loadCharacterFile(PlayState.SONG.player1).vocals_file;
+					var dadVocals:String = loadCharacterFile(PlayState.SONG.player2).vocals_file;
+
 					try
 					{
 						if (PlayState.SONG.needsVoices) 
 						{
 							#if SCEFEATURES_ALLOWED
-							vocals = new FlxSound().loadEmbedded(Paths.voices((PlayState.SONG.vocalsPrefix != null ? PlayState.SONG.vocalsPrefix : ''), songPath, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : '')));
+							var normalVocals = Paths.voices((PlayState.SONG.vocalsPrefix != null ? PlayState.SONG.vocalsPrefix : ''), songPath, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : ''));
+							var playerVocals = Paths.voices((PlayState.SONG.vocalsPrefix != null ? PlayState.SONG.vocalsPrefix : ''), songPath, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : ''),
+							(boyfriendVocals == null || boyfriendVocals.length < 1) ? '' : boyfriendVocals);
+							vocals = new FlxSound().loadEmbedded(playerVocals != null ? playerVocals : normalVocals);
 							#else
-							vocals = new FlxSound().loadEmbedded(Paths.voices(songPath));
+							var normalVocals = Paths.voices(PlayState.SONG.song);
+							var playerVocals = Paths.voices(PlayState.SONG.song, (boyfriendVocals == null || boyfriendVocals.length < 1) ? '' : boyfriendVocals);
+							vocals = new FlxSound().loadEmbedded(playerVocals != null ? playerVocals : normalVocals);
 							#end
 	
 							vocals.volume = 0;
@@ -666,7 +693,33 @@ class FreeplayState extends MusicBeatState
 					}
 					catch(e:Dynamic)
 					{
+						remove(vocals);
 						vocals = null;
+					}
+
+					try
+					{
+						if (PlayState.SONG.needsVoices) 
+						{
+							#if SCEFEATURES_ALLOWED
+							var oppVocals = Paths.voices((PlayState.SONG.vocalsPrefix != null ? PlayState.SONG.vocalsPrefix : ''), songPath, 
+								(PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : ''), (dadVocals == null || dadVocals.length < 1) ? '' : dadVocals);
+							if (oppVocals != null) opponentVocals = new FlxSound().loadEmbedded(oppVocals);
+							#else
+							var oppVocals = Paths.voices(songPath, (dadVocals == null || dadVocals.length < 1) ? '' : dadVocals);
+							if (oppVocals != null) opponentVocals = new FlxSound().loadEmbedded(oppVocals);
+							#end
+							if (opponentVocals != null) 
+							{
+								opponentVocals.volume = 0;
+								add(opponentVocals);
+							}
+						}
+					}
+					catch(e:Dynamic)
+					{
+						remove(opponentVocals);
+						opponentVocals = null;
 					}
 	
 					try
@@ -684,7 +737,6 @@ class FreeplayState extends MusicBeatState
 						inst = null;
 					}
 	
-	
 					songPath = null;
 				}
 	
@@ -692,11 +744,13 @@ class FreeplayState extends MusicBeatState
 	
 				inst.time = 0;
 				if (vocals != null) vocals.time = 0;
+				if (opponentVocals != null) opponentVocals.volume = 0;
 	
 				Conductor.bpm = PlayState.SONG.bpm;
 	
 				inst.play();
 				if (vocals != null) vocals.play();
+				if (opponentVocals != null) opponentVocals.play();
 	
 				instPlaying = curSelected;
 
@@ -711,11 +765,14 @@ class FreeplayState extends MusicBeatState
 				inst.onComplete = function()
 				{
 					if (vocals != null) vocals.time = 0;
+					if (opponentVocals != null) opponentVocals.time = 0;
 					inst.time = 0;
 					remove(inst);
 					if (vocals != null) remove(vocals);
+					if (opponentVocals != null) remove(opponentVocals);
 					inst.destroy();
 					if (vocals != null) vocals.destroy(); vocals = null;
+					if (opponentVocals != null) opponentVocals.destroy(); opponentVocals = null;
 					inst = null;
 					completed = true;
 					exit = false;
@@ -743,6 +800,8 @@ class FreeplayState extends MusicBeatState
 	{
 		if (inst != null) inst = null;
 		if (vocals != null) vocals = null;
+		if (opponentVocals != null) opponentVocals = null;
+		Conductor.songPosition = 0;
 		player.playingMusic = false;
 		persistentUpdate = false;
 		var songLowercase:String = Paths.formatToSongPath(songs[curSelected].songName);
@@ -772,7 +831,7 @@ class FreeplayState extends MusicBeatState
 	function changeDiff(change:Int = 0)
 	{
 		if (player.playingMusic) return;
-		menuScript.callFunc('onChangeDiff', [change]);
+		freeplayScript.callFunc('onChangeDiff', [change]);
 		curDifficulty += change;
 
 		if (curDifficulty < 0)
@@ -805,7 +864,7 @@ class FreeplayState extends MusicBeatState
 				ease: FlxEase.quadInOut
 			});
 
-		menuScript.callFunc('onChangeDiffPost', [change]);
+		freeplayScript.callFunc('onChangeDiffPost', [change]);
 	}
 
 	function changeSelection(change:Int = 0, playSound:Bool = true)
@@ -813,7 +872,7 @@ class FreeplayState extends MusicBeatState
 		if (player.playingMusic) return;
 
 		_updateSongLastDifficulty();
-		menuScript.callFunc('onChangeSelection', [change, playSound]);
+		freeplayScript.callFunc('onChangeSelection', [change, playSound]);
 		if(playSound) FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
 
 		var lastList:Array<String> = Difficulty.list;
@@ -922,15 +981,42 @@ class FreeplayState extends MusicBeatState
 		}
 	}
 
+	#if SCEFEATURES_ALLOWED
+    function loadCharacterFile(char:String):objects.Character.CharacterFile {
+		var characterPath:String = 'data/characters/' + char + '.json';
+		#if MODS_ALLOWED
+		var path:String = Paths.modFolders(characterPath);
+		if (!FileSystem.exists(path)) {
+			path = Paths.getSharedPath(characterPath);
+		}
+
+		if (!FileSystem.exists(path))
+		#else
+		var path:String = Paths.getSharedPath(characterPath);
+		if (!OpenFlAssets.exists(path))
+		#end
+		{
+			path = Paths.getSharedPath('data/characters/' + objects.Character.DEFAULT_CHARACTER + '.json'); //If a character couldn't be found, change him to BF just to prevent a crash
+		}
+
+		#if MODS_ALLOWED
+		var rawJson = File.getContent(path);
+		#else
+		var rawJson = OpenFlAssets.getText(path);
+		#end
+		return cast haxe.Json.parse(rawJson);
+	}
+    #end
+
 	override function stepHit()
 	{
-		menuScript.callFunc('onStepHit', [curStep]);
+		freeplayScript.callFunc('onStepHit', [curStep]);
 		super.stepHit();
 	}
 
 	override function beatHit()
 	{
-		menuScript.callFunc('onBeatHit', [curBeat]);
+		freeplayScript.callFunc('onBeatHit', [curBeat]);
 		super.beatHit();
 
 		if (!player.playingMusic) return;
@@ -960,7 +1046,7 @@ class FreeplayState extends MusicBeatState
 
 	override function sectionHit()
 	{
-		menuScript.callFunc('onSectionHit', [curSection]);
+		freeplayScript.callFunc('onSectionHit', [curSection]);
 		super.sectionHit();
 
 		if (player.playingMusic)

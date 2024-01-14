@@ -40,9 +40,8 @@ class PauseSubState extends MusicBeatSubstate
 
 	var num:Int = 0;
 
-	public function new(x:Float, y:Float)
-	{
-		super();
+	override function create()
+	{	
 		PlayState.instance.paused = true;
 		
 		if(Difficulty.list.length < 2) menuItemsOG.remove('Change Difficulty'); //No need to change difficulty if there is only one!
@@ -93,8 +92,12 @@ class PauseSubState extends MusicBeatSubstate
 				}
 				else pauseMusic.loadEmbedded(Paths.music(songName), true, true);
 			}
+
+			pauseMusic.volume = 0;
+			pauseMusic.play(false, FlxG.random.int(0, Std.int(pauseMusic.length / 2)));
+
+			FlxG.sound.list.add(pauseMusic);
 		} catch(e:Dynamic) {}
-		FlxG.sound.list.add(pauseMusic);
 
 		var bg:FlxSprite = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
 		bg.scale.set(FlxG.width, FlxG.height);
@@ -184,6 +187,8 @@ class PauseSubState extends MusicBeatSubstate
 
 		regenMenu();
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
+
+		super.create();
 	}
 
 	var holdTime:Float = 0;
@@ -202,11 +207,11 @@ class PauseSubState extends MusicBeatSubstate
 		PlayState.instance.paused = true;
 		cantUnpause -= elapsed;
 		if (!stoppedUpdatingMusic){ //Reason to no put != null outside is to not confuse the game to not "stop" when intended.
-			if (pauseMusic.volume < 0.5 && pauseMusic != null)
+			if (pauseMusic != null && pauseMusic.volume < 0.5)
 				pauseMusic.volume += 0.01 * elapsed;
 		}else{
 			if (pauseMusic != null)
-			pauseMusic.volume = 0;
+				pauseMusic.volume = 0;
 		}
 
 		super.update(elapsed);
@@ -390,7 +395,6 @@ class PauseSubState extends MusicBeatSubstate
 					if(PlayState.isStoryMode) MusicBeatState.switchState(new StoryMenuState());
 					else MusicBeatState.switchState(new FreeplayState());
 
-					PlayState.cancelMusicFadeTween();
 					FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
 					PlayState.changedDifficulty = false;
 					PlayState.chartingMode = false;
@@ -534,7 +538,8 @@ class PauseSubState extends MusicBeatSubstate
 
 	override function destroy()
 	{
-		pauseMusic.destroy();
+		if (pauseMusic != null)
+			pauseMusic.destroy();
 
 		super.destroy();
 	}

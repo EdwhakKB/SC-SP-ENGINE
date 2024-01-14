@@ -12,7 +12,9 @@ import game.Conductor;
 import polymod.backends.PolymodAssets;
 #end
 #end
+#if hscript
 import hscript.*;
+#end
 using StringTools;
 
 typedef ModchartJson = 
@@ -367,6 +369,7 @@ class ModchartFile
     }
 }
 
+#if hscript
 class CustomModifierScript
 {
     public var interp:Interp = null;
@@ -457,3 +460,4 @@ class CustomModifierScript
         interp = null;
     }
 }
+#end
