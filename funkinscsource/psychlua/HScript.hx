@@ -502,7 +502,7 @@ class HScript extends SScript
 		#end
 	}
 
-	public static function initHaxeModuleCode(parent:FunkinLua, code:String, ?varToBring:Any = null)
+	public static function initHaxeModuleCode(parent:FunkinLua, code:String, ?varsToBring:Any = null)
 	{
 		#if (SScript >= "3.0.0")
 		if(parent.hscript == null)
@@ -515,12 +515,12 @@ class HScript extends SScript
 	#end
 
 	public var origin:String;
-	override public function new(?parent:Dynamic, ?file:String, ?varToBring:Any = null, ?isHxStage:Bool = false)
+	override public function new(?parent:Dynamic, ?file:String, ?varsToBring:Any = null, ?isHxStage:Bool = false)
 	{
 		if (file == null)
 			file = '';
 
-		this.varToBring = varToBring;
+		this.varsToBring = varsToBring;
 		this.isHxStage = isHxStage;
 	
 		super(file, false, false);
@@ -688,16 +688,16 @@ class HScript extends SScript
 		set('insert', function(pos:Int, obj:FlxBasic) PlayState.instance.insert(pos, obj));
 		set('remove', function(obj:FlxBasic, splice:Bool = false) PlayState.instance.remove(obj, splice));
 
-		if(varToBring != null)
+		if(varsToBring != null)
 		{
-			for (key in Reflect.fields(varToBring))
+			for (key in Reflect.fields(varsToBring))
 			{
 				key = key.trim();
-				var value = Reflect.field(varToBring, key);
+				var value = Reflect.field(varsToBring, key);
 				//trace('Key $key: $value');
-				set(key, Reflect.field(varToBring, key));
+				set(key, Reflect.field(varsToBring, key));
 			}
-			varToBring = null;
+			varsToBring = null;
 		}
 		#end
 	}
