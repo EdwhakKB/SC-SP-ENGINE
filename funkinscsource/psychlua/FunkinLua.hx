@@ -11,7 +11,6 @@ import flixel.FlxBasic;
 import flixel.FlxObject;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.addons.display.FlxBackdrop;
-import flixel.addons.effects.FlxSkewedSprite;
 
 import cutscenes.DialogueBoxPsych;
 
@@ -1354,10 +1353,10 @@ class FunkinLua {
 			set("makeLuaSkewedSprite", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0, ?skewX:Float = 0, ?skewY:Float = 0) {
 				tag = tag.replace('.', '');
 				LuaUtils.resetSkewedSpriteTag(tag);
-				var leSprite:FlxSkewedSprite = null;
+				var leSprite:FlxSkewed = null;
 				if(image != null && image.length > 0)
 				{
-					leSprite = new FlxSkewedSprite();
+					leSprite = new FlxSkewed();
 					leSprite.loadGraphic(Paths.image(image));
 					leSprite.x = x;
 					leSprite.y = y;
@@ -1584,7 +1583,7 @@ class FunkinLua {
 			#end
 			set("addSkewedSprite", function(tag:String, front:Bool = false) {
 				if(game.modchartSkewedSprite.exists(tag)) {
-					var spr:FlxSkewedSprite = game.modchartSkewedSprite.get(tag);
+					var spr:FlxSkewed = game.modchartSkewedSprite.get(tag);
 					if(front) LuaUtils.getTargetInstance().add(spr);
 					else
 					{
@@ -1722,7 +1721,7 @@ class FunkinLua {
 					return;
 				}
 	
-				var pee:FlxSkewedSprite = game.modchartSkewedSprite.get(tag);
+				var pee:FlxSkewed = game.modchartSkewedSprite.get(tag);
 				if(destroy) {
 					pee.kill();
 				}
@@ -1773,19 +1772,46 @@ class FunkinLua {
 			});
 	
 			set("setHealthBarColors", function(left:String, right:String) {
+				if (!ClientPrefs.data.healthColor) return;
 				var left_color:Null<FlxColor> = null;
 				var right_color:Null<FlxColor> = null;
 				if (left != null && left != '') left_color = CoolUtil.colorFromString(left);
 				if (right != null && right != '') right_color = CoolUtil.colorFromString(right);
-				if (ClientPrefs.data.hudStyle != 'HITMANS') game.healthBar.setColors(left_color, right_color);
-				else game.healthBarHit.setColors(left_color, right_color);
+
+ 				for (i in [game.healthBar, game.healthBarHit])
+				{
+					if (i != null)
+					{
+						if (PlayState.SONG.oldBarSystem)
+						{
+							if (!ClientPrefs.data.gradientSystemForOldBars) i.createFilledBar(left_color, right_color);
+							else i.createGradientBar([right_color, left_color], [right_color, left_color]);
+							i.updateBar();
+						}
+					}
+				}
+
+				if (!PlayState.SONG.oldBarSystem)
+				{
+					game.healthBarNew.setColors(left_color, right_color);
+					game.healthBarHitNew.setColors(left_color, right_color);
+				}
 			});
 			set("setTimeBarColors", function(left:String, right:String) {
 				var left_color:Null<FlxColor> = null;
 				var right_color:Null<FlxColor> = null;
 				if (left != null && left != '') left_color = CoolUtil.colorFromString(left);
 				if (right != null && right != '') right_color = CoolUtil.colorFromString(right);
-				game.timeBar.setColors(left_color, right_color);
+				if (PlayState.SONG.oldBarSystem)
+				{
+					if (ClientPrefs.data.colorBarType == 'No Colors') game.timeBar.createFilledBar(FlxColor.fromString(Std.string(right)), FlxColor.fromString(Std.string(left)));
+					else if (ClientPrefs.data.colorBarType == 'Main Colors') game.timeBar.createGradientBar([FlxColor.BLACK], [FlxColor.fromString(Std.string(right)), FlxColor.fromString(Std.string(left))]);
+					else if (ClientPrefs.data.colorBarType == 'Reversed Colors') game.timeBar.createGradientBar([FlxColor.BLACK], [FlxColor.fromString(Std.string(left)), FlxColor.fromString(Std.string(right))]);
+					game.timeBar.updateBar();
+				}
+				else{
+					game.timeBarNew.setColors(left_color, right_color);
+				}
 			});
 	
 			set("setObjectCamera", function(obj:String, camera:String = '') {
@@ -2187,7 +2213,7 @@ class FunkinLua {
 			#if SCEFEATURES_ALLOWED SupportBETAFunctions.implement(this); #end
 			#if HSCRIPT_ALLOWED HScript.implement(this); #end
 			#if flxanimate FlxAnimateFunctions.implement(this); #end
-			#if SCEModchartingTools if (game != null && PlayState.SONG != null && !isStageLua && PlayState.SONG.notITG && game.notITGMod) ModchartFuncs.implement(this); #end
+			#if SCEModchartingTools if (game != null && PlayState.SONG != null && !isStageLua && PlayState.SONG.notITG && game.notITGMod) modcharting.ModchartFuncs.loadLuaFunctions(this); #end
 			ReflectionFunctions.implement(this);
 			TextFunctions.implement(this);
 			ExtraFunctions.implement(this);
@@ -2439,30 +2465,31 @@ class FunkinLua {
 
 	function findScript(scriptFile:String, ext:String = '.lua')
 	{
-		if(!scriptFile.endsWith(ext)) scriptFile += ext;
-		var preloadPath:String = Paths.getSharedPath(scriptFile);
-		Debug.logInfo('founded Starting Path: $preloadPath');
+		var cervix = scriptFile + ".lua";
+		if(scriptFile.endsWith(".lua"))cervix=scriptFile;
+		var doPush = false;
 		#if MODS_ALLOWED
-		var path:String = Paths.modFolders(scriptFile);
-		if(FileSystem.exists(scriptFile))
+		if(FileSystem.exists(Paths.modFolders(cervix)))
 		{
-			Debug.logInfo('founded Path: $path');
-			return scriptFile;
+			cervix = Paths.modFolders(cervix);
+			doPush = true;
 		}
-		if(FileSystem.exists(path))
+		else if(FileSystem.exists(cervix))
 		{
-			Debug.logInfo('founded Path: $path');
-			return path;
+			doPush = true;
 		}
-
-		if(FileSystem.exists(preloadPath))
+		else{
+			cervix = Paths.getSharedPath(cervix);
+			if(FileSystem.exists(cervix))
+				doPush = true;
+		}
 		#else
-		if(Assets.exists(preloadPath))
+		cervix = Paths.getSharedPath(cervix);
+		if(Assets.exists(cervix)) 
+			doPush = true;	
 		#end
-		{
-			Debug.logInfo('founded Path: $preloadPath');
-			return preloadPath;
-		}
+		if (doPush)
+			return cervix;
 		return null;
 	}
 

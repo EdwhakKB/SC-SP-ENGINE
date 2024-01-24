@@ -332,7 +332,7 @@ class ScriptHandler #if HAXE_EXTENSION extends tea.SScript #end
 		super.destroy();
 	}
 	#else
-	override public function kill()
+	public function kill()
 	{
 		interp = null;
 		scriptFile = null;

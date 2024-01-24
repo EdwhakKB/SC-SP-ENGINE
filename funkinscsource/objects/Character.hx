@@ -458,10 +458,10 @@ class Character extends FlxSprite
 
 		if (!debugMode)
 		{
-			var nextAnim = animNext.get(animation.curAnim.name);
-			var forceDanced = animDanced.get(animation.curAnim.name);
+			var nextAnim = animNext.get(getAnimationName());
+			var forceDanced = animDanced.get(getAnimationName());
 
-			if (nextAnim != null && animation.curAnim.finished)
+			if (nextAnim != null && isAnimationFinished())
 			{
 				if (isDancing && forceDanced != null)
 					danced = forceDanced;

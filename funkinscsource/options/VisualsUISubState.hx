@@ -235,6 +235,18 @@ class VisualsUISubState extends BaseOptionsMenu
 			['None', 'Angled']);
 		addOption(option);
 
+		var option:Option = new Option('Gradient System For Old Bars.',
+			'A gradient system will be used if the old bar system is activated in PlayState.',
+			'gradientSystemForOldBars',
+			'bool');
+		addOption(option);
+
+		var option:Option = new Option('Colored Changing Text.',
+			'Mainly all text in playstate will change color on character change and will start with dad\'s character color.',
+			'coloredText',
+			'bool');
+		addOption(option);
+
 		super();
 		add(notes);
 	}

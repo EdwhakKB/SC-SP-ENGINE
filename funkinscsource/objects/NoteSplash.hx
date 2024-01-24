@@ -2,7 +2,6 @@ package objects;
 
 import shaders.RGBPalette;
 import flixel.system.FlxAssets.FlxShader;
-import flixel.addons.effects.FlxSkewedSprite;
 import flixel.FlxG;
 
 typedef NoteSplashConfig = {
@@ -13,7 +12,7 @@ typedef NoteSplashConfig = {
 	offsets:Array<Array<Float>>
 }
 
-class NoteSplash extends FlxSkewedSprite
+class NoteSplash extends FlxSkewed
 {
 	public var rgbShader:PixelSplashShaderRef;
 	private var idleAnim:String;

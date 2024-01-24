@@ -25,11 +25,17 @@ class Rating
 		return shitWindows[shitWindows.length - 1];
 	}
 
-	public static function generateComboRank(accuracy:Float, songMisses:Int) // generate a letter ranking
+	public static function generateComboRank(songMisses:Int):String // generate a letter ranking
 	{
 		var comboranking:String = "N/A";
 
-		if (songMisses == 0)
+		if (songMisses != 10 && songMisses > 10)
+		{
+			comboranking = "(Clear)";
+		}
+		else if (songMisses < 10) // Single Digit Combo Breaks
+			comboranking = "(SDCB)";
+		else
 		{
 			var reverseWindows = timingWindows.copy();
 			reverseWindows.reverse();
@@ -41,10 +47,6 @@ class Rating
 				}
 			}
 		}
-		else if (songMisses < 10) // Single Digit Combo Breaks
-			comboranking = "(SDCB)";
-		else
-			comboranking = "(Clear)";
 		return comboranking;
 	}
 

@@ -92,7 +92,7 @@
 	<define name="PSYCH"/>
 
 	<!-- Defines what version of the engine. -->
-	<define name="PSYCHVERSION" value="0.7" />
+	<define name="PSYCHVERSION" value="0.7.3" />
 
 	<!-- Defines the SCE's version of modcharting Tools. -->
 	<define name="SCEModchartingTools"/>
@@ -147,7 +147,8 @@
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
 	<haxelib name="SScript" if="HSCRIPT_ALLOWED"/>
 	<haxelib name="hxCodec" if="VIDEOS_ALLOWED"/>
-	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>
+	<!-- <haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>-->
+	<haxelib name="discord_rpc" if="DISCORD_ALLOWED"/>
 
 	<!--if you don't need FlxAnimate for exporting or for a mod just null it-->
 	<haxelib name="flxanimate"/>
@@ -164,7 +165,7 @@
   	<!--Incase you want parallaxlt-->
 	<!-- <haxelib name="parallaxlt" /> -->
 
-	<haxelib name="fnf-modcharting-tools"/>
+	<haxelib name="modchartingTools"/>
 
 	<!-- Disable Discord IO Thread -->
 	<haxedef name="DISCORD_DISABLE_IO_THREAD" if="hxdiscord_rpc" />

@@ -31,9 +31,15 @@ class IndieDiamondTransSubState extends MusicBeatSubstate
         super();
     }
 
+    var cameraTrans:FlxCamera = null;
+
     override public function create()
     {
-        cameras = [FlxG.cameras.list[FlxG.cameras.list.length-1]];
+        cameraTrans = new FlxCamera();
+        cameraTrans.bgColor.alpha = 0;
+
+        FlxG.cameras.add(cameraTrans, false);
+
 		var width:Int = divideZoom ? Std.int(FlxG.width / Math.max(camera.zoom, 0.001)) : Std.int(FlxG.width * Math.max(camera.zoom, 0.001));
 		var height:Int = divideZoom ? Std.int(FlxG.height / Math.max(camera.zoom, 0.001)) : Std.int(FlxG.width * Math.max(camera.zoom, 0.001));
 
@@ -48,6 +54,7 @@ class IndieDiamondTransSubState extends MusicBeatSubstate
         rect.scrollFactor.set();
         rect.shader = shader;
         rect.visible = false;
+        rect.cameras = [cameraTrans];
         rect.updateHitbox();
         rect.screenCenter(X);
         add(rect);
@@ -65,6 +72,10 @@ class IndieDiamondTransSubState extends MusicBeatSubstate
         {
             shader.progress.value = [num];
         });
+
+        super.create();
+
+        cameras = [cameraTrans];
     }
     
     override function destroy()

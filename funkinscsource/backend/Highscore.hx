@@ -163,6 +163,8 @@ class Highscore
 	{
 		switch (combo)
 		{
+			case '???':
+				return 6;
 			case 'Clear':
 				return 0;
 			case 'SDCB':

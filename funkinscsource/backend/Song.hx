@@ -59,6 +59,8 @@ typedef SwagSong =
 	var ?instrumentalPrefix:String;
 
 	var ?blockOpponentMode:Bool;
+
+	var ?oldBarSystem:Bool;
 }
 
 class Song
@@ -106,6 +108,8 @@ class Song
 	public var instrumentalPrefix:String = null;
 
 	public var blockOpponentMode:Bool = false;
+
+	public var oldBarSystem:Bool = false;
 
 	private static function onLoadJson(songJson:Dynamic) // Convert old charts to newest format
 	{

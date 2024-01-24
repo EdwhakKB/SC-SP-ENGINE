@@ -73,6 +73,12 @@ class MiscSettingsSubState extends BaseOptionsMenu
 			'clearFolderOnStart',
 			'bool');
 		addOption(option);
+
+		var option:Option = new Option('Initial Caching [EXPERIMENTAL]',
+			"Game caches images and songs on starting the game. (Very Laggy)",
+			'skipInitialCaching',
+			'bool');
+		addOption(option);
 		super();
 	}
 

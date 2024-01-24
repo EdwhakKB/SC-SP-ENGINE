@@ -166,7 +166,7 @@ class ChartingState extends MusicBeatState
 	var value13InputText:FlxUIInputText;
 	var value14InputText:FlxUIInputText;
 
-	var zoomTxt:FlxText;
+	var zoomFactorTxt:String = "1 / 1";
 
 	var zoomList:Array<Float> = [
 		0.25,
@@ -431,10 +431,6 @@ class ChartingState extends MusicBeatState
 		}
 		lastSong = currentSongName;
 
-		zoomTxt = new FlxText(10, 10, 0, "Zoom: 1 / 1", 16);
-		zoomTxt.scrollFactor.set();
-		add(zoomTxt);
-
 		updateGrid();
 
 		super.create();
@@ -554,161 +550,6 @@ class ChartingState extends MusicBeatState
 		stepperSpeed.value = _song.speed;
 		stepperSpeed.name = 'song_speed';
 		blockPressWhileTypingOnStepper.push(stepperSpeed);
-		#if MODS_ALLOWED
-		var directories:Array<String> = [Paths.mods('data/characters/'), Paths.mods(Mods.currentModDirectory + '/data/characters/'), Paths.getSharedPath('data/characters/')];
-		for(mod in Mods.getGlobalMods())
-			directories.push(Paths.mods(mod + '/characters/'));
-		#else
-		var directories:Array<String> = [Paths.getSharedPath('data/characters/')];
-		#end
-
-		var tempArray:Array<String> = [];
-		var characters:Array<String> = Mods.mergeAllTextsNamed('data/characterList.txt', Paths.getSharedPath());
-		for (character in characters)
-		{
-			if(character.trim().length > 0)
-				tempArray.push(character);
-		}
-
-		#if MODS_ALLOWED
-		for (i in 0...directories.length) {
-			var directory:String = directories[i];
-			if(FileSystem.exists(directory)) {
-				for (file in FileSystem.readDirectory(directory)) {
-					var path = haxe.io.Path.join([directory, file]);
-					if (!FileSystem.isDirectory(path) && file.endsWith('.json')) {
-						var charToCheck:String = file.substr(0, file.length - 5);
-						if(charToCheck.trim().length > 0 && !charToCheck.endsWith('-dead') && !tempArray.contains(charToCheck)) {
-							tempArray.push(charToCheck);
-							characters.push(charToCheck);
-						}
-					}
-				}
-			}
-		}
-		#end
-
-		var player1DropDown = new FlxUIDropDownMenu(10, stepperSpeed.y + 45, FlxUIDropDownMenu.makeStrIdLabelArray(characters, true), function(character:String)
-		{
-			_song.player1 = characters[Std.parseInt(character)];
-			updateJsonData();
-			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
-			updateHeads();
-		});
-		player1DropDown.selectedLabel = _song.player1;
-		blockPressWhileScrolling.push(player1DropDown);
-
-		var gfVersionDropDown = new FlxUIDropDownMenu(player1DropDown.x, player1DropDown.y + 40, FlxUIDropDownMenu.makeStrIdLabelArray(characters, true), function(character:String)
-		{
-			_song.gfVersion = characters[Std.parseInt(character)];
-			updateJsonData();
-			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
-			updateHeads();
-		});
-		gfVersionDropDown.selectedLabel = _song.gfVersion;
-		blockPressWhileScrolling.push(gfVersionDropDown);
-
-		var player2DropDown = new FlxUIDropDownMenu(player1DropDown.x, gfVersionDropDown.y + 40, FlxUIDropDownMenu.makeStrIdLabelArray(characters, true), function(character:String)
-		{
-			_song.player2 = characters[Std.parseInt(character)];
-			updateJsonData();
-			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
-			updateHeads();
-		});
-		player2DropDown.selectedLabel = _song.player2;
-		blockPressWhileScrolling.push(player2DropDown);
-
-		var player4DropDown = new FlxUIDropDownMenu(player1DropDown.x, player2DropDown.y + 40, FlxUIDropDownMenu.makeStrIdLabelArray(characters, true), function(character:String)
-		{
-			_song.player4 = characters[Std.parseInt(character)];
-			updateJsonData();
-			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
-			updateHeads();
-		});
-		player4DropDown.selectedLabel = _song.player4;
-		blockPressWhileScrolling.push(player4DropDown);
-
-		#if MODS_ALLOWED
-		var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Mods.currentModDirectory + '/stages/'), Paths.getSharedPath('stages/')];
-		for(mod in Mods.getGlobalMods())
-			directories.push(Paths.mods(mod + '/stages/'));
-		#else
-		var directories:Array<String> = [Paths.getSharedPath('stages/')];
-		#end
-
-		var stageFile:Array<String> = Mods.mergeAllTextsNamed('data/stageList.txt', Paths.getSharedPath());
-		var stages:Array<String> = [];
-		for (stage in stageFile) {
-			if(stage.trim().length > 0) {
-				stages.push(stage);
-			}
-			tempArray.push(stage);
-		}
-		#if MODS_ALLOWED
-		for (i in 0...directories.length) {
-			var directory:String = directories[i];
-			if(FileSystem.exists(directory)) {
-				for (file in FileSystem.readDirectory(directory)) {
-					var path = haxe.io.Path.join([directory, file]);
-					if (!FileSystem.isDirectory(path) && file.endsWith('.json')) {
-						var stageToCheck:String = file.substr(0, file.length - 5);
-						if(stageToCheck.trim().length > 0 && !tempArray.contains(stageToCheck)) {
-							tempArray.push(stageToCheck);
-							stages.push(stageToCheck);
-						}
-					}
-				}
-			}
-		}
-		#end
-
-		if(stages.length < 1) stages.push('stage');
-
-		stageDropDown = new FlxUIDropDownMenu(player1DropDown.x + 140, player1DropDown.y, FlxUIDropDownMenu.makeStrIdLabelArray(stages, true), function(character:String)
-		{
-			_song.stage = stages[Std.parseInt(character)];
-			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
-		});
-		stageDropDown.selectedLabel = _song.stage;
-		blockPressWhileScrolling.push(stageDropDown);
-
-		// Checks if all difficulties json files exists and removes difficulties that dont have a json file.
-		var availableDifficulties:Array<Int> = [];
-		var availableDifficultiesTexts:Array<String> = [];
-
-		for(i in 0...Difficulty.list.length){
-			var jsonInput:String;
-			if(Difficulty.list[i].toLowerCase() == 'normal') jsonInput = _song.songId.toLowerCase();
-			else jsonInput = _song.songId.toLowerCase() + "-" + Difficulty.list[i];
-
-			var folder:String = _song.songId.toLowerCase();
-			var formattedFolder:String = Paths.formatToSongPath(folder);
-			var formattedSong:String = Paths.formatToSongPath(jsonInput);
-
-			var pathExists:Bool = (Paths.fileExists('data/songs/' + formattedFolder + '/' + formattedSong + '.json', BINARY) || Paths.fileExists('shared/data/songs/' + formattedFolder + '/' + formattedSong + '.json', BINARY));
-			if(pathExists == true){
-				availableDifficulties.push(i);
-				availableDifficultiesTexts.push(Difficulty.list[i]);
-			}
-		}
-
-		if(availableDifficulties == null || availableDifficulties.length <= 0){
-			Debug.logTrace('Where are the difficulties...?');
-			availableDifficulties.push(PlayState.storyDifficulty);
-			availableDifficultiesTexts.push(Difficulty.list[0]);
-		}
-
-		difficultyDropDown = new FlxUIDropDownMenu(stageDropDown.x, stageDropDown.y + 40, FlxUIDropDownMenu.makeStrIdLabelArray(availableDifficultiesTexts, true), function(pressed:String)
-		{	
-			var curSelected:Int = Std.parseInt(pressed);
-			openSubState(new Prompt('This action will clear current progress.\n\nProceed?', 0, function(){
-				PlayState.storyDifficulty = availableDifficulties[curSelected];
-				PlayState.changedDifficulty = true;
-				loadJson(_song.songId.toLowerCase());
-			}, null,ignoreWarnings));
-		});		
-		difficultyDropDown.selectedLabel = Difficulty.list[PlayState.storyDifficulty];
-		blockPressWhileScrolling.push(difficultyDropDown);
 
 		var tab_group_song = new FlxUI(null, UI_box);
 		tab_group_song.name = "Song";
@@ -727,18 +568,6 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(new FlxText(stepperBPM.x, stepperBPM.y - 15, 0, 'Song BPM:'));
 		//tab_group_song.add(new FlxText(stepperBPM.x + 100, stepperBPM.y - 15, 0, 'Song Offset:'));
 		tab_group_song.add(new FlxText(stepperSpeed.x, stepperSpeed.y - 15, 0, 'Song Speed:'));
-		tab_group_song.add(new FlxText(player4DropDown.x, player4DropDown.y - 15, 0, 'Player 4:'));
-		tab_group_song.add(new FlxText(player2DropDown.x, player2DropDown.y - 15, 0, 'Opponent:'));
-		tab_group_song.add(new FlxText(gfVersionDropDown.x, gfVersionDropDown.y - 15, 0, 'Girlfriend:'));
-		tab_group_song.add(new FlxText(player1DropDown.x, player1DropDown.y - 15, 0, 'Boyfriend:'));
-		tab_group_song.add(new FlxText(stageDropDown.x, stageDropDown.y - 15, 0, 'Stage:'));
-		tab_group_song.add(new FlxText(difficultyDropDown.x, difficultyDropDown.y - 15, 0, 'Difficulty:'));
-		tab_group_song.add(player4DropDown);
-		tab_group_song.add(player2DropDown);
-		tab_group_song.add(gfVersionDropDown);
-		tab_group_song.add(player1DropDown);
-		tab_group_song.add(stageDropDown);
-		tab_group_song.add(difficultyDropDown);
 
 		UI_box.addGroup(tab_group_song);
 
@@ -1383,6 +1212,7 @@ class ChartingState extends MusicBeatState
 		\nH - Go to the start of the chart
 		\nA/D - Go to the previous/next section
 		\nLeft/Right - Change Snap
+		\n
 		\nUp/Down - Change Conductor's Strum Time with Snapping" +
 		#if FLX_PITCH
 		"\nLeft Bracket / Right Bracket - Change Song Playback Rate (SHIFT to go Faster)
@@ -1402,8 +1232,8 @@ class ChartingState extends MusicBeatState
 		for (i in 0...tipTextArray.length) {
 			var tipText:FlxText = new FlxText(20, 30, 0, tipTextArray[i], 14);
 			tipText.y += i * 9;
-			tipText.setFormat(Paths.font("vcr.ttf"), 14, FlxColor.WHITE, LEFT/*, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK*/);
-			//tipText.borderSize = 2;
+			tipText.setFormat(Paths.font("vcr.ttf"), 14, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			tipText.borderSize = 2;
 			tipText.scrollFactor.set();
 			tab_group_tips.add(tipText);
 		}
@@ -1667,6 +1497,162 @@ class ChartingState extends MusicBeatState
 		blockPressWhileTypingOn.push(gameOverEndInputText);
 		//
 
+		#if MODS_ALLOWED
+		var directories:Array<String> = [Paths.mods('data/characters/'), Paths.mods(Mods.currentModDirectory + '/data/characters/'), Paths.getSharedPath('data/characters/')];
+		for(mod in Mods.getGlobalMods())
+			directories.push(Paths.mods(mod + '/characters/'));
+		#else
+		var directories:Array<String> = [Paths.getSharedPath('data/characters/')];
+		#end
+
+		var tempArray:Array<String> = [];
+		var characters:Array<String> = Mods.mergeAllTextsNamed('data/characterList.txt', Paths.getSharedPath());
+		for (character in characters)
+		{
+			if(character.trim().length > 0)
+				tempArray.push(character);
+		}
+
+		#if MODS_ALLOWED
+		for (i in 0...directories.length) {
+			var directory:String = directories[i];
+			if(FileSystem.exists(directory)) {
+				for (file in FileSystem.readDirectory(directory)) {
+					var path = haxe.io.Path.join([directory, file]);
+					if (!FileSystem.isDirectory(path) && file.endsWith('.json')) {
+						var charToCheck:String = file.substr(0, file.length - 5);
+						if(charToCheck.trim().length > 0 && !charToCheck.endsWith('-dead') && !tempArray.contains(charToCheck)) {
+							tempArray.push(charToCheck);
+							characters.push(charToCheck);
+						}
+					}
+				}
+			}
+		}
+		#end
+
+		var player1DropDown = new FlxUIDropDownMenu(gameOverEndInputText.x + 280, gameOverCharacterInputText.y, FlxUIDropDownMenu.makeStrIdLabelArray(characters, true), function(character:String)
+		{
+			_song.player1 = characters[Std.parseInt(character)];
+			updateJsonData();
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
+			updateHeads();
+		});
+		player1DropDown.selectedLabel = _song.player1;
+		blockPressWhileScrolling.push(player1DropDown);
+
+		var gfVersionDropDown = new FlxUIDropDownMenu(player1DropDown.x, player1DropDown.y + 40, FlxUIDropDownMenu.makeStrIdLabelArray(characters, true), function(character:String)
+		{
+			_song.gfVersion = characters[Std.parseInt(character)];
+			updateJsonData();
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
+			updateHeads();
+		});
+		gfVersionDropDown.selectedLabel = _song.gfVersion;
+		blockPressWhileScrolling.push(gfVersionDropDown);
+
+		var player2DropDown = new FlxUIDropDownMenu(player1DropDown.x, gfVersionDropDown.y + 40, FlxUIDropDownMenu.makeStrIdLabelArray(characters, true), function(character:String)
+		{
+			_song.player2 = characters[Std.parseInt(character)];
+			updateJsonData();
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
+			updateHeads();
+		});
+		player2DropDown.selectedLabel = _song.player2;
+		blockPressWhileScrolling.push(player2DropDown);
+
+		var player4DropDown = new FlxUIDropDownMenu(player1DropDown.x, player2DropDown.y + 40, FlxUIDropDownMenu.makeStrIdLabelArray(characters, true), function(character:String)
+		{
+			_song.player4 = characters[Std.parseInt(character)];
+			updateJsonData();
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
+			updateHeads();
+		});
+		player4DropDown.selectedLabel = _song.player4;
+		blockPressWhileScrolling.push(player4DropDown);
+
+		#if MODS_ALLOWED
+		var directories:Array<String> = [Paths.mods('stages/'), Paths.mods(Mods.currentModDirectory + '/stages/'), Paths.getSharedPath('stages/')];
+		for(mod in Mods.getGlobalMods())
+			directories.push(Paths.mods(mod + '/stages/'));
+		#else
+		var directories:Array<String> = [Paths.getSharedPath('stages/')];
+		#end
+
+		var stageFile:Array<String> = Mods.mergeAllTextsNamed('data/stageList.txt', Paths.getSharedPath());
+		var stages:Array<String> = [];
+		for (stage in stageFile) {
+			if(stage.trim().length > 0) {
+				stages.push(stage);
+			}
+			tempArray.push(stage);
+		}
+		#if MODS_ALLOWED
+		for (i in 0...directories.length) {
+			var directory:String = directories[i];
+			if(FileSystem.exists(directory)) {
+				for (file in FileSystem.readDirectory(directory)) {
+					var path = haxe.io.Path.join([directory, file]);
+					if (!FileSystem.isDirectory(path) && file.endsWith('.json')) {
+						var stageToCheck:String = file.substr(0, file.length - 5);
+						if(stageToCheck.trim().length > 0 && !tempArray.contains(stageToCheck)) {
+							tempArray.push(stageToCheck);
+							stages.push(stageToCheck);
+						}
+					}
+				}
+			}
+		}
+		#end
+
+		if(stages.length < 1) stages.push('stage');
+
+		stageDropDown = new FlxUIDropDownMenu(player1DropDown.x + 140, player1DropDown.y, FlxUIDropDownMenu.makeStrIdLabelArray(stages, true), function(character:String)
+		{
+			_song.stage = stages[Std.parseInt(character)];
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
+		});
+		stageDropDown.selectedLabel = _song.stage;
+		blockPressWhileScrolling.push(stageDropDown);
+
+		// Checks if all difficulties json files exists and removes difficulties that dont have a json file.
+		var availableDifficulties:Array<Int> = [];
+		var availableDifficultiesTexts:Array<String> = [];
+
+		for(i in 0...Difficulty.list.length){
+			var jsonInput:String;
+			if(Difficulty.list[i].toLowerCase() == 'normal') jsonInput = _song.songId.toLowerCase();
+			else jsonInput = _song.songId.toLowerCase() + "-" + Difficulty.list[i];
+
+			var folder:String = _song.songId.toLowerCase();
+			var formattedFolder:String = Paths.formatToSongPath(folder);
+			var formattedSong:String = Paths.formatToSongPath(jsonInput);
+
+			var pathExists:Bool = (Paths.fileExists('data/songs/' + formattedFolder + '/' + formattedSong + '.json', BINARY) || Paths.fileExists('shared/data/songs/' + formattedFolder + '/' + formattedSong + '.json', BINARY));
+			if(pathExists == true){
+				availableDifficulties.push(i);
+				availableDifficultiesTexts.push(Difficulty.list[i]);
+			}
+		}
+
+		if(availableDifficulties == null || availableDifficulties.length <= 0){
+			Debug.logTrace('Where are the difficulties...?');
+			availableDifficulties.push(PlayState.storyDifficulty);
+			availableDifficultiesTexts.push(Difficulty.list[0]);
+		}
+
+		difficultyDropDown = new FlxUIDropDownMenu(stageDropDown.x, stageDropDown.y + 40, FlxUIDropDownMenu.makeStrIdLabelArray(availableDifficultiesTexts, true), function(pressed:String)
+		{	
+			var curSelected:Int = Std.parseInt(pressed);
+			openSubState(new Prompt('This action will clear current progress.\n\nProceed?', 0, function(){
+				PlayState.storyDifficulty = availableDifficulties[curSelected];
+				PlayState.changedDifficulty = true;
+				loadJson(_song.songId.toLowerCase());
+			}, null,ignoreWarnings));
+		});		
+		difficultyDropDown.selectedLabel = Difficulty.list[PlayState.storyDifficulty];
+		blockPressWhileScrolling.push(difficultyDropDown);
+
 		var check_disableNoteRGB:FlxUICheckBox = new FlxUICheckBox(10, 170, null, null, "Disable Note RGB", 100);
 		check_disableNoteRGB.checked = (_song.disableNoteRGB == true);
 		check_disableNoteRGB.callback = function()
@@ -1753,6 +1739,15 @@ class ChartingState extends MusicBeatState
 			//Debug.logInfo('CHECKED!');
 		};
 
+		var oldBarSystem = new FlxUICheckBox(reloadNotesButton.x + 160, reloadNotesButton.y - 150, null, null, "Old Bar System", 100);
+		oldBarSystem.checked = _song.oldBarSystem;
+		oldBarSystem.callback = function()
+		{
+			_song.oldBarSystem = oldBarSystem.checked;
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
+			//Debug.logInfo('CHECKED!');
+		};
+
 		tab_group_data.add(gameOverCharacterInputText);
 		tab_group_data.add(gameOverSoundInputText);
 		tab_group_data.add(gameOverLoopInputText);
@@ -1768,6 +1763,7 @@ class ChartingState extends MusicBeatState
 		tab_group_data.add(forceRightScroll);
 		tab_group_data.add(notITGModchart);
 		tab_group_data.add(blockOpponentMode);
+		tab_group_data.add(oldBarSystem);
 		tab_group_data.add(noteSkinInputText);
 		tab_group_data.add(noteSplashesInputText);
 
@@ -1778,6 +1774,19 @@ class ChartingState extends MusicBeatState
 
 		tab_group_data.add(new FlxText(noteSkinInputText.x, noteSkinInputText.y - 15, 0, 'Note Texture:'));
 		tab_group_data.add(new FlxText(noteSplashesInputText.x, noteSplashesInputText.y - 15, 0, 'Note Splashes Texture:'));
+
+		tab_group_data.add(new FlxText(player4DropDown.x, player4DropDown.y - 15, 0, 'Player 4:'));
+		tab_group_data.add(new FlxText(player2DropDown.x, player2DropDown.y - 15, 0, 'Opponent:'));
+		tab_group_data.add(new FlxText(gfVersionDropDown.x, gfVersionDropDown.y - 15, 0, 'Girlfriend:'));
+		tab_group_data.add(new FlxText(player1DropDown.x, player1DropDown.y - 15, 0, 'Boyfriend:'));
+		tab_group_data.add(new FlxText(stageDropDown.x, stageDropDown.y - 15, 0, 'Stage:'));
+		tab_group_data.add(new FlxText(difficultyDropDown.x, difficultyDropDown.y - 15, 0, 'Difficulty:'));
+		tab_group_data.add(player4DropDown);
+		tab_group_data.add(player2DropDown);
+		tab_group_data.add(gfVersionDropDown);
+		tab_group_data.add(player1DropDown);
+		tab_group_data.add(difficultyDropDown);
+		tab_group_data.add(stageDropDown);
 		UI_box2.addGroup(tab_group_data);
 	}
 
@@ -2687,8 +2696,8 @@ class ChartingState extends MusicBeatState
 		"\nSection: " + curSec +
 		"\n\nBeat: " + Std.string(curDecBeat).substring(0,4) +
 		"\n\nStep: " + curStep +
-		if ((quantization - 2) % 10 == 0 && quantization != 12) "\n\nBeat Snap: " + quantization + "nd";
-		else "\n\nBeat Snap: " + quantization + "th";
+		"\n\nBeat Snap: " + quantization + (((quantization - 2) % 10 == 0 && quantization != 12) ? "nd" : "th") +
+		"\n\nZoom: " + zoomFactorTxt;
 
 		var playedSound:Array<Bool> = [false, false, false, false]; //Prevents ouchy GF sex sounds
 		curRenderedNotes.forEachAlive(function(note:Note) {
@@ -2781,9 +2790,8 @@ class ChartingState extends MusicBeatState
 
 	function updateZoom() {
 		var daZoom:Float = zoomList[curZoom];
-		var zoomThing:String = '1 / ' + daZoom;
-		if(daZoom < 1) zoomThing = Math.round(1 / daZoom) + ' / 1';
-		zoomTxt.text = 'Zoom: ' + zoomThing;
+		zoomFactorTxt = '1 / ' + daZoom;
+		if(daZoom < 1) zoomFactorTxt = Math.round(1 / daZoom) + ' / 1';
 		reloadGridLayer();
 	}
 

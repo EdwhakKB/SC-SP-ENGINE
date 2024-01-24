@@ -2,11 +2,10 @@ package objects;
 
 import shaders.RGBPalette;
 import shaders.RGBPalette.RGBShaderReference;
-import flixel.addons.effects.FlxSkewedSprite;
 
 import openfl.Assets;
 
-class StrumArrow extends FlxSkewedSprite
+class StrumArrow extends FlxSkewed
 {
 	public var rgbShader:RGBShaderReference;
 	public var resetAnim:Float = 0;
@@ -18,15 +17,17 @@ class StrumArrow extends FlxSkewedSprite
 	public var player:Int;
 	public var containsPixelTexture:Bool = false;
 	public var pathNotFound:Bool = false;
+	public var changedSkin:Bool = false;
 
 	public var laneFollowsReceptor:Bool = true;
 
 	public var z:Float = 0;
 
-	public var bgLane:FlxSkewedSprite;
+	public var bgLane:FlxSkewed;
 	
 	public var texture(default, set):String = null;
 	private function set_texture(value:String):String {
+		changedSkin = true;
 		reloadNote(value);
 		return value;
 	}
@@ -207,7 +208,7 @@ class StrumArrow extends FlxSkewedSprite
 	}
 
 	public function loadLane(){
-		bgLane = new FlxSkewedSprite();
+		bgLane = new FlxSkewed();
 		bgLane.makeGraphic(Std.int(Note.swagWidth), 2160);
 		bgLane.antialiasing = FlxG.save.data.antialiasing;
 		bgLane.color = FlxColor.BLACK;

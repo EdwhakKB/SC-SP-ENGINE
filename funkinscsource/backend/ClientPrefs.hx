@@ -176,6 +176,8 @@ import states.TitleState;
 
 	public var guitarHeroSustains:Bool = true;
 
+	public var coloredText:Bool = false;
+
 	public var noteSplashes:Bool = true;
 	public var noteSplashesOP:Bool = true;
 
@@ -185,6 +187,10 @@ import states.TitleState;
 	public var clearFolderOnStart:Bool = false;
 
 	public var iconMovement:String = 'None';
+
+	public var skipInitialCaching:Bool = true;
+
+	public var gradientSystemForOldBars:Bool = false;
 }
 
 class ClientPrefs {

@@ -10,7 +10,6 @@ import shaders.RGBPalette.RGBShaderReference;
 import objects.StrumArrow;
 
 import flixel.math.FlxRect;
-import flixel.addons.effects.FlxSkewedSprite;
 
 import openfl.Assets;
 
@@ -47,7 +46,7 @@ typedef NoteSplashData = {
 	a:Float
 }
 
-class Note extends FlxSkewedSprite
+class Note extends FlxSkewed
 {
 	public static var globalRgbShaders:Array<RGBPalette> = [];
 	public static var instance:Note = null;
@@ -170,6 +169,7 @@ class Note extends FlxSkewedSprite
 	public var containsPixelTexture:Bool = false;
 	public var pathNotFound:Bool = false;
 	public var isPixel:Bool = false;
+	public var changedSkin:Bool = false;
 
 	private function set_multSpeed(value:Float):Float {
 		resizeByRatio(value / multSpeed);
@@ -187,6 +187,7 @@ class Note extends FlxSkewedSprite
 	}
 
 	private function set_texture(value:String):String {
+		changedSkin = true;
 		reloadNote(value);
 		return value;
 	}
@@ -211,7 +212,7 @@ class Note extends FlxSkewedSprite
 		if(noteData > -1 && noteType != value) {
 			switch(value) {
 				case 'Hurt Note':
-					ignoreNote = true;
+					ignoreNote = true; //NO ONE WANTS TO GET HURT NOT EVEN THE OPPONENT :sob:
 					//reloadNote('HURTNOTE_assets');
 					//this used to change the note texture to HURTNOTE_assets.png,
 					//but i've changed it to something more optimized with the implementation of RGBPalette:
@@ -326,11 +327,23 @@ class Note extends FlxSkewedSprite
 				if(createdFrom != null && createdFrom.songSpeed != null) prevNote.scale.y *= createdFrom.songSpeed;
 
 				//Let's see if I might un-null it!
-				/*if(texture.contains('pixel') || noteSkin.contains('pixel') || containsPixelTexture || isPixel) {
-					prevNote.scale.y *= 1.19;
-					prevNote.scale.y *= (6 / height); //Auto adjust note size
-				}*/
+				if (!changedSkin)
+				{
+					if(texture.contains('pixel') || noteSkin.contains('pixel') || containsPixelTexture || isPixel) {
+						prevNote.scale.y *= 1.19;
+						prevNote.scale.y *= (6 / height); //Auto adjust note size
+					}
+				}
 				prevNote.updateHitbox();
+			}
+
+			if (!changedSkin)
+			{
+				if(PlayState.isPixelStage)
+				{
+					scale.y *= PlayState.daPixelZoom;
+					updateHitbox();
+				}
 			}
 			earlyHitMult = 0;
 		}
@@ -403,21 +416,24 @@ class Note extends FlxSkewedSprite
 		if(isSustainNote) {
 			scale.y = lastScaleY;
 
-			if (wasPixelNote && !becomePixelNote) //fixes the scaling
+			if (changedSkin)
 			{
-				scale.y /= PlayState.daPixelZoom;
-				scale.y *= 0.7;
-	
-				offsetX += 3;
-			}
-	
-			if (becomePixelNote && !wasPixelNote) //fixes the scaling
-			{
-				if (getNoteSkinPostfix().contains('future')) scale.y /= 1.26;
-				else scale.y /= 0.7;
-				scale.y *= PlayState.daPixelZoom;
-	
-				offsetX -= 3;
+				if (wasPixelNote && !becomePixelNote) //fixes the scaling
+				{
+					scale.y /= PlayState.daPixelZoom;
+					scale.y *= 0.7;
+		
+					offsetX += 3;
+				}
+		
+				if (becomePixelNote && !wasPixelNote) //fixes the scaling
+				{
+					if (getNoteSkinPostfix().contains('future')) scale.y /= 1.26;
+					else scale.y /= 0.7;
+					scale.y *= PlayState.daPixelZoom;
+		
+					offsetX -= 3;
+				}
 			}
 		}
 
