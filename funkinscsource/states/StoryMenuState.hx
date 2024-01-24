@@ -46,6 +46,9 @@ class StoryMenuState extends MusicBeatState
 		Paths.clearStoredMemory();
 		Paths.clearUnusedMemory();
 
+		PlayState.alreadyPreloaded = false;
+		PlayState.alreadyPreloadedPreDoneCharacters = false;
+
 		PlayState.isStoryMode = true;
 		WeekData.reloadWeekFiles(true);
 		if(curWeek >= WeekData.weeksList.length) curWeek = 0;

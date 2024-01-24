@@ -215,11 +215,7 @@ class ScriptHandler #if HAXE_EXTENSION extends tea.SScript #end
 		set('FlxText', FlxText);
 		set('FlxTextBorderStyle', FlxTextBorderStyle);
 		#if (!flash && sys)
-		#if (flixel_addons > "3.0.2")
 		set('FlxRuntimeShader', flixel.addons.display.FlxRuntimeShader);
-		#else
-		set('FlxRuntimeShader', flixel.addons.display.FlxRuntimeShader);
-		#end
 		#end
 		set('FlxSound', FlxSound);
 		set('FlxState', flixel.FlxState);

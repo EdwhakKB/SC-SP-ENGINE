@@ -99,6 +99,9 @@ class FreeplayState extends MusicBeatState
 		DiscordClient.changePresence("In the Menus", null);
 		#end
 
+		PlayState.alreadyPreloaded = false;
+		PlayState.alreadyPreloadedPreDoneCharacters = false;
+
 		freeplayScript = new ScriptHandler(Paths.scriptsForHandler('FreeplayState'));
 
 		freeplayScript.setVar('FreeplayState', this);
@@ -824,7 +827,7 @@ class FreeplayState extends MusicBeatState
             LoadingState.loadAndSwitchState(new ChartingState());
         }else{
 			//restore this functionality
-			LoadingState.loadAndSwitchState(new states.ThingsToLoad());
+			LoadingState.loadAndSwitchState(new states.PlayState());
 		}
 	}
 

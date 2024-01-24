@@ -1212,6 +1212,7 @@ class ChartingState extends MusicBeatState
 		\nH - Go to the start of the chart
 		\nA/D - Go to the previous/next section
 		\nLeft/Right - Change Snap
+		\n
 		\nUp/Down - Change Conductor's Strum Time with Snapping" +
 		#if FLX_PITCH
 		"\nLeft Bracket / Right Bracket - Change Song Playback Rate (SHIFT to go Faster)
@@ -1231,8 +1232,8 @@ class ChartingState extends MusicBeatState
 		for (i in 0...tipTextArray.length) {
 			var tipText:FlxText = new FlxText(20, 30, 0, tipTextArray[i], 14);
 			tipText.y += i * 9;
-			tipText.setFormat(Paths.font("vcr.ttf"), 14, FlxColor.WHITE, LEFT/*, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK*/);
-			//tipText.borderSize = 2;
+			tipText.setFormat(Paths.font("vcr.ttf"), 14, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			tipText.borderSize = 2;
 			tipText.scrollFactor.set();
 			tab_group_tips.add(tipText);
 		}

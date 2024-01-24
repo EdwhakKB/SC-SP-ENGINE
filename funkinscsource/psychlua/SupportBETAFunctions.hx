@@ -837,8 +837,8 @@ class SupportBETAFunctions
 			}
 		});
 
-		funk.set("cacheCharacter", function(characterType:Int = 0, character:String = 'bf'){
-			PlayState.instance.cacheCharacter(character, characterType);
+		funk.set("cacheCharacter", function(character:String = 'bf'){
+			PlayState.instance.cacheCharacter(character);
 		});
 
 		//change individual values

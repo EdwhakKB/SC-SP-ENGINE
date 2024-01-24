@@ -458,8 +458,6 @@ class PlayState extends MusicBeatState
 
 	public static var highestCombo:Int = 0;
 
-	public var charCacheList:Array<String> = [];
-
 	var col:FlxColor = 0xFFFFD700;
 	var col2:FlxColor = 0xFFFFD700;
 	
@@ -467,43 +465,48 @@ class PlayState extends MusicBeatState
 	var dataStuff:Float = 0;
 
 	public var Stage:Stage = null;
+	public var preloadStage:Stage = null;
 
 	public static var alreadyPreloaded:Bool = false;
+	public static var alreadyPreloadedPreDoneCharacters:Bool = false;
 
-	public var preloadStage:Stage = null;
+	private function txt(text:String)
+    {
+        return Paths.modFolders(text);
+    }
 
 	override public function create()
 	{
 		Paths.clearStoredMemory();
 
-		if (!alreadyPreloaded)
-		{
-			cacheCharacter(PlayState.SONG.player2, 1);
-			cacheCharacter(PlayState.SONG.player1, 0);
-			cacheCharacter(PlayState.SONG.gfVersion, 2);
-			cacheCharacter(PlayState.SONG.player4, 3);
-		}
+		#if MODS_ALLOWED
+        if (FileSystem.exists(txt('data/songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase() + '/preload.txt')) || FileSystem.exists(Paths.txt('songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase() + '/preload')))
+        #else
+        if (Assets.exists(Paths.txt('songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase() + "/preload")))
+        #end
+        {   
+            Debug.logInfo('Preloading Characters!');
+            PlayState.alreadyPreloaded = true;
+            var characters:Array<String> = CoolUtil.coolTextFile(txt('data/songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase() + '/preload.txt'));
+            if (characters.length < 1)
+                characters = CoolUtil.coolTextFile(Paths.txt('songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase() + "/preload"));
+            for (i in 0...characters.length)
+            {
+                var data:Array<String> = characters[i].split(' ');
+				cacheCharacter(data[0]);
 
-		// Before all characters being loaded, it makes then invisible 0.01s later so that the player won't freeze when you change characters
-		var someSongStuff:String = 'songs/' + songName.toLowerCase();
+                var luaFile:String = 'data/characters/' + data[0];
 
-		if (#if MODS_ALLOWED FileSystem.exists(Paths.txt(someSongStuff + "/preload")) #else Assets.exists(Paths.txt(someSongStuff + "/preload")) #end)
-		{
-			PlayState.alreadyPreloaded = true;
-			var characters:Array<String> = CoolUtil.coolTextFile(Paths.txt(someSongStuff + "/preload"));
+                #if MODS_ALLOWED
+                if (FileSystem.exists(txt('data/characters/'+data[0]+'.lua')) || FileSystem.exists(FileSystem.absolutePath("assets/shared/"+luaFile+'.lua')) || FileSystem.exists(Paths.lua(luaFile)))
+                #else
+                if (Assets.exists(Paths.lua(luaFile)))
+                #end
+                    PlayState.startCharScripts.push(data[0]);
 
-			for (i in 0...characters.length) // whoops. still need to load the luas
-			{
-				var data:Array<String> = characters[i].split(' ');
-				startCharScripts.push(data[0]);
-			}
-		}
-		
-		for(i in 0...startCharScripts.length)
-		{
-			startCharacterScripts(startCharScripts[i]);
-			startCharScripts.remove(startCharScripts[i]);
-		}
+                Debug.logInfo('found ' + data[0]);
+            }
+        }
 
 		tweenManager = new FlxTweenManager();
 		timerManager = new FlxTimerManager();
@@ -757,6 +760,26 @@ class PlayState extends MusicBeatState
 		gf.scrollFactor.set(Stage.gfScrollFactor[0], Stage.gfScrollFactor[1]);
 
 		if (boyfriend.deadChar != null) GameOverSubstate.characterName = boyfriend.deadChar;
+
+		// Before all characters being loaded, it makes then invisible 0.01s later so that the player won't freeze when you change characters
+		var someSongStuff:String = 'songs/' + songName.toLowerCase();
+
+		if (#if MODS_ALLOWED FileSystem.exists(Paths.txt(someSongStuff + "/preload")) #else Assets.exists(Paths.txt(someSongStuff + "/preload")) #end)
+		{
+			var characters:Array<String> = CoolUtil.coolTextFile(Paths.txt(someSongStuff + "/preload"));
+
+			for (i in 0...characters.length) // whoops. still need to load the luas
+			{
+				var data:Array<String> = characters[i].split(' ');
+				startCharScripts.push(data[0]);
+			}
+		}
+		
+		for(i in 0...startCharScripts.length)
+		{
+			startCharacterScripts(startCharScripts[i]);
+			startCharScripts.remove(startCharScripts[i]);
+		}
 
 		var camPos:FlxPoint = FlxPoint.get(girlfriendCameraOffset[0], girlfriendCameraOffset[1]);
 		if(gf != null)
@@ -2639,9 +2662,6 @@ class PlayState extends MusicBeatState
 						if(Math.isNaN(val1)) val1 = 0;
 						charType = val1;
 				}
-
-				var newCharacter:String = event.value2;
-				if (!alreadyPreloaded) cacheCharacter(newCharacter, charType);
 
 			case 'Play Sound':
 				Paths.sound(event.value1);
@@ -6907,31 +6927,20 @@ class PlayState extends MusicBeatState
 	public static var alreadyPushedCharacter:Array<String> = [];
 	public static var preloadedCharacters:Array<String> = [];
 
-	public function cacheCharacter(character:String, charType:Int) //Make cacheCharacter function not repeat already preloaded characters!
+	public function cacheCharacter(character:String) //Make cacheCharacter function not repeat already preloaded characters!
 	{
-		if (!PlayState.alreadyPushedCharacter.contains(character)) PlayState.alreadyPushedCharacter.push(character);
-		if (PlayState.preloadedCharacters.contains(character)) return;
-
-		var cacheChar:Character = null;
-		switch (charType)
-		{
-			case 0: cacheChar = boyfriend;
-			case 1: cacheChar = dad;
-			case 2: cacheChar = gf;
-			case 3: cacheChar = mom;
-		}
-
-		for (i in 0...PlayState.alreadyPushedCharacter.length)
-		{
-			cacheChar = new Character(0, 0, PlayState.alreadyPushedCharacter[i], (charType < 1));
+		try{
+			var cacheChar:Character = null;
+			cacheChar = new Character(0, 0, character);
 			cacheChar.alpha = 0.00001;
 			add(cacheChar);
 			remove(cacheChar);
-			cacheChar.destroy();
 
 			startCharacterScripts(cacheChar.curCharacter);
-
-			PlayState.preloadedCharacters.push(PlayState.alreadyPushedCharacter[i]);
+		}
+		catch(e:Dynamic)
+		{
+			Debug.logWarn('Error on $e');
 		}
 	}
 

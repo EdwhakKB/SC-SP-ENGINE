@@ -58,8 +58,6 @@ class ThingsToLoad extends MusicBeatState
 		loadingBar2.scrollFactor.set();
         loadingBar2.createFilledBar(FlxG.random.color(), FlxG.random.color());
 
-        toBeDone = 0;
-
         add(text);
         add(loadingBar);
         add(loadingBar2);
@@ -84,62 +82,7 @@ class ThingsToLoad extends MusicBeatState
 
     function finishCaching()
     {
-        var characterString:String = '';
-        var stageString:String = '';
-
-        #if MODS_ALLOWED
-        if (FileSystem.exists(txt('data/songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase() + '/preload.txt')) || FileSystem.exists(Paths.txt('songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase() + '/preload')))
-        #else
-        if (Assets.exists(Paths.txt('songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase() + "/preload")))
-        #end
-        {   
-            Debug.logInfo('Preloading Characters!');
-            PlayState.alreadyPreloaded = true;
-            var characters:Array<String> = CoolUtil.coolTextFile(txt('data/songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase() + '/preload.txt'));
-            if (characters.length < 1)
-                characters = CoolUtil.coolTextFile(Paths.txt('songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase() + "/preload"));
-            for (i in 0...characters.length)
-            {
-                var data:Array<String> = characters[i].split(' ');
-                character = new Character (0, 0, data[0]);
-
-                var luaFile:String = 'data/characters/' + data[0];
-
-                #if MODS_ALLOWED
-                if (FileSystem.exists(Paths.modFolders('data/characters/'+data[0]+'.lua')) || FileSystem.exists(FileSystem.absolutePath("assets/shared/"+luaFile+'.lua')) || FileSystem.exists(Paths.lua(luaFile)))
-                #else
-                if (Assets.exists(Paths.lua(luaFile)))
-                #end
-                    PlayState.startCharScripts.push(data[0]);
-
-                Debug.logInfo('found ' + data[0]);
-                done++;
-            }
-        }   
-        
-        /*#if MODS_ALLOWED
-        if (FileSystem.exists(txt('data/songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase() + '/preload-stage.txt')) || FileSystem.exists(Paths.txt('songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase() + '/preload-stage')))
-        #else
-        if (Assets.exists(Paths.txt('songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase() + "/preload-stage")))
-        #end
-        {
-            PlayState.alreadyPreloaded = true;
-            var characters:Array<String> = CoolUtil.coolTextFile(txt('data/songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase() + "/preload-stage.txt"));
-            if (characters.length < 1)
-                characters = CoolUtil.coolTextFile(Paths.txt('songs/' + Paths.formatToSongPath(PlayState.SONG.songId).toLowerCase() + "/preload"));
-            for (i in 0...characters.length)
-            {
-                var data:Array<String> = characters[i].split(' ');
-                Stage = new Stage(data[0], true);
-                Stage.setupStageProperties(data[0], true, true);
-                Debug.logInfo('stages are ' + data[0]);
-                done++;
-            }
-
-            PlayState.curStage = PlayState.SONG.stage;
-        }*/
-
-        new FlxTimer().start(done/20, function(tmr){
+        new FlxTimer().start(20, function(tmr){
             text.text = text.text.replace('.', '').replace(' is now caching objects', '') + " COMPLETED LOADING!";
             loadPlayState();
         });
