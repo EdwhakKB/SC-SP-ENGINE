@@ -120,7 +120,7 @@ class Init extends FlxState
 			FlxTransitionableState.skipNextTransOut = true;
 			MusicBeatState.switchState(new FlashingState());
 		} else {
-			if (ClientPrefs.data.skipInitialCaching) FlxG.switchState(new InitialCachingState());
+			if (!ClientPrefs.data.skipInitialCaching) FlxG.switchState(new InitialCachingState());
 			else FlxG.switchState(Type.createInstance(Main.game.initialState, []));
 		}
 	}

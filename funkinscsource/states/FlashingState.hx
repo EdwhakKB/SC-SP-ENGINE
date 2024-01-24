@@ -44,7 +44,7 @@ class FlashingState extends MusicBeatState
 					FlxG.sound.play(Paths.sound('confirmMenu'));
 					FlxFlicker.flicker(warnText, 1, 0.1, false, true, function(flk:FlxFlicker) {
 						new FlxTimer().start(0.5, function (tmr:FlxTimer) {
-							if (ClientPrefs.data.skipInitialCaching) FlxG.switchState(new InitialCachingState());
+							if (!ClientPrefs.data.skipInitialCaching) FlxG.switchState(new InitialCachingState());
 							else MusicBeatState.switchState(new TitleState());
 						});
 					});
@@ -52,7 +52,7 @@ class FlashingState extends MusicBeatState
 					FlxG.sound.play(Paths.sound('cancelMenu'));
 					FlxTween.tween(warnText, {alpha: 0}, 1, {
 						onComplete: function (twn:FlxTween) {
-							if (ClientPrefs.data.skipInitialCaching) FlxG.switchState(new InitialCachingState());
+							if (!ClientPrefs.data.skipInitialCaching) FlxG.switchState(new InitialCachingState());
 							else MusicBeatState.switchState(new TitleState());
 						}
 					});
