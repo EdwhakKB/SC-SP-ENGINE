@@ -2328,7 +2328,12 @@ class PlayState extends MusicBeatState
 
 		// Song duration in a float, useful for the time left feature
 		songLength = FlxG.sound.music.length;
-		createTween(timeBar, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
+		if (SONG.oldBarSystem)
+		{
+			createTween(timeBarBG, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
+			createTween(timeBar, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
+		}
+		else createTween(timeBar, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
 		createTween(timeTxt, {alpha: 1}, 0.5, {ease: FlxEase.circOut});
 
 		#if DISCORD_ALLOWED
@@ -3081,6 +3086,9 @@ class PlayState extends MusicBeatState
 
 		callOnScripts('onUpdate', [elapsed]);
 
+		if (notITGMod && SONG.notITG)
+			playfieldRenderer.speed = playbackRate; //LMAO IT LOOKS SOO GOOFY AS FUCK
+
 		#if desktop
 		if (songStarted) // kade stuff
 		{
@@ -3100,7 +3108,7 @@ class PlayState extends MusicBeatState
 
 		if (showCaseMode)
 		{
-			for (i in [iconP1, iconP2, healthBar, healthBarNew, healthBarBG, timeBar, timeBarBG, timeTxt, scoreTxt, scoreTxtSprite, kadeEngineWatermark, 
+			for (i in [iconP1, iconP2, healthBar, healthBarNew, healthBarBG, timeBar, timeBarBG, timeTxt, timeBarNew, scoreTxt, scoreTxtSprite, kadeEngineWatermark, 
 				healthBarHit, healthBarHitBG, healthBarHitNew, healthBarOverlay
 			]){
 				i.visible = false;
@@ -4628,6 +4636,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
+		timeBarNew.visible = false;
 		timeBar.visible = false;
 		timeTxt.visible = false;
 		canPause = false;
