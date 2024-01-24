@@ -768,6 +768,7 @@ class SupportBETAFunctions
 		});
 
 		funk.set("updateHealthbar", function(dadColor:String = "", bfColor:String = ""){
+			if (!ClientPrefs.data.healthColor) return;
 			// ALREADY CONTAINS # JUST ADD THE REST OF THE CODE (FFFFFF / 000000 / 30DB01)
 			var opponent:String;
 			var player:String;
@@ -782,20 +783,41 @@ class SupportBETAFunctions
 			else
 				player = bfColor;
 
-			if ((opponent.contains('#') || opponent.contains('#FF') || opponent.contains('0x')) || 
-				(player.contains('#') || player.contains('#FF') || player.contains('0x')))
+			var flxStringUsageBool:Bool = ((opponent.contains('#') || opponent.contains('#FF') || opponent.contains('0x')) || 
+				(player.contains('#') || player.contains('#FF') || player.contains('0x')));
+			
+			for (i in [PlayState.instance.healthBar, PlayState.instance.healthBarHit])
 			{
-				if (ClientPrefs.data.hudStyle != "HITMANS")
-					PlayState.instance.healthBar.setColors(FlxColor.fromString(opponent), FlxColor.fromString(player));
-				else
-					PlayState.instance.healthBarHit.setColors(FlxColor.fromString(opponent), FlxColor.fromString(player));
+				if (PlayState.SONG.oldBarSystem)
+				{
+					if (!ClientPrefs.data.gradientSystemForOldBars)
+					{
+						if (flxStringUsageBool) i.createFilledBar(FlxColor.fromString(opponent), FlxColor.fromString(player));
+						else i.createFilledBar(CoolUtil.colorFromString(opponent), CoolUtil.colorFromString(player));
+					}
+					else
+					{
+						if (flxStringUsageBool) 
+							i.createGradientBar([FlxColor.fromString(player), FlxColor.fromString(opponent)], 
+								[FlxColor.fromString(player), FlxColor.fromString(opponent)]);
+						else
+							i.createGradientBar([FlxColor.fromString(player), FlxColor.fromString(opponent)], 
+								[FlxColor.fromString(player), FlxColor.fromString(opponent)]);
+					}
+					i.updateBar();
+				}
 			}
-			else
+
+			if (!PlayState.SONG.oldBarSystem)
 			{
-				if (ClientPrefs.data.hudStyle != "HITMANS")
-					PlayState.instance.healthBar.setColors(CoolUtil.colorFromString(opponent), CoolUtil.colorFromString(player));
-				else
-					PlayState.instance.healthBarHit.setColors(CoolUtil.colorFromString(opponent), CoolUtil.colorFromString(player));
+				if (flxStringUsageBool) {
+					PlayState.instance.healthBarNew.setColors(FlxColor.fromString(opponent), FlxColor.fromString(player));
+					PlayState.instance.healthBarHitNew.setColors(FlxColor.fromString(opponent), FlxColor.fromString(player));
+				}
+				else {
+					PlayState.instance.healthBarNew.setColors(CoolUtil.colorFromString(opponent), CoolUtil.colorFromString(player));
+					PlayState.instance.healthBarHitNew.setColors(CoolUtil.colorFromString(opponent), CoolUtil.colorFromString(player));
+				}
 			}
 		});
 

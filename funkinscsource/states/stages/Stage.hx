@@ -223,8 +223,8 @@ class Stage extends MusicBeatState
 					swagBacks['halloweenBG'] = halloweenBG;
 			
 					//PRECACHE SOUNDS
-					precacheSound('thunder_1');
-					precacheSound('thunder_2');
+					Paths.sound('thunder_1');
+					Paths.sound('thunder_2');
 			
 					//Monster cutscene
 					if (PlayState.isStoryMode && !PlayState.seenCutscene)
@@ -299,7 +299,7 @@ class Stage extends MusicBeatState
 					if(!ClientPrefs.data.flashing) phillyGlowGradient.intendedAlpha = 0.7;
 					toAdd.push(phillyGlowGradient);
 	
-					precacheImage('philly/particle'); //precache philly glow particle image
+					Paths.image('philly/particle'); //precache philly glow particle image
 					phillyGlowParticles = new FlxTypedGroup<PhillyGlowParticle>();
 					phillyGlowParticles.visible = false;
 					swagGroup['phillyGlowParticles'] = phillyGlowParticles;
@@ -358,7 +358,7 @@ class Stage extends MusicBeatState
 					resetLimoKill();
 		
 					//PRECACHE SOUND
-					precacheSound('dancerdeath');
+					Paths.sound('dancerdeath');
 					setDefaultGF('gf-car');
 
 					fastCar = new BGSprite('limo/fastCarLol', -300, 160);
@@ -407,7 +407,7 @@ class Stage extends MusicBeatState
 					swagBacks['santa'] = santa;
 					toAdd.push(santa);
 					animatedBacks.push(santa);
-					precacheSound('Lights_Shut_off');
+					Paths.sound('Lights_Shut_off');
 					setDefaultGF('gf-christmas');
 			
 					if(PlayState.isStoryMode && !PlayState.seenCutscene)
@@ -1307,27 +1307,6 @@ class Stage extends MusicBeatState
 		PlayState.instance.endCallback = myfn;
 	}
 
-	//precache functions
-	public function precacheImage(key:String) precache(key, 'image');
-	public function precacheSound(key:String) precache(key, 'sound');
-	public function precacheMusic(key:String) precache(key, 'music');
-
-	public function precache(key:String, type:String)
-	{
-		if(onPlayState)
-			PlayState.instance.precacheList.set(key, type);
-
-		switch(type)
-		{
-			case 'image':
-				Paths.image(key);
-			case 'sound':
-				Paths.sound(key);
-			case 'music':
-				Paths.music(key);
-		}
-	}
-
 	//overrides
 	function startCountdown() if(onPlayState) return PlayState.instance.startCountdown(); else return false;
 	function endSong() if(onPlayState)return PlayState.instance.endSong(); else return false;
@@ -2194,9 +2173,9 @@ class Stage extends MusicBeatState
 		prepareCutscene();
 		cutsceneHandler.endTime = 12;
 		cutsceneHandler.music = 'DISTORTO';
-		precacheSound('wellWellWell');
-		precacheSound('killYou');
-		precacheSound('bfBeep');
+		Paths.sound('wellWellWell');
+		Paths.sound('killYou');
+		Paths.sound('bfBeep');
 
 		var wellWellWell:FlxSound = new FlxSound().loadEmbedded(Paths.sound('wellWellWell'));
 		FlxG.sound.list.add(wellWellWell);
@@ -2255,7 +2234,7 @@ class Stage extends MusicBeatState
 		cutsceneHandler.music = 'DISTORTO';
 		tankman.x += 40;
 		tankman.y += 10;
-		precacheSound('tankSong2');
+		Paths.sound('tankSong2');
 
 		var tightBars:FlxSound = new FlxSound().loadEmbedded(Paths.sound('tankSong2'));
 		FlxG.sound.list.add(tightBars);
@@ -2304,7 +2283,7 @@ class Stage extends MusicBeatState
 		{
 			spr.y += 100;
 		});
-		precacheSound('stressCutscene');
+		Paths.sound('stressCutscene');
 
 		#if flxanimate
 		pico = new FlxAnimate(PlayState.instance.gf.x + 150, PlayState.instance.gf.y + 450);

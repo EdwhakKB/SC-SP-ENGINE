@@ -34,7 +34,7 @@ import objects.BGSprite;
 import states.PlayState;
 import states.LoadingState;
 
-import flixel.addons.effects.FlxSkewedSprite;
+import flixel.addons.effects.FlxSkewedSprite as FlxSkewed;
 
 //Flixel
 import flixel.sound.FlxSound;
@@ -57,7 +57,9 @@ import flxanimate.*;
 import animateatlas.AtlasFrameMaker;
 #end
 
-#if SCEModchartingTools
+#if modchartingTools
+import modchartingTools.modcharting.*;
+#else
 import modcharting.*;
 #end
 

@@ -2,15 +2,18 @@ package backend;
 
 import Sys.sleep;
 import lime.app.Application;
+#if discord_rpc
+import discord_rpc.DiscordRpc;
+#else
 import hxdiscord_rpc.Discord;
 import hxdiscord_rpc.Types;
-
-
+#end
 class DiscordClient
 {
 	public static var isInitialized:Bool = false;
 	private static var _defaultID:String = "1112118075517575169";
 	public static var clientID(default, set):String = _defaultID;
+	#if !discord_rpc
 	private static var presence:DiscordRichPresence = DiscordRichPresence.create();
 
 	public static function check()
@@ -89,7 +92,7 @@ class DiscordClient
 		presence.details = details;
 		presence.state = state;
 		presence.largeImageKey = 'icon';
-		presence.largeImageText = "Engine Version: " + states.MainMenuState.psychEngineVersion;
+		presence.largeImageText = "PE Version: " + states.MainMenuState.psychEngineVersion + ", SCE Version: " + states.MainMenuState.SCEVersion;
 		presence.smallImageKey = smallImageKey;
 		// Obtained times are in milliseconds so they are divided so Discord can use it
 		presence.startTimestamp = Std.int(startTimestamp / 1000);
@@ -101,6 +104,101 @@ class DiscordClient
 
 	public static function updatePresence()
 		Discord.UpdatePresence(cpp.RawConstPointer.addressOf(presence));
+	#else
+	public function new()
+	{
+		Debug.logTrace("Discord Client starting...");
+		DiscordRpc.start({
+			clientID: clientID,
+			onReady: onReady,
+			onError: onError,
+			onDisconnected: onDisconnected
+		});
+		Debug.logTrace("Discord Client started.");
+
+		var localID:String = clientID;
+		while (localID == clientID)
+		{
+			DiscordRpc.process();
+			sleep(2);
+		}
+	}
+
+	private static var _options:Dynamic = {
+		details: "In the Menus",
+		state: null,
+		largeImageKey: 'icon',
+		largeImageText: "SC Engine",
+		smallImageKey : null,
+		startTimestamp : null,
+		endTimestamp : null
+	};
+
+	public static function check()
+	{
+		if(ClientPrefs.data.discordRPC) initialize();
+		else if(isInitialized) shutdown();
+	}
+
+	public static function prepare()
+	{
+		if (!isInitialized && ClientPrefs.data.discordRPC) 
+			initialize();
+		Application.current.window.onClose.add(function() {
+			shutdown();
+		});
+	}
+
+	public dynamic static function shutdown()
+	{
+		DiscordRpc.shutdown();
+		isInitialized = false;
+	}
+
+	static function onReady()
+	{
+		DiscordRpc.presence(_options);
+	}
+
+	static function onError(_code:Int, _message:String)
+	{
+		Debug.logTrace('Error! $_code : $_message');
+	}
+
+	static function onDisconnected(_code:Int, _message:String)
+	{
+		Debug.logTrace('Disconnected! $_code : $_message');
+	}
+
+	public static function initialize()
+	{
+		var discord = sys.thread.Thread.create(() ->
+		{
+			new DiscordClient();
+		});
+		Debug.logTrace("Discord Client initialized");
+		isInitialized = true;
+	}
+
+	public static function changePresence(?details:String = 'In The Menus', ?state:Null<String>, ?smallImageKey : String, ?hasStartTimestamp : Bool, ?endTimestamp: Float)
+	{
+		var startTimestamp:Float = 0;
+		if (hasStartTimestamp) startTimestamp = Date.now().getTime();
+		if (endTimestamp > 0) endTimestamp = startTimestamp + endTimestamp;
+
+		_options.details = details;
+		_options.state = state;
+		_options.largeImageKey = 'icon';
+		_options.largeImageText = "PE Version: " + states.MainMenuState.psychEngineVersion + ", SCE Version: " + states.MainMenuState.SCEVersion;
+		_options.smallImageKey = smallImageKey;
+		// Obtained times are in milliseconds so they are divided so Discord can use it
+		_options.startTimestamp = Std.int(startTimestamp / 1000);
+		_options.endTimestamp = Std.int(endTimestamp / 1000);
+		DiscordRpc.presence(_options);
+
+		//Debug.logTrace('Discord RPC Updated. Arguments: $details, $state, $smallImageKey, $hasStartTimestamp, $endTimestamp');
+	}
+	#end
 	
 	public static function resetClientID()
 		clientID = _defaultID;
@@ -112,9 +210,16 @@ class DiscordClient
 
 		if(change && isInitialized)
 		{
+			#if !discord_rpc
 			shutdown();
 			initialize();
 			updatePresence();
+			#else
+			shutdown();
+			isInitialized = false;
+			initialize();
+			DiscordRpc.process();
+			#end
 		}
 		return newID;
 	}

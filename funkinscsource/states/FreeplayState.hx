@@ -348,7 +348,7 @@ class FreeplayState extends MusicBeatState
 
 			for (i in 0...iconArray.length)
 			{
-				if (iconArray[i].isOnScreen() && iconArray[i] != null)
+				if (iconArray[i] != null)
 				{
 					var mult:Float = FlxMath.lerp(1, iconArray[i].scale.x, CoolUtil.boundTo(1 - (elapsed * 35 * player.playbackRate), 0, 1));
 					iconArray[i].scale.set(mult, mult);
@@ -792,7 +792,7 @@ class FreeplayState extends MusicBeatState
 		}
 		catch (e)
 		{
-			Debug.logInfo('ERROR! $e');
+			Debug.logError('ERROR! $e');
 		}
 	}
 
@@ -912,9 +912,7 @@ class FreeplayState extends MusicBeatState
 		for (item in grpSongs.members)
 		{
 			bullShit++;
-			item.alpha = 0.6;
-			if (item.targetY == curSelected)
-				item.alpha = 1;
+			item.alpha = (item.targetY == curSelected ? 1 : 0.6);
 		}
 		
 		Mods.currentModDirectory = songs[curSelected].folder;
@@ -1030,17 +1028,8 @@ class FreeplayState extends MusicBeatState
 		}
 		for (i in 0...iconArray.length)
 		{
-			iconArray[i].scale.set(1.2, 1.2);
-			iconArray[i].updateHitbox();
-
-			curBeat % 2 == 0 ? {
-				var reverse = iconArray[curSelected].animation.curAnim.curFrame > 0 ? 1 : -1;
-				FlxTween.angle(iconArray[i], 15 * reverse, 0, Conductor.crochet / 1300 / player.playbackRate, {ease: FlxEase.quadOut});
-			}
-			: {
-				var reverse = iconArray[curSelected].animation.curAnim.curFrame > 0 ? -1 : 1;
-				FlxTween.angle(iconArray[i], 15 * reverse, 0, Conductor.crochet / 1300 / player.playbackRate, {ease: FlxEase.quadOut});
-			};
+			iconArray[i].iconBopSpeed = 1;
+			iconArray[i].beatHit(curBeat);
 		}
 	}
 

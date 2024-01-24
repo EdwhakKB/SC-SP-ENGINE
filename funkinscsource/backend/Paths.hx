@@ -10,7 +10,7 @@ import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 
 import openfl.display.BitmapData;
-import openfl.display3D.textures.RectangleTexture;
+import openfl.display3D.textures.Texture;
 import openfl.utils.AssetType;
 import openfl.utils.Assets as OpenFlAssets;
 import openfl.system.System;
@@ -49,28 +49,17 @@ class Paths
 			dumpExclusions.push(key);
 	}
 
-	public static var dumpExclusions:Array<String> =
-	[
-		'assets/shared/music/freakyMenu.$SOUND_EXT',
-		'assets/shared/music/breakfast.$SOUND_EXT',
-		'assets/shared/music/tea-time.$SOUND_EXT',
-	];
+	public static var dumpExclusions:Array<String> = ['assets/shared/music/freakyMenu.$SOUND_EXT'];
 	/// haya I love you for the base cache dump I took to the max
 	public static function clearUnusedMemory() {
-		var counter:Int = 0;
 		// clear non local assets in the tracked assets list
-		for (key in currentTrackedAssets.keys()) {
+		var counter:Int = 0;
+		for (key in currentTrackedAssets.keys())
+		{
 			// if it is not currently contained within the used local assets
-			if (!localTrackedAssets.contains(key) && !dumpExclusions.contains(key)) {
+			if (!localTrackedAssets.contains(key) && !dumpExclusions.contains(key))
+			{
 				// get rid of it
-
-				if (currentTrackedTextures.exists(key)) {
-					var texture:Null<RectangleTexture> = currentTrackedTextures.get(key);
-					texture.dispose();
-					texture = null;
-					currentTrackedTextures.remove(key);
-				}
-
 				var obj = cast(currentTrackedAssets.get(key), FlxGraphic);
 				@:privateAccess
 				if (obj != null)
@@ -102,6 +91,8 @@ class Paths
 
 					currentTrackedAssets.remove(key);
 					counter++;
+					Debug.logTrace('Cleared $key form RAM');
+					Debug.logTrace('Cleared and removed $counter assets.');
 				}
 			}
 		}
@@ -123,9 +114,7 @@ class Paths
 
 	// define the locally tracked assets
 	public static var localTrackedAssets:Array<String> = [];
-	public static function clearStoredMemory() 
-	{
-		// clear anything not in the tracked assets list
+	public static function clearStoredMemory() {
 		var counterAssets:Int = 0;
 
 		@:privateAccess
@@ -160,6 +149,8 @@ class Paths
 				obj.destroy();
 				obj = null;
 				counterAssets++;
+				Debug.logTrace('Cleared $key from RAM');
+				Debug.logTrace('Cleared and removed $counterAssets cached assets.');
 			}
 		}
 
@@ -169,21 +160,19 @@ class Paths
 		{
 			if (!localTrackedAssets.contains(key) && !dumpExclusions.contains(key) && key != null)
 			{
-				// Debug.logTrace('test: ' + dumpExclusions, key);
+				// trace('test: ' + dumpExclusions, key);
 				OpenFlAssets.cache.clear(key);
 				OpenFlAssets.cache.removeSound(key);
 				currentTrackedSounds.remove(key);
 				counterSound++;
+				Debug.logTrace('Cleared $key from RAM');
+				Debug.logTrace('Cleared and removed $counterSound cached sounds.');
 			}
 		}
 
 		// flags everything to be cleared out next unused memory clear
 		localTrackedAssets = [];
-		var pathsToCheck:Array<String> = ['songs', "shared:assets/shared/data/characters", "mods", "assets/stages"];
-
-		for (i in 0...pathsToCheck.length){
-			openfl.Assets.cache.clear(pathsToCheck[i]);
-		}
+		openfl.Assets.cache.clear("songs");
 
 		runGC();
 	}
@@ -285,7 +274,7 @@ class Paths
 		return 'assets/shared/$file';
 	}
 
-	inline public static function getPathOriginal(file:String = ''):String
+	inline public static function getPreloadPath(file:String = ''):String
 	{
 		return 'assets/$file';
 	}
@@ -458,7 +447,7 @@ class Paths
 		return null;
 	}
 
-	public static var currentTrackedTextures:Map<String, RectangleTexture> = [];
+	public static var currentTrackedTextures:Map<String, Texture> = [];
 	static public function cacheBitmap(file:String, ?bitmap:BitmapData = null, ?allowGPU:Bool = true)
 	{
 		if(bitmap == null)
@@ -477,27 +466,29 @@ class Paths
 			if(bitmap == null) return null;
 		}
 
-		localTrackedAssets.push(file);
-		if (allowGPU && ClientPrefs.data.cacheOnGPU)
+		if (!currentTrackedAssets.exists(file))
 		{
-			bitmap.lock();
-			var texture:RectangleTexture = FlxG.stage.context3D.createRectangleTexture(bitmap.width, bitmap.height, BGRA, true);
-			texture.uploadFromBitmapData(bitmap);
-			currentTrackedTextures.set(file, texture);
+			if (allowGPU && ClientPrefs.data.cacheOnGPU)
+			{
+				bitmap.lock();
+				var texture:Texture = FlxG.stage.context3D.createTexture(bitmap.width, bitmap.height, BGRA, true, 0);
+				texture.uploadFromBitmapData(bitmap);
+				if (!currentTrackedTextures.exists(file))
+					currentTrackedTextures.set(file, texture);
 
-			bitmap.image.data = null;
-			bitmap.dispose();
-			bitmap.disposeImage();
-			FlxDestroyUtil.dispose(bitmap);
-			bitmap = null;
-			bitmap = BitmapData.fromTexture(texture);
-			bitmap.unlock();
+				bitmap.disposeImage();
+				FlxDestroyUtil.dispose(bitmap);
+				bitmap = null;
+				bitmap = BitmapData.fromTexture(texture);
+				bitmap.unlock();
+			}
+			var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(bitmap, false, file, false);
+			newGraphic.persist = true;
+			currentTrackedAssets.set(file, newGraphic);
 		}
-		var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(bitmap, false, file);
-		newGraphic.persist = true;
-		newGraphic.destroyOnNoUse = false;
-		currentTrackedAssets.set(file, newGraphic);
-		return newGraphic;
+
+		localTrackedAssets.push(file);
+		return currentTrackedAssets.get(file);
 	}
 
 	static public function getTextFromFile(key:String, ?ignoreMods:Bool = false):String
@@ -693,14 +684,15 @@ class Paths
 		#if MODS_ALLOWED
 		var modLibPath:String = '';
 		if (library != null) modLibPath = '$library/';
-		if (path != null) modLibPath += '$path/';
+		if (path != null) modLibPath += '$path';
 
 		var file:String = modsSounds(modLibPath, key);
 		if(FileSystem.exists(file)) {
-			if(!currentTrackedSounds.exists(file)) {
+			if(!currentTrackedSounds.exists(file)) 
+			{
 				currentTrackedSounds.set(file, Sound.fromFile(file));
 			}
-			localTrackedAssets.push(key);
+			localTrackedAssets.push(file);
 			return currentTrackedSounds.get(file);
 		}
 		#end
@@ -718,7 +710,9 @@ class Paths
 			var retKey:String = (path != null) ? '$path/$key' : key;
 			retKey = ((path == 'songs') ? 'songs:' : '') + getPath('$retKey.$SOUND_EXT', SOUND, library);
 			if(OpenFlAssets.exists(retKey, SOUND))
+			{
 				currentTrackedSounds.set(gottenPath, OpenFlAssets.getSound(retKey));
+			}
 		}
 		localTrackedAssets.push(gottenPath);
 		return currentTrackedSounds.get(gottenPath);
@@ -862,16 +856,16 @@ class Paths
 		spr.loadAtlasEx(folderOrImg, spriteJson, animationJson);
 	}
 
-	/*private static function getContentFromFile(path:String):String
-	{
-		var onAssets:Bool = false;
-		var path:String = Paths.getPath(path, TEXT, true);
-		if(FileSystem.exists(path) || (onAssets = true && Assets.exists(path, TEXT)))
-		{
-			//trace('Found text: $path');
-			return !onAssets ? File.getContent(path) : Assets.getText(path);
-		}
-		return null;
-	}*/
+	// static  public function getContentFromFile(path:String):String
+	// {
+	// 	var onAssets:Bool = false;
+	// 	var path:String = Paths.getPath(path, TEXT, true);
+	// 	if(FileSystem.exists(path) || (onAssets = true && Assets.exists(path, TEXT)))
+	// 	{
+	// 		//trace('Found text: $path');
+	// 		return !onAssets ? File.getContent(path) : Assets.getText(path);
+	// 	}
+	// 	return null;
+	// }
 	#end
 }

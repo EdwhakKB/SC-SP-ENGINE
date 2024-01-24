@@ -546,7 +546,7 @@ class LuaUtils
 			return;
 		}
 		
-		var target:FlxSkewedSprite = PlayState.instance.modchartSkewedSprite.get(tag);
+		var target:FlxSkewed = PlayState.instance.modchartSkewedSprite.get(tag);
 		target.kill();
 		PlayState.instance.remove(target, true);
 		target.destroy();
@@ -995,6 +995,7 @@ class LuaUtils
 		PlayState.instance.startCharacterScripts(PlayState.instance.mom.curCharacter);
 	}
 
+	#if LUA_ALLOWED
 	public static function getCameraByName(id:String):FunkinLua.LuaCamera
     {
         if(FunkinLua.lua_Cameras.exists(id))
@@ -1060,6 +1061,7 @@ class LuaUtils
 
 		return PlayState.instance.strumLineNotes.members[Std.parseInt(id)];
 	}
+	#end
 	
 	public function callOnCompleted(type:String = "tween", tag:String, ?loops:Int, ?loopsLeft:Int)
 	{
@@ -1102,7 +1104,7 @@ class LuaUtils
 		switch (id)
 		{
 			case 'startCountdown': PlayState.instance.startCountdown();
-			case 'resyncMusic': PlayState.instance.resyncMusic();	
+			case 'resyncVocals': PlayState.instance.resyncVocals([val1]);	
 			//case 'doTimeTravel': PlayState.instance.doTimeTravel(val1, val2);		
 			//case 'uncacheImage': Paths.clearStoredMemory2(val1, 'image');	
 			//case 'uncacheSound': Paths.clearStoredMemory2(val1, 'sound');			

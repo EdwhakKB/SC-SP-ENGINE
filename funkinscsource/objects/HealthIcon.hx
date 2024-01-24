@@ -2,6 +2,7 @@ package objects;
 
 import haxe.Json as Json;
 import lime.utils.Assets;
+import flixel.math.FlxMath;
 
 class HealthIcon extends FlxSprite
 {
@@ -18,7 +19,7 @@ class HealthIcon extends FlxSprite
 	public var hasLosingAnimated:Bool = false;
 	
 	public var alreadySized:Bool = true;
-	public var findAutoMaticSize:Bool = false;
+	public var findAutomaticSize:Bool = false;
 	public var needAutoSize:Bool = true;
 	public var defaultSize:Bool = false;
 	public var isOneSized:Bool = false;
@@ -29,7 +30,7 @@ class HealthIcon extends FlxSprite
 	public var animatedIcon:Bool = false;
 	public var animationStopped:Bool = false;
 	public var autoAnimatedSetup:Bool = false;
-	public var overrideIconAnimatedOnUpdate:Bool = false;
+	public var overrideIconOnUpdate:Bool = false;
 	public var overrideIconPlacement:Bool = false;
 
 	public var offsetX:Float = 0;
@@ -40,6 +41,24 @@ class HealthIcon extends FlxSprite
 	public var losingAnimation:Bool = false;
 	public var winningAnimation:Bool = false;
 	public var normalAnimation:Bool = false;
+
+	public var healthIndication:Float = 1;
+
+	public var percent20:Bool = false;
+	public var percent80:Bool = false;
+
+	public var speedBopLerp:Float = 1;
+	public var setIconScale:Float = 1.2;
+
+	private var animName:String = 'normal';
+
+	public var iconBopSpeed:Int = 2;
+	public var iconBopAngleSpeed:Int = 2;
+
+	public var overrideBeatBop:Bool = false;
+
+	public var ableSizes:Array<String> = ['450', '600', '750', '900'];
+	public var choosenDivisionMult:Int = 3;
 
 	public function new(char:String = 'bf', isPlayer:Bool = false, isSizedState:Bool = false, ?allowGPU:Bool = true)
 	{
@@ -52,13 +71,10 @@ class HealthIcon extends FlxSprite
 		scrollFactor.set();
 	}
 
-	override function update(elapsed:Float)
-	{
-		super.update(elapsed);
-		if (sprTracker != null) setPosition(sprTracker.x + sprTracker.width + 12 + offsetX, sprTracker.y - 30 + offsetY);
-	}
+	public var changedComplete:Bool = true;
 
 	public function changeIcon(char:String, ?allowGPU:Bool = true) {
+		changedComplete = false;
 		var name:String = 'icons/';
 		var iconSuffix:String = 'icon-';
 		if(!Paths.fileExists('images/' + name + char + '.png', IMAGE)) 
@@ -107,12 +123,14 @@ class HealthIcon extends FlxSprite
 			Debug.logInfo("Couldn't find image nor xml nor sprite to load!");
 		}
 
+		changedComplete = true;
 		this.char = char;
 	}
 
 	public function loadGraphicIcon(icon:String, gpuAllowed:Bool)
 	{
-		if (animatedIcon) return;
+		frames = null;
+		if (animatedIcon) animatedIcon = false;
 		var graphic = Paths.image(icon, gpuAllowed);
 
 		//If null once it turns into icon-face, but it that fails, fully stop working!
@@ -124,17 +142,32 @@ class HealthIcon extends FlxSprite
 
 		isOneSized = (graphic.height == 150 && graphic.width == 150);
 
-		if ((graphic.width == 450 || graphic.width == 600) && graphic.width == 300) needAutoSize = false;
+		for (size in 0...ableSizes.length)
+			if (graphic.width == Std.parseFloat(ableSizes[size]) && graphic.height == 150) 
+				needAutoSize = false;
+
+		switch (graphic.width)
+		{
+			case 450:
+				choosenDivisionMult = 3;
+			case 600:
+				choosenDivisionMult = 4;
+			case 750:
+				choosenDivisionMult = 5;
+			case 900:
+				choosenDivisionMult = 6;
+		}
 
 		if (graphic.width == 300 && graphic.height == 150) alreadySized = true;
 		else alreadySized = false;
 
-		findAutoMaticSize = ((graphic.width <= 300 && graphic.height <= 150) && !isOneSized && needAutoSize); // Fucking fix somethings
+		findAutomaticSize = (((graphic.width <= 300 && graphic.height <= 150) || 
+			(graphic.width >= 300 && graphic.height >= 150)) && needAutoSize && !isOneSized); // Fucking fix somethings
 
 		if (!isOneSized)
 		{
-			if (findAutoMaticSize || alreadySized) divisionMult = 2;
-			else divisionMult = 3;
+			if (findAutomaticSize || alreadySized) divisionMult = 2;
+			else divisionMult = choosenDivisionMult;
 		}
 		else divisionMult = 1;
 
@@ -146,7 +179,7 @@ class HealthIcon extends FlxSprite
 			hasWinning = false;
 			defaultSize = true;
 		}
-		else if (divisionMult == 3) hasWinning = true;
+		else if (divisionMult >= 3) hasWinning = true;
 
 		offset.set(iconOffset[0], iconOffset[1]);
 		updateHitbox();
@@ -154,6 +187,18 @@ class HealthIcon extends FlxSprite
 		var animArray:Array<Int> = [];
 
 		if (hasWinning) animArray = [0, 1, 2];
+		else if (divisionMult > 3)
+		{
+			switch (divisionMult)
+			{
+				case 4:
+					animArray = [0, 1, 2, 3];
+				case 5:
+					animArray = [0, 1, 2, 3, 4];
+				case 6:
+					animArray = [0, 1, 2, 3, 4, 5];
+			}
+		}
 		else
 		{
 			if (defaultSize) animArray = [0, 1];
@@ -168,12 +213,15 @@ class HealthIcon extends FlxSprite
 
 	public function loadIconFile(json:Dynamic, path:String, graphicIcon:String, gpuAllowed:Bool)
 	{
+		if (json.image != null) path = 'images/' + json.image + '.json';
+
 		frames = Paths.getSparrowAtlas(path, null, gpuAllowed);
 
 		animatedIcon = true;
 
 		if (frames == null)
 		{
+			frames = null;
 			animatedIcon = false;
 			return;
 		}
@@ -234,19 +282,6 @@ class HealthIcon extends FlxSprite
 		json.startingAnim != null ? playAnim(json.startingAnim) : playAnim('normal', true);
 	}
 
-	override function updateHitbox()
-	{
-		super.updateHitbox();
-		if (!animatedIcon)
-		{
-			offset.x = iconOffset[0];
-			offset.y = iconOffset[1];
-			width = Math.abs(scale.x) * frameWidth;
-			height = Math.abs(scale.y) * frameHeight;
-			centerOrigin();
-		}
-	}
-
 	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
 	{
 		animation.play(AnimName, Force, Reversed, Frame);
@@ -266,6 +301,163 @@ class HealthIcon extends FlxSprite
 
 	public function getCharacter():String {
 		return char;
+	}
+
+	override function updateHitbox()
+	{
+		super.updateHitbox();
+		if (!animatedIcon)
+		{
+			offset.x = iconOffset[0];
+			offset.y = iconOffset[1];
+			width = Math.abs(scale.x) * frameWidth;
+			height = Math.abs(scale.y) * frameHeight;
+			centerOrigin();
+		}
+	}
+
+	override function update(elapsed:Float)
+	{
+		super.update(elapsed);
+		if (sprTracker != null) setPosition(sprTracker.x + sprTracker.width + 12 + offsetX, sprTracker.y - 30 + offsetY);
+
+		if (Type.getClass(FlxG.state) == states.FreeplayState || Type.getClass(FlxG.state) == states.editors.ChartingState || !changedComplete) return;
+
+		if (!iconStoppedBop)
+		{
+			var mult:Float = FlxMath.lerp((setIconScale-0.2), scale.x, Math.exp(-elapsed * 9 * speedBopLerp));
+			scale.set(mult, mult);
+			updateHitbox();
+		}
+		
+		if (!overrideIconOnUpdate)
+		{
+			if (!animatedIcon)
+			{
+				if (isPlayer)
+				{
+					if (percent20 && frames.frames.length > 0)
+					{
+						animation.curAnim.curFrame = 1;
+					}
+					else if (percent80 && hasWinning && frames.frames.length > 2)
+					{
+						animation.curAnim.curFrame = 2;
+					}
+					else
+					{
+						animation.curAnim.curFrame = 0;
+					}
+				}
+				else
+				{
+					if (percent20 && hasWinning && frames.frames.length > 2)
+					{
+						animation.curAnim.curFrame = 2;
+					}
+					else if (percent80 && frames.frames.length > 0)
+					{
+						animation.curAnim.curFrame = 1;
+					}
+					else
+					{
+						animation.curAnim.curFrame = 0;
+					}
+				}
+			}
+			else
+			{
+				if (isPlayer)
+				{
+					if (percent20 && hasLosingAnimated)
+					{
+						normalAnimation = false;
+						winningAnimation = false;
+						losingAnimation = true;
+
+						animName = 'losing';
+					}
+					else if (percent80 && hasWinningAnimated)
+					{
+						normalAnimation = false;
+						winningAnimation = true;
+						losingAnimation = false;
+
+						animName = 'winning';
+					}
+					else
+					{
+						normalAnimation = true;
+						winningAnimation = false;
+						losingAnimation = false;
+
+						animName = 'normal';
+					}
+				}
+				else
+				{
+					if (percent20 && hasWinningAnimated)
+					{
+						normalAnimation = false;
+						winningAnimation = true;
+						losingAnimation = false;
+
+						animName = 'normal';
+					}
+					else if (percent80 && hasLosingAnimated)
+					{
+						normalAnimation = false;
+						winningAnimation = true;
+						losingAnimation = false;
+
+						animName = 'winning';
+					}
+					else
+					{
+						normalAnimation = false;
+						winningAnimation = false;
+						losingAnimation = true;
+
+						animName = 'losing';
+					}
+				}
+
+				if (animatedIcon)
+				{
+					if (animation.curAnim.finished || (animName != animation.curAnim.name))
+					{
+						playAnim(animName, true);
+					}
+				}
+			}
+		}
+	}
+
+ 	public function beatHit(curBeat:Int)
+	{
+		if (!overrideBeatBop)
+		{
+			if (curBeat % iconBopSpeed == 0)
+			{
+				if (!iconStoppedBop)
+				{
+					scale.set(setIconScale, setIconScale);
+					updateHitbox();
+				}
+
+				switch (ClientPrefs.data.iconMovement.toLowerCase())
+				{
+					case 'angled':
+						if (iconStoppedBop) return;
+						curBeat % iconBopAngleSpeed == 0 ? {
+							FlxTween.angle(this, -15, 0, Conductor.crochet / 1300 / speedBopLerp, {ease: FlxEase.circOut});
+						}
+						: {
+							FlxTween.angle(this, 15, 0, Conductor.crochet / 1300 / speedBopLerp, {ease: FlxEase.circOut});
+						};
+				}
+			}
+		}
 	}
 }
 

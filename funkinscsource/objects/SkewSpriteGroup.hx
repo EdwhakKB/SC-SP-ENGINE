@@ -17,18 +17,17 @@ import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxSort;
-import flixel.addons.effects.FlxSkewedSprite;
 import flixel.group.*;
 import flixel.FlxG;
 
-typedef SkewSpriteGroup = TypedSkewedSpriteGroup<FlxSkewedSprite>;
+typedef SkewSpriteGroup = TypedSkewedSpriteGroup<FlxSkewed>;
 
 /**
  * `FlxSpriteGroup` is a special `FlxSprite` that can be treated like
  * a single sprite even if it's made up of several member sprites.
  * It shares the `FlxTypedGroup` API, but it doesn't inherit from it.
  */
-class TypedSkewedSpriteGroup<T:FlxSkewedSprite> extends FlxSprite
+class TypedSkewedSpriteGroup<T:FlxSkewed> extends FlxSprite
 {
 	/**
 	 * The actual group which holds all sprites.

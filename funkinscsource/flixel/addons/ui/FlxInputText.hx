@@ -5,10 +5,7 @@ import flash.errors.Error;
 import flash.events.KeyboardEvent;
 import flash.geom.Rectangle;
 import flixel.addons.ui.FlxUI.NamedString;
-
-import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
-
 import flixel.util.FlxDestroyUtil;
 
 /**
@@ -307,7 +304,7 @@ class FlxInputText extends FlxText
 		if (FlxG.mouse.justPressed)
 		{
 			var hadFocus:Bool = hasFocus;
-			if (FlxG.mouse.overlaps(this,camera))
+			if (mouseOverlapping())
 			{
 				caretIndex = getCaretIndex();
 				hasFocus = true;
@@ -324,6 +321,19 @@ class FlxInputText extends FlxText
 		#end
 	}
 
+	function mouseOverlapping()
+	{
+		var mousePoint = FlxG.mouse.getScreenPosition(camera);
+		var objPoint = this.getScreenPosition(null, camera);
+		if(mousePoint.x >= objPoint.x && mousePoint.y >= objPoint.y &&
+			mousePoint.x < objPoint.x + this.width && mousePoint.y < objPoint.y + this.height)
+		{
+			return true;
+		}
+		return false;
+	}
+	
+
 	/**
 	 * Handles keypresses generated on the stage.
 	 */
@@ -338,11 +348,10 @@ class FlxInputText extends FlxText
 			  // This copies the entire input, because i'm too lazy to do caret selection, and if i did it i whoud probabbly make it a pr in flixel-ui.
 
 			  #if (macos)
-			  if (key == 67 && e.commandKey) 
+			  if (key == 67 && e.commandKey) {
 			  #else
-			  if (key == 67 && e.ctrlKey) 
+			  if (key == 67 && e.ctrlKey) {
 		 	  #end
-              {
 				Clipboard.text = text;
 
 				onChange(COPY_ACTION);
@@ -353,11 +362,10 @@ class FlxInputText extends FlxText
 
 			  //// Crtl/Cmd + V to paste in the clipboard text to the input
 			  #if (macos)
-			  if (key == 86 && e.commandKey)
+			  if (key == 86 && e.commandKey) {
 			  #else
-			  if (key == 86 && e.ctrlKey) 
+			  if (key == 86 && e.ctrlKey) {
 			  #end
-              {
 				var newText:String = filter(Clipboard.text);
 
 				if (newText.length > 0 && (maxLength == 0 || (text.length + newText.length) < maxLength)) {
@@ -374,11 +382,10 @@ class FlxInputText extends FlxText
 			//// Crtl/Cmd + X to cut the text from the input to the clipboard
 			// Again, this copies the entire input text because there is no caret selection.
 			#if (macos)
-			if (key == 88 && e.commandKey)
+			if (key == 88 && e.commandKey) {
 			#else
-			if (key == 88 && e.ctrlKey)
+			if (key == 88 && e.ctrlKey) {
 			#end
-            {
 				Clipboard.text = text;
 				text = '';
 				caretIndex = 0;

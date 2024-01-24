@@ -14,6 +14,7 @@ import openfl.media.Sound;
 import openfl.media.SoundChannel;
 import openfl.media.SoundTransform;
 import openfl.net.URLRequest;
+import flixel.FlxObject;
 #if flash11
 import openfl.utils.ByteArray;
 #end
@@ -22,7 +23,7 @@ import openfl.utils.AssetType;
 #end
 
 #if (flixel >= "5.3.0")
-import flixel.sound.FlxSoundGroup;
+import flixel.system.FlxSoundGroup;
 #else
 import flixel.system.FlxSoundGroup;
 #end

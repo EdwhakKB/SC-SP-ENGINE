@@ -509,10 +509,10 @@ class Toast extends Sprite
         desc.width = 360;
         desc.height = 95;
         desc.x = iconPath != null ? 120 : 5;
-        for (number in 0...desc.length) desc.y++;
+        //for (number in 0...desc.length) desc.y++;
         if (titleText.length >= 25 || titleText.contains("\n"))
         {   
-            desc.y -= 25;
+            desc.y += 25;
             desc.height -= 25;
         }
 

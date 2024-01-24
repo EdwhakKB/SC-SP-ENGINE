@@ -82,22 +82,12 @@ class PauseSubState extends MusicBeatSubstate
 		pauseMusic = new FlxSound();
 		try
 		{
-			if (songName == null || songName.toLowerCase() != 'none')
-			{
-				if(songName == null)
-				{
-					var path:String = Paths.formatToSongPath(ClientPrefs.data.pauseMusic);
-					if(path.toLowerCase() != 'none')
-						pauseMusic.loadEmbedded(Paths.music(Paths.formatToSongPath(ClientPrefs.data.pauseMusic)), true, true);
-				}
-				else pauseMusic.loadEmbedded(Paths.music(songName), true, true);
-			}
-
-			pauseMusic.volume = 0;
-			pauseMusic.play(false, FlxG.random.int(0, Std.int(pauseMusic.length / 2)));
-
-			FlxG.sound.list.add(pauseMusic);
+			var pauseSong:String = getPauseSong();
+			if(pauseSong != null) pauseMusic.loadEmbedded(Paths.music(pauseSong), true, true);
 		} catch(e:Dynamic) {}
+		pauseMusic.volume = 0;
+		pauseMusic.play(false, FlxG.random.int(0, Std.int(pauseMusic.length / 2)));
+		FlxG.sound.list.add(pauseMusic);
 
 		var bg:FlxSprite = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
 		bg.scale.set(FlxG.width, FlxG.height);
@@ -134,12 +124,9 @@ class PauseSubState extends MusicBeatSubstate
 
 		var chartingText:FlxText = new FlxText(20, 15 + 101, 0, "", 32);
 		chartingText.scrollFactor.set();
-		if (PlayState.chartingMode)
-			chartingText.text = "CHARTING MODE";
-		else if (PlayState.modchartMode)
-			chartingText.text = "MODCHART MODE";
-		else 
-			chartingText.text = "";
+		if (PlayState.chartingMode) chartingText.text = "CHARTING MODE";
+		else if (PlayState.modchartMode) chartingText.text = "MODCHART MODE";
+		else chartingText.text = "";
 		chartingText.setFormat(Paths.font('vcr.ttf'), 32);
 		chartingText.x = FlxG.width - (chartingText.width + 20);
 		chartingText.y = FlxG.height - (chartingText.height + 20);
@@ -189,6 +176,15 @@ class PauseSubState extends MusicBeatSubstate
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
 
 		super.create();
+	}
+
+	function getPauseSong()
+	{
+		var formattedSongName:String = (songName != null ? Paths.formatToSongPath(songName) : '');
+		var formattedPauseMusic:String = Paths.formatToSongPath(ClientPrefs.data.pauseMusic);
+		if(formattedSongName == 'none' || (formattedSongName != 'none' && formattedPauseMusic == 'none')) return null;
+
+		return (formattedSongName != '') ? formattedSongName : formattedPauseMusic;
 	}
 
 	var holdTime:Float = 0;
@@ -303,7 +299,7 @@ class PauseSubState extends MusicBeatSubstate
 			switch (daSelected)
 			{
 				case "Resume":
-					unPauseTimer = new FlxTimer().start(Conductor.crochet / 1000 / PlayState.instance.playbackRate, function(hmmm:FlxTimer)
+					unPauseTimer = new FlxTimer().start(Conductor.crochet / 1000 / music.pitch, function(hmmm:FlxTimer)
 					{
 						switch (hmmm.loopsLeft)
 						{
@@ -311,8 +307,7 @@ class PauseSubState extends MusicBeatSubstate
 								pauseCountDown();
 							case 0:
 								if (hmmm.finished){
-									PlayState.instance.modchartTimers.remove('hmmm'); 
-									close();	
+									pauseCountDown();
 								}
 						}
 					}, 5);
@@ -419,8 +414,9 @@ class PauseSubState extends MusicBeatSubstate
 
 	function pauseCountDown()
 	{
-		game.stageIntroSoundsSuffix = game.Stage.stageIntroSoundsSuffix;
-		game.stageIntroSoundsPrefix = game.Stage.stageIntroSoundsPrefix;
+		if (game == null) return;
+		game.stageIntroSoundsSuffix = game.Stage.stageIntroSoundsSuffix != null ? game.Stage.stageIntroSoundsSuffix : '';
+		game.stageIntroSoundsPrefix = game.Stage.stageIntroSoundsPrefix != null ? game.Stage.stageIntroSoundsPrefix : '';
 		
 		var introAssets:Map<String, Array<String>> = new Map<String, Array<String>>();
 		var introImagesArray:Array<String> = switch(PlayState.stageUI) {
@@ -444,13 +440,11 @@ class PauseSubState extends MusicBeatSubstate
 
 				if (game.stageIntroSoundsSuffix != '' || game.stageIntroSoundsSuffix != null || game.stageIntroSoundsSuffix != "")
 					game.introSoundsSuffix = game.stageIntroSoundsSuffix;
-				else
-					game.introSoundsSuffix = '';
+				else game.introSoundsSuffix = '';
 
 				if (game.stageIntroSoundsPrefix != '' || game.stageIntroSoundsPrefix != null || game.stageIntroSoundsPrefix != "")
 					game.introSoundsPrefix = game.stageIntroSoundsPrefix;
-				else
-					game.introSoundsPrefix = '';
+				else game.introSoundsPrefix = '';
 			}
 		}
 
@@ -480,6 +474,8 @@ class PauseSubState extends MusicBeatSubstate
 			case 1:
 				countdownGo = createCountdownSprite(introAlts[introAlts.length - 1], antialias, game.introSoundsPrefix + 'introGo' + game.introSoundsSuffix, introArrays3);
 			case 0:
+				PlayState.instance.modchartTimers.remove('hmmm'); 
+				close();	
 		}
 	}
 	

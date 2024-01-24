@@ -3,6 +3,8 @@ package flixel.animation;
 
 import flixel.graphics.frames.FlxFrame;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
+import flixel.animation.FlxAnimation;
+import flixel.animation.FlxPrerotatedAnimation;
 
 #if !(flixel >= "5.4.1")
 class FlxAnimationController implements IFlxDestroyable

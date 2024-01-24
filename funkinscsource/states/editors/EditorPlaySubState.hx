@@ -163,6 +163,8 @@ class EditorPlaySubState extends MusicBeatSubstate
 		DiscordClient.changePresence('Playtesting on Chart Editor', PlayState.SONG.songId, null, true, songLength);
 		#end
 		RecalculateRating();
+
+		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
 	}
 
 	override function update(elapsed:Float)
@@ -172,17 +174,14 @@ class EditorPlaySubState extends MusicBeatSubstate
 			if (inst != null)
 			{
 				inst.stop();
-				inst.destroy();
 			}
 			if (vocals != null)
 			{
 				vocals.stop();
-				vocals.destroy();
 			}
 			if (opponentVocals != null)
 			{
 				opponentVocals.stop();
-				opponentVocals.destroy();
 			}
 			endSong();
 			super.update(elapsed);
@@ -245,22 +244,22 @@ class EditorPlaySubState extends MusicBeatSubstate
 		
 		var time:Float = CoolUtil.floorDecimal((Conductor.songPosition - ClientPrefs.data.noteOffset) / 1000, 1);
 		dataTxt.text = 'Time: $time / ${songLength/1000}
-		\nSection: $curSection
-		\nBeat: $curBeat
-		\nStep: $curStep';
+		Section: $curSection
+		Beat: $curBeat
+		Step: $curStep';
 		super.update(elapsed);
 	}
 	
 	var lastStepHit:Int = -1;
 	override function stepHit()
 	{
-		if (PlayState.SONG.needsVoices && inst.time >= -ClientPrefs.data.noteOffset)
+		if (inst.time >= -ClientPrefs.data.noteOffset)
 		{
 			var timeSub:Float = Conductor.songPosition - Conductor.offset;
 			var syncTime:Float = 20 * playbackRate;
-			if (Math.abs(FlxG.sound.music.time - timeSub) > syncTime ||
-			(vocals.length > 0 && Math.abs(vocals.time - timeSub) > syncTime) ||
-			(opponentVocals != null && opponentVocals.length > 0 && Math.abs(opponentVocals.time - timeSub) > syncTime))
+			if (Math.abs(inst.time - timeSub) > syncTime ||
+			(PlayState.SONG.needsVoices && vocals.length > 0 && Math.abs(vocals.time - timeSub) > syncTime) ||
+			(PlayState.SONG.needsVoices && opponentVocals != null && opponentVocals.length > 0 && Math.abs(opponentVocals.time - timeSub) > syncTime))
 			{
 				resyncMusic();
 			}
@@ -622,7 +621,7 @@ class EditorPlaySubState extends MusicBeatSubstate
 		var noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition);
 		//Debug.logTrace(noteDiff, ' ' + Math.abs(note.strumTime - Conductor.songPosition));
 
-		if (PlayState.SONG.needsVoices) vocals.volume = 1;
+		if (PlayState.SONG.needsVoices && vocals.playing) vocals.volume = 1;
 		var placement:String = Std.string(combo);
 
 		var coolText:FlxText = new FlxText(0, 0, 0, placement, 32);
@@ -800,8 +799,8 @@ class EditorPlaySubState extends MusicBeatSubstate
 		var lastTime:Float = Conductor.songPosition;
 		if(Conductor.songPosition >= 0) Conductor.songPosition = inst.time;
 		
-		if (ClientPrefs.data.hitsoundType == 'Keys' && ClientPrefs.data.hitsoundVolume != 0 && ClientPrefs.data.hitSounds != "None")
-			FlxG.sound.play(Paths.sound('hitsounds/${ClientPrefs.data.hitSounds}'), ClientPrefs.data.hitsoundVolume).pitch = playbackRate;
+		/*if (ClientPrefs.data.hitsoundType == 'Keys' && ClientPrefs.data.hitsoundVolume != 0 && ClientPrefs.data.hitSounds != "None")
+			FlxG.sound.play(Paths.sound('hitsounds/${ClientPrefs.data.hitSounds}'), ClientPrefs.data.hitsoundVolume).pitch = playbackRate;*/
 
 		// obtain notes that the player can hit
 		var plrInputNotes:Array<Note> = notes.members.filter(function(n:Note)
@@ -914,7 +913,7 @@ class EditorPlaySubState extends MusicBeatSubstate
 	
 	function opponentNoteHit(note:Note):Void
 	{
-		if (PlayState.SONG.needsVoices && opponentVocals.length <= 0)
+		if (PlayState.SONG.needsVoices && opponentVocals.length <= 0 && vocals.playing)
 			vocals.volume = 1;
 
 		if (ClientPrefs.data.LightUpStrumsOP)
@@ -941,8 +940,8 @@ class EditorPlaySubState extends MusicBeatSubstate
 		if (!note.hitsoundDisabled)
 		{
 			var hitSound:String = note.hitsound == null ? 'emptySound' : 'hitsound';
-			if (ClientPrefs.data.hitsoundType == 'Notes' && ClientPrefs.data.hitsoundVolume != 0 && ClientPrefs.data.hitSounds != "None")
-				if (hitSound == 'emptySound') hitSound = 'hitsounds/${ClientPrefs.data.hitSounds}';
+			/*if (ClientPrefs.data.hitsoundType == 'Notes' && ClientPrefs.data.hitsoundVolume != 0 && ClientPrefs.data.hitSounds != "None")
+				if (hitSound == 'emptySound') hitSound = 'hitsounds/${ClientPrefs.data.hitSounds}';*/
 					
 			FlxG.sound.play(Paths.sound(hitSound),  ClientPrefs.data.hitsoundVolume);
 		}
@@ -966,7 +965,7 @@ class EditorPlaySubState extends MusicBeatSubstate
 
 		var spr:StrumArrow = playerStrums.members[note.noteData];
 		if(spr != null) spr.playAnim('confirm', true);
-		if (PlayState.SONG.needsVoices) vocals.volume = 1;
+		if (PlayState.SONG.needsVoices && vocals.playing) vocals.volume = 1;
 
 		if (!note.isSustainNote)
 			invalidateNote(note);
@@ -1019,7 +1018,7 @@ class EditorPlaySubState extends MusicBeatSubstate
 		songMisses++;
 		totalPlayed++;
 		RecalculateRating(true);
-		vocals.volume = 0;
+		if (PlayState.SONG.needsVoices && vocals.playing) vocals.volume = 0;
 		combo = 0;
 	}
 
@@ -1084,7 +1083,7 @@ class EditorPlaySubState extends MusicBeatSubstate
 		if(totalPlayed != 0) //Prevent divide by 0
 			ratingPercent = Math.min(1, Math.max(0, totalNotesHit / totalPlayed));
 
-		fullComboUpdate();
+		ratingFC = Rating.generateComboRank(songMisses);
 		updateScore(badHit); // score will only update after rating is calculated, if it's a badHit, it shouldn't bounce -Ghost
 	}
 
@@ -1135,11 +1134,6 @@ class EditorPlaySubState extends MusicBeatSubstate
 				+ ' | Rank: ' 
 				+ comboLetterRank;
 		}
-	}
-	
-	function fullComboUpdate()
-	{
-		ratingFC = Rating.generateComboRank(percent, songMisses);
 	}
 
 	function loadCharacterFile(char:String):CharacterFile {
