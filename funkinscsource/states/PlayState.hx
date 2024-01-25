@@ -537,24 +537,6 @@ class PlayState extends MusicBeatState
 
 		// for lua
 		instance = this;
-
-		#if LUA_ALLOWED
-		modchartTweens.clear();
-		modchartSprites.clear(); //because some sprites arent modchartsprites
-		modchartTimers.clear();
-		modchartSounds.clear();
-		modchartTexts.clear();
-		modchartSaves.clear();
-		#if ((flixel == "5.3.1" || flixel >= "4.11.0" && flixel <= "5.0.0") && parallaxlt)
-		modchartParallax.clear();
-		#end
-		modchartSkewedSprite.clear();
-		modchartBackdrop.clear();
-		modchartIcons.clear(); //should also help for cosmic
-		modchartCameras.clear(); // FUCK!!!
-		modchartCharacters.clear(); //worth a shot
-		#end
-
 		PauseSubState.songName = null; //Reset to default
 		playbackRate = ClientPrefs.getGameplaySetting('songspeed');
 	
@@ -6085,6 +6067,21 @@ class PlayState extends MusicBeatState
 
 	override function destroy() {
 		#if LUA_ALLOWED
+		modchartTweens.clear();
+		modchartSprites.clear(); //because some sprites arent modchartsprites
+		modchartTimers.clear();
+		modchartSounds.clear();
+		modchartTexts.clear();
+		modchartSaves.clear();
+		#if ((flixel == "5.3.1" || flixel >= "4.11.0" && flixel <= "5.0.0") && parallaxlt)
+		modchartParallax.clear();
+		#end
+		modchartSkewedSprite.clear();
+		modchartBackdrop.clear();
+		modchartIcons.clear(); //should also help for cosmic
+		modchartCameras.clear(); // FUCK!!!
+		modchartCharacters.clear(); //worth a shot
+
 		for (lua in luaArray) {
 			lua.call('onDestroy', []);
 			lua.stop();
