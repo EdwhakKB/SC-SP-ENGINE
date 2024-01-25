@@ -65,9 +65,14 @@ class IndieDiamondTransSubState extends MusicBeatSubstate
     
         tween = FlxTween.num(0.0, 1.0, duration, {ease: FlxEase.linear, onComplete: function(_)
         {
-            close();
-            if(finishCallback != null) finishCallback();
-			finishCallback = null;
+            new FlxTimer().start(duration, function(twn:FlxTimer) {
+                if (fadeInState)
+				    close();
+                else{
+                    if(finishCallback != null) finishCallback();
+                    finishCallback = null;
+                }
+			});
         }}, function(num:Float)
         {
             shader.progress.value = [num];
@@ -77,13 +82,15 @@ class IndieDiamondTransSubState extends MusicBeatSubstate
 
         cameras = [cameraTrans];
     }
+
+    override function update(elapsed:Float) {
+		super.update(elapsed);
+	}
     
     override function destroy()
     {
         if (tween != null)
         {
-            rect.destroy();
-            shader = null;
             tween.cancel();
         }
         super.destroy();

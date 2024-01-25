@@ -64,6 +64,8 @@ class MusicBeatState extends #if SCEModchartingTools modcharting.ModchartMusicBe
 
 	var _psychCameraInitialized:Bool = false;
 
+	public static var time:Float = 0.7;
+
 	override function create()
 	{
 		destroySubStates = false;
@@ -75,7 +77,7 @@ class MusicBeatState extends #if SCEModchartingTools modcharting.ModchartMusicBe
 
 		super.create();
 		if(!skip) {
-			openSubState(new IndieDiamondTransSubState(0.6, true, FlxG.camera.zoom));
+			openSubState(new IndieDiamondTransSubState(time, true, FlxG.camera.zoom));
 		}
 		FlxTransitionableState.skipNextTransOut = false;
 		timePassedOnState = 0;
@@ -219,7 +221,7 @@ class MusicBeatState extends #if SCEModchartingTools modcharting.ModchartMusicBe
 		curStep = lastChange.stepTime + Math.floor(shit);
 	}
 
-	public static function switchState(nextState:FlxState = null) {
+	public static function switchState(nextState:FlxState = null, ?time:Float = 0.75) {
 		if(nextState == null) nextState = FlxG.state;
 		if(nextState == FlxG.state)
 		{
@@ -228,7 +230,7 @@ class MusicBeatState extends #if SCEModchartingTools modcharting.ModchartMusicBe
 		}
 
 		if(FlxTransitionableState.skipNextTransIn) FlxG.switchState(nextState);
-		else startTransition(nextState);
+		else startTransition(nextState, time);
 		FlxTransitionableState.skipNextTransIn = false;
 	}
 
@@ -239,12 +241,12 @@ class MusicBeatState extends #if SCEModchartingTools modcharting.ModchartMusicBe
 	}
 
 	// Custom made Trans in
-	public static function startTransition(nextState:FlxState = null)
+	public static function startTransition(nextState:FlxState = null, ?time:Float = 0.75)
 	{
 		if(nextState == null)
 			nextState = FlxG.state;
 
-		FlxG.state.openSubState(new IndieDiamondTransSubState(0.6, false, FlxG.camera.zoom));
+		FlxG.state.openSubState(new IndieDiamondTransSubState(time, false, FlxG.camera.zoom));
 		if(nextState == FlxG.state) IndieDiamondTransSubState.finishCallback = function() FlxG.resetState();
 		else IndieDiamondTransSubState.finishCallback = function() FlxG.switchState(nextState);
 	}

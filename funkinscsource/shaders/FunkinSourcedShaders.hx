@@ -1933,6 +1933,7 @@ class VCRDistortionEffect extends ShaderEffectNew
   public var distortion(default, set):Bool = true;
   public var perspectiveOn(default, set):Bool = true;
   public var vignetteMoving(default, set):Bool = true;
+  public var scanlinesOn(default, set):Bool = true;
 
   public function set_glitchFactor(glitch:Float):Float
   {
@@ -1962,6 +1963,13 @@ class VCRDistortionEffect extends ShaderEffectNew
     return moving;
   }
 
+  public function set_scanlinesOn(scan:Bool):Bool
+  {
+    scanlinesOn = scan;
+    shader.vignetteOn.value = [scanlinesOn];
+    return scan;
+  }
+
 
   public function new(){
     shader.iTime.value = [0];
@@ -1969,7 +1977,7 @@ class VCRDistortionEffect extends ShaderEffectNew
     shader.distortionOn.value = [distortion];
     shader.perspectiveOn.value = [perspectiveOn];
     shader.vignetteOn.value = [vignetteMoving];
-    shader.scanlinesOn.value = [true];
+    shader.scanlinesOn.value = [scanlinesOn];
     shader.iResolution.value = [Lib.current.stage.stageWidth,Lib.current.stage.stageHeight];
   }
 
@@ -1979,7 +1987,7 @@ class VCRDistortionEffect extends ShaderEffectNew
     shader.distortionOn.value = [distortion];
     shader.perspectiveOn.value = [perspectiveOn];
     shader.vignetteOn.value = [vignetteMoving];
-    shader.scanlinesOn.value = [true];
+    shader.scanlinesOn.value = [scanlinesOn];
     shader.iResolution.value = [Lib.current.stage.stageWidth,Lib.current.stage.stageHeight];
   }
 
