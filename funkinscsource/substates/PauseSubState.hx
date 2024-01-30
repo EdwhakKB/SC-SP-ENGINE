@@ -270,7 +270,7 @@ class PauseSubState extends MusicBeatSubstate
 						var poop = Highscore.formatSong(name, curSelected);
 						PlayState.SONG = Song.loadFromJson(poop, name);
 						PlayState.storyDifficulty = curSelected;
-						MusicBeatState.resetState();
+						LoadingState.loadAndSwitchState(new PlayState());
 						music.volume = 0;
 						PlayState.changedDifficulty = true;
 						PlayState.chartingMode = false;
@@ -328,12 +328,12 @@ class PauseSubState extends MusicBeatSubstate
 					PlayState.changedDifficulty = true;
 					practiceText.visible = PlayState.instance.practiceMode;
 				case "Restart Song":
-					restartSong();
+					LoadingState.loadAndSwitchState(new PlayState());
 				case "Leave Charting Mode":
-					restartSong();
+					LoadingState.loadAndSwitchState(new PlayState());
 					PlayState.chartingMode = false;
 				case "Leave ModChart Mode":
-					restartSong();
+					LoadingState.loadAndSwitchState(new PlayState());
 					PlayState.modchartMode = false;
 				case 'Skip Time':
 					if(curTime < Conductor.songPosition)

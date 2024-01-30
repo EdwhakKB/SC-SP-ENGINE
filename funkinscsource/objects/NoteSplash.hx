@@ -30,6 +30,8 @@ class NoteSplash extends FlxSkewed
 
 	public var styleChoice:String = '';
 
+	public var z:Float = 0;
+
 	public function new(x:Float = 0, y:Float = 0, ?opponentSplashes:Bool = false) {
 		super(x, y);
 

@@ -126,7 +126,7 @@ class HScript extends SScript
 		setClass(psychlua.FunkinLua);
 		#end
 		setClass(codenameengine.CustomCodeShader);
-		setClass(states.stages.Stage);
+		setClass(objects.Stage);
 		#if flxanimate
 		setClass(flxanimate.FlxAnimate);
 		#end
@@ -297,7 +297,7 @@ class HScript extends SScript
 		#end
 		set('this', this);
 		set('game', FlxG.state);
-		set('stage', states.stages.Stage.instance);
+		set('stage', objects.Stage.instance);
 		set('buildTarget', LuaUtils.getBuildTarget());
 		set('customSubstate', CustomSubstate.instance);
 		set('customSubstateName', CustomSubstate.name);
@@ -327,6 +327,35 @@ class HScript extends SScript
 		set('add', FlxG.state.add);
 		set('insert', FlxG.state.insert);
 		set('remove', FlxG.state.remove);
+
+		#if modchartingTools
+		set('Math', Math);
+		setClass(modcharting.ModchartEditorState);
+		setClass(modcharting.ModchartEvent);
+		setClass(modcharting.ModchartEventManager);
+		setClass(modcharting.ModchartFile);
+		setClass(modcharting.ModchartFuncs);
+		setClass(modcharting.ModchartMusicBeatState);
+		setClass(modcharting.ModchartUtil);
+		setClass(modcharting.Modifier); //the game crashes without this???????? what??????????? -- fue glow
+		setClass(modcharting.Modifier.ModifierSubValue);
+		setClass(modcharting.ModTable);
+		setClass(modcharting.NoteMovement);
+		setClass(modcharting.NotePositionData);
+		setClass(modcharting.Playfield);
+		setClass(modcharting.PlayfieldRenderer);
+		setClass(modcharting.SimpleQuaternion);
+		setClass(modcharting.SustainStrip);
+
+		//Why?
+		setClass(modcharting.Modifier.BeatXModifier);
+		#if SCEModchartingTools
+		if (PlayState.instance != null && PlayState.SONG != null && !isHxStage && PlayState.SONG.notITG && PlayState.instance.notITGMod)
+			modcharting.ModchartFuncs.loadHScriptFunctions(this);
+		#else
+		modcharting.ModchartFuncs.loadHScriptFunctions(this);
+		#end
+		#end
 
 		if(PlayState.instance == FlxG.state)
 		{
@@ -487,11 +516,19 @@ class HScript extends SScript
 		super.kill();
 	}
 	#end
+
+	#if modchartingTools
+	public function initMod(mod:modcharting.Modifier)
+    {
+        call("initMod", [mod]);
+    }
+	#end
 }
 #else
 class HScript extends SScript
 {
 	public var isHxStage:Bool = false;
+	public var modFolder:String;
 	
 	#if LUA_ALLOWED
 	public var parentLua:FunkinLua;
@@ -555,7 +592,7 @@ class HScript extends SScript
 		set('FlxTween', flixel.tweens.FlxTween);
 		set('FlxEase', flixel.tweens.FlxEase);
 		set('FlxColor', psychlua.CustomFlxColor);
-		set('Countdown', states.stages.Stage.Countdown);
+		set('Countdown', objects.Stage.Countdown);
 		set('PlayState', states.PlayState);
 		set('Paths', backend.Paths);
 		set('Conductor', backend.Conductor);
@@ -574,7 +611,7 @@ class HScript extends SScript
 		#if LUA_ALLOWED
 		set('FunkinLua', psychlua.FunkinLua);
 		#end
-		set('Stage', states.stages.Stage);
+		set('Stage', objects.Stage);
 		#if flxanimate
 		set('FlxAnimate', FlxAnimate);
 		#end
@@ -749,7 +786,7 @@ class HScript extends SScript
 		#end
 		set('this', this);
 		set('game', FlxG.state);
-		set('stage', states.stages.Stage.instance);
+		set('stage', objects.Stage.instance);
 		set('buildTarget', LuaUtils.getBuildTarget());
 		set('customSubstate', CustomSubstate.instance);
 		set('customSubstateName', CustomSubstate.name);
@@ -781,12 +818,41 @@ class HScript extends SScript
 		set('insert', FlxG.state.insert);
 		set('remove', FlxG.state.remove);
 
+		#if modchartingTools
+		set('Math', Math);
+		set('ModchartEditorState', modcharting.ModchartEditorState);
+		set('ModchartEvent', modcharting.ModchartEvent);
+		set('ModchartEventManager', modcharting.ModchartEventManager);
+		set('ModchartFile', modcharting.ModchartFile);
+		set('ModchartFuncs', modcharting.ModchartFuncs);
+		set('ModchartMusicBeatState', modcharting.ModchartMusicBeatState);
+		set('ModchartUtil', modcharting.ModchartUtil);
+		for (i in ['mod', 'Modifier'])
+			set(i, modcharting.Modifier); //the game crashes without this???????? what??????????? -- fue glow
+		set('ModifierSubValue', modcharting.Modifier.ModifierSubValue);
+		set('ModTable', modcharting.ModTable);
+		set('NoteMovement', modcharting.NoteMovement);
+		set('NotePositionData', modcharting.NotePositionData);
+		set('Playfield', modcharting.Playfield);
+		set('PlayfieldRenderer', modcharting.PlayfieldRenderer);
+		set('SimpleQuaternion', modcharting.SimpleQuaternion);
+		set('SustainStrip', modcharting.SustainStrip);
+
+		//Why?
+		set('BeatXModifier', modcharting.Modifier.BeatXModifier);
+		#if SCEModchartingTools
+		if (PlayState.instance != null && PlayState.SONG != null && !isHxStage && PlayState.SONG.notITG && PlayState.instance.notITGMod)
+			modcharting.ModchartFuncs.loadHScriptFunctions(this);
+		#else
+		modcharting.ModchartFuncs.loadHScriptFunctions(this);
+		#end
+		#end
+
 		if(PlayState.instance == FlxG.state)
 		{
 			set('addBehindGF', PlayState.instance.addBehindGF);
 			set('addBehindDad', PlayState.instance.addBehindDad);
 			set('addBehindBF', PlayState.instance.addBehindBF);
-			setSpecialObject(PlayState.instance, false, PlayState.instance.instancesExclude);
 		}
 
 		if(varsToBring != null)
@@ -934,6 +1000,13 @@ class HScript extends SScript
 	{
 		active = false;
 	}
+	#end
+
+	#if modchartingTools
+	public function initMod(mod:modcharting.Modifier)
+    {
+        call("initMod", [mod]);
+    }
 	#end
 }
 #end

@@ -44,8 +44,8 @@ class HealthIcon extends FlxSprite
 
 	public var healthIndication:Float = 1;
 
-	public var percent20:Bool = false;
-	public var percent80:Bool = false;
+	public var percent20or80:Bool = false;
+	public var percent80or20:Bool = false;
 
 	public var speedBopLerp:Float = 1;
 	public var setIconScale:Float = 1.2;
@@ -336,11 +336,11 @@ class HealthIcon extends FlxSprite
 			{
 				if (isPlayer)
 				{
-					if (percent20 && frames.frames.length > 0)
+					if (percent20or80 && frames.frames.length > 0)
 					{
 						animation.curAnim.curFrame = 1;
 					}
-					else if (percent80 && hasWinning && frames.frames.length > 2)
+					else if (percent80or20 && hasWinning && frames.frames.length > 2)
 					{
 						animation.curAnim.curFrame = 2;
 					}
@@ -351,11 +351,11 @@ class HealthIcon extends FlxSprite
 				}
 				else
 				{
-					if (percent20 && hasWinning && frames.frames.length > 2)
+					if (percent20or80 && hasWinning && frames.frames.length > 2)
 					{
 						animation.curAnim.curFrame = 2;
 					}
-					else if (percent80 && frames.frames.length > 0)
+					else if (percent80or20 && frames.frames.length > 0)
 					{
 						animation.curAnim.curFrame = 1;
 					}
@@ -369,7 +369,7 @@ class HealthIcon extends FlxSprite
 			{
 				if (isPlayer)
 				{
-					if (percent20 && hasLosingAnimated)
+					if (percent20or80 && hasLosingAnimated)
 					{
 						normalAnimation = false;
 						winningAnimation = false;
@@ -377,7 +377,7 @@ class HealthIcon extends FlxSprite
 
 						animName = 'losing';
 					}
-					else if (percent80 && hasWinningAnimated)
+					else if (percent80or20 && hasWinningAnimated)
 					{
 						normalAnimation = false;
 						winningAnimation = true;
@@ -396,7 +396,7 @@ class HealthIcon extends FlxSprite
 				}
 				else
 				{
-					if (percent20 && hasWinningAnimated)
+					if (percent20or80 && hasWinningAnimated)
 					{
 						normalAnimation = false;
 						winningAnimation = true;
@@ -404,7 +404,7 @@ class HealthIcon extends FlxSprite
 
 						animName = 'normal';
 					}
-					else if (percent80 && hasLosingAnimated)
+					else if (percent80or20 && hasLosingAnimated)
 					{
 						normalAnimation = false;
 						winningAnimation = true;

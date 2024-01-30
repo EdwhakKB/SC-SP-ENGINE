@@ -805,6 +805,7 @@ class CharacterEditorState extends MusicBeatState
 				character.jsonScale = sender.value;
 				character.scale.set(character.jsonScale, character.jsonScale);
 				character.updateHitbox();
+				character.playAnim(anims[curAnim].anim, true);
 				updatePointerPos(false);
 			}
 			else if (sender == graphicScaleStepper)
@@ -813,6 +814,7 @@ class CharacterEditorState extends MusicBeatState
 				character.jsonGraphicScale = sender.value;
 				character.setGraphicSize(Std.int(character.width * character.jsonGraphicScale));
 				character.updateHitbox();
+				character.playAnim(anims[curAnim].anim, true);
 				updatePointerPos(false);
 			}
 			else if(sender == positionXStepper)

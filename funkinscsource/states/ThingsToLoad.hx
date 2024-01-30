@@ -11,7 +11,7 @@ import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 import flixel.text.FlxText;
 import objects.Character;
-import states.stages.Stage;
+import objects.Stage;
 
 using StringTools;
 

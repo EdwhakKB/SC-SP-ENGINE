@@ -2247,7 +2247,7 @@ class FunkinLua {
 		}
 		call('onCreate', []);
 
-		if (isStageLua) Debug.logInfo('Limited usage of playstate properties inside the stage .laus or .hxs!');
+		if (isStageLua) Debug.logInfo('Limited usage of playstate properties inside the stage .lua\'s or .hx\'s!');
 		Debug.logInfo('lua file loaded succesfully: $scriptName (${Std.int(Date.now().getTime() - times)}ms)');
 	}
 
