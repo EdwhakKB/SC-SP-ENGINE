@@ -74,7 +74,7 @@ class MiscSettingsSubState extends BaseOptionsMenu
 			'bool');
 		addOption(option);
 
-		var option:Option = new Option('Initial Caching [EXPERIMENTAL]',
+		var option:Option = new Option('Do / Don\'t Initial Caching [EXPERIMENTAL]',
 			"Game caches images and songs on starting the game. (Very Laggy)",
 			'skipInitialCaching',
 			'bool');

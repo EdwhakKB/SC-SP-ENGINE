@@ -23,7 +23,7 @@ import substates.MusicBeatSubstate;
 import substates.IndieDiamondTransSubState;
 import backend.ClientPrefs;
 import backend.Conductor;
-import states.stages.Stage;
+import objects.Stage;
 import backend.Difficulty;
 import backend.Mods;
 import backend.Debug;

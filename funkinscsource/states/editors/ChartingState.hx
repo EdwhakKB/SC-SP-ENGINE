@@ -380,7 +380,6 @@ class ChartingState extends MusicBeatState
 
 		var tabs2 = [
 			{name: "Events", label: 'Events'},
-			{name: "Tips", label: 'Tips'},
 			{name: "Data", label: 'Data'},
 		];
 
@@ -392,7 +391,7 @@ class ChartingState extends MusicBeatState
 		UI_box.y = 365;
 		UI_box.scrollFactor.set();
 
-		UI_box2.resize(655, 650);
+		UI_box2.resize(655, 670);
 		UI_box2.x = 640 + GRID_SIZE / 2;
 		UI_box2.y = 25;
 		UI_box2.scrollFactor.set();
@@ -416,8 +415,6 @@ class ChartingState extends MusicBeatState
 		updateWaveform();
 
 		addEventsUI();
-		//addEventTextUI();
-		addTipsUI();
 		//UI_box.selected_tab = 4;
 
 		add(curRenderedSustains);
@@ -1201,46 +1198,6 @@ class ChartingState extends MusicBeatState
 		UI_box2.addGroup(tab_group_event);
 	}
 
-	function addTipsUI()
-	{
-
-		var tab_group_tips = new FlxUI(null, UI_box2);
-		tab_group_tips.name = 'Tips';
-
-		text =
-		"W/S or Mouse Wheel - Change Conductor's strum time
-		\nH - Go to the start of the chart
-		\nA/D - Go to the previous/next section
-		\nLeft/Right - Change Snap
-		\n
-		\nUp/Down - Change Conductor's Strum Time with Snapping" +
-		#if FLX_PITCH
-		"\nLeft Bracket / Right Bracket - Change Song Playback Rate (SHIFT to go Faster)
-		\nALT + Left Bracket / Right Bracket - Reset Song Playback Rate" +
-		#end
-		"\nHold Shift - Move 4x faster Conductor's strum time
-		\nHold Control + click on an arrow - Select it
-		\nHold Control + Left/Right - Move selected arrow
-
-		\nZ/X - Zoom in/out
-		\nEsc - Test your chart inside Chart Editor
-		\nEnter - Play your chart
-		\nQ/E - Decrease/Increase Note Sustain Length
-		\nSpace - Stop/Resume song";
-
-		var tipTextArray:Array<String> = text.split('\n');
-		for (i in 0...tipTextArray.length) {
-			var tipText:FlxText = new FlxText(20, 30, 0, tipTextArray[i], 14);
-			tipText.y += i * 9;
-			tipText.setFormat(Paths.font("vcr.ttf"), 14, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-			tipText.borderSize = 2;
-			tipText.scrollFactor.set();
-			tab_group_tips.add(tipText);
-		}
-
-		UI_box2.addGroup(tab_group_tips);
-	}
-
 	function changeEventSelected(change:Int = 0)
 	{
 		if(curSelectedNote != null && curSelectedNote[2] == null) //Is event note
@@ -1531,7 +1488,7 @@ class ChartingState extends MusicBeatState
 		}
 		#end
 
-		var player1DropDown = new FlxUIDropDownMenu(gameOverEndInputText.x + 280, gameOverCharacterInputText.y, FlxUIDropDownMenu.makeStrIdLabelArray(characters, true), function(character:String)
+		var player1DropDown = new FlxUIDropDownMenu(gameOverEndInputText.x + 320, gameOverCharacterInputText.y, FlxUIDropDownMenu.makeStrIdLabelArray(characters, true), function(character:String)
 		{
 			_song.player1 = characters[Std.parseInt(character)];
 			updateJsonData();
@@ -1686,17 +1643,8 @@ class ChartingState extends MusicBeatState
 			updateGrid();
 		});
 		//
-
-		var notITGModchart = new FlxUICheckBox(reloadNotesButton.x + 160, reloadNotesButton.y - 70, null, null, "NotITG modcharts", 100);
-		notITGModchart.checked = _song.notITG;
-		notITGModchart.callback = function()
-		{
-			_song.notITG = notITGModchart.checked;
-			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
-			//Debug.logInfo('CHECKED!');
-		};
-		
-		var usingHUD = new FlxUICheckBox(reloadNotesButton.x + 160, reloadNotesButton.y - 40, null, null, "usesHUD Cameras", 100);
+	
+		var usingHUD = new FlxUICheckBox(reloadNotesButton.x + 160, reloadNotesButton.y - 20, null, null, "usesHUD Cameras", 100);
 		usingHUD.checked = _song.usesHUD;
 		usingHUD.callback = function()
 		{
@@ -1705,7 +1653,7 @@ class ChartingState extends MusicBeatState
 			//Debug.logInfo('CHECKED!');
 		};
 
-		var noIntroSkipping = new FlxUICheckBox(usingHUD.x, usingHUD.y + 20, null, null, "Doesn't Skip Intro", 100);
+		var noIntroSkipping = new FlxUICheckBox(usingHUD.x, usingHUD.y - 20, null, null, "Doesn't Skip Intro", 100); //
 		noIntroSkipping.checked = _song.noIntroSkip;
 		noIntroSkipping.callback = function()
 		{
@@ -1714,7 +1662,16 @@ class ChartingState extends MusicBeatState
 			//Debug.logInfo('CHECKED!');
 		};
 
-		var forceRightScroll = new FlxUICheckBox(reloadNotesButton.x + 160, reloadNotesButton.y - 90, null, null, "Forced RightScroll", 100);
+		var notITGModchart = new FlxUICheckBox(noIntroSkipping.x, noIntroSkipping.y - 20, null, null, "NotITG modcharts", 100);
+		notITGModchart.checked = _song.notITG;
+		notITGModchart.callback = function()
+		{
+			_song.notITG = notITGModchart.checked;
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
+			//Debug.logInfo('CHECKED!');
+		};
+
+		var forceRightScroll = new FlxUICheckBox(notITGModchart.x, notITGModchart.y - 20, null, null, "Forced RightScroll", 100);
 		forceRightScroll.checked = _song.rightScroll;
 		forceRightScroll.callback = function()
 		{
@@ -1722,7 +1679,7 @@ class ChartingState extends MusicBeatState
 			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 		};
 
-		var forceMiddleScroll = new FlxUICheckBox(reloadNotesButton.x + 160, reloadNotesButton.y - 110, null, null, "Forced MiddleScroll", 100);
+		var forceMiddleScroll = new FlxUICheckBox(forceRightScroll.x, forceRightScroll.y - 20, null, null, "Forced MiddleScroll", 100);
 		forceMiddleScroll.checked = _song.middleScroll;
 		forceMiddleScroll.callback = function()
 		{
@@ -1730,7 +1687,7 @@ class ChartingState extends MusicBeatState
 			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 		};
 
-		var blockOpponentMode = new FlxUICheckBox(reloadNotesButton.x + 160, reloadNotesButton.y - 130, null, null, "Block Opponent Mode", 100);
+		var blockOpponentMode = new FlxUICheckBox(forceMiddleScroll.x, forceMiddleScroll.y - 20, null, null, "Block Opponent Mode", 100);
 		blockOpponentMode.checked = _song.blockOpponentMode;
 		blockOpponentMode.callback = function()
 		{
@@ -1739,7 +1696,7 @@ class ChartingState extends MusicBeatState
 			//Debug.logInfo('CHECKED!');
 		};
 
-		var oldBarSystem = new FlxUICheckBox(reloadNotesButton.x + 160, reloadNotesButton.y - 150, null, null, "Old Bar System", 100);
+		var oldBarSystem = new FlxUICheckBox(blockOpponentMode.x, blockOpponentMode.y - 20, null, null, "Old Bar System", 100);
 		oldBarSystem.checked = _song.oldBarSystem;
 		oldBarSystem.callback = function()
 		{
@@ -1747,6 +1704,38 @@ class ChartingState extends MusicBeatState
 			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 			//Debug.logInfo('CHECKED!');
 		};
+
+		var disableCaching = new FlxUICheckBox(oldBarSystem.x, oldBarSystem.y - 20, null, null, "Disable Initial PlayState Caching", 100);
+		disableCaching.checked = _song.disableStartCaching;
+		disableCaching.callback = function()
+		{
+			_song.disableStartCaching = disableCaching.checked;
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
+			//Debug.logInfo('CHECKED!');
+		};
+
+		text =
+		"W/S or Mouse Wheel - Change Conductor's strum time
+		\nH - Go to the start of the chart
+		\nA/D - Go to the previous/next section
+		\nLeft/Right - Change Snap
+
+		\nUp/Down - Change Conductor's Strum Time with Snapping" +
+		#if FLX_PITCH
+		"
+		\n
+		\nLeft Bracket / Right Bracket - Change Song Playback Rate (SHIFT to go Faster)
+		\nALT + Left Bracket / Right Bracket - Reset Song Playback Rate" +
+		#end
+		"\nHold Shift - Move 4x faster Conductor's strum time
+		\nHold Control + click on an arrow - Select it
+		\nHold Control + Left/Right - Move selected arrow
+
+		\nZ/X - Zoom in/out
+		\nEsc - Test your chart inside Chart Editor
+		\nEnter - Play your chart
+		\nQ/E - Decrease/Increase Note Sustain Length
+		\nSpace - Stop/Resume song";
 
 		tab_group_data.add(gameOverCharacterInputText);
 		tab_group_data.add(gameOverSoundInputText);
@@ -1764,8 +1753,19 @@ class ChartingState extends MusicBeatState
 		tab_group_data.add(notITGModchart);
 		tab_group_data.add(blockOpponentMode);
 		tab_group_data.add(oldBarSystem);
+		tab_group_data.add(disableCaching);
 		tab_group_data.add(noteSkinInputText);
 		tab_group_data.add(noteSplashesInputText);
+
+		var tipTextArray:Array<String> = text.split('\n');
+		for (i in 0...tipTextArray.length) {
+			var tipText:FlxText = new FlxText(20, reloadNotesButton.y + 36.6, 0, tipTextArray[i], 15);
+			tipText.y += i * 8.02;
+			tipText.setFormat(Paths.font("vcr.ttf"), 15, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+			tipText.borderSize = 0.9;
+			tipText.scrollFactor.set();
+			tab_group_data.add(tipText);
+		}
 
 		tab_group_data.add(new FlxText(gameOverCharacterInputText.x, gameOverCharacterInputText.y - 15, 0, 'Game Over Character Name:'));
 		tab_group_data.add(new FlxText(gameOverSoundInputText.x, gameOverSoundInputText.y - 15, 0, 'Game Over Death Sound (sounds/):'));
@@ -1787,6 +1787,7 @@ class ChartingState extends MusicBeatState
 		tab_group_data.add(player1DropDown);
 		tab_group_data.add(difficultyDropDown);
 		tab_group_data.add(stageDropDown);
+
 		UI_box2.addGroup(tab_group_data);
 	}
 

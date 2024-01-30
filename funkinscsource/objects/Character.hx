@@ -5,7 +5,7 @@ import flixel.util.FlxSort;
 import openfl.utils.Assets;
 import flixel.util.FlxDestroyUtil;
 import haxe.Json;
-import states.stages.objects.TankmenBG;
+import objects.stageObjects.TankmenBG;
 import backend.Song;
 import backend.Section;
 
@@ -17,8 +17,8 @@ class Character extends FlxSprite
 	public static var colorPreCut:String;
 
 	public var mostRecentRow:Int = 0;
-	public var animOffsets:Map<String, Array<Dynamic>>;
-	public var animPlayerOffsets:Map<String, Array<Dynamic>>; // for saving as jsons lol
+	public var animOffsets:Map<String, Array<Float>>;
+	public var animPlayerOffsets:Map<String, Array<Float>>; // for saving as jsons lol
 	public var animInterrupt:Map<String, Bool>;
 	public var animNext:Map<String, String>;
 	public var animDanced:Map<String, Bool>;
@@ -99,8 +99,8 @@ class Character extends FlxSprite
 
 	public function resetCharacterAttributes(?character:String = "bf", ?isPlayer:Bool = false)
 	{
-		animOffsets = new Map<String, Array<Dynamic>>();
-		animPlayerOffsets = new Map<String, Array<Dynamic>>();
+		animOffsets = new Map<String, Array<Float>>();
+		animPlayerOffsets = new Map<String, Array<Float>>();
 		animInterrupt = new Map<String, Bool>();
 		animNext = new Map<String, String>();
 		animDanced = new Map<String, Bool>();
@@ -186,18 +186,16 @@ class Character extends FlxSprite
 
 		dance();
 
-		if (isPlayer)
+		switch (isPlayer)
 		{
-			// Doesn't flip for BF, since his are already in the right place???
-			if (!curCharacter.startsWith('bf') && !isPsychPlayer)
-				flipAnims();
-		}
-	
-		if (!isPlayer)
-		{
-			// Flip for just bf
-			if (curCharacter.startsWith('bf') || isPsychPlayer)
-				flipAnims();
+			case true:
+				// Doesn't flip for BF, since his are already in the right place???
+				if (!curCharacter.startsWith('bf') && !isPsychPlayer)
+					flipAnims(true);
+			case false:
+				// Flip for just bf
+				if (curCharacter.startsWith('bf') || isPsychPlayer)
+					flipAnims(true);
 		}
 
 		switch (curCharacter)
@@ -575,11 +573,25 @@ class Character extends FlxSprite
 		if (nonanimated || charNotPlaying)
 			return;
 
+		if (AnimName.endsWith('alt') && animation.getByName(AnimName) == null)
+			AnimName = AnimName.split('-')[0];
+
+		if (AnimName == 'laugh' && animation.getByName(AnimName) == null)
+			AnimName = 'singUP';
+
 		if (AnimName.endsWith('miss') && animation.getByName(AnimName) == null)
 		{
 			AnimName = AnimName.substr(0, AnimName.length - 4);
 			if (doMissThing)
 				missed = true;
+		}
+
+		if (animation.getByName(AnimName) == null) // if it's STILL null, just play idle, and if you REALLY messed up, it'll look in the xml for a valid anim
+		{
+			if(isDancing && animation.getByName('danceRight') != null)
+				AnimName = 'danceRight';
+			else if (animation.getByName('idle') != null)
+				AnimName = 'idle';
 		}
 
 		if(!isAnimateAtlas) animation.play(AnimName, Force, Reversed, Frame);
@@ -590,20 +602,17 @@ class Character extends FlxSprite
 		else if (color != curColor && doMissThing)
 			color = curColor;
 
-		var daOffset = animOffsets.get(AnimName);
-
-		if (debugMode && isPlayer)
-			daOffset = animPlayerOffsets.get(AnimName);
-
 		if (debugMode)
 		{
+			final daOffset = (debugMode && isPlayer) ? animPlayerOffsets.get(AnimName) : animOffsets.get(AnimName);
 			if (animOffsets.exists(AnimName) && !isPlayer || animPlayerOffsets.exists(AnimName) && isPlayer)
-				offset.set(daOffset[0], daOffset[1]);
+				offset.set(daOffset[0] * daZoom, daOffset[1] * daZoom);
 		}
 		else
 		{
+			final daOffset = (debugMode && isPlayer) ? animPlayerOffsets.get(AnimName) : animOffsets.get(AnimName);
 			if (animOffsets.exists(AnimName))
-				offset.set(daOffset[0], daOffset[1]);
+				offset.set(daOffset[0] * daZoom, daOffset[1] * daZoom);
 		}
 
 		if (curCharacter.startsWith('gf-') || curCharacter == 'gf')
@@ -673,17 +682,26 @@ class Character extends FlxSprite
 		}
 	}
 
-	public function flipAnims()
+	public function flipAnims(left_right:Bool = true)
 	{
 		var animSuf:Array<String> = ["", "miss", "-alt", "-alt2", "-loop"];
 
 		for (i in 0...animSuf.length)
 		{
-			if (animation.getByName('singRIGHT' + animSuf[i]) != null && animation.getByName('singLEFT' + animSuf[i]) != null)
-			{
-				var oldRight = animation.getByName('singRIGHT' + animSuf[i]).frames;
-				animation.getByName('singRIGHT' + animSuf[i]).frames = animation.getByName('singLEFT' + animSuf[i]).frames;
-				animation.getByName('singLEFT' + animSuf[i]).frames = oldRight;
+			if (left_right){
+				if (animation.getByName('singRIGHT' + animSuf[i]) != null && animation.getByName('singLEFT' + animSuf[i]) != null)
+				{
+					var oldRight = animation.getByName('singRIGHT' + animSuf[i]).frames;
+					animation.getByName('singRIGHT' + animSuf[i]).frames = animation.getByName('singLEFT' + animSuf[i]).frames;
+					animation.getByName('singLEFT' + animSuf[i]).frames = oldRight;
+				}
+			}else{
+				if (animation.getByName('singUP' + animSuf[i]) != null && animation.getByName('singDOWN' + animSuf[i]) != null)
+				{
+					var oldRight = animation.getByName('singUP' + animSuf[i]).frames;
+					animation.getByName('singUP' + animSuf[i]).frames = animation.getByName('singDOWN' + animSuf[i]).frames;
+					animation.getByName('singDOWN' + animSuf[i]).frames = oldRight;
+				}
 			}
 		}
 	}

@@ -9,7 +9,7 @@ import flixel.FlxSprite;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
 import openfl.net.FileReference;
-import states.stages.Stage;
+import objects.Stage;
 import flixel.tweens.FlxTween;
 import flixel.addons.ui.FlxUI;
 import flixel.addons.ui.FlxUIDropDownMenu;

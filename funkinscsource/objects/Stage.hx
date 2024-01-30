@@ -1,4 +1,4 @@
-package states.stages;
+package objects;
 
 import flixel.FlxBasic;
 import flixel.FlxObject;
@@ -12,7 +12,7 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 
 import objects.Character;
 
-import states.stages.objects.*;
+import objects.stageObjects.*;
 import cutscenes.CutsceneHandler;
 import substates.GameOverSubstate;
 
@@ -1711,10 +1711,33 @@ class Stage extends MusicBeatState
 	{
 		if (sprite == null) return;
 
-		if (place > -1) layInFront[place].push(sprite);
-		else toAdd.push(sprite);
+		if (place > -1) 
+		{
+			/*
+				for those who don't know
+				layInFront[0].push(sprite) what the 0 means is that the "sprite" is on top of gf but no other characters
+				layInFront[1].push(sprite) what the 1 means is that the "sprite" is on top of mom but no other characters
+				layInFront[2].push(sprite) what the 2 means is that the "sprite" is on top of dad ???
+				layInFront[3].push(sprite) what the 3 means is that the "sprite" is on top of bf (but since haxeflixel is goofy it also means on top of dad) ??
+				layInFront[4].push(sprite) what the 4 means is that the "sprite" is on top of all of the characters
+				also .push(sprite) means it is adding the sprite like the rest from toAddPushed(sprite) but with layering
+			*/
+			layInFront[place].push(sprite);
+		}
+		else 
+		{
+			/*
+				just adding the sprite
+			*/
+			toAdd.push(sprite);
+		}
 
-		swagBacks[tag] = sprite;
+		var newTag:String = tag;
+
+		if (newTag.endsWith('-UPPER')) newTag = newTag.substring(0, newTag.length-6).toUpperCase();
+		else if (newTag.endsWith('-lower')) newTag = newTag.substring(0, newTag.length-6).toLowerCase();
+			
+		swagBacks[newTag] = sprite;
 
 		if (hideLast != null)
 			hideLastBG = hideLast;
