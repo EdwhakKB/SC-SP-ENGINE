@@ -566,6 +566,31 @@ class PlayState extends MusicBeatState
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.stop();
 
+		//Force A Scroll
+		if (SONG.middleScroll && !ClientPrefs.data.middleScroll){
+			forceMiddleScroll = true;
+			forceRightScroll = false;
+			ClientPrefs.data.middleScroll = true;
+		}else if (SONG.rightScroll && ClientPrefs.data.middleScroll){
+			forceMiddleScroll = false;
+			forceRightScroll = true;
+			ClientPrefs.data.middleScroll = false;
+		}
+
+		if (forceMiddleScroll && !ClientPrefs.data.middleScroll){
+			savePrefixScrollR = true;
+		}else if (forceRightScroll && ClientPrefs.data.middleScroll){
+			savePrefixScrollM = true;
+		}
+		
+		if (ClientPrefs.data.middleScroll){
+			prefixMiddleScroll = true;
+			prefixRightScroll = false;
+		}else if (!ClientPrefs.data.middleScroll){
+			prefixRightScroll = true;
+			prefixMiddleScroll = false;
+		}
+
 		// Gameplay settings
 		healthGain = ClientPrefs.getGameplaySetting('healthgain');
 		healthLoss = ClientPrefs.getGameplaySetting('healthloss');
@@ -650,14 +675,6 @@ class PlayState extends MusicBeatState
 
 		GameOverSubstate.resetVariables();
 		songName = Paths.formatToSongPath(SONG.songId);
-
-		if (ClientPrefs.data.middleScroll){
-			prefixMiddleScroll = true;
-			prefixRightScroll = false;
-		}else if (!ClientPrefs.data.middleScroll){
-			prefixRightScroll = true;
-			prefixMiddleScroll = false;
-		}
 
 		if(SONG.stage == null || SONG.stage.length < 1) SONG.stage = StageData.vanillaSongStage(songName);
 		curStage = SONG.stage;
@@ -2728,22 +2745,6 @@ class PlayState extends MusicBeatState
 			case 1:
 				if (OMANDNOTMS) dadStrumStyle = style;
 				else bfStrumStyle = style;
-		}
-
-		if (SONG.middleScroll && !ClientPrefs.data.middleScroll){
-			forceMiddleScroll = true;
-			forceRightScroll = false;
-			ClientPrefs.data.middleScroll = true;
-		}else if (SONG.rightScroll && ClientPrefs.data.middleScroll){
-			forceMiddleScroll = false;
-			forceRightScroll = true;
-			ClientPrefs.data.middleScroll = false;
-		}
-
-		if (forceMiddleScroll && !ClientPrefs.data.middleScroll){
-			savePrefixScrollR = true;
-		}else if (forceRightScroll && ClientPrefs.data.middleScroll){
-			savePrefixScrollM = true;
 		}
 
 		generateStaticStrumArrows(player, style);
