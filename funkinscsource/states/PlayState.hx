@@ -3629,9 +3629,7 @@ class PlayState extends MusicBeatState
 		{
 			if (ClientPrefs.data.quantNotes && !PlayState.SONG.disableNoteRGB)
 			{
-				var group:FlxTypedGroup<StrumArrow> = playerStrums;
-				if (OMANDNOTMSANDNOTITG)
-					group = opponentStrums;
+				var group:FlxTypedGroup<StrumArrow> = OMANDNOTMSANDNOTITG ? opponentStrums : playerStrums;
 				for (this2 in group){
 					if (this2.animation.curAnim.name == 'static'){
 						this2.rgbShader.r = 0xFFFFFFFF;
@@ -3782,9 +3780,7 @@ class PlayState extends MusicBeatState
 
 		if(!cpuControlled)
 		{
-			var group:FlxTypedGroup<StrumArrow> = playerStrums;
-			if (OMANDNOTMSANDNOTITG)
-				group = opponentStrums;
+			var group:FlxTypedGroup<StrumArrow> = OMANDNOTMSANDNOTITG ? opponentStrums : playerStrums;
 			for (note in group)
 				if(note.animation.curAnim != null && note.animation.curAnim.name != 'static')
 				{
@@ -5455,7 +5451,7 @@ class PlayState extends MusicBeatState
 		var ret:Dynamic = callOnScripts('onKeyReleasePre', [key]);
 		if(ret == LuaUtils.Function_Stop) return;
 
-		var spr:StrumArrow = playerStrums.members[key];
+		var spr:StrumArrow = OMANDNOTMSANDNOTITG ? opponentStrums.members[key] : playerStrums.members[key];
 		if(spr != null && spr.animation.getByName('static') != null)
 		{
 			spr.playAnim('static');
