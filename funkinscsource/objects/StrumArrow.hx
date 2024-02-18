@@ -33,15 +33,18 @@ class StrumArrow extends FlxSkewed
 	}
 
 	public var useRGBShader:Bool = true;
-	public function new(x:Float, y:Float, leData:Int, player:Int, style:String) {
+
+	public var quantizedNotes:Bool = false;
+	
+	public function new(x:Float, y:Float, leData:Int, player:Int, ?style:String, ?quantizedNotes:Bool) {
 		#if (flixel >= "5.5.0")
 		animation = new backend.animation.PsychAnimationController(this);
 		#end
-		rgbShader = new RGBShaderReference(this, Note.initializeGlobalRGBShader(leData));
+		rgbShader = new RGBShaderReference(this, !quantizedNotes ? Note.initializeGlobalRGBShader(leData) : Note.initializeGlobalQuantRGBShader(leData));
 		rgbShader.enabled = false;
 		if(PlayState.SONG != null && PlayState.SONG.disableStrumRGB) useRGBShader = false;
 		
-		var arr:Array<FlxColor> = ClientPrefs.data.arrowRGB[leData];
+		var arr:Array<FlxColor> = !quantizedNotes ? ClientPrefs.data.arrowRGB[leData] : ClientPrefs.data.arrowRGBQuantize[leData];
 		if(texture.contains('pixel') || style.contains('pixel') || containsPixelTexture) arr = ClientPrefs.data.arrowRGBPixel[leData];
 		
 		if(leData <= arr.length)
@@ -58,6 +61,7 @@ class StrumArrow extends FlxSkewed
 		this.player = player;
 		this.noteData = leData;
 		this.daStyle = style;
+		this.quantizedNotes = quantizedNotes;
 		super(x, y);
 
 		var skin:String = null;
@@ -172,6 +176,10 @@ class StrumArrow extends FlxSkewed
 
 	public function addAnims(?pixel:Bool = false)
 	{
+		var notesAnim:Array<String> = quantizedNotes ? ['UP', 'UP', 'UP', 'UP', 'UP', 'UP', 'UP', 'UP'] : ['LEFT', 'DOWN', 'UP', 'RIGHT'];
+		var pressAnim:Array<String> = quantizedNotes ? ['up', 'up', 'up', 'up', 'up', 'up', 'up', 'up'] : ['left', 'down', 'up', 'right'];
+		var colorAnims:Array<String> = quantizedNotes ? ['green', 'green', 'green', 'green', 'green', 'green', 'green', 'green'] : ['purple', 'blue', 'green', 'red'];
+
 		if (pixel)
 		{
 			isPixel = true;
@@ -193,10 +201,6 @@ class StrumArrow extends FlxSkewed
 
 			antialiasing = ClientPrefs.data.antialiasing;
 			setGraphicSize(Std.int(width * 0.7));
-
-			var notesAnim:Array<String> = ['LEFT', 'DOWN', 'UP', 'RIGHT'];
-			var pressAnim:Array<String> = ['left', 'down', 'up', 'right'];
-			var colorAnims:Array<String> = ['purple', 'blue', 'green', 'red'];
 
 			animation.addByPrefix(colorAnims[noteData], 'arrow' + notesAnim[noteData]);
 
