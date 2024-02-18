@@ -261,7 +261,6 @@ class MusicPlayer extends FlxGroup
 
 	public function switchPlayMusic()
 	{
-		FlxG.autoPause = (!playingMusic && ClientPrefs.data.autoPause);
 		active = visible = playingMusic;
 
 		instance.scoreBG.visible = instance.diffText.visible = 

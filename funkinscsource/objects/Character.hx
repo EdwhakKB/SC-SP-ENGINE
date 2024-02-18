@@ -1,11 +1,14 @@
 package objects;
 
-import flixel.tweens.FlxTween;
 import flixel.util.FlxSort;
-import openfl.utils.Assets;
 import flixel.util.FlxDestroyUtil;
+
+import openfl.utils.Assets;
+
 import haxe.Json;
+
 import objects.stageObjects.TankmenBG;
+
 import backend.Song;
 import backend.Section;
 
@@ -70,7 +73,7 @@ class Character extends FlxSprite
 	public var healthColorArray:Array<Int> = [255, 0, 0];
 
 	public var iconColor:String; // New icon color change!
-	public var iconColorFormated:String; // Original icon color change!
+	public var iconColorFormatted:String; // Original icon color change!
 
 	public var flipMode:Bool = false;
 
@@ -86,6 +89,8 @@ class Character extends FlxSprite
 	public var isCustomCharacter:Bool = false; // Check if the character is maybe external or like custom or lua character
 
 	public var editorIsPlayer:Null<Bool> = null;
+
+	public var skipHeyTimer:Bool = false; // Used to override the HEY Timer to leave it only for the length of the animation and not a timer.
 
 	public function new(x:Float, y:Float, ?character:String = 'bf', ?isPlayer:Bool = false)
 	{
@@ -112,7 +117,7 @@ class Character extends FlxSprite
 		idleSuffix = "";
 
 		iconColor = isPlayer ? 'FF66FF33' : 'FFFF0000';
-		iconColorFormated = isPlayer ? '#66FF33' : '#FF0000';
+		iconColorFormatted = isPlayer ? '#66FF33' : '#FF0000';
 
 		noteSkinStyleOfCharacter = 'noteSkins/NOTE_assets';
 
@@ -305,13 +310,13 @@ class Character extends FlxSprite
 		colorPreCut = colorPreString.toHexString();
 
 		iconColor = colorPreCut.substring(2);
-		iconColorFormated = '0x' + colorPreCut.substring(2);
+		iconColorFormatted = '0x' + colorPreCut.substring(2);
 
 		// I HATE YOU SO MUCH! -- code by me, glowsoony
-		if (iconColorFormated.contains('0xFF') || iconColorFormated.contains('#') || iconColorFormated.contains('0x'))
+		if (iconColorFormatted.contains('0xFF') || iconColorFormatted.contains('#') || iconColorFormatted.contains('0x'))
 		{
-			var newIconColorFormat:String = iconColorFormated.replace('#', '').replace('0xFF', '').replace('0x', '');
-			iconColorFormated = '#' + newIconColorFormat;
+			var newIconColorFormat:String = iconColorFormatted.replace('#', '').replace('0xFF', '').replace('0x', '');
+			iconColorFormatted = '#' + newIconColorFormat;
 		}
 
 		// antialiasing
@@ -382,6 +387,7 @@ class Character extends FlxSprite
 
 	override function update(elapsed:Float)
 	{
+		if (!ClientPrefs.data.characters) return;
 		#if flxanimate if(isAnimateAtlas) atlas.update(elapsed); #end
 
 		if(debugMode || (!isAnimateAtlas && animation.curAnim == null) #if flxanimate || (isAnimateAtlas && atlas.anim.curSymbol == null) #end)
@@ -437,7 +443,7 @@ class Character extends FlxSprite
 			if (getAnimationName().startsWith('sing')) holdTimer += elapsed;
 			else holdTimer = 0;
 
-			if (!ClientPrefs.getGameplaySetting('opponent') || ClientPrefs.getGameplaySetting('opponent') && isCustomCharacter)
+			if (!CoolUtil.opponentModeActive || CoolUtil.opponentModeActive && isCustomCharacter)
 			{
 				if (!isPlayer
 					&& holdTimer >= Conductor.stepCrochet * singDuration * (0.001 #if FLX_PITCH / (FlxG.sound.music != null ? FlxG.sound.music.pitch : 1) #end))
@@ -531,6 +537,7 @@ class Character extends FlxSprite
 	 */
 	public function dance(forced:Bool = false, altAnim:Bool = false)
 	{
+		if (!ClientPrefs.data.characters) return;
 		if (debugMode || stoppedDancing || skipDance || specialAnim || nonanimated || stopIdle)
 			return;
 		if (animation.curAnim != null)
@@ -567,6 +574,8 @@ class Character extends FlxSprite
 
 	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
 	{
+		if (!ClientPrefs.data.characters) return;
+		
 		specialAnim = false;
 		missed = false;
 
@@ -624,6 +633,52 @@ class Character extends FlxSprite
 			if (AnimName == 'singUP' || AnimName == 'singDOWN')
 				danced = !danced;
 		}
+	}
+
+	public function allowDance():Bool
+	{
+		if (!isAnimationNull() && !getAnimationName().startsWith("sing") && !specialAnim && !stunned)
+			return true;
+		return false;
+	}
+
+	public function isDancingType():Bool
+	{
+		if (isDancing)
+			return true;
+		return false;
+	}
+
+	public function allowHoldTimer():Bool
+	{
+		var conditions:Bool = (
+			!isAnimationNull() && holdTimer > Conductor.stepCrochet * singDuration * (0.001 #if FLX_PITCH / FlxG.sound.music.pitch #end) &&
+			getAnimationName().startsWith('sing') && 
+			!getAnimationName().endsWith('miss')
+		);
+		if (conditions)
+			return true;
+		return false;
+	}
+
+	public function danceChar(characterString:String, ?altBool:Bool, ?forcedToIdle:Bool, ?singArg:Bool)
+	{
+		switch (characterString)
+		{
+			case 'dad', 'bf', 'mom':
+				if (allowDance() && singArg)
+					dance(forcedToIdle, altBool);
+			default:
+				if (allowDance())
+					dance();
+		}
+	}
+
+	public function beatDance(isGF:Bool, beat:Int, speed:Int):Bool
+	{
+		if (((((beat % speed == 0) && !isDancingType()) || ((beat % speed != 0) && isDancingType())) && !isGF) || (isGF && (((beat % speed == 0) && (isDancingType() || !isDancingType())))))
+			return true;
+		return false;
 	}
 
 	function loadMappedAnims(?defaultJson:String = 'picospeaker'):Void
@@ -752,9 +807,8 @@ class Character extends FlxSprite
 	}
 	#end
 
-	public override function destroy()
+	override public function destroy()
 	{
-		super.destroy();
 		animOffsets.clear();
 		animInterrupt.clear();
 		animNext.clear();
@@ -764,6 +818,7 @@ class Character extends FlxSprite
 		#if flxanimate
 		destroyAtlas();
 		#end
+		super.destroy();
 	}
 }
 
@@ -847,7 +902,7 @@ typedef CharacterFile =
 	 * Whether the character has a vocals file for the game to change to.
 	 * @default 'Player'
 	 */
-	var vocals_file:String;
+	var ?vocals_file:String;
 }
 
 typedef AnimArray =

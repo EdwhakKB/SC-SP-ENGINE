@@ -1,8 +1,5 @@
 package objects;
 
-import flixel.math.FlxPoint;
-import flixel.math.FlxRect;
-
 import flixel.util.FlxGradient;
 
 class Bar extends FlxSpriteGroup

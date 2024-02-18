@@ -1,29 +1,20 @@
 package objects;
 
 import flixel.FlxBasic;
-import flixel.FlxObject;
-import flixel.math.FlxPoint;
-import flixel.FlxSubState;
-
-import states.MusicBeatState;
 
 import objects.Note.EventNote;
-import flixel.group.FlxGroup.FlxTypedGroup;
-
 import objects.Character;
-
 import objects.stageObjects.*;
-import cutscenes.CutsceneHandler;
-import substates.GameOverSubstate;
 
+import cutscenes.CutsceneHandler;
 import cutscenes.DialogueBox;
 
-import openfl.utils.Assets as OpenFlAssets;
+import substates.GameOverSubstate;
 
-import flixel.addons.display.FlxBackdrop;
-import backend.StageData;
+import openfl.utils.Assets as OpenFlAssets;
 import openfl.Assets;
-import states.PlayState;
+
+import backend.StageData;
 
 #if LUA_ALLOWED
 import psychlua.*;
@@ -163,9 +154,7 @@ class Stage extends MusicBeatState
 
 	public function setupStageProperties(daStage:String, ?inPlayState:Bool = false, ?stageChanged:Bool = false)
 	{
-		if (!ClientPrefs.data.background)
-			return;
-
+		if (!ClientPrefs.data.background) return;
 		if (inPlayState) songLowercase = PlayState.SONG.songId.toLowerCase();
 		loadStageJson(daStage, stageChanged);
 
@@ -650,8 +639,7 @@ class Stage extends MusicBeatState
 
 					isLuaStage = true;
 					isHxStage = true;
-					startLuasNamed('stages/' + daStage + '.lua', true, preloading);
-					startHScriptsNamed('stages/' + daStage + '.hx', true);
+					startStageScriptsNamed('stages/' + daStage, preloading);
 				}
 		}
 	}
@@ -774,8 +762,7 @@ class Stage extends MusicBeatState
 		if (stageData.stageUI != null && stageData.stageUI.trim().length > 0)
 			PlayState.stageUI = stageData.stageUI;
 		else {
-			if (stageData.isPixelStage)
-				PlayState.stageUI = "pixel";
+			if (stageData.isPixelStage) PlayState.stageUI = "pixel";
 		}
 
 		hideGirlfriend = stageData.hide_girlfriend;
@@ -1326,24 +1313,37 @@ class Stage extends MusicBeatState
 		object.destroy(); 
 	}
 
-	#if LUA_ALLOWED
-	public function startLuasNamed(luaFile:String, ?isStageLua:Bool = false, ?preloading:Bool = false)
+	#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
+	public function startStageScriptsNamed(file:String, ?preloading:Bool = false)
 	{
+		#if LUA_ALLOWED
+		startLuasNamed(file, preloading);
+		#end
+		#if HSCRIPT_ALLOWED
+		startHScriptsNamed(file);
+		#end
+	}
+	#end
+
+	#if LUA_ALLOWED
+	public function startLuasNamed(luaFile:String, ?preloading:Bool = false)
+	{
+		var scriptFilelua:String = luaFile + '.lua';
 		#if MODS_ALLOWED
-		var luaToLoad:String = Paths.modFolders(luaFile);
+		var luaToLoad:String = Paths.modFolders(scriptFilelua);
 		if(!FileSystem.exists(luaToLoad))
-			luaToLoad = Paths.getSharedPath(luaFile);
+			luaToLoad = Paths.getSharedPath(scriptFilelua);
 		
 		if(FileSystem.exists(luaToLoad))
 		#elseif sys
-		var luaToLoad:String = Paths.getSharedPath(luaFile);
+		var luaToLoad:String = Paths.getSharedPath(scriptFilelua);
 		if(OpenFlAssets.exists(luaToLoad))
 		#end
 		{
 			for (script in luaArray)
 				if(script.scriptName == luaToLoad) return false;
 	
-			new FunkinLua(luaToLoad, isStageLua, preloading);
+			new FunkinLua(luaToLoad, true, preloading);
 			return true;
 		}
 		return false;
@@ -1351,22 +1351,26 @@ class Stage extends MusicBeatState
 	#end
 
 	#if HSCRIPT_ALLOWED
-	public function startHScriptsNamed(scriptFile:String, ?isStageHx:Bool = false)
+	public function startHScriptsNamed(scriptFile:String)
 	{
-		#if MODS_ALLOWED
-		var scriptToLoad:String = Paths.modFolders(scriptFile);
-		if(!FileSystem.exists(scriptToLoad))
-			scriptToLoad = Paths.getSharedPath(scriptFile);
-		#else
-		var scriptToLoad:String = Paths.getSharedPath(scriptFile);
-		#end
-
-		if(FileSystem.exists(scriptToLoad))
+		for (extn in CoolUtil.haxeExtensions)
 		{
-			if (SScript.global.exists(scriptToLoad)) return false;
+			var scriptFileHx:String = scriptFile + '.$extn';
+			#if MODS_ALLOWED
+			var scriptToLoad:String = Paths.modFolders(scriptFileHx);
+			if(!FileSystem.exists(scriptToLoad))
+				scriptToLoad = Paths.getSharedPath(scriptFileHx);
+			#else
+			var scriptToLoad:String = Paths.getSharedPath(scriptFileHx);
+			#end
 
-			initHScript(scriptToLoad);
-			return true;
+			if(FileSystem.exists(scriptToLoad))
+			{
+				if (SScript.global.exists(scriptToLoad)) return false;
+
+				initHScript(scriptToLoad);
+				return true;
+			}
 		}
 		return false;
 	}

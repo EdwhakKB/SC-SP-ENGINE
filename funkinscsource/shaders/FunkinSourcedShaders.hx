@@ -4,18 +4,22 @@ package shaders;
 //Am I even allowed to use this?
 //Blantados code! Thanks!!
 import flixel.system.FlxAssets.FlxShader;
-import openfl.display.Shader;
-import openfl.utils.Assets;
-import flixel.FlxG;
-import openfl.Lib;
-import haxe.Json;
-import flixel.math.FlxAngle;
-import openfl.display.GraphicsShader;
 import flixel.graphics.tile.FlxGraphicsShader;
+import flixel.math.FlxAngle;
 #if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
 #end
+
+import openfl.display.Shader;
+import openfl.utils.Assets;
+import openfl.Lib;
+
+import haxe.Json;
+
+import openfl.display.GraphicsShader;
+
 import codenameengine.FunkinShader;
+
 using StringTools;
 
 class ShaderEffectNew
@@ -30,7 +34,7 @@ class ShaderEffectNew
 
 /*class RGBPinEffect extends ShaderEffectNew
 {
-    public var shader(default,null):RGBPinShader = new RGBPinShader();
+    public var shader:RGBPinShader = new RGBPinShader();
 
     public var amount(default, set):Float = 0;
 	public var distortionFactor(default, set):Float = 0;
@@ -64,7 +68,7 @@ class ShaderEffectNew
     }
 }
 
-class RGBPinShader extends FlxFixedShader
+class RGBPinShader extends FlxShader
 {
     @:glFragmentSource('
     #pragma header
@@ -955,16 +959,18 @@ class BarrelBlurShader extends FlxFixedShader
 		super();
 	}
 }
+
 //same thingy just copied so i can use it in scripts
 /**
  * Cool Shader by ShadowMario that changes RGB based on HSV.
  */
- class ColorSwapEffectDiff extends ShaderEffectNew
+ class ColorSwapEffect extends ShaderEffectNew
  {
 	public var shader(default, null):ColorSwap.ColorSwapShader = new ColorSwap.ColorSwapShader();
 	public var hue(default, set):Float = 0;
 	public var saturation(default, set):Float = 0;
 	public var brightness(default, set):Float = 0;
+    public var awesomeOutline(default, set):Bool = false;
 
 	private function set_hue(value:Float) {
 		hue = value;
@@ -982,6 +988,12 @@ class BarrelBlurShader extends FlxFixedShader
 		brightness = value;
 		shader.uTime.value[2] = brightness;
 		return brightness;
+	}
+
+    private function set_awesomeOutline(value:Bool) {
+		awesomeOutline = value;
+		shader.awesomeOutline.value = [awesomeOutline];
+		return awesomeOutline;
 	}
 
 	public function new()

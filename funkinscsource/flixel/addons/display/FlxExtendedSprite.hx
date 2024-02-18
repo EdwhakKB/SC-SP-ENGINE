@@ -1,11 +1,7 @@
 package flixel.addons.display;
 
-import flixel.FlxG;
-import flixel.FlxSprite;
 import flixel.addons.plugin.FlxMouseControl;
 import flixel.math.FlxMath;
-import flixel.math.FlxPoint;
-import flixel.math.FlxRect;
 import flixel.system.FlxAssets;
 import flixel.util.FlxCollision;
 import flixel.util.FlxDirectionFlags;

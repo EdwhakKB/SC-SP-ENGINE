@@ -1,12 +1,7 @@
 package substates;
 
-import flixel.FlxCamera;
-import flixel.FlxG;
-import flixel.FlxSprite;
 import flixel.FlxSubState;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
-import flixel.util.FlxColor;
+
 import shaders.IndieDiamondTransShader;
 
 class IndieDiamondTransSubState extends MusicBeatSubstate

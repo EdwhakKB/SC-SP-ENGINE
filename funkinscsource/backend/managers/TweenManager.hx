@@ -1,10 +1,6 @@
 package backend.managers;
 
-import flixel.util.FlxColor;
-import flixel.FlxSprite;
-import flixel.math.FlxPoint;
 import flixel.FlxObject;
-import flixel.tweens.FlxTween;
 
 class TweenManager extends FlxTweenManager
 {

@@ -1,15 +1,13 @@
 package states;
 
-import openfl.utils.Assets;
 import flixel.ui.FlxBar;
+
+import openfl.utils.Assets;
+
 #if sys
 import sys.FileSystem;
 #end
-import flixel.FlxG;
-import flixel.FlxSprite;
-import flixel.util.FlxColor;
-import flixel.util.FlxTimer;
-import flixel.text.FlxText;
+
 import objects.Character;
 import objects.Stage;
 

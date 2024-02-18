@@ -1,9 +1,6 @@
-package objects;
-
-import states.PlayState;
+package backend;
 
 //bcuz god damn it. those offset things in playstate take up a bunch of space
-
 class CharacterOffsets
 {
 	public var daOffsetArray:Array<Float> = [0, 0, 0, 0, 0, 0];

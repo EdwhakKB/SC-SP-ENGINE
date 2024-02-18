@@ -1,17 +1,24 @@
 package psychlua;
 
 import backend.WeekData;
+import backend.CharacterOffsets;
+
+import objects.HealthIcon;
 import objects.Character;
 
-import openfl.display.BlendMode;
 import Type.ValueType;
+
+import openfl.display.BlendMode;
+
 import shaders.FunkinSourcedShaders.ShaderEffectNew as ShaderEffectNew;
 import shaders.FunkinSourcedShaders;
 
 import substates.GameOverSubstate;
+
 #if LUA_ALLOWED
 import psychlua.FunkinLua;
 #end
+
 #if ((flixel == "5.3.1" || flixel >= "4.11.0" && flixel <= "5.0.0") && parallaxlt)
 import flixel_5_3_1.ParallaxSprite;
 #end
@@ -439,6 +446,9 @@ class LuaUtils
 				spr.frames = AtlasFrameMaker.construct(image, null, true);
 			#end
 
+			case "json" | 'aseprite' | 'jsoni8':
+				spr.frames = Paths.getJsonAtlas(image);
+
 			case "packer" | "packeratlas" | "pac":
 				spr.frames = Paths.getPackerAtlas(image);
 
@@ -532,7 +542,7 @@ class LuaUtils
 			return;
 		}
 		
-		var target:ModchartIcon = PlayState.instance.modchartIcons.get(tag);
+		var target:HealthIcon = PlayState.instance.modchartIcons.get(tag);
 		target.kill();
 		PlayState.instance.remove(target, true);
 		target.destroy();
@@ -742,21 +752,26 @@ class LuaUtils
 		return camera.cam;
 	}
 
-	public static function makeLuaCharacter(tag:String, character:String, isPlayer:Bool = false, flipped:Bool = false)
+	public static function makeLuaCharacter(tag:String, character:String, isPlayer:Bool = false, flipped:Bool = false, ?playAnimationBeforeSwitch:Bool = false)
 	{
-		if (!ClientPrefs.data.characters) return;
 		tag = tag.replace('.', '');
 
 		var animationName:String = "no way anyone have an anim name this big";
 		var animationFrame:Int = 0;	
 		var position:Int = -1;
-							
-		if (PlayState.instance.modchartCharacters.get(tag) != null)
+
+		if (ClientPrefs.data.characters)
 		{
-			var daChar:Character = PlayState.instance.modchartCharacters.get(tag);
-			animationName = daChar.animation.curAnim.name;
-			animationFrame = daChar.animation.curAnim.curFrame;
-			position = getTargetInstance().members.indexOf(daChar);
+			if (PlayState.instance.modchartCharacters.get(tag) != null)
+			{
+				var daChar:Character = PlayState.instance.modchartCharacters.get(tag);
+				if (playAnimationBeforeSwitch)
+				{
+					animationName = daChar.animation.curAnim.name;
+					animationFrame = daChar.animation.curAnim.curFrame;
+				}
+				position = getTargetInstance().members.indexOf(daChar);
+			}
 		}
 		
 		resetCharacterTag(tag);
@@ -765,12 +780,14 @@ class LuaUtils
 		leSprite.isCustomCharacter = true;
 		PlayState.instance.modchartCharacters.set(tag, leSprite); //yes
 		var shit:Character = PlayState.instance.modchartCharacters.get(tag);
-		getTargetInstance().add(shit);
+		if (ClientPrefs.data.characters) {
+			getTargetInstance().add(shit);
 
-		if (position >= 0) //this should keep them in the same spot if they switch
-		{
-			getTargetInstance().remove(shit, true);
-			getTargetInstance().insert(position, shit);
+			if (position >= 0) //this should keep them in the same spot if they switch
+			{
+				getTargetInstance().remove(shit, true);
+				getTargetInstance().insert(position, shit);
+			}
 		}
 
 		var charOffset = new CharacterOffsets(character, flipped);
@@ -801,10 +818,16 @@ class LuaUtils
 			shit.y = PlayState.instance.Stage.bfYOffset + charY + PlayState.instance.BF_Y;
 		}
 
-		if (shit.animOffsets.exists(animationName))
-			shit.playAnim(animationName, true, false, animationFrame);
+		if (ClientPrefs.data.characters)
+		{
+			if (playAnimationBeforeSwitch)
+			{
+				if (shit.animOffsets.exists(animationName))
+					shit.playAnim(animationName, true, false, animationFrame);
+			}
 
-		PlayState.instance.startCharacterScripts(shit.curCharacter);
+			PlayState.instance.startCharacterScripts(shit.curCharacter);
+		}
 	}
 
 	//Kade why tf is it not like in PlayState???
@@ -864,9 +887,8 @@ class LuaUtils
 	{
 		if (!ClientPrefs.data.characters) return;
 		var animationName:String = "no way anyone have an anim name this big";
-		var animationFrame:Int = 0;						
-		if (PlayState.instance.boyfriend.animation.curAnim.name.startsWith('sing') && playAnimationBeforeSwitch)
-		{
+		var animationFrame:Int = 0;
+		if (playAnimationBeforeSwitch){
 			animationName = PlayState.instance.boyfriend.animation.curAnim.name;
 			animationFrame = PlayState.instance.boyfriend.animation.curAnim.curFrame;
 		}
@@ -894,9 +916,11 @@ class LuaUtils
 		
 		PlayState.instance.reloadHealthBarColors();
 
-		if (PlayState.instance.boyfriend.animOffsets.exists(animationName) && playAnimationBeforeSwitch)
-			PlayState.instance.boyfriend.playAnim(animationName, true, false, animationFrame);
-
+		if (playAnimationBeforeSwitch)
+		{
+			if (PlayState.instance.boyfriend.animOffsets.exists(animationName))
+				PlayState.instance.boyfriend.playAnim(animationName, true, false, animationFrame);
+		}
 
 		PlayState.instance.startCharacterScripts(PlayState.instance.boyfriend.curCharacter);
 	}
@@ -905,8 +929,8 @@ class LuaUtils
 	{	
 		if (!ClientPrefs.data.characters) return;
 		var animationName:String = "no way anyone have an anim name this big";
-		var animationFrame:Int = 0;						
-		if (PlayState.instance.dad.animation.curAnim.name.startsWith('sing') && playAnimationBeforeSwitch)
+		var animationFrame:Int = 0;
+		if (playAnimationBeforeSwitch)
 		{
 			animationName = PlayState.instance.dad.animation.curAnim.name;
 			animationFrame = PlayState.instance.dad.animation.curAnim.curFrame;
@@ -934,8 +958,11 @@ class LuaUtils
 			
 		PlayState.instance.reloadHealthBarColors();
 
-		if (PlayState.instance.dad.animOffsets.exists(animationName) && playAnimationBeforeSwitch)
-			PlayState.instance.dad.playAnim(animationName, true, false, animationFrame);
+		if (playAnimationBeforeSwitch)
+		{
+			if (PlayState.instance.dad.animOffsets.exists(animationName))
+				PlayState.instance.dad.playAnim(animationName, true, false, animationFrame);
+		}
 
 		PlayState.instance.startCharacterScripts(PlayState.instance.dad.curCharacter);
 	}
@@ -964,8 +991,8 @@ class LuaUtils
 	{
 		if (!ClientPrefs.data.characters) return;
 		var animationName:String = "no way anyone have an anim name this big";
-		var animationFrame:Int = 0;						
-		if (PlayState.instance.mom.animation.curAnim.name.startsWith('sing') && playAnimationBeforeSwitch)
+		var animationFrame:Int = 0;
+		if (playAnimationBeforeSwitch)
 		{
 			animationName = PlayState.instance.mom.animation.curAnim.name;
 			animationFrame = PlayState.instance.mom.animation.curAnim.curFrame;
@@ -989,8 +1016,10 @@ class LuaUtils
 		PlayState.instance.mom.y = PlayState.instance.Stage.momYOffset + charY + PlayState.instance.MOM_Y;
 		PlayState.instance.addObject(PlayState.instance.mom);
 
-		if (PlayState.instance.mom.animOffsets.exists(animationName) && playAnimationBeforeSwitch)
-			PlayState.instance.mom.playAnim(animationName, true, false, animationFrame);
+		if (playAnimationBeforeSwitch){
+			if (PlayState.instance.mom.animOffsets.exists(animationName))
+				PlayState.instance.mom.playAnim(animationName, true, false, animationFrame);
+		}
 
 		PlayState.instance.startCharacterScripts(PlayState.instance.mom.curCharacter);
 	}
@@ -1090,6 +1119,11 @@ class LuaUtils
 					PlayState.instance.Stage.gfXOffset = x;
 				if (y != -10000)
 					PlayState.instance.Stage.gfYOffset = y;
+			case 'mom':
+				if (x != -10000)
+					PlayState.instance.Stage.momXOffset = x;
+				if (y != -10000)
+					PlayState.instance.Stage.momYOffset = y;
 			default:
 				if (x != -10000)
 					PlayState.instance.Stage.dadXOffset = x;

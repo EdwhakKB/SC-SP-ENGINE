@@ -2,6 +2,7 @@ package states;
 
 import flixel.FlxObject;
 import flixel.util.FlxSort;
+
 import objects.Bar;
 
 #if ACHIEVEMENTS_ALLOWED

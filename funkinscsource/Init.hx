@@ -1,19 +1,24 @@
 package;
 
-import states.MusicBeatState;
+import flixel.graphics.FlxGraphic;
+import flixel.FlxState;
+import flixel.addons.transition.FlxTransitionableState;
+
 import states.TitleState;
+import states.FlashingState;
+
 #if (cpp && windows)
 import cpp.CPPInterface;
 #end
+
 import debug.FPSCounter;
+
 import openfl.Lib;
-import flixel.graphics.FlxGraphic;
-import states.FlashingState;
-import flixel.FlxState;
+
 import backend.Highscore;
-import flixel.addons.transition.FlxTransitionableState;
-import lime.app.Application;
 import backend.Debug;
+
+import lime.app.Application;
 
 class Init extends FlxState
 {
@@ -94,10 +99,6 @@ class Init extends FlxState
 		#if DISCORD_ALLOWED
 		DiscordClient.prepare();
 		#end
-		
-		#if (cpp && windows)
-		CPPInterface.darkMode();
-		#end
 
 		#if cpp
 		cpp.NativeGc.enable(true);
@@ -123,5 +124,9 @@ class Init extends FlxState
 			if (!ClientPrefs.data.skipInitialCaching) FlxG.switchState(new InitialCachingState());
 			else FlxG.switchState(Type.createInstance(Main.game.initialState, []));
 		}
+
+		#if (cpp && windows)
+		CPPInterface.darkMode();
+		#end
 	}
 }

@@ -1,11 +1,13 @@
 package states;
 
 import tjson.TJSON as Json;
+
+import flixel.graphics.FlxGraphic;
+import flixel.util.FlxGradient;
+import flixel.effects.particles.FlxEmitter;
 import flixel.graphics.frames.FlxFrame;
 import flixel.group.FlxSpriteGroup;
 import flixel.input.keyboard.FlxKey;
-import flixel.graphics.frames.FlxFrame;
-import flixel.group.FlxGroup;
 import flixel.input.gamepad.FlxGamepad;
 import flixel.addons.transition.FlxTransitionableState;
 
@@ -16,12 +18,6 @@ import shaders.ColorSwap;
 import states.StoryMenuState;
 import states.OutdatedState;
 import states.MainMenuState;
-
-import flixel.graphics.FlxGraphic;
-import flixel.util.FlxGradient;
-import flixel.effects.particles.FlxEmitter;
-import flixel.math.FlxPoint;
-import flixel.math.FlxRect;
 
 @:structInit
 class TitleData {

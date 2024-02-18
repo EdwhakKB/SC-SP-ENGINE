@@ -5,9 +5,10 @@ import flixel.addons.display.FlxGridOverlay;
 import flixel.addons.display.shapes.FlxShapeCircle;
 import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepadInputID;
-import flixel.math.FlxPoint;
-import lime.system.Clipboard;
 import flixel.util.FlxGradient;
+
+import lime.system.Clipboard;
+
 import objects.StrumArrow;
 import objects.Note;
 
@@ -65,7 +66,7 @@ class NotesSubState extends MusicBeatSubstate
 		var grid:FlxBackdrop = new FlxBackdrop(FlxGridOverlay.createGrid(80, 80, 160, 160, true, 0x33FFFFFF, 0x0));
 		grid.velocity.set(40, 40);
 		grid.alpha = 0;
-		FlxTween.tween(grid, {alpha: 1}, 0.5, {ease: FlxEase.quadOut});
+		FlxTween.tween(grid, {alpha: 0.56}, 0.5, {ease: FlxEase.quadOut});
 		add(grid);
 
 		modeBG = new FlxSprite(215, 85).makeGraphic(315, 115, FlxColor.BLACK);

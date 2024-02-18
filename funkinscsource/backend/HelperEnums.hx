@@ -1,6 +1,5 @@
 package backend;
 
-import flixel.FlxG;
 import flixel.math.FlxMath;
 
 class HelperFunctions

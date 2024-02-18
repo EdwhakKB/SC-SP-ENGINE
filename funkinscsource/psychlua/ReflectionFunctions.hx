@@ -1,21 +1,23 @@
 package psychlua;
 
 import Type.ValueType;
+
 import haxe.Constraints;
 
 import substates.GameOverSubstate;
+
 import objects.Character;
+
 import lime.app.Application;
 
 //
 // Functions that use a high amount of Reflections, which are somewhat CPU intensive
 // These functions are held together by duct tape
 //
-
 class ReflectionFunctions
 {
 	static final instanceStr:Dynamic = "##PSYCHLUA_STRINGTOOBJ";
-	public static function implement(funk:FunkinLua)
+	public static function implement(funk:FunkinLua, game:PlayState)
 	{
 		funk.set("getProperty", function(variable:String, ?allowMaps:Bool = false) {
 			try{
@@ -158,16 +160,16 @@ class ReflectionFunctions
 		});
 		
 		funk.set("callMethod", function(funcToRun:String, ?args:Array<Dynamic> = null) {
-			return callMethodFromObject(PlayState.instance, funcToRun,  parseInstances(args));
+			return callMethodFromObject(game, funcToRun,  parseInstances(args, game));
 			
 		});
 		funk.set("callMethodFromClass", function(className:String, funcToRun:String, ?args:Array<Dynamic> = null) {
-			return callMethodFromObject(Type.resolveClass(className), funcToRun,  parseInstances(args));
+			return callMethodFromObject(Type.resolveClass(className), funcToRun,  parseInstances(args, game));
 		});
 
 		funk.set("createInstance", function(variableToSave:String, className:String, ?args:Array<Dynamic> = null) {
 			variableToSave = variableToSave.trim().replace('.', '');
-			if(!PlayState.instance.variables.exists(variableToSave))
+			if(!game.variables.exists(variableToSave))
 			{
 				if(args == null) args = [];
 				var myType:Dynamic = Type.resolveClass(className);
@@ -180,7 +182,7 @@ class ReflectionFunctions
 
 				var obj:Dynamic = Type.createInstance(myType, args);
 				if(obj != null)
-					PlayState.instance.variables.set(variableToSave, obj);
+					game.variables.set(variableToSave, obj);
 				else
 					FunkinLua.luaTrace('createInstance: Failed to create $variableToSave, arguments are possibly wrong.', false, false, FlxColor.RED);
 
@@ -190,15 +192,15 @@ class ReflectionFunctions
 			return false;
 		});
 		funk.set("addInstance", function(objectName:String, ?inFront:Bool = false) {
-			if(PlayState.instance.variables.exists(objectName))
+			if(game.variables.exists(objectName))
 			{
-				var obj:Dynamic = PlayState.instance.variables.get(objectName);
+				var obj:Dynamic = game.variables.get(objectName);
 				if (inFront)
 					LuaUtils.getTargetInstance().add(obj);
 				else
 				{
-					if(!PlayState.instance.isDead)
-						PlayState.instance.insert(PlayState.instance.members.indexOf(LuaUtils.getLowestCharacterPlacement()), obj);
+					if(!game.isDead)
+						game.insert(game.members.indexOf(LuaUtils.getLowestCharacterPlacement()), obj);
 					else
 						GameOverSubstate.instance.insert(GameOverSubstate.instance.members.indexOf(GameOverSubstate.instance.boyfriend), obj);
 				}
@@ -212,7 +214,7 @@ class ReflectionFunctions
 		});
 	}
 
-	static function parseInstances(args:Array<Dynamic>)
+	static function parseInstances(args:Array<Dynamic>, game:PlayState)
 	{
 		for (i in 0...args.length)
 		{
@@ -227,7 +229,7 @@ class ReflectionFunctions
 					var lastIndex:Int = myArg.lastIndexOf('::');
 
 					var split:Array<String> = myArg.split('.');
-					args[i] = (lastIndex > -1) ? Type.resolveClass(myArg.substring(0, lastIndex)) : PlayState.instance;
+					args[i] = (lastIndex > -1) ? Type.resolveClass(myArg.substring(0, lastIndex)) : game;
 					for (j in 0...split.length)
 					{
 						//trace('Op2: ${Type.getClass(args[i])}, ${split[j]}');

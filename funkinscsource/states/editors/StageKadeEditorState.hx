@@ -1,19 +1,15 @@
 package states.editors; //Thanks Jake!
 
-import flixel.util.FlxColor;
-import flixel.FlxG;
 import flixel.FlxObject;
-import flixel.text.FlxText;
-import flixel.FlxCamera;
-import flixel.FlxSprite;
-import openfl.events.Event;
-import openfl.events.IOErrorEvent;
-import openfl.net.FileReference;
-import objects.Stage;
-import flixel.tweens.FlxTween;
 import flixel.addons.ui.FlxUI;
 import flixel.addons.ui.FlxUIDropDownMenu;
 import flixel.addons.ui.FlxUITabMenu;
+
+import openfl.events.Event;
+import openfl.events.IOErrorEvent;
+import openfl.net.FileReference;
+
+import objects.Stage;
 import objects.Character;
 
 using StringTools;
@@ -100,7 +96,7 @@ class StageKadeEditorState extends states.MusicBeatState
 		startCharacterPos(mom, true);
 		startCharacterPos(boyfriend, false, true);
 
-		var gfOffset = new CharacterOffsets(PlayState.SONG.gfVersion, false, true);
+		var gfOffset = new backend.CharacterOffsets(PlayState.SONG.gfVersion, false, true);
 		var daGFX:Float = gfOffset.daOffsetArray[0];
 		var daGFY:Float = gfOffset.daOffsetArray[1];
 		gf.x += daGFX;

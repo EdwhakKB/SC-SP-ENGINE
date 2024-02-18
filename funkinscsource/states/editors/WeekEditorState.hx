@@ -2,7 +2,6 @@ package states.editors;
 
 import backend.WeekData;
 
-import openfl.utils.Assets;
 import flixel.addons.ui.FlxUI;
 import flixel.addons.ui.FlxUICheckBox;
 import flixel.addons.ui.FlxUIInputText;
@@ -10,11 +9,15 @@ import flixel.addons.ui.FlxUINumericStepper;
 import flixel.addons.ui.FlxUITabMenu;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.ui.FlxButton;
+
 import openfl.net.FileReference;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
-import flash.net.FileFilter;
+import openfl.net.FileFilter;
+import openfl.utils.Assets;
+
 import lime.system.Clipboard;
+
 import tjson.TJSON as Json;
 
 import objects.HealthIcon;

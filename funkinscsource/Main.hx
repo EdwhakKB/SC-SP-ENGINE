@@ -4,30 +4,39 @@ package;
 #if android
 import android.content.Context;
 #end
-import flixel.FlxG;
+
+import flixel.input.keyboard.FlxKey;
 import flixel.system.scaleModes.*;
 import flixel.graphics.FlxGraphic;
 import flixel.FlxGame;
-import haxe.io.Path;
+import flixel.system.FlxAssets.FlxShader;
+
+
 import openfl.Assets;
 import openfl.Lib;
-import debug.FPSCounter;
+#if CRASH_HANDLER
+import openfl.events.UncaughtErrorEvent;
+#end
 import openfl.display.Sprite;
 import openfl.events.Event;
 import openfl.display.StageScaleMode;
+import openfl.filters.ShaderFilter;
+import openfl.display.StageQuality;
+
+import debug.FPSCounter;
+
 import lime.app.Application;
 
 //crash handler stuff
 #if CRASH_HANDLER
-import openfl.events.UncaughtErrorEvent;
 import haxe.CallStack;
 import haxe.io.Path;
 #end
 
-//State things
+//Other Things
 import gamejolt.GameJolt.GJToastManager;
 import gamejolt.*;
-import flixel.input.keyboard.FlxKey;
+
 import states.TitleState;
 
 #if linux
@@ -85,6 +94,10 @@ class Main extends Sprite
 		addChild(new FlxGame(game.width, game.height, Init, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
 
 		FlxG.sound.volume = 0.2;
+
+		FlxG.game.setFilters([new ShaderFilter(new FlxShader())]);
+
+		FlxG.game.stage.quality = StageQuality.LOW;
 
 		#if !mobile
 		Lib.current.stage.align = "tl";

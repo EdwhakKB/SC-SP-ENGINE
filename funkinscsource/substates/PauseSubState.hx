@@ -5,11 +5,11 @@ import backend.Highscore;
 import backend.Song;
 
 import flixel.addons.transition.FlxTransitionableState;
-
 import flixel.util.FlxStringUtil;
 
 import states.StoryMenuState;
 import states.FreeplayState;
+
 import options.OptionsState;
 
 class PauseSubState extends MusicBeatSubstate
@@ -229,6 +229,8 @@ class PauseSubState extends MusicBeatSubstate
 			changeSelection(1);
 		}
 
+		if (FlxG.mouse.wheel != 0) changeSelection(-FlxG.mouse.wheel);
+
 		var daSelected:String = menuItems[curSelected];
 		switch (daSelected)
 		{
@@ -260,8 +262,12 @@ class PauseSubState extends MusicBeatSubstate
 				}
 		}
 
-		if (controls.ACCEPT && (cantUnpause <= 0 || !controls.controllerMode) && !inCountDown)
+		if ((controls.ACCEPT && (cantUnpause <= 0 || !controls.controllerMode)) && !inCountDown)
 		{
+			//Finally
+			stoppedUpdatingMusic = true;
+			destroyMusic();
+
 			if (menuItems == difficultyChoices)
 			{
 				try{
@@ -279,26 +285,35 @@ class PauseSubState extends MusicBeatSubstate
 					}					
 				}catch(e:Dynamic){
 					Debug.logTrace('ERROR! $e');
-
+	
 					var errorStr:String = e.toString();
-					if(errorStr.startsWith('[file_contents,assets/data/songs/')) errorStr = 'Missing file: ' + errorStr.substring(27, errorStr.length-1); //Missing chart
+					if(errorStr.startsWith('[lime.utils.Assets] ERROR:')) errorStr = 'Missing file: ' + errorStr.substring(errorStr.indexOf(Paths.formatToSongPath(PlayState.SONG.song)), errorStr.length-1); //Missing chart
 					missingText.text = 'ERROR WHILE LOADING CHART:\n$errorStr';
 					missingText.screenCenter(Y);
 					missingText.visible = true;
 					missingTextBG.visible = true;
 					FlxG.sound.play(Paths.sound('cancelMenu'));
-
+	
 					super.update(elapsed);
 					return;
 				}
-
+	
 				menuItems = menuItemsOG;
 				regenMenu();
 			}
+			menuOptions(daSelected);
+		}
+	}
 
-			switch (daSelected)
-			{
-				case "Resume":
+	var isCountDown:Bool = false;
+
+	function menuOptions(daSelected:String)
+	{
+		switch (daSelected)
+		{
+			case "Resume":
+				if (ClientPrefs.data.pauseCountDown)
+				{
 					unPauseTimer = new FlxTimer().start(Conductor.crochet / 1000 / music.pitch, function(hmmm:FlxTimer)
 					{
 						switch (hmmm.loopsLeft)
@@ -311,102 +326,100 @@ class PauseSubState extends MusicBeatSubstate
 								}
 						}
 					}, 5);
-					pauseMusic.volume = 0;
-					pauseMusic.destroy();
-					pauseMusic = null;
-					inCountDown = true;
-					menuItems = [];
-					deleteSkipTimeText();
-					stoppedUpdatingMusic = true;
-					regenMenu();
-				case 'Change Difficulty':
-					menuItems = difficultyChoices;
-					deleteSkipTimeText();
-					regenMenu();
-				case 'Toggle Practice Mode':
-					PlayState.instance.practiceMode = !PlayState.instance.practiceMode;
-					PlayState.changedDifficulty = true;
-					practiceText.visible = PlayState.instance.practiceMode;
-				case "Restart Song":
-					LoadingState.loadAndSwitchState(new PlayState());
-				case "Leave Charting Mode":
-					LoadingState.loadAndSwitchState(new PlayState());
-					PlayState.chartingMode = false;
-				case "Leave ModChart Mode":
-					LoadingState.loadAndSwitchState(new PlayState());
-					PlayState.modchartMode = false;
-				case 'Skip Time':
-					if(curTime < Conductor.songPosition)
+					isCountDown = true;
+				}
+				inCountDown = true;
+				menuItems = [];
+				deleteSkipTimeText();
+				regenMenu();
+				if (!isCountDown) close();
+			case 'Change Difficulty':
+				menuItems = difficultyChoices;
+				deleteSkipTimeText();
+				regenMenu();
+			case 'Toggle Practice Mode':
+				PlayState.instance.practiceMode = !PlayState.instance.practiceMode;
+				PlayState.changedDifficulty = true;
+				practiceText.visible = PlayState.instance.practiceMode;
+			case "Restart Song":
+				LoadingState.loadAndSwitchState(new PlayState());
+			case "Leave Charting Mode":
+				LoadingState.loadAndSwitchState(new PlayState());
+				PlayState.chartingMode = false;
+			case "Leave ModChart Mode":
+				LoadingState.loadAndSwitchState(new PlayState());
+				PlayState.modchartMode = false;
+			case 'Skip Time':
+				if(curTime < Conductor.songPosition)
+				{
+					PlayState.startOnTime = curTime;
+					restartSong(true);
+				}
+				else
+				{
+					if (curTime != Conductor.songPosition)
 					{
-						PlayState.startOnTime = curTime;
-						restartSong(true);
+						PlayState.instance.clearNotesBefore(curTime);
+						PlayState.instance.setSongTime(curTime);
 					}
-					else
-					{
-						if (curTime != Conductor.songPosition)
-						{
-							PlayState.instance.clearNotesBefore(curTime);
-							PlayState.instance.setSongTime(curTime);
-						}
-						close();
-					}
-				case 'Toggle Botplay':
-					PlayState.instance.cpuControlled = !PlayState.instance.cpuControlled;
-					PlayState.changedDifficulty = true;
-					PlayState.instance.botplayTxt.visible = PlayState.instance.cpuControlled;
-					PlayState.instance.botplayTxt.alpha = 1;
-					PlayState.instance.botplaySine = 0;
-				case 'Options':
-					PlayState.instance.paused = true; // For lua
-					PlayState.instance.vocals.volume = 0;
-					music.volume = 0;
-					MusicBeatState.switchState(new OptionsState());
-
-					stoppedUpdatingMusic = true;
-					pauseMusic.volume = 0;
-					pauseMusic.destroy();
-
-					if(ClientPrefs.data.pauseMusic != 'None')
-					{
-						FlxG.sound.playMusic(Paths.music(Paths.formatToSongPath(ClientPrefs.data.pauseMusic)));
-						FlxTween.tween(FlxG.sound.music, {volume: 1}, 0.8);
-					}
-					OptionsState.onPlayState = true;
-				case 'End Song':
 					close();
-					PlayState.instance.notes.clear();
-					PlayState.instance.unspawnNotes = [];
-					PlayState.instance.finishSong(true);
-				case "Exit to menu":
-					stoppedUpdatingMusic = true;
-					pauseMusic.volume = 0;
-					pauseMusic.destroy();
-					#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
-					PlayState.deathCounter = 0;
-					PlayState.seenCutscene = false;
+				}
+			case 'Toggle Botplay':
+				PlayState.instance.cpuControlled = !PlayState.instance.cpuControlled;
+				PlayState.changedDifficulty = true;
+				PlayState.instance.botplayTxt.visible = PlayState.instance.cpuControlled;
+				PlayState.instance.botplayTxt.alpha = 1;
+				PlayState.instance.botplaySine = 0;
+			case 'Options':
+				PlayState.instance.paused = true; // For lua
+				PlayState.instance.vocals.volume = 0;
+				music.volume = 0;
+				MusicBeatState.switchState(new OptionsState());
 
-					Mods.loadTopMod();
+				if(ClientPrefs.data.pauseMusic != 'None')
+				{
+					FlxG.sound.playMusic(Paths.music(Paths.formatToSongPath(ClientPrefs.data.pauseMusic)));
+					FlxTween.tween(FlxG.sound.music, {volume: 1}, 0.8);
+				}
+				OptionsState.onPlayState = true;
+			case 'End Song':
+				close();
+				PlayState.instance.notes.clear();
+				PlayState.instance.unspawnNotes = [];
+				PlayState.instance.finishSong(true);
+			case "Exit to menu":
+				#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
+				PlayState.deathCounter = 0;
+				PlayState.seenCutscene = false;
 
-					if(PlayState.isStoryMode) MusicBeatState.switchState(new StoryMenuState());
-					else MusicBeatState.switchState(new FreeplayState());
+				Mods.loadTopMod();
 
-					FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
-					PlayState.changedDifficulty = false;
-					PlayState.chartingMode = false;
-					PlayState.modchartMode = false;
-					PlayState.instance.alreadyEndedSong = false;
-					FlxG.camera.followLerp = 0;
-					if (PlayState.forceMiddleScroll){
-						if (PlayState.savePrefixScrollR && PlayState.prefixRightScroll){
-							ClientPrefs.data.middleScroll = false;
-						}
-					}else if (PlayState.forceRightScroll){
-						if (PlayState.savePrefixScrollM && PlayState.prefixMiddleScroll){
-							ClientPrefs.data.middleScroll = true;
-						}
+				if(PlayState.isStoryMode) MusicBeatState.switchState(new StoryMenuState());
+				else MusicBeatState.switchState(new FreeplayState());
+
+				FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
+				PlayState.changedDifficulty = false;
+				PlayState.chartingMode = false;
+				PlayState.modchartMode = false;
+				PlayState.instance.alreadyEndedSong = false;
+				FlxG.camera.followLerp = 0;
+				if (PlayState.forceMiddleScroll){
+					if (PlayState.savePrefixScrollR && PlayState.prefixRightScroll){
+						ClientPrefs.data.middleScroll = false;
 					}
-			}
+				}else if (PlayState.forceRightScroll){
+					if (PlayState.savePrefixScrollM && PlayState.prefixMiddleScroll){
+						ClientPrefs.data.middleScroll = true;
+					}
+				}
 		}
+	}
+
+	function destroyMusic()
+	{
+		pauseMusic.volume = 0;
+		pauseMusic.destroy();
+		pauseMusic = null;
 	}
 
 	var CDANumber:Int = 5;

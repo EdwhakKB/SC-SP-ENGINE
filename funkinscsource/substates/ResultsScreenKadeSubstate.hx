@@ -1,11 +1,11 @@
 package substates;
 
-import flixel.FlxCamera;
-import flixel.sound.FlxSound;
 import flixel.util.FlxSpriteUtil;
 
 import backend.*;
+
 import states.*;
+
 import objects.*;
 
 using StringTools;
@@ -87,7 +87,7 @@ class ResultsScreenKadeSubstate extends substates.MusicBeatSubstate
 		settingsText.scrollFactor.set();
 	}
 
-	var camResults:FlxCamera;
+	public static var camResults:FlxCamera;
 	var mean:Float = 0;
 
 	override public function create()
@@ -107,7 +107,7 @@ class ResultsScreenKadeSubstate extends substates.MusicBeatSubstate
 		add(background);
 		if (PlayState.inResults)
 		{
-			music.pitch = game.playbackRate;
+			music.pitch = ClientPrefs.getGameplaySetting('songspeed');
 			music.play(false, FlxG.random.int(0, Std.int(music.length / 2)));
 			FlxG.sound.list.add(music);
 		}
@@ -251,7 +251,7 @@ class ResultsScreenKadeSubstate extends substates.MusicBeatSubstate
 
 		// keybinds
 
-		if ((controls.ACCEPT || FlxG.mouse.pressed) && PlayState.inResults)
+		if ((controls.ACCEPT || FlxG.mouse.pressed) && PlayState.inResults && !fadingMusic)
 		{
 			if (music != null){
 				fadingMusic = true;
@@ -280,7 +280,7 @@ class ResultsScreenKadeSubstate extends substates.MusicBeatSubstate
 			}
 		}
 
-		if (FlxG.keys.justPressed.H && PlayState.inResults)
+		if (FlxG.keys.justPressed.H && PlayState.inResults && !fadingMusic)
 		{
 			if (music != null)
 			{

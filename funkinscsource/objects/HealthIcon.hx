@@ -1,7 +1,9 @@
 package objects;
 
 import haxe.Json as Json;
+
 import lime.utils.Assets;
+
 import flixel.math.FlxMath;
 
 class HealthIcon extends FlxSprite
@@ -263,10 +265,8 @@ class HealthIcon extends FlxSprite
 				var animLoop:Bool = !!anim.loop; // Bruh
 				var animFlipY:Bool = !!anim.flipY;
 				var animIndices:Array<Int> = anim.indices;
-				if (animIndices != null && animIndices.length > 0)
-					animation.addByIndices(animAnim, animName, animIndices, "", animFps, animLoop, isPlayer, animFlipY);
-				else
-					animation.addByPrefix(animAnim, animName, animFps, animLoop, isPlayer, animFlipY);
+				if (animIndices != null && animIndices.length > 0) animation.addByIndices(animAnim, animName, animIndices, "", animFps, animLoop, isPlayer, animFlipY);
+				else animation.addByPrefix(animAnim, animName, animFps, animLoop, isPlayer, animFlipY);
 	
 				var offsets:Array<Int> = anim.offsets;
 				var swagOffsets:Array<Int> = offsets;

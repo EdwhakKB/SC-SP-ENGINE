@@ -23,7 +23,7 @@
 		'stepCrochet', "Float", "crochet / 4", "Steps in miliseconds", --Grabs crochet and divides by 4
 		'songLength', "Float", "music.length", "music's Length", --inst.length when playstate or if not then FlxG.sound.music.length;
 		'songName', "String", "Song Id", "Song's name", --Grabs PlayState.SONG.songId;
-		'songPath', "String", "Song's path", "Song's formated path", --Grabs Paths.formatToSongPath(PlayState.SONG.songId);
+		'songPath', "String", "Song's path", "Song's formatted path", --Grabs Paths.formatToSongPath(PlayState.SONG.songId);
 		'startedCountDown', "Boolean", "false", "if count down has started",
 		'curStage', "String", "stage", "PlayState's SONG Stage", --Grabs PlayState.SONG.stage;
 

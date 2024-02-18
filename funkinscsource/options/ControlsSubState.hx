@@ -1,10 +1,11 @@
 package options;
 
 import backend.InputFormatter;
-import flixel.addons.display.FlxBackdrop;
-import flixel.addons.display.FlxGridOverlay;
+
 import objects.AttachedSprite;
 
+import flixel.addons.display.FlxBackdrop;
+import flixel.addons.display.FlxGridOverlay;
 import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepad;
 import flixel.input.gamepad.FlxGamepadInputID;
@@ -88,7 +89,7 @@ class ControlsSubState extends MusicBeatSubstate
 		var grid:FlxBackdrop = new FlxBackdrop(FlxGridOverlay.createGrid(80, 80, 160, 160, true, 0x33FFFFFF, 0x0));
 		grid.velocity.set(40, 40);
 		grid.alpha = 0;
-		FlxTween.tween(grid, {alpha: 1}, 0.5, {ease: FlxEase.quadOut});
+		FlxTween.tween(grid, {alpha: 0.56}, 0.5, {ease: FlxEase.quadOut});
 		add(grid);
 
 		grpDisplay = new FlxTypedGroup<Alphabet>();

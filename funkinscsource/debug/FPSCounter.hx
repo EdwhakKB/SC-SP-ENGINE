@@ -3,10 +3,11 @@ package debug;
 import openfl.events.Event;
 import openfl.text.TextField;
 import openfl.text.TextFormat;
-import flixel.FlxG;
 import openfl.Lib;
 import openfl.system.System;
+
 import haxe.Int64;
+
 import flixel.util.FlxStringUtil;
 
 #if cpp

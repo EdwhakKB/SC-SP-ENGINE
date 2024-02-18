@@ -1,8 +1,8 @@
 package objects;
 
 import shaders.RGBPalette;
+
 import flixel.system.FlxAssets.FlxShader;
-import flixel.FlxG;
 
 typedef NoteSplashConfig = {
 	anim:String,
@@ -58,7 +58,7 @@ class NoteSplash extends FlxSkewed
 				skin = "notes/noteSplashes-"+ styleChoice;
 			else{
 				if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) skin = PlayState.SONG.splashSkin;
-				else skin = (PlayState.SONG != null && PlayState.SONG.disableNoteRGB) ? 'noteSplashes' : defaultNoteSplash + getSplashSkinPostfix();
+				else skin = (PlayState.SONG != null && PlayState.SONG.disableSplashRGB) ? 'noteSplashes' : defaultNoteSplash + getSplashSkinPostfix();
 			}
 		}
 		else
@@ -76,7 +76,7 @@ class NoteSplash extends FlxSkewed
 				skin = "notes/noteSplashes-"+ styleChoice;
 			else{
 				if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) skin = PlayState.SONG.splashSkin;
-				else skin = (PlayState.SONG != null && PlayState.SONG.disableNoteRGB) ? 'noteSplashes' : defaultNoteSplash + getSplashSkinPostfix();
+				else skin = (PlayState.SONG != null && PlayState.SONG.disableSplashRGB) ? 'noteSplashes' : defaultNoteSplash + getSplashSkinPostfix();
 			}
 		}
 
@@ -121,7 +121,7 @@ class NoteSplash extends FlxSkewed
 			{
 				if(note != null && note.noteSplashData.texture != null) texture = note.noteSplashData.texture;
 				else if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) texture = PlayState.SONG.splashSkin;
-				else texture = (PlayState.SONG != null && PlayState.SONG.disableNoteRGB) ? 'noteSplashes' : defaultNoteSplash + getSplashSkinPostfix();
+				else texture = (PlayState.SONG != null && PlayState.SONG.disableSplashRGB) ? 'noteSplashes' : defaultNoteSplash + getSplashSkinPostfix();
 			}
 		}
 		else
@@ -141,7 +141,7 @@ class NoteSplash extends FlxSkewed
 			{
 				if(note != null && note.noteSplashData.texture != null) texture = note.noteSplashData.texture;
 				else if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) texture = PlayState.SONG.splashSkin;
-				else texture = (PlayState.SONG != null && PlayState.SONG.disableNoteRGB) ? 'noteSplashes' : defaultNoteSplash + getSplashSkinPostfix();
+				else texture = (PlayState.SONG != null && PlayState.SONG.disableSplashRGB) ? 'noteSplashes' : defaultNoteSplash + getSplashSkinPostfix();
 			}
 		}
 
@@ -153,7 +153,7 @@ class NoteSplash extends FlxSkewed
 		else config = precacheConfig(_configLoaded);
 
 		var tempShader:RGBPalette = null;
-		if((note == null || note.noteSplashData.useRGBShader) && (PlayState.SONG == null || !PlayState.SONG.disableNoteRGB))
+		if((note == null || note.noteSplashData.useRGBShader) && (PlayState.SONG == null || !PlayState.SONG.disableSplashRGB))
 		{
 			// If Note RGB is enabled:
 			if(note != null && !note.noteSplashData.useGlobalShader)

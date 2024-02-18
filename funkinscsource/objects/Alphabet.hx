@@ -1,7 +1,5 @@
 package objects;
 
-import flixel.math.FlxPoint;
-
 enum Alignment
 {
 	LEFT;
@@ -402,6 +400,29 @@ class AlphaCharacter extends FlxSprite
 			}
 		}
 		updateHitbox();
+	}
+
+	var prevY:Float = 0;
+	var elapsedTotal:Float = 0;
+	var number:Int = 0;
+
+	override public function update(elapsed:Float)
+	{
+		super.update(elapsed);
+
+		// i love math
+		if (elapsed > 0) {
+			displacementFormula();
+		}
+	}
+
+	public function displacementFormula() {
+		elapsedTotal += FlxG.elapsed;
+		var elapsedAverage:Float = (1 / FlxG.drawFramerate);
+		var formula:Float = Math.sin(Math.PI * (elapsedTotal + ((number * elapsedAverage) * 24))) * 1.5 * ((FlxG.elapsed / (1 / 120)) / 16);
+		prevY += y;
+		y = prevY + formula;
+		prevY -= y + formula;
 	}
 
 	public static function isTypeAlphabet(c:String) // thanks kade

@@ -6,241 +6,23 @@ import lime.app.Future;
 import flixel.FlxState;
 
 import openfl.utils.Assets;
+
 import lime.utils.Assets as LimeAssets;
 import lime.utils.AssetLibrary;
 import lime.utils.AssetManifest;
 
-import backend.StageData;
-
 import haxe.io.Path;
 
-import flixel.ui.FlxBar;
-import flixel.util.FlxColor;
-import flixel.sound.FlxSound;
-import flixel.text.FlxText;
-
 import flixel.addons.transition.FlxTransitionableState;
-import flixel.FlxG;
-import backend.Song;
+import flixel.ui.FlxBar;
+
 import objects.Character;
+
+import backend.StageData;
+import backend.Song;
 import backend.CoolUtil;
 
 using StringTools;
-
-class AsyncAssetPreloader
-{
-	var characters:Array<String> = [];
-	var stages:Array<String> = [];
-	var audio:Array<String> = [];
-	var Stage:Stage;
-
-	var onComplete:Void->Void = null;
-
-	public var percent(get, default):Float = 0;
-	private function get_percent()
-	{
-		if (totalLoadCount > 0)
-		{
-			percent = loadedCount/totalLoadCount;
-		}
-
-		return percent;
-	}
-	public var totalLoadCount:Int = 0;
-	public var loadedCount:Int = 0;
-
-	public function new(onComplete:Void->Void)
-	{
-		this.onComplete = onComplete;
-		generatePreloadList();
-	}
-
-	private function generatePreloadList()
-	{
-		var events:Array<Dynamic> = [];
-		var eventStr:String = '';
-		var eventNoticed:String = '';
-
-		if (PlayState.SONG != null)
-		{
-			characters.push(PlayState.SONG.player1);
-			characters.push(PlayState.SONG.player2);
-			characters.push(PlayState.SONG.gfVersion);
-			characters.push(PlayState.SONG.player4);
-	
-			#if SCEFEATURES_ALLOWED
-			audio.push(Paths.inst((PlayState.SONG.instrumentalPrefix != null ? PlayState.SONG.instrumentalPrefix : ''), PlayState.SONG.songId, (PlayState.SONG.instrumentalSuffix != null ? PlayState.SONG.instrumentalSuffix : '')));
-			audio.push(Paths.voices((PlayState.SONG.vocalsPrefix != null ? PlayState.SONG.vocalsPrefix : ''), PlayState.SONG.songId, (PlayState.SONG.vocalsSuffix != null ? PlayState.SONG.vocalsSuffix : '')));
-			#else
-			audio.push(Paths.inst(PlayState.SONG.songId));
-			audio.push(Paths.voices(PlayState.SONG.songId));
-			#end
-
-			var charactersString:Array<String> = Mods.mergeAllTextsNamed('data/songs/${PlayState.SONG.songId.toLowerCase()}/preload.txt', Paths.getSharedPath());
-			for (i in 0...characters.length) 
-			{
-				var data:Array<String> = characters[i].split(' ');
-				characters.push(data[0]);
-			}
-
-			var stages:Array<String> = Mods.mergeAllTextsNamed('data/songs/${PlayState.SONG.songId.toLowerCase()}/preload-stage.txt', Paths.getSharedPath());
-			for (i in 0...stages.length) 
-			{
-				var data:Array<String> = stages[i].split(' ');
-				stages.push(data[0]);
-			}
-
-			// if(PlayState.SONG.events.length > 0)
-			// {
-			// 	for(event in PlayState.SONG.events)
-			// 	{
-			// 		for (i in 0...event[1].length)
-			// 			{
-			// 				eventStr = event[1][i][0].toLowerCase();
-			// 				eventNoticed = event[1][i][2];
-			// 			}
-			// 		events.push(event);
-			// 	}
-			// }
-	
-			// if(Assets.exists(Paths.songEvents(PlayState.SONG.songId.toLowerCase())))
-			// {
-			// 	var eventFunnies:Array<Dynamic> = Song.parseJSONshit(Assets.getText(Paths.songEvents(PlayState.SONG.songId.toLowerCase()))).events;
-	
-			// 	for(event in eventFunnies)
-			// 	{
-			// 		for (i in 0...event[1].length)
-			// 			{
-			// 				eventStr = event[1][i][0].toLowerCase();
-			// 				eventNoticed = event[1][i][2];
-			// 			}
-			// 		events.push(event);
-			// 	}
-			// }
-			// if (events.length > 0)
-			// {
-			// 	events.sort(function(a, b){
-			// 		if (a[1] < b[1])
-			// 			return -1;
-			// 		else if (a[1] > b[1])
-			// 			return 1;
-			// 		else
-			// 			return 0;
-			// 	});
-			// }
-			// for(event in events)
-			// {
-			// 	switch(eventStr)
-			// 	{
-			// 		case "change character": 
-			// 			if (!characters.contains(eventNoticed))
-			// 				characters.push(eventNoticed);
-			// 	}
-			// }
-		}
-
-		totalLoadCount = audio.length + characters.length + stages.length-1; //do -1 because it will be behind at the end when theres a small freeze
-	}
-
-	public function load(async:Bool = true)
-	{
-		if (async)
-		{
-			trace('loading async');
-		
-			var multi:Bool = false;
-
-			if (multi) //sometimes faster, sometimes slower, wont bother using it
-			{
-				setupFuture(function()
-				{
-					loadAudio();
-					return true;
-				});
-				setupFuture(function()
-				{
-					loadCharacters();
-					return true;
-				});
-				setupFuture(function()
-				{
-					loadStages();
-					return true;
-				});
-			}
-			else 
-			{
-				setupFuture(function()
-				{
-					loadAudio();
-					loadCharacters();
-					loadStages();
-					return true;
-				});
-			}
-
-
-		}
-		else 
-		{
-			loadAudio();
-			loadCharacters();
-			loadStages();
-			finish();
-		}
-	}
-	function setupFuture(func:Void->Bool)
-	{
-		var fut:Future<Bool> = new Future(func, true);
-		fut.onComplete(function(ashgfjkasdfhkjl) {
-			finish();
-		});
-		fut.onError(function(_) {
-			finish(); //just continue anyway who cares
-		});
-		totalFinishes++;
-	}
-	var totalFinishes:Int = 0;
-	var finshCount:Int = 0;
-	private function finish()
-	{
-		finshCount++;
-		if (finshCount < totalFinishes)
-			return;
-
-		if (onComplete != null)
-			onComplete();
-	}
-	public function loadAudio()
-	{
-		for (i in audio)
-		{
-			loadedCount++;
-			new FlxSound().loadEmbedded(i);
-		}
-		trace('loaded audio');
-	}
-	public function loadCharacters()
-	{
-		for (i in characters)
-		{
-			loadedCount++;
-			new Character(0, 0, i);
-		}
-		trace('loaded characters');
-	}
-
-	public function loadStages()
-	{
-		for (i in stages)
-		{
-			loadedCount++;
-			Stage = new Stage(i, false);
-			Stage.setupStageProperties(i, false, true);
-			trace('loaded stages');
-		}
-	}
-}
 
 class LoadingState extends MusicBeatState
 {
@@ -271,7 +53,6 @@ class LoadingState extends MusicBeatState
 	var funkay:FlxSprite;
 	var loadBar:FlxSprite;
 
-	var loader:AsyncAssetPreloader = null;
 	var loadingBar:FlxBar;
 	var loadingText:FlxText;
 	var lerpedPercent:Float = 0;
@@ -308,43 +89,30 @@ class LoadingState extends MusicBeatState
 		loadingText.setFormat(Paths.font("vcr.ttf"), 24, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(loadingText);
 
-		/*if (!ClientPrefs.data.cacheOnGPU)
-		{
-			loader = new AsyncAssetPreloader(function()
+		loadingBar.visible = false;
+
+		final WAIT_TIME:Float = 1.0;
+
+		initSongsManifest().onComplete
+		(
+			function (lib)
 			{
-				//FlxTransitionableState.skipNextTransOut = true;
-				trace("Load time: " + loadTime);
-				onLoad();
-			});
-			loader.load(true);
-		}
-		else
-		{*/
-			loadingBar.visible = false;
-
-			final WAIT_TIME:Float = 1.0;
-
-			initSongsManifest().onComplete
-			(
-				function (lib)
-				{
-					callbacks = new MultiCallback(onLoad);
-					var introComplete = callbacks.add("introComplete");
-					if (PlayState.SONG != null) {
-						checkLoadSong(getSongPath());
-						if (PlayState.SONG.needsVoices)
-							checkLoadSong(getVocalPath());
-					}
-					if(directory != null && directory.length > 0 && directory != 'shared') {
-						checkLibrary('week_assets');
-					}
-
-					var fadeTime = 0.5;
-					FlxG.camera.fade(FlxG.camera.bgColor, fadeTime, true);
-					new FlxTimer().start(fadeTime + WAIT_TIME, function(_) introComplete());
+				callbacks = new MultiCallback(onLoad);
+				var introComplete = callbacks.add("introComplete");
+				if (PlayState.SONG != null) {
+					checkLoadSong(getSongPath());
+					if (PlayState.SONG.needsVoices)
+						checkLoadSong(getVocalPath());
 				}
-			);
-		//}
+				if(directory != null && directory.length > 0 && directory != 'shared') {
+					checkLibrary('week_assets');
+				}
+
+				var fadeTime = 0.5;
+				FlxG.camera.fade(FlxG.camera.bgColor, fadeTime, true);
+				new FlxTimer().start(fadeTime + WAIT_TIME, function(_) introComplete());
+			}
+		);
 	}
 	
 	function checkLoadSong(path:String)
@@ -384,12 +152,6 @@ class LoadingState extends MusicBeatState
 			FlxTween.tween(FlxG.camera, {zoom: 1}, 1.2);
 		}
 
-		if (loader != null)
-		{
-			loadTime += elapsed;
-			lerpedPercent = FlxMath.lerp(lerpedPercent, loader.percent, elapsed*8);
-			loadingText.text = "Loading... (" + loader.loadedCount + "/" + (loader.totalLoadCount+1) + ")";
-		}
 		if(callbacks != null) {
 			targetShit = FlxMath.remapToRange(callbacks.numRemaining / callbacks.length, 1, 0, 0, 1);
 		}
@@ -442,36 +204,14 @@ class LoadingState extends MusicBeatState
 
 		Paths.setCurrentLevel(directory);
 		Debug.logInfo('Setting asset folder to ' + directory);
-		/*#if NO_PRELOAD_ALL
-		var loaded:Bool = false;
-		if (PlayState.SONG != null) {
-			loaded = isSoundLoaded(getSongPath()) && (!PlayState.SONG.needsVoices || isSoundLoaded(getVocalPath())) && isLibraryLoaded('week_assets');
-		}
-		
-		if (!loaded)
-			return new LoadingState(target, stopMusic, directory);
-		#end*/
+
 		if (stopMusic && FlxG.sound.music != null){
 			FlxG.sound.music.stop();
 			FlxG.sound.music.destroy();
 		}
 		return target;
-		// if (ClientPrefs.data.cacheOnGPU) return target;
-		// else return new LoadingState(target, stopMusic, directory);
 	}
 	
-	/*#if NO_PRELOAD_ALL
-	static function isSoundLoaded(path:String):Bool
-	{
-		Debug.logTrace(path);
-		return Assets.cache.hasSound(path);
-	}
-	
-	static function isLibraryLoaded(library:String):Bool
-	{
-		return Assets.getLibrary(library) != null;
-	}
-	#end*/
 
 	override function destroy()
 	{

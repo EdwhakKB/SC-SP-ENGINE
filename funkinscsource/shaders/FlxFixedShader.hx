@@ -1,12 +1,12 @@
 package shaders;
 
 import openfl.display3D.Program3D;
+
 import flixel.system.FlxAssets.FlxShader;
 
 using StringTools;
 
 // goddamn prefix
-
 @:access(openfl.display3D.Context3D)
 @:access(openfl.display3D.Program3D)
 @:access(openfl.display.ShaderInput)

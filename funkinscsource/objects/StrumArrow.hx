@@ -39,7 +39,7 @@ class StrumArrow extends FlxSkewed
 		#end
 		rgbShader = new RGBShaderReference(this, Note.initializeGlobalRGBShader(leData));
 		rgbShader.enabled = false;
-		if(PlayState.SONG != null && PlayState.SONG.disableNoteRGB) useRGBShader = false;
+		if(PlayState.SONG != null && PlayState.SONG.disableStrumRGB) useRGBShader = false;
 		
 		var arr:Array<FlxColor> = ClientPrefs.data.arrowRGB[leData];
 		if(texture.contains('pixel') || style.contains('pixel') || containsPixelTexture) arr = ClientPrefs.data.arrowRGBPixel[leData];
@@ -125,7 +125,7 @@ class StrumArrow extends FlxSkewed
 						}
 						else
 						{
-							if (PlayState.SONG != null && PlayState.SONG.disableNoteRGB)
+							if (PlayState.SONG != null && PlayState.SONG.disableStrumRGB)
 							{
 								loadGraphic(Paths.image('pixelUI/NOTE_assets'));
 								width = width / 4;
@@ -155,7 +155,7 @@ class StrumArrow extends FlxSkewed
 						}
 						else
 						{
-							if (PlayState.SONG != null && PlayState.SONG.disableNoteRGB)
+							if (PlayState.SONG != null && PlayState.SONG.disableStrumRGB)
 							{
 								frames = Paths.getSparrowAtlas('NOTE_assets', null, !ClientPrefs.data.cacheOnGPU);
 							}else{

@@ -1,16 +1,20 @@
 package states;
 
 import backend.WeekData;
+
 import flixel.FlxObject;
 import flixel.addons.transition.FlxTransitionableState;
-import flixel.effects.FlxFlicker;
-import flixel.input.keyboard.FlxKey;
-import lime.app.Application;
-import states.editors.MasterEditorMenu;
-import options.OptionsState;
 import flixel.addons.display.FlxBackdrop;
 import flixel.addons.display.FlxGridOverlay;
+import flixel.effects.FlxFlicker;
+import flixel.input.keyboard.FlxKey;
 import flixel.input.mouse.FlxMouseEvent;
+
+import lime.app.Application;
+
+import states.editors.MasterEditorMenu;
+
+import options.OptionsState;
 
 class MainMenuState extends MusicBeatState
 {
@@ -194,7 +198,7 @@ class MainMenuState extends MusicBeatState
 		grid = new FlxBackdrop(FlxGridOverlay.createGrid(80, 80, 160, 160, true, 0x33FFFFFF, 0x0));
 		grid.velocity.set(FlxG.random.bool(50) ? 90 : -90, FlxG.random.bool(50) ? 90 : -90);
 		grid.alpha = 0;
-		FlxTween.tween(grid, {alpha: 0.7}, 0.5, {ease: FlxEase.quadOut});
+		FlxTween.tween(grid, {alpha: 0.56}, 0.5, {ease: FlxEase.quadOut});
 		add(grid);
 
 		menuItems = new FlxTypedGroup<FlxSprite>();
