@@ -1354,7 +1354,9 @@ class PlayState extends MusicBeatState
 			else if (ClientPrefs.data.colorBarType == 'Reversed Colors') FlxTween.color(timeBarNew.leftBar, 3, FlxColor.fromString(boyfriend.iconColorFormatted), FlxColor.fromString(dad.iconColorFormatted), {ease: FlxEase.expoOut, type: PINGPONG});
 		}
 
-		if (ClientPrefs.data.resultsScreenType == 'KADE') subStates.push(new ResultsScreenKadeSubstate()); // 0
+		if (ClientPrefs.data.resultsScreenType == 'KADE') {
+			subStates.push(new ResultsScreenKadeSubstate(camFollow)); // 0
+		}
 	}
 
 	public var stopCountDown:Bool = false;
@@ -4755,8 +4757,6 @@ class PlayState extends MusicBeatState
 
 					if (ClientPrefs.data.resultsScreenType == 'KADE')
 					{
-						/*ResultsScreenKadeSubstate.camResults.follow(camFollow, LOCKON, 0);
-						ResultsScreenKadeSubstate.camResults.snapToTarget();*/
 						if (persistentUpdate != false) persistentUpdate = false;
 						openSubState(subStates[0]);
 						inResults = true;
@@ -4830,8 +4830,6 @@ class PlayState extends MusicBeatState
 
 				if (ClientPrefs.data.resultsScreenType == 'KADE')
 				{
-					/*ResultsScreenKadeSubstate.camResults.follow(camFollow, LOCKON, 0);
-					ResultsScreenKadeSubstate.camResults.snapToTarget();*/
 					if (persistentUpdate != false) persistentUpdate = false;
 					openSubState(subStates[0]);
 					inResults = true;

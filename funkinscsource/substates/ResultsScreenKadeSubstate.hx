@@ -35,10 +35,16 @@ class ResultsScreenKadeSubstate extends substates.MusicBeatSubstate
 
 	private var game:PlayState = PlayState.instance;
 
-	public function new()
+	var camFollow:flixel.FlxObject;
+
+	public function new(follow:flixel.FlxObject)
 	{
 		super();
 		instance = this;
+
+		camFollow = new flixel.FlxObject(0, 0, 1, 1);
+		add(camFollow);
+		camFollow.setPosition(follow.x, follow.y);
 
 		openCallback = refresh;
 
@@ -94,8 +100,11 @@ class ResultsScreenKadeSubstate extends substates.MusicBeatSubstate
 	{
 		camResults = new FlxCamera();
 		FlxG.cameras.add(camResults, false);
-        //FlxCamera.defaultCameras = [camResults];
 		FlxG.cameras.setDefaultDrawTarget(camResults, true);
+
+		camResults.follow(camFollow, LOCKON, 0);
+		camResults.zoom = FlxG.camera.zoom;
+		camResults.snapToTarget();
 
 		#if SCEFEATURES_ALLOWED
 		music = new FlxSound().loadEmbedded(Paths.inst((PlayState.SONG.instrumentalPrefix != null ? PlayState.SONG.instrumentalPrefix : ''), PlayState.SONG.songId, (PlayState.SONG.instrumentalSuffix != null ? PlayState.SONG.instrumentalSuffix : '')), true, true);
