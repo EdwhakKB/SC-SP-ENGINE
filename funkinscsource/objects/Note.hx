@@ -49,6 +49,7 @@ typedef NoteSplashData = {
 class Note extends FlxSkewed
 {
 	public static var globalRgbShaders:Array<RGBPalette> = [];
+	public static var globalQuantRgbShaders:Array<RGBPalette> = [];
 	public static var instance:Note = null;
 
 	#if SCEModchartingTools
@@ -164,6 +165,7 @@ class Note extends FlxSkewed
 
 	//Quant Stuff
 	public var quantColorsOnNotes:Bool = true;
+	public var quantizedNotes:Bool = false;
 
 	//Extra support for textures
 	public var containsPixelTexture:Bool = false;
@@ -205,9 +207,20 @@ class Note extends FlxSkewed
 		}
 	}
 
+	public function defaultRGBQuant() {
+		var arrQuantRGB:Array<FlxColor> = ClientPrefs.data.arrowRGBQuantize[noteData];
+
+		if (noteData > -1 && noteData <= arrQuantRGB.length)
+		{
+			rgbShader.r = arrQuantRGB[0];
+			rgbShader.g = arrQuantRGB[0];
+			rgbShader.b = arrQuantRGB[2];
+		}	
+	}
+
 	private function set_noteType(value:String):String {
 		noteSplashData.texture = PlayState.SONG != null ? PlayState.SONG.splashSkin : 'noteSplashes';
-		defaultRGB();
+		quantizedNotes ? defaultRGBQuant() : defaultRGB();
 
 		if(noteData > -1 && noteType != value) {
 			switch(value) {
@@ -283,7 +296,7 @@ class Note extends FlxSkewed
 
 		if(noteData > -1) {
 			texture = noteSkin;
-			rgbShader = new RGBShaderReference(this, initializeGlobalRGBShader(noteData));
+			rgbShader = new RGBShaderReference(this, quantizedNotes ? initializeGlobalQuantRGBShader(noteData) : initializeGlobalRGBShader(noteData));
 			if(PlayState.SONG != null && PlayState.SONG.disableNoteRGB) rgbShader.enabled = false;
 
 			x += swagWidth * (noteData);
@@ -373,6 +386,25 @@ class Note extends FlxSkewed
 		}
 		return globalRgbShaders[noteData];
 	}
+
+	public static function initializeGlobalQuantRGBShader(noteData:Int)
+	{
+		if(globalQuantRgbShaders[noteData] == null)
+		{
+			var newRGB:RGBPalette = new RGBPalette();
+			globalQuantRgbShaders[noteData] = newRGB;
+
+			var arr:Array<FlxColor> = ClientPrefs.data.arrowRGBQuantize[noteData];
+
+			if (noteData > -1 && noteData <= arr.length)
+			{
+				newRGB.r = arr[0];
+				newRGB.g = arr[1];
+				newRGB.b = arr[2];
+			}
+		}
+		return globalQuantRgbShaders[noteData];
+	}	
 
 	var _lastNoteOffX:Float = 0;
 	static var _lastValidChecked:String; //optimization

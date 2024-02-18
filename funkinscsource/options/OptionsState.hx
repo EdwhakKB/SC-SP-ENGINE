@@ -8,14 +8,17 @@ import flixel.FlxObject;
 
 class OptionsState extends MusicBeatState
 {
-	var options:Array<String> = ['Note Colors', 'Controls', 'Adjust Delay and Combo', 'Graphics', 'Visuals and UI', 'Gameplay', 'Misc', 'Game Jolt Login'];
+	var options:Array<String> = ['Note Options', 'Controls', 'Adjust Delay and Combo', 'Graphics', 'Visuals and UI', 'Gameplay', 'Misc', 'Game Jolt Login'];
 	private var grpOptions:FlxTypedGroup<Alphabet>;
 	private static var curSelected:Int = 0;
 	public static var menuBG:FlxSprite;
 	public static var onPlayState:Bool = false;
 	function openSelectedSubstate(label:String) {
 		switch(label) {
-			case 'Note Colors': openSubState(new options.NotesSubState());
+			case 'Note Options': 
+				flixel.addons.transition.FlxTransitionableState.skipNextTransOut = true;
+				flixel.addons.transition.FlxTransitionableState.skipNextTransIn = true;
+				MusicBeatState.switchState(new options.NoteOptions());
 			case 'Controls': openSubState(new options.ControlsSubState());
 			case 'Graphics': openSubState(new options.GraphicsSettingsSubState());
 			case 'Visuals and UI': openSubState(new options.VisualsUISubState());
@@ -56,7 +59,7 @@ class OptionsState extends MusicBeatState
 		grpOptions = new FlxTypedGroup<Alphabet>();
 		add(grpOptions);
 
-		if (!Main.checkGJKeysAndId()) options = ['Note Colors', 'Controls', 'Adjust Delay and Combo', 'Graphics', 'Visuals and UI', 'Gameplay', 'Misc'];
+		if (!Main.checkGJKeysAndId()) options = ['Note Options', 'Controls', 'Adjust Delay and Combo', 'Graphics', 'Visuals and UI', 'Gameplay', 'Misc'];
 
 		for (i in 0...options.length)
 		{
