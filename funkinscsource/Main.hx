@@ -95,10 +95,6 @@ class Main extends Sprite
 
 		FlxG.sound.volume = 0.2;
 
-		FlxG.game.setFilters([new ShaderFilter(new FlxShader())]);
-
-		FlxG.game.stage.quality = StageQuality.LOW;
-
 		#if !mobile
 		Lib.current.stage.align = "tl";
 		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
