@@ -4755,8 +4755,8 @@ class PlayState extends MusicBeatState
 
 					if (ClientPrefs.data.resultsScreenType == 'KADE')
 					{
-						ResultsScreenKadeSubstate.camResults.follow(camFollow, LOCKON, 0);
-						ResultsScreenKadeSubstate.camResults.snapToTarget();
+						/*ResultsScreenKadeSubstate.camResults.follow(camFollow, LOCKON, 0);
+						ResultsScreenKadeSubstate.camResults.snapToTarget();*/
 						if (persistentUpdate != false) persistentUpdate = false;
 						openSubState(subStates[0]);
 						inResults = true;
@@ -4830,8 +4830,8 @@ class PlayState extends MusicBeatState
 
 				if (ClientPrefs.data.resultsScreenType == 'KADE')
 				{
-					ResultsScreenKadeSubstate.camResults.follow(camFollow, LOCKON, 0);
-					ResultsScreenKadeSubstate.camResults.snapToTarget();
+					/*ResultsScreenKadeSubstate.camResults.follow(camFollow, LOCKON, 0);
+					ResultsScreenKadeSubstate.camResults.snapToTarget();*/
 					if (persistentUpdate != false) persistentUpdate = false;
 					openSubState(subStates[0]);
 					inResults = true;
