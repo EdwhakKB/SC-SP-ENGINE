@@ -179,7 +179,7 @@ class PlayState extends MusicBeatState
 	public static var storyPlaylist:Array<String> = [];
 	public static var storyDifficulty:Int = 1;
 
-	public var spawnTime:Float = 1000;
+	public var spawnTime:Float = 2000;
 
 	public var inst:FlxSound;
 	public var vocals:FlxSound;
@@ -3111,8 +3111,8 @@ class PlayState extends MusicBeatState
 		}
 		else FlxG.camera.followLerp = 0;
 
-		if (health <= 0 && practiceMode) health = 0;
-		else if (health >= 2 && practiceMode) health = 2;
+		if (health <= 0) health = 0;
+		else if (health >= 2) health = 2;
 
 		if (!paused)
 		{
