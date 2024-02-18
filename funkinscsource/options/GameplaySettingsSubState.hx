@@ -141,36 +141,6 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			'bool');
 		addOption(option);
 
-		var option:Option = new Option('Opponent Pop Up Score',
-			"If checked, The opponent can have ratings appear!",
-			'popupScoreForOp',
-			'bool');
-		addOption(option);
-
-		var option:Option = new Option('Quant Notes',
-			"If checked, Notes will have quant colors like StepMania!",
-			'quantNotes',
-			'bool');
-		addOption(option);
-
-		var option:Option = new Option('Sustains as One Note',
-			"If checked, Hold Notes can't be pressed if you miss,\nand count as a single Hit/Miss.\nUncheck this if you prefer the old Input System.",
-			'guitarHeroSustains',
-			'bool');
-		addOption(option);
-
-		var option:Option = new Option('Note Splashes',
-			"If checked, on rating swag or sick will give a splash effect.",
-			'noteSplashes',
-			'bool');
-		addOption(option);
-
-		var option:Option = new Option('Note Splashes Opponent',
-			"If checked, on a note being hit it will give a splash effect.",
-			'noteSplashesOP',
-			'bool');
-		addOption(option);
-
 		super();
 	}
 

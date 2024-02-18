@@ -7,13 +7,14 @@ import backend.Rating;
 import objects.Note;
 import objects.NoteSplash;
 import objects.StrumArrow;
+import objects.Character;
 
 import flixel.util.FlxSort;
 import flixel.input.keyboard.FlxKey;
+
 import openfl.events.KeyboardEvent;
 
 import haxe.Json;
-import objects.Character;
 
 class EditorPlaySubState extends MusicBeatSubstate
 {
@@ -247,12 +248,8 @@ class EditorPlaySubState extends MusicBeatSubstate
 		{
 			var timeSub:Float = (Conductor.songPosition - Conductor.offset);
 			var syncTime:Float = 20 * playbackRate;
-			if (Math.abs(FlxG.sound.music.time - timeSub) > syncTime){
-				var vocalsToSync:Array<FlxSound> = [vocals];
-				if(splitVocals)
-					vocalsToSync.push(opponentVocals);
-				resyncVocals(vocalsToSync);
-			}
+			if (Math.abs(FlxG.sound.music.time - timeSub) > syncTime)
+				resyncVocals(splitVocals ? [opponentVocals, vocals] : [vocals]);
 			if(Math.abs(vocals.time - timeSub) > syncTime)
 				resyncVocals([vocals]);
 			if(splitVocals && Math.abs(opponentVocals.time - timeSub) > syncTime)
@@ -1051,16 +1048,12 @@ class EditorPlaySubState extends MusicBeatSubstate
 	
 	function resyncVocals(vocals:Array<FlxSound>):Void
 	{
-		if(finishTimer != null) return;
-
-		FlxG.sound.music.play();
-		#if FLX_PITCH FlxG.sound.music.pitch = playbackRate; #end
-		Conductor.songPosition = FlxG.sound.music.time;
-
-		if(vocals == null || !PlayState.SONG.needsVoices) return;
+		if(finishTimer != null || vocals == null) return;
 
 		for(vocal in vocals){
-			vocal.pause();
+			FlxG.sound.music.play();
+			#if FLX_PITCH FlxG.sound.music.pitch = playbackRate; #end
+			Conductor.songPosition = FlxG.sound.music.time;
 
 			if(Conductor.songPosition <= vocal.length){
 				vocal.time = Conductor.songPosition;

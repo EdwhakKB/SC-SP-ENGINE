@@ -1,11 +1,12 @@
 package states;
 
+import flixel.FlxState;
+import flixel.FlxSubState;
 import flixel.addons.ui.FlxUIState;
 import flixel.addons.transition.FlxTransitionableState;
-import flixel.FlxState;
 import flixel.addons.transition.TransitionData;
 import flixel.addons.transition.Transition;
-import flixel.FlxSubState;
+
 import backend.PsychCamera;
 
 class MusicBeatState extends #if SCEModchartingTools modcharting.ModchartMusicBeatState #else FlxUIState #end

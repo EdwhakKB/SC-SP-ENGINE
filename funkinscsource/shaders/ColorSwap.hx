@@ -7,6 +7,7 @@ class ColorSwap {
 	public var hue(default, set):Float = 0;
 	public var saturation(default, set):Float = 0;
 	public var brightness(default, set):Float = 0;
+	public var awesomeOutline(default, set):Bool = false;
 
 	private function set_hue(value:Float) {
 		hue = value;
@@ -26,6 +27,12 @@ class ColorSwap {
 		return brightness;
 	}
 
+	private function set_awesomeOutline(value:Bool) {
+		awesomeOutline = value;
+		shader.awesomeOutline.value = [awesomeOutline];
+		return awesomeOutline;
+	}
+
 	public function new()
 	{
 		shader.uTime.value = [0, 0, 0];
@@ -33,7 +40,7 @@ class ColorSwap {
 	}
 }
 
-class ColorSwapShader extends FlxFixedShader {
+class ColorSwapShader extends FlxShader {
 	@:glFragmentSource('
 		varying float openfl_Alphav;
 		varying vec4 openfl_ColorMultiplierv;

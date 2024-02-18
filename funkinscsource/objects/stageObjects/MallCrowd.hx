@@ -3,6 +3,7 @@ package objects.stageObjects;
 class MallCrowd extends BGSprite
 {
 	public var heyTimer:Float = 0;
+	public var overrideHeyTimer:Bool = false;
 	public function new(x:Float = 0, y:Float = 0, sprite:String = 'christmas/bottomBop', idle:String = 'Bottom Level Boppers Idle', hey:String = 'Bottom Level Boppers HEY')
 	{
 		super(sprite, x, y, 0.9, 0.9, [idle]);
@@ -14,7 +15,7 @@ class MallCrowd extends BGSprite
 	{
 		super.update(elapsed);
 
-		if(heyTimer > 0) {
+		if(heyTimer > 0 && !overrideHeyTimer) {
 			heyTimer -= elapsed;
 			if(heyTimer <= 0) {
 				dance(true);

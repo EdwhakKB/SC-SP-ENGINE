@@ -54,7 +54,7 @@ class CallbackHandler
 		{
 			LuaL.error(l, 'CALLBACK ERROR! ${if(e.message != null) e.message else e}');
 			return 0;
-			Debug.logTrace(e);
+			Debug.logError(e);
 			throw(e);
 		}
 		return 0;

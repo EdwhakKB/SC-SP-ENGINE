@@ -2,15 +2,22 @@
 #if LUA_ALLOWED
 package psychlua;
 
+import flixel.FlxBasic;
+import flixel.FlxObject;
+import flixel.util.FlxAxes;
+import flixel.addons.transition.FlxTransitionableState;
+import flixel.addons.display.FlxBackdrop;
+
+#if ((flixel == "5.3.1" || flixel >= "4.11.0" && flixel <= "5.0.0") && parallaxlt)
+import flixel_5_3_1.ParallaxSprite; // flixel 5 render pipeline
+#end
+
 import backend.WeekData;
 import backend.Highscore;
 import backend.Song;
 
 import openfl.utils.Assets;
-import flixel.FlxBasic;
-import flixel.FlxObject;
-import flixel.addons.transition.FlxTransitionableState;
-import flixel.addons.display.FlxBackdrop;
+import openfl.filters.BitmapFilter;
 
 import cutscenes.DialogueBoxPsych;
 
@@ -29,24 +36,15 @@ import substates.GameOverSubstate;
 
 import psychlua.LuaUtils;
 import psychlua.LuaUtils.LuaTweenOptions;
-#if SScript
+#if HSCRIPT_ALLOWED
 import psychlua.HScript;
 #end
 import psychlua.ModchartSprite;
-import psychlua.ModchartIcon;
 
 import haxe.PosInfos;
 
-import shaders.ColorSwapOld;
-
-import flixel.util.FlxAxes;
-import openfl.filters.BitmapFilter;
-
-#if ((flixel == "5.3.1" || flixel >= "4.11.0" && flixel <= "5.0.0") && parallaxlt)
-import flixel_5_3_1.ParallaxSprite; // flixel 5 render pipeline
-#end
-
 import tjson.TJSON as Json;
+
 import lime.app.Application;
 
 typedef LuaCamera =
@@ -523,7 +521,7 @@ class FunkinLua {
 						}
 					Lua.pushnil(lua);
 			});
-			set("setGlobalFromScript", function(luaFile:String, global:String, val:Dynamic) { // returns the global from a script
+			set("setGlobalFromScrip", function(luaFile:String, global:String, val:Dynamic) { // returns the global from a script
 				var foundScript:String = findScript(luaFile);
 				if(foundScript != null)
 					for (luaInstance in game.luaArray)
@@ -588,12 +586,23 @@ class FunkinLua {
 					}
 				}
 			});*/
-			set("isRunning", function(luaFile:String) {
+			set("isRunningLuaFile", function(luaFile:String) {
 				var foundScript:String = findScript(luaFile);
 				if(foundScript != null)
 					for (luaInstance in game.luaArray)
 						if(luaInstance.scriptName == foundScript)
 							return true;
+				return false;
+			});
+			set("isRunningHxFile", function(hxFile:String) {
+				for (extn in CoolUtil.haxeExtensions)
+				{
+					var foundScript:String = findScript(hxFile, '.$extn');
+					if(foundScript != null)
+						for (luaInstance in game.hscriptArray)
+							if(luaInstance.origin == foundScript)
+								return true;
+				}
 				return false;
 			});
 	
@@ -622,21 +631,24 @@ class FunkinLua {
 				}
 				luaTrace("addLuaScript: Script doesn't exist!", false, false, FlxColor.RED);
 			});
-			set("addHScript", function(luaFile:String, ?ignoreAlreadyRunning:Bool = false) {
+			set("addHScript", function(hxFile:String, ?ignoreAlreadyRunning:Bool = false) {
 				#if HSCRIPT_ALLOWED
-				var foundScript:String = findScript(luaFile, '.hx');
-				if(foundScript != null)
+				for (extn in CoolUtil.haxeExtensions)
 				{
-					if(!ignoreAlreadyRunning)
-						for (script in game.hscriptArray)
-							if(script.origin == foundScript)
-							{
-								luaTrace('addHScript: The script "' + foundScript + '" is already running!');
-								return;
-							}
-	
-					game.initHScript(foundScript);
-					return;
+					var foundScript:String = findScript(hxFile, '.$extn');
+					if(foundScript != null)
+					{
+						if(!ignoreAlreadyRunning)
+							for (script in game.hscriptArray)
+								if(script.origin == foundScript)
+								{
+									luaTrace('addHScript: The script "' + foundScript + '" is already running!');
+									return;
+								}
+		
+						game.initHScript(foundScript);
+						return;
+					}
 				}
 				luaTrace("addHScript: Script doesn't exist!", false, false, FlxColor.RED);
 				#else
@@ -667,23 +679,26 @@ class FunkinLua {
 				luaTrace('removeLuaScript: Script $luaFile isn\'t running!', false, false, FlxColor.RED);
 				return false;
 			});
-			set("removeHScript", function(luaFile:String, ?ignoreAlreadyRunning:Bool = false) {
+			set("removeHScript", function(hxFile:String, ?ignoreAlreadyRunning:Bool = false) {
 				#if HSCRIPT_ALLOWED
-				var foundScript:String = findScript(luaFile, '.hx');
-				if(foundScript != null)
+				for (extn in CoolUtil.haxeExtensions)
 				{
-					if(!ignoreAlreadyRunning)
-						for (script in game.hscriptArray)
-	
-							if(script.origin == foundScript)
-							{
-								trace('Closing script ' + script.origin);
-								game.hscriptArray.remove(script);
-								script.destroy();
-								return true;
-							}
+					var foundScript:String = findScript(hxFile, '.$extn');
+					if(foundScript != null)
+					{
+						if(!ignoreAlreadyRunning)
+							for (script in game.hscriptArray)
+		
+								if(script.origin == foundScript)
+								{
+									trace('Closing script ' + script.origin);
+									game.hscriptArray.remove(script);
+									script.destroy();
+									return true;
+								}
+					}
 				}
-				luaTrace('removeHScript: Script $luaFile isn\'t running!', false, false, FlxColor.RED);
+				luaTrace('removeHScript: Script $hxFile isn\'t running!', false, false, FlxColor.RED);
 				return false;
 				#else
 				luaTrace("addHScript: HScript is not supported on this platform!", false, false, FlxColor.RED);
@@ -950,7 +965,7 @@ class FunkinLua {
 	
 			set("mouseClicked", function(button:String) {
 				var click:Bool = FlxG.mouse.justPressed;
-				switch(button){
+				switch(button.trim().toLowerCase()){
 					case 'middle':
 						click = FlxG.mouse.justPressedMiddle;
 					case 'right':
@@ -960,7 +975,7 @@ class FunkinLua {
 			});
 			set("mousePressed", function(button:String) {
 				var press:Bool = FlxG.mouse.pressed;
-				switch(button){
+				switch(button.trim().toLowerCase()){
 					case 'middle':
 						press = FlxG.mouse.pressedMiddle;
 					case 'right':
@@ -970,7 +985,7 @@ class FunkinLua {
 			});
 			set("mouseReleased", function(button:String) {
 				var released:Bool = FlxG.mouse.justReleased;
-				switch(button){
+				switch(button.trim().toLowerCase()){
 					case 'middle':
 						released = FlxG.mouse.justReleasedMiddle;
 					case 'right':
@@ -1053,15 +1068,8 @@ class FunkinLua {
 			});
 	
 			// precaching
-			set("addCharacterToList", function(name:String, type:String) {
-				var charType:Int = 0;
-				switch(type.toLowerCase()) {
-					case 'dad': charType = 1;
-					case 'gf' | 'girlfriend': charType = 2;
-					case 'mom': charType = 3;
-				}
-				game.preloadChar = new Character(0, 0, name);
-				game.startCharacterScripts(game.preloadChar.curCharacter);
+			set("addCharacterToList", function(name:String, ?superCache:Bool = false) {
+				game.cacheCharacter(name, superCache);
 			});
 			set("precacheImage", function(name:String, ?allowGPU:Bool = true) {
 				Paths.image(name, allowGPU);
@@ -1778,20 +1786,16 @@ class FunkinLua {
 				if (left != null && left != '') left_color = CoolUtil.colorFromString(left);
 				if (right != null && right != '') right_color = CoolUtil.colorFromString(right);
 
- 				for (i in [game.healthBar, game.healthBarHit])
+ 				if (PlayState.SONG.oldBarSystem)
 				{
-					if (i != null)
+					if (!ClientPrefs.data.gradientSystemForOldBars)
 					{
-						if (PlayState.SONG.oldBarSystem)
-						{
-							if (!ClientPrefs.data.gradientSystemForOldBars) i.createFilledBar(left_color, right_color);
-							else i.createGradientBar([right_color, left_color], [right_color, left_color]);
-							i.updateBar();
-						}
+						game.healthBar.createFilledBar((game.opponentMode ? right_color : left_color), (game.opponentMode ? left_color : right_color));
 					}
+					else game.healthBar.createGradientBar([right_color, left_color], [right_color, left_color]);
+					game.healthBar.updateBar();
 				}
-
-				if (!PlayState.SONG.oldBarSystem)
+				else
 				{
 					game.healthBarNew.setColors(left_color, right_color);
 					game.healthBarHitNew.setColors(left_color, right_color);
@@ -2153,7 +2157,7 @@ class FunkinLua {
 			});
 	
 			set("changeAddedIcon", function(tag:String, character:String){
-				var shit:ModchartIcon = game.modchartIcons.get(tag);
+				var shit:HealthIcon = game.modchartIcons.get(tag);
 				shit.changeIcon(character);
 			});
 			
@@ -2163,7 +2167,7 @@ class FunkinLua {
 			});
 			
 			set("changeLuaIcon", function(tag:String, character:String){
-				var shit:ModchartIcon = game.modchartIcons.get(tag);
+				var shit:HealthIcon = game.modchartIcons.get(tag);
 				shit.changeIcon(character);
 			});
 	
@@ -2177,20 +2181,26 @@ class FunkinLua {
 			});
 	
 			set("stopIdle", function(id:String, stopped:Bool) {
-				if (game.modchartCharacters.exists(id) && ClientPrefs.data.characters)
+				if (ClientPrefs.data.characters)
 				{
-					game.modchartCharacters.get(id).stopIdle = stopped;
-					return;
+					if (game.modchartCharacters.exists(id))
+					{
+						game.modchartCharacters.get(id).stopIdle = stopped;
+						return;
+					}
+					LuaUtils.getActorByName(id).stopIdle = stopped;
 				}
-				LuaUtils.getActorByName(id).stopIdle = stopped;
 			});
 	
 			set("characterDance", function(character:String) {
-				if(game.modchartCharacters.exists(character) && ClientPrefs.data.characters) {
-					var spr:Character = game.modchartCharacters.get(character);
-					spr.dance();
+				if (ClientPrefs.data.characters)
+				{
+					if(game.modchartCharacters.exists(character)) {
+						var spr:Character = game.modchartCharacters.get(character);
+						spr.dance();
+					}
+					else LuaUtils.getObjectDirectly(character).dance();
 				}
-				else LuaUtils.getObjectDirectly(character).dance();
 			});
 
 			set("initBackgroundOverlayVideo", function(vidPath:String, type:String, layInFront:Bool)
@@ -2210,16 +2220,16 @@ class FunkinLua {
 	
 			#if DISCORD_ALLOWED DiscordClient.addLuaCallbacks(this); #end
 			#if ACHIEVEMENTS_ALLOWED Achievements.addLuaCallbacks(this); #end
-			#if SCEFEATURES_ALLOWED SupportBETAFunctions.implement(this); #end
+			#if SCEFEATURES_ALLOWED SupportBETAFunctions.implement(this, game); #end
 			#if HSCRIPT_ALLOWED HScript.implement(this); #end
 			#if flxanimate FlxAnimateFunctions.implement(this); #end
 			#if SCEModchartingTools if (game != null && PlayState.SONG != null && !isStageLua && PlayState.SONG.notITG && game.notITGMod) modcharting.ModchartFuncs.loadLuaFunctions(this); #end
-			ReflectionFunctions.implement(this);
-			TextFunctions.implement(this);
-			ExtraFunctions.implement(this);
+			ReflectionFunctions.implement(this, game);
+			TextFunctions.implement(this, game);
+			ExtraFunctions.implement(this, game);
 			CustomSubstate.implement(this);
 			ShaderFunctions.implement(this);
-			DeprecatedFunctions.implement(this);
+			DeprecatedFunctions.implement(this, game);
 		}
 
 		try{
@@ -2255,11 +2265,11 @@ class FunkinLua {
 	{
 		tag = tag.replace('.', '');
 		LuaUtils.resetIconTag(tag);
-		var leSprite:ModchartIcon = new ModchartIcon(character, player);
+		var leSprite:HealthIcon = new HealthIcon(character, player);
 		PlayState.instance.modchartIcons.set(tag, leSprite); //yes
-		var shit:ModchartIcon = PlayState.instance.modchartIcons.get(tag);
+		var shit:HealthIcon = PlayState.instance.modchartIcons.get(tag);
 		PlayState.instance.add(shit);
-		shit.camera = PlayState.instance.camHUD;
+		shit.camera = !player ? PlayState.instance.iconP2.camera : PlayState.instance.iconP1.camera;
 	}
 
 	//main
@@ -2465,8 +2475,7 @@ class FunkinLua {
 
 	function findScript(scriptFile:String, ext:String = '.lua')
 	{
-		var cervix = scriptFile + ".lua";
-		if(scriptFile.endsWith(".lua"))cervix=scriptFile;
+		var cervix = scriptFile + ext;
 		var doPush = false;
 		#if MODS_ALLOWED
 		if(FileSystem.exists(Paths.modFolders(cervix)))
@@ -2528,8 +2537,12 @@ class FunkinLua {
 		#if (MODS_ALLOWED && !flash && sys)
 		if(runtimeShaders.exists(name))
 		{
-			luaTrace('Shader $name was already initialized!');
-			return true;
+			var shaderData:Array<String> = runtimeShaders.get(name);
+			if(shaderData != null && (shaderData[0] != null || shaderData[1] != null))
+			{
+				luaTrace('Shader $name was already initialized!');
+				return true;
+			}
 		}
 
 		var foldersToCheck:Array<String> = [Paths.mods('shaders/')];

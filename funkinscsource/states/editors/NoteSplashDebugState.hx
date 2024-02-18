@@ -3,6 +3,7 @@ package states.editors;
 import objects.Note;
 import objects.StrumArrow;
 import objects.NoteSplash;
+
 import flixel.addons.ui.FlxInputText;
 import flixel.addons.ui.FlxUINumericStepper;
 

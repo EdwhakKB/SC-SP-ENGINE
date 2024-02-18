@@ -1,27 +1,18 @@
 package gamejolt;
 
-// GameJolt things
+// GameJolt things && Login things && Toast things
 import tentools.api.FlxGameJolt as GJApi;
 
-// Login things
 import flixel.addons.ui.FlxInputText;
 import flixel.addons.ui.FlxButtonPlus;
-import flixel.text.FlxText;
 import flixel.group.FlxGroup.FlxTypedGroup;
-import flixel.util.FlxColor;
-import flixel.FlxSprite;
 import flixel.ui.FlxBar;
 
-// Toast things
-import flixel.util.FlxTimer;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
 import openfl.display.BitmapData;
 import openfl.text.TextField;
 import openfl.display.Bitmap;
 import openfl.text.TextFormat;
 import openfl.Lib;
-import flixel.FlxG;
 import openfl.display.Sprite;
 
 import objects.Alphabet;

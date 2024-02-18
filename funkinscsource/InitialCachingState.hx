@@ -1,15 +1,8 @@
 package;
 
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
 #if sys
 import sys.FileSystem;
 #end
-import flixel.FlxG;
-import flixel.FlxSprite;
-import flixel.util.FlxColor;
-import flixel.util.FlxTimer;
-import flixel.text.FlxText;
 import flixel.addons.display.FlxGridOverlay;
 import flixel.addons.display.FlxBackdrop;
 

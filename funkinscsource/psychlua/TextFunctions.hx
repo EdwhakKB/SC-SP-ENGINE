@@ -2,9 +2,8 @@ package psychlua;
 
 class TextFunctions
 {
-	public static function implement(funk:FunkinLua)
+	public static function implement(funk:FunkinLua, game:PlayState)
 	{
-		var game:PlayState = PlayState.instance;
 		funk.set("makeLuaText", function(tag:String, text:String, width:Int, x:Float, y:Float) {
 			tag = tag.replace('.', '');
 			LuaUtils.resetTextTag(tag);

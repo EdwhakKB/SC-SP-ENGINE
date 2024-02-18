@@ -191,6 +191,10 @@ import states.TitleState;
 	public var skipInitialCaching:Bool = true;
 
 	public var gradientSystemForOldBars:Bool = false;
+
+	public var heyIntro:Bool = false;
+
+	public var pauseCountDown:Bool = false;
 }
 
 class ClientPrefs {

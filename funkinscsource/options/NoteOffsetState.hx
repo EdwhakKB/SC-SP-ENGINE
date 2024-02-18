@@ -1,10 +1,10 @@
 package options;
 
-import flixel.math.FlxPoint;
-
 import backend.StageData;
+
 import objects.Character;
 import objects.Bar;
+
 import flixel.addons.display.shapes.FlxShapeCircle;
 
 class NoteOffsetState extends MusicBeatState

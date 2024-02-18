@@ -1,16 +1,11 @@
 package states;
 
-import flixel.FlxG;
-import flixel.FlxSprite;
 import flixel.FlxSubState;
-import flixel.text.FlxText;
-import flixel.util.FlxColor;
 import flixel.effects.FlxFlicker;
-import lime.app.Application;
 import flixel.addons.transition.FlxTransitionableState;
-import flixel.tweens.FlxTween;
-import flixel.util.FlxTimer;
 import flixel.math.FlxMath;
+
+import lime.app.Application;
 
 class WarnFreeplay extends states.MusicBeatState
 {
@@ -28,10 +23,8 @@ class WarnFreeplay extends states.MusicBeatState
 
 		warnText = new FlxText(0, 0, FlxG.width,
 			"Hey!\n
-			This Mod has some settings you may need to change before playing!\n
-			For songs like defeat (notITG Songs), opponent mode needs to be off!.\n
-			Else for other songs please don't use opponent mode and middleScroll.\n
-			In this case for defeat please have downscroll on thanks!",
+			This Engine has some settings you may need to change before playing!\n
+			\nWhich may be due to how some songs are!",
 			32);
 		warnText.setFormat("VCR OSD Mono", 32, FlxColor.WHITE, CENTER);
 		warnText.screenCenter(Y);

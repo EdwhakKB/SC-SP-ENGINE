@@ -4,27 +4,21 @@ import backend.WeekData;
 import backend.Highscore;
 import backend.Song;
 
-import lime.utils.Assets;
 import openfl.utils.Assets as OpenFlAssets;
 
-import objects.HealthIcon;
 import states.editors.ChartingState;
 
+import objects.HealthIcon;
 import objects.MusicPlayer;
 
 import substates.GameplayChangersSubstate;
 import substates.ResetScoreSubState;
 
-import flixel.util.FlxStringUtil;
-
-import flixel.effects.FlxFlicker;
-
-import backend.ScriptHandler;
-
 import flixel.addons.display.FlxBackdrop;
 import flixel.addons.display.FlxGridOverlay;
-
+import flixel.effects.FlxFlicker;
 import flixel.math.FlxMath;
+import flixel.util.FlxStringUtil;
 import flixel.ui.FlxBar;
 
 class FreeplayState extends MusicBeatState
@@ -83,7 +77,9 @@ class FreeplayState extends MusicBeatState
 	var grid:FlxBackdrop;
 	var player:MusicPlayer;
 
-	public var freeplayScript:ScriptHandler;
+	#if HSCRIPT_ALLOWED
+	public var freeplayScript:psychlua.HScript;
+	#end
 
 	override function create()
 	{
@@ -99,18 +95,17 @@ class FreeplayState extends MusicBeatState
 		DiscordClient.changePresence("In the Menus", null);
 		#end
 
-		PlayState.alreadyPreloaded = false;
-		PlayState.alreadyPreloadedPreDoneCharacters = false;
+		#if HSCRIPT_ALLOWED
+		freeplayScript = new psychlua.HScript(null, Paths.scriptsForHandler('FreeplayState'));
 
-		freeplayScript = new ScriptHandler(Paths.scriptsForHandler('FreeplayState'));
+		freeplayScript.set('FreeplayState', this);
+		freeplayScript.set('add', add);
+		freeplayScript.set('insert', insert);
+		freeplayScript.set('members', members);
+		freeplayScript.set('remove', remove);
 
-		freeplayScript.setVar('FreeplayState', this);
-		freeplayScript.setVar('add', add);
-		freeplayScript.setVar('insert', insert);
-		freeplayScript.setVar('members', members);
-		freeplayScript.setVar('remove', remove);
-
-		freeplayScript.callFunc('onCreate', []);
+		freeplayScript.call('onCreate', []);
+		#end
 
 		for (i in 0...WeekData.weeksList.length) {
 			if(weekIsLocked(WeekData.weeksList[i])) continue;
@@ -146,7 +141,7 @@ class FreeplayState extends MusicBeatState
 		grid = new FlxBackdrop(FlxGridOverlay.createGrid(80, 80, 160, 160, true, 0xFFFFFFFF, 0x0));
 		grid.velocity.set(-90, 90);
 		grid.alpha = 0;
-		FlxTween.tween(grid, {alpha: 0.2}, 0.5, {ease: FlxEase.quadOut});
+		FlxTween.tween(grid, {alpha: 0.25}, 0.5, {ease: FlxEase.quadOut});
 		add(grid);   
 
 		grpSongs = new FlxTypedGroup<Alphabet>();
@@ -179,10 +174,6 @@ class FreeplayState extends MusicBeatState
 			// using a FlxGroup is too much fuss!
 			iconArray.push(icon);
 			add(icon);
-
-			// songText.x += 40;
-			// DONT PUT X IN THE FIRST PARAMETER OF new ALPHABET() !!
-			// songText.screenCenter(X);
 		}
 		WeekData.setDirectoryFromWeek();
 
@@ -267,6 +258,7 @@ class FreeplayState extends MusicBeatState
 
 		if (inst != null) inst = null;
 		
+		changeSelection();
 		updateTexts();
 		super.create();
 
@@ -274,13 +266,20 @@ class FreeplayState extends MusicBeatState
 		{
 			playSong();
 		}
-		freeplayScript.callFunc('onCreatePost', []);
+		#if HSCRIPT_ALLOWED
+		freeplayScript.call('onCreatePost', []);
+		#end
 	}
 
 	override function closeSubState() 
 	{
-		freeplayScript.callFunc('onCloseSubState', []);
+		#if HSCRIPT_ALLOWED
+		freeplayScript.call('onCloseSubState', []);
+		#end
 		changeSelection(0, false);
+		opponentMode = ClientPrefs.getGameplaySetting('opponent');
+		opponentText.text = "OPPONENT MODE: " + (opponentMode ? "ON" : "OFF");
+		opponentText.updateHitbox();
 		persistentUpdate = true;
 		super.closeSubState();
 	}
@@ -294,23 +293,26 @@ class FreeplayState extends MusicBeatState
 		var leWeek:WeekData = WeekData.weeksLoaded.get(name);
 		return (!leWeek.startUnlocked && leWeek.weekBefore.length > 0 && (!StoryMenuState.weekCompleted.exists(leWeek.weekBefore) || !StoryMenuState.weekCompleted.get(leWeek.weekBefore)));
 	}
-	var instPlaying:Int = -1;
-	public static var vocals:FlxSound = null;
-	public static var opponentVocals:FlxSound = null;
-	var holdTime:Float = 0;
-
-	public var instPlayingtxt:String = "N/A"; // its not really a text but who cares?
 
 	public static var curInstPlayingtxt:String = "N/A";
 
 	public static var inst:FlxSound = null;
+	public static var vocals:FlxSound = null;
+	public static var opponentVocals:FlxSound = null;
+
+	public var instPlayingtxt:String = "N/A"; // its not really a text but who cares?
+	public var canSelectSong:Bool = true;
+
+	var completed:Bool = false;
+	var holdTime:Float = 0;
+	var instPlaying:Int = -1;
 	var startedBopping:Bool = false;
 
-	public var canSelectSong:Bool = true;
-	var completed:Bool = false;
 	override function update(elapsed:Float)
 	{
-		freeplayScript.callFunc('onUpdate', [elapsed]);
+		#if HSCRIPT_ALLOWED
+		freeplayScript.call('onUpdate', [elapsed]);
+		#end
 
 		if (inst != null)
 		{
@@ -368,6 +370,8 @@ class FreeplayState extends MusicBeatState
 			}
 		}
 
+		if (!player.playingMusic) if (FlxG.camera.zoom != 1) FlxG.camera.zoom = 1;
+
 		for (icon in iconArray) {
 			if (curSelected != iconArray.indexOf(icon)) {
 				if (icon.animation.curAnim != null && icon.animation.curAnim.name != 'normal')
@@ -420,9 +424,7 @@ class FreeplayState extends MusicBeatState
 		comboText.updateHitbox();
 
 		opponentMode = ClientPrefs.getGameplaySetting('opponent');
-
 		opponentText.text = "OPPONENT MODE: " + (opponentMode ? "ON" : "OFF");
-
 		opponentText.updateHitbox();
 
 		var shiftMult:Int = 1;
@@ -517,8 +519,8 @@ class FreeplayState extends MusicBeatState
 
 				Conductor.bpm = 102.0;
 				Conductor.songPosition = 0;
-				exit = true;
 
+				exit = true;
 				completed = false;
 
 				player.playingMusic = false;
@@ -580,19 +582,16 @@ class FreeplayState extends MusicBeatState
 						{
 							if (e.text == songs[curSelected].songName)
 							{
+								FlxFlicker.flicker(e);
 								for (i in [scoreBG, scoreText, helpText, opponentText, diffText, comboText])
 								{
 									FlxTween.tween(i, {alpha: 0}, llll / 1000);
 								}
 								FlxTween.tween(bg, {alpha: 0}, llll / 1000);
-								if (inst != null)
-									inst.fadeOut(llll / 1000, 0);
-								if (vocals != null)
-									vocals.fadeOut(llll / 1000, 0);
-								if (opponentVocals != null)
-									opponentVocals.fadeOut(llll / 1000, 0);
+								if (inst != null) inst.fadeOut(llll / 1000, 0);
+								if (vocals != null) vocals.fadeOut(llll / 1000, 0);
+								if (opponentVocals != null) opponentVocals.fadeOut(llll / 1000, 0);
 								FlxG.camera.fade(FlxColor.BLACK, llll / 1000, false, AcceptedSong, true);
-								FlxFlicker.flicker(e);
 							}
 							else
 							{
@@ -611,7 +610,7 @@ class FreeplayState extends MusicBeatState
 				Debug.logTrace('ERROR! $e');
 
 				var errorStr:String = e.toString();
-				if(errorStr.startsWith('[file_contents,assets/data/')) errorStr = 'Missing file: ' + errorStr.substring(34, errorStr.length-1); //Missing chart
+				if(errorStr.startsWith('[lime.utils.Assets] ERROR:')) errorStr = 'Missing file: ' + errorStr.substring(errorStr.indexOf(Paths.formatToSongPath(songs[curSelected].songName)), errorStr.length-1); //Missing chart
 				missingText.text = 'ERROR WHILE LOADING CHART:\n$errorStr';
 				missingText.screenCenter(Y);
 				missingText.visible = true;
@@ -626,7 +625,9 @@ class FreeplayState extends MusicBeatState
 
 		if (canSelectSong) updateTexts(elapsed);
 		super.update(elapsed);
-		freeplayScript.callFunc('onUpdatePost', [elapsed]);
+		#if HSCRIPT_ALLOWED
+		freeplayScript.call('onUpdatePost', [elapsed]);
+		#end
 	}
 
 	var alreadyPlayingSong:Bool = false;
@@ -799,7 +800,7 @@ class FreeplayState extends MusicBeatState
 		}
 	}
 
-	function AcceptedSong()
+	public function AcceptedSong()
 	{
 		if (inst != null) inst = null;
 		if (vocals != null) vocals = null;
@@ -834,7 +835,9 @@ class FreeplayState extends MusicBeatState
 	function changeDiff(change:Int = 0)
 	{
 		if (player.playingMusic) return;
-		freeplayScript.callFunc('onChangeDiff', [change]);
+		#if HSCRIPT_ALLOWED
+		freeplayScript.call('onChangeDiff', [change]);
+		#end
 		curDifficulty += change;
 
 		if (curDifficulty < 0)
@@ -867,7 +870,7 @@ class FreeplayState extends MusicBeatState
 				ease: FlxEase.quadInOut
 			});
 
-		freeplayScript.callFunc('onChangeDiffPost', [change]);
+		freeplayScript.call('onChangeDiffPost', [change]);
 	}
 
 	function changeSelection(change:Int = 0, playSound:Bool = true)
@@ -875,7 +878,9 @@ class FreeplayState extends MusicBeatState
 		if (player.playingMusic) return;
 
 		_updateSongLastDifficulty();
-		freeplayScript.callFunc('onChangeSelection', [change, playSound]);
+		#if HSCRIPT_ALLOWED
+		freeplayScript.call('onChangeSelection', [change, playSound]);
+		#end
 		if(playSound) FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
 
 		var lastList:Array<String> = Difficulty.list;
@@ -1011,13 +1016,17 @@ class FreeplayState extends MusicBeatState
 
 	override function stepHit()
 	{
-		freeplayScript.callFunc('onStepHit', [curStep]);
 		super.stepHit();
+
+		#if HSCRIPT_ALLOWED
+		freeplayScript.set('curStep', [curStep]);
+		freeplayScript.call('onStepHit');
+		freeplayScript.call('stepHit');
+		#end
 	}
 
 	override function beatHit()
 	{
-		freeplayScript.callFunc('onBeatHit', [curBeat]);
 		super.beatHit();
 
 		if (!player.playingMusic) return;
@@ -1034,11 +1043,16 @@ class FreeplayState extends MusicBeatState
 			iconArray[i].iconBopSpeed = 1;
 			iconArray[i].beatHit(curBeat);
 		}
+
+		#if HSCRIPT_ALLOWED
+		freeplayScript.set('curBeat', [curBeat]);
+		freeplayScript.call('onBeatHit');
+		freeplayScript.call('beatHit');
+		#end
 	}
 
 	override function sectionHit()
 	{
-		freeplayScript.callFunc('onSectionHit', [curSection]);
 		super.sectionHit();
 
 		if (player.playingMusic)
@@ -1048,6 +1062,12 @@ class FreeplayState extends MusicBeatState
 				FlxG.camera.zoom += 0.03 / rate;
 			}
 		}
+
+		#if HSCRIPT_ALLOWED
+		freeplayScript.set('curSection', [curSection]);
+		freeplayScript.call('onSectionHit');
+		freeplayScript.call('sectionHit');
+		#end
 	}
 
 	override function destroy()

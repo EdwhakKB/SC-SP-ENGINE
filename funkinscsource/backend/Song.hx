@@ -43,8 +43,10 @@ typedef SwagSong =
 	var ?gameOverLoop:String;
 	var ?gameOverEnd:String;
 
+	var ?disableStrumRGB:Bool;
+	var ?disableSplashRGB:Bool;
 	var ?disableNoteRGB:Bool;
-	var ?disableNoteQuant:Bool;
+	var ?disableNoteQuantRGB:Bool;
 
 	var ?arrowSkin:String;
 	var ?splashSkin:String;
@@ -94,8 +96,10 @@ class Song
 	public var gameOverLoop:String;
 	public var gameOverEnd:String;
 
+	public var disableStrumRGB:Bool = false;
+	public var disableSplashRGB:Bool = false;
 	public var disableNoteRGB:Bool = false;
-	public var disableNoteQuant:Bool = false;
+	public var disableNoteQuantRGB:Bool = false;
 
 	public var arrowSkin:String = null;
 	public var splashSkin:String = null;

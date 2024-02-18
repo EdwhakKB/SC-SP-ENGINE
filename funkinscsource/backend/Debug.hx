@@ -1,11 +1,11 @@
 package backend;
 
 import lime.app.Application;
-import flixel.FlxG;
-import flixel.FlxSprite;
+
 import flixel.system.debug.log.LogStyle;
 import flixel.system.debug.watch.Tracker.TrackerProfile;
 import flixel.util.FlxStringUtil;
+
 import haxe.Log;
 import haxe.PosInfos;
 
@@ -206,6 +206,10 @@ class Debug
 		#else
 		logInfo("This is a RELEASE build.");
 		#end
+		#if !web
+		logInfo('Operating System : ${Sys.systemName()}');
+		#end
+		logInfo('Haxe Version: ' + haxe.macro.Compiler.getDefine("haxe"));
 		logInfo('HaxeFlixel version: ${Std.string(FlxG.VERSION)}');
 		logInfo('Friday Night Funkin\' version: 2.8.0');
 		logInfo('SC Engine version: ${states.MainMenuState.SCEVersion}');
@@ -228,6 +232,7 @@ class Debug
 			FlxG.save.data.debugLogLevel = "TRACE";
 
 		logFileWriter.setLogLevel(FlxG.save.data.debugLogLevel);
+		logInfo('Current Build Version: ' + flixel.FlxG.game.stage.application.meta["build"]);
 	}
 
 	public static function clearLogsFolder()
@@ -273,7 +278,7 @@ class Debug
 	static function defineTrackerProfiles()
 	{
 		// Example: This will display all the properties that FlxSprite does, along with curCharacter and HealthBarColorArray.
-		FlxG.debugger.addTrackerProfile(new TrackerProfile(objects.Character, ["curCharacter", "isPlayer", "iconColor", "iconColorFormated", "healthColorArray"], [FlxSprite]));
+		FlxG.debugger.addTrackerProfile(new TrackerProfile(objects.Character, ["curCharacter", "isPlayer", "iconColor", "iconColorFormatted", "healthColorArray"], [FlxSprite]));
 		FlxG.debugger.addTrackerProfile(new TrackerProfile(objects.HealthIcon, ["char", "isPlayer", "isOldIcon"], [FlxSprite]));
 		FlxG.debugger.addTrackerProfile(new TrackerProfile(backend.Song, [
 			"songId",

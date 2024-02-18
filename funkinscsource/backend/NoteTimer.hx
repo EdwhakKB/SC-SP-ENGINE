@@ -1,15 +1,10 @@
 package backend;
 
-import flixel.FlxSprite;
 import flixel.system.FlxAssets.FlxShader;
-import flixel.math.FlxPoint;
 import flixel.math.FlxMath;
-import flixel.util.FlxColor;
-import flixel.text.FlxText;
 import flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup;
 
 import backend.Conductor;
-import states.PlayState;
 
 using flixel.util.FlxSpriteUtil;
 

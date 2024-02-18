@@ -1,23 +1,21 @@
 package psychlua;
 
-import openfl.utils.Assets;
 import flixel.FlxObject;
+import flixel.util.FlxAxes;
+
+import openfl.utils.Assets;
+import openfl.filters.ShaderFilter;
+
+import lime.app.Application;
 
 import objects.Note;
 import objects.Character;
 import objects.HealthIcon;
 
 import psychlua.LuaUtils;
-import psychlua.ModchartIcon;
 
-import flixel.math.FlxRect;
-import lime.app.Application;
+import shaders.ColorSwap;
 
-import shaders.ColorSwapOld;
-
-import flixel.util.FlxAxes;
-
-import openfl.filters.ShaderFilter;
 import codenameengine.CustomCodeShader;
 
 using StringTools;
@@ -25,7 +23,7 @@ using StringTools;
 class SupportBETAFunctions
 {
     //some kade / psych stuff from blantados, thanks ! (Added for lua, some of kade)
-    public static function implement(funk:FunkinLua)
+    public static function implement(funk:FunkinLua, game:PlayState)
     {
         //set actors
 		funk.set("setActorX", function(x:Int,id:String) {
@@ -44,27 +42,27 @@ class SupportBETAFunctions
 		});
 
 		funk.set("setActorAccelerationX", function(x:Int, id:String, ?bg:Bool = false) {
-			if (bg) PlayState.instance.Stage.swagBacks[id].acceleration.x = x;
+			if (bg) game.Stage.swagBacks[id].acceleration.x = x;
 			else LuaUtils.getActorByName(id).acceleration.x = x;
 		});
 		
 		funk.set("setActorDragX", function(x:Int, id:String, ?bg:Bool = false) {
-			if (bg) PlayState.instance.Stage.swagBacks[id].drag.x = x;
+			if (bg) game.Stage.swagBacks[id].drag.x = x;
 			else LuaUtils.getActorByName(id).drag.x = x;
 		});
 		
 		funk.set("setActorVelocityX", function(x:Int,id:String, ?bg:Bool = false) {
-			if (bg) PlayState.instance.Stage.swagBacks[id].velocity.x = x;
+			if (bg) game.Stage.swagBacks[id].velocity.x = x;
 			else LuaUtils.getActorByName(id).velocity.x = x;		
 		});
 
 		funk.set("setActorAlpha", function(alpha:Float,id:String, ?bg:Bool = false) {
-			if (bg) PlayState.instance.Stage.swagBacks[id].alpha = alpha;
+			if (bg) game.Stage.swagBacks[id].alpha = alpha;
 			else LuaUtils.getActorByName(id).alpha = alpha;
 		});
 
 		funk.set("setActorVisibility", function(visible:Bool,id:String, ?bg:Bool = false) {
-			if (bg) PlayState.instance.Stage.swagBacks[id].visible = visible;
+			if (bg) game.Stage.swagBacks[id].visible = visible;
 			else LuaUtils.getActorByName(id).visible = visible;	
 		});
 
@@ -73,22 +71,22 @@ class SupportBETAFunctions
 		});
 
 		funk.set("setActorAccelerationY", function(y:Int, id:String, ?bg:Bool = false) {
-			if (bg) PlayState.instance.Stage.swagBacks[id].acceleration.y = y;
+			if (bg) game.Stage.swagBacks[id].acceleration.y = y;
 			else LuaUtils.getActorByName(id).acceleration.y = y;
 		});
 		
 		funk.set("setActorDragY", function(y:Int, id:String, ?bg:Bool = false) {
-			if (bg) PlayState.instance.Stage.swagBacks[id].drag.y = y;
+			if (bg) game.Stage.swagBacks[id].drag.y = y;
 			else LuaUtils.getActorByName(id).drag.y = y;
 		});
 		
 		funk.set("setActorVelocityY", function(y:Int, id:String, ?bg:Bool = false) {
-			if (bg) PlayState.instance.Stage.swagBacks[id].velocity.y = y;
+			if (bg) game.Stage.swagBacks[id].velocity.y = y;
 			else LuaUtils.getActorByName(id).velocity.y = y;
 		});
 		
 		funk.set("setActorAngle", function(angle:Int, id:String, ?bg:Bool = false) {
-			if (bg) PlayState.instance.Stage.swagBacks[id].angle = angle;
+			if (bg) game.Stage.swagBacks[id].angle = angle;
 			else LuaUtils.getActorByName(id).angle = angle;
 		});
 
@@ -141,8 +139,8 @@ class SupportBETAFunctions
             var actor = LuaUtils.getActorByName(id);
             if(actor != null)
             {
-                PlayState.instance.remove(actor);
-                PlayState.instance.insert(layer, actor);
+                game.remove(actor);
+                game.insert(layer, actor);
             }
         });
 
@@ -164,16 +162,16 @@ class SupportBETAFunctions
 		});
 
 		funk.set("getActorX", function (id:String, ?bg:Bool = false) {
-			if (bg) return PlayState.instance.Stage.swagBacks[id].x;
+			if (bg) return game.Stage.swagBacks[id].x;
 			else return LuaUtils.getActorByName(id).x;
 		});
 
 		funk.set("getCameraZoom", function (id:String) {
-			return PlayState.instance.defaultCamZoom;
+			return game.defaultCamZoom;
 		});
 
 		funk.set("getActorY", function (id:String, ?bg:Bool = false) {
-			if (bg) return PlayState.instance.Stage.swagBacks[id].y;
+			if (bg) return game.Stage.swagBacks[id].y;
 			else return LuaUtils.getActorByName(id).y;
 		});
 
@@ -191,28 +189,28 @@ class SupportBETAFunctions
 
 		funk.set("getActorLayer", function(id:String) {
             var actor = LuaUtils.getActorByName(id);
-            if(actor != null) return PlayState.instance.members.indexOf(actor);
+            if(actor != null) return game.members.indexOf(actor);
             else return -1;
         });
 
 		funk.set("characterZoom", function(id:String, zoomAmount:Float) {
-			if(PlayState.instance.modchartCharacters.exists(id) && ClientPrefs.data.characters) {
-				var spr:Character = PlayState.instance.modchartCharacters.get(id);
+			if(game.modchartCharacters.exists(id) && ClientPrefs.data.characters) {
+				var spr:Character = game.modchartCharacters.get(id);
 				spr.setZoom(zoomAmount);
 			}
 			else LuaUtils.getActorByName(id).setZoom(zoomAmount);
 		});
 
 		funk.set("tweenColor", function(vars:String, duration:Float, initColor:FlxColor, finalColor:FlxColor, ease:String, ?tag:String) {
-			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
+			if (game != null){duration = duration / game.playbackRate;}
 			if (tag == null){tag = vars+'TweenCol';}
 			var penisExam:Dynamic = LuaUtils.tweenPrepare(tag, vars);
 			if(penisExam != null) {
-				PlayState.instance.modchartTweens.set(tag, FlxTween.color(penisExam, duration, initColor, finalColor, {
+				game.modchartTweens.set(tag, FlxTween.color(penisExam, duration, initColor, finalColor, {
 					ease: LuaUtils.getTweenEaseByString(ease),
 					onComplete: function(twn:FlxTween) {
-						PlayState.instance.callOnLuas('onTweenCompleted', [tag]);
-						PlayState.instance.modchartTweens.remove(tag);
+						game.callOnLuas('onTweenCompleted', [tag]);
+						game.modchartTweens.remove(tag);
 					}
 				}));
 			} else {
@@ -222,14 +220,14 @@ class SupportBETAFunctions
 
 		//and then one that's more akin to psych which has tags first as to not mess up the original
 		funk.set("doTweenColor2", function(tag:String, vars:String, duration:Float, initColor:FlxColor, finalColor:FlxColor, ease:String, ?tag:String) {
-			if (PlayState.instance != null){duration = duration / PlayState.instance.playbackRate;}
+			if (game != null){duration = duration / game.playbackRate;}
 			var penisExam:Dynamic = LuaUtils.tweenPrepare(tag, vars);
 			if(penisExam != null) {
-				PlayState.instance.modchartTweens.set(tag, FlxTween.color(penisExam, duration, initColor, finalColor, {
+				game.modchartTweens.set(tag, FlxTween.color(penisExam, duration, initColor, finalColor, {
 					ease: LuaUtils.getTweenEaseByString(ease),
 					onComplete: function(twn:FlxTween) {
-						PlayState.instance.callOnLuas('onTweenCompleted', [tag]);
-						PlayState.instance.modchartTweens.remove(tag);
+						game.callOnLuas('onTweenCompleted', [tag]);
+						game.modchartTweens.remove(tag);
 					}
 				}));
 			} else {
@@ -255,15 +253,15 @@ class SupportBETAFunctions
 		});
 
 		funk.set("tweenHudPos", function(toX:Int, toY:Int, time:Float, onComplete:String) {
-			FlxTween.tween(PlayState.instance.camHUD, {x: toX, y: toY}, time, {ease: FlxEase.linear, onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {funk.call(onComplete,["camera"]);}}});
+			FlxTween.tween(game.camHUD, {x: toX, y: toY}, time, {ease: FlxEase.linear, onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {funk.call(onComplete,["camera"]);}}});
 		});
 						
 		funk.set("tweenHudAngle", function(toAngle:Float, time:Float, onComplete:String) {
-			FlxTween.tween(PlayState.instance.camHUD, {angle: toAngle}, time, {ease: FlxEase.linear, onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {funk.call(onComplete,["camera"]);}}});
+			FlxTween.tween(game.camHUD, {angle: toAngle}, time, {ease: FlxEase.linear, onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {funk.call(onComplete,["camera"]);}}});
 		});
 
 		funk.set("tweenHudZoom", function(toZoom:Float, time:Float, onComplete:String) {
-			FlxTween.tween(PlayState.instance.camHUD, {zoom: toZoom}, time, {ease: FlxEase.linear, onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {funk.call(onComplete,["camera"]);}}});
+			FlxTween.tween(game.camHUD, {zoom: toZoom}, time, {ease: FlxEase.linear, onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {funk.call(onComplete,["camera"]);}}});
 		});
 
 		funk.set("tweenPos", function(id:String, toX:Int, toY:Int, time:Float, onComplete:String) {
@@ -299,15 +297,15 @@ class SupportBETAFunctions
 		});
 
 		funk.set("tweenHudPosOut", function(toX:Int, toY:Int, time:Float, onComplete:String) {
-			FlxTween.tween(PlayState.instance.camHUD, {x: toX, y: toY}, time, {ease: FlxEase.cubeOut, onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {funk.call(onComplete,["camera"]);}}});
+			FlxTween.tween(game.camHUD, {x: toX, y: toY}, time, {ease: FlxEase.cubeOut, onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {funk.call(onComplete,["camera"]);}}});
 		});
 						
 		funk.set("tweenHudAngleOut", function(toAngle:Float, time:Float, onComplete:String) {
-			FlxTween.tween(PlayState.instance.camHUD, {angle: toAngle}, time, {ease: FlxEase.cubeOut, onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {funk.call(onComplete,["camera"]);}}});
+			FlxTween.tween(game.camHUD, {angle: toAngle}, time, {ease: FlxEase.cubeOut, onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {funk.call(onComplete,["camera"]);}}});
 		});
 
 		funk.set("tweenHudZoomOut", function(toZoom:Float, time:Float, onComplete:String) {
-			FlxTween.tween(PlayState.instance.camHUD, {zoom: toZoom}, time, {ease: FlxEase.cubeOut, onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {funk.call(onComplete,["camera"]);}}});
+			FlxTween.tween(game.camHUD, {zoom: toZoom}, time, {ease: FlxEase.cubeOut, onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {funk.call(onComplete,["camera"]);}}});
 		});
 
 		funk.set("tweenPosOut", function(id:String, toX:Int, toY:Int, time:Float, onComplete:String) {
@@ -339,15 +337,15 @@ class SupportBETAFunctions
 		});
 
 		funk.set("tweenHudPosIn", function(toX:Int, toY:Int, time:Float, onComplete:String) {
-			FlxTween.tween(PlayState.instance.camHUD, {x: toX, y: toY}, time, {ease: FlxEase.cubeIn, onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {funk.call(onComplete,["camera"]);}}});
+			FlxTween.tween(game.camHUD, {x: toX, y: toY}, time, {ease: FlxEase.cubeIn, onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {funk.call(onComplete,["camera"]);}}});
 		});
 						
 		funk.set("tweenHudAngleIn", function(toAngle:Float, time:Float, onComplete:String) {
-			FlxTween.tween(PlayState.instance.camHUD, {angle: toAngle}, time, {ease: FlxEase.cubeIn, onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {funk.call(onComplete,["camera"]);}}});
+			FlxTween.tween(game.camHUD, {angle: toAngle}, time, {ease: FlxEase.cubeIn, onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {funk.call(onComplete,["camera"]);}}});
 		});
 
 		funk.set("tweenHudZoomIn", function(toZoom:Float, time:Float, onComplete:String) {
-			FlxTween.tween(PlayState.instance.camHUD, {zoom: toZoom}, time, {ease: FlxEase.cubeIn, onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {funk.call(onComplete,["camera"]);}}});
+			FlxTween.tween(game.camHUD, {zoom: toZoom}, time, {ease: FlxEase.cubeIn, onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {funk.call(onComplete,["camera"]);}}});
 		});
 
 		funk.set("tweenPosIn", function(id:String, toX:Int, toY:Int, time:Float, onComplete:String) {
@@ -371,7 +369,7 @@ class SupportBETAFunctions
 		});
 
 		funk.set("tweenFadeInBG", function(id:String, toAlpha:Float, time:Float, onComplete:String) {
-			FlxTween.tween(PlayState.instance.Stage.swagBacks[id], {alpha: toAlpha}, time, {ease: FlxEase.circIn, onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {funk.call(onComplete,[id]);}}});
+			FlxTween.tween(game.Stage.swagBacks[id], {alpha: toAlpha}, time, {ease: FlxEase.circIn, onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {funk.call(onComplete,[id]);}}});
 		});
 
 		funk.set("tweenFadeOut", function(id:String, toAlpha:Float, time:Float, ease:String, onComplete:String) {
@@ -379,7 +377,7 @@ class SupportBETAFunctions
 		});
 
 		funk.set("tweenFadeOutBG", function(id:String, toAlpha:Float, time:Float, onComplete:String) {
-			FlxTween.tween(PlayState.instance.Stage.swagBacks[id], {alpha: toAlpha}, time, {ease: FlxEase.circOut, onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {funk.call(onComplete,[id]);}}});
+			FlxTween.tween(game.Stage.swagBacks[id], {alpha: toAlpha}, time, {ease: FlxEase.circOut, onComplete: function(flxTween:FlxTween) { if (onComplete != '' && onComplete != null) {funk.call(onComplete,[id]);}}});
 		});
 
 		funk.set("tweenFadeOutOneShot", function(id:String, toAlpha:Float, time:Float) {
@@ -484,19 +482,19 @@ class SupportBETAFunctions
 		});
 
 		funk.set("setCamFollow", function(x:Float, y:Float) {
-			PlayState.instance.isCameraOnForcedPos = true;
-			PlayState.instance.camFollow.setPosition(x, y);
+			game.isCameraOnForcedPos = true;
+			game.camFollow.setPosition(x, y);
 		});
 
 		funk.set("offCamFollow", function(id:String) {
-			PlayState.instance.isCameraOnForcedPos = false;
+			game.isCameraOnForcedPos = false;
 		});
 
 		funk.set("snapCam", function(x:Float, y:Float) {
-			PlayState.instance.isCameraOnForcedPos = true;
-			PlayState.instance.charCam = null;
-			PlayState.instance.forceChangeOnTarget = true;
-			PlayState.instance.cameraTargeted = '';
+			game.isCameraOnForcedPos = true;
+			game.charCam = null;
+			game.forceChangeOnTarget = true;
+			game.cameraTargeted = '';
 			
 			var camPosition:FlxObject = new FlxObject(0, 0, 1, 1);
 			camPosition.setPosition(x, y);
@@ -505,9 +503,9 @@ class SupportBETAFunctions
 
 		funk.set("resetSnapCam", function(id:String) {
 			//The string does absolutely nothing
-			PlayState.instance.isCameraOnForcedPos = false;
-			PlayState.instance.forceChangeOnTarget = false;
-			PlayState.instance.cameraTargeted = 'dad';
+			game.isCameraOnForcedPos = false;
+			game.forceChangeOnTarget = false;
+			game.cameraTargeted = 'dad';
 		});
 
 		funk.set("shakeCam", function (i:Float, d:Float) {
@@ -515,7 +513,7 @@ class SupportBETAFunctions
 		});
 
 		funk.set("shakeHUD", function (i:Float, d:Float) {
-			PlayState.instance.camHUD.shake(i, d);
+			game.camHUD.shake(i, d);
 		});
 
 		funk.set("setCamZoom", function(zoomAmount:Float) {
@@ -527,7 +525,7 @@ class SupportBETAFunctions
 		});
 
 		funk.set("addHudZoom", function(zoomAmount:Float) {
-			PlayState.instance.camHUD.zoom += zoomAmount;
+			game.camHUD.zoom += zoomAmount;
 		});
 
 		funk.set("getArrayLength", function(obj:String) {
@@ -614,12 +612,12 @@ class SupportBETAFunctions
 
 		funk.set("removeObject", function(id:String) {
 			var shit:Dynamic = LuaUtils.getObjectDirectly(id);
-			PlayState.instance.removeObject(shit);
+			game.removeObject(shit);
 		});
 
 		funk.set("addObject", function(id:String) {
 			var shit:Dynamic = LuaUtils.getObjectDirectly(id);
-			PlayState.instance.addObject(shit);
+			game.addObject(shit);
 		});
 
 		funk.set("animationSwap", function(char:String, anim1:String, anim2:String) {
@@ -635,10 +633,10 @@ class SupportBETAFunctions
 
 		funk.set("destroyObject", function(id:String, ?bg:Bool = false) {
 			if (bg){
-				PlayState.instance.Stage.destroyObject(PlayState.instance.Stage.swagBacks[id]);
+				game.Stage.destroyObject(game.Stage.swagBacks[id]);
 			}else{
 				var shit:Dynamic = LuaUtils.getObjectDirectly(id);
-				PlayState.instance.destroyObject(shit);
+				game.destroyObject(shit);
 			}
 		});
 
@@ -648,7 +646,7 @@ class SupportBETAFunctions
 			shit.forEach(function(spr:Dynamic)
 			{			
 				if (spr.ID == index)		
-					PlayState.instance.removeObject(spr);
+					game.removeObject(spr);
 			});
 		});
 
@@ -678,11 +676,11 @@ class SupportBETAFunctions
 		});
 
 		funk.set("changeDadIcon", function(id:String) {
-			PlayState.instance.iconP2.changeIcon(id);
+			game.iconP2.changeIcon(id);
 		});
 
 		funk.set("changeBFIcon", function(id:String) {
-			PlayState.instance.iconP1.changeIcon(id);
+			game.iconP1.changeIcon(id);
 		});
 
 		funk.set("changeIcon", function(obj:String, iconName:String) {
@@ -701,23 +699,23 @@ class SupportBETAFunctions
 		});
 
 		funk.set("removeLuaIcon", function(tag:String) {
-			if(!PlayState.instance.modchartIcons.exists(tag)) {
+			if(!game.modchartIcons.exists(tag)) {
 				return;
 			}
 			
-			var pee:ModchartIcon = PlayState.instance.modchartIcons.get(tag);
+			var pee:HealthIcon = game.modchartIcons.get(tag);
 			pee.kill();
 			LuaUtils.getTargetInstance().remove(pee, true);
 			pee.destroy();
-			PlayState.instance.modchartIcons.remove(tag);
+			game.modchartIcons.remove(tag);
 		});
 
 		funk.set("changeDadIconNew", function(id:String) {
-			PlayState.instance.iconP2.changeIcon(id);
+			game.iconP2.changeIcon(id);
 		});
 
 		funk.set("changeBFIconNew", function(id:String) {
-			PlayState.instance.iconP1.changeIcon(id);
+			game.iconP1.changeIcon(id);
 		});
 
 		funk.set("setWindowPos",function(x:Int = 0, y:Int = 0) {
@@ -774,90 +772,94 @@ class SupportBETAFunctions
 			var player:String;
 
 			if (dadColor == "" || dadColor == null || dadColor == '')
-				opponent = PlayState.instance.dad.iconColor;
+				opponent = game.dad.iconColor;
 			else
 				opponent = dadColor;
 
 			if (bfColor == "" || bfColor == null || bfColor == '')
-				player = PlayState.instance.boyfriend.iconColor;
+				player = game.boyfriend.iconColor;
 			else
 				player = bfColor;
 
 			var flxStringUsageBool:Bool = ((opponent.contains('#') || opponent.contains('#FF') || opponent.contains('0x')) || 
 				(player.contains('#') || player.contains('#FF') || player.contains('0x')));
 			
-			for (i in [PlayState.instance.healthBar, PlayState.instance.healthBarHit])
+			if (PlayState.SONG.oldBarSystem)
 			{
-				if (PlayState.SONG.oldBarSystem)
+				if (!ClientPrefs.data.gradientSystemForOldBars)
 				{
-					if (!ClientPrefs.data.gradientSystemForOldBars)
-					{
-						if (flxStringUsageBool) i.createFilledBar(FlxColor.fromString(opponent), FlxColor.fromString(player));
-						else i.createFilledBar(CoolUtil.colorFromString(opponent), CoolUtil.colorFromString(player));
+					if (flxStringUsageBool) {
+						game.healthBar.createFilledBar((game.opponentMode ? FlxColor.fromString(player) : FlxColor.fromString(opponent)), 
+							(game.opponentMode ? FlxColor.fromString(opponent) : FlxColor.fromString(player)));
 					}
-					else
-					{
-						if (flxStringUsageBool) 
-							i.createGradientBar([FlxColor.fromString(player), FlxColor.fromString(opponent)], 
-								[FlxColor.fromString(player), FlxColor.fromString(opponent)]);
-						else
-							i.createGradientBar([FlxColor.fromString(player), FlxColor.fromString(opponent)], 
-								[FlxColor.fromString(player), FlxColor.fromString(opponent)]);
+					else {
+						game.healthBar.createFilledBar((game.opponentMode ? CoolUtil.colorFromString(player) : CoolUtil.colorFromString(opponent)), 
+							(game.opponentMode ? CoolUtil.colorFromString(opponent) : CoolUtil.colorFromString(player)));
 					}
-					i.updateBar();
 				}
+				else
+				{
+					if (flxStringUsageBool) 
+						game.healthBar.createGradientBar([FlxColor.fromString(player), FlxColor.fromString(opponent)], 
+							[FlxColor.fromString(player), FlxColor.fromString(opponent)]);
+					else
+						game.healthBar.createGradientBar([FlxColor.fromString(player), FlxColor.fromString(opponent)], 
+							[FlxColor.fromString(player), FlxColor.fromString(opponent)]);
+				}
+				game.healthBar.updateBar();
 			}
-
-			if (!PlayState.SONG.oldBarSystem)
+			else
 			{
 				if (flxStringUsageBool) {
-					PlayState.instance.healthBarNew.setColors(FlxColor.fromString(opponent), FlxColor.fromString(player));
-					PlayState.instance.healthBarHitNew.setColors(FlxColor.fromString(opponent), FlxColor.fromString(player));
+					game.healthBarNew.setColors(FlxColor.fromString(opponent), FlxColor.fromString(player));
+					game.healthBarHitNew.setColors(FlxColor.fromString(opponent), FlxColor.fromString(player));
 				}
 				else {
-					PlayState.instance.healthBarNew.setColors(CoolUtil.colorFromString(opponent), CoolUtil.colorFromString(player));
-					PlayState.instance.healthBarHitNew.setColors(CoolUtil.colorFromString(opponent), CoolUtil.colorFromString(player));
+					game.healthBarNew.setColors(CoolUtil.colorFromString(opponent), CoolUtil.colorFromString(player));
+					game.healthBarHitNew.setColors(CoolUtil.colorFromString(opponent), CoolUtil.colorFromString(player));
 				}
 			}
 		});
 
 		funk.set("getScared", function(id:String) {
-			PlayState.instance.Stage.swagBacks[id].swapDanceType();
+			game.Stage.swagBacks[id].swapDanceType();
 		});
 
 		funk.set("getStageOffsets", function (char:String, value:String) {
 			switch (char)
 			{
 				case 'boyfriend' | 'bf':
-					return (value == 'y' ? PlayState.instance.Stage.bfYOffset : PlayState.instance.Stage.bfXOffset);
+					return (value == 'y' ? game.Stage.bfYOffset : game.Stage.bfXOffset);
 				case 'gf':
-					return (value == 'y' ? PlayState.instance.Stage.gfYOffset : PlayState.instance.Stage.gfXOffset);
+					return (value == 'y' ? game.Stage.gfYOffset : game.Stage.gfXOffset);
+				case 'mom':
+					return (value == 'y' ? game.Stage.momYOffset : game.Stage.momXOffset);
 				default:
-					return (value == 'y' ? PlayState.instance.Stage.dadYOffset : PlayState.instance.Stage.dadXOffset);
+					return (value == 'y' ? game.Stage.dadYOffset : game.Stage.dadXOffset);
 			}
 		});
 
-		funk.set("cacheCharacter", function(character:String = 'bf'){
-			PlayState.instance.cacheCharacter(character);
+		funk.set("cacheCharacter", function(character:String = 'bf', ?superCache:Bool = false){
+			game.cacheCharacter(character, superCache);
 		});
 
 		//change individual values
 		funk.set("changeHue", function(id:String, hue:Int) {
-			var newShader:ColorSwapOld = new ColorSwapOld();
+			var newShader:ColorSwap = new ColorSwap();
 			var shit:Dynamic = LuaUtils.getObjectDirectly(id);
 			shit.shader = newShader.shader;
 			newShader.hue = hue / 360;
 		});
 
 		funk.set("changeSaturation", function(id:String, sat:Int) {
-			var newShader:ColorSwapOld = new ColorSwapOld();
+			var newShader:ColorSwap = new ColorSwap();
 			var shit:Dynamic = LuaUtils.getObjectDirectly(id);
 			shit.shader = newShader.shader;
 			newShader.saturation = sat / 100;
 		});
 
 		funk.set("changeBrightness", function(id:String, bright:Int) {
-			var newShader:ColorSwapOld = new ColorSwapOld();
+			var newShader:ColorSwap = new ColorSwap();
 			var shit:Dynamic = LuaUtils.getObjectDirectly(id);
 			shit.shader = newShader.shader;
 			newShader.brightness = bright / 100;
@@ -865,7 +867,7 @@ class SupportBETAFunctions
 
 		//change as a group. you should probably use this one
 		funk.set("changeHSB", function(id:String, hue:Int = 0, sat:Int = 0, bright:Int = 0) {
-			var newShader:ColorSwapOld = new ColorSwapOld();
+			var newShader:ColorSwap = new ColorSwap();
 		
 			var shit:Dynamic = LuaUtils.getObjectDirectly(id);
 			shit.shader = newShader.shader;
@@ -879,7 +881,7 @@ class SupportBETAFunctions
 
 			shit.forEach(function(thing:Dynamic)
 			{
-				var newShader:ColorSwapOld = new ColorSwapOld();
+				var newShader:ColorSwap = new ColorSwap();
 				newShader.hue = hue / 360;
 				thing.shader = newShader.shader;
 			});
@@ -891,7 +893,7 @@ class SupportBETAFunctions
 			if(Std.isOfType(Reflect.getProperty(LuaUtils.getTargetInstance(), obj), FlxTypedGroup))
 				shit = Reflect.getProperty(LuaUtils.getTargetInstance(), obj).members[index];
 
-			var newShader:ColorSwapOld = new ColorSwapOld();
+			var newShader:ColorSwap = new ColorSwap();
 			newShader.hue = hue / 360;
 			shit.shader = newShader.shader;
 
@@ -901,23 +903,23 @@ class SupportBETAFunctions
 			switch (character)
 			{
 				case 'boyfriend' | 'bf':
-					PlayState.instance.notes.forEach(function(daNote:Note)
+					game.notes.forEach(function(daNote:Note)
 					{
 						if (daNote.mustPress)
 						{
 							if (daNote.noteType != "")
-								PlayState.instance.callOnScripts('onNoteChange', [style, postfix]); //i really don't wanna use this but I will if I have to
+								game.callOnScripts('onNoteChange', [style, postfix]); //i really don't wanna use this but I will if I have to
 							else
 								daNote.reloadNote(style, postfix);
 						}
 					});
 				default:
-					PlayState.instance.notes.forEach(function(daNote:Note)
+					game.notes.forEach(function(daNote:Note)
 					{
 						if (!daNote.mustPress)
 						{
 							if (daNote.noteType != "")
-								PlayState.instance.callOnScripts('onNoteChange', [style, postfix]); //i really don't wanna use this but I will if I have to
+								game.callOnScripts('onNoteChange', [style, postfix]); //i really don't wanna use this but I will if I have to
 							else
 								daNote.reloadNote(style, postfix);
 						}
@@ -926,9 +928,9 @@ class SupportBETAFunctions
 		});
 
 		funk.set("changeNotes2", function(style:String, character:String, ?postfix:String = "") {
-			for (i in 0...PlayState.instance.unspawnNotes.length)
+			for (i in 0...game.unspawnNotes.length)
 			{
-				var daNote = PlayState.instance.unspawnNotes[i];
+				var daNote = game.unspawnNotes[i];
 				switch (character)
 				{
 					case 'boyfriend' | 'bf':
@@ -942,13 +944,13 @@ class SupportBETAFunctions
 		});
 
 		funk.set("changeIndividualNotes", function(style:String, i:Int, ?postfix:String = "") {
-			PlayState.instance.unspawnNotes[i].reloadNote(style, postfix);
+			game.unspawnNotes[i].reloadNote(style, postfix);
 		});
 
 		funk.set("playStrumAnim", function(isDad:Bool, id:Int, time:Float = 0) {
 			if (!ClientPrefs.data.LightUpStrumsOP && isDad) return;
-			if (time > 0) PlayState.instance.strumPlayAnim(isDad, id, time / 1000 / PlayState.instance.playbackRate);	
-			else PlayState.instance.strumPlayAnim(isDad, id, Conductor.stepCrochet * 1.25 / 1000 / PlayState.instance.playbackRate);
+			if (time > 0) game.strumPlayAnim(isDad, id, time / 1000 / game.playbackRate);	
+			else game.strumPlayAnim(isDad, id, Conductor.stepCrochet * 1.25 / 1000 / game.playbackRate);
 		});
 
 		// shader bullshit
@@ -1014,7 +1016,7 @@ class SupportBETAFunctions
 			
             var shad = FunkinLua.lua_Shaders.get(shaderName);
 			var actor = LuaUtils.getActorByName(actorStr);
-			var spr:FlxSprite = PlayState.instance.getLuaObject(actorStr);
+			var spr:FlxSprite = game.getLuaObject(actorStr);
 	
 			if(spr==null){
 				var split:Array<String> = actorStr.split('.');
@@ -1067,7 +1069,7 @@ class SupportBETAFunctions
 
             if(shad != null)
             {
-                PlayState.instance.modchartTweens.set(tag, 
+                game.modchartTweens.set(tag, 
 					PlayState.tweenManager.num(startValue, value, time, {
 					ease: ease,
 					onUpdate: function(tween:FlxTween) {
@@ -1076,8 +1078,8 @@ class SupportBETAFunctions
 					}, 
 					onComplete: function(tween:FlxTween) {
 						Reflect.setProperty(shad, prop, value);
-						PlayState.instance.callOnLuas('onTweenCompleted', [tag]);
-						PlayState.instance.modchartTweens.remove(tag);
+						game.callOnLuas('onTweenCompleted', [tag]);
+						game.modchartTweens.remove(tag);
 					}})
 				);
                 //trace('set shader prop');
@@ -1145,8 +1147,12 @@ class SupportBETAFunctions
 
 		funk.set("pushShaderToCamera", function(id:String, camera:String){
 			var funnyCustomShader:CustomCodeShader = FunkinLua.lua_Custom_Shaders.get(id);
-			@:privateAccess
-			LuaUtils.cameraFromString(camera)._filters.push(new ShaderFilter(funnyCustomShader));
+			#if (flixel >= "5.4.0")
+				LuaUtils.cameraFromString(camera)._filters.push(new ShaderFilter(funnyCustomShader));
+			#else
+				@:privateAccess
+				LuaUtils.cameraFromString(camera)._filters.push(new ShaderFilter(funnyCustomShader));
+			#end
 		});
 
 		funk.set("setCameraNoCustomShader", function(camera:String){
@@ -1174,7 +1180,7 @@ class SupportBETAFunctions
 
             if(shad != null)
             {
-				PlayState.instance.modchartTweens.set(tag, 
+				game.modchartTweens.set(tag, 
 					PlayState.tweenManager.num(startValue, value, time, {
 					onUpdate: function(tween:FlxTween){
 						var ting = FlxMath.lerp(startValue, value, ease(tween.percent));
@@ -1182,8 +1188,8 @@ class SupportBETAFunctions
 					}, ease: ease, 
 					onComplete: function(tween:FlxTween) {
 						shad.set(prop, value);
-						PlayState.instance.callOnLuas('onTweenCompleted', [tag]);
-						PlayState.instance.modchartTweens.remove(tag);
+						game.callOnLuas('onTweenCompleted', [tag]);
+						game.modchartTweens.remove(tag);
 					}})
 				);
                 //trace('set shader prop');

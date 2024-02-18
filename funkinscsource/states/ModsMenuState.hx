@@ -3,18 +3,21 @@ package states;
 import backend.WeekData;
 import backend.Mods;
 
-import flixel.math.FlxPoint;
-import flixel.ui.FlxButton;
+import openfl.geom.Rectangle;
+
 import flixel.FlxBasic;
+import flixel.ui.FlxButton;
+import flixel.util.FlxSpriteUtil;
 import flixel.graphics.FlxGraphic;
-import flash.geom.Rectangle;
+import flixel.addons.transition.FlxTransitionableState;
+
 import lime.utils.Assets;
+
 import tjson.TJSON as Json;
 
-import flixel.util.FlxSpriteUtil;
 import objects.AttachedSprite;
+
 import options.ModSettingsSubState;
-import flixel.addons.transition.FlxTransitionableState;
 
 class ModsMenuState extends MusicBeatState
 {
@@ -173,7 +176,6 @@ class ModsMenuState extends MusicBeatState
 			txt.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE);
 			add(txt);
 
-			FlxG.autoPause = false;
 			changeSelectedMod();
 			return super.create();
 		}
@@ -773,7 +775,6 @@ class ModsMenuState extends MusicBeatState
 	function reload()
 	{
 		saveTxt();
-		FlxG.autoPause = ClientPrefs.data.autoPause;
 		FlxTransitionableState.skipNextTransIn = true;
 		FlxTransitionableState.skipNextTransOut = true;
 		var curMod:ModItem = modsGroup.members[curSelectedMod];

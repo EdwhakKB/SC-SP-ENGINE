@@ -79,6 +79,37 @@ class MiscSettingsSubState extends BaseOptionsMenu
 			'skipInitialCaching',
 			'bool');
 		addOption(option);
+
+		var option:Option = new Option('Hey! Intro',
+			"A Hey! Intro starts for characters that use Hey! animations.",
+			'heyIntro',
+			'bool');
+		addOption(option);
+
+		var option:Option = new Option('Pause Count Down',
+			"A countdown plays after pressing 'resume' in the pause menu.",
+			'pauseCountDown',
+			'bool');
+		addOption(option);
+
+		var option:Option = new Option('Opponent Pop Up Score',
+			"If checked, The opponent can have ratings appear!",
+			'popupScoreForOp',
+			'bool');
+		addOption(option);
+
+		var option:Option = new Option('Quant Notes',
+			"If checked, Notes will have quant colors like StepMania!",
+			'quantNotes',
+			'bool');
+		addOption(option);
+
+		var option:Option = new Option('Sustains as One Note',
+			"If checked, Hold Notes can't be pressed if you miss,\nand count as a single Hit/Miss.\nUncheck this if you prefer the old Input System.",
+			'guitarHeroSustains',
+			'bool');
+		addOption(option);
+		
 		super();
 	}
 

@@ -4,7 +4,6 @@ import backend.WeekData;
 import backend.Highscore;
 import backend.Song;
 
-import flixel.group.FlxGroup;
 import flixel.graphics.FlxGraphic;
 
 import objects.MenuItem;
@@ -45,9 +44,6 @@ class StoryMenuState extends MusicBeatState
 	{
 		Paths.clearStoredMemory();
 		Paths.clearUnusedMemory();
-
-		PlayState.alreadyPreloaded = false;
-		PlayState.alreadyPreloadedPreDoneCharacters = false;
 
 		PlayState.isStoryMode = true;
 		WeekData.reloadWeekFiles(true);

@@ -7,11 +7,14 @@ import flixel.addons.ui.FlxUINumericStepper;
 import flixel.addons.ui.FlxUIDropDownMenu;
 import flixel.addons.ui.FlxUITabMenu;
 import flixel.ui.FlxButton;
+
 import openfl.net.FileReference;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
-import flash.net.FileFilter;
+import openfl.net.FileFilter;
+
 import tjson.TJSON as Json;
+
 import lime.system.Clipboard;
 
 import objects.TypedAlphabet;

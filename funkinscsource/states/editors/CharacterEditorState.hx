@@ -14,6 +14,7 @@ import openfl.net.FileReference;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
 import openfl.utils.Assets;
+
 import lime.system.Clipboard;
 
 import objects.Character;

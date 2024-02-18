@@ -3,11 +3,9 @@ package gamejolt;
 // GameJoltAPI Things
 import tentools.api.FlxGameJolt as GJApi;
 
-import flixel.util.FlxTimer;
-import flixel.FlxG;
-
 import gamejolt.GameJolt.GameJoltInfo;
 import gamejolt.GameJolt.GameJoltLogin;
+
 import lime.app.Application;
 
 using StringTools;

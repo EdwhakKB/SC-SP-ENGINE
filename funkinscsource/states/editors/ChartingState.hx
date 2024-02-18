@@ -1,12 +1,13 @@
 package states.editors;
 
-import flash.geom.Rectangle;
 import tjson.TJSON as Json;
+
 import haxe.format.JsonParser;
 import haxe.io.Bytes;
-import flixel.util.FlxStringUtil;
 
 import flixel.FlxObject;
+import flixel.FlxSubState;
+
 import flixel.addons.display.FlxGridOverlay;
 import flixel.addons.ui.FlxUI;
 import flixel.addons.ui.FlxUICheckBox;
@@ -16,15 +17,16 @@ import flixel.addons.ui.FlxUINumericStepper;
 import flixel.addons.ui.FlxUISlider;
 import flixel.addons.ui.FlxUITabMenu;
 import flixel.addons.ui.FlxUIButton;
-import flixel.group.FlxGroup;
-import flixel.math.FlxPoint;
 import flixel.ui.FlxButton;
-
+import flixel.util.FlxStringUtil;
 import flixel.util.FlxSort;
+
 import lime.media.AudioBuffer;
+
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
 import openfl.media.Sound;
+import openfl.geom.Rectangle;
 import openfl.net.FileReference;
 import openfl.utils.Assets as OpenFlAssets;
 
@@ -37,13 +39,8 @@ import objects.StrumArrow;
 import objects.HealthIcon;
 import objects.AttachedSprite;
 import objects.Character;
-import substates.Prompt;
-import flixel.FlxSubState;
-import flixel.FlxCamera;
 
-#if sys
-import flash.media.Sound;
-#end
+import substates.Prompt;
 
 @:access(flixel.sound.FlxSound._sound)
 @:access(openfl.media.Sound.__buffer)
@@ -222,6 +219,9 @@ class ChartingState extends MusicBeatState
 	var camGame:FlxCamera;
 
 	var hasUnsavedChanges = false; //Copies modcharteditor's way of telling if something changed!
+
+	var helpBg:FlxSprite;
+	var helpTexts:FlxSpriteGroup;
 	override function create()
 	{	
 		Paths.clearStoredMemory();
@@ -430,7 +430,78 @@ class ChartingState extends MusicBeatState
 
 		updateGrid();
 
+		var tipText:FlxText = new FlxText(FlxG.width - 300, FlxG.height - 24, 300, "Press F1 for Help", 16);
+		tipText.cameras = [camHUD];
+		tipText.setFormat(null, 16, FlxColor.WHITE, RIGHT, OUTLINE_FAST, FlxColor.BLACK);
+		tipText.borderColor = FlxColor.BLACK;
+		tipText.scrollFactor.set();
+		tipText.borderSize = 1;
+		tipText.active = false;
+		add(tipText);
+
+		addHelpScreen();
+
 		super.create();
+	}
+
+	function addHelpScreen()
+	{
+		var str:String = "CHARTING
+		\nW/S or Mouse Wheel - Change Conductor's strum time
+		\nH - Go to the start of the chart
+		\nA/D - Go to the previous/next section
+		\nUp/Down - Change Conductor's Strum Time with Snapping
+		\nHold Shift - Move 4x faster Conductor's strum time
+
+		\nSNAP
+		\nLeft/Right - Change Snap
+		\nHold Control + click on an arrow - Select it
+		\nHold Control + Left/Right - Move selected arrow
+
+		\nEXTRA
+		\nZ/X - Zoom in/out
+		\nEsc - Test your chart inside Chart Editor
+		\nEnter - Play your chart
+		\nQ/E - Decrease/Increase Note Sustain Length
+		\nSpace - Stop/Resume song";
+
+		#if FLX_PITCH
+		str += "
+
+		\nPITCH
+		\nLeft Bracket / Right Bracket - Change Song Playback Rate (SHIFT to go Faster)
+		
+		\nALT + Left Bracket / Right Bracket - Reset Song Playback Rate";
+		#end
+
+		helpBg = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
+		helpBg.scale.set(FlxG.width, FlxG.height);
+		helpBg.updateHitbox();
+		helpBg.alpha = 0.4;
+		helpBg.cameras = [camHUD];
+		helpBg.active = helpBg.visible = false;
+		add(helpBg);
+
+		var arr = str.split('\n');
+		helpTexts = new FlxSpriteGroup();
+		helpTexts.cameras = [camHUD];
+		for (i in 0...arr.length)
+		{
+			if(arr[i].length < 2) continue;
+
+			var helpText:FlxText = new FlxText(0, 0, 600, arr[i], 16);
+			helpText.setFormat(null, 16, FlxColor.WHITE, CENTER, OUTLINE_FAST, FlxColor.BLACK);
+			helpText.borderColor = FlxColor.BLACK;
+			helpText.scrollFactor.set();
+			helpText.borderSize = 1;
+			helpText.screenCenter();
+			add(helpText);
+			helpText.y += ((i - arr.length/2) * 16);
+			helpText.active = false;
+			helpTexts.add(helpText);
+		}
+		helpTexts.active = helpTexts.visible = false;
+		add(helpTexts);
 	}
 
 	var UI_box2:FlxUITabMenu;
@@ -925,7 +996,7 @@ class ChartingState extends MusicBeatState
 				var fileName:String = file.toLowerCase();
 				var wordLen:Int = 4;
 				if((#if LUA_ALLOWED fileName.endsWith('.lua') || #end
-					#if HSCRIPT_ALLOWED (fileName.endsWith('.hx') && (wordLen = 3) == 3) || #end
+					#if HSCRIPT_ALLOWED checkForHScriptExtens(wordLen, fileName) || #end
 					fileName.endsWith('.txt')) && fileName != 'readme.txt')
 				{
 					var fileToCheck:String = file.substr(0, file.length - wordLen);
@@ -963,6 +1034,15 @@ class ChartingState extends MusicBeatState
 
 		UI_box.addGroup(tab_group_note);
 	}
+
+	#if HSCRIPT_ALLOWED
+	function checkForHScriptExtens(wordLen:Int, file:String):Bool
+	{
+		return ((file.endsWith('.hx') && (wordLen = 3) == 3) || (file.endsWith('.hscript') && (wordLen = 8) == 8) || 
+			file.endsWith('.hsc') || file.endsWith('.hxs')
+		);
+	}
+	#end
 
 	var eventDropDown:FlxUIDropDownMenu;
 	var descText:FlxText;
@@ -1620,11 +1700,31 @@ class ChartingState extends MusicBeatState
 			//Debug.logTrace('CHECKED!');
 		};
 
-		var check_disableNoteQuant:FlxUICheckBox = new FlxUICheckBox(check_disableNoteRGB.x, check_disableNoteRGB.y + 20, null, null, "Disable Note Quant", 100);
-		check_disableNoteQuant.checked = (_song.disableNoteQuant == true);
-		check_disableNoteQuant.callback = function()
+		var check_disableNoteQuantRGB:FlxUICheckBox = new FlxUICheckBox(check_disableNoteRGB.x, check_disableNoteRGB.y + 20, null, null, "Disable Note Quant", 100);
+		check_disableNoteQuantRGB.checked = (_song.disableNoteQuantRGB == true);
+		check_disableNoteQuantRGB.callback = function()
 		{
-			_song.disableNoteQuant = check_disableNoteQuant.checked;
+			_song.disableNoteQuantRGB = check_disableNoteQuantRGB.checked;
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
+			updateGrid();
+			//Debug.logTrace('CHECKED!');
+		};
+
+		var check_disableStrumRGB:FlxUICheckBox = new FlxUICheckBox(check_disableNoteQuantRGB.x, check_disableNoteQuantRGB.y + 20, null, null, "Disable Strum RGB", 100);
+		check_disableStrumRGB.checked = (_song.disableStrumRGB == true);
+		check_disableStrumRGB.callback = function()
+		{
+			_song.disableStrumRGB = check_disableStrumRGB.checked;
+			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
+			updateGrid();
+			//Debug.logTrace('CHECKED!');
+		};
+
+		var check_disableSplashRGB:FlxUICheckBox = new FlxUICheckBox(check_disableStrumRGB.x, check_disableStrumRGB.y + 20, null, null, "Disable Splash RGB", 100);
+		check_disableSplashRGB.checked = (_song.disableSplashRGB == true);
+		check_disableSplashRGB.callback = function()
+		{
+			_song.disableSplashRGB = check_disableSplashRGB.checked;
 			hasUnsavedChanges = true; //Copies modcharteditor's way of telling if something changed!
 			updateGrid();
 			//Debug.logTrace('CHECKED!');
@@ -1714,36 +1814,15 @@ class ChartingState extends MusicBeatState
 			//Debug.logInfo('CHECKED!');
 		};
 
-		text =
-		"W/S or Mouse Wheel - Change Conductor's strum time
-		\nH - Go to the start of the chart
-		\nA/D - Go to the previous/next section
-		\nLeft/Right - Change Snap
-
-		\nUp/Down - Change Conductor's Strum Time with Snapping" +
-		#if FLX_PITCH
-		"
-		\n
-		\nLeft Bracket / Right Bracket - Change Song Playback Rate (SHIFT to go Faster)
-		\nALT + Left Bracket / Right Bracket - Reset Song Playback Rate" +
-		#end
-		"\nHold Shift - Move 4x faster Conductor's strum time
-		\nHold Control + click on an arrow - Select it
-		\nHold Control + Left/Right - Move selected arrow
-
-		\nZ/X - Zoom in/out
-		\nEsc - Test your chart inside Chart Editor
-		\nEnter - Play your chart
-		\nQ/E - Decrease/Increase Note Sustain Length
-		\nSpace - Stop/Resume song";
-
 		tab_group_data.add(gameOverCharacterInputText);
 		tab_group_data.add(gameOverSoundInputText);
 		tab_group_data.add(gameOverLoopInputText);
 		tab_group_data.add(gameOverEndInputText);
 
 		tab_group_data.add(check_disableNoteRGB);
-		tab_group_data.add(check_disableNoteQuant);
+		tab_group_data.add(check_disableNoteQuantRGB);
+		tab_group_data.add(check_disableSplashRGB);
+		tab_group_data.add(check_disableStrumRGB);
 
 		tab_group_data.add(reloadNotesButton);
 		tab_group_data.add(noIntroSkipping);
@@ -1756,16 +1835,6 @@ class ChartingState extends MusicBeatState
 		tab_group_data.add(disableCaching);
 		tab_group_data.add(noteSkinInputText);
 		tab_group_data.add(noteSplashesInputText);
-
-		var tipTextArray:Array<String> = text.split('\n');
-		for (i in 0...tipTextArray.length) {
-			var tipText:FlxText = new FlxText(20, reloadNotesButton.y + 36.6, 0, tipTextArray[i], 15);
-			tipText.y += i * 8.02;
-			tipText.setFormat(Paths.font("vcr.ttf"), 15, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-			tipText.borderSize = 0.9;
-			tipText.scrollFactor.set();
-			tab_group_data.add(tipText);
-		}
 
 		tab_group_data.add(new FlxText(gameOverCharacterInputText.x, gameOverCharacterInputText.y - 15, 0, 'Game Over Character Name:'));
 		tab_group_data.add(new FlxText(gameOverSoundInputText.x, gameOverSoundInputText.y - 15, 0, 'Game Over Death Sound (sounds/):'));
@@ -2351,7 +2420,12 @@ class ChartingState extends MusicBeatState
 
 		if (!blockInput)
 		{
-			if (FlxG.keys.justPressed.ESCAPE)
+			if(FlxG.keys.justPressed.F1 || (helpBg.visible && FlxG.keys.justPressed.ESCAPE))
+			{
+				helpBg.visible = !helpBg.visible;
+				helpTexts.visible = helpBg.visible;
+			}
+			else if (FlxG.keys.justPressed.ESCAPE)
 			{
 				if(FlxG.sound.music != null) FlxG.sound.music.pause();
 				if(vocals != null)
@@ -2865,6 +2939,27 @@ class ChartingState extends MusicBeatState
 		gridBlackLine.updateHitbox();
 		gridBlackLine.antialiasing = false;
 		gridLayer.add(gridBlackLine);
+
+		if (strumLine != null)
+		{
+			remove(strumLine);
+			strumLine = new FlxSprite(0, 50).makeGraphic(Std.int(GRID_SIZE * 9), 4);
+			add(strumLine);
+		}
+
+		if (strumLineNotes != null)
+		{
+			strumLineNotes.clear();
+			for (i in 0...8){
+				var note:StrumArrow = new StrumArrow(GRID_SIZE * (i+1), strumLine.y, i % 4, 0, _song.arrowSkin);
+				note.setGraphicSize(GRID_SIZE, GRID_SIZE);
+				note.updateHitbox();
+				note.playAnim('static', true);
+				strumLineNotes.add(note);
+				note.scrollFactor.set(1, 1);
+			}
+		}
+
 		updateGrid();
 
 		lastSecBeats = getSectionBeats();
@@ -3754,7 +3849,7 @@ class ChartingState extends MusicBeatState
 			Debug.logTrace('ERROR! $e');
 
 			var errorStr:String = e.toString();
-			if(errorStr.startsWith('[file_contents, assets/data/')) errorStr = 'Missing file: ' + errorStr.substring(27, errorStr.length-1); //Missing chart
+			if(errorStr.startsWith('[lime.utils.Assets] ERROR:')) errorStr = 'Missing file: ' + errorStr.substring(errorStr.indexOf(Paths.formatToSongPath(PlayState.SONG.song)), errorStr.length-1); //Missing chart
 			
 			if(missingText == null)
 			{

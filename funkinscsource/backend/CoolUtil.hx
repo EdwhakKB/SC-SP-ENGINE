@@ -8,9 +8,15 @@ import lime.utils.Assets as LimeAssets;
 import backend.DataType;
 import flixel.text.FlxBitmapText;
 import flixel.graphics.frames.FlxBitmapFont;
+import flixel.text.FlxText.FlxTextBorderStyle;
 
+//Start placing more stuff for around the engine here!
 class CoolUtil
 {
+	public static final haxeExtensions:Array<String> = ["hx", "hscript", "hsc", "hxs"];
+
+	public static var opponentModeActive:Bool = false;
+
 	inline public static function quantize(f:Float, snap:Float){
 		// changed so this actually works lol
 		var m:Float = Math.fround(f * snap);
@@ -212,17 +218,23 @@ class CoolUtil
 
 	public static function setTextBorderFromString(text:FlxText, border:String)
 	{
+		text.borderStyle = returnTextBorderFromString(border.toLowerCase().trim());
+	}
+
+	public static function returnTextBorderFromString(border:String):FlxTextBorderStyle
+	{
 		switch(border.toLowerCase().trim())
 		{
 			case 'shadow':
-				text.borderStyle = SHADOW;
+				return SHADOW;
 			case 'outline':
-				text.borderStyle = OUTLINE;
+				return OUTLINE;
 			case 'outline_fast', 'outlinefast':
-				text.borderStyle = OUTLINE_FAST;
+				return OUTLINE_FAST;
 			default:
-				text.borderStyle = NONE;
+				return NONE;
 		}
+		return NONE;
 	}
 
 	public static function returnColor(?str:String = ''):FlxColor

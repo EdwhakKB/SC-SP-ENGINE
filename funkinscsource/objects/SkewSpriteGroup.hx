@@ -2,23 +2,17 @@
 
 package objects;
 
-import flash.display.BitmapData;
-import flash.display.BlendMode;
-import flixel.FlxCamera;
-import flixel.FlxSprite;
+import openfl.display.BitmapData;
+import openfl.display.BlendMode;
+
 import flixel.graphics.frames.FlxFrame;
 import flixel.graphics.frames.FlxFramesCollection;
-import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.group.FlxGroup.FlxTypedGroupIterator;
 import flixel.math.FlxMath;
-import flixel.math.FlxPoint;
-import flixel.math.FlxRect;
 import flixel.system.FlxAssets.FlxGraphicAsset;
-import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxSort;
 import flixel.group.*;
-import flixel.FlxG;
 
 typedef SkewSpriteGroup = TypedSkewedSpriteGroup<FlxSkewed>;
 

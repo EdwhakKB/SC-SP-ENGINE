@@ -81,9 +81,6 @@
 
 	<!-- Defines whether if the crashhandler can be used. -->
 	<define name="CRASH_HANDLER" if="desktop release" />
-	
-	<!-- Defines whether if the scripthandler has access to SScript -->
-	<define name="HAXE_EXTENSION" if="HSCRIPT_ALLOWED" />
 
 	<!-- Defines whether the engine should check for updates or not. -->
 	<define name="CHECK_FOR_UPDATES" if="desktop"/>
@@ -119,7 +116,6 @@
 	<library name="videos"        preload="true" if="VIDEOS_ALLOWED"/>
 	<library name="songs"         preload="true" />
 	<library name="week_assets"   preload="true" />
-
 	
 	<section if="MODS_ALLOWED">
 		<assets path='example_mods' rename='mods' embed='false'/>
@@ -149,6 +145,19 @@
 	<haxelib name="hxCodec" if="VIDEOS_ALLOWED"/>
 	<!-- <haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>-->
 	<haxelib name="discord_rpc" if="DISCORD_ALLOWED"/>
+	
+	<!--Avoid memory leaks with for loops in HScript-->
+	<haxedef name="loop_unroll_max_cost" value="25" />
+
+	<!--DIFINE YOUR SSCRIPT CALL THINGY -->
+		<!-- UN NULL WHAT WHAT TO USE FOR YOUR VERSION OF SSCRIPT AND NULL THE RESET-->
+		<!--For SScript Versions 8.1.6 through 6.1.8 use this one. -->
+			<define name="SScriptTeaCall"/>
+		<!--For SScript Versions older than that use this one.-->
+			<!--<define name="SScriptSCall"/>-->
+		<!--Completey higher versions tham 8.1.6 use this one-->
+			<!--<define name="SScriptTea"/>-->
+	<!--end-->
 
 	<!--if you don't need FlxAnimate for exporting or for a mod just null it-->
 	<haxelib name="flxanimate"/>
