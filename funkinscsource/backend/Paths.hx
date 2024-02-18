@@ -436,18 +436,14 @@ class Paths
 				bitmap = OpenFlAssets.getBitmapData(file, false);
 		}
 
-		if (bitmap != null)
-		{
-			var retVal = cacheBitmap(file, bitmap, allowGPU);
-			if(retVal != null) return retVal;
-		}
+		if (bitmap != null)  return cacheBitmap(file, bitmap, allowGPU);
 
 		Debug.logTrace('oh no its returning null NOOOO ($file)');
 		return null;
 	}
 
 	public static var currentTrackedTextures:Map<String, Texture> = [];
-	static public function cacheBitmap(file:String, ?bitmap:BitmapData = null, ?allowGPU:Bool = true)
+	public static function cacheBitmap(file:String, ?bitmap:BitmapData = null, ?allowGPU:Bool = true):FlxGraphic
 	{
 		if(bitmap == null)
 		{
@@ -455,39 +451,34 @@ class Paths
 			if (FileSystem.exists(file))
 				bitmap = BitmapData.fromFile(file);
 			else
-			#else
-			{
-				if (OpenFlAssets.exists(file, IMAGE))
-					bitmap = OpenFlAssets.getBitmapData(file);
-			}
 			#end
+			if (OpenFlAssets.exists(file, IMAGE))
+				bitmap = OpenFlAssets.getBitmapData(file);
 
 			if(bitmap == null) return null;
 		}
 
-		if (!currentTrackedAssets.exists(file))
+		if (allowGPU && ClientPrefs.data.cacheOnGPU && bitmap.image != null)
 		{
-			if (allowGPU && ClientPrefs.data.cacheOnGPU)
-			{
+			@:privateAccess {
 				bitmap.lock();
-				var texture:Texture = FlxG.stage.context3D.createTexture(bitmap.width, bitmap.height, BGRA, true, 0);
-				texture.uploadFromBitmapData(bitmap);
-				if (!currentTrackedTextures.exists(file))
-					currentTrackedTextures.set(file, texture);
-
+				if (bitmap.__texture == null) {
+					bitmap.image.premultiplied = true;
+					bitmap.getTexture(FlxG.stage.context3D);
+				}
+				bitmap.getSurface();
 				bitmap.disposeImage();
-				FlxDestroyUtil.dispose(bitmap);
-				bitmap = null;
-				bitmap = BitmapData.fromTexture(texture);
-				bitmap.unlock();
+				bitmap.image.data = null;
+				bitmap.image = null;
 			}
-			var newGraphic:FlxGraphic = FlxGraphic.fromBitmapData(bitmap, false, file, false);
-			newGraphic.persist = true;
-			currentTrackedAssets.set(file, newGraphic);
 		}
+		var graph:FlxGraphic = FlxGraphic.fromBitmapData(bitmap, false, file);
+		graph.persist = true;
+		graph.destroyOnNoUse = false;
 
+		currentTrackedAssets.set(file, graph);
 		localTrackedAssets.push(file);
-		return currentTrackedAssets.get(file);
+		return graph;
 	}
 
 	static public function getTextFromFile(key:String, ?ignoreMods:Bool = false):String
