@@ -61,6 +61,13 @@
       "version": null
     },
     {
+      "name": "modchartingTools",
+      "type": "git",
+      "dir": null,
+      "ref": "main",
+      "url": " https://github.com/EdwhakKB/FNF-Modcharting-Tools/tree/main"
+    },
+    {
       "name": "discord_rpc",
       "type": "git",
       "dir": null,
