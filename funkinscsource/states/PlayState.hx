@@ -226,6 +226,8 @@ class PlayState extends MusicBeatState
 	public var maxHealth:Float = 2;
 	public var combo:Int = 0;
 
+	public static var isPixelNotes:Bool; 
+
 	public var healthBarOverlay:AttachedSprite;
 	public var healthBarHitBG:AttachedSprite;
 	public var healthBarBG:AttachedSprite;

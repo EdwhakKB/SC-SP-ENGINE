@@ -20,6 +20,33 @@ open up a Command Prompt/PowerShell or Terminal, type `haxelib install hmm`
 
 after it finishes, simply type `haxelib run hmm install` in order to install all the needed libraries for *Psych Engine!*
 
+## HxCodec in Linux:
+
+some linux distros do not have certain libraries that we need to compile HxCodec on such distros, if you get this error:
+
+```cmd
+Link: ApplicationMain
+hxCodec/anyVersion/lib/vlc/lib/Linux/libvlc.so.5: file format not recognized; treating as linker script
+hxCodec/anyVersion/lib/vlc/lib/Linux/libvlc.so.5:0: syntax error collect2: error: ld returned 1 exit status
+```
+
+Use the following commands:
+
+```cmd
+sudo apt-get install libvlc-dev
+sudo apt-get install libvlccore-dev
+sudo apt-get install vlc-bin
+sudo apt-get install glibc-source
+sudo apt-get install libidn12
+sudo apt-get install libidn-dev
+```
+
+It doesn't matter if you already have some of those libraries, just use the command and retry the compile command (``lime test linux``?)
+
+I recommend using HxCodec version ``3.0.2``
+
+This was a product of my tests trying to compile SCE in Pop!_OS, maybe in other linux distros there are other errors that I don't know -- Slushi
+
 ## Customization:
 
 if you wish to disable things like *Lua Scripts* or *Video Cutscenes*, you can read over to `Project.xml`

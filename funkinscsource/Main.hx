@@ -39,12 +39,12 @@ import gamejolt.*;
 
 import states.TitleState;
 
-#if linux
-@:cppInclude('./external/gamemode_client.h')
-@:cppFileCode('
-	#define GAMEMODE_AUTO
-')
-#end
+	// #if linux
+	// @:cppInclude('./external/gamemode_client.h')
+	// @:cppFileCode('
+	// 	#define GAMEMODE_AUTO
+	// ')
+	// #end
 
 class Main extends Sprite
 {
