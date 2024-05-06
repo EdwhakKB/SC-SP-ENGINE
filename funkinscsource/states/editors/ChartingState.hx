@@ -3454,7 +3454,7 @@ class ChartingState extends MusicBeatState
 				curRenderedNotes.add(note);
 
 				var theDumbText:String = '';
-				for (i in 1...note.eventVals.length){
+				for (i in 1...14){
 					theDumbText += '\nValue 1: ' + i;
 				}
 				var text:String = 'Event: ' + note.eventName + ' (' + Math.floor(note.strumTime) + ' ms)' + theDumbText + ' Events:\n' + note.eventName;
