@@ -3453,14 +3453,11 @@ class ChartingState extends MusicBeatState
 				var note:Note = setupNoteData(i, false);
 				curRenderedNotes.add(note);
 
-				var text:String = 'Event: ' + note.eventName + ' (' + Math.floor(note.strumTime) + ' ms)' + '\nValue 1: ' + note.eventVal1 + '\nValue 2: ' 
-				+ note.eventVal2 + (note.eventVal3 != null ? '\nValue 3: ' + note.eventVal3 : '') + (note.eventVal4 != null ? '\nValue 4: ' + note.eventVal4 : '') + 
-				(note.eventVal5 != null ? '\nValue 5: ' + note.eventVal5 : '') + (note.eventVal6 != null ? '\nValue 6: ' + note.eventVal6 : '')
-				+ (note.eventVal7 != null ? '\nValue 7: ' + note.eventVal7 : '') + (note.eventVal8 != null ? '\nValue 8: ' + note.eventVal8 : '') + 
-				(note.eventVal9 != null ? '\nValue 9: ' + note.eventVal9 : '') + (note.eventVal10 != null ? '\nValue 10: ' + note.eventVal10 : '') 
-				+ (note.eventVal11 != null ? '\nValue 11: ' + note.eventVal11 : '') + (note.eventVal12 != null ? '\nValue 12: ' + note.eventVal12 : '') + 
-				(note.eventVal13 != null ? '\nValue 13: ' + note.eventVal13 : '') + (note.eventVal14 != null ? '\nValue 14: ' + note.eventVal14 : '');
-				if(note.eventLength > 1) text = note.eventLength + ' Events:\n' + note.eventName;
+				var theDumbText:String = '';
+				for (i in 1...note.eventVals.length){
+					theDumbText += '\nValue 1: ' + i;
+				}
+				var text:String = 'Event: ' + note.eventName + ' (' + Math.floor(note.strumTime) + ' ms)' + theDumbText + ' Events:\n' + note.eventName;
 
 				var daText:AttachedFlxText = new AttachedFlxText(0, 0, 410, text, 12);
 				daText.setFormat(Paths.font("vcr.ttf"), 12, FlxColor.WHITE, RIGHT, FlxTextBorderStyle.OUTLINE_FAST, FlxColor.BLACK);
@@ -3527,20 +3524,9 @@ class ChartingState extends MusicBeatState
 			note.eventLength = i[1].length;
 			if(i[1].length < 2)
 			{
-				note.eventVal1 = i[1][0][1];
-				note.eventVal2 = i[1][0][2];
-				note.eventVal3 = i[1][0][3];
-				note.eventVal4 = i[1][0][4];
-				note.eventVal5 = i[1][0][5];
-				note.eventVal6 = i[1][0][6];
-				note.eventVal7 = i[1][0][7];
-				note.eventVal8 = i[1][0][8];
-				note.eventVal9 = i[1][0][9];
-				note.eventVal10 = i[1][0][10];
-				note.eventVal11 = i[1][0][11];
-				note.eventVal12 = i[1][0][12];
-				note.eventVal13 = i[1][0][13];
-				note.eventVal14 = i[1][0][14];
+				for (j in 1...14){
+					note.eventVals.push(i[1][0][j]);
+				}
 			}
 			note.noteData = -1;
 			daNoteInfo = -1;

@@ -92,7 +92,8 @@ class Note extends FlxSkewed
 
 	public var eventName:String = '';
 	public var eventLength:Int = 0;
-	public var eventVal1:String = '';
+	//im going to kill whoever coded this in
+	/*public var eventVal1:String = '';
 	public var eventVal2:String = '';
 	public var eventVal3:String = null;
 	public var eventVal4:String = null;
@@ -105,7 +106,8 @@ class Note extends FlxSkewed
 	public var eventVal11:String = null;
 	public var eventVal12:String = null;
 	public var eventVal13:String = null;
-	public var eventVal14:String = null;
+	public var eventVal14:String = null;*/
+	public var eventVals:Array<String> = [];
 
 	public var rgbShader:RGBShaderReference;
 

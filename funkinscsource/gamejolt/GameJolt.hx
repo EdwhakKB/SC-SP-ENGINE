@@ -1,7 +1,7 @@
 package gamejolt;
 
 // GameJolt things && Login things && Toast things
-import tentools.api.FlxGameJolt as GJApi;
+import hxgamejolt.GameJolt as GJApi;
 
 import flixel.addons.ui.FlxInputText;
 import flixel.addons.ui.FlxButtonPlus;

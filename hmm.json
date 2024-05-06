@@ -89,18 +89,9 @@
       "url": "https://github.com/superpowers04/linc_luajit"
     },
     {
-      "name": "tentools",
-      "type": "git",
-      "dir": null,
-      "ref": "main",
-      "url": "https://github.com/TentaRJ/tentools.git"
-    },
-    {
-      "name": "systools",
-      "type": "git",
-      "dir": null,
-      "ref": "master",
-      "url": "https://github.com/haya3218/systools"
+      "name": "hxgamejolt-api",
+      "type": "haxelib",
+      "version": null
     }
   ]
 }

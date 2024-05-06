@@ -152,11 +152,8 @@
 	<!--if you don't need FlxAnimate for exporting or for a mod just null it-->
 	<haxelib name="flxanimate"/>
 
-	<!-- <haxelib name="HaxeGJClient" /> -->
 	<!-- GameJolt Stuff -->
-	<haxelib name="tentools" />
-	<haxelib name="systools" />
-	<ndll name="systools" haxelib="systools" />
+	<haxelib name="hxgamejolt-api" />
   
   	<!--Incase you want parallaxlt-->
 	<!-- <haxelib name="parallaxlt" /> -->
@@ -170,9 +167,9 @@
 	<!-- Enables a terminal log prompt on debug builds -->
 	<haxelib name="hxcpp-debug-server" if="debug"/>
 	<haxedef name="HXC_LIBVLC_LOGGING" if="VIDEOS_ALLOWED debug" />
+
+	<define name="no-deprecation-warnings" />
 	
-	<haxelib name="hxtelemetry" if="telemetry"/>
-	<haxedef name="HXCPP_TELEMETRY"  if="telemetry"/>
 
 	<!-- <haxelib name="markdown" /> -->
 	<!-- <haxelib name="HtmlParser" /> -->
@@ -241,8 +238,6 @@
 	<icon path="assets/art/icon32.png" size='32'/>
 	<icon path="assets/art/icon64.png" size='64'/>
 	<icon path="assets/art/iconOG.png" />
-
-	<config:hxtelemetry host="192.168.100.68" allocations="false" />
 
 	<assets path="SCE-CrashDialog.exe" type="template" if="windows release" />
 </project>

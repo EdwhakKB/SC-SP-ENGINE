@@ -1,7 +1,7 @@
 package options;
 
 import flixel.FlxSubState;
-import flash.text.TextField;
+import openfl.text.TextField;
 import flixel.input.keyboard.FlxKey;
 import flixel.addons.display.FlxGridOverlay;
 import flixel.group.FlxGroup.FlxTypedGroup;
