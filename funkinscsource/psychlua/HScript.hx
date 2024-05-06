@@ -500,7 +500,7 @@ class HScript extends SScript
 	}
 
 	//I hate the CALLS CANT THEY BE STATIC FOR ONCE!?
-	public function executeCode(?funcToRun:String = null, ?funcArgs:Array<Dynamic> = null):#if SScriptTeaCall TeaCall #elseif SScriptSCall SCall #elseif SScriptTea Tea #end
+	public function executeCode(?funcToRun:String = null, ?funcArgs:Array<Dynamic> = null):Tea
 	{
 		if (funcToRun == null) return null;
 
@@ -536,7 +536,7 @@ class HScript extends SScript
 	}
 
 	//I hate the CALLS CANT THEY BE STATIC FOR ONCE!?
-	public function executeFunction(funcToRun:String = null, funcArgs:Array<Dynamic>):#if SScriptTeaCall TeaCall #elseif SScriptSCall SCall #elseif SScriptTea Tea #end
+	public function executeFunction(funcToRun:String = null, funcArgs:Array<Dynamic>):Tea
 	{
 		if (funcToRun == null)
 			return null;
@@ -550,7 +550,7 @@ class HScript extends SScript
 		funk.addLocalCallback("runHaxeCode", function(codeToRun:String, ?varsToBring:Any = null, ?funcToRun:String = null, ?funcArgs:Array<Dynamic> = null):Dynamic {
 			#if SScript
 			initHaxeModuleCode(funk, codeToRun, varsToBring);
-			final retVal:#if SScriptTeaCall TeaCall #elseif SScriptSCall SCall #elseif SScriptTea Tea #end = funk.hscript.executeCode(funcToRun, funcArgs);
+			final retVal:Tea = funk.hscript.executeCode(funcToRun, funcArgs);
 			if (retVal != null)
 			{
 				if(retVal.succeeded)
@@ -598,13 +598,8 @@ class HScript extends SScript
 			if (c == null)
 				c = Type.resolveEnum(str + libName);
 
-			#if (SScriptTeaCall || SScriptSCall)
 			if (c != null)
 				SScript.globalVariables[libName] = c;
-			#elseif SScriptTea
-			if (c != null)
-				SScript.strictGlobalVariables[libName] = c;
-			#end
 
 			#if SScript
 			if (funk.hscript != null)
@@ -624,23 +619,16 @@ class HScript extends SScript
 	}
 	#end
 
-	#if (SScript >= "3.0.3" || SScript >= "10.0.618")
 	override public function destroy()
-	{
-		origin = null;
-		#if LUA_ALLOWED parentLua = null; #end
-
-		super.destroy();
-	}
-	#else
-	public function destroy()
-	{
-		active = false;
-	}
-	#end
+		{
+			origin = null;
+			#if LUA_ALLOWED parentLua = null; #end
+	
+			super.destroy();
+		}
 
 	#if modchartingTools
-	public function initMod(mod:modcharting.Modifier)
+	public inline function initMod(mod:modcharting.Modifier)
     {
         call("initMod", [mod]);
     }

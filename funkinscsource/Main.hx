@@ -91,7 +91,7 @@ class Main extends Sprite
 	public static var focusMusicTween:FlxTween;
 
 	private function setupGame():Void {
-		addChild(new FlxGame(game.width, game.height, Init, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
+		addChild(new FlxGame(game.width, game.height, Init, game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
 
 		FlxG.sound.volume = 0.2;
 

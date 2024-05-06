@@ -1096,7 +1096,7 @@ class SupportBETAFunctions
             {
                 cam.shaders.push(new ShaderFilter(Reflect.getProperty(shad, 'shader'))); //use reflect to workaround compiler errors
                 cam.shaderNames.push(shaderName);
-                cam.cam.setFilters(cam.shaders);
+                cam.cam.filters = cam.shaders;
                 //trace('added shader '+shaderName+" to " + camStr);
             }
         });
@@ -1113,7 +1113,7 @@ class SupportBETAFunctions
                     {
                         cam.shaderNames.remove(cam.shaderNames[idx]);
                         cam.shaders.remove(cam.shaders[idx]);
-                        cam.cam.setFilters(cam.shaders); //refresh filters
+                        cam.cam.filters = cam.shaders; //refresh filters
                     }
                     
                 }
@@ -1142,21 +1142,16 @@ class SupportBETAFunctions
 
 		funk.set("setCameraCustomShader", function(id:String, camera:String){
 			var funnyCustomShader:CustomCodeShader = FunkinLua.lua_Custom_Shaders.get(id);
-			LuaUtils.cameraFromString(camera).setFilters([new ShaderFilter(funnyCustomShader)]);
+			LuaUtils.cameraFromString(camera).filters = [new ShaderFilter(funnyCustomShader)];
 		});
 
 		funk.set("pushShaderToCamera", function(id:String, camera:String){
 			var funnyCustomShader:CustomCodeShader = FunkinLua.lua_Custom_Shaders.get(id);
-			#if (flixel >= "5.4.0")
-				LuaUtils.cameraFromString(camera)._filters.push(new ShaderFilter(funnyCustomShader));
-			#else
-				@:privateAccess
-				LuaUtils.cameraFromString(camera)._filters.push(new ShaderFilter(funnyCustomShader));
-			#end
+			LuaUtils.cameraFromString(camera).filters.push(new ShaderFilter(funnyCustomShader));
 		});
 
 		funk.set("setCameraNoCustomShader", function(camera:String){
-			LuaUtils.cameraFromString(camera).setFilters(null);
+			LuaUtils.cameraFromString(camera).filters = null;
 		});
 
 		funk.set("getCustomShaderProperty", function(id:String, property:String) {

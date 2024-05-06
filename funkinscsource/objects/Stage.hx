@@ -1381,27 +1381,14 @@ class Stage extends MusicBeatState
 		{
 			var times:Float = Date.now().getTime();
 			var newScript:HScript = new HScript(null, file, null, true);
-			#if (SScript > "6.1.80" || SScript != "6.1.80")
-			@:privateAccess
-			if(newScript.parsingExceptions != null && newScript.parsingExceptions.length > 0)
-			{
-				@:privateAccess
-				for (e in newScript.parsingExceptions)
-					if(e != null)
-						PlayState.instance.addTextToDebug('ERROR ON LOADING ($file): ${e.message.substr(0, e.message.indexOf('\n'))}', FlxColor.RED);
-				newScript.destroy();
-				return;
-			}
-			#else
 			if(newScript.parsingException != null)
 			{
 				var e = newScript.parsingException.message;
 				if (!e.contains(newScript.origin)) e = '${newScript.origin}: $e';
 				HScript.hscriptTrace('ERROR ON LOADING - $e', FlxColor.RED);
-				newScript.kill();
+				newScript.destroy();
 				return;
 			}
-			#end
 
 			hscriptArray.push(newScript);
 			if(newScript.exists('onCreate'))
@@ -2333,41 +2320,6 @@ class Stage extends MusicBeatState
 		boyfriendCutscene.animation.curAnim.finish();
 		PlayState.instance.addBehindBF(boyfriendCutscene);
 		cutsceneHandler.push(boyfriendCutscene);
-		#else
-		tankman2.frames = Paths.getSparrowAtlas('cutscenes/stress2');
-		PlayState.instance.addBehindDad(tankman2);
-		cutsceneHandler.push(tankman2);
-
-		if (!ClientPrefs.data.lowQuality)
-		{
-			gfDance.frames = Paths.getSparrowAtlas('characters/gfTankmen');
-			gfDance.animation.addByPrefix('dance', 'GF Dancing at Gunpoint', 24, true);
-			gfDance.animation.play('dance', true);
-			PlayState.instance.addBehindGF(gfDance);
-			cutsceneHandler.push(gfDance);
-		}
-
-		gfCutscene.frames = Paths.getSparrowAtlas('cutscenes/stressGF');
-		gfCutscene.animation.addByPrefix('dieBitch', 'GF STARTS TO TURN PART 1', 24, false);
-		gfCutscene.animation.addByPrefix('getRektLmao', 'GF STARTS TO TURN PART 2', 24, false);
-		gfCutscene.animation.play('dieBitch', true);
-		gfCutscene.animation.pause();
-		PlayState.instance.addBehindGF(gfCutscene);
-		cutsceneHandler.push(gfCutscene);
-		if (!ClientPrefs.data.lowQuality) gfCutscene.alpha = 0.00001;
-
-		picoCutscene.frames = AtlasFrameMaker.construct('cutscenes/stressPico');
-		picoCutscene.animation.addByPrefix('anim', 'Pico Badass', 24, false);
-		PlayState.instance.addBehindGF(picoCutscene);
-		cutsceneHandler.push(picoCutscene);
-		picoCutscene.alpha = 0.00001;
-
-		boyfriendCutscene.frames = Paths.getSparrowAtlas('characters/BOYFRIEND');
-		boyfriendCutscene.animation.addByPrefix('idle', 'BF idle dance', 24, false);
-		boyfriendCutscene.animation.play('idle', true);
-		boyfriendCutscene.animation.curAnim.finish();
-		PlayState.instance.addBehindBF(boyfriendCutscene);
-		cutsceneHandler.push(boyfriendCutscene);
 		#end
 
 		var cutsceneSnd:FlxSound = new FlxSound().loadEmbedded(Paths.sound('stressCutscene'));
@@ -2377,9 +2329,6 @@ class Stage extends MusicBeatState
 		tankman.anim.addBySymbol('godEffingDamnIt', 'TANK TALK 3 P1 UNCUT', 24, false);
 		tankman.anim.addBySymbol('lookWhoItIs', 'TANK TALK 3 P2 UNCUT', 24, false);
 		tankman.anim.play('godEffingDamnIt', true);
-		#else
-		tankman.animation.addByPrefix('godEffingDamnIt', 'TANK TALK 3', 24, false);
-		tankman.animation.play('godEffingDamnIt', true);
 		#end
 
 		cutsceneHandler.onStart = function()

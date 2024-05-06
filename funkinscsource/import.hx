@@ -58,8 +58,6 @@ import flixel.addons.effects.FlxSkewedSprite as FlxSkewed;
 
 #if flxanimate
 import flxanimate.*;
-#else
-import animateatlas.AtlasFrameMaker;
 #end
 
 #if modchartingTools

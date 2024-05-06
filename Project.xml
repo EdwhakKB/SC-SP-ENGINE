@@ -149,16 +149,6 @@
 	<!--Avoid memory leaks with for loops in HScript-->
 	<haxedef name="loop_unroll_max_cost" value="25" />
 
-	<!--DIFINE YOUR SSCRIPT CALL THINGY -->
-		<!-- UN NULL WHAT WHAT TO USE FOR YOUR VERSION OF SSCRIPT AND NULL THE RESET-->
-		<!--For SScript Versions 8.1.6 through 6.1.8 use this one. -->
-			<define name="SScriptTeaCall"/>
-		<!--For SScript Versions older than that use this one.-->
-			<!--<define name="SScriptSCall"/>-->
-		<!--Completey higher versions tham 8.1.6 use this one-->
-			<!--<define name="SScriptTea"/>-->
-	<!--end-->
-
 	<!--if you don't need FlxAnimate for exporting or for a mod just null it-->
 	<haxelib name="flxanimate"/>
 
@@ -167,9 +157,6 @@
 	<haxelib name="tentools" />
 	<haxelib name="systools" />
 	<ndll name="systools" haxelib="systools" />
-
-	<!--In case you want to use the ui package-->
-	<haxelib name="faxe" if='switch'/>
   
   	<!--Incase you want parallaxlt-->
 	<!-- <haxelib name="parallaxlt" /> -->
@@ -233,8 +220,6 @@
 	<haxedef name="HXCPP_CHECK_POINTER" if="CRASH_HANDLER" />
 	<haxedef name="HXCPP_STACK_LINE" if="CRASH_HANDLER" />
 
-	<!-- No deprecation warnings. -->
-	<haxedef name="no-deprecation-warnings"/>
 
 	<!--<haxedef name="HXCPP_GC_GENERATIONAL"/>-->
 
@@ -245,6 +230,8 @@
 	<!--Macro fixes-->
 	<haxeflag name="--macro" value="allowPackage('flash')" />
 	<haxeflag name="--macro" value="include('my.pack')" />
+
+	<haxedef name="message.reporting" value="pretty" />
 
 	<!-- _________________________________ Custom _______________________________ -->
 

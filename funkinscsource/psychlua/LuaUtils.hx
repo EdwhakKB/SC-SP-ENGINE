@@ -438,14 +438,6 @@ class LuaUtils
 	{
 		switch(spriteType.toLowerCase().trim())
 		{
-			#if !flxanimate
-			case "texture" | "textureatlas" | "tex":
-				spr.frames = AtlasFrameMaker.construct(image);
-
-			case "texture_noaa" | "textureatlas_noaa" | "tex_noaa":
-				spr.frames = AtlasFrameMaker.construct(image, null, true);
-			#end
-
 			case "json" | 'aseprite' | 'jsoni8':
 				spr.frames = Paths.getJsonAtlas(image);
 
