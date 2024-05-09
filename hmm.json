@@ -8,12 +8,14 @@
     {
       "name": "openfl",
       "type": "haxelib",
-      "version": null
+      "verions": null
     },
     {
       "name": "flixel",
-      "type": "haxelib",
-      "version": null
+      "type": "git",
+      "dir": null,
+      "ref": "Main-SCE",
+      "url": "https://github.com/glowsoony/flixel"
     },
     {
       "name": "flixel-addons",
