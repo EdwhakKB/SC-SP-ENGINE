@@ -2267,7 +2267,6 @@ class ChartingState extends MusicBeatState
 		loadEventJson.text = 'Load Events'; 
 		loadEventJson.onClick = function(e)
 		{
-
 			var songName:String = Paths.formatToSongPath(SONG.songId);
 			var file:String = Paths.json('songs/' + songName + '/events');
 			#if sys
@@ -4062,9 +4061,7 @@ class ChartingState extends MusicBeatState
 			var text12 = value12InputText.text;
 			var text13 = value13InputText.text;
 			var text14 = value14InputText.text;
-			//[0] = event,  [][] = events
-			var events:Array<Dynamic> = [noteStrum, [[event, [text1, text2, text3, text4, text5, text6, text7, text8, text9, text10, text11, text12, text13, text14]]]];
-			SONG.events.push(events);
+			SONG.events.push([noteStrum, [[event, [text1, text2, text3, text4, text5, text6, text7, text8, text9, text10, text11, text12, text13, text14]]]]);
 			curSelectedNote = SONG.events[SONG.events.length - 1];
 			curEventSelected = 0;
 		}

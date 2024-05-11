@@ -6142,7 +6142,7 @@ class PlayState extends MusicBeatState
 
 	override function stepHit()
 	{
-		if (curDifficulty < 3)
+		if (storyDifficulty < 3)
 		{
 			if (curStep % 64 == 60 && SONG.songId.toLowerCase() == 'tutorial' && dad.curCharacter == 'gf' && curStep > 64 && curStep < 192)
 			{

@@ -275,6 +275,8 @@
 	<haxeflag name="--macro" value="allowPackage('flash')" />
 	<haxeflag name="--macro" value="include('my.pack')" />
 
+	<haxedef name="message.reporting" value="pretty" />
+
 	<!--Used for Izzy Engine's crash handler-->
 	<haxedef name="HXCPP_STACK_TRACE" if="CRASH_HANDLER"/>  <!--if you want stack traces--> 
 	<haxedef name="HXCPP_CHECK_POINTER" if="CRASH_HANDLER" />
