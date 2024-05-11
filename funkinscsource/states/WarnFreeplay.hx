@@ -2,7 +2,6 @@ package states;
 
 import flixel.FlxSubState;
 import flixel.effects.FlxFlicker;
-import flixel.addons.transition.FlxTransitionableState;
 import flixel.math.FlxMath;
 
 import lime.app.Application;

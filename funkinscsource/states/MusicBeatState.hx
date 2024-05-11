@@ -3,7 +3,6 @@ package states;
 import flixel.FlxState;
 import flixel.FlxSubState;
 import flixel.addons.ui.FlxUIState;
-import flixel.addons.transition.FlxTransitionableState;
 import flixel.addons.transition.TransitionData;
 import flixel.addons.transition.Transition;
 
@@ -67,6 +66,10 @@ class MusicBeatState extends #if SCEModchartingTools modcharting.ModchartMusicBe
 
 	public static var time:Float = 0.7;
 
+	public var variables:Map<String, Dynamic> = new Map<String, Dynamic>();
+	public static function getVariables()
+		return getState().variables;
+
 	override function create()
 	{
 		destroySubStates = false;
@@ -106,7 +109,7 @@ class MusicBeatState extends #if SCEModchartingTools modcharting.ModchartMusicBe
 
 		if (oldStep != curStep)
 		{
-			if(curStep > 0)
+			if(curStep >= 0)
 				stepHit();
 
 			if(PlayState.SONG != null)
@@ -266,20 +269,12 @@ class MusicBeatState extends #if SCEModchartingTools modcharting.ModchartMusicBe
 
 	public function stepHit():Void
 	{
-		if (curStep % 4 == 0)
-			beatHit();
+		if (curStep % 4 == 0) beatHit();
 	}
 
-	public function beatHit():Void
-	{
-		//Debug.logTrace('Beat: ' + curBeat);
-	}
+	public function beatHit():Void {}
 
-	public function sectionHit():Void
-	{
-		//Debug.logTrace('Section: ' + curSection + ', Beat: ' + curBeat + ', Step: ' + curStep);
-	}
-
+	public function sectionHit():Void {}
 
 	function getBeatsOnSection()
 	{

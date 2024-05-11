@@ -74,7 +74,7 @@ class QuantSubState extends MusicBeatSubstate
 		modeBG.alpha = 0.4;
 		add(modeBG);
 
-		notesBG = new FlxSprite(140, 190).makeGraphic(480, 425, FlxColor.BLACK);
+		notesBG = new FlxSprite(20, 190).makeGraphic(710, 125, FlxColor.BLACK);
 		notesBG.visible = false;
 		notesBG.alpha = 0.4;
 		add(notesBG);
@@ -91,11 +91,6 @@ class QuantSubState extends MusicBeatSubstate
 		var bg:FlxSprite = new FlxSprite(750, 160).makeGraphic(FlxG.width - 780, 540, FlxColor.BLACK);
 		bg.alpha = 0.25;
 		add(bg);
-		
-		var text:Alphabet = new Alphabet(50, 86, 'CTRL', false);
-		text.alignment = CENTERED;
-		text.setScale(0.4);
-		add(text);
 
 		copyButton = new FlxSprite(760, 50).loadGraphic(Paths.image('noteColorMenu/copy'));
 		copyButton.alpha = 0.6;
@@ -149,7 +144,7 @@ class QuantSubState extends MusicBeatSubstate
 
 		var tipX = 20;
 		var tipY = 660;
-		var tip:FlxText = new FlxText(tipX, tipY, 0, "Press RELOAD to Reset the selected Note Part.", 16);
+		var tip:FlxText = new FlxText(tipX, tipY, 0, Language.getPhrase('note_colors_tip', "Press RESET to Reset the selected Note Part."), 16);
 		tip.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		tip.borderSize = 2;
 		add(tip);
@@ -175,7 +170,8 @@ class QuantSubState extends MusicBeatSubstate
 
 	function updateTip()
 	{
-		tipTxt.text = 'Hold ' + (!controls.controllerMode ? 'Shift' : 'Left Shoulder Button') + ' + Press RELOAD to fully reset the selected Note.';
+		var key:String = !controls.controllerMode ? Language.getPhrase('note_colors_shift', 'Shift') : Language.getPhrase('note_colors_lb', 'Left Shoulder Button');
+		tipTxt.text = Language.getPhrase('note_colors_hold_tip', 'Hold {1} + Press RESET key to fully reset the selected Note.', [key]);
 	}
 
 	var _storedColor:FlxColor;
@@ -204,7 +200,6 @@ class QuantSubState extends MusicBeatSubstate
 		var changedToController:Bool = false;
 		if(controls.controllerMode != _lastControllerMode)
 		{
-			//Debug.logTrace('changed controller mode');
 			FlxG.mouse.visible = !controls.controllerMode;
 			controllerPointer.visible = controls.controllerMode;
 
@@ -265,7 +260,6 @@ class QuantSubState extends MusicBeatSubstate
 				hexTypeNum++;
 			else if(allowedTypeKeys.exists(keyPressed))
 			{
-				//Debug.logTrace('keyPressed: $keyPressed, lil str: ' + allowedTypeKeys.get(keyPressed));
 				var curColor:String = alphabetHex.text;
 				var newColor:String = curColor.substring(0, hexTypeNum) + allowedTypeKeys.get(keyPressed) + curColor.substring(hexTypeNum + 1);
 
@@ -352,7 +346,6 @@ class QuantSubState extends MusicBeatSubstate
 			{
 				var formattedText = Clipboard.text.trim().toUpperCase().replace('#', '').replace('0x', '');
 				var newColor:Null<FlxColor> = FlxColor.fromString('#' + formattedText);
-				//Debug.logTrace('#${Clipboard.text.trim().toUpperCase()}');
 				if(newColor != null && formattedText.length == 6)
 				{
 					setShaderColor(newColor);
@@ -413,13 +406,6 @@ class QuantSubState extends MusicBeatSubstate
 				FlxG.sound.play(Paths.sound('scrollMenu'), 0.6);
 				updateColors();
 			}
-			/*else if (pointerOverlaps(skinNote))
-			{
-				onPixel = !onPixel;
-				spawnNotes();
-				updateNotes(true);
-				FlxG.sound.play(Paths.sound('scrollMenu'), 0.6);
-			}*/
 			else if(pointerY() >= hexTypeLine.y && pointerY() < hexTypeLine.y + hexTypeLine.height &&
 					Math.abs(pointerX() - 1000) <= 84)
 			{
@@ -463,7 +449,6 @@ class QuantSubState extends MusicBeatSubstate
 					var mouse:FlxPoint = pointerFlxPoint();
 					var hue:Float = FlxMath.wrap(FlxMath.wrap(Std.int(mouse.degreesTo(center)), 0, 360) - 90, 0, 360);
 					var sat:Float = FlxMath.bound(mouse.dist(center) / colorWheel.width*2, 0, 1);
-					//Debug.logTrace('$hue, $sat');
 					if(sat != 0) setShaderColor(FlxColor.fromHSB(hue, sat, _storedColor.brightness));
 					else setShaderColor(FlxColor.fromRGBFloat(_storedColor.brightness, _storedColor.brightness, _storedColor.brightness));
 					updateColors();
@@ -472,7 +457,7 @@ class QuantSubState extends MusicBeatSubstate
 		}
 		else if(controls.RESET && hexTypeNum < 0)
 		{
-			if(FlxG.keys.pressed.SHIFT || FlxG.gamepads.anyJustPressed(LEFT_SHOULDER))
+			if(FlxG.keys.pressed.SHIFT || FlxG.gamepads.anyPressed(LEFT_SHOULDER))
 			{
 				for (i in 0...7)
 				{
@@ -519,7 +504,6 @@ class QuantSubState extends MusicBeatSubstate
 
 	function centerHexTypeLine()
 	{
-		//Debug.logTrace(hexTypeNum);
 		if(hexTypeNum > 0)
 		{
 			var letter = alphabetHex.letters[hexTypeNum-1];
@@ -537,8 +521,8 @@ class QuantSubState extends MusicBeatSubstate
 	function changeSelectionMode(change:Int = 0) {
 		curSelectedMode += change;
 		if (curSelectedMode < 0)
-			curSelectedMode = 1;
-		if (curSelectedMode >= 2)
+			curSelectedMode = 2;
+		if (curSelectedMode >= 3)
 			curSelectedMode = 0;
 
 		modeBG.visible = true;
@@ -572,7 +556,6 @@ class QuantSubState extends MusicBeatSubstate
 	}
 
 	// notes sprites functions
-	var skinNote:FlxSprite;
 	var modeNotes:FlxTypedGroup<FlxSprite>;
 	var myNotes:FlxTypedGroup<StrumArrow>;
 	var bigNote:Note;
@@ -593,11 +576,6 @@ class QuantSubState extends MusicBeatSubstate
 		modeNotes.clear();
 		myNotes.clear();
 
-		if(skinNote != null)
-		{
-			remove(skinNote);
-			skinNote.destroy();
-		}
 		if(bigNote != null)
 		{
 			remove(bigNote);
@@ -606,18 +584,9 @@ class QuantSubState extends MusicBeatSubstate
 
 		// respawn stuff
 		var res:Int = 160;
-		skinNote = new FlxSprite(48, 24).loadGraphic(Paths.image('noteColorMenu/note'), true, res, res);
-		skinNote.antialiasing = ClientPrefs.data.antialiasing;
-		skinNote.setGraphicSize(68);
-		skinNote.updateHitbox();
-		skinNote.animation.add('anim', [0], 24, true);
-		skinNote.animation.play('anim', true);
-		add(skinNote);
-
-		var res:Int = 160;
 		for (i in 0...3)
 		{
-			var newNote:FlxSprite = new FlxSprite(210 + (100 * i), 100).loadGraphic(Paths.image('noteColorMenu/note'), true, res, res);
+			var newNote:FlxSprite = new FlxSprite(230 + (100 * i), 100).loadGraphic(Paths.image('noteColorMenu/note'), true, res, res);
 			newNote.antialiasing = ClientPrefs.data.antialiasing;
 			newNote.setGraphicSize(85);
 			newNote.updateHitbox();
@@ -669,6 +638,7 @@ class QuantSubState extends MusicBeatSubstate
 		}
 		bigNote.animation.play('note$curSelectedNote', true);
 		updateColors();
+		fixColors(); // fixes your gosh dang note colors    - DM-kun
 	}
 
 	function updateColors(specific:Null<FlxColor> = null)
@@ -701,6 +671,27 @@ class QuantSubState extends MusicBeatSubstate
 			case 2:
 				getShader().b = strumRGB.b = color;
 		}
+	}
+
+	function fixColors()
+	{
+		for (i in 0...7)
+		{
+			var strumRGB:RGBShaderReference = myNotes.members[curSelectedNote].rgbShader;
+			var color:FlxColor = ClientPrefs.data.arrowRGBQuantize[curSelectedNote][i];
+			switch(i)
+			{
+				case 0:
+					getShader().r = strumRGB.r = color;
+				case 1:
+					getShader().g = strumRGB.g = color;
+				case 2:
+					getShader().b = strumRGB.b = color;
+			}
+			dataArray[curSelectedNote][i] = color;
+		}
+		setShaderColor(ClientPrefs.data.arrowRGBQuantize[curSelectedNote][curSelectedMode]);
+		updateColors();
 	}
 
 	function setShaderColor(value:FlxColor) dataArray[curSelectedNote][curSelectedMode] = value;

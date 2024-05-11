@@ -1,5 +1,6 @@
 package objects;
 
+import flxanimate.data.AnimationData.StageInstance;
 import flixel.FlxBasic;
 
 import objects.Note.EventNote;
@@ -21,6 +22,10 @@ import psychlua.*;
 #else
 import psychlua.LuaUtils;
 import psychlua.HScript;
+#end
+
+#if (HSCRIPT_ALLOWED && HScriptImproved)
+import codenameengine.scripting.Script as HScriptCode;
 #end
 
 #if SScript
@@ -65,6 +70,8 @@ class Stage extends MusicBeatState
 		Array<FlxSprite>> = []; // Change/add/remove backgrounds mid song! Format: "slowBacks[StepToBeActivated] = [Sprites,To,Be,Changed,Or,Added];"
 
 	public var stopBGDancing:Bool = false;
+
+	public var game:PlayState;
 
 	public static var instance:Stage = null;
 
@@ -132,8 +139,12 @@ class Stage extends MusicBeatState
 	#if LUA_ALLOWED public var luaArray:Array<FunkinLua> = []; #end
 
 	#if HSCRIPT_ALLOWED
-	public var hscriptArray:Array<HScript> = [];
+	public var hscriptArray:Array<psychlua.HScript> = [];
 	public var instancesExclude:Array<String> = [];
+	#end
+
+	#if (HSCRIPT_ALLOWED && HScriptImproved)
+	public var scripts:codenameengine.scripting.ScriptPack;
 	#end
 
 	public var preloading:Bool = false;
@@ -146,16 +157,21 @@ class Stage extends MusicBeatState
 	
 		this.curStage = daStage;
 		this.preloading = preloading;
+		if (startsPlayState && PlayState.instance != null) this.game = PlayState.instance;
 	
 		onPlayState = startsPlayState;
 	
 		instance = this;
+
+		#if (HSCRIPT_ALLOWED && HScriptImproved)
+		if (scripts == null) (scripts = new codenameengine.scripting.ScriptPack('Stage')).setParent(this);
+		#end
 	}
 
-	public function setupStageProperties(daStage:String, ?inPlayState:Bool = false, ?stageChanged:Bool = false)
+	public function setupStageProperties(daStage:String, ?SONG:Null<backend.Song.SwagSong> = null, ?stageChanged:Bool = false)
 	{
 		if (!ClientPrefs.data.background) return;
-		if (inPlayState) songLowercase = PlayState.SONG.songId.toLowerCase();
+		if (SONG != null) songLowercase = SONG.songId.toLowerCase();
 		loadStageJson(daStage, stageChanged);
 
 		switch (daStage)
@@ -167,19 +183,23 @@ class Stage extends MusicBeatState
 					var stageFront:BGSprite = new BGSprite('stagefront', -650, 600, 0.9, 0.9);
 					stageFront.setGraphicSize(Std.int(stageFront.width * 1.1));
 					stageFront.updateHitbox();
+					swagBacks['stageFront'] = stageFront;
 						
 					var stageLight:BGSprite = new BGSprite('stage_light', -125, -100, 0.9, 0.9);
 					stageLight.setGraphicSize(Std.int(stageLight.width * 1.1));
 					stageLight.updateHitbox();
+					swagBacks['stageLight'] = stageLight;
 						
 					var stageLight2:BGSprite = new BGSprite('stage_light', 1225, -100, 0.9, 0.9);
 					stageLight2.setGraphicSize(Std.int(stageLight2.width * 1.1));
 					stageLight2.updateHitbox();
 					stageLight2.flipX = true;
+					swagBacks['stageLight2'] = stageLight2;
 			
 					var stageCurtains:BGSprite = new BGSprite('stagecurtains', -500, -300, 1.3, 1.3);
 					stageCurtains.setGraphicSize(Std.int(stageCurtains.width * 0.9));
 					stageCurtains.updateHitbox();
+					swagBacks['stageCurtains'] = stageCurtains;
 					
 					toAdd.push(bg);
 					toAdd.push(stageFront);
@@ -191,16 +211,19 @@ class Stage extends MusicBeatState
 					dadbattleBlack.makeGraphic(Std.int(FlxG.width * 2), Std.int(FlxG.height * 2), FlxColor.BLACK);
 					dadbattleBlack.alpha = 0.25;
 					dadbattleBlack.visible = false;
+					swagBacks['dadbattleBlack'] = dadbattleBlack;
 					layInFront[4].push(dadbattleBlack);
 	
 					dadbattleLight = new BGSprite('spotlight', 400, -400);
 					dadbattleLight.alpha = 0.375;
 					dadbattleLight.blend = ADD;
 					dadbattleLight.visible = false;
+					swagBacks['dadbattleLight'] = dadbattleLight;
 					layInFront[4].push(dadbattleLight);
 	
 					dadbattleFog = new DadBattleFog();
 					dadbattleFog.visible = false;
+					swagBacks['dadbattleFog'] = dadbattleFog;
 					layInFront[4].push(dadbattleFog);
 				}
 			case 'spooky': //Week 2
@@ -404,15 +427,18 @@ class Stage extends MusicBeatState
 				}
 			case 'mallEvil': //Week 5 - Winter Horrorland
 				{
-					var bg:BGSprite = new BGSprite('christmas/evilBG', -400, -500, 0.2, 0.2);
-					bg.setGraphicSize(Std.int(bg.width * 0.8));
-					bg.updateHitbox();
-					toAdd.push(bg);
+					var evilBG:BGSprite = new BGSprite('christmas/evilBG', -400, -500, 0.2, 0.2);
+					evilBG.setGraphicSize(Std.int(evilBG.width * 0.8));
+					evilBG.updateHitbox();
+					swagBacks['evilBG'] = evilBG;
+					toAdd.push(evilBG);
 			
 					var evilTree:BGSprite = new BGSprite('christmas/evilTree', 300, -300, 0.2, 0.2);
+					swagBacks['evilTree'] = evilTree;
 					toAdd.push(evilTree);
 			
 					var evilSnow:BGSprite = new BGSprite('christmas/evilSnow', -200, 700);
+					swagBacks['evilSnow'] = evilSnow;
 					toAdd.push(evilSnow);
 					setDefaultGF('gf-christmas');
 					
@@ -434,16 +460,19 @@ class Stage extends MusicBeatState
 					if(_song.gameOverChar == null || _song.gameOverChar.trim().length < 1) GameOverSubstate.characterName = 'bf-pixel-dead';
 			
 					bgSky = new BGSprite('weeb/' + addedSongStagePrefix + 'weebSky', 0, 0, 0.1, 0.1);
+					swagBacks['bgSky'] = bgSky;
 					toAdd.push(bgSky);
 					bgSky.antialiasing = false;
 			
 					var repositionShit = -200;
 			
 					bgSchool = new BGSprite('weeb/' + addedSongStagePrefix + 'weebSchool', repositionShit, 0, 0.6, 0.90);
+					swagBacks['bgSchool'] = bgSchool;
 					toAdd.push(bgSchool);
 					bgSchool.antialiasing = false;
 			
 					bgStreet = new BGSprite('weeb/' + addedSongStagePrefix + 'weebStreet', repositionShit, 0, 0.95, 0.95);
+					swagBacks['bgStreet'] = bgStreet;
 					toAdd.push(bgStreet);
 					bgStreet.antialiasing = false;
 			
@@ -451,6 +480,7 @@ class Stage extends MusicBeatState
 					fgTrees = new BGSprite('weeb/' + addedSongStagePrefix + 'weebTreesBack', repositionShit + 170, 130, 0.9, 0.9);
 					fgTrees.setGraphicSize(Std.int(widShit * 0.8));
 					fgTrees.updateHitbox();
+					swagBacks['fgTrees'] = fgTrees;
 					toAdd.push(fgTrees);
 					fgTrees.antialiasing = false;
 					fgTrees.visible = !ClientPrefs.data.lowQuality;
@@ -460,12 +490,14 @@ class Stage extends MusicBeatState
 					bgTrees.animation.add('treeLoop', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18], 12);
 					bgTrees.animation.play('treeLoop');
 					bgTrees.scrollFactor.set(0.85, 0.85);
+					swagBacks['bgTrees'] = bgTrees;
 					toAdd.push(bgTrees);
 					bgTrees.antialiasing = false;
 			
 					treeLeaves = new BGSprite('weeb/' + addedSongStagePrefix + 'petals', repositionShit, -40, 0.85, 0.85, ['PETALS ALL'], true);
 					treeLeaves.setGraphicSize(widShit);
 					treeLeaves.updateHitbox();
+					swagBacks['treeLeaves'] = treeLeaves;
 					toAdd.push(treeLeaves);
 					treeLeaves.antialiasing = false;
 					treeLeaves.visible = !ClientPrefs.data.lowQuality;
@@ -483,13 +515,17 @@ class Stage extends MusicBeatState
 					bgGirls = new BackgroundGirls(-100, 190, addedSongStagePrefix);
 					bgGirls.scrollFactor.set(0.9, 0.9);
 					bgGirls.visible = !ClientPrefs.data.lowQuality;
+					swagBacks['bgGirls'] = bgGirls;
 					toAdd.push(bgGirls);
 
 					rosesRain = new BGSprite('weeb/roses/rain', repositionShit, -40, 0.85, 0.85, ['rain'], true);
 					rosesRain.setGraphicSize(widShit);
 					rosesRain.updateHitbox();
 					if (songLowercase == 'roses')
+					{
+						swagBacks['rosesRain'] = rosesRain;
 						layInFront[4].push(rosesRain);
+					}
 					rosesRain.antialiasing = false;
 					rosesRain.visible = !ClientPrefs.data.lowQuality;
 					rosesRain.alpha = 0;
@@ -528,17 +564,15 @@ class Stage extends MusicBeatState
 					var posX = 400;
 					var posY = 200;
 			
-					var bg:BGSprite;
-					if(!ClientPrefs.data.lowQuality)
-						bg = new BGSprite('weeb/animatedEvilSchool', posX, posY, 0.8, 0.9, ['background 2'], true);
-					else
-						bg = new BGSprite('weeb/animatedEvilSchool_low', posX, posY, 0.8, 0.9);
+					var thornsBG:BGSprite;
+					if(!ClientPrefs.data.lowQuality) thornsBG = new BGSprite('weeb/animatedEvilSchool', posX, posY, 0.8, 0.9, ['background 2'], true);
+					else thornsBG = new BGSprite('weeb/animatedEvilSchool_low', posX, posY, 0.8, 0.9);
 			
-					bg.scale.set(PlayState.daPixelZoom, PlayState.daPixelZoom);
-					bg.antialiasing = false;
-					swagBacks['thornsBG'] = bg;
-					bg.alpha = 0;
-					toAdd.push(bg);
+					thornsBG.scale.set(PlayState.daPixelZoom, PlayState.daPixelZoom);
+					thornsBG.antialiasing = false;
+					swagBacks['thornsBG'] = thornsBG;
+					thornsBG.alpha = 0;
+					toAdd.push(thornsBG);
 					setDefaultGF('gf-pixel');
 			
 					FlxG.sound.playMusic(Paths.music('LunchboxScary'), 0);
@@ -552,6 +586,7 @@ class Stage extends MusicBeatState
 			case 'tank': //Week 7 - Ugh, Guns, Stress
 				{
 					var sky:BGSprite = new BGSprite('tankSky', -400, -400, 0, 0);
+					swagBacks['tankSky'] = sky;
 					toAdd.push(sky);
 			
 					if(!ClientPrefs.data.lowQuality)
@@ -559,36 +594,44 @@ class Stage extends MusicBeatState
 						var clouds:BGSprite = new BGSprite('tankClouds', FlxG.random.int(-700, -100), FlxG.random.int(-20, 20), 0.1, 0.1);
 						clouds.active = true;
 						clouds.velocity.x = FlxG.random.float(5, 15);
+						swagBacks['tankClouds'] = clouds;
 						toAdd.push(clouds);
 			
 						var mountains:BGSprite = new BGSprite('tankMountains', -300, -20, 0.2, 0.2);
 						mountains.setGraphicSize(Std.int(1.2 * mountains.width));
 						mountains.updateHitbox();
+						swagBacks['tankMountains'] = mountains;
 						toAdd.push(mountains);
 			
 						var buildings:BGSprite = new BGSprite('tankBuildings', -200, 0, 0.3, 0.3);
 						buildings.setGraphicSize(Std.int(1.1 * buildings.width));
 						buildings.updateHitbox();
+						swagBacks['tankBuildings'] = buildings;
 						toAdd.push(buildings);
 					}
 			
 					var ruins:BGSprite = new BGSprite('tankRuins',-200,0,.35,.35);
 					ruins.setGraphicSize(Std.int(1.1 * ruins.width));
 					ruins.updateHitbox();
+					swagBacks['tankRuins'] = ruins;
 					toAdd.push(ruins);
 			
 					if(!ClientPrefs.data.lowQuality)
 					{
 						var smokeLeft:BGSprite = new BGSprite('smokeLeft', -200, -100, 0.4, 0.4, ['SmokeBlurLeft'], true);
+						swagBacks['smokeLeft'] = smokeLeft;
 						toAdd.push(smokeLeft);
 						var smokeRight:BGSprite = new BGSprite('smokeRight', 1100, -100, 0.4, 0.4, ['SmokeRight'], true);
+						swagBacks['smokeRight'] = smokeRight;
 						toAdd.push(smokeRight);
 			
 						tankWatchtower = new BGSprite('tankWatchtower', 100, 50, 0.5, 0.5, ['watchtower gradient color']);
+						swagBacks['tankWatchtower'] = tankWatchtower;
 						toAdd.push(tankWatchtower);
 					}
 			
 					tankGround = new BackgroundTank();
+					swagBacks['tankGround'] = tankGround;
 					toAdd.push(tankGround);
 			
 					tankmanRun = new FlxTypedGroup<TankmenBG>();
@@ -598,6 +641,7 @@ class Stage extends MusicBeatState
 					var ground:BGSprite = new BGSprite('tankGround', -420, -150);
 					ground.setGraphicSize(Std.int(1.15 * ground.width));
 					ground.updateHitbox();
+					swagBacks['tankGround'] = tankGround;
 					toAdd.push(ground);
 			
 					foregroundSprites = new FlxTypedGroup<BGSprite>();
@@ -607,6 +651,8 @@ class Stage extends MusicBeatState
 					if(!ClientPrefs.data.lowQuality) foregroundSprites.add(new BGSprite('tank4', 1300, 900, 1.5, 1.5, ['fg']));
 					foregroundSprites.add(new BGSprite('tank5', 1620, 700, 1.5, 1.5, ['fg']));
 					if(!ClientPrefs.data.lowQuality) foregroundSprites.add(new BGSprite('tank3', 1300, 1200, 3.5, 2.5, ['fg']));
+
+					for (i in 0...foregroundSprites.members.length) swagBacks['foreTankGroundSprite'+i] = foregroundSprites.members[i];
 			
 					// Default GFs
 					if(songLowercase == 'stress') setDefaultGF('pico-speaker');
@@ -639,7 +685,8 @@ class Stage extends MusicBeatState
 
 					isLuaStage = true;
 					isHxStage = true;
-					startStageScriptsNamed('stages/' + daStage, preloading);
+					//Looks for two types of stages or more
+					startStageScriptsNamed(daStage, preloading);
 				}
 		}
 	}
@@ -690,6 +737,8 @@ class Stage extends MusicBeatState
 	public var stageRatingOffsetYOpponent:Float = 0;
 
 	public var stageIntroSpriteScales:Array<Array<Float>> = null;
+ 
+	public var stageRatingScales:Array<Float> = null;
 	
 	public function setupWeekDir(stage:String, stageDir:String)
 	{
@@ -708,7 +757,6 @@ class Stage extends MusicBeatState
 		var stageData:StageFile = StageData.getStageFile(stage);
 		var stageDir:String = '';
 		if(stageData == null) { //Stage couldn't be found, create a dummy stage for preventing a crash
-			stageData = StageData.dummy();
 			Debug.logInfo('stage failed to have .json or .json didn\'t load properly, loading stage.json....');
 		}
 		stageDir = stageData.directory;
@@ -755,14 +803,18 @@ class Stage extends MusicBeatState
 			stageRatingOffsetYPlayer = stageData.ratingOffsets[0][1];
 
 			stageRatingOffsetXOpponent = stageData.ratingOffsets[1][0];
-			stageRatingOffsetXOpponent = stageData.ratingOffsets[1][1];
+			stageRatingOffsetYOpponent = stageData.ratingOffsets[1][1];
 		}
+
+		if (stageData.ratingScales != null) stageRatingScales = stageData.ratingScales;
 
 		PlayState.stageUI = "normal";
 		if (stageData.stageUI != null && stageData.stageUI.trim().length > 0)
 			PlayState.stageUI = stageData.stageUI;
-		else {
-			if (stageData.isPixelStage) PlayState.stageUI = "pixel";
+		else //Backward compatibility
+		{
+			if (stageData.isPixelStage == true)
+				PlayState.stageUI = "pixel";
 		}
 
 		hideGirlfriend = stageData.hide_girlfriend;
@@ -806,6 +858,14 @@ class Stage extends MusicBeatState
 		opponent2CameraOffset = stageData.camera_opponent2;
 		if(opponent2CameraOffset == null)
 			opponent2CameraOffset = [0, 0];
+
+		if(stageData.objects != null && stageData.objects.length > 0)
+		{
+			var list:Map<String, FlxSprite> = StageData.addObjectsToState(stageData.objects, null, null, null, null, this);
+			for (key => spr in list)
+				if(!StageData.reservedNames.contains(key))
+					swagBacks.set(key, spr);
+		}
 	}
 
 	override public function update(elapsed:Float)
@@ -1051,6 +1111,7 @@ class Stage extends MusicBeatState
 	{
 		if (paused)
 		{
+			if(phillyTrain != null && phillyTrain.sound != null) phillyTrain.sound.resume();
 			if(rainSound != null) rainSound.play();
 			if(carTimer != null) carTimer.active = true;
 		}
@@ -1059,6 +1120,7 @@ class Stage extends MusicBeatState
 	{
 		if (paused)
 		{
+			if(phillyTrain != null && phillyTrain.sound != null) phillyTrain.sound.pause();
 			if(rainSound != null) rainSound.pause();
 			if(carTimer != null) carTimer.active = false;
 		}
@@ -1066,43 +1128,19 @@ class Stage extends MusicBeatState
 
 	// Ghouls event
 	public var bgGhouls:BGSprite;
-	public function eventCalled(eventName:String, value1:String, value2:String, strumTime:Float, value3:String, value4:String, value5:String, value6:String, value7:String, value8:String, 
-		value9:String, value10:String, value11:String, value12:String, value13:String, value14:String):Void
+	public function eventCalled(eventName:String, eventParams:Array<String>, strumTime:Float):Void
 	{
-		var flValue1:Null<Float> = Std.parseFloat(value1);
-		var flValue2:Null<Float> = Std.parseFloat(value2);
-		var flValue3:Null<Float> = Std.parseFloat(value3);
-		var flValue4:Null<Float> = Std.parseFloat(value4);
-		var flValue5:Null<Float> = Std.parseFloat(value5);
-		var flValue6:Null<Float> = Std.parseFloat(value6);
-		var flValue7:Null<Float> = Std.parseFloat(value7);
-		var flValue8:Null<Float> = Std.parseFloat(value8);
-		var flValue9:Null<Float> = Std.parseFloat(value9);
-		var flValue10:Null<Float> = Std.parseFloat(value10);
-		var flValue11:Null<Float> = Std.parseFloat(value11);
-		var flValue12:Null<Float> = Std.parseFloat(value12);
-		var flValue13:Null<Float> = Std.parseFloat(value13);
-		var flValue14:Null<Float> = Std.parseFloat(value14);
-		if(Math.isNaN(flValue1)) flValue1 = null;
-		if(Math.isNaN(flValue2)) flValue2 = null;
-		if(Math.isNaN(flValue3)) flValue3 = null;
-		if(Math.isNaN(flValue4)) flValue4 = null;
-		if(Math.isNaN(flValue5)) flValue5 = null;
-		if(Math.isNaN(flValue6)) flValue6 = null;
-		if(Math.isNaN(flValue7)) flValue7 = null;
-		if(Math.isNaN(flValue8)) flValue8 = null;
-		if(Math.isNaN(flValue9)) flValue9 = null;
-		if(Math.isNaN(flValue10)) flValue10 = null;
-		if(Math.isNaN(flValue11)) flValue11 = null;
-		if(Math.isNaN(flValue12)) flValue12 = null;
-		if(Math.isNaN(flValue13)) flValue13 = null;
-		if(Math.isNaN(flValue14)) flValue14 = null;
+		var flValues:Array<Null<Float>> = [];
+		for (i in 0...eventParams.length-1) {
+			if (!Math.isNaN(Std.parseFloat(eventParams[i]))) flValues.push(Std.parseFloat(eventParams[i]));
+			else flValues.push(null);
+		}
 
 		switch(eventName)
 		{
 			case "Dadbattle Spotlight":
-				if(flValue1 == null) flValue1 = 0;
-				var val:Int = Math.round(flValue1);
+				if(flValues[0] == null) flValues[0] = 0;
+				var val:Int = Math.round(flValues[0]);
 
 				switch(val)
 				{
@@ -1132,8 +1170,8 @@ class Stage extends MusicBeatState
 						FlxTween.tween(dadbattleFog, {alpha: 0}, 0.7, {onComplete: function(twn:FlxTween) dadbattleFog.visible = false});
 				}
 			case "Philly Glow":
-				if(flValue1 == null || flValue1 <= 0) flValue1 = 0;
-				var lightId:Int = Math.round(flValue1);
+				if(flValues[0] == null || flValues[0] <= 0) flValues[0] = 0;
+				var lightId:Int = Math.round(flValues[0]);
 
 				var chars:Array<Character> = [PlayState.instance.boyfriend, PlayState.instance.gf, PlayState.instance.dad];
 				switch(lightId)
@@ -1228,12 +1266,12 @@ class Stage extends MusicBeatState
 				if (curStage != 'mall')
 					return;
 				else{
-					switch(value1.toLowerCase().trim()) {
+					switch(eventParams[0].toLowerCase().trim()) {
 						case 'bf' | 'boyfriend' | '0':
 							return;
 					}
 					swagBacks['bottomBoppers'].animation.play('hey', true);
-					swagBacks['bottomBoppers'].heyTimer = flValue2;
+					swagBacks['bottomBoppers'].heyTimer = flValues[1];
 				}
 			case "BG Freaks Expression":
 				if(bgGirls != null) bgGirls.swapDanceType();
@@ -1258,7 +1296,7 @@ class Stage extends MusicBeatState
 					bgGhouls.updateHitbox();
 					bgGhouls.visible = false;
 					bgGhouls.antialiasing = false;
-					swagBacks['thornGhouls'] = bgGhouls;
+					swagBacks['bgGhouls'] = bgGhouls;
 					bgGhouls.animation.finishCallback = function(name:String)
 					{
 						if(name == 'BG freaks glitch instance')
@@ -1314,13 +1352,14 @@ class Stage extends MusicBeatState
 	}
 
 	#if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-	public function startStageScriptsNamed(file:String, ?preloading:Bool = false)
+	public function startStageScriptsNamed(stage:String, preloading:Bool = false)
 	{
 		#if LUA_ALLOWED
-		startLuasNamed(file, preloading);
+		startLuasNamed('stages/' + stage, preloading);
 		#end
 		#if HSCRIPT_ALLOWED
-		startHScriptsNamed(file);
+		startHScriptsNamed('stages/' + stage);
+		#if HScriptImproved startHSIScriptsNamed('stages/advancedStages/' + stage); #end
 		#end
 	}
 	#end
@@ -1462,6 +1501,44 @@ class Stage extends MusicBeatState
 			}
 		}
 	}
+
+	#if HScriptImproved
+	public function startHSIScriptsNamed(scriptFile:String)
+	{
+		for (extn in CoolUtil.haxeExtensions)
+		{
+			var scriptFileHx:String = scriptFile + '.$extn';
+			#if MODS_ALLOWED
+			var scriptToLoad:String = Paths.modFolders(scriptFileHx);
+			if(!FileSystem.exists(scriptToLoad))
+				scriptToLoad = Paths.getSharedPath(scriptFileHx);
+			#else
+			var scriptToLoad:String = Paths.getSharedPath(scriptFileHx);
+			#end
+
+			if(FileSystem.exists(scriptToLoad))
+			{
+				initHSIScript(scriptToLoad);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public function initHSIScript(scriptFile:String)
+	{
+		try
+		{
+			var times:Float = Date.now().getTime();
+			addScript(scriptFile);
+			Debug.logInfo('initialized hscript-improved interp successfully: $scriptFile (${Std.int(Date.now().getTime() - times)}ms)');
+		}
+		catch(e)
+		{
+			Debug.logInfo('Error on loading Script!');
+		}
+	}
+	#end
 	#end
 
 	public function callOnScripts(funcToCall:String, args:Array<Dynamic> = null, ignoreStops = false, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
@@ -1471,7 +1548,10 @@ class Stage extends MusicBeatState
 		if(excludeValues == null) excludeValues = [LuaUtils.Function_Continue];
 
 		var result:Dynamic = callOnLuas(funcToCall, args, ignoreStops, exclusions, excludeValues);
-		if(result == null || excludeValues.contains(result)) result = callOnHScript(funcToCall, args, ignoreStops, exclusions, excludeValues);
+		if(result == null || excludeValues.contains(result)) 
+			result = callOnHScript(funcToCall, args, ignoreStops, exclusions, excludeValues);
+			if (result == null || excludeValues.contains(result))
+				result = callOnHSI(funcToCall, args, ignoreStops, exclusions, excludeValues);
 		return result;
 	}
 
@@ -1564,10 +1644,37 @@ class Stage extends MusicBeatState
 		return returnVal;
 	}
 
+	public function callOnHSI(funcToCall:String, args:Array<Dynamic> = null, ignoreStops:Bool = false, exclusions:Array<String> = null, excludeValues:Array<Dynamic> = null):Dynamic {
+		var returnVal:Dynamic = LuaUtils.Function_Continue;
+
+		#if (HSCRIPT_ALLOWED && HScriptImproved)
+		if(args == null) args = [];
+		if(exclusions == null) exclusions = [];
+		if(excludeValues == null) excludeValues = [LuaUtils.Function_Continue];
+		
+		var len:Int = scripts.scripts.length;
+		if (len < 1)
+			return returnVal;
+
+		var myValue = scripts.call(funcToCall, args);
+		if((myValue == LuaUtils.Function_StopLua || myValue == LuaUtils.Function_StopAll) && !excludeValues.contains(myValue) && !ignoreStops)
+		{
+			returnVal = myValue;
+			return returnVal;
+		}
+		
+		if(myValue != null && !excludeValues.contains(myValue))
+			returnVal = myValue;
+		#end
+
+		return returnVal;
+	}
+
 	public function setOnScripts(variable:String, arg:Dynamic, exclusions:Array<String> = null) {
 		if(exclusions == null) exclusions = [];
 		setOnLuas(variable, arg, exclusions);
 		setOnHScript(variable, arg, exclusions);
+		setOnHSI(variable, arg, exclusions);
 	}
 
 	public function setOnLuas(variable:String, arg:Dynamic, exclusions:Array<String> = null) {
@@ -1597,11 +1704,27 @@ class Stage extends MusicBeatState
 		#end
 	}
 
+	public function setOnHSI(variable:String, arg:Dynamic, exclusions:Array<String> = null) {
+		#if (HSCRIPT_ALLOWED && HScriptImproved)
+		if(exclusions == null) exclusions = [];
+		for (script in scripts.scripts) {
+			if(exclusions.contains(script.fileName))
+				continue;
+			
+			if(!instancesExclude.contains(variable))
+				instancesExclude.push(variable);
+
+			script.set(variable, arg);
+		}
+		#end
+	}
+
 	public function getOnScripts(variable:String, arg:String, exclusions:Array<String> = null)
 	{
 		if(exclusions == null) exclusions = [];
 		getOnLuas(variable, arg, exclusions);
 		getOnHScript(variable, exclusions);
+		getOnHSI(variable, exclusions);
 	}
 
 	public function getOnLuas(variable:String, arg:String, exclusions:Array<String> = null)
@@ -1630,6 +1753,28 @@ class Stage extends MusicBeatState
 		#end
 	}
 
+	public function getOnHSI(variable:String, exclusions:Array<String> = null)
+	{
+		#if (HSCRIPT_ALLOWED && HScriptImproved)
+		if(exclusions == null) exclusions = [];
+		for (script in scripts.scripts) {
+			if(exclusions.contains(script.fileName))
+				continue;
+
+			script.get(variable);
+		}
+		#end
+	}
+
+	public function searchForVarsOnScripts(variable:String, arg:String, result:Bool) {
+		var result:Dynamic = searchLuaVar(variable, arg, result);
+		if (result == null) {
+			result = searchHxVar(variable, arg, result);
+			if (result == null) result = searchHSIVar(variable, arg, result);
+		}
+		return result;
+	}
+
 	public function searchLuaVar(variable:String, arg:String, result:Bool) {
 		#if LUA_ALLOWED
 		for (script in luaArray)
@@ -1640,6 +1785,50 @@ class Stage extends MusicBeatState
 		}
 		#end
 		return !result;
+	}
+
+	public function searchHxVar(variable:String, arg:String, result:Bool) {
+		#if HSCRIPT_ALLOWED
+		for (script in hscriptArray)
+		{
+			if (LuaUtils.convert(script.get(variable), arg) == result){
+				return result;
+			}
+		}
+		#end
+		return !result;
+	}
+
+	public function searchHSIVar(variable:String, arg:String, result:Bool) {
+		#if (HSCRIPT_ALLOWED && HScriptImproved)
+		for (script in scripts.scripts)
+		{
+			if (LuaUtils.convert(script.get(variable), arg) == result){
+				return result;
+			}
+		}
+		#end
+		return !result;
+	}
+
+	public function getHxNewVar(name:String, type:String):Dynamic
+	{
+		#if HSCRIPT_ALLOWED
+		var hxVar:Dynamic = null;
+
+		// we prioritize modchart cuz frick you
+
+		for (script in hscriptArray)
+		{
+			var newHxVar = Std.isOfType(script.get(name), Type.resolveClass(type));
+			hxVar = newHxVar;
+		}
+
+		if(hxVar != null)
+			return hxVar;
+		#end
+
+		return null;
 	}
 
 	public function getLuaNewVar(name:String, type:String):Dynamic
@@ -1663,6 +1852,7 @@ class Stage extends MusicBeatState
 
 		return null;
 	}
+	
 
 	public function setGraphicSize(name:String, val:Float = 1, ?updateHitBox:Bool = true)
 	{
@@ -1677,36 +1867,100 @@ class Stage extends MusicBeatState
 		}
 	}
 
-	public function getProperty(variable:String)
+	public function getPropertyObject(variable:String)
 	{
 		var split:Array<String> = variable.split('.');
 		if(split.length > 1) {
-			var coverMeInPiss:Dynamic = null;
+			var refelectedItem:Dynamic = null;
 
-			coverMeInPiss = swagBacks.get(split[0]);
+			refelectedItem = swagBacks.get(split[0]);
 
 			for (i in 1...split.length-1) {
-				coverMeInPiss = Reflect.getProperty(coverMeInPiss, split[i]);
+				refelectedItem = Reflect.getProperty(refelectedItem, split[i]);
 			}
-			return Reflect.getProperty(coverMeInPiss, split[split.length-1]);
+			return Reflect.getProperty(refelectedItem, split[split.length-1]);
 		}
 		return Reflect.getProperty(Stage.instance, swagBacks.get(variable));
 	}
 
-	public function setProperty(variable:String, value:Dynamic)
+	public function setPropertyObject(variable:String, value:Dynamic)
 	{
 		var split:Array<String> = variable.split('.');
 		if(split.length > 1) {
-			var coverMeInPiss:Dynamic = null;
+			var refelectedItem:Dynamic = null;
 
-			coverMeInPiss = swagBacks.get(split[0]);
+			refelectedItem = swagBacks.get(split[0]);
 
 			for (i in 1...split.length-1) {
-				coverMeInPiss = Reflect.getProperty(coverMeInPiss, split[i]);
+				refelectedItem = Reflect.getProperty(refelectedItem, split[i]);
 			}
-			return Reflect.setProperty(coverMeInPiss, split[split.length-1], value);
+			return Reflect.setProperty(refelectedItem, split[split.length-1], value);
 		}
 		return Reflect.setProperty(Stage.instance, swagBacks.get(variable), value);
+	}
+
+	public function getPropertyNoInstance(variable:String)
+	{
+		var split:Array<String> = variable.split('.');
+		if(split.length > 1) {
+			var refelectedItem:Dynamic = null;
+
+			refelectedItem = split[0];
+
+			for (i in 1...split.length-1) {
+				refelectedItem = Reflect.getProperty(refelectedItem, split[i]);
+			}
+			return Reflect.getProperty(refelectedItem, split[split.length-1]);
+		}
+		return Reflect.getProperty(Stage, variable);
+	}
+
+	public function setPropertyNoInstance(variable:String, value:Dynamic)
+	{
+		var split:Array<String> = variable.split('.');
+		if(split.length > 1) {
+			var refelectedItem:Dynamic = null;
+
+			refelectedItem = split[0];
+
+			for (i in 1...split.length-1) {
+				refelectedItem = Reflect.getProperty(refelectedItem, split[i]);
+			}
+			return Reflect.setProperty(refelectedItem, split[split.length-1], value);
+		}
+		return Reflect.setProperty(Stage, variable, value);
+	}
+
+	public function getPropertyInstance(variable:String)
+	{
+		var split:Array<String> = variable.split('.');
+		if(split.length > 1) {
+			var refelectedItem:Dynamic = null;
+
+			refelectedItem = swagBacks.get(split[0]);
+
+			for (i in 1...split.length-1) {
+				refelectedItem = Reflect.getProperty(refelectedItem, split[i]);
+			}
+			return Reflect.getProperty(refelectedItem, split[split.length-1]);
+		}
+		return Reflect.getProperty(Stage.instance, swagBacks.get(variable));
+	}
+
+	public function setPropertyInstance(variable:String, value:Dynamic)
+	{
+		var split:Array<String> = variable.split('.');
+		if(split.length > 1) {
+			var refelectedItem:Dynamic = null;
+
+			refelectedItem = split[0];
+
+			for (i in 1...split.length-1) {
+				refelectedItem = Reflect.getProperty(refelectedItem, split[i]);
+			}
+			return Reflect.setProperty(refelectedItem, split[split.length-1], value);
+		}
+		return Reflect.setProperty(Stage, variable, value);
 	}
 
 	public function stageSpriteHandler(sprite:Dynamic = null, place:Int = -1, tag:String = '', hideLast:Null<Bool> = null, tweenDuration:Null<Float> = null, 
@@ -1760,6 +2014,28 @@ class Stage extends MusicBeatState
 
 		if (stopDancing != null)
 			stopBGDancing = stopDancing;
+	}
+
+	public function addScript(file:String) {
+		#if (HSCRIPT_ALLOWED && HScriptImproved)
+		for (ext in CoolUtil.haxeExtensions){
+			if (haxe.io.Path.extension(file).toLowerCase().contains(ext)){
+				Debug.logInfo('INITIALIZED');
+				var script = HScriptCode.create(file);
+				if (!(script is codenameengine.scripting.DummyScript))
+				{
+					scripts.add(script);
+
+					//Set the things first
+					script.set("game", PlayState.instance);
+
+					//Then CALL SCRIPT
+					script.load();
+					script.call('onCreate');
+				}
+			}
+		}
+		#end
 	}
 
 	function lightningStrikeShit():Void
@@ -1871,9 +2147,7 @@ class Stage extends MusicBeatState
 	var carTimer:FlxTimer;
 	function fastCarDrive()
 	{
-		//Debug.logTrace('Car drive');
-		if (!PlayState.finishedSong)
-			FlxG.sound.play(Paths.soundRandom('carPass', 0, 1), 0.7);
+		if (!PlayState.finishedSong) FlxG.sound.play(Paths.soundRandom('carPass', 0, 1), 0.7);
 
 		fastCar.velocity.x = (FlxG.random.int(170, 220) / FlxG.elapsed) * 3;
 		fastCarCanDrive = false;
@@ -1970,7 +2244,16 @@ class Stage extends MusicBeatState
 	var doof:DialogueBox = null;
 	function initDoof()
 	{
-		var file:String = Paths.txt('songs/' + songLowercase + '/' + songLowercase + 'Dialogue'); //Checks for vanilla/Senpai dialogue
+		var file:String = Paths.txt('songs/$songLowercase/${songLowercase}Dialogue_${ClientPrefs.data.language}'); //Checks for vanilla/Senpai dialogue
+		#if MODS_ALLOWED
+		if (!FileSystem.exists(file))
+		#else
+		if (!OpenFlAssets.exists(file))
+		#end
+		{
+			file = Paths.txt('songs/$songLowercase/${songLowercase}Dialogue');
+		}
+
 		#if MODS_ALLOWED
 		if (!FileSystem.exists(file))
 		#else
@@ -2013,9 +2296,7 @@ class Stage extends MusicBeatState
 			{
 				black.alpha -= 0.15;
 
-				if (black.alpha > 0)
-					tmr.reset(0.3);
-				else
+				if (black.alpha <= 0)
 				{
 					if (doof != null)
 						PlayState.instance.add(doof);
@@ -2030,6 +2311,7 @@ class Stage extends MusicBeatState
 					PlayState.instance.remove(black);
 					black.destroy();
 				}
+				else tmr.reset(0.3);
 			});
 		}else{
 			var red:FlxSprite = new FlxSprite(-100, -100).makeGraphic(FlxG.width * 2, FlxG.height * 2, 0xFFff1b31);
@@ -2133,54 +2415,15 @@ class Stage extends MusicBeatState
 		PlayState.instance.camHUD.visible = false;
 		//inCutscene = true; //this would stop the camera movement, oops
 
-		#if flxanimate 
 		tankman = new FlxAnimate(PlayState.instance.dad.x + 419, PlayState.instance.dad.y + 225);
 		tankman.showPivot = false;
 		Paths.loadAnimateAtlas(tankman, 'cutscenes/tankman');
 		tankman.antialiasing = ClientPrefs.data.antialiasing;
 		PlayState.instance.addBehindDad(tankman);
 		cutsceneHandler.push(tankman);
-		#else
-		tankman = new FlxSprite(-20, 320);
-		tankman.frames = Paths.getSparrowAtlas('cutscenes/' + songLowercase);
-		tankman.antialiasing = ClientPrefs.data.antialiasing;
-		PlayState.instance.addBehindDad(tankman);
-
-		tankman2 = new FlxSprite(16, 312);
-		tankman2.antialiasing = ClientPrefs.data.antialiasing;
-		tankman2.alpha = 0.000001;
-
-		gfDance = new FlxSprite(PlayState.instance.gf.x - 107, PlayState.instance.gf.y + 140);
-		gfDance.antialiasing = ClientPrefs.data.antialiasing;
-
-		gfCutscene = new FlxSprite(PlayState.instance.gf.x - 104, PlayState.instance.gf.y + 122);
-		gfCutscene.antialiasing = ClientPrefs.data.antialiasing;
-
-		picoCutscene = new FlxSprite(PlayState.instance.gf.x - 849, PlayState.instance.gf.y - 264);
-		picoCutscene.antialiasing = ClientPrefs.data.antialiasing;
-
-		boyfriendCutscene = new FlxSprite(PlayState.instance.boyfriend.x + 5, PlayState.instance.boyfriend.y + 20);
-		boyfriendCutscene.antialiasing = ClientPrefs.data.antialiasing;
-
-		var cutsceneHandlerObjects:Array<FlxSprite> = [tankman];
-		cutsceneHandlerObjects.push(tankman2);
-		cutsceneHandlerObjects.push(gfDance);
-		cutsceneHandlerObjects.push(gfCutscene);
-		cutsceneHandlerObjects.push(picoCutscene);
-		cutsceneHandlerObjects.push(boyfriendCutscene);
-		#end
 
 		cutsceneHandler.finishCallback = function()
 		{
-			#if !flxanimate 
-			for (spr in cutsceneHandlerObjects)
-			{
-				spr.kill();
-				PlayState.instance.remove(spr);
-				spr.destroy();
-			}
-			#end
-
 			var timeForStuff:Float = Conductor.crochet / 1000 * 4.5;
 			if (FlxG.sound.music != null) FlxG.sound.music.fadeOut(timeForStuff);
 			FlxTween.tween(FlxG.camera, {zoom: PlayState.instance.defaultCamZoom}, timeForStuff, {ease: FlxEase.quadInOut});
@@ -2207,15 +2450,9 @@ class Stage extends MusicBeatState
 		var wellWellWell:FlxSound = new FlxSound().loadEmbedded(Paths.sound('wellWellWell'));
 		FlxG.sound.list.add(wellWellWell);
 
-		#if flxanimate
 		tankman.anim.addBySymbol('wellWell', 'TANK TALK 1 P1', 24, false);
 		tankman.anim.addBySymbol('killYou', 'TANK TALK 1 P2', 24, false);
 		tankman.anim.play('wellWell', true);
-		#else
-		tankman.animation.addByPrefix('wellWell', 'TANK TALK 1 P1', 24, false);
-		tankman.animation.addByPrefix('killYou', 'TANK TALK 1 P2', 24, false);
-		tankman.animation.play('wellWell', true);
-		#end
 		FlxG.camera.zoom *= 1.2;
 
 		// Well well well, what do we got here?
@@ -2246,11 +2483,7 @@ class Stage extends MusicBeatState
 			PlayState.instance.camFollow.y -= 100;
 
 			// We should just kill you but... what the hell, it's been a boring day... let's see what you've got!
-			#if flxanimate
 			tankman.anim.play('killYou', true);
-			#else
-			tankman.animation.play('killYou', true);
-			#end
 			FlxG.sound.play(Paths.sound('killYou'));
 		});
 	}
@@ -2266,13 +2499,8 @@ class Stage extends MusicBeatState
 		var tightBars:FlxSound = new FlxSound().loadEmbedded(Paths.sound('tankSong2'));
 		FlxG.sound.list.add(tightBars);
 
-		#if flxanimate
 		tankman.anim.addBySymbol('tightBars', 'TANK TALK 2', 24, false);
 		tankman.anim.play('tightBars', true);
-		#else
-		tankman.animation.addByPrefix('tightBars', 'TANK TALK 2', 24, false);
-		tankman.animation.play('tightBars', true);
-		#end
 		PlayState.instance.boyfriend.animation.curAnim.finish();
 
 		cutsceneHandler.onStart = function()
@@ -2298,10 +2526,6 @@ class Stage extends MusicBeatState
 		prepareCutscene();
 		
 		cutsceneHandler.endTime = 35.5;
-		#if !flxanimate
-		tankman.x -= 54;
-		tankman.y -= 14;
-		#end
 		PlayState.instance.gf.alpha = 0.00001;
 		PlayState.instance.boyfriend.alpha = 0.00001;
 		PlayState.instance.camFollow.setPosition(PlayState.instance.dad.x + 400, PlayState.instance.dad.y + 170);
@@ -2312,7 +2536,6 @@ class Stage extends MusicBeatState
 		});
 		Paths.sound('stressCutscene');
 
-		#if flxanimate
 		pico = new FlxAnimate(PlayState.instance.gf.x + 150, PlayState.instance.gf.y + 450);
 		pico.showPivot = false;
 		Paths.loadAnimateAtlas(pico, 'cutscenes/picoAppears');
@@ -2333,54 +2556,13 @@ class Stage extends MusicBeatState
 		boyfriendCutscene.animation.curAnim.finish();
 		PlayState.instance.addBehindBF(boyfriendCutscene);
 		cutsceneHandler.push(boyfriendCutscene);
-		#else
-		tankman2.frames = Paths.getSparrowAtlas('cutscenes/stress2');
-		PlayState.instance.addBehindDad(tankman2);
-		cutsceneHandler.push(tankman2);
-
-		if (!ClientPrefs.data.lowQuality)
-		{
-			gfDance.frames = Paths.getSparrowAtlas('characters/gfTankmen');
-			gfDance.animation.addByPrefix('dance', 'GF Dancing at Gunpoint', 24, true);
-			gfDance.animation.play('dance', true);
-			PlayState.instance.addBehindGF(gfDance);
-			cutsceneHandler.push(gfDance);
-		}
-
-		gfCutscene.frames = Paths.getSparrowAtlas('cutscenes/stressGF');
-		gfCutscene.animation.addByPrefix('dieBitch', 'GF STARTS TO TURN PART 1', 24, false);
-		gfCutscene.animation.addByPrefix('getRektLmao', 'GF STARTS TO TURN PART 2', 24, false);
-		gfCutscene.animation.play('dieBitch', true);
-		gfCutscene.animation.pause();
-		PlayState.instance.addBehindGF(gfCutscene);
-		cutsceneHandler.push(gfCutscene);
-		if (!ClientPrefs.data.lowQuality) gfCutscene.alpha = 0.00001;
-
-		picoCutscene.frames = AtlasFrameMaker.construct('cutscenes/stressPico');
-		picoCutscene.animation.addByPrefix('anim', 'Pico Badass', 24, false);
-		PlayState.instance.addBehindGF(picoCutscene);
-		cutsceneHandler.push(picoCutscene);
-		picoCutscene.alpha = 0.00001;
-
-		boyfriendCutscene.frames = Paths.getSparrowAtlas('characters/BOYFRIEND');
-		boyfriendCutscene.animation.addByPrefix('idle', 'BF idle dance', 24, false);
-		boyfriendCutscene.animation.play('idle', true);
-		boyfriendCutscene.animation.curAnim.finish();
-		PlayState.instance.addBehindBF(boyfriendCutscene);
-		cutsceneHandler.push(boyfriendCutscene);
-		#end
 
 		var cutsceneSnd:FlxSound = new FlxSound().loadEmbedded(Paths.sound('stressCutscene'));
 		FlxG.sound.list.add(cutsceneSnd);
 
-		#if flxanimate
 		tankman.anim.addBySymbol('godEffingDamnIt', 'TANK TALK 3 P1 UNCUT', 24, false);
 		tankman.anim.addBySymbol('lookWhoItIs', 'TANK TALK 3 P2 UNCUT', 24, false);
 		tankman.anim.play('godEffingDamnIt', true);
-		#else
-		tankman.animation.addByPrefix('godEffingDamnIt', 'TANK TALK 3', 24, false);
-		tankman.animation.play('godEffingDamnIt', true);
-		#end
 
 		cutsceneHandler.onStart = function()
 		{
@@ -2392,7 +2574,6 @@ class Stage extends MusicBeatState
 			FlxTween.tween(PlayState.instance.camFollow, {x: 650, y: 300}, 1, {ease: FlxEase.sineOut});
 			FlxTween.tween(FlxG.camera, {zoom: 1.296}, 2.25, {ease: FlxEase.quadInOut});
 
-			#if flxanimate
 			pico.anim.play('dieBitch', true);
 			pico.anim.onComplete = function()
 			{
@@ -2421,45 +2602,6 @@ class Stage extends MusicBeatState
 					}
 				};
 			};
-			#else
-			gfDance.visible = false;
-			gfCutscene.alpha = 1;
-			gfCutscene.animation.play('dieBitch', true);
-			gfCutscene.animation.finishCallback = function(name:String)
-			{
-				if(name == 'dieBitch') //Next part
-				{
-					gfCutscene.animation.play('getRektLmao', true);
-					gfCutscene.offset.set(224, 445);
-				}
-				else
-				{
-					gfCutscene.visible = false;
-					picoCutscene.alpha = 1;
-					picoCutscene.animation.play('anim', true);
-
-					PlayState.instance.boyfriend.alpha = 1;
-					boyfriendCutscene.visible = false;
-					PlayState.instance.boyfriend.playAnim('bfCatch', true);
-					PlayState.instance.boyfriend.animation.finishCallback = function(name:String)
-					{
-						if(name != 'idle')
-						{
-							PlayState.instance.boyfriend.playAnim('idle', true);
-							PlayState.instance.boyfriend.animation.curAnim.finish(); //Instantly goes to last frame
-						}
-					};
-
-					picoCutscene.animation.finishCallback = function(name:String)
-					{
-						picoCutscene.visible = false;
-						PlayState.instance.gf.alpha = 1;
-						picoCutscene.animation.finishCallback = null;
-					};
-					gfCutscene.animation.finishCallback = null;
-				}
-			};
-			#end
 		});
 
 		cutsceneHandler.timer(17.5, function()
@@ -2469,14 +2611,7 @@ class Stage extends MusicBeatState
 
 		cutsceneHandler.timer(19.5, function()
 		{
-			#if flxanimate
 			tankman.anim.play('lookWhoItIs', true);
-			#else
-			tankman2.animation.addByPrefix('lookWhoItIs', 'TANK TALK 3', 24, false);
-			tankman2.animation.play('lookWhoItIs', true);
-			tankman2.alpha = 1;
-			tankman.visible = false;
-			#end
 		});
 
 		cutsceneHandler.timer(20, function()
@@ -2528,8 +2663,6 @@ class Stage extends MusicBeatState
 
 	override function destroy()
 	{
-		super.destroy();
-
 		#if LUA_ALLOWED
 		for (lua in luaArray) {
 			lua.call('onDestroy', []);
@@ -2540,9 +2673,17 @@ class Stage extends MusicBeatState
 		LuaUtils.killShaders();
 		#end
 
-		#if HSCRIPT_ALLOWED
+		for (sprite in swagBacks.keys())
+		{
+			if (swagBacks[sprite] != null)
+				swagBacks[sprite].destroy();
+		}
+
+		swagBacks.clear();
+
+		#if HSCRIPT_ALLOWED	
 		for (script in hscriptArray)
-			if(script != null)
+			if (script != null)
 			{
 				script.call('onDestroy');
 				#if (SScript > "6.1.80" || SScript != "6.1.80")
@@ -2553,15 +2694,22 @@ class Stage extends MusicBeatState
 			}
 		while (hscriptArray.length > 0)
 			hscriptArray.pop();
+
+		#if HScriptImproved
+		for (script in scripts.scripts)
+			if (script != null)
+			{
+				script.call('onDestroy');
+				script.destroy();
+			}
+		while (scripts.scripts.length > 0)
+			scripts.scripts.pop();
+
+		remove(scripts);
+		scripts.destroy();
+		scripts = null;
 		#end
-
-		for (sprite in swagBacks.keys())
-		{
-			if (swagBacks[sprite] != null)
-				swagBacks[sprite].destroy();
-		}
-
-		swagBacks.clear();
+		#end
 
 		while (toAdd.length > 0)
 		{
@@ -2598,5 +2746,6 @@ class Stage extends MusicBeatState
 		}
 
 		swagGroup.clear();
+		super.destroy();
 	}
 }

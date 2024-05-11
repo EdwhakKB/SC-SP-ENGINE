@@ -293,8 +293,7 @@ class NoteSplashDebugState extends MusicBeatState
 		{
 			if(forceFrame < 0) forceFrame = 0;
 			else if(forceFrame >= maxFrame) forceFrame = maxFrame - 1;
-			//Debug.logTrace('curFrame: $forceFrame');
-			
+
 			curFrameText.text = 'Force Frame: ${forceFrame+1} / $maxFrame\n(Press Q/E to change)';
 			splashes.forEachAlive(function(spr:FlxSprite) {
 				spr.animation.curAnim.paused = true;
@@ -350,8 +349,6 @@ class NoteSplashDebugState extends MusicBeatState
 		var path:String = pathSplit[pathSplit.length-1].trim();
 		savedText.text = 'Saved to: $path';
 		File.saveContent(path, strToSave);
-
-		//Debug.logTrace(strToSave);
 		#else
 		savedText.text = 'Can\'t save on this platform, too bad.';
 		#end
@@ -445,9 +442,7 @@ class NoteSplashDebugState extends MusicBeatState
 	function changeSelection(change:Int = 0)
 	{
 		var max:Int = Note.colArray.length;
-		curSelected += change;
-		if(curSelected < 0) curSelected = max - 1;
-		else if(curSelected >= max) curSelected = 0;
+		curSelected = FlxMath.wrap(curSelected + change, 0, max - 1);
 
 		selection.x = curSelected * 220 + 220;
 		updateOffsetText();

@@ -103,14 +103,9 @@ class ResultsScreenKadeSubstate extends substates.MusicBeatSubstate
 		FlxG.cameras.setDefaultDrawTarget(camResults, true);
 
 		camResults.follow(camFollow, LOCKON, 0);
-		camResults.zoom = FlxG.camera.zoom;
 		camResults.snapToTarget();
 
-		#if SCEFEATURES_ALLOWED
 		music = new FlxSound().loadEmbedded(Paths.inst((PlayState.SONG.instrumentalPrefix != null ? PlayState.SONG.instrumentalPrefix : ''), PlayState.SONG.songId, (PlayState.SONG.instrumentalSuffix != null ? PlayState.SONG.instrumentalSuffix : '')), true, true);
-		#else
-		music = new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.songId), true, true);
-		#end
 		music.volume = 0;
 
 		add(background);
@@ -137,17 +132,17 @@ class ResultsScreenKadeSubstate extends substates.MusicBeatSubstate
 
 		if (PlayState.isStoryMode)
 		{
-			acc = PlayState.campaignAccuracy;
-			score = PlayState.campaignScore;
+			acc = PlayState.averageWeekAccuracy;
+			score = PlayState.averageWeekScore;
 		}
 
-		var swags = PlayState.isStoryMode ? PlayState.campaignSwags : PlayState.swags;
-		var sicks = PlayState.isStoryMode ? PlayState.campaignSicks : PlayState.sicks;
-		var goods = PlayState.isStoryMode ? PlayState.campaignGoods : PlayState.goods;
-		var bads = PlayState.isStoryMode ? PlayState.campaignBads : PlayState.bads;
-		var shits = PlayState.isStoryMode ? PlayState.campaignShits : PlayState.shits;
+		var swags = PlayState.isStoryMode ? PlayState.averageWeekSwags : PlayState.averageSwags;
+		var sicks = PlayState.isStoryMode ? PlayState.averageWeekSicks : PlayState.averageSicks;
+		var goods = PlayState.isStoryMode ? PlayState.averageWeekGoods : PlayState.averageGoods;
+		var bads = PlayState.isStoryMode ? PlayState.averageWeekBads : PlayState.averageGoods;
+		var shits = PlayState.isStoryMode ? PlayState.averageWeekShits : PlayState.averageShits;
 
-		comboText.text = 'Judgements:\nSwags - ${swags}\nSicks - ${sicks}\nGoods - ${goods}\nBads - ${bads}\nShits - ${shits}\n\nCombo Breaks: ${PlayState.isStoryMode ? PlayState.campaignMisses : game.songMisses}\nHighest Combo: ${PlayState.highestCombo + 1}\nScore: $score\n${PlayState.isStoryMode ? 'Average Accuracy' : 'Accuracy'}: ${acc}% \nRank: ${game.comboLetterRank} - ${game.ratingFC} \nRate: ${game.playbackRate}x\n\nH - Replay song';
+		comboText.text = 'Judgements:\nSwags - ${swags}\nSicks - ${sicks}\nGoods - ${goods}\nBads - ${bads}\nShits - ${shits}\n\nCombo Breaks: ${PlayState.isStoryMode ? PlayState.averageWeekMisses : game.songMisses}\nHighest Combo: ${PlayState.highestCombo + 1}\nScore: $score\n${PlayState.isStoryMode ? 'Average Accuracy' : 'Accuracy'}: ${acc}% \nRank: ${game.comboLetterRank} - ${game.ratingFC} \nRate: ${game.playbackRate}x\n\nH - Replay song';
 
 		add(comboText);
 
@@ -167,23 +162,17 @@ class ResultsScreenKadeSubstate extends substates.MusicBeatSubstate
 
 		add(graphSprite);
 
-		var swags = HelperFunctions.truncateFloat(PlayState.swags / PlayState.sicks, 1);
-		var sicks = HelperFunctions.truncateFloat(PlayState.sicks / PlayState.goods, 1);
-		var goods = HelperFunctions.truncateFloat(PlayState.goods / PlayState.bads, 1);
+		var swags = HelperFunctions.truncateFloat(PlayState.averageSwags / PlayState.averageSicks, 1);
+		var sicks = HelperFunctions.truncateFloat(PlayState.averageSicks / PlayState.averageGoods, 1);
+		var goods = HelperFunctions.truncateFloat(PlayState.averageGoods / PlayState.averageBads, 1);
 
-		if (swags == Math.POSITIVE_INFINITY)
-			swags = 0;
-		if (sicks == Math.POSITIVE_INFINITY)
-			sicks = 0;
-		if (goods == Math.POSITIVE_INFINITY)
-			goods = 0;
+		if (swags == Math.POSITIVE_INFINITY) swags = 0;
+		if (sicks == Math.POSITIVE_INFINITY) sicks = 0;
+		if (goods == Math.POSITIVE_INFINITY) goods = 0;
 
-		if (swags == Math.POSITIVE_INFINITY || swags == Math.NaN)
-			swags = 0;
-		if (sicks == Math.POSITIVE_INFINITY || sicks == Math.NaN)
-			sicks = 0;
-		if (goods == Math.POSITIVE_INFINITY || goods == Math.NaN)
-			goods = 0;
+		if (swags == Math.POSITIVE_INFINITY || swags == Math.NaN) swags = 0;
+		if (sicks == Math.POSITIVE_INFINITY || sicks == Math.NaN) sicks = 0;
+		if (goods == Math.POSITIVE_INFINITY || goods == Math.NaN) goods = 0;
 
 		var legitTimings:Bool = true;
 		for (rating in Rating.timingWindows)
@@ -238,7 +227,7 @@ class ResultsScreenKadeSubstate extends substates.MusicBeatSubstate
 
 		add(settingsText);
 
-		FlxTween.tween(background, {alpha: 0.5}, 1.4);
+		FlxTween.tween(background, {alpha: 0.65}, 1.4);
 		FlxTween.tween(songText, {y: 65}, 1.4, {ease: FlxEase.expoInOut});
 		FlxTween.tween(activeMods, {y: FlxG.height - 400}, 1.4, {ease: FlxEase.expoInOut});
 		FlxTween.tween(text, {y: 20}, 1.4, {ease: FlxEase.expoInOut});

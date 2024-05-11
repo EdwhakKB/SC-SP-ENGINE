@@ -30,6 +30,8 @@ class CustomSubstate extends MusicBeatSubstate
 		PlayState.instance.openSubState(new CustomSubstate(name));
 		PlayState.instance.setOnHScript('customSubstate', instance);
 		PlayState.instance.setOnHScript('customSubstateName', name);
+		PlayState.instance.setOnHSI('customSubstate', instance);
+		PlayState.instance.setOnHSI('customSubstateName', instance);
 	}
 
 	public static function closeCustomSubstate()
@@ -47,8 +49,8 @@ class CustomSubstate extends MusicBeatSubstate
 	{
 		if(instance != null)
 		{
-			var tagObject:FlxObject = cast (PlayState.instance.variables.get(tag), FlxObject);
-			#if LUA_ALLOWED if(tagObject == null) tagObject = cast (PlayState.instance.modchartSprites.get(tag), FlxObject); #end
+			var tagObject:FlxObject = cast (MusicBeatState.getVariables(), FlxObject);
+			#if LUA_ALLOWED if(tagObject == null) tagObject = cast (MusicBeatState.getVariables(), FlxObject); #end
 			if (tagObject != null)
 			{
 				if(pos < 0) instance.add(tagObject);
@@ -89,6 +91,8 @@ class CustomSubstate extends MusicBeatSubstate
 
 		PlayState.instance.setOnHScript('customSubstate', null);
 		PlayState.instance.setOnHScript('customSubstateName', name);
+		PlayState.instance.setOnHSI('customSubstate', null);
+		PlayState.instance.setOnHSI('customSubstateName', name);
 		super.destroy();
 	}
 }

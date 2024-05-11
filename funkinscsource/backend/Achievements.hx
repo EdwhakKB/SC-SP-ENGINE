@@ -13,12 +13,12 @@ typedef Achievement =
 {
 	var name:String;
 	var description:String;
-	@:optional var hidden:Bool;
-	@:optional var maxScore:Float;
-	@:optional var maxDecimals:Int;
+	var ?hidden:Bool;
+	var ?maxScore:Float;
+	var ?maxDecimals:Int;
 	//handled automatically, ignore these two
-	@:optional var mod:String;
-	@:optional var ID:Int;
+	var ?mod:String;
+	var ?ID:Int;
 }
 
 class Achievements {
@@ -186,7 +186,6 @@ class Achievements {
 
 		var newPop:AchievementPopup = new AchievementPopup(achieve, endFunc);
 		_popups.push(newPop);
-		//Debug.logTrace('Giving achievement ' + achieve);
 	}
 	
 	
@@ -241,7 +240,7 @@ class Achievements {
 							var errorTitle = 'Mod name: ' + Mods.currentModDirectory != null ? Mods.currentModDirectory : "None";
 							var errorMsg = 'Achievement #${i+1} is invalid.';
 							#if windows
-							lime.app.Application.current.window.alert(errorMsg, errorTitle);
+							Debug.displayAlert(errorMsg, errorTitle);
 							#end
 							trace('$errorTitle - $errorMsg');
 							continue;
@@ -253,7 +252,7 @@ class Achievements {
 							var errorTitle = 'Error on Achievement: ' + (achieve.name != null ? achieve.name : achieve.save);
 							var errorMsg = 'Missing valid "save" value.';
 							#if windows
-							lime.app.Application.current.window.alert(errorMsg, errorTitle);
+							Debug.displayAlert(errorMsg, errorTitle);
 							#end
 							trace('$errorTitle - $errorMsg');
 							continue;
@@ -268,7 +267,7 @@ class Achievements {
 				var errorTitle = 'Mod name: ' + Mods.currentModDirectory != null ? Mods.currentModDirectory : "None";
 				var errorMsg = 'Error loading achievements.json: $e';
 				#if windows
-				lime.app.Application.current.window.alert(errorMsg, errorTitle);
+				Debug.displayAlert(errorMsg, errorTitle);
 				#end
 				trace('$errorTitle - $errorMsg');
 			}

@@ -16,22 +16,9 @@ import openfl.Assets;
 using StringTools;
 
 typedef EventNote = {
-	strumTime:Float,
-	event:String,
-	value1:String,
-	value2:String,
-	value3:String,
-	value4:String,
-	value5:String,
-	value6:String,
-	value7:String,
-	value8:String,
-	value9:String,
-	value10:String,
-	value11:String,
-	value12:String,
-	value13:String,
-	value14:String
+	var strumTime:Float;
+	var event:String;
+	var eventParams:Array<String>;
 }
 
 typedef NoteSplashData = {
@@ -46,7 +33,7 @@ typedef NoteSplashData = {
 	a:Float
 }
 
-class Note extends FlxSkewed
+class Note extends FunkinSCSprite
 {
 	public static var globalRgbShaders:Array<RGBPalette> = [];
 	public static var globalQuantRgbShaders:Array<RGBPalette> = [];
@@ -54,13 +41,13 @@ class Note extends FlxSkewed
 
 	#if SCEModchartingTools
 	public var mesh:modcharting.SustainStrip;
-	public var z:Float = 0;
 	#end
 
 	public var extraData:Map<String, Dynamic> = new Map<String, Dynamic>();
 
 	public var strumTime:Float = 0;
 	public var noteData:Int = 0;
+	public var strumLine:Int = 0;
 
 	public var mustPress:Bool = false;
 	public var canBeHit:Bool = false;
@@ -90,22 +77,9 @@ class Note extends FlxSkewed
 	public var isSustainNote:Bool = false;
 	public var noteType(default, set):String = null;
 
-	public var eventName:String = '';
 	public var eventLength:Int = 0;
-	public var eventVal1:String = '';
-	public var eventVal2:String = '';
-	public var eventVal3:String = null;
-	public var eventVal4:String = null;
-	public var eventVal5:String = null;
-	public var eventVal6:String = null;
-	public var eventVal7:String = null;
-	public var eventVal8:String = null;
-	public var eventVal9:String = null;
-	public var eventVal10:String = null;
-	public var eventVal11:String = null;
-	public var eventVal12:String = null;
-	public var eventVal13:String = null;
-	public var eventVal14:String = null;
+	public var eventName:String = '';
+	public var eventParams:Array<String> = [];
 
 	public var rgbShader:RGBShaderReference;
 
@@ -172,6 +146,12 @@ class Note extends FlxSkewed
 	public var pathNotFound:Bool = false;
 	public var isPixel:Bool = false;
 	public var changedSkin:Bool = false;
+
+	//For comfert.
+	public var notePathLib:String = null;
+	public static var notITGNotes:Bool = false;
+
+	public var canSplash:Bool = true;
 
 	private function set_multSpeed(value:Float):Float {
 		resizeByRatio(value / multSpeed);
@@ -270,10 +250,6 @@ class Note extends FlxSkewed
 	{
 		super();
 
-		#if (flixel >= "5.5.0")
-		animation = new backend.animation.PsychAnimationController(this);
-		#end
-
 		antialiasing = ClientPrefs.data.antialiasing;
 		if(createdFrom == null) createdFrom = PlayState.instance;
 
@@ -318,8 +294,6 @@ class Note extends FlxSkewed
 			hitsoundDisabled = true;
 			if(ClientPrefs.data.downScroll) flipY = true;
 
-			isHoldEnd = true;
-
 			offsetX += width / 2;
 			copyAngle = false;
 
@@ -333,7 +307,6 @@ class Note extends FlxSkewed
 
 			if (prevNote.isSustainNote)
 			{
-				isHoldEnd = false;
 				prevNote.animation.play(colArray[prevNote.noteData % colArray.length] + 'hold');
 
 				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.05; //Because of how SCE works with sustains the value is static to 1.05 unless they break.
@@ -452,17 +425,23 @@ class Note extends FlxSkewed
 			{
 				if (wasPixelNote && !becomePixelNote) //fixes the scaling
 				{
-					scale.y /= PlayState.daPixelZoom;
-					scale.y *= 0.7;
+					if (PlayState.SONG != null && !PlayState.SONG.notITG)
+					{
+						scale.y /= PlayState.daPixelZoom;
+						scale.y *= 0.7;
+					}
 		
 					offsetX += 3;
 				}
 		
 				if (becomePixelNote && !wasPixelNote) //fixes the scaling
 				{
-					if (getNoteSkinPostfix().contains('future')) scale.y /= 1.26;
-					else scale.y /= 0.7;
-					scale.y *= PlayState.daPixelZoom;
+					if (PlayState.SONG != null && !PlayState.SONG.notITG)
+					{
+						if (getNoteSkinPostfix().contains('future')) scale.y /= 1.26;
+						else scale.y /= 0.7;
+						scale.y *= PlayState.daPixelZoom;
+					}
 		
 					offsetX -= 3;
 				}
@@ -484,11 +463,11 @@ class Note extends FlxSkewed
 					if(FileSystem.exists(Paths.modsImages('notes/' + noteStyleType)) || FileSystem.exists(Paths.getSharedPath('images/notes/' + noteStyleType)) || Assets.exists('notes/' + noteStyleType))
 					{
 						if(isSustainNote) {
-							var graphic = Paths.image(noteStyleType != "" ?  'notes/' + noteStyleType + 'ENDS' : ('pixelUI/' + skinPixel + 'ENDS' + skinPostfix), null, !ClientPrefs.data.cacheOnGPU);
+							var graphic = Paths.image(noteStyleType != "" ?  'notes/' + noteStyleType + 'ENDS' : ('pixelUI/' + skinPixel + 'ENDS' + skinPostfix), notePathLib, !notITGNotes);
 							loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
 							originalHeight = graphic.height / 2;
 						} else {
-							var graphic = Paths.image(noteStyleType != "" ? 'notes/' + noteStyleType : ('pixelUI/' + skinPixel + skinPostfix), null, !ClientPrefs.data.cacheOnGPU);
+							var graphic = Paths.image(noteStyleType != "" ? 'notes/' + noteStyleType : ('pixelUI/' + skinPixel + skinPostfix), notePathLib, !notITGNotes);
 							loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
 						}
 
@@ -497,11 +476,11 @@ class Note extends FlxSkewed
 					else if(FileSystem.exists(Paths.modsImages(noteStyleType)) || FileSystem.exists(Paths.getSharedPath('images/' + noteStyleType)) || Assets.exists(noteStyleType))
 					{
 						if(isSustainNote) {
-							var graphic = Paths.image(noteStyleType != "" ?  noteStyleType + 'ENDS' : ('pixelUI/' + skinPixel + 'ENDS' + skinPostfix), null, !ClientPrefs.data.cacheOnGPU);
+							var graphic = Paths.image(noteStyleType != "" ?  noteStyleType + 'ENDS' : ('pixelUI/' + skinPixel + 'ENDS' + skinPostfix), notePathLib, !notITGNotes);
 							loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
 							originalHeight = graphic.height / 2;
 						} else {
-							var graphic = Paths.image(noteStyleType != "" ? noteStyleType : ('pixelUI/' + skinPixel + skinPostfix), null, !ClientPrefs.data.cacheOnGPU);
+							var graphic = Paths.image(noteStyleType != "" ? noteStyleType : ('pixelUI/' + skinPixel + skinPostfix), notePathLib, !notITGNotes);
 							loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
 						}
 
@@ -511,11 +490,11 @@ class Note extends FlxSkewed
 					{
 						var noteSkinNonRGB:Bool = (PlayState.SONG != null && PlayState.SONG.disableNoteRGB);
 						if(isSustainNote) {
-							var graphic = Paths.image(noteSkinNonRGB ? 'pixelUI/NOTE_assetsENDS' : 'pixelUI/noteSkins/NOTE_assets' + 'ENDS' + getNoteSkinPostfix(), null, !ClientPrefs.data.cacheOnGPU);
+							var graphic = Paths.image(noteSkinNonRGB ? 'pixelUI/NOTE_assetsENDS' : 'pixelUI/noteSkins/NOTE_assetsENDS' + getNoteSkinPostfix(), notePathLib, !notITGNotes);
 							loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
 							originalHeight = graphic.height / 2;
 						} else {
-							var graphic = Paths.image(noteSkinNonRGB ? 'pixelUI/NOTE_assets' : 'pixelUI/noteSkins/NOTE_assets' + getNoteSkinPostfix(), null, !ClientPrefs.data.cacheOnGPU);
+							var graphic = Paths.image(noteSkinNonRGB ? 'pixelUI/NOTE_assets' : 'pixelUI/noteSkins/NOTE_assets' + getNoteSkinPostfix(), notePathLib, !notITGNotes);
 							loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
 						}
 						
@@ -524,18 +503,18 @@ class Note extends FlxSkewed
 				} else {
 					if(FileSystem.exists(Paths.modsImages('notes/' + noteStyleType)) || FileSystem.exists(Paths.getSharedPath('images/notes/' + noteStyleType)) || Assets.exists('notes/' + noteStyleType))
 					{
-						frames = Paths.getSparrowAtlas('notes/' + noteStyleType, null, !ClientPrefs.data.cacheOnGPU);
+						frames = Paths.getSparrowAtlas('notes/' + noteStyleType, notePathLib, !notITGNotes);
 						loadNoteAnims();
 					}
 					else if(FileSystem.exists(Paths.modsImages(noteStyleType)) || FileSystem.exists(Paths.getSharedPath('shared/images/' + noteStyleType)) || Assets.exists(noteStyleType))
 					{
-						frames = Paths.getSparrowAtlas(noteStyleType, null, !ClientPrefs.data.cacheOnGPU);
+						frames = Paths.getSparrowAtlas(noteStyleType, notePathLib, !notITGNotes);
 						loadNoteAnims();
 					}
 					else
 					{
 						var noteSkinNonRGB:Bool = (PlayState.SONG != null && PlayState.SONG.disableNoteRGB);
-						frames = Paths.getSparrowAtlas(noteSkinNonRGB ? "NOTE_assets" :  "noteSkins/NOTE_assets" + getNoteSkinPostfix(), null, !ClientPrefs.data.cacheOnGPU);
+						frames = Paths.getSparrowAtlas(noteSkinNonRGB ? "NOTE_assets" :  "noteSkins/NOTE_assets" + getNoteSkinPostfix(), notePathLib, !notITGNotes);
 						loadNoteAnims();
 					}
 				}
@@ -603,14 +582,15 @@ class Note extends FlxSkewed
 
 	override function update(elapsed:Float)
 	{
-		if (texture.contains('pixel') || noteSkin.contains('pixel'))
-			containsPixelTexture = true;
+		if ((texture.contains('pixel') || noteSkin.contains('pixel')) && !containsPixelTexture) containsPixelTexture = true;
 		super.update(elapsed);
+
+		if (this.animation.curAnim.name.endsWith('end')) isHoldEnd = true;
 
 		if (mustPress)
 		{
 			canBeHit = (strumTime > Conductor.songPosition - (Conductor.safeZoneOffset * lateHitMult) &&
-						strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * earlyHitMult));
+				strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * earlyHitMult));
 
 			if (strumTime < Conductor.songPosition - Conductor.safeZoneOffset && !wasGoodHit)
 				tooLate = true;

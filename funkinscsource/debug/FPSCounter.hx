@@ -8,8 +8,6 @@ import openfl.system.System;
 
 import haxe.Int64;
 
-import flixel.util.FlxStringUtil;
-
 #if cpp
 import cpp.vm.Gc;
 #elseif hl
@@ -94,8 +92,11 @@ class FPSCounter extends TextField
 
 		text = "FPS: ";
 
-		memoryMegas = Int64.make(0, System.totalMemory);
-		taskMemoryMegas = Int64.make(0, MemoryUtil.getMemoryfromProcess());
+		/*memoryMegas = Int64.make(0, System.totalMemory);
+		taskMemoryMegas = Int64.make(0, MemoryUtil.getMemoryfromProcess());*/
+
+		memoryMegas = MemoryUtil.currentMemUsage();
+		if (taskMemoryMegas < memoryMegas) taskMemoryMegas = memoryMegas;
 
 		var stateText:String = '\nState: ${Type.getClassName(Type.getClass(FlxG.state))}';
 		var substateText:String = '\nSubState: ${Type.getClassName(Type.getClass(FlxG.state.subState))}';
@@ -106,10 +107,11 @@ class FPSCounter extends TextField
 
 
 		text = 'FPS: $currentFPS'
-		+ (ClientPrefs.data.memoryDisplay ? '\nMemory: ${CoolUtil.getSizeString(memoryMegas)} (${CoolUtil.getSizeString(taskMemoryMegas)})' : '')
+		+ (ClientPrefs.data.memoryDisplay ? '\nMemory: ${CoolUtil.getSizeString(memoryMegas)} / ${CoolUtil.getSizeString(taskMemoryMegas)}' : '')
 		+ (ClientPrefs.data.dateDisplay ? '\nDate: $stringTimeToReturn' : '')
+		+ '\nVersion: ${states.MainMenuState.psychEngineVersion}'
 
-		#if debug + '$stateText' + '$substateText'; #else ; #end
+		#if debug + '$stateText$substateText'; #else ; #end
 	}
 }
 
@@ -177,6 +179,8 @@ class MemoryUtil
 	public static inline function currentMemUsage() {
 		#if cpp
 		return Gc.memInfo64(Gc.MEM_INFO_USAGE);
+		#elseif hl
+		return Gc.stats().currentMemory;
 		#elseif sys
 		return cast(cast(System.totalMemory, UInt), Float);
 		#else

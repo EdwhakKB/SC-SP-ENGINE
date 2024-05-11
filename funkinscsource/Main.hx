@@ -1,16 +1,11 @@
 package;
 
-
-#if android
-import android.content.Context;
-#end
+import backend.ColorBlindness;
 
 import flixel.input.keyboard.FlxKey;
-import flixel.system.scaleModes.*;
 import flixel.graphics.FlxGraphic;
 import flixel.FlxGame;
 import flixel.system.FlxAssets.FlxShader;
-
 
 import openfl.Assets;
 import openfl.Lib;
@@ -39,12 +34,7 @@ import gamejolt.*;
 
 import states.TitleState;
 
-#if linux
-@:cppInclude('./external/gamemode_client.h')
-@:cppFileCode('
-	#define GAMEMODE_AUTO
-')
-#end
+import haxe.ui.Toolkit;
 
 class Main extends Sprite
 {
@@ -54,12 +44,14 @@ class Main extends Sprite
 		initialState: TitleState, // initial game state
 		zoom: -1.0, // game state bounds
 		framerate: 60, // default framerate
-		skipSplash: false, // if the default flixel splash screen should be skipped
+		skipSplash: true, // if the default flixel splash screen should be skipped
 		startFullscreen: false // if the game should start at fullscreen mode
 	};
 
 	public static var focused:Bool = true;
 	public static var fpsVar:FPSCounter;
+
+	public static var colorFilter:ColorBlindness;
 
 	public static var appName:String = ''; // Application name.
 
@@ -75,14 +67,13 @@ class Main extends Sprite
 	{
 		super();
 
-		// Credits to MAJigsaw77 (he's the og author for this code)
-		#if android
-		Sys.setCwd(Path.addTrailingSlash(Context.getExternalFilesDir()));
-		#elseif ios
-		Sys.setCwd(lime.system.System.applicationStorageDirectory);
-		#end
-
 		setupGame();
+
+		#if VIDEOS_ALLOWED
+		#if hxvlc
+		hxvlc.util.Handle.init();
+		#end
+		#end
 	}
 
 	var oldVol:Float = 1.0;
@@ -91,24 +82,25 @@ class Main extends Sprite
 	public static var focusMusicTween:FlxTween;
 
 	private function setupGame():Void {
-		addChild(new FlxGame(game.width, game.height, Init, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
+		Toolkit.init();
+        Toolkit.theme = "dark";
+		Toolkit.autoScale = false;
 
-		FlxG.sound.volume = 0.2;
+		haxe.ui.focus.FocusManager.instance.autoFocus = false;
+		//funkin.input.Cursor.registerHaxeUICursors();
+		haxe.ui.tooltips.ToolTipManager.defaultDelay = 200;
 
-		#if !mobile
-		Lib.current.stage.align = "tl";
-		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
-		FlxG.scaleMode = new FillScaleMode();
-		#end
+		addChild(new FlxGame(game.width, game.height, Init, game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
 
 		gjToastManager = new GJToastManager();
 		addChild(gjToastManager);
 
 		gameContainer = this;
 
-		#if !(flixel >= "5.4.0")
-		FlxG.fixedTimestep = false;
+		#if HSCRIPT_ALLOWED
+		codenameengine.scripting.GlobalScript.init();
 		#end
+		Paths.init();
 
 		FlxGraphic.defaultPersist = false;
 		FlxG.signals.preStateSwitch.add(function()
@@ -177,33 +169,25 @@ class Main extends Sprite
 		// shader coords fix
 		FlxG.signals.gameResized.add(function(w, h)
 		{	
-			if (FlxG.cameras != null) {
-				for (cam in FlxG.cameras.list) {
-			  		#if (flixel >= "5.4.0")
-						if (cam != null && cam.filters != null)
-							resetSpriteCache(cam.flashSprite);
-					#else
-					@:privateAccess
-					if (cam != null && cam._filters != null)
-						resetSpriteCache(cam.flashSprite);
-					#end
-				}
-	  		}
+			resetSpriteCache(Main.gameContainer);
 
 			if (FlxG.game != null)
 				resetSpriteCache(FlxG.game);
+
+			if (FlxG.cameras != null) {
+				for (cam in FlxG.cameras.list) if (cam != null && cam.filters != null) resetSpriteCache(cam.flashSprite);
+	  		}
 		});
 	}
 
 	static function resetSpriteCache(sprite:Sprite):Void {
+		if (sprite == null) return;
 		@:privateAccess {
 			sprite.__cacheBitmap = null;
 			sprite.__cacheBitmapData = null;
-			#if (flixel < "5.4.1")
 			sprite.__cacheBitmapData2 = null;
 			sprite.__cacheBitmapData3 = null;
 			sprite.__cacheBitmapColorTransform = null;
-			#end
 		}
 	}
 
@@ -288,7 +272,7 @@ class Main extends Sprite
 		else
 		{
 			Debug.logInfo("No crash dialog found! Making a simple alert instead...");
-			Application.current.window.alert(errMsg, "Oh no... SC Engine has crashed!");
+			lime.app.Application.current.window.alert(errMsg, "Oh no... SC Engine has crashed!");
 		}
 
 		#if DISCORD_ALLOWED
@@ -308,8 +292,8 @@ class Main extends Sprite
 			FlxG.height = 720;
 		}
 
-		if (!(FlxG.scaleMode is RatioScaleMode)) // just to be sure yk.
-			FlxG.scaleMode = new RatioScaleMode();
+		if (!(FlxG.scaleMode is flixel.system.scaleModes.RatioScaleMode)) // just to be sure yk.
+			FlxG.scaleMode = new flixel.system.scaleModes.RatioScaleMode();
 
 		Application.current.window.width = 1280; 
 		Application.current.window.height = 720;

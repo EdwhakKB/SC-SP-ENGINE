@@ -2,12 +2,6 @@ package flixel.sound;
 
 import flixel.math.FlxMath;
 import flixel.system.FlxAssets.FlxSoundAsset;
-import flixel.util.FlxStringUtil;
-#if (flixel >= "5.3.0")
-import flixel.sound.FlxSoundGroup;
-#else
-import flixel.system.FlxSoundGroup;
-#end
 
 import openfl.Assets;
 import openfl.events.Event;

@@ -38,7 +38,6 @@ class NoteTypesConfig
 				property: arr,
 				value: _interpretValue(line.substr(sep + 1).trim())
 			}
-			//Debug.logTrace('pushing $newProp');
 			parsed.push(newProp);
 		}
 		noteTypesData.set(name, parsed);
@@ -98,11 +97,9 @@ class NoteTypesConfig
 		}
 		else if(setProp)
 		{
-			//Debug.logTrace('setProp: $slice');
 			Reflect.setProperty(obj, slice, valueToSet);
 			return valueToSet;
 		}
-		//Debug.logTrace('getting prop: $slice');
 		return Reflect.getProperty(obj, slice);
 	}
 

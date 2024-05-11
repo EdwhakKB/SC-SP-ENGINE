@@ -174,7 +174,7 @@ import states.TitleState;
 	//Started Freeplay Warn!
 	public var freeplayWarn:Bool = false;
 
-	public var guitarHeroSustains:Bool = true;
+	public var newSustainBehavior:Bool = true;
 
 	public var coloredText:Bool = false;
 
@@ -188,13 +188,13 @@ import states.TitleState;
 
 	public var iconMovement:String = 'None';
 
-	public var skipInitialCaching:Bool = true;
-
 	public var gradientSystemForOldBars:Bool = false;
 
 	public var heyIntro:Bool = false;
 
 	public var pauseCountDown:Bool = false;
+
+	public var colorFilter:String = "NONE";
 }
 
 class ClientPrefs {
@@ -328,9 +328,7 @@ class ClientPrefs {
 		if (FlxG.save.data.mute != null)
 			FlxG.sound.muted = FlxG.save.data.mute;
 
-		#if DISCORD_ALLOWED
-		DiscordClient.check();
-		#end
+		#if DISCORD_ALLOWED DiscordClient.check(); #end
 	}
 
 	public static function keybindSaveLoad() {

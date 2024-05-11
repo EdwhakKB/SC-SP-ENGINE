@@ -71,11 +71,7 @@ class StageKadeEditorState extends states.MusicBeatState
 	{
 		Paths.clearUnusedMemory();
 		FlxG.sound.music.stop();
-		#if SCEFEATURES_ALLOWED
 		FlxG.sound.playMusic(Paths.inst((PlayState.SONG.instrumentalPrefix != null ? PlayState.SONG.instrumentalPrefix : ''), PlayState.SONG.songId, (PlayState.SONG.instrumentalSuffix != null ? PlayState.SONG.instrumentalSuffix : '')));
-        #else
-        FlxG.sound.playMusic(Paths.inst(PlayState.SONG.songId));
-        #end
 		FlxG.sound.music.fadeIn(3, 0, 0.5);
 		FlxG.mouse.visible = true;
 

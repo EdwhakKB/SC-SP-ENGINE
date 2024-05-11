@@ -287,7 +287,7 @@ class GameJoltLogin extends MusicBeatState
                 {
                     FlxG.save.flush();
                     FlxG.mouse.visible = false;
-                    MusicBeatState.switchState(new options.OptionsState());
+                    MusicBeatState.switchState(new states.MainMenuState());
                     ClientPrefs.saveSettings();
                 }
             }

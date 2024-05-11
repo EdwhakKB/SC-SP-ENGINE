@@ -77,8 +77,9 @@ class PhillyTrain extends BGSprite
 
 	var tweend:Bool = false;
 
-	public function beatHit(curBeat:Int):Void
+	override public function beatHit(curBeat:Int):Void
 	{
+		super.beatHit(curBeat);
 		if (!moving)
 			cooldown += 1;
 

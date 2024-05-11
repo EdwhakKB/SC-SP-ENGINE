@@ -1,7 +1,7 @@
 package psychlua;
 
 #if flxanimate
-class ModchartAnimateSprite extends FlxAnimate
+class ModchartAnimateSprite extends FlxAnimate implements backend.interfaces.IOffsetSetter
 {
 	public var animOffsets:Map<String, Array<Float>> = new Map<String, Array<Float>>();
 	public function new(?x:Float = 0, ?y:Float = 0, ?path:String, ?settings:FlxAnimate.Settings)
@@ -18,9 +18,14 @@ class ModchartAnimateSprite extends FlxAnimate
 		if (animOffsets.exists(name)) offset.set(daOffset[0], daOffset[1]);
 	}
 
-	public function addOffset(name:String, x:Float, y:Float)
+	public function addOffset(name:String, x:Float = 0, y:Float = 0)
 	{
 		animOffsets.set(name, [x, y]);
+	}
+
+	public function removeOffset(name:String)
+	{
+		animOffsets.remove(name);
 	}
 }
 #end

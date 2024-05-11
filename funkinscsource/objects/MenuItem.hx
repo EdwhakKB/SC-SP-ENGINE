@@ -1,6 +1,6 @@
 package objects;
 
-class MenuItem extends FlxSprite
+class MenuItem extends FunkinSCSprite
 {
 	public var targetY:Float = 0;
 
@@ -9,7 +9,6 @@ class MenuItem extends FlxSprite
 		super(x, y);
 		loadGraphic(Paths.image('storymenu/' + weekName));
 		antialiasing = ClientPrefs.data.antialiasing;
-		//Debug.logTrace('Test added: ' + WeekData.getWeekNumber(weekNum) + ' (' + weekNum + ')');
 	}
 
 	public var isFlashing(default, set):Bool = false;

@@ -10,6 +10,7 @@
 * Newer versions of flixel fixes by system32unknown [FlxRuntimerShader, FlxAnimationController, Main](https://github.com/ShadowMario/FNF-PsychEngine/pull/13422)
 * FlxCustomColor Stuff from TheLeerName [Thanks](https://github.com/ShadowMario/FNF-PsychEngine/pull/13323)
 * Most other fixes, noteskin support, char json edits, and more all by me *glowsoony*
+* Most new things include zoomFactor, initialZoom for sprites, much support coming newly from CNE [Engine](CodeNameEngine) [Many things borrowed from here!](https://github.com/FNF-CNE-Devs/CodenameEngine/tree/main)
 
 * [Input Rewrite! by this psych pull request!](https://github.com/ShadowMario/FNF-PsychEngine/pull/13448)
 
@@ -129,4 +130,4 @@ _____________________________________
 * You can listen to a song or adjust Scroll Speed/Damage taken/etc. on Freeplay by pressing Space.
 * You can play on the opponent's side!
 * You can turn off the sustains!
-* You can do a show casing mode for gameplay, playing normaly, or even for videos!
+* You can do a show casing mode for gameplay, playing normally, or even for videos!

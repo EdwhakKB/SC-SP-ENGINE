@@ -62,10 +62,11 @@ class IndieDiamondTransSubState extends MusicBeatSubstate
         {
             new FlxTimer().start(duration, function(twn:FlxTimer) {
                 if (fadeInState)
-				    close();
+                    close();
                 else{
-                    if(finishCallback != null) finishCallback();
-                    finishCallback = null;
+                    if(finishCallback != null) {
+                        finishCallback();
+                    }
                 }
 			});
         }}, function(num:Float)

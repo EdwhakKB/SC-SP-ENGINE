@@ -23,10 +23,12 @@ import backend.Conductor;
 import backend.Difficulty;
 import backend.Mods;
 import backend.Debug;
+import backend.Language;
 
 import objects.Alphabet;
 import objects.BGSprite;
 import objects.Stage;
+import objects.FunkinSCSprite;
 
 import states.PlayState;
 import states.LoadingState;
@@ -45,6 +47,7 @@ import flixel.math.FlxPoint;
 import flixel.math.FlxRect;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
+import flixel.util.FlxStringUtil;
 import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
@@ -53,17 +56,17 @@ import flixel.group.FlxGroup;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.sound.FlxSound;
 
+
 //Flixel Addons
+import flixel.addons.transition.FlxTransitionableState;
 import flixel.addons.effects.FlxSkewedSprite as FlxSkewed;
 
 #if flxanimate
 import flxanimate.*;
-#else
-import animateatlas.AtlasFrameMaker;
 #end
 
-#if modchartingTools
-import modchartingTools.modcharting.*;
+#if SCEModchartingTools
+import fnf_modcharting_tools.modcharting.*;
 #else
 import modcharting.*;
 #end

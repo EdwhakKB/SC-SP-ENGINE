@@ -5,7 +5,9 @@ class Difficulty
 	public static var defaultList(default, never):Array<String> = [
 		'Easy',
 		'Normal',
-		'Hard'
+		'Hard',
+		'Erect',
+		'Nightmare'
 	];
 	public static var list:Array<String> = [];
 	private static var defaultDifficulty(default, never):String = 'Normal'; //The chart that has no suffix and starting difficulty on Freeplay/Story Mode
@@ -15,7 +17,7 @@ class Difficulty
 		if(num == null) num = PlayState.storyDifficulty;
 
 		var fileSuffix:String = list[num].toLowerCase();
-		if(fileSuffix != defaultDifficulty.toLowerCase())
+		if(Paths.formatToSongPath(fileSuffix) != Paths.formatToSongPath(defaultDifficulty).toLowerCase())
 		{
 			fileSuffix = '-' + fileSuffix;
 		}
@@ -61,9 +63,10 @@ class Difficulty
 		list = diffs.copy();
 	}
 
-	inline public static function getString(num:Null<Int> = null):String
+	inline public static function getString(?num:Null<Int> = null, ?canTranslate:Bool = true):String
 	{
-		return list[num == null ? PlayState.storyDifficulty : num];
+		var diffName:String = list[num == null ? PlayState.storyDifficulty : num];
+		return canTranslate ? Language.getPhrase('difficulty_$diffName', diffName) : diffName;
 	}
 
 	inline public static function getDefault():String

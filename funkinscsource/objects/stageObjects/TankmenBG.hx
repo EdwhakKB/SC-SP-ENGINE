@@ -2,7 +2,7 @@ package objects.stageObjects;
 
 import flixel.graphics.frames.FlxAtlasFrames;
 
-class TankmenBG extends FlxSprite
+class TankmenBG extends FunkinSCSprite
 {
 	public static var animationNotes:Array<Dynamic> = [];
 	private var tankSpeed:Float;

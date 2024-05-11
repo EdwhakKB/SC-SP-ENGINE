@@ -54,8 +54,8 @@ class AchievementPopup extends openfl.display.Sprite {
 		var desc:String = 'Description not found';
 		if(achievement != null)
 		{
-			if(achievement.name != null) name = achievement.name;
-			if(achievement.description != null)  desc = achievement.description;
+			if(achievement.name != null) name = Language.getPhrase('achievement_$achieve', achievement.name);
+			if(achievement.description != null)  desc = Language.getPhrase('description_$achieve', achievement.description);
 		}
 
 		var textX = sizeX + imgX + 15;
@@ -114,7 +114,6 @@ class AchievementPopup extends openfl.display.Sprite {
 		var time = Lib.getTimer();
 		var elapsed:Float = (time - timePassed) / 1000;
 		timePassed = time;
-		//Debug.logTrace('update called! $elapsed');
 
 		if(elapsed >= 0.5) return; //most likely passed through a loading
 
@@ -146,7 +145,6 @@ class AchievementPopup extends openfl.display.Sprite {
 	public function destroy()
 	{
 		Achievements._popups.remove(this);
-		//Debug.logTrace('destroyed achievement, new count: ' + Achievements._popups.length);
 
 		if (FlxG.game.contains(this))
 		{

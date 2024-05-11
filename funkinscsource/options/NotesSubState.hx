@@ -149,7 +149,7 @@ class NotesSubState extends MusicBeatSubstate
 
 		var tipX = 20;
 		var tipY = 660;
-		var tip:FlxText = new FlxText(tipX, tipY, 0, "Press RELOAD to Reset the selected Note Part.", 16);
+		var tip:FlxText = new FlxText(tipX, tipY, 0, Language.getPhrase('note_colors_tip', "Press RESET to Reset the selected Note Part."), 16);
 		tip.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		tip.borderSize = 2;
 		add(tip);
@@ -175,7 +175,8 @@ class NotesSubState extends MusicBeatSubstate
 
 	function updateTip()
 	{
-		tipTxt.text = 'Hold ' + (!controls.controllerMode ? 'Shift' : 'Left Shoulder Button') + ' + Press RELOAD to fully reset the selected Note.';
+		var key:String = !controls.controllerMode ? Language.getPhrase('note_colors_shift', 'Shift') : Language.getPhrase('note_colors_lb', 'Left Shoulder Button');
+		tipTxt.text = Language.getPhrase('note_colors_hold_tip', 'Hold {1} + Press RESET key to fully reset the selected Note.', [key]);
 	}
 
 	var _storedColor:FlxColor;
@@ -204,7 +205,6 @@ class NotesSubState extends MusicBeatSubstate
 		var changedToController:Bool = false;
 		if(controls.controllerMode != _lastControllerMode)
 		{
-			//Debug.logTrace('changed controller mode');
 			FlxG.mouse.visible = !controls.controllerMode;
 			controllerPointer.visible = controls.controllerMode;
 
@@ -265,7 +265,6 @@ class NotesSubState extends MusicBeatSubstate
 				hexTypeNum++;
 			else if(allowedTypeKeys.exists(keyPressed))
 			{
-				//Debug.logTrace('keyPressed: $keyPressed, lil str: ' + allowedTypeKeys.get(keyPressed));
 				var curColor:String = alphabetHex.text;
 				var newColor:String = curColor.substring(0, hexTypeNum) + allowedTypeKeys.get(keyPressed) + curColor.substring(hexTypeNum + 1);
 
@@ -352,7 +351,6 @@ class NotesSubState extends MusicBeatSubstate
 			{
 				var formattedText = Clipboard.text.trim().toUpperCase().replace('#', '').replace('0x', '');
 				var newColor:Null<FlxColor> = FlxColor.fromString('#' + formattedText);
-				//Debug.logTrace('#${Clipboard.text.trim().toUpperCase()}');
 				if(newColor != null && formattedText.length == 6)
 				{
 					setShaderColor(newColor);
@@ -463,7 +461,6 @@ class NotesSubState extends MusicBeatSubstate
 					var mouse:FlxPoint = pointerFlxPoint();
 					var hue:Float = FlxMath.wrap(FlxMath.wrap(Std.int(mouse.degreesTo(center)), 0, 360) - 90, 0, 360);
 					var sat:Float = FlxMath.bound(mouse.dist(center) / colorWheel.width*2, 0, 1);
-					//Debug.logTrace('$hue, $sat');
 					if(sat != 0) setShaderColor(FlxColor.fromHSB(hue, sat, _storedColor.brightness));
 					else setShaderColor(FlxColor.fromRGBFloat(_storedColor.brightness, _storedColor.brightness, _storedColor.brightness));
 					updateColors();
@@ -472,7 +469,7 @@ class NotesSubState extends MusicBeatSubstate
 		}
 		else if(controls.RESET && hexTypeNum < 0)
 		{
-			if(FlxG.keys.pressed.SHIFT || FlxG.gamepads.anyJustPressed(LEFT_SHOULDER))
+			if(FlxG.keys.pressed.SHIFT || FlxG.gamepads.anyPressed(LEFT_SHOULDER))
 			{
 				for (i in 0...3)
 				{
@@ -520,7 +517,6 @@ class NotesSubState extends MusicBeatSubstate
 
 	function centerHexTypeLine()
 	{
-		//Debug.logTrace(hexTypeNum);
 		if(hexTypeNum > 0)
 		{
 			var letter = alphabetHex.letters[hexTypeNum-1];
@@ -681,6 +677,7 @@ class NotesSubState extends MusicBeatSubstate
 		}
 		bigNote.animation.play('note$curSelectedNote', true);
 		updateColors();
+		fixColors(); // fixes your gosh dang note colors    - DM-kun
 	}
 
 	function updateColors(specific:Null<FlxColor> = null)
@@ -713,6 +710,28 @@ class NotesSubState extends MusicBeatSubstate
 			case 2:
 				getShader().b = strumRGB.b = color;
 		}
+	}
+
+	function fixColors()
+	{
+		for (i in 0...3)
+		{
+			var strumRGB:RGBShaderReference = myNotes.members[curSelectedNote].rgbShader;
+			var color:FlxColor = !onPixel ? ClientPrefs.data.arrowRGB[curSelectedNote][i] :
+											ClientPrefs.data.arrowRGBPixel[curSelectedNote][i];
+			switch(i)
+			{
+				case 0:
+					getShader().r = strumRGB.r = color;
+				case 1:
+					getShader().g = strumRGB.g = color;
+				case 2:
+					getShader().b = strumRGB.b = color;
+			}
+			dataArray[curSelectedNote][i] = color;
+		}
+		setShaderColor(!onPixel ? ClientPrefs.data.arrowRGB[curSelectedNote][curSelectedMode] : ClientPrefs.data.arrowRGBPixel[curSelectedNote][curSelectedMode]);
+		updateColors();
 	}
 
 	function setShaderColor(value:FlxColor) dataArray[curSelectedNote][curSelectedMode] = value;

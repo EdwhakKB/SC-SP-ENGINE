@@ -12,7 +12,7 @@ import flixel.util.FlxDirectionFlags;
  * @link http://www.photonstorm.com
  * @author Richard Davey / Photon Storm
  */
-class FlxExtendedSprite extends FlxSprite
+class FlxExtendedSprite extends FunkinSCSprite
 {
 	/**
 	 * Used by FlxMouseControl when multiple sprites overlap and register clicks, and you need to determine which sprite has priority

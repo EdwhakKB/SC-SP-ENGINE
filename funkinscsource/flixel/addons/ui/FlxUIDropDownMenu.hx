@@ -1,14 +1,14 @@
 package flixel.addons.ui;
 
 import openfl.geom.Rectangle;
+
 import flixel.addons.ui.interfaces.IFlxUIClickable;
 import flixel.addons.ui.interfaces.IFlxUIWidget;
 import flixel.addons.ui.interfaces.IHasParams;
 
 import flixel.ui.FlxButton;
-
 import flixel.util.FlxDestroyUtil;
-import flixel.util.FlxStringUtil;
+
 import flixel.addons.ui.FlxUIGroup;
 import flixel.addons.ui.FlxUIText;
 import flixel.addons.ui.FlxUIButton;

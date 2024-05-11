@@ -6,10 +6,8 @@ import lime.utils.Assets;
 
 import flixel.math.FlxMath;
 
-class HealthIcon extends FlxSprite
+class HealthIcon extends FunkinSCSprite
 {
-	public var animOffsets:Map<String, Array<Dynamic>>;
-
 	public var isOldIcon:Bool = false;
 	public var isPlayer:Bool = false;
 	public var char:String = '';
@@ -52,8 +50,6 @@ class HealthIcon extends FlxSprite
 	public var speedBopLerp:Float = 1;
 	public var setIconScale:Float = 1.2;
 
-	private var animName:String = 'normal';
-
 	public var iconBopSpeed:Int = 2;
 	public var iconBopAngleSpeed:Int = 2;
 
@@ -62,18 +58,20 @@ class HealthIcon extends FlxSprite
 	public var ableSizes:Array<String> = ['450', '600', '750', '900'];
 	public var choosenDivisionMult:Int = 3;
 
+	public var divideByWidthAndHeight:Bool = false;
+
+	private var animName:String = 'normal';
+	private var changedComplete:Bool = true;
+
 	public function new(char:String = 'bf', isPlayer:Bool = false, isSizedState:Bool = false, ?allowGPU:Bool = true)
 	{
 		super();
-		animOffsets = new Map<String, Array<Dynamic>>();
 		isOldIcon = (char == 'bf-old');
 		this.isPlayer = isPlayer;
 		this.isSizedState = isSizedState;
 		changeIcon(char, allowGPU);
 		scrollFactor.set();
 	}
-
-	public var changedComplete:Bool = true;
 
 	public function changeIcon(char:String, ?allowGPU:Bool = true) {
 		changedComplete = false;
@@ -87,15 +85,9 @@ class HealthIcon extends FlxSprite
 		if (iconSuffix != '')
 		{
 			name = name + char;
-			if(!Paths.fileExists('images/' + name + '.png', IMAGE)) 
-			{
-				name = 'icons/' + iconSuffix + 'face';
-			}
+			if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/' + iconSuffix + 'face';
 		}
-		else
-		{
-			name = name + 'icon-' + char;
-		}
+		else name = name + 'icon-' + char;
 
 		if (animatedIcon && isSizedState)
 		{
@@ -107,22 +99,22 @@ class HealthIcon extends FlxSprite
 		if (frameName.contains('.png')) frameName = frameName.substring(0, frameName.length-4);
 
 		var filePath:String = 'images/$frameName.json';
-		var path:String = Paths.getPath(filePath, TEXT, null, true);
+		var path:String = Paths.getPath(filePath, TEXT);
 
 		// now with winning icon support
 		try
 		{
 			#if MODS_ALLOWED
-			if (FileSystem.exists(Paths.getPath('images/$frameName.xml', TEXT, null, true)))
-				loadIconFile(Json.parse(File.getContent(path)), frameName, name, allowGPU);
+			if (FileSystem.exists(Paths.getPath('images/$frameName.xml', TEXT)))
+				loadIconFile(Json.parse(File.getContent(path)), frameName, name);
 			#else
-			if (Assets.exists(Paths.getPath('images/$frameName.xml', TEXT, null, true)))
-				loadIconFile(Json.parse(Assets.getText(path)), frameName, name, allowGPU);
+			if (Assets.exists(Paths.getPath('images/$frameName.xml', TEXT)))
+				loadIconFile(Json.parse(Assets.getText(path)), frameName, name);
 			#end
 			else loadGraphicIcon(name, allowGPU);
 		}
 		catch(e:Dynamic){
-			Debug.logInfo("Couldn't find image nor xml nor sprite to load!");
+			Debug.logInfo("Couldn't find sprite and xml, nor single sprite to load!, Error: " + e);
 		}
 
 		changedComplete = true;
@@ -163,17 +155,26 @@ class HealthIcon extends FlxSprite
 		if (graphic.width == 300 && graphic.height == 150) alreadySized = true;
 		else alreadySized = false;
 
-		findAutomaticSize = (((graphic.width <= 300 && graphic.height <= 150) || 
-			(graphic.width >= 300 && graphic.height >= 150)) && needAutoSize && !isOneSized); // Fucking fix somethings
-
+		// Fixed icons that don't use perfect height and width with these!
 		if (!isOneSized)
 		{
-			if (findAutomaticSize || alreadySized) divisionMult = 2;
+			findAutomaticSize = (((graphic.width <= 300 && graphic.height <= 150) || (graphic.width >= 300 && graphic.height >= 150)) && needAutoSize);
+			if (alreadySized || findAutomaticSize) divisionMult = 2;
+			else if (!findAutomaticSize && needAutoSize)
+			{ 
+				divisionMult = 2; 
+				divideByWidthAndHeight = true; 
+			}
 			else divisionMult = choosenDivisionMult;
 		}
 		else divisionMult = 1;
 
-		loadGraphic(graphic, true, Math.floor(graphic.width / divisionMult), Math.floor(graphic.height));
+		if (divideByWidthAndHeight) 
+		{
+			loadGraphic(graphic); //Load stupidly first for getting the file size
+			loadGraphic(graphic, true, Math.floor(width / divisionMult), Math.floor(height));
+		}
+		else loadGraphic(graphic, true, Math.floor(graphic.width / divisionMult), Math.floor(graphic.height));
 		iconOffset[0] = (width - 150) / divisionMult;
 		iconOffset[1] = (height - 150) / divisionMult;
 		if(divisionMult == 2)
@@ -213,11 +214,11 @@ class HealthIcon extends FlxSprite
 		antialiasing = (ClientPrefs.data.antialiasing && !char.endsWith('-pixel'));
 	}
 
-	public function loadIconFile(json:Dynamic, path:String, graphicIcon:String, gpuAllowed:Bool)
+	public function loadIconFile(json:Dynamic, path:String, graphicIcon:String)
 	{
 		if (json.image != null) path = 'images/' + json.image + '.json';
 
-		frames = Paths.getSparrowAtlas(path, null, gpuAllowed);
+		frames = Paths.getSparrowAtlas(path);
 
 		animatedIcon = true;
 
@@ -246,7 +247,7 @@ class HealthIcon extends FlxSprite
 			}
 		}
 
-		flipX = (json.flip_x != isPlayer);
+		flipX = (json.flip_x != null ? json.flip_x : isPlayer);
 
 		final noAntialiasing = (json.no_antialiasing == true);
 		antialiasing = ClientPrefs.data.antialiasing ? !noAntialiasing && !char.endsWith('-pixel') : false;
@@ -263,10 +264,9 @@ class HealthIcon extends FlxSprite
 				var animName:String = '' + anim.name;
 				var animFps:Int = anim.fps;
 				var animLoop:Bool = !!anim.loop; // Bruh
-				var animFlipY:Bool = !!anim.flipY;
 				var animIndices:Array<Int> = anim.indices;
-				if (animIndices != null && animIndices.length > 0) animation.addByIndices(animAnim, animName, animIndices, "", animFps, animLoop, isPlayer, animFlipY);
-				else animation.addByPrefix(animAnim, animName, animFps, animLoop, isPlayer, animFlipY);
+				if (animIndices != null && animIndices.length > 0) animation.addByIndices(animAnim, animName, animIndices, "", animFps, animLoop);
+				else animation.addByPrefix(animAnim, animName, animFps, animLoop);
 	
 				var offsets:Array<Int> = anim.offsets;
 				var swagOffsets:Array<Int> = offsets;
@@ -280,23 +280,6 @@ class HealthIcon extends FlxSprite
 		if (animOffsets.exists('winning')) hasWinningAnimated = true;
 
 		json.startingAnim != null ? playAnim(json.startingAnim) : playAnim('normal', true);
-	}
-
-	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
-	{
-		animation.play(AnimName, Force, Reversed, Frame);
-
-		var daOffset = animOffsets.get(AnimName);
-
-		if (animOffsets.exists(AnimName))
-		{
-			offset.set(daOffset[0], daOffset[1]);
-		}
-	}
-
-	public function addOffset(name:String, x:Float = 0, y:Float = 0)
-	{
-		animOffsets[name] = [x, y];
 	}
 
 	public function getCharacter():String {
@@ -336,90 +319,34 @@ class HealthIcon extends FlxSprite
 			{
 				if (isPlayer)
 				{
-					if (percent20or80 && frames.frames.length > 0)
-					{
-						animation.curAnim.curFrame = 1;
-					}
-					else if (percent80or20 && hasWinning && frames.frames.length > 2)
-					{
-						animation.curAnim.curFrame = 2;
-					}
-					else
-					{
-						animation.curAnim.curFrame = 0;
-					}
+					if (percent20or80 && frames.frames.length > 0) animation.curAnim.curFrame = 1;
+					else if (percent80or20 && hasWinning && frames.frames.length > 2) animation.curAnim.curFrame = 2;
+					else animation.curAnim.curFrame = 0;
 				}
 				else
 				{
-					if (percent20or80 && hasWinning && frames.frames.length > 2)
-					{
-						animation.curAnim.curFrame = 2;
-					}
-					else if (percent80or20 && frames.frames.length > 0)
-					{
-						animation.curAnim.curFrame = 1;
-					}
-					else
-					{
-						animation.curAnim.curFrame = 0;
-					}
+					if (percent20or80 && hasWinning && frames.frames.length > 2) animation.curAnim.curFrame = 2;
+					else if (percent80or20 && frames.frames.length > 0) animation.curAnim.curFrame = 1;
+					else animation.curAnim.curFrame = 0;
 				}
 			}
 			else
 			{
 				if (isPlayer)
 				{
-					if (percent20or80 && hasLosingAnimated)
-					{
-						normalAnimation = false;
-						winningAnimation = false;
-						losingAnimation = true;
+					normalAnimation = (!(percent80or20 && hasWinningAnimated) && !(percent20or80 && hasLosingAnimated));
+					winningAnimation = (percent80or20 && hasWinningAnimated);
+					losingAnimation = (percent20or80 && hasLosingAnimated);
 
-						animName = 'losing';
-					}
-					else if (percent80or20 && hasWinningAnimated)
-					{
-						normalAnimation = false;
-						winningAnimation = true;
-						losingAnimation = false;
-
-						animName = 'winning';
-					}
-					else
-					{
-						normalAnimation = true;
-						winningAnimation = false;
-						losingAnimation = false;
-
-						animName = 'normal';
-					}
+					animName = ((percent80or20 && hasWinningAnimated) ? 'winning' : ((percent20or80 && hasLosingAnimated) ? 'losing' : 'normal'));
 				}
 				else
 				{
-					if (percent20or80 && hasWinningAnimated)
-					{
-						normalAnimation = false;
-						winningAnimation = true;
-						losingAnimation = false;
+					normalAnimation = (!(percent20or80 && hasWinningAnimated) && !(percent80or20 && hasLosingAnimated));
+					winningAnimation = (percent20or80 && hasWinningAnimated);
+					losingAnimation = (percent80or20 && hasLosingAnimated);
 
-						animName = 'normal';
-					}
-					else if (percent80or20 && hasLosingAnimated)
-					{
-						normalAnimation = false;
-						winningAnimation = true;
-						losingAnimation = false;
-
-						animName = 'winning';
-					}
-					else
-					{
-						normalAnimation = false;
-						winningAnimation = false;
-						losingAnimation = true;
-
-						animName = 'losing';
-					}
+					animName = ((percent20or80 && hasWinningAnimated) ? 'winning' : ((percent80or20 && hasLosingAnimated) ? 'losing' : 'normal'));
 				}
 
 				if (animatedIcon)
@@ -433,8 +360,9 @@ class HealthIcon extends FlxSprite
 		}
 	}
 
- 	public function beatHit(curBeat:Int)
+ 	override public function beatHit(curBeat:Int)
 	{
+		super.beatHit(curBeat);
 		if (!overrideBeatBop)
 		{
 			if (curBeat % iconBopSpeed == 0)
@@ -478,5 +406,4 @@ typedef IconAnimations = {
 	var ?offsets:Array<Int>;
 	var ?loop:Bool;
 	var ?indices:Array<Int>;
-	var ?flipY:Bool;
 }

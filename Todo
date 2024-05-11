@@ -1,0 +1,5 @@
+* Update Gamejolt Code (Use different code then use for now.)
+* Fix a lot of things that still need work!
+* Overhaul ways of explaining about what things do.
+* Change many states and organize the source folder in a different way.
+* Remove almost all flixel-ui components and replace with HaxeUI.

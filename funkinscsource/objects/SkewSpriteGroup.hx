@@ -21,7 +21,7 @@ typedef SkewSpriteGroup = TypedSkewedSpriteGroup<FlxSkewed>;
  * a single sprite even if it's made up of several member sprites.
  * It shares the `FlxTypedGroup` API, but it doesn't inherit from it.
  */
-class TypedSkewedSpriteGroup<T:FlxSkewed> extends FlxSprite
+class TypedSkewedSpriteGroup<T:FlxSkewed> extends FunkinSCSprite
 {
 	/**
 	 * The actual group which holds all sprites.

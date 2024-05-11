@@ -62,8 +62,9 @@ class HScript extends SScript
 	#end
 
 	public static function hscriptTrace(text:String, color:FlxColor = FlxColor.WHITE) {
-		states.PlayState.instance.addTextToDebug(text, color);
-		backend.Debug.logTrace(text);
+		if (states.PlayState.instance != null)
+			states.PlayState.instance.addTextToDebug(text, color);
+		backend.Debug.logInfo(text);
 	}
 
 	public var origin:String;
@@ -140,11 +141,6 @@ class HScript extends SScript
 		set('FlxBar', flixel.ui.FlxBar);
 		set('FlxBackdrop', flixel.addons.display.FlxBackdrop);
 		set('StageSizeScaleMode', flixel.system.scaleModes.StageSizeScaleMode);
-		//set('FlxBarFillDirection', flixel.ui.FlxBar.FlxBarFillDirection);
-		#if (flixel < "5.0.0")
-		set('FlxAxes', flixel.util.FlxAxes);
-		set('FlxPoint', flixel.math.FlxPoint);
-		#end
 		set('GraphicsShader', openfl.display.GraphicsShader);
 		set('ShaderFilter', openfl.filters.ShaderFilter);
 
@@ -169,9 +165,6 @@ class HScript extends SScript
 		set('NoteSplash', objects.NoteSplash);
 		set('StrumArrow', objects.StrumArrow);
 		set('CustomSubstate', psychlua.CustomSubstate);
-		#if (!flash && sys)
-		set('FlxRuntimeShader', flixel.addons.display.FlxRuntimeShader);
-		#end
 		set('ShaderFilter', openfl.filters.ShaderFilter);
 		#if LUA_ALLOWED
 		set('FunkinLua', psychlua.FunkinLua);
@@ -191,19 +184,19 @@ class HScript extends SScript
 		// Functions & Variables
 		set('setVar', function(name:String, value:Dynamic)
 		{
-			states.PlayState.instance.variables.set(name, value);
+			MusicBeatState.getVariables().set(name, value);
 		});
 		set('getVar', function(name:String)
 		{
 			var result:Dynamic = null;
-			if(states.PlayState.instance.variables.exists(name)) result = states.PlayState.instance.variables.get(name);
+			if(MusicBeatState.getVariables().exists(name)) result = MusicBeatState.getVariables().get(name);
 			return result;
 		});
 		set('removeVar', function(name:String)
 		{
-			if(states.PlayState.instance.variables.exists(name))
+			if(MusicBeatState.getVariables().exists(name))
 			{
-				states.PlayState.instance.variables.remove(name);
+				MusicBeatState.getVariables().remove(name);
 				return true;
 			}
 			return false;
@@ -271,7 +264,7 @@ class HScript extends SScript
 		});
 
 		set('keyJustPressed', function(name:String = '') {
-			name = name.toLowerCase();
+			name = name.toLowerCase().trim();
 			switch(name) {
 				case 'left': return Controls.instance.NOTE_LEFT_P;
 				case 'down': return Controls.instance.NOTE_DOWN_P;
@@ -282,7 +275,7 @@ class HScript extends SScript
 			return false;
 		});
 		set('keyPressed', function(name:String = '') {
-			name = name.toLowerCase();
+			name = name.toLowerCase().trim();
 			switch(name) {
 				case 'left': return Controls.instance.NOTE_LEFT;
 				case 'down': return Controls.instance.NOTE_DOWN;
@@ -293,7 +286,7 @@ class HScript extends SScript
 			return false;
 		});
 		set('keyReleased', function(name:String = '') {
-			name = name.toLowerCase();
+			name = name.toLowerCase().trim();
 			switch(name) {
 				case 'left': return Controls.instance.NOTE_LEFT_R;
 				case 'down': return Controls.instance.NOTE_DOWN_R;
@@ -323,7 +316,7 @@ class HScript extends SScript
 		{
 			if(funk == null) funk = parentLua;
 			
-			if(parentLua != null) funk.addLocalCallback(name, func);
+			if(funk != null) funk.addLocalCallback(name, func);
 			else FunkinLua.luaTrace('createCallback ($name): 3rd argument is null', false, false, FlxColor.RED);
 		});
 		#end
@@ -350,7 +343,13 @@ class HScript extends SScript
 				else backend.Debug.logInfo('$origin - $msg');
 			}
 		});
-		set('CustomCodeShader', codenameengine.CustomCodeShader);
+
+		#if LUA_ALLOWED
+		set('doLua', function(code:String = null, stageLua:Bool = false, preloading:Bool = false, scriptName:String = 'unknown'){
+			if (code != null) new FunkinLua(code, stageLua, preloading, scriptName);
+		});
+		#end
+		set('CustomCodeShader', codenameengine.shaders.CustomCodeShader);
 		set('StringTools', StringTools);
 		#if LUA_ALLOWED
 		set('parentLua', parentLua);
@@ -393,8 +392,7 @@ class HScript extends SScript
 		set('insert', FlxG.state.insert);
 		set('remove', FlxG.state.remove);
 
-		#if modchartingTools
-		set('Math', Math);
+		#if SCEModchartingTools
 		set('ModchartEditorState', modcharting.ModchartEditorState);
 		set('ModchartEvent', modcharting.ModchartEvent);
 		set('ModchartEventManager', modcharting.ModchartEventManager);
@@ -415,28 +413,19 @@ class HScript extends SScript
 
 		//Why?
 		set('BeatXModifier', modcharting.Modifier.BeatXModifier);
-		#if SCEModchartingTools
-		if (PlayState.instance != null && PlayState.SONG != null && !isHxStage && PlayState.SONG.notITG && PlayState.instance.notITGMod)
+		if (PlayState.instance != null && PlayState.SONG != null && !isHxStage && PlayState.SONG.notITG && ClientPrefs.getGameplaySetting('modchart'))
 			modcharting.ModchartFuncs.loadHScriptFunctions(this);
-		#else
-		modcharting.ModchartFuncs.loadHScriptFunctions(this);
 		#end
-		#end
-		set('setAxes', function(fromString:Bool, axes:String, xAxes:Bool, yAxes:Bool, bothAxes:Bool)
-		{
-			if (fromString)
-				return FlxAxes.fromString(axes);
-			else if (xAxes)
-				return FlxAxes.X;
-			else if (yAxes)
-				return FlxAxes.Y;
-			else if (bothAxes)
-				return FlxAxes.XY;
-			return FlxAxes.fromString('XY');
-		});
+		set('setAxes', function(axes:String) return FlxAxes.fromString(axes));
 
 		if(states.PlayState.instance == FlxG.state)
 		{
+			#if (HSCRIPT_ALLOWED && HScriptImproved)
+			set('doHSI', function(path:String)
+			{
+				states.PlayState.instance.addScript(path);
+			});
+			#end
 			set('addBehindGF', states.PlayState.instance.addBehindGF);
 			set('addBehindDad', states.PlayState.instance.addBehindDad);
 			set('addBehindBF', states.PlayState.instance.addBehindBF);
@@ -444,6 +433,9 @@ class HScript extends SScript
 			setSpecialObject(states.PlayState.instance, false, states.PlayState.instance.instancesExclude);
 			#end
 		}
+
+		set("playDadSing", true);
+		set("playBFSing", true);
 
 		set('setVarFromClass', function(instance:String, variable:String, value:Dynamic)
 		{
@@ -484,6 +476,24 @@ class HScript extends SScript
 			call("postStateSwitch", []);
 		});
 
+		set('parseJson', function(directory:String, ?ignoreMods:Bool = false):{}
+		{
+			var parseJson:{} = {};
+			final funnyPath:String = directory + '.json';
+			final jsonContents:String = Paths.getTextFromFile(funnyPath, ignoreMods);
+			final realPath:String = (ignoreMods ? '' : Paths.modFolders(Mods.currentModDirectory)) + '/' + funnyPath;
+			final jsonExists:Bool = Paths.fileExists(realPath, null, ignoreMods);
+			if (jsonContents != null || jsonExists) parseJson = haxe.Json.parse(jsonContents);
+			else if (!jsonExists && PlayState.chartingMode) 
+			{
+				parseJson = {};
+				if (states.PlayState.instance != null && states.PlayState.instance == FlxG.state){
+					states.PlayState.instance.addTextToDebug('parseJson: "' + realPath + '" doesn\'t exist!', 0xff0000, 6);
+				}	
+			}
+			return parseJson;
+		});
+
 		set('sys', #if sys true #else false #end);
 
 		if(varsToBring != null)
@@ -500,7 +510,7 @@ class HScript extends SScript
 	}
 
 	//I hate the CALLS CANT THEY BE STATIC FOR ONCE!?
-	public function executeCode(?funcToRun:String = null, ?funcArgs:Array<Dynamic> = null):#if SScriptTeaCall TeaCall #elseif SScriptSCall SCall #elseif SScriptTea Tea #end
+	public function executeCode(?funcToRun:String = null, ?funcArgs:Array<Dynamic> = null)
 	{
 		if (funcToRun == null) return null;
 
@@ -514,12 +524,11 @@ class HScript extends SScript
 			return null;
 		}
 
-		var callValue = call(funcToRun, funcArgs);
+		final callValue = call(funcToRun, funcArgs);
 		if (!callValue.succeeded)
 		{
 			final e = callValue.exceptions[0];
-			if (e != null)
-			{
+			if (e != null) {
 				var msg:String = e.toString();
 				#if LUA_ALLOWED
 				if(parentLua != null)
@@ -536,11 +545,9 @@ class HScript extends SScript
 	}
 
 	//I hate the CALLS CANT THEY BE STATIC FOR ONCE!?
-	public function executeFunction(funcToRun:String = null, funcArgs:Array<Dynamic>):#if SScriptTeaCall TeaCall #elseif SScriptSCall SCall #elseif SScriptTea Tea #end
+	public function executeFunction(funcToRun:String = null, funcArgs:Array<Dynamic>)
 	{
-		if (funcToRun == null)
-			return null;
-
+		if (funcToRun == null) return null;
 		return call(funcToRun, funcArgs);
 	}
 
@@ -550,20 +557,22 @@ class HScript extends SScript
 		funk.addLocalCallback("runHaxeCode", function(codeToRun:String, ?varsToBring:Any = null, ?funcToRun:String = null, ?funcArgs:Array<Dynamic> = null):Dynamic {
 			#if SScript
 			initHaxeModuleCode(funk, codeToRun, varsToBring);
-			final retVal:#if SScriptTeaCall TeaCall #elseif SScriptSCall SCall #elseif SScriptTea Tea #end = funk.hscript.executeCode(funcToRun, funcArgs);
+			final retVal = funk.hscript.executeCode(funcToRun, funcArgs);
 			if (retVal != null)
 			{
 				if(retVal.succeeded)
 					return (retVal.returnValue == null || LuaUtils.isOfTypes(retVal.returnValue, [Bool, Int, Float, String, Array])) ? retVal.returnValue : null;
 
-				var e = retVal.exceptions[0];
-				var calledFunc:String = if(funk.hscript.origin == funk.lastCalledFunction) funcToRun else funk.lastCalledFunction;
+				final e = retVal.exceptions[0];
+				final calledFunc:String = if(funk.hscript.origin == funk.lastCalledFunction) funcToRun else funk.lastCalledFunction;
 				if (e != null)
 					FunkinLua.luaTrace(funk.hscript.origin + ":" + calledFunc + " - " + e, false, false, FlxColor.RED);
 				return null;
 			}
 			else if (funk.hscript.returnValue != null)
+			{
 				return funk.hscript.returnValue;
+			}
 			#else
 			FunkinLua.luaTrace("runHaxeCode: HScript isn't supported on this platform!", false, false, FlxColor.RED);
 			#end
@@ -598,15 +607,10 @@ class HScript extends SScript
 			if (c == null)
 				c = Type.resolveEnum(str + libName);
 
-			#if (SScriptTeaCall || SScriptSCall)
+			#if SScript
 			if (c != null)
 				SScript.globalVariables[libName] = c;
-			#elseif SScriptTea
-			if (c != null)
-				SScript.strictGlobalVariables[libName] = c;
-			#end
 
-			#if SScript
 			if (funk.hscript != null)
 			{
 				try {
@@ -624,7 +628,7 @@ class HScript extends SScript
 	}
 	#end
 
-	#if (SScript >= "3.0.3" || SScript >= "10.0.618")
+	#if (SScript >= "3.0.3")
 	override public function destroy()
 	{
 		origin = null;
@@ -639,8 +643,8 @@ class HScript extends SScript
 	}
 	#end
 
-	#if modchartingTools
-	public function initMod(mod:modcharting.Modifier)
+	#if SCEModchartingTools
+	public inline function initMod(mod:modcharting.Modifier)
     {
         call("initMod", [mod]);
     }

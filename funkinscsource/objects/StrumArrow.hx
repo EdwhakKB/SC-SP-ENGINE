@@ -5,7 +5,7 @@ import shaders.RGBPalette.RGBShaderReference;
 
 import openfl.Assets;
 
-class StrumArrow extends FlxSkewed
+class StrumArrow extends FunkinSCSprite
 {
 	public var rgbShader:RGBShaderReference;
 	public var resetAnim:Float = 0;
@@ -21,8 +21,6 @@ class StrumArrow extends FlxSkewed
 
 	public var laneFollowsReceptor:Bool = true;
 
-	public var z:Float = 0;
-
 	public var bgLane:FlxSkewed;
 	
 	public var texture(default, set):String = null;
@@ -35,11 +33,11 @@ class StrumArrow extends FlxSkewed
 	public var useRGBShader:Bool = true;
 
 	public var quantizedNotes:Bool = false;
+
+	public var strumPathLib:String = null;
+	public static var notITGStrums:Bool = false;
 	
 	public function new(x:Float, y:Float, leData:Int, player:Int, ?style:String, ?quantizedNotes:Bool) {
-		#if (flixel >= "5.5.0")
-		animation = new backend.animation.PsychAnimationController(this);
-		#end
 		rgbShader = new RGBShaderReference(this, !quantizedNotes ? Note.initializeGlobalRGBShader(leData) : Note.initializeGlobalQuantRGBShader(leData));
 		rgbShader.enabled = false;
 		if(PlayState.SONG != null && PlayState.SONG.disableStrumRGB) useRGBShader = false;
@@ -107,67 +105,53 @@ class StrumArrow extends FlxSkewed
 		switch (style)
 		{
 			default:
-					if((texture.contains('pixel') || style.contains('pixel') || daStyle.contains('pixel') || containsPixelTexture) && !FileSystem.exists(Paths.modsXml(style)))
+				if((texture.contains('pixel') || style.contains('pixel') || daStyle.contains('pixel') || containsPixelTexture) && !FileSystem.exists(Paths.modsXml(style)))
+				{
+					if (FileSystem.exists(Paths.modsImages('notes/' + style)) || FileSystem.exists(Paths.getSharedPath('images/notes/' + style)) || Assets.exists('notes/' + style))
 					{
-						if (FileSystem.exists(Paths.modsImages('notes/' + style)) || FileSystem.exists(Paths.getSharedPath('images/notes/' + style)) || Assets.exists('notes/' + style))
-						{
-							loadGraphic(Paths.image(style != "" ? 'notes/' + style : ('pixelUI/' + style)));
-							width = width / 4;
-							height = height / 5;
-							loadGraphic(Paths.image(style != "" ? 'notes/' + style : ('pixelUI/' + style)), true, Math.floor(width), Math.floor(height));
-
-							addAnims(true);
-						}
-						else if (FileSystem.exists(Paths.modsImages(style)) || FileSystem.exists(Paths.getSharedPath('images/' + style)) || Assets.exists(style))
-						{
-							loadGraphic(Paths.image(style != "" ? style : ('pixelUI/' + style)));
-							width = width / 4;
-							height = height / 5;
-							loadGraphic(Paths.image(style != "" ? style : ('pixelUI/' + style)), true, Math.floor(width), Math.floor(height));
-
-							addAnims(true);
-						}
-						else
-						{
-							if (PlayState.SONG != null && PlayState.SONG.disableStrumRGB)
-							{
-								loadGraphic(Paths.image('pixelUI/NOTE_assets'));
-								width = width / 4;
-								height = height / 5;
-								loadGraphic(Paths.image('pixelUI/NOTE_assets'), true, Math.floor(width), Math.floor(height));
-							}else{
-								loadGraphic(Paths.image('pixelUI/noteSkins/NOTE_assets' + Note.getNoteSkinPostfix()));
-								width = width / 4;
-								height = height / 5;
-								loadGraphic(Paths.image('pixelUI/noteSkins/NOTE_assets' + Note.getNoteSkinPostfix()), true, Math.floor(width), Math.floor(height));
-							}
-
-							addAnims(true);
-						}
+						loadGraphic(Paths.image(style != "" ? 'notes/' + style : ('pixelUI/' + style), strumPathLib, !notITGStrums));
+						width = width / 4;
+						height = height / 5;
+						loadGraphic(Paths.image(style != "" ? 'notes/' + style : ('pixelUI/' + style), strumPathLib, !notITGStrums), true, Math.floor(width), Math.floor(height));
+						addAnims(true);
+					}
+					else if (FileSystem.exists(Paths.modsImages(style)) || FileSystem.exists(Paths.getSharedPath('images/' + style)) || Assets.exists(style))
+					{
+						loadGraphic(Paths.image(style != "" ? style : ('pixelUI/' + style), strumPathLib, !notITGStrums));
+						width = width / 4;
+						height = height / 5;
+						loadGraphic(Paths.image(style != "" ? style : ('pixelUI/' + style), strumPathLib, !notITGStrums), true, Math.floor(width), Math.floor(height));
+						addAnims(true);
 					}
 					else
 					{
-						if (FileSystem.exists(Paths.modsImages('notes/' + style)) || FileSystem.exists(Paths.getSharedPath('images/notes/' + style)) || Assets.exists('notes/' + style))
-						{
-							frames = Paths.getSparrowAtlas('notes/' + style, null, !ClientPrefs.data.cacheOnGPU);
-							addAnims();
-						}
-						else if (FileSystem.exists(Paths.modsImages(style)) || FileSystem.exists(Paths.getSharedPath('images/' + style)) || Assets.exists(style))
-						{
-							frames = Paths.getSparrowAtlas(style, null, !ClientPrefs.data.cacheOnGPU);
-							addAnims();
-						}
-						else
-						{
-							if (PlayState.SONG != null && PlayState.SONG.disableStrumRGB)
-							{
-								frames = Paths.getSparrowAtlas('NOTE_assets', null, !ClientPrefs.data.cacheOnGPU);
-							}else{
-								frames = Paths.getSparrowAtlas('noteSkins/NOTE_assets' + Note.getNoteSkinPostfix(), null, !ClientPrefs.data.cacheOnGPU);
-							}
-							addAnims();
-						}
+						var noteSkinNonRGB:Bool = (PlayState.SONG != null && PlayState.SONG.disableStrumRGB);
+						loadGraphic(Paths.image(noteSkinNonRGB ? 'pixelUI/NOTE_assets' : 'pixelUI/noteSkins/NOTE_assets' + Note.getNoteSkinPostfix(), strumPathLib, !notITGStrums));
+						width = width / 4;
+						height = height / 5;
+						loadGraphic(Paths.image(noteSkinNonRGB ? 'pixelUI/NOTE_assets' : 'pixelUI/noteSkins/NOTE_assets' + Note.getNoteSkinPostfix(), strumPathLib, !notITGStrums), true, Math.floor(width), Math.floor(height));
+						addAnims(true);
 					}
+				}
+				else
+				{
+					if (FileSystem.exists(Paths.modsImages('notes/' + style)) || FileSystem.exists(Paths.getSharedPath('images/notes/' + style)) || Assets.exists('notes/' + style))
+					{
+						frames = Paths.getSparrowAtlas('notes/' + style, strumPathLib, !notITGStrums);
+						addAnims();
+					}
+					else if (FileSystem.exists(Paths.modsImages(style)) || FileSystem.exists(Paths.getSharedPath('images/' + style)) || Assets.exists(style))
+					{
+						frames = Paths.getSparrowAtlas(style, strumPathLib, !notITGStrums);
+						addAnims();
+					}
+					else
+					{
+						var noteSkinNonRGB:Bool = (PlayState.SONG != null && PlayState.SONG.disableStrumRGB);
+						frames = Paths.getSparrowAtlas(noteSkinNonRGB ? 'NOTE_assets' : 'noteSkins/NOTE_assets' + Note.getNoteSkinPostfix(), strumPathLib, !notITGStrums);
+						addAnims();
+					}
+				}
 		}
 
 		if (first)
@@ -193,12 +177,11 @@ class StrumArrow extends FlxSkewed
 			
 			animation.add('static', [0 + noteData]);
 			animation.add('pressed', [4 + noteData, 8 + noteData], 12, false);
-			animation.add('confirm', [12 + noteData, 16 + noteData], 24, false);
+			animation.add('confirm', [12 + noteData, 16 + noteData], 12, false);
 		}
 		else
 		{	
 			isPixel = false;
-
 			antialiasing = ClientPrefs.data.antialiasing;
 			setGraphicSize(Std.int(width * 0.7));
 
@@ -254,8 +237,11 @@ class StrumArrow extends FlxSkewed
 		super.update(elapsed);
 	}
 
-	public function playAnim(anim:String, ?force:Bool = false) {
-		animation.play(anim, force);
+	override public function playAnim(anim:String, force:Bool = false, reverse:Bool = false, frame:Int = 0) 
+	{
+		super.playAnim(anim, force, reverse, frame);
+		
+		animation.play(anim, force, reverse, frame);
 		if(animation.curAnim != null)
 		{
 			centerOffsets();

@@ -60,6 +60,8 @@ class DialogueCharacterEditorState extends MusicBeatState
 
 	var curAnim:Int = 0;
 
+	var unsavedProgress:Bool = false;
+
 	override function create() {
 		persistentUpdate = persistentDraw = true;
 		camGame = initPsychCamera();
@@ -459,8 +461,12 @@ class DialogueCharacterEditorState extends MusicBeatState
 	}
 
 	override function getEvent(id:String, sender:Dynamic, data:Dynamic, ?params:Array<Dynamic>) {
+		if(id == FlxUICheckBox.CLICK_EVENT)
+			unsavedProgress = true;
+
 		if(id == FlxUIInputText.CHANGE_EVENT && sender == imageInputText) {
 			character.jsonFile.image = imageInputText.text;
+			unsavedProgress = true;
 		} else if(id == FlxUINumericStepper.CHANGE_EVENT && (sender is FlxUINumericStepper)) {
 			if(sender == scaleStepper) {
 				character.jsonFile.scale = scaleStepper.value;
@@ -472,6 +478,7 @@ class DialogueCharacterEditorState extends MusicBeatState
 				character.jsonFile.position[1] = yStepper.value;
 				reloadCharacter();
 			}
+			unsavedProgress = true;
 		}
 	}
 
@@ -651,9 +658,13 @@ class DialogueCharacterEditorState extends MusicBeatState
 			}
 
 			if(FlxG.keys.justPressed.ESCAPE) {
-				MusicBeatState.switchState(new states.editors.MasterEditorMenu());
-				FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"), 1);
-				transitioning = true;
+				if(!unsavedProgress)
+				{
+					MusicBeatState.switchState(new states.editors.MasterEditorMenu());
+					FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
+					transitioning = true;
+				}
+				else openSubState(new ConfirmationPopupSubstate(function() transitioning = true));
 			}
 
 			ghostLoop.setPosition(character.x, character.y);

@@ -16,11 +16,7 @@ class PsychCamera extends FlxCamera
 		updateFlash(elapsed);
 		updateFade(elapsed);
 
-		#if (flixel >= "5.4.0")
 		flashSprite.filters = filtersEnabled ? filters : null;
-		#else
-		flashSprite.filters = filtersEnabled ? _filters : null;
-		#end
 
 		updateFlashSpritePosition();
 		updateShake(elapsed);
@@ -62,9 +58,7 @@ class PsychCamera extends FlxCamera
 					_scrollTarget.y -= viewHeight;
 				}
 				// without this we see weird behavior when switching to SCREEN_BY_SCREEN at arbitrary scroll positions
-				#if (flixel >= "5.4.0")
 				bindScrollPos(_scrollTarget);
-				#end
 			}
 			else
 			{
@@ -105,7 +99,7 @@ class PsychCamera extends FlxCamera
 			}
 		}
 
-		var mult:Float = 1 - Math.exp(-elapsed * followLerp);
+		var mult:Float = 1 - Math.exp(-elapsed * followLerp / (1/60));
 		scroll.x += (_scrollTarget.x - scroll.x) * mult;
 		scroll.y += (_scrollTarget.y - scroll.y) * mult;
 		//trace('lerp on this frame: $mult');

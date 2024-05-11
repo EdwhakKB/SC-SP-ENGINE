@@ -88,7 +88,7 @@ class ThingsToLoad extends MusicBeatState
 
     function loadPlayState()
     {
-        Assets.cache.clear("shared:assets/shared/data/characters"); //it doesn't take that much time to read from the json anyway.
+        Assets.cache.clear("shared:assets/shared/characters"); //it doesn't take that much time to read from the json anyway.
         LoadingState.loadAndSwitchState(new PlayState());
     }
 

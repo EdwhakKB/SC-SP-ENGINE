@@ -55,9 +55,9 @@ typedef SwagSong =
 	var ?bfNoteStyle:String;
 
 	var ?vocalsSuffix:String;
-	var ?instrumentalSuffix:String;
-
 	var ?vocalsPrefix:String;
+
+	var ?instrumentalSuffix:String;
 	var ?instrumentalPrefix:String;
 
 	var ?blockOpponentMode:Bool;
@@ -65,6 +65,31 @@ typedef SwagSong =
 	var ?oldBarSystem:Bool;
 
 	var ?disableStartCaching:Bool;
+}
+
+//// "what"?
+//// a typedef with default values, basically. @crowplexus
+@:structInit class ChartNoteData {
+	public var time: Null<Float> = null;
+	public var id: Null<Int> = null;
+	public var type: Null<String> = null;
+	public var strumLine: Null<Int> = null;
+	public var isGfNote: Null<Bool> = null;
+	public var sLen: Null<Float> = null;
+	public var skin: Null<String> = null;
+	public var dType: Null<Int> = null;
+
+	public function dispose() {
+		// will be cleared by the GC later
+		time = null;
+		id = null;
+		type = null;
+		strumLine = null;
+		isGfNote = null;
+		sLen = null;
+		skin = null;
+		dType = null;
+	}
 }
 
 class Song
@@ -108,9 +133,9 @@ class Song
 	public var bfNoteStyle:String = 'noteSkins/NOTE_assets';
 
 	public var vocalsSuffix:String = null;
-	public var instrumentalSuffix:String = null;
-
 	public var vocalsPrefix:String = null;
+
+	public var instrumentalSuffix:String = null;
 	public var instrumentalPrefix:String = null;
 
 	public var blockOpponentMode:Bool = false;
@@ -142,7 +167,7 @@ class Song
 					var note:Array<Dynamic> = notes[i];
 					if(note[1] < 0)
 					{					      //StrumTime /EventName,         V1,   V2,     V3,      V4,      V5,      V6,      V7,      V8,       V9,       V10,      V11,      V12,      V13,      V14
-						songJson.events.push([note[0], [[note[2], note[3], note[4]]]]);
+						songJson.events.push([note[0], [[note[2], [note[3], note[4]]]]]);
 						notes.remove(note);
 						len = notes.length;
 					}
@@ -205,5 +230,25 @@ class Song
 	public static function parseJSONshit(rawJson:String):SwagSong
 	{
 		return cast Json.parse(rawJson).song;
+	}
+}
+
+class FreeplaySongMetaData
+{
+	public var songName:String = "";
+	public var week:Int = 0;
+	public var songCharacter:String = "";
+	public var color:Int = -7179779;
+	public var folder:String = "";
+	public var lastDifficulty:String = null;
+
+	public function new(song:String, week:Int, songCharacter:String, color:Int)
+	{
+		this.songName = song;
+		this.week = week;
+		this.songCharacter = songCharacter;
+		this.color = color;
+		this.folder = Mods.currentModDirectory;
+		if(this.folder == null) this.folder = '';
 	}
 }

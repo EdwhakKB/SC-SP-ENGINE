@@ -1,6 +1,6 @@
 package objects.stageObjects;
 
-class PhillyGlowParticle extends FlxSprite
+class PhillyGlowParticle extends FunkinSCSprite
 {
 	var lifeTime:Float = 0;
 	var decay:Float = 0;

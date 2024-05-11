@@ -1,14 +1,17 @@
 package backend;
 
-import flixel.util.FlxSave;
-
 import openfl.utils.Assets;
+
 import lime.utils.Assets as LimeAssets;
 
 import backend.DataType;
+
+import objects.VideoSprite;
+
+import flixel.util.FlxSave;
 import flixel.text.FlxBitmapText;
-import flixel.graphics.frames.FlxBitmapFont;
 import flixel.text.FlxText.FlxTextBorderStyle;
+import flixel.graphics.frames.FlxBitmapFont;
 
 //Start placing more stuff for around the engine here!
 class CoolUtil
@@ -57,8 +60,23 @@ class CoolUtil
 		spr.centerOrigin();
 	}
 
+	/**
+	 * Add several zeros at the beginning of a string, so that `2` becomes `02`.
+	 * @param str String to add zeros
+	 * @param num The length required
+	 */
 	public static inline function addZeros(str:String, num:Int) {
 		while(str.length < num) str = '0${str}';
+		return str;
+	}
+
+	/**
+	 * Add several zeros at the end of a string, so that `2` becomes `20`, useful for ms.
+	 * @param str String to add zeros
+	 * @param num The length required
+	 */
+	public static inline function addEndZeros(str:String, num:Int) {
+		while(str.length < num) str = '${str}0';
 		return str;
 	}
 
@@ -82,8 +100,6 @@ class CoolUtil
 	{
 		var daList:String = null;
 		#if (sys && MODS_ALLOWED)
-		var formatted:Array<String> = path.split(':'); //prevent "shared:", "preload:" and other library names on file path
-		path = formatted[formatted.length-1];
 		if(FileSystem.exists(path)) daList = File.getContent(path);
 		#else
 		if(Assets.exists(path)) daList = Assets.getText(path);
@@ -126,7 +142,7 @@ class CoolUtil
 		return newValue / tempMult;
 	}
 	
-	inline public static function dominantColor(sprite:flixel.FlxSprite):Int
+	inline public static function dominantColor(sprite:FlxSprite):Int
 	{
 		var countByColor:Map<Int, Int> = [];
 		for(col in 0...sprite.frameWidth) {
@@ -188,19 +204,7 @@ class CoolUtil
 			FlxG.error("Platform is not supported for CoolUtil.openFolder");
 		#end
 	}
-
-	/** Quick Function to Fix Save Files for Flixel 5
-		if you are making a mod, you are gonna wanna change "ShadowMario" to something else
-		so Base Psych saves won't conflict with yours
-		@BeastlyGabi
-	**/
-	/*inline public static function getSavePath(folder:String = 'ShadowMario'):String {
-		@:privateAccess
-		return #if (flixel < "5.0.0") folder #else FlxG.stage.application.meta.get('company')
-			+ '/'
-			+ FlxSave.validate(FlxG.stage.application.meta.get('file')) #end;
-	}*/
-
+	
 	/**
 		Helper Function to Fix Save Files for Flixel 5
 		-- EDIT: [November 29, 2023] --
@@ -211,9 +215,7 @@ class CoolUtil
 	@:access(flixel.util.FlxSave.validate)
 	inline public static function getSavePath():String {
 		final company:String = FlxG.stage.application.meta.get('company');
-		#if (flixel < "5.0.0") return company; #else
 		return '${company}/${flixel.util.FlxSave.validate(FlxG.stage.application.meta.get('file'))}';
-		#end
 	}
 
 	public static function setTextBorderFromString(text:FlxText, border:String)
@@ -281,16 +283,6 @@ class CoolUtil
 	}
 
 	/**
-	 * Add several zeros at the end of a string, so that `2` becomes `20`, useful for ms.
-	 * @param str String to add zeros
-	 * @param num The length required
-	 */
-	 public static inline function addEndZeros(str:String, num:Int) {
-		while(str.length < num) str = '${str}0';
-		return str;
-	}
-
-	/**
 	 * Returns a string representation of a size, following this format: `1.02 GB`, `134.00 MB`
 	 * @param size Size to convert ot string
 	 * @return String Result string representation
@@ -317,6 +309,64 @@ class CoolUtil
 		}
 
 		return strs;
+	}
+
+	/**
+ 	* Gets the macro class created by hscript-improved for an abstract / enum
+ 	*/
+	@:noUsing public static inline function getMacroAbstractClass(className:String) {
+		return Type.resolveClass('${className}_HSC');
+	}
+
+	/**
+ 	* Sprite getting set to this instead of the original.
+ 	*/
+	public static var videoSprite:VideoSprite = null;
+
+	/**
+ 	* Allows creating a video outside playstate.
+ 	*/
+	public static function startVideo(name:String, type:String = 'mp4', forMidSong:Bool = false, canSkip:Bool = true, loop:Bool = false, playOnLoad:Bool = true)
+	{
+		#if VIDEOS_ALLOWED
+		try
+		{	
+			var foundFile:Bool = false;
+			var fileName:String = Paths.video(name, type);
+			#if sys
+			if (FileSystem.exists(fileName))
+			#else
+			if (OpenFlAssets.exists(fileName))
+			#end
+			foundFile = true;
+
+			if (foundFile)
+			{
+				var cutscene:VideoSprite = new VideoSprite(fileName, forMidSong, canSkip, loop);
+
+				// Finish callback
+				if (!forMidSong)
+				{
+					cutscene.finishCallback = function()
+					{
+						Sys.exit(0);
+					};
+	
+					// Skip callback
+					cutscene.onSkip = function()
+					{
+					};
+				}
+
+				if (playOnLoad) cutscene.videoSprite.play();
+				return cutscene;
+			}
+			else FlxG.log.error("Video not found: " + fileName);
+		}
+		#else
+		FlxG.log.warn('Platform not supported!');
+		#end
+		return null;
 	}
 }
 

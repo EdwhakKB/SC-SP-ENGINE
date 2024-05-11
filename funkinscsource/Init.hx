@@ -2,14 +2,9 @@ package;
 
 import flixel.graphics.FlxGraphic;
 import flixel.FlxState;
-import flixel.addons.transition.FlxTransitionableState;
 
 import states.TitleState;
 import states.FlashingState;
-
-#if (cpp && windows)
-import cpp.CPPInterface;
-#end
 
 import debug.FPSCounter;
 
@@ -22,7 +17,7 @@ import lime.app.Application;
 
 class Init extends FlxState
 {
-	var mouseCursor:FlxSprite;
+	public static var mouseCursor:FlxSprite;
 
 	override function create()
 	{
@@ -61,10 +56,10 @@ class Init extends FlxState
 
 		ClientPrefs.loadPrefs();
 		ClientPrefs.keybindSaveLoad();
+		Language.reloadPhrases();
+		backend.ColorBlindness.setFilter();
 
-		#if !(flixel >= "5.4.0")
 		FlxG.fixedTimestep = false;
-		#end
 		FlxG.game.focusLostFramerate = 60;
 		FlxG.keys.preventDefaultKeys = [TAB];
 
@@ -121,12 +116,9 @@ class Init extends FlxState
 			FlxTransitionableState.skipNextTransOut = true;
 			MusicBeatState.switchState(new FlashingState());
 		} else {
-			if (!ClientPrefs.data.skipInitialCaching) FlxG.switchState(new InitialCachingState());
-			else FlxG.switchState(Type.createInstance(Main.game.initialState, []));
+			FlxG.switchState(Type.createInstance(Main.game.initialState, []));
 		}
 
-		#if (cpp && windows)
-		CPPInterface.darkMode();
-		#end
+		if (ClientPrefs.data.gjUser.toLowerCase() == 'glowsoony') FlxG.scaleMode = new flixel.system.scaleModes.FillScaleMode();
 	}
 }

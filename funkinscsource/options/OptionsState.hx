@@ -8,7 +8,16 @@ import flixel.FlxObject;
 
 class OptionsState extends MusicBeatState
 {
-	var options:Array<String> = ['Note Options', 'Controls', 'Adjust Delay and Combo', 'Graphics', 'Visuals and UI', 'Gameplay', 'Misc', 'Game Jolt Login'];
+	public static final options:Array<String> = [
+		'Note Options',
+		'Controls',
+		'Adjust Delay and Combo',
+		'Graphics',
+		'Visuals',
+		'Gameplay',
+		'Misc'
+		#if TRANSLATIONS_ALLOWED , 'Language', #end
+	];
 	private var grpOptions:FlxTypedGroup<Alphabet>;
 	private static var curSelected:Int = 0;
 	public static var menuBG:FlxSprite;
@@ -16,16 +25,16 @@ class OptionsState extends MusicBeatState
 	function openSelectedSubstate(label:String) {
 		switch(label) {
 			case 'Note Options': 
-				flixel.addons.transition.FlxTransitionableState.skipNextTransOut = true;
-				flixel.addons.transition.FlxTransitionableState.skipNextTransIn = true;
+				FlxTransitionableState.skipNextTransOut = true;
+				FlxTransitionableState.skipNextTransIn = true;
 				MusicBeatState.switchState(new options.NoteOptions());
 			case 'Controls': openSubState(new options.ControlsSubState());
 			case 'Graphics': openSubState(new options.GraphicsSettingsSubState());
-			case 'Visuals and UI': openSubState(new options.VisualsUISubState());
+			case 'Visuals': openSubState(new options.VisualsSettingsSubState());
 			case 'Gameplay': openSubState(new options.GameplaySettingsSubState());
 			case 'Misc': openSubState(new options.MiscSettingsSubState());
 			case 'Adjust Delay and Combo':  MusicBeatState.switchState(new options.NoteOffsetState());
-			case 'Game Jolt Login': LoadingState.loadAndSwitchState(new gamejolt.GameJolt.GameJoltLogin());
+			case 'Language': openSubState(new options.LanguageSubState());
 		}
 	}
 
@@ -39,7 +48,8 @@ class OptionsState extends MusicBeatState
 	var camMain:FlxCamera;
 	var camSub:FlxCamera;
 
-	override function create() {
+	override function create() 
+	{
 		#if DISCORD_ALLOWED
 		DiscordClient.changePresence("Options Menu", null);
 		#end
@@ -59,13 +69,11 @@ class OptionsState extends MusicBeatState
 		grpOptions = new FlxTypedGroup<Alphabet>();
 		add(grpOptions);
 
-		if (!Main.checkGJKeysAndId()) options = ['Note Options', 'Controls', 'Adjust Delay and Combo', 'Graphics', 'Visuals and UI', 'Gameplay', 'Misc'];
-
-		for (i in 0...options.length)
+		for (num => option in options)
 		{
-			var optionText:Alphabet = new Alphabet(0, 0, options[i], true);
+			var optionText:Alphabet = new Alphabet(0, 0, Language.getPhrase('options_$option', option), true);
 			optionText.screenCenter();
-			optionText.y += (70 * (i - (options.length / 2))) + 60;
+			optionText.y += (78 * (num - (options.length / 2))) + 65;
 			grpOptions.add(optionText);
 		}
 
@@ -80,7 +88,8 @@ class OptionsState extends MusicBeatState
 		super.create();
 	}
 
-	override function closeSubState() {
+	override function closeSubState() 
+	{
 		super.closeSubState();
 		ClientPrefs.saveSettings();
 		#if DISCORD_ALLOWED
@@ -98,12 +107,11 @@ class OptionsState extends MusicBeatState
 		bg.updateHitbox();
 		bg.offset.set();
 
-		if (controls.UI_UP_P) {
+		if (controls.UI_UP_P)
 			changeSelection(-1);
-		}
-		if (controls.UI_DOWN_P) {
+
+		if (controls.UI_DOWN_P)
 			changeSelection(1);
-		}
 
 		var shiftMult:Int = 1;
 
@@ -128,21 +136,16 @@ class OptionsState extends MusicBeatState
 		else if (controls.ACCEPT) openSelectedSubstate(options[curSelected]);
 	}
 	
-	function changeSelection(change:Int = 0) {
-		curSelected += change;
-		if (curSelected < 0)
-			curSelected = options.length - 1;
-		if (curSelected >= options.length)
-			curSelected = 0;
+	function changeSelection(change:Int = 0) 
+	{
+		curSelected = FlxMath.wrap(curSelected + change, 0, options.length - 1);
 
-		var bullShit:Int = 0;
-
-		for (item in grpOptions.members) {
-			item.targetY = bullShit - curSelected;
-			bullShit++;
-
+		for (num => item in grpOptions.members)
+		{
+			item.targetY = num - curSelected;
 			item.alpha = 0.6;
-			if (item.targetY == 0) {
+			if (item.targetY == 0) 
+			{
 				item.alpha = 1;
 				selectorLeft.x = item.x - 63;
 				selectorLeft.y = item.y;
@@ -153,7 +156,8 @@ class OptionsState extends MusicBeatState
 		FlxG.sound.play(Paths.sound('scrollMenu'));
 	}
 
-	override function beatHit() {
+	override function beatHit() 
+	{
 		super.beatHit();
 
 		bg.scale.set(1.11, 1.11);

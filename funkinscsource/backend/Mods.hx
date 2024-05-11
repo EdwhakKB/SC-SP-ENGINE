@@ -12,7 +12,7 @@ class Mods
 {
 	static public var currentModDirectory:String = '';
 
-	public static var ignoreModFolders:Array<String> = [
+	public static final ignoreModFolders:Array<String> = [
 		'custom_events',
 		'custom_notetypes',
 		'data',
@@ -62,7 +62,7 @@ class Mods
 		return list;
 	}
 	
-	inline public static function mergeAllTextsNamed(path:String, defaultDirectory:String = null, allowDuplicates:Bool = false)
+	inline public static function mergeAllTextsNamed(path:String, ?defaultDirectory:String = null, allowDuplicates:Bool = false)
 	{
 		if(defaultDirectory == null) defaultDirectory = Paths.getSharedPath();
 		defaultDirectory = defaultDirectory.trim();
@@ -153,7 +153,6 @@ class Mods
 		try {
 			for (mod in CoolUtil.coolTextFile('modsList.txt'))
 			{
-				//Debug.logTrace('Mod: $mod');
 				if(mod.trim().length < 1) continue;
 
 				var dat = mod.split("|");
@@ -213,7 +212,6 @@ class Mods
 
 		File.saveContent('modsList.txt', fileStr);
 		updatedOnState = true;
-		//Debug.logTrace('Saved modsList.txt');
 		#end
 	}
 

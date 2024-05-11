@@ -273,7 +273,7 @@ precacheMusic(name)
 
 precacheSound(name)
 
-triggerEvent(name, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14)
+triggerEventLegacy(name, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14)
 
 startCountdown()
 
@@ -401,7 +401,7 @@ objectOverlap(obj1, obj2)
 
 getPixelColor(obj, x, y)
 
-startDialouge(dialougeFile, music)
+startDialogue(dialogueFile, music)
 
 startVideo(videoFile, videoType)
 
@@ -484,6 +484,12 @@ stopIdle(id, bool)
 characterDance(character)
 
 initBackgroundOverlayVideo(vidPath, videoType, layInFront)
+
+startCharScripts(name)
+
+setGeneralItem(item, value, instance) --Instance is if it uses the instance or the global item (PlayState.instance or PlayState)
+
+getGeneralItem(item, instance) --Instance is if it uses the instance or the global item (PlayState.instance or PlayState)
 
 --SupportBeta Functions (BETADCIU, EXTRA FUNCTIONS FOR SCE)--
 setActorX(x, id)
@@ -741,39 +747,3 @@ changeNotes2(style, character, postfix)
 changeIndividualNotes(style, i, postfix)
 
 playStrumAnim(isDad, id, time)
-
-setActorWaveCircleShader(id, speed, frequency, amplitude)
-
-setActorNoShader(id)
-
-initShaderFromSource(name, classString)
-
-setActorShader(actorStr, shaderName)
-
-setShaderProperty(shaderName, prop, value)
-
-getShaderProperty(shaderName, prop)
-
-tweenShaderProperty(shaderName, prop, value, time, easeStr)
-
-setCameraShader(camStr, shaderName)
-
-removeCameraShader(camStr, shaderName)
-
-createCustomShader(id, file, glslVersion)
-
-setActorCustomShader(id, actor)
-
-setActorNoCustomShader(actor)
-
-setCameraCustomShader(id, camera)
-
-pushShaderToCamera(id, camera)
-
-setCameraNoCustomShader(shader)
-
-getCustomShaderProperty(id, property)
-
-setCustomShaderProperty(id, property, value)
-
-tweenCustomShaderProperty(shaderName, prop, value, time, easeStr)

@@ -110,7 +110,6 @@ class RGBShaderReference
 			parent.b = _original.b;
 			parent.mult = _original.mult;
 			_owner.shader = parent.shader;
-			//Debug.logTrace('created new shader');
 		}
 	}
 }

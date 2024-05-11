@@ -9,15 +9,19 @@ import flixel.graphics.frames.FlxFrame;
 import flixel.group.FlxSpriteGroup;
 import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepad;
-import flixel.addons.transition.FlxTransitionableState;
 
 import openfl.Assets;
 
 import shaders.ColorSwap;
 
 import states.StoryMenuState;
-import states.OutdatedState;
 import states.MainMenuState;
+
+import backend.ColorBlindness;
+
+#if sys
+import debug.Arguments;
+#end
 
 @:structInit
 class TitleData {
@@ -78,6 +82,10 @@ class TitleState extends MusicBeatState
 		Paths.clearStoredMemory();
 		FlxTransitionableState.skipNextTransOut = false;
 		persistentUpdate = true;
+		
+		#if (cpp && windows)
+		cpp.CPPInterface.darkMode();
+		#end
 
 		super.create();
 
@@ -275,6 +283,13 @@ class TitleState extends MusicBeatState
 		randomPhrase = FlxG.random.getObject(getIntroTextShit());
 
 		if (!skippedIntro) {
+			#if sys
+			if (debug.Arguments.parse(Sys.args()))
+			{
+				FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"), 0);
+				return;
+			}
+			#end	
 			add(ngSpr = new FlxSprite(0, FlxG.height * 0.52, Paths.image('newgrounds_logo')));
 			ngSpr.visible = false;
 			ngSpr.active = false;
@@ -297,7 +312,7 @@ class TitleState extends MusicBeatState
 	function getIntroTextShit():Array<Array<String>>
 	{
 		#if MODS_ALLOWED
-		final firstArray:Array<String> = Mods.mergeAllTextsNamed('data/introText.txt', Paths.getSharedPath());
+		final firstArray:Array<String> = Mods.mergeAllTextsNamed('data/introText.txt');
 		#else
 		final fullText:String = Assets.getText(Paths.txt('introText'));
 		final firstArray:Array<String> = fullText.split('\n');
@@ -368,8 +383,8 @@ class TitleState extends MusicBeatState
 				new FlxTimer().start(1.5, function(okFlixel:FlxTimer) {
 					FlxTransitionableState.skipNextTransIn = false;
 
-					if (mustUpdate) MusicBeatState.switchState(new OutdatedState());
-					else MusicBeatState.switchState(new MainMenuState());
+					/*if (mustUpdate) MusicBeatState.switchState(new OutdatedState());
+					else */ MusicBeatState.switchState(new MainMenuState());
 				});
 			}
 		} else skipIntro();
@@ -430,8 +445,7 @@ class TitleState extends MusicBeatState
 						addMoreText('Edwhak_KillBot', 60, "#1D2E28");
 					}
 					else addMoreText('present', 0, "#006A89");
-				case 4:
-					deleteText();
+				case 4: deleteText();
 				case 5:
 					if (ClientPrefs.data.SCEWatermark) createText(['In association', 'with'], -50, "random");
 					else createText(['Not associated', 'with'], -40, "random");
@@ -444,21 +458,15 @@ class TitleState extends MusicBeatState
 				case 8:
 					deleteText();
 					ngSpr.visible = false;
-				case 9:
-					createText([randomPhrase[0]], 0, "random");
-				case 11:
-					addMoreText(randomPhrase[1], 0, "random");
-				case 12:
-					deleteText();
-				case 13:
-					addMoreText('Friday Night', 0, "random");
-				case 14:
-					addMoreText('Funkin', 0, "random");
+				case 9: createText([randomPhrase[0]], 0, "random");
+				case 11: addMoreText(randomPhrase[1], 0, "random");
+				case 12: deleteText();
+				case 13: addMoreText('Friday Night', 0, "random");
+				case 14: addMoreText('Funkin', 0, "random");
 				case 15:
 					if (ClientPrefs.data.SCEWatermark) addMoreText('Sick Coders Edition', 0, "#FFFF90");
 					else addMoreText('Psych Engine Edition', 0, "#FFFF90");
-				case 16:
-					skipIntro();
+				case 16: skipIntro();
 			}
 		}
 	}
@@ -555,6 +563,7 @@ class TitleState extends MusicBeatState
 	}
 
 	function skipIntro() {
+		remove(ngSpr);
 		FlxG.camera.flash(FlxColor.WHITE, 2);
 		skippedIntro = true;
 
@@ -564,7 +573,7 @@ class TitleState extends MusicBeatState
 
 		particlesUP.visible = true;
 		particlesDOWN.visible = true;
-
+		
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.time = 9400; // 9.4 seconds
 

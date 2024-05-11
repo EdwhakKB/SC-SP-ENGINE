@@ -168,11 +168,11 @@ end
 
 -- There are 14 values for each not 2 anymore!
 -- Event notes hooks
-function onEvent(name, value1, value2)
+function onEvent(name, eventParams)
 	-- event note triggered
-	-- triggerEvent() does not call this function!!
+	-- triggerEventLegacy() does not call this function!!
 
-	-- print('Event triggered: ', name, value1, value2);
+	-- print('Event triggered: ', name, eventParams);
 end
 
 function eventEarlyTrigger(name)
@@ -204,7 +204,7 @@ function onTimerCompleted(tag, loops, loopsLeft)
 end
 
 --SCE extra Doc functions or Functions not mentioned originally
-function onStrumNote(membersIndex, playerNumber, ID)
+function onSpawnNote(membersIndex, playerNumber, ID)
 	--membersIndex of the strums
 	--plyaerNumber of what strum number "playerNumber ? 0 : 1" -- haxe form
 	--ID number ID of strum as in noteData

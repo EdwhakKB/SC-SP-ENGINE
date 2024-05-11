@@ -1,6 +1,6 @@
 package objects.stageObjects;
 
-class PhillyGlowGradient extends FlxSprite
+class PhillyGlowGradient extends FunkinSCSprite
 {
 	public var originalY:Float;
 	public var originalHeight:Int = 400;

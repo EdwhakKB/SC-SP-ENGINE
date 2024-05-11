@@ -4,7 +4,6 @@ import lime.app.Application;
 
 import flixel.system.debug.log.LogStyle;
 import flixel.system.debug.watch.Tracker.TrackerProfile;
-import flixel.util.FlxStringUtil;
 
 import haxe.Log;
 import haxe.PosInfos;

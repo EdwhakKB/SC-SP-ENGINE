@@ -4,6 +4,7 @@ import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepadInputID;
 
 import objects.Character;
+import options.Option.OptionType;
 
 class ModSettingsSubState extends BaseOptionsMenu
 {
@@ -34,13 +35,13 @@ class ModSettingsSubState extends BaseOptionsMenu
 					option.name != null ? option.name : option.save,
 					option.description != null ? option.description : 'No description provided.',
 					option.save,
-					option.type,
+					convertType(option.type),
 					option.options
 				);
 
 				switch(newOption.type)
 				{
-					case 'keybind':
+					case KEYBIND:
 						//Defaulting and error checking
 						var keyboardStr:String = option.keyboard;
 						var gamepadStr:String = option.gamepad;
@@ -89,7 +90,7 @@ class ModSettingsSubState extends BaseOptionsMenu
 						}
 				}
 
-				if(option.type != 'keybind')
+				if(option.type != KEYBIND)
 				{
 					if(option.format != null) newOption.displayFormat = option.format;
 					if(option.min != null) newOption.minValue = option.min;
@@ -103,7 +104,7 @@ class ModSettingsSubState extends BaseOptionsMenu
 					if(save.get(option.save) != null)
 					{
 						myValue = save.get(option.save);
-						if(newOption.type != 'keybind') newOption.setValue(myValue);
+						if(newOption.type != KEYBIND) newOption.setValue(myValue);
 						else newOption.setValue(!Controls.instance.controllerMode ? myValue.keyboard : myValue.gamepad);
 					}
 					else
@@ -114,9 +115,10 @@ class ModSettingsSubState extends BaseOptionsMenu
 
 					switch(newOption.type)
 					{
-						case 'string':
+						case STRING:
 							var num:Int = newOption.options.indexOf(myValue);
 							if(num > -1) newOption.curOption = num;
+						default:
 					}
 
 					save.set(option.save, myValue);
@@ -130,7 +132,7 @@ class ModSettingsSubState extends BaseOptionsMenu
 			var errorTitle = 'Mod name: ' + folder;
 			var errorMsg = 'An error occurred: $e';
 			#if windows
-			lime.app.Application.current.window.alert(errorMsg, errorTitle);
+			Debug.displayAlert(errorMsg, errorTitle);
 			#end
 			trace('$errorTitle - $errorMsg');
 			_crashed = true;
@@ -143,6 +145,27 @@ class ModSettingsSubState extends BaseOptionsMenu
 		bg.alpha = 0.75;
 		bg.color = FlxColor.WHITE;
 		reloadCheckboxes();
+	}
+
+	private function convertType(str:String):OptionType
+	{
+		switch(str.toLowerCase().trim())
+		{
+			case 'bool', 'boolean':
+				return BOOL;
+			case 'int', 'integer':
+				return INT;
+			case 'float', 'fl':
+				return FLOAT;
+			case 'percent', 'percentage':
+				return PERCENT;
+			case 'string', 'str':
+				return STRING;
+			case 'keybind', 'key':
+				return KEYBIND;
+		}
+		FlxG.log.error("Could not find option type: " + str);
+		return BOOL;
 	}
 
 	override public function update(elapsed:Float)

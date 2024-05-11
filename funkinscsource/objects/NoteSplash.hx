@@ -12,7 +12,7 @@ typedef NoteSplashConfig = {
 	offsets:Array<Array<Float>>
 }
 
-class NoteSplash extends FlxSkewed
+class NoteSplash extends FunkinSCSprite
 {
 	public var rgbShader:PixelSplashShaderRef;
 	private var idleAnim:String;
@@ -30,14 +30,8 @@ class NoteSplash extends FlxSkewed
 
 	public var styleChoice:String = '';
 
-	public var z:Float = 0;
-
 	public function new(x:Float = 0, y:Float = 0, ?opponentSplashes:Bool = false) {
 		super(x, y);
-
-		#if (flixel >= "5.5.0")
-		animation = new backend.animation.PsychAnimationController(this);
-		#end
 
 		this.opponentSplashes = opponentSplashes;
 
@@ -57,8 +51,11 @@ class NoteSplash extends FlxSkewed
 			else if (FileSystem.exists(Paths.modsImages('notes/$string2NoteSkin')) || FileSystem.exists(Paths.getSharedPath('images/notes/$string2NoteSkin.png')))
 				skin = "notes/noteSplashes-"+ styleChoice;
 			else{
-				if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) skin = PlayState.SONG.splashSkin;
-				else skin = (PlayState.SONG != null && PlayState.SONG.disableSplashRGB) ? 'noteSplashes' : defaultNoteSplash + getSplashSkinPostfix();
+				if (PlayState.SONG != null)
+				{
+					if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) skin = PlayState.SONG.splashSkin;
+					else skin = PlayState.SONG.disableSplashRGB ? 'noteSplashes' : defaultNoteSplash + getSplashSkinPostfix();
+				}
 			}
 		}
 		else
@@ -75,8 +72,11 @@ class NoteSplash extends FlxSkewed
 			else if (FileSystem.exists(Paths.modsImages('notes/$string2NoteSkin')) || FileSystem.exists(Paths.getSharedPath('images/notes/$string2NoteSkin.png')))
 				skin = "notes/noteSplashes-"+ styleChoice;
 			else{
-				if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) skin = PlayState.SONG.splashSkin;
-				else skin = (PlayState.SONG != null && PlayState.SONG.disableSplashRGB) ? 'noteSplashes' : defaultNoteSplash + getSplashSkinPostfix();
+				if (PlayState.SONG != null)
+				{
+					if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) skin = PlayState.SONG.splashSkin;
+					else skin = PlayState.SONG.disableSplashRGB ? 'noteSplashes' : defaultNoteSplash + getSplashSkinPostfix();
+				}
 			}
 		}
 
@@ -88,7 +88,7 @@ class NoteSplash extends FlxSkewed
 		precacheConfig(skin);
 		_configLoaded = skin;
 		scrollFactor.set();
-		// setupNoteSplash(x, y, 0);
+		setupNoteSplash(x, y, 0);
 	}
 
 	override function destroy()
@@ -120,8 +120,11 @@ class NoteSplash extends FlxSkewed
 			else
 			{
 				if(note != null && note.noteSplashData.texture != null) texture = note.noteSplashData.texture;
-				else if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) texture = PlayState.SONG.splashSkin;
-				else texture = (PlayState.SONG != null && PlayState.SONG.disableSplashRGB) ? 'noteSplashes' : defaultNoteSplash + getSplashSkinPostfix();
+				else if (PlayState.SONG != null)
+				{
+					if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) texture = PlayState.SONG.splashSkin;
+					else texture = PlayState.SONG.disableSplashRGB ? 'noteSplashes' : defaultNoteSplash + getSplashSkinPostfix();
+				}
 			}
 		}
 		else
@@ -140,8 +143,11 @@ class NoteSplash extends FlxSkewed
 			else
 			{
 				if(note != null && note.noteSplashData.texture != null) texture = note.noteSplashData.texture;
-				else if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) texture = PlayState.SONG.splashSkin;
-				else texture = (PlayState.SONG != null && PlayState.SONG.disableSplashRGB) ? 'noteSplashes' : defaultNoteSplash + getSplashSkinPostfix();
+				else if (PlayState.SONG != null)
+				{
+					if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) texture = PlayState.SONG.splashSkin;
+					else texture = PlayState.SONG.disableSplashRGB ? 'noteSplashes' : defaultNoteSplash + getSplashSkinPostfix();
+				}
 			}
 		}
 
@@ -155,7 +161,7 @@ class NoteSplash extends FlxSkewed
 		var tempShader:RGBPalette = null;
 		if((note == null || note.noteSplashData.useRGBShader) && (PlayState.SONG == null || !PlayState.SONG.disableSplashRGB))
 		{
-			// If Note RGB is enabled:
+			// If Splash RGB is enabled:
 			if(note != null && !note.noteSplashData.useGlobalShader)
 			{
 				if(note.noteSplashData.r != -1) note.rgbShader.r = note.noteSplashData.r;
@@ -186,7 +192,6 @@ class NoteSplash extends FlxSkewed
 		{
 			var animID:Int = direction + ((animNum - 1) * Note.colArray.length);
 			var offs:Array<Float> = null;
-			//Debug.logTrace('anim: ${animation.curAnim.name}, $animID');
 			if (config.offsets.length > 0)
 			{
 				offs = config.offsets[FlxMath.wrap(animID, 0, config.offsets.length-1)];
@@ -240,12 +245,10 @@ class NoteSplash extends FlxSkewed
 			var animID:Int = maxAnims + 1;
 			for (i in 0...Note.colArray.length) {
 				if (!addAnimAndCheck('note$i-$animID', '$animName ${Note.colArray[i]} $animID', 24, false)) {
-					//Debug.logTrace('maxAnims: $maxAnims');
 					return config;
 				}
 			}
 			maxAnims++;
-			//Debug.logTrace('currently: $maxAnims');
 		}
 	}
 
@@ -253,7 +256,7 @@ class NoteSplash extends FlxSkewed
 	{
 		if(configs.exists(skin)) return configs.get(skin);
 
-		var path:String = Paths.getPath('images/$skin.txt', TEXT, true);
+		var path:String = Paths.getPath('images/$skin.txt', TEXT);
 		var configFile:Array<String> = CoolUtil.coolTextFile(path);
 		if(configFile.length < 1) return null;
 		
@@ -291,7 +294,7 @@ class NoteSplash extends FlxSkewed
 		return true;
 	}
 
-	static var aliveTime:Float = 0;
+	private var aliveTime:Float = 0;
 	static var buggedKillTime:Float = 0.5; //automatically kills note splashes if they break to prevent it from flooding your HUD
 	override function update(elapsed:Float) {
 		aliveTime += elapsed;
@@ -315,8 +318,7 @@ class PixelSplashShaderRef {
 		//Even though the shader is not RGB make it pixelate the splashes!
 		if(enabled)
 		{
-			for (i in 0...3)
-			{
+			for (i in 0...3){
 				shader.r.value[i] = tempShader.shader.r.value[i];
 				shader.g.value[i] = tempShader.shader.g.value[i];
 				shader.b.value[i] = tempShader.shader.b.value[i];
@@ -340,7 +342,6 @@ class PixelSplashShaderRef {
 		var pixel:Float = 1;
 		if(containsPixel) pixel = PlayState.daPixelZoom;
 		shader.uBlocksize.value = [pixel, pixel];
-		//Debug.logTrace('Created shader ' + Conductor.songPosition);
 	}
 }
 

@@ -61,18 +61,23 @@
       "version": null
     },
     {
-      "name": "modchartingTools",
-      "type": "git",
-      "dir": null,
-      "ref": "main",
-      "url": " https://github.com/EdwhakKB/FNF-Modcharting-Tools/tree/main"
+      "name": "hxvlc",
+      "type": "haxelib",
+      "version": null
     },
     {
-      "name": "discord_rpc",
+      "name": "fnf-modcharting-tools",
       "type": "git",
       "dir": null,
       "ref": "main",
-      "url": "https://github.com/Aidan63/linc_discord-rpc"
+      "url": "https://github.com/EdwhakKB/FNF-Modcharting-Tools"
+    },
+    {
+      "name": "hxdiscord_rpc",
+      "type": "git",
+      "dir": null,
+      "ref": "main",
+      "url": "https://github.com/FNF-CNE-Devs/hxdiscord_rpc"
     },
     {
       "name": "flxanimate",
@@ -101,6 +106,13 @@
       "dir": null,
       "ref": "master",
       "url": "https://github.com/haya3218/systools"
+    },
+    {
+      "name": "hscript-improved",
+      "type": "git",
+      "dir": null,
+      "ref": "custom-classes",
+      "url": "https://github.com/FNF-CNE-Devs/hscript-improved"
     }
   ]
 }
