@@ -1,16 +1,16 @@
 package gamejolt;
 
 // GameJoltAPI Things
-import tentools.api.FlxGameJolt as GJApi;
+import hxgamejolt.GameJolt as GJApi;
 
-import gamejolt.GameJolt.GameJoltInfo;
-import gamejolt.GameJolt.GameJoltLogin;
+import gamejolt.GameJoltGroup.GameJoltInfo;
+import gamejolt.GameJoltGroup.GameJoltLogin;
 
 import lime.app.Application;
 
 using StringTools;
 
-class GameJoltAPI // Connects to tentools.api.FlxGameJolt
+class GameJoltAPI // Connects to hxgamejolt.GameJolt
 {
     /**
 	 * Tells you if some GUI already exists in the game app or not.
@@ -42,40 +42,22 @@ class GameJoltAPI // Connects to tentools.api.FlxGameJolt
 	 * @param username Bool value
 	 * @return String 
 	 */
-	public static function getUser():String
-		return GJApi.username;
-
-	/**
-	 * Grabs the game token of the actual logged in user and returns it
-	 * @param username Bool value
-	 * @return String 
-	 */
-	public static function getToken():String
-		return GJApi.usertoken;
+	public static inline function getUser():String
+		return ClientPrefs.data.gjUser;
 
      /**
      * Returns the user login status
      * @return Bool
      */
     public static function getStatus():Bool
-    {
         return getTokenActive() != null && getUserActive() != null;
-    }
 
 	/**
 	 * Sets the game API key from GJKeys.api
 	 * Doesn't return anything
 	 */
-	public static function connect() {
-		trace("Grabbing API keys...");
-
-		GJApi.init(Std.int(GJKeys.id), Std.string(GJKeys.key), function(data:Bool)
-		{
-			// #if debug
-			// var daDesc:String = "If you are a developer, check GJKeys.hx\nMake sure the id and key are formatted correctly!";
-			// Main.gjToastManager.createToast(GameJoltInfo.imagePath, 'Game${!data ? " not" : ""} authenticated!', !data ? daDesc : "Success!");
-			// #end
-		});
+	public inline static function connect() {
+		GJApi.init(Std.string(GJKeys.id), Std.string(GJKeys.key));
 	}
 
 	/**
@@ -86,33 +68,34 @@ class GameJoltAPI // Connects to tentools.api.FlxGameJolt
 	 */
      public static function authDaUser(in1:String, in2:String, ?loginArg:Bool = false) {
 		if (!userLogin && in1 != "" && in2 != "") {
-			GJApi.authUser(in1, in2, function(v:Bool) {
-				trace("User: " + in1);
-				trace("Token: " + in2);
+			GJApi.authUser(in1, in2, {
+				onSucceed: function(data:Dynamic):Void
+				{
+					Debug.logInfo("User: " + in1);
+					Debug.logInfo("Token: " + in2);
 
-				if (v) {
 					Main.gjToastManager.createToast(GameJoltInfo.imagePath, '$in1 SIGNED IN!', "CONNECTED TO GAMEJOLT!");
-					trace("User authenticated!");
+					Debug.logInfo("User authenticated!");
 					FlxG.save.data.gjUser = in1;
 					FlxG.save.data.gjToken = in2;
 					FlxG.save.flush();
 					userLogin = true;
 					startSession();
-					if (loginArg) {
+					/*if (loginArg) {
 						GameJoltLogin.login = true;
 						FlxG.switchState(new GameJoltLogin());
-					}
-				}
-				else
+					}*/
+				},
+				onFail: function(message:String):Void
 				{
+					Debug.logInfo(message);
 					if (loginArg)
 					{
 						GameJoltLogin.login = true;
 						FlxG.switchState(new GameJoltLogin());
 					}
-					Main.gjToastManager.createToast(GameJoltInfo.imagePath, "Not signed in!\nSign in to save GameJolt Trophies and Leaderboard Scores!", "");
-					trace("User login failure!");
-					// FlxG.switchState(new GameJoltLogin());
+					Main.gjToastManager.createToast(GameJoltInfo.imagePath, "Not signed in!\nSign in to save GameJolt Trophies 
+					and Leaderboard Scores!", "");
 				}
 			});
 		}
@@ -126,11 +109,11 @@ class GameJoltAPI // Connects to tentools.api.FlxGameJolt
 	{
 		closeSession();
 		userLogin = false;
-		trace('User: ${FlxG.save.data.gjUser} | Token: ${FlxG.save.data.gjToken}');
+		Debug.logInfo('User: ${FlxG.save.data.gjUser} | Token: ${FlxG.save.data.gjToken}');
 		FlxG.save.data.gjUser = "";
 		FlxG.save.data.gjToken = "";
 		FlxG.save.flush();
-		trace("Logged out!");
+		Debug.logInfo("Logged out!");
 		//System.exit(0);
 	}
 
@@ -141,7 +124,19 @@ class GameJoltAPI // Connects to tentools.api.FlxGameJolt
 	public static function getTrophy(id:Int)
 	{
 		if (userLogin)
-			GJApi.addTrophy(id, (data:Map<String, String>) -> trace(!data.exists("message") ? data : 'Could not add Trophy [$id] : ${data.get("message")}'));
+		{
+			GJApi.addTrophy(ClientPrefs.data.gjUser, ClientPrefs.data.gjToken, id, {
+				onSucceed: function(data:Dynamic):Void
+				{
+					Debug.logInfo('Added trophy');
+				},
+				onFail: function(message:String):Void
+				{
+					Debug.logInfo(message);
+					Debug.logInfo('Could not add Trophy [$id]');
+				}
+			});
+		}
 	}
 
 	/**
@@ -157,22 +152,25 @@ class GameJoltAPI // Connects to tentools.api.FlxGameJolt
 		if (trophy != null)
 		{
 			value = trophy.get("achieved") == "true";
-			trace('Trophy state [$id]: ${value ? "achieved" : "unachieved"}');
+			Debug.logInfo('Trophy state [$id]: ${value ? "achieved" : "unachieved"}');
 		}
 
 		return value;
 	}
 
-	public static function pullTrophy(id:Int):Null<Map<String, String>>
+	public static function pullTrophy(id:Int):Map<String, String>
 	{
 		var returnable:Map<String, String> = [];
 
-		GJApi.fetchTrophy(id, (data:Map<String, String>) -> returnable = data);
-		if (returnable.exists("message"))
-		{
-			trace('Failed to pull trophy [$id] : ${returnable.get("message")}');
-			return null;
-		}
+		GJApi.fetchTrophy(ClientPrefs.data.gjUser, ClientPrefs.data.gjToken, null, id, {
+			onSucceed: function(data:Dynamic):Void
+			{
+			},
+			onFail: function(message:String):Void
+			{
+				Debug.logInfo(message);
+			}
+		});
 		return returnable;
 	}
 
@@ -187,16 +185,22 @@ class GameJoltAPI // Connects to tentools.api.FlxGameJolt
 		var retFormat:String = 'Score: $score';
 		if (GameJoltAPI.leaderboardToggle)
 		{
-			trace("Trying to add a score");
+			Debug.logInfo("Trying to add a score");
 			var formData:Null<String> = extraData != null ? extraData.split(" ").join("%20") : null;
 
 			if (formData != null)
 				retFormat += '\nExtra Data: $formData';
 
-			GJApi.addScore(score + "%20Points", score, tableID, false, null, formData, function(data:Map<String, String>)
-			{
-				trace("Score submitted with a result of: " + data.get("success"));
-				Main.gjToastManager.createToast(GameJoltInfo.imagePath, "Score submitted!", retFormat, true);
+			GJApi.addScore(ClientPrefs.data.gjUser, ClientPrefs.data.gjToken, "guest", score + "%20Points", score, formData, tableID, {
+				onSucceed: function(data:Dynamic):Void
+				{
+					Debug.logInfo("Score submitted with a result of: " + data.get("success"));
+					Main.gjToastManager.createToast(GameJoltInfo.imagePath, "Score submitted!", retFormat, true);
+				},
+				onFail: function(message:String):Void
+				{
+					Debug.logInfo(message);
+				}
 			});
 		}
 		else
@@ -222,13 +226,20 @@ class GameJoltAPI // Connects to tentools.api.FlxGameJolt
 	public static function pullHighScore(id:Int):Map<String, String>
 	{
 		var returnable:Null<Map<String, String>>;
-		GJApi.fetchScore(id, 1, function(data:Map<String, String>) {
-			if (!data.exists('message')) {
-				trace('Could not pull High Score from Table [$id] :' + data.get('message'));
-				returnable = null;
-			} else {
-				trace(data);
-				returnable = data;
+		GJApi.fetchScore(id, 1, {
+			onSucceed: function(data:Dynamic):Void
+			{
+				if (!data.exists('message')) {
+					Debug.logInfo('Could not pull High Score from Table [$id] :' + data.get('message'));
+					returnable = null;
+				} else {
+					Debug.logInfo(data);
+					returnable = data;
+				}
+			},
+			onFail: function(message:String):Void
+			{
+				Debug.logInfo(message);
 			}
 		});
 		return returnable;
@@ -240,10 +251,16 @@ class GameJoltAPI // Connects to tentools.api.FlxGameJolt
 	 */
 	public static function startSession()
 	{
-		GJApi.openSession(function()
-		{
-			trace("Session started!");
-			new FlxTimer().start(20, tmr -> pingSession(), 0);
+		GJApi.openSessions(ClientPrefs.data.gjUser, ClientPrefs.data.gjToken, {
+			onSucceed: function(data:Dynamic):Void
+			{
+				Debug.logInfo("Session started!");
+				new FlxTimer().start(20, tmr -> pingSession(), 0);
+			},
+			onFail: function(message:String):Void
+			{
+				Debug.logInfo(message);
+			}
 		});
 	}
 
@@ -251,24 +268,24 @@ class GameJoltAPI // Connects to tentools.api.FlxGameJolt
 	 * Tells GameJolt that you are still active!
 	 * Called every 20 seconds by a loop in startSession().
 	 */
-	public static function pingSession()
-		GJApi.pingSession(true, () -> trace("Ping!"));
+	public inline static function pingSession()
+		GJApi.pingSessions(ClientPrefs.data.gjUser, ClientPrefs.data.gjToken);
 
 	/**
 	 * Closes the session, used for signing out
 	 */
-	public static function closeSession()
-		GJApi.closeSession(() -> trace('Closed out the session'));
+	public inline static function closeSession()
+		GJApi.closeSessions(ClientPrefs.data.gjUser, ClientPrefs.data.gjToken);
 
     /**
      * Returns Active UserName
      */
-    public static function getUserActive():Null<String>
+    public inline static function getUserActive():Null<String>
 		return ClientPrefs.data.gjUser;
 
     /**
      * Returns Active Token
      */
-	public static function getTokenActive():Null<String>
+	public inline static function getTokenActive():Null<String>
 		return ClientPrefs.data.gjToken;
 }

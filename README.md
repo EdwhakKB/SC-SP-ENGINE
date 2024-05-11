@@ -41,6 +41,9 @@ same goes for *Lua Scripts*, comment out or delete the line with `LUA_ALLOWED`, 
 * Edwhak_Killbot - Programmer (Leader of SCE)
 * Slushi - Programmer (Has helped with the Crash Handler and a few other things! he is also a beta tester for bugs! ***thanks***)!
 
+## Extra Credits:
+* Vortex2Oblivion - Helped with changing gamejolt code to hxgamejolt-api code.
+
 ### Special Thanks
 * bbpanzu - Ex-Programmer
 * Yoshubs - New Input System

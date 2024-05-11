@@ -222,7 +222,7 @@ function eventEarlyTrigger(name:String)
 
 // Event notes hooks legacy
 // AFTER strumTime use ?value3:String, to 14 (?value14:String) in the function to make it work!
-function onEventLegacy(name:String, value1:String, value2:String, strumTime:Float, etc...)
+function onEventLegacy(name:String, value1:String, value2:String, strumTime:Float, etc)
 {
 	// event note triggered
 	// triggerEvent() does not call this function!!
@@ -231,13 +231,13 @@ function onEventLegacy(name:String, value1:String, value2:String, strumTime:Floa
 }
 
 // AFTER strumTime use ?value3:String, to 14 (?value14:String) in the function to make it work!
-function onEventPushedLegacy(name:String, value1:String, value2:String, strumTime:Float, etc...)
+function onEventPushedLegacy(name:String, value1:String, value2:String, strumTime:Float, etc)
 {
 	// Called for every event note, recommended to precache assets
 }
 
 // BEFORE strumTime use value1:String, to 14 (value14:String) in the function to make it work! ()
-function eventEarlyTriggerLegacy(name:String, etc..., strumTime:Float)
+function eventEarlyTriggerLegacy(name:String, etc, strumTime:Float)
 {
 	/*
 	Here's a port of the Kill Henchmen early trigger:

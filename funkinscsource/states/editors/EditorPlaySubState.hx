@@ -377,16 +377,19 @@ class EditorPlaySubState extends MusicBeatSubstate
 		notes = new FlxTypedGroup<Note>();
 		add(notes);
 
-		var noteDatas: Array<ChartNoteData> = [];
+		var noteData:Array<SwagSection>;
 
-		for (section in songData.notes)
+		// NEW SHIT
+		noteData = songData.notes;
+
+		for (section in noteData)
 		{
-			for (i in 0...section.sectionNotes.length)
+			for (songNotes in section.sectionNotes)
 			{
-				final songNotes: Array<Dynamic> = section.sectionNotes[i];
-				if (songNotes[1] == -1)
-					continue;
+				var daStrumTime:Float = songNotes[0];
+				if(daStrumTime < startPos) continue;
 
+				var daNoteData:Int = Std.int(songNotes[1] % 4);
 				var gottaHitNote:Bool = section.mustHitSection;
 
 				if (songNotes[1] > 3 && !opponentMode)
@@ -394,115 +397,81 @@ class EditorPlaySubState extends MusicBeatSubstate
 				else if (songNotes[1] <= 3 && opponentMode)
 					gottaHitNote = !section.mustHitSection;
 
-				final leNoteData: ChartNoteData = {
-					time: songNotes[0],
-					id: Std.int(songNotes[1] % 4),
-					sLen: songNotes[2],
-					strumLine: gottaHitNote ? 1 : 0,
-					isGfNote: (section.gfSection && (songNotes[1]<4)),
-					type: songNotes[3],
-					skin: PlayState.SONG.arrowSkin,
-					dType: section.dType
-				};
-				if(!Std.isOfType(songNotes[3], String))
-					leNoteData.type = ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
+				var oldNote:Note = null;
+				if (unspawnNotes.length > 0) oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
+				var swagNote:Note = new Note(daStrumTime, daNoteData, oldNote, false, PlayState.SONG.arrowSkin);
+				swagNote.mustPress = gottaHitNote;
+				swagNote.sustainLength = songNotes[2];
+				swagNote.strumLine = gottaHitNote ? 1 : 0;
+				//swagNote.gfNote = (section.gfSection && (songNotes[1]<4));
+				swagNote.noteType = songNotes[3];
+				swagNote.dType = section.dType;
+				swagNote.containsPixelTexture = (swagNote.texture.contains('pixel') || swagNote.noteSkin.contains('pixel'));
+				swagNote.scrollFactor.set();
+				if(!Std.isOfType(songNotes[3], String)) swagNote.noteType = ChartingState.noteTypeList[songNotes[3]]; //Backward compatibility + compatibility with Week 7 charts
+				unspawnNotes.push(swagNote);
 
-				if (i != 0) {
-					// CLEAR ANY POSSIBLE JACKS
-					for (evilNoteData in noteDatas) {
-						if (evilNoteData.id == leNoteData.id // does its direction match?
-							&& evilNoteData.strumLine == leNoteData.strumLine // does it strumline match?
-							&& Math.abs(evilNoteData.time - leNoteData.time) < 1.0) { // is it in the same step?
-								evilNoteData.dispose();
-								noteDatas.remove(evilNoteData);
-								//continue;
-						}
-					}
-				}
-				noteDatas.push(leNoteData);
-			}
-		}
-		for (i in 0...noteDatas.length) {
-			var oldNote:Note = null;
-			if (unspawnNotes.length > 0) oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
-			var swagNote:Note = new Note(noteDatas[i].time, noteDatas[i].id, oldNote, false, noteDatas[i].skin);
-			swagNote.mustPress = noteDatas[i].strumLine == 1;
-			swagNote.sustainLength = noteDatas[i].sLen;
-			swagNote.strumLine = noteDatas[i].strumLine;
-			swagNote.gfNote = noteDatas[i].isGfNote;
-			swagNote.noteType = noteDatas[i].type;
-			swagNote.dType = noteDatas[i].dType;
-			swagNote.scrollFactor.set();
-			unspawnNotes.push(swagNote);
+				final susLength:Float = swagNote.sustainLength / Conductor.stepCrochet;
+				final floorSus:Int = Math.floor(susLength);
 
-			if (swagNote.texture.contains('pixel') || swagNote.noteSkin.contains('pixel')){
-				swagNote.containsPixelTexture = true;
-			}
-
-			unspawnNotes.push(swagNote);
-
-			final susLength:Float = swagNote.sustainLength / Conductor.stepCrochet;
-			final floorSus:Int = Math.floor(susLength);
-
-			if(floorSus != 0) {
-				for (susNote in 0...floorSus + 1)
-				{
-					oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
-
-					var sustainNote:Note = new Note(noteDatas[i].time + (Conductor.stepCrochet * susNote), noteDatas[i].id, oldNote, true, noteDatas[i].skin);
-					sustainNote.mustPress = swagNote.mustPress;
-					sustainNote.gfNote = swagNote.gfNote;
-					sustainNote.strumLine = swagNote.strumLine;
-					sustainNote.noteType = swagNote.noteType;
-					sustainNote.dType = noteDatas[i].dType;
-					sustainNote.scrollFactor.set();
-					sustainNote.parent = swagNote;
-					unspawnNotes.push(sustainNote);
-					swagNote.tail.push(sustainNote);
-					
-					var isNotePixel:Bool = (sustainNote.texture.contains('pixel') || sustainNote.noteSkin.contains('pixel') || oldNote.texture.contains('pixel') || oldNote.noteSkin.contains('pixel'));
-					if (isNotePixel) {
-						oldNote.containsPixelTexture = true;
-						sustainNote.containsPixelTexture = true;
-					}
-					sustainNote.correctionOffset = swagNote.height / 2;
-					if(!isNotePixel)
+				if(floorSus != 0) {
+					for (susNote in 0...floorSus + 1)
 					{
-						if(oldNote.isSustainNote)
+						oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
+
+						var sustainNote:Note = new Note(daStrumTime + (Conductor.stepCrochet * susNote), daNoteData, oldNote, true, PlayState.SONG.arrowSkin);
+						sustainNote.mustPress = gottaHitNote;
+						//sustainNote.gfNote = swagNote.gfNote;
+						sustainNote.strumLine = gottaHitNote ? 1 : 0;
+						sustainNote.noteType = swagNote.noteType;
+						sustainNote.dType = section.dType;
+						sustainNote.containsPixelTexture = (sustainNote.texture.contains('pixel') || sustainNote.noteSkin.contains('pixel') || oldNote.texture.contains('pixel') || oldNote.noteSkin.contains('pixel'));
+						sustainNote.scrollFactor.set();
+						sustainNote.parent = swagNote;
+						unspawnNotes.push(sustainNote);
+						swagNote.tail.push(sustainNote);
+						
+						var isNotePixel:Bool = (sustainNote.texture.contains('pixel') || sustainNote.noteSkin.contains('pixel') || oldNote.texture.contains('pixel') || oldNote.noteSkin.contains('pixel'));
+						oldNote.containsPixelTexture = isNotePixel;
+						sustainNote.correctionOffset = swagNote.height / 2;
+						if(!isNotePixel)
 						{
-							oldNote.scale.y *= Note.SUSTAIN_SIZE / oldNote.frameHeight;
+							if(oldNote.isSustainNote)
+							{
+								oldNote.scale.y *= Note.SUSTAIN_SIZE / oldNote.frameHeight;
+								oldNote.scale.y /= playbackRate;
+								oldNote.updateHitbox();
+							}
+
+							if(ClientPrefs.data.downScroll)
+								sustainNote.correctionOffset = 0;
+						}
+						else if(oldNote.isSustainNote)
+						{
 							oldNote.scale.y /= playbackRate;
 							oldNote.updateHitbox();
 						}
 
-						if(ClientPrefs.data.downScroll)
-							sustainNote.correctionOffset = 0;
-					}
-					else if(oldNote.isSustainNote)
-					{
-						oldNote.scale.y /= playbackRate;
-						oldNote.updateHitbox();
-					}
-
-					if (sustainNote.mustPress) sustainNote.x += FlxG.width / 2; // general offset
-					else if(ClientPrefs.data.middleScroll)
-					{
-						sustainNote.x += 310;
-						if(noteDatas[i].id > 1) //Up and Right
-							sustainNote.x += FlxG.width / 2 + 25;
+						if (sustainNote.mustPress) sustainNote.x += FlxG.width / 2; // general offset
+						else if(ClientPrefs.data.middleScroll)
+						{
+							sustainNote.x += 310;
+							if(daNoteData > 1) //Up and Right
+								sustainNote.x += FlxG.width / 2 + 25;
+						}
 					}
 				}
-			}
 
-			if (swagNote.mustPress)
-			{
-				swagNote.x += FlxG.width / 2; // general offset
-			}
-			else if(ClientPrefs.data.middleScroll)
-			{
-				swagNote.x += 310;
-				if(noteDatas[i].id > 1) //Up and Right
-					swagNote.x += FlxG.width / 2 + 25;
+				if (swagNote.mustPress)
+				{
+					swagNote.x += FlxG.width / 2; // general offset
+				}
+				else if(ClientPrefs.data.middleScroll)
+				{
+					swagNote.x += 310;
+					if(daNoteData > 1) //Up and Right
+						swagNote.x += FlxG.width / 2 + 25;
+				}
 			}
 		}
 
@@ -812,18 +781,33 @@ class EditorPlaySubState extends MusicBeatSubstate
 			FlxG.sound.play(Paths.sound('hitsounds/${ClientPrefs.data.hitSounds}'), ClientPrefs.data.hitsoundVolume).pitch = playbackRate;
 
 		// obtain notes that the player can hit
-		final plrInputNotes:Array<Note> = notes.members.filter(function(n:Note):Bool {
-			final noteIsHittable:Bool = n.canBeHit && n.mustPress && !n.tooLate && !n.wasGoodHit && !n.blockHit;
-			return n != null && noteIsHittable && !n.isSustainNote && n.noteData == key;
-		});
+		var plrInputNotes:Array<Note> = notes.members.filter(function(n:Note)
+			return n != null && n.canBeHit && n.mustPress && !n.tooLate &&
+			!n.wasGoodHit && !n.blockHit && !n.isSustainNote && n.noteData == key);
 
 		plrInputNotes.sort(PlayState.sortHitNotes);
 
 		var shouldMiss:Bool = !ClientPrefs.data.ghostTapping;
 
-		if (plrInputNotes.length != 0) { // nicer on the GPU usage than doing `> 0` lol
-			final funnyNote:Note = plrInputNotes[0]; // front note
-		
+		if (plrInputNotes.length != 0) { // slightly faster than doing `> 0` lol
+			var funnyNote:Note = plrInputNotes[0]; // front note
+			// trace('✡⚐🕆☼ 💣⚐💣');
+
+			if (plrInputNotes.length > 1) {
+				var doubleNote:Note = plrInputNotes[1];
+
+				if (doubleNote.noteData == funnyNote.noteData) {
+					// if the note has a 0ms distance (is on top of the current note), kill it
+					if (Math.abs(doubleNote.strumTime - funnyNote.strumTime) < 1.0)
+						invalidateNote(doubleNote);
+					else if (doubleNote.strumTime < funnyNote.strumTime)
+					{
+						// replace the note if its ahead of time (or at least ensure "doubleNote" is ahead)
+						funnyNote = doubleNote;
+					}
+				}
+			}
+
 			goodNoteHit(funnyNote);
 		}
 
@@ -880,15 +864,18 @@ class EditorPlaySubState extends MusicBeatSubstate
 					keyPressed(i);
 
 		if (notes.length > 0) {
-			final sustains: Array<Note> = notes.members.filter((n: Note) -> {
-				return n.canBeHit && n.mustPress && !n.tooLate && !n.blockHit;
-			});
-			for (sustainNote in sustains) {
-				var hit: Bool = true;
-				if (guitarHeroSustains) hit = sustainNote.parent != null && sustainNote.parent.wasGoodHit;
-				if (hit) {
-					final released:Bool = !holdArray[sustainNote.noteData];
-					if (!released) goodNoteHit(sustainNote);
+			for (n in notes) { // I can't do a filter here, that's kinda awesome
+				var canHit:Bool = (n != null && n.canBeHit && n.mustPress &&
+					!n.tooLate && !n.wasGoodHit && !n.blockHit);
+
+				if (guitarHeroSustains)
+					canHit = canHit && n.parent != null && n.parent.wasGoodHit;
+
+				if (canHit && n.isSustainNote) {
+					var released:Bool = !holdArray[n.noteData];
+					
+					if (!released)
+						goodNoteHit(n);
 				}
 			}
 		}

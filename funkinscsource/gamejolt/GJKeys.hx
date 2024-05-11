@@ -14,6 +14,6 @@ class GJKeys {
 	/** Your Game ID from GameJolt **/
 	public static var id:Int = 850631;
 
-	/** Your Game Private Key from GameJolt **/
-	public static var key:String = 'c53b51f82a7944411e4a230ac5590eea';
+	/** Your Game Private Key from GameJolt, If key is updated with this file, it will be changed to still be private. **/
+	public static var key:String = 'ff97f88d23ba21ef5b32a6f39ee5ede0';
 }

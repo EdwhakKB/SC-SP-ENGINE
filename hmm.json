@@ -11,16 +11,6 @@
       "version": null
     },
     {
-      "name": "flixel",
-      "type": "haxelib",
-      "version": null
-    },
-    {
-      "name": "flixel-addons",
-      "type": "haxelib",
-      "version": null
-    },
-    {
       "name": "flixel-tools",
       "type": "haxelib",
       "version": null
@@ -37,11 +27,6 @@
     },
     {
       "name": "hxCodec",
-      "type": "haxelib",
-      "version": null
-    },
-    {
-      "name": "SScript",
       "type": "haxelib",
       "version": null
     },
@@ -64,6 +49,50 @@
       "name": "hxvlc",
       "type": "haxelib",
       "version": null
+    },
+    {
+      "name": "SScript",
+      "type": "haxelib",
+      "version": null
+    },
+    {
+      "name": "markdown",
+      "type": "haxelib",
+      "version": null
+    },
+    {
+      "name": "format",
+      "type": "haxelib",
+      "version": null
+    },
+    {
+      "name": "haxeui-flixel",
+      "type": "haxelib",
+      "version": null
+    },
+    {
+      "name": "haxeui-core",
+      "type": "haxelib",
+      "version": null
+    },
+    {
+      "name": "hxgamejolt-api",
+      "type": "haxelib",
+      "version": null
+    },
+    {
+      "name": "flixel",
+      "type": "git",
+      "dir": null,
+      "ref": "Main-SCE",
+      "url": "https://github.com/glowsoony/flixel"
+    },
+    {
+      "name": "flixel-addons",
+      "type": "git",
+      "dir": null,
+      "ref": "dev",
+      "url": "https://github.com/glowsoony/flixel-addons"
     },
     {
       "name": "fnf-modcharting-tools",
@@ -92,20 +121,6 @@
       "dir": null,
       "ref": "master",
       "url": "https://github.com/superpowers04/linc_luajit"
-    },
-    {
-      "name": "tentools",
-      "type": "git",
-      "dir": null,
-      "ref": "main",
-      "url": "https://github.com/TentaRJ/tentools.git"
-    },
-    {
-      "name": "systools",
-      "type": "git",
-      "dir": null,
-      "ref": "master",
-      "url": "https://github.com/haya3218/systools"
     },
     {
       "name": "hscript-improved",

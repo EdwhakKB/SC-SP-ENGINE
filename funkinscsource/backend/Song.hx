@@ -67,31 +67,6 @@ typedef SwagSong =
 	var ?disableStartCaching:Bool;
 }
 
-//// "what"?
-//// a typedef with default values, basically. @crowplexus
-@:structInit class ChartNoteData {
-	public var time: Null<Float> = null;
-	public var id: Null<Int> = null;
-	public var type: Null<String> = null;
-	public var strumLine: Null<Int> = null;
-	public var isGfNote: Null<Bool> = null;
-	public var sLen: Null<Float> = null;
-	public var skin: Null<String> = null;
-	public var dType: Null<Int> = null;
-
-	public function dispose() {
-		// will be cleared by the GC later
-		time = null;
-		id = null;
-		type = null;
-		strumLine = null;
-		isGfNote = null;
-		sLen = null;
-		skin = null;
-		dType = null;
-	}
-}
-
 class Song
 {
 	public var song:String;

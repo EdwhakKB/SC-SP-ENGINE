@@ -29,7 +29,7 @@ import haxe.io.Path;
 #end
 
 //Other Things
-import gamejolt.GameJolt.GJToastManager;
+import gamejolt.GameJoltGroup.GJToastManager;
 import gamejolt.*;
 
 import states.TitleState;

@@ -585,7 +585,7 @@ class Note extends FunkinSCSprite
 		if ((texture.contains('pixel') || noteSkin.contains('pixel')) && !containsPixelTexture) containsPixelTexture = true;
 		super.update(elapsed);
 
-		if (this.animation.curAnim.name.endsWith('end')) isHoldEnd = true;
+		if (this.animation.curAnim != null && this.animation.curAnim.name.endsWith('end')) isHoldEnd = true;
 
 		if (mustPress)
 		{

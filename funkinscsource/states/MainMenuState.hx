@@ -332,7 +332,7 @@ class MainMenuState extends MusicBeatState
 				if (gameJoltButton.color != 0xB8F500) gameJoltButton.color = 0xB8F500;
 				if (FlxG.mouse.justPressed)
 				{
-					LoadingState.loadAndSwitchState(new gamejolt.GameJolt.GameJoltLogin());
+					LoadingState.loadAndSwitchState(new gamejolt.GameJoltGroup.GameJoltLogin());
 				}
 			}
 			else

@@ -1019,25 +1019,22 @@ class FunkinLua {
 			// others
 			set("triggerEventLegacy", function(name:String, arg1:Dynamic, arg2:Dynamic, ?arg3:Dynamic, arg4:Dynamic, ?arg5:Dynamic, ?arg6:Dynamic, ?arg7:Dynamic,
 				?arg8:Dynamic, ?arg9:Dynamic, ?arg10:Dynamic, ?arg11:Dynamic, ?arg12:Dynamic, ?arg13:Dynamic, ?arg14:Dynamic) {
-				var luaArgs:Array<Dynamic> = [];
-				if (arg1 != null) luaArgs.push(arg1);
-				if (arg2 != null) luaArgs.push(arg2);
-				if (arg3 != null) luaArgs.push(arg3);
-				if (arg4 != null) luaArgs.push(arg4);
-				if (arg5 != null) luaArgs.push(arg5);
-				if (arg6 != null) luaArgs.push(arg6);
-				if (arg7 != null) luaArgs.push(arg7);
-				if (arg8 != null) luaArgs.push(arg8);
-				if (arg9 != null) luaArgs.push(arg9);
-				if (arg10 != null) luaArgs.push(arg10);
-				if (arg11 != null) luaArgs.push(arg11);
-				if (arg12 != null) luaArgs.push(arg12);
-				if (arg13 != null) luaArgs.push(arg13);
-				if (arg14 != null) luaArgs.push(arg14);
-
-				var args:Array<String> = [];
-				for (i in 0...luaArgs.length) args.push(Std.string(luaArgs[i]));
-				game.triggerEvent(name, args, Conductor.songPosition);
+				var value1:String = arg1;
+				var value2:String = arg2;
+				var value3:String = arg3;
+				var value4:String = arg4;
+				var value5:String = arg5;
+				var value6:String = arg6;
+				var value7:String = arg7;
+				var value8:String = arg8;
+				var value9:String = arg9;
+				var value10:String = arg10;
+				var value11:String = arg11;
+				var value12:String = arg12;
+				var value13:String = arg13;
+				var value14:String = arg14;
+				game.triggerEventLegacy(name, value1, value2, Conductor.songPosition, value3, value4, value5, value6, value7, value8, 
+					value9, value10, value11, value12, value13, value14);
 				return true;
 			});
 
@@ -1045,6 +1042,7 @@ class FunkinLua {
 				var args:Array<String> = [];
 				for (i in 0...luaArgs.length) args.push(Std.string(luaArgs[i]));
 				game.triggerEvent(name, args, Conductor.songPosition);
+				return true;
 			});
 	
 			set("startCountdown", function() {
@@ -1333,7 +1331,7 @@ class FunkinLua {
 	
 			set("playActorAnimation", function(obj:String,anim:String,force:Bool = false, reverse:Bool = false, ?frame:Int = 0) {
 				var char:Character = LuaUtils.getObjectDirectly(obj);
-				
+
 				if (char != null && Std.isOfType(char, Character) && ClientPrefs.data.characters){ //what am I doing? of course it'll be a character
 					char.playAnim(anim, force, reverse, frame);
 					return;

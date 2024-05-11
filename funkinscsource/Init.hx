@@ -106,7 +106,7 @@ class Init extends FlxState
 		if (Main.checkGJKeysAndId())
 		{
 			GameJoltAPI.connect();
-			GameJoltAPI.authDaUser(ClientPrefs.data.gjUser, ClientPrefs.data.gjToken);
+			GameJoltAPI.authDaUser(ClientPrefs.data.gjUser, ClientPrefs.data.gjToken, true);
 		}
 
 		if (FlxG.save.data != null && FlxG.save.data.fullscreen) FlxG.fullscreen = FlxG.save.data.fullscreen;

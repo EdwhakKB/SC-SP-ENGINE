@@ -3,3 +3,4 @@
 * Overhaul ways of explaining about what things do.
 * Change many states and organize the source folder in a different way.
 * Remove almost all flixel-ui components and replace with HaxeUI.
+* Change almost all libs used to custom ones.

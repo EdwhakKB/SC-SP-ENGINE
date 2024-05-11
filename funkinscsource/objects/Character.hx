@@ -185,7 +185,7 @@ class Character extends FunkinSCSprite
 
 		skipDance = false;
 		hasMissAnimations = animOffsets.exists('singLEFTmiss') || animOffsets.exists('singDOWNmiss') || animOffsets.exists('singUPmiss') || animOffsets.exists('singRIGHTmiss');
-		isDancing = ((animation.getByName('danceLeft') != null && animation.getByName('danceRight') != null) && !isDancing);
+		isDancing = (animation.getByName('danceLeft') != null && animation.getByName('danceRight') != null);
 		doMissThing = (animation.getByName('singUPmiss') == null); // if for some reason you only have an up miss, why?
 
 		dance();
