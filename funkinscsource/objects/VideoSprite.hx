@@ -23,6 +23,8 @@ class VideoSprite extends FlxSpriteGroup {
 	public var waiting:Bool = false;
 	public var didPlay:Bool = false;
 
+	public var removeFromPlayState:Bool = true;
+
 	public function new(videoName:String, isWaiting:Bool, canSkip:Bool = false, shouldLoop:Dynamic = false) {
 		super();
 
@@ -99,7 +101,7 @@ class VideoSprite extends FlxSpriteGroup {
 			finishCallback();
 		onSkip = null;
 
-		PlayState.instance.remove(this);
+		if (PlayState.instance != null && removeFromPlayState) PlayState.instance.remove(this);
 		super.destroy();
 	}
 
