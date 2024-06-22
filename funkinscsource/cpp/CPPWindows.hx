@@ -19,9 +19,9 @@ package cpp;
 #end
 class CPPWindows
 {
-	#if cpp
-	#if windows
-	@:functionCode('
+  #if cpp
+  #if windows
+  @:functionCode('
         int darkMode = mode;
         HWND window = GetActiveWindow();
         if (S_OK != DwmSetWindowAttribute(window, 19, &darkMode, sizeof(darkMode))) {
@@ -29,41 +29,37 @@ class CPPWindows
         }
         UpdateWindow(window);
     ')
-	public static function _setWindowColorMode(mode:Int)
-	{
-	}
+  public static function _setWindowColorMode(mode:Int) {}
 
-	public static function setWindowColorMode(mode:WindowColorMode)
-	{
-		var darkMode:Int = cast(mode, Int);
+  public static function setWindowColorMode(mode:WindowColorMode)
+  {
+    var darkMode:Int = cast(mode, Int);
 
-		if (darkMode > 1 || darkMode < 0)
-		{
-			trace("WindowColorMode Not Found...");
+    if (darkMode > 1 || darkMode < 0)
+    {
+      trace("WindowColorMode Not Found...");
 
-			return;
-		}
+      return;
+    }
 
-		_setWindowColorMode(darkMode);
-	}
+    _setWindowColorMode(darkMode);
+  }
 
-	@:functionCode('
+  @:functionCode('
 	HWND window = GetActiveWindow();
 	SetWindowLong(window, GWL_EXSTYLE, GetWindowLong(window, GWL_EXSTYLE) ^ WS_EX_LAYERED);
 	')
-	@:noCompletion
-	public static function _setWindowLayered()
-	{
-	}
+  @:noCompletion
+  public static function _setWindowLayered() {}
 
-	@:functionCode('
+  @:functionCode('
         HWND window = GetActiveWindow();
 
 		float a = alpha;
 
 		if (alpha > 1) {
 			a = 1;
-		} 
+		}
 		if (alpha < 0) {
 			a = 0;
 		}
@@ -71,34 +67,33 @@ class CPPWindows
        	SetLayeredWindowAttributes(window, 0, (255 * (a * 100)) / 100, LWA_ALPHA);
 
     ')
-	/**
-	 * Set Whole Window's Opacity
-	 * ! MAKE SURE TO CALL _setWindowLayered(); BEFORE RUNNING THIS
-	 * @param alpha 
-	 */
-	public static function setWindowAlpha(alpha:Float)
-	{
-		return alpha;
-	}
+  /**
+   * Set Whole Window's Opacity
+   * ! MAKE SURE TO CALL _setWindowLayered(); BEFORE RUNNING THIS
+   * @param alpha
+   */
+  public static function setWindowAlpha(alpha:Float)
+  {
+    return alpha;
+  }
 
-	// ! https://github.com/brightfyregit/Indie-Cross-Public/blob/master/source/SpecsDetector.hx#L87-L102
-	public static function messageBox(msg:ConstCharStar = null, title:ConstCharStar = null, ?handler:Null<Int->Void>)
-	{
-		var msgID:Int = untyped MessageBox(null, msg, title, untyped __cpp__("MB_ICONERROR | MB_OK"));
+  // ! https://github.com/brightfyregit/Indie-Cross-Public/blob/master/source/SpecsDetector.hx#L87-L102
+  public static function messageBox(msg:ConstCharStar = null, title:ConstCharStar = null, ?handler:Null<Int->Void>)
+  {
+    var msgID:Int = untyped MessageBox(null, msg, title, untyped __cpp__("MB_ICONERROR | MB_OK"));
 
-		if (handler != null)
-			handler(msgID);
+    if (handler != null) handler(msgID);
 
-		return true;
-	}
-	#end
-	#end
+    return true;
+  }
+  #end
+  #end
 }
 
 #if windows
 enum abstract WindowColorMode(Int)
 {
-	var DARK:WindowColorMode = 1;
-	var LIGHT:WindowColorMode = 0;
+  var DARK:WindowColorMode = 1;
+  var LIGHT:WindowColorMode = 0;
 }
 #end

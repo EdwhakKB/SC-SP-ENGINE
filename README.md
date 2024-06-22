@@ -124,7 +124,7 @@ _____________________________________
   * Alt Animation: Forces an alt animation to play, useful for songs like Ugh/Stress
   * Hey: Forces a "Hey" animation instead of the base Sing animation, if Boyfriend hits this note, Girlfriend will do a "Hey!" too.
   * You can use gf and mom notes to make the second opponent or gf play animations!
-* You can now use up to 14 values for each event! 
+* You can now use up to 14 values for each event!
 
 ## Multiple editors to assist you in making your own Mod
 ![Screenshot_3](https://user-images.githubusercontent.com/44785097/144629914-1fe55999-2f18-4cc1-bc70-afe616d74ae5.png)

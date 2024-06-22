@@ -1,0 +1,41 @@
+{
+  "directory": "week7",
+  "defaultZoom": 0.8,
+  "isPixelStage": false,
+
+  "boyfriend": [810, 40],
+  "girlfriend": [200, 5],
+  "opponent": [20, 40],
+
+  "ratingSkin": ["", ""],
+  "countDownAssets": ["ready", "set", "go"],
+  "introSoundsSuffix": "",
+  "introSoundsPrefix": "",
+
+  "cameraXYMovement": [30, 30],
+
+  "preload": {
+    "images/tank0": 3,
+    "images/tank1": 2,
+    "images/tank2": 3,
+    "images/tank3": 2,
+    "images/tank4": 2,
+    "images/tank5": 3,
+    "images/tankClouds": 2,
+    "images/tankMountains": 2,
+    "images/tankBuildings": 2,
+    "images/smokeLeft": 2,
+    "images/smokeRight": 2,
+    "images/tankWatchtower": 2,
+    "images/tankGround": 3,
+    "images/tankRolling": 3,
+    "images/tankRuins": 3,
+    "images/tankSky": 3
+  },
+
+  "_editorMeta": {
+    "dad": "tankman",
+    "boyfriend": "bf",
+    "gf": "gf-tankmen"
+  }
+}

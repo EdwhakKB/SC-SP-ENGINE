@@ -30,7 +30,7 @@ class CreditsState extends MusicBeatState
 		bg.antialiasing = ClientPrefs.data.antialiasing;
 		add(bg);
 		bg.screenCenter();
-		
+
 		grpOptions = new FlxTypedGroup<Alphabet>();
 		add(grpOptions);
 
@@ -76,11 +76,11 @@ class CreditsState extends MusicBeatState
 			['Itz-Miles',			'miles', 			"Code for parallaxLT!",			 						 'https://github.com/Itz-Miles',		 'CC875E'],
 			['Haone', 				'', 				"Extra Function code for Chart editor.",				 'https://github.com/haoneRG',			 '879AD9']
 		];
-		
+
 		for(i in defaultList) {
 			creditsStuff.push(i);
 		}
-	
+
 		for (i in 0...creditsStuff.length)
 		{
 			var isSelectable:Bool = !unselectableCheck(i);
@@ -109,7 +109,7 @@ class CreditsState extends MusicBeatState
 				if(str.contains('pixel')) icon.antialiasing = false;
 				icon.xAdd = optionText.width + 10;
 				icon.sprTracker = optionText;
-	
+
 				// using a FlxGroup is too much fuss!
 				iconArray.push(icon);
 				add(icon);
@@ -119,7 +119,7 @@ class CreditsState extends MusicBeatState
 			}
 			else optionText.alignment = CENTERED;
 		}
-		
+
 		descBox = new AttachedSprite();
 		descBox.makeGraphic(1, 1, FlxColor.BLACK);
 		descBox.xAdd = -10;
@@ -197,7 +197,7 @@ class CreditsState extends MusicBeatState
 				quitting = true;
 			}
 		}
-		
+
 		for (item in grpOptions.members)
 		{
 			if(!item.bold)

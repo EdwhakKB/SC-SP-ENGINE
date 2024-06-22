@@ -1,124 +1,64 @@
 package substates;
 
 import flixel.FlxSubState;
+import backend.Conductor;
 
-class MusicBeatSubstate extends FlxSubState
+class MusicBeatSubState extends FlxSubState
 {
-	public function new()
-	{
-		super();
-	}
+  public function new()
+  {
+    super();
+  }
 
-	private var curSection:Int = 0;
-	private var stepsToDo:Int = 0;
+  public var conductorInUse(get, set):Conductor;
 
-	private var lastBeat:Float = 0;
-	private var lastStep:Float = 0;
+  var _conductorInUse:Null<Conductor>;
 
-	private var curStep:Int = 0;
-	private var curBeat:Int = 0;
+  function get_conductorInUse():Conductor
+  {
+    if (_conductorInUse == null) return Conductor.instance;
+    return _conductorInUse;
+  }
 
-	private var curDecStep:Float = 0;
-	private var curDecBeat:Float = 0;
-	private var controls(get, never):Controls;
+  function set_conductorInUse(value:Conductor):Conductor
+  {
+    return _conductorInUse = value;
+  }
 
-	inline function get_controls():Controls
-		return Controls.instance;
+  public var controls(get, never):Controls;
 
-	override function update(elapsed:Float)
-	{
-		//everyStep();
-		if(!persistentUpdate) MusicBeatState.timePassedOnState += elapsed;
-		var oldStep:Int = curStep;
+  inline function get_controls():Controls
+    return Controls.instance;
 
-		updateCurStep();
-		updateBeat();
+  override function create():Void
+  {
+    super.create();
+    Conductor.beatHit.add(this.beatHit);
+    Conductor.stepHit.add(this.stepHit);
+    Conductor.sectionHit.add(this.sectionHit);
+  }
 
-		if (oldStep != curStep)
-		{
-			if(curStep > 0)
-				stepHit();
+  public override function destroy():Void
+  {
+    super.destroy();
+    Conductor.beatHit.remove(this.beatHit);
+    Conductor.stepHit.remove(this.stepHit);
+    Conductor.sectionHit.remove(this.sectionHit);
+  }
 
-			if(PlayState.SONG != null)
-			{
-				if (oldStep < curStep)
-					updateSection();
-				else
-					rollbackSection();
-			}
-		}
+  override function update(elapsed:Float)
+  {
+    super.update(elapsed);
+  }
 
-		super.update(elapsed);
-	}
+  public function stepHit():Void {}
 
-	private function updateSection():Void
-	{
-		if(stepsToDo < 1) stepsToDo = Math.round(getBeatsOnSection() * 4);
-		while(curStep >= stepsToDo)
-		{
-			curSection++;
-			var beats:Float = getBeatsOnSection();
-			stepsToDo += Math.round(beats * 4);
-			sectionHit();
-		}
-	}
+  public function beatHit():Void {}
 
-	private function rollbackSection():Void
-	{
-		if(curStep < 0) return;
+  public function sectionHit():Void {}
 
-		var lastSection:Int = curSection;
-		curSection = 0;
-		stepsToDo = 0;
-		for (i in 0...PlayState.SONG.notes.length)
-		{
-			if (PlayState.SONG.notes[i] != null)
-			{
-				stepsToDo += Math.round(getBeatsOnSection() * 4);
-				if(stepsToDo > curStep) break;
-				
-				curSection++;
-			}
-		}
-
-		if(curSection > lastSection) sectionHit();
-	}
-
-	private function updateBeat():Void
-	{
-		curBeat = Math.floor(curStep / 4);
-		curDecBeat = curDecStep/4;
-	}
-
-	private function updateCurStep():Void
-	{
-		var lastChange = Conductor.getBPMFromSeconds(Conductor.songPosition);
-
-		var shit = ((Conductor.songPosition - ClientPrefs.data.noteOffset) - lastChange.songTime) / lastChange.stepCrochet;
-		curDecStep = lastChange.stepTime + shit;
-		curStep = lastChange.stepTime + Math.floor(shit);
-	}
-
-	public function stepHit():Void
-	{
-		if (curStep % 4 == 0)
-			beatHit();
-	}
-
-	public function beatHit():Void
-	{
-		//do literally nothing dumbass
-	}
-	
-	public function sectionHit():Void
-	{
-		//yep, you guessed it, nothing again, dumbass
-	}
-	
-	function getBeatsOnSection()
-	{
-		var val:Null<Float> = 4;
-		if(PlayState.SONG != null && PlayState.SONG.notes[curSection] != null) val = PlayState.SONG.notes[curSection].sectionBeats;
-		return val == null ? 4 : val;
-	}
+  public function refresh()
+  {
+    sort(utils.SortUtil.byZIndex, flixel.util.FlxSort.ASCENDING);
+  }
 }

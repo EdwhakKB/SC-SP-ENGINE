@@ -1,0 +1,76 @@
+{
+  "songData": {
+    "playData": {
+      "version": "2.2.2",
+      "songName": "Spookeez",
+      "songVariations": [],
+      "difficulties": ["erect", "nightmare"],
+      "characters": {
+        "player": "bf",
+        "girlfriend": "gf",
+        "opponent": "spooky",
+        "instrumental": "erect"
+      },
+      "stage": "spookyMansion",
+      "gameOverData": {
+        "gameOverChart": "bf-dead",
+        "gameOverSound": "fnf_loss_sfx",
+        "gameOverLoop": "gameOver",
+        "gameOverEnd": "gameOverEnd"
+      },
+      "options": {
+        "disableNoteRGB": false,
+        "disableNoteQuantRGB": false,
+        "disableStrumRGB": false,
+        "disableSplashRGB": false,
+        "disableHoldCoverRGB": false,
+        "disableHoldCover": false,
+        "disableCaching": false,
+        "notITG": false,
+        "usesHUD": false,
+        "oldBaSystem": false,
+        "rightScroll": false,
+        "middleScroll": false,
+        "blockOpponentMode": false,
+        "arrowSkin": null,
+        "splashSkin": "",
+        "holdCoverSkin": "",
+        "opponentNoteStyle": "",
+        "playerNoteStyle": "",
+        "vocalsPrefix": "",
+        "vocalsSuffix": "",
+        "instrumentalPrefix": "",
+        "instrumentalSuffix": ""
+      },
+      "ratings": {
+        "erect": 12,
+        "nightmare": 13
+      },
+      "timeChanges": [
+        {
+          "t": 0,
+          "b": 0,
+          "bpm": 166,
+          "n": 4,
+          "d": 4,
+          "bt": [4, 4, 4, 4]
+        }
+      ]
+    },
+    "inclusiveData": {
+      "artist": "Kawai Sprite (feat. Saruky)",
+      "charter": "SpazKid + fabs",
+      "divisions": 96,
+      "looped": false,
+      "offsets": {
+        "instrumental": 0,
+        "altInstrumentals": {},
+        "vocals": {}
+      },
+      "generatedBy": "Friday Night Funkin' - v0.3.0 (rewrite/master : f2e682d) PROTOTYPE",
+      "timeFormat": "ms",
+      "previewStart": 0,
+      "previewEnd": 0
+    }
+  }
+}

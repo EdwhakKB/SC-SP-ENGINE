@@ -2,29 +2,23 @@ package options;
 
 import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepadInputID;
-
 import objects.Character;
 
 class ModSettingsSubState extends BaseOptionsMenu
 {
-	var save:Map<String, Dynamic> = new Map<String, Dynamic>();
-	var folder:String;
-	private var _crashed:Bool = false;
-	public function new(options:Array<Dynamic>, folder:String, name:String)
-	{
-		this.folder = folder;
+  var save:Map<String, Dynamic> = new Map<String, Dynamic>();
+  var folder:String;
+  private var _crashed:Bool = false;
 
-		title = '';
-		//title = name;
-		rpcTitle = 'Mod Settings ($name)'; //for Discord Rich Presence
+  public function new(options:Array<Dynamic>, folder:String, name:String)
+  {
+    this.folder = folder;
 
-		if(FlxG.save.data.modSettings == null) FlxG.save.data.modSettings = new Map<String, Dynamic>();
-		else
-		{
-			var saveMap:Map<String, Dynamic> = FlxG.save.data.modSettings;
-			save = saveMap[folder] != null ? saveMap[folder] : [];
-		}
+    title = '';
+    // title = name;
+    rpcTitle = 'Mod Settings ($name)'; // for Discord Rich Presence
 
+<<<<<<< Updated upstream
 		//save = []; //reset for debug purposes
 		try
 		{
@@ -46,59 +40,91 @@ class ModSettingsSubState extends BaseOptionsMenu
 						var gamepadStr:String = option.gamepad;
 						if(keyboardStr == null) keyboardStr = 'NONE';
 						if(gamepadStr == null) gamepadStr = 'NONE';
+=======
+    if (FlxG.save.data.modSettings == null) FlxG.save.data.modSettings = new Map<String, Dynamic>();
+    else
+    {
+      var saveMap:Map<String, Dynamic> = FlxG.save.data.modSettings;
+      save = saveMap[folder] != null ? saveMap[folder] : [];
+    }
 
-						newOption.defaultKeys.keyboard = keyboardStr;
-						newOption.defaultKeys.gamepad = gamepadStr;
-						if(save.get(option.save) == null)
-						{
-							newOption.keys.keyboard = newOption.defaultKeys.keyboard;
-							newOption.keys.gamepad = newOption.defaultKeys.gamepad;
-							save.set(option.save, newOption.keys);
-						}
+    // save = []; //reset for debug purposes
+    try
+    {
+      for (option in options)
+      {
+        var newOption = new Option(option.name != null ? option.name : option.save,
+          option.description != null ? option.description : 'No description provided.', option.save, convertType(option.type), option.options);
+>>>>>>> Stashed changes
 
-						// getting inputs and checking
-						var keyboardKey:FlxKey = cast FlxKey.fromString(keyboardStr);
-						var gamepadKey:FlxGamepadInputID = cast FlxGamepadInputID.fromString(gamepadStr);
-						//trace('${keyboardStr}: $keyboardKey, ${gamepadStr}: $gamepadKey');
+        switch (newOption.type)
+        {
+          case KEYBIND:
+            // Defaulting and error checking
+            var keyboardStr:String = option.keyboard;
+            var gamepadStr:String = option.gamepad;
+            if (keyboardStr == null) keyboardStr = 'NONE';
+            if (gamepadStr == null) gamepadStr = 'NONE';
 
-						@:privateAccess
-						{
-							newOption.getValue = function() {
-								var data = save.get(newOption.variable);
-								if(data == null) return 'NONE';
-								return !Controls.instance.controllerMode ? data.keyboard : data.gamepad;
-							};
-							newOption.setValue = function(value:Dynamic) {
-								var data = save.get(newOption.variable);
-								if(data == null) data = {keyboard: 'NONE', gamepad: 'NONE'};
+            newOption.defaultKeys.keyboard = keyboardStr;
+            newOption.defaultKeys.gamepad = gamepadStr;
+            if (save.get(option.save) == null)
+            {
+              newOption.keys.keyboard = newOption.defaultKeys.keyboard;
+              newOption.keys.gamepad = newOption.defaultKeys.gamepad;
+              save.set(option.save, newOption.keys);
+            }
 
-								if(!controls.controllerMode) data.keyboard = value;
-								else data.gamepad = value;
-								save.set(newOption.variable, data);
-							};
-						}
+            // getting inputs and checking
+            var keyboardKey:FlxKey = cast FlxKey.fromString(keyboardStr);
+            var gamepadKey:FlxGamepadInputID = cast FlxGamepadInputID.fromString(gamepadStr);
+            // trace('${keyboardStr}: $keyboardKey, ${gamepadStr}: $gamepadKey');
 
-					default:
-						if(option.value != null)
-							newOption.defaultValue = option.value;
+            @:privateAccess
+            {
+              newOption.getValue = function() {
+                var data = save.get(newOption.variable);
+                if (data == null) return 'NONE';
+                return !Controls.instance.controllerMode ? data.keyboard : data.gamepad;
+              };
+              newOption.setValue = function(value:Dynamic) {
+                var data = save.get(newOption.variable);
+                if (data == null) data = {keyboard: 'NONE', gamepad: 'NONE'};
 
-						@:privateAccess
-						{
-							newOption.getValue = function() return save.get(newOption.variable);
-							newOption.setValue = function(value:Dynamic) save.set(newOption.variable, value);
-						}
-				}
+                if (!controls.controllerMode) data.keyboard = value;
+                else
+                  data.gamepad = value;
+                save.set(newOption.variable, data);
+              };
+            }
 
+          default:
+            if (option.value != null) newOption.defaultValue = option.value;
+
+<<<<<<< Updated upstream
 				if(option.type != 'keybind')
 				{
 					if(option.format != null) newOption.displayFormat = option.format;
 					if(option.min != null) newOption.minValue = option.min;
 					if(option.max != null) newOption.maxValue = option.max;
 					if(option.step != null) newOption.changeValue = option.step;
+=======
+            @:privateAccess
+            {
+              newOption.getValue = function() return save.get(newOption.variable);
+              newOption.setValue = function(value:Dynamic) save.set(newOption.variable, value);
+            }
+        }
+>>>>>>> Stashed changes
 
-					if(option.scroll != null) newOption.scrollSpeed = option.scroll;
-					if(option.decimals != null) newOption.decimals = option.decimals;
+        if (option.type != KEYBIND)
+        {
+          if (option.format != null) newOption.displayFormat = option.format;
+          if (option.min != null) newOption.minValue = option.min;
+          if (option.max != null) newOption.maxValue = option.max;
+          if (option.step != null) newOption.changeValue = option.step;
 
+<<<<<<< Updated upstream
 					var myValue:Dynamic = null;
 					if(save.get(option.save) != null)
 					{
@@ -137,14 +163,55 @@ class ModSettingsSubState extends BaseOptionsMenu
 			close();
 			return;
 		}
+=======
+          if (option.scroll != null) newOption.scrollSpeed = option.scroll;
+          if (option.decimals != null) newOption.decimals = option.decimals;
 
-		super();
+          var myValue:Dynamic = null;
+          if (save.get(option.save) != null)
+          {
+            myValue = save.get(option.save);
+            if (newOption.type != KEYBIND) newOption.setValue(myValue);
+            else
+              newOption.setValue(!Controls.instance.controllerMode ? myValue.keyboard : myValue.gamepad);
+          }
+          else
+          {
+            myValue = newOption.getValue();
+            if (myValue == null) myValue = newOption.defaultValue;
+          }
 
-		bg.alpha = 0.75;
-		bg.color = FlxColor.WHITE;
-		reloadCheckboxes();
-	}
+          switch (newOption.type)
+          {
+            case STRING:
+              var num:Int = newOption.options.indexOf(myValue);
+              if (num > -1) newOption.curOption = num;
+            default:
+          }
+>>>>>>> Stashed changes
 
+          save.set(option.save, myValue);
+        }
+        addOption(newOption);
+        // updateTextFrom(newOption);
+      }
+    }
+    catch (e:Dynamic)
+    {
+      var errorTitle = 'Mod name: ' + folder;
+      var errorMsg = 'An error occurred: $e';
+      #if windows
+      Debug.displayAlert(errorMsg, errorTitle);
+      #end
+      trace('$errorTitle - $errorMsg');
+      _crashed = true;
+      close();
+      return;
+    }
+
+    super();
+
+<<<<<<< Updated upstream
 	override public function update(elapsed:Float)
 	{
 		if(_crashed)
@@ -154,11 +221,48 @@ class ModSettingsSubState extends BaseOptionsMenu
 		}
 		super.update(elapsed);
 	}
+=======
+    bg.alpha = 0.75;
+    bg.color = FlxColor.WHITE;
+    reloadCheckboxes();
+  }
 
-	override public function close()
-	{
-		FlxG.save.data.modSettings.set(folder, save);
-		FlxG.save.flush();
-		super.close();
-	}
+  private function convertType(str:String):OptionType
+  {
+    switch (str.toLowerCase().trim())
+    {
+      case 'bool', 'boolean':
+        return BOOL;
+      case 'int', 'integer':
+        return INT;
+      case 'float', 'fl':
+        return FLOAT;
+      case 'percent', 'percentage':
+        return PERCENT;
+      case 'string', 'str':
+        return STRING;
+      case 'keybind', 'key':
+        return KEYBIND;
+    }
+    FlxG.log.error("Could not find option type: " + str);
+    return BOOL;
+  }
+>>>>>>> Stashed changes
+
+  override public function update(elapsed:Float)
+  {
+    if (_crashed)
+    {
+      close();
+      return;
+    }
+    super.update(elapsed);
+  }
+
+  override public function close()
+  {
+    FlxG.save.data.modSettings.set(folder, save);
+    FlxG.save.flush();
+    super.close();
+  }
 }

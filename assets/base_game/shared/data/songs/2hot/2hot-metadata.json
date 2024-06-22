@@ -1,0 +1,64 @@
+{
+  "songData": {
+    "playData": {
+      "songName": "2Hot",
+      "timeChanges": [
+        { "d": 4, "n": 4, "t": -1, "bt": [4, 4, 4, 4], "bpm": 182 }
+      ],
+      "version": "2.2.2",
+      "stage": "phillyStreets",
+      "characters": {
+        "player": "pico-playable",
+        "girlfriend": "nene",
+        "opponent": "darnell"
+      },
+      "songVariations": [],
+      "difficulties": ["easy", "normal", "hard"],
+      "ratings": {
+        "easy": 3,
+        "normal": 4,
+        "hard": 5
+      },
+      "gameOverData": {
+        "gameOverChart": "bf-dead",
+        "gameOverSound": "fnf_loss_sfx",
+        "gameOverLoop": "gameOver",
+        "gameOverEnd": "gameOverEnd"
+      },
+      "options": {
+        "disableNoteRGB": false,
+        "disableNoteQuantRGB": false,
+        "disableStrumRGB": false,
+        "disableSplashRGB": false,
+        "disableHoldCoverRGB": false,
+        "disableHoldCover": false,
+        "disableCaching": false,
+        "notITG": false,
+        "usesHUD": false,
+        "oldBaSystem": false,
+        "rightScroll": false,
+        "middleScroll": false,
+        "blockOpponentMode": false,
+        "arrowSkin": null,
+        "splashSkin": "",
+        "holdCoverSkin": "",
+        "opponentNoteStyle": "",
+        "playerNoteStyle": "",
+        "vocalsPrefix": "",
+        "vocalsSuffix": "",
+        "instrumentalPrefix": "",
+        "instrumentalSuffix": ""
+      }
+    },
+    "inclusiveData": {
+      "generatedBy": "Chart Editor Import (FNF Legacy)",
+      "looped": false,
+      "artist": "Kawai Sprite",
+      "charter": "Jenny Crowe + Spazkid + ninjamuffin99",
+      "timeFormat": "ms",
+      "album": "volume3",
+      "previewStart": 0,
+      "previewEnd": 15000
+    }
+  }
+}

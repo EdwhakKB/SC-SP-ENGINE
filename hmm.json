@@ -38,7 +38,7 @@
       "version": null
     },
     {
-      "name": "hxCodec",
+      "name": "hxvlc",
       "type": "haxelib",
       "version": null
     },
@@ -63,7 +63,45 @@
       "version": null
     },
     {
+<<<<<<< Updated upstream
       "name": "modchartingTools",
+=======
+      "name": "SScript",
+      "type": "haxelib",
+      "version": "8.1.6"
+    },
+    {
+      "name": "markdown",
+      "type": "haxelib",
+      "version": null
+    },
+    {
+      "name": "format",
+      "type": "haxelib",
+      "version": null
+    },
+    {
+      "name": "hxgamejolt-api",
+      "type": "haxelib",
+      "version": null
+    },
+    {
+      "name": "flixel",
+      "type": "git",
+      "dir": null,
+      "ref": "Main-SCE",
+      "url": "https://github.com/glowsoony/flixel"
+    },
+    {
+      "name": "flixel-addons",
+      "type": "git",
+      "dir": null,
+      "ref": "dev",
+      "url": "https://github.com/glowsoony/flixel-addons"
+    },
+    {
+      "name": "fnf-modcharting-tools",
+>>>>>>> Stashed changes
       "type": "git",
       "dir": null,
       "ref": "main",
@@ -94,6 +132,7 @@
       "name": "tentools",
       "type": "git",
       "dir": null,
+<<<<<<< Updated upstream
       "ref": "main",
       "url": "https://github.com/TentaRJ/tentools.git"
     },
@@ -103,6 +142,66 @@
       "dir": null,
       "ref": "master",
       "url": "https://github.com/haya3218/systools"
+=======
+      "ref": "custom-classes",
+      "url": "https://github.com/FNF-CNE-Devs/hscript-improved"
+    },
+    {
+      "name": "haxeui-core",
+      "type": "git",
+      "dir": null,
+      "ref": "0212d8fdfcafeb5f0d5a41e1ddba8ff21d0e183b",
+      "url": "https://github.com/haxeui/haxeui-core"
+    },
+    {
+      "name": "haxeui-flixel",
+      "type": "git",
+      "dir": null,
+      "ref": "63a906a6148958dbfde8c7b48d90b0693767fd95",
+      "url": "https://github.com/haxeui/haxeui-flixel"
+    },
+    {
+      "name": "json2object",
+      "type": "git",
+      "dir": null,
+      "ref": "a8c26f18463c98da32f744c214fe02273e1823fa",
+      "url": "https://github.com/FunkinCrew/json2object"
+    },
+    {
+      "name": "thx.core",
+      "type": "git",
+      "dir": null,
+      "ref": "22605ff44f01971d599641790d6bae4869f7d9f4",
+      "url": "https://github.com/FunkinCrew/thx.core"
+    },
+    {
+      "name": "thx.semver",
+      "type": "git",
+      "dir": null,
+      "ref": "cf8d213589a2c7ce4a59b0fdba9e8ff36bc029fa",
+      "url": "https://github.com/FunkinCrew/thx.semver"
+    },
+    {
+      "name": "funk.vis",
+      "type": "git",
+      "dir": null,
+      "ref": "38261833590773cb1de34ac5d11e0825696fc340",
+      "url": "https://github.com/FunkinCrew/funkVis"
+    },
+    {
+      "name": "grig.audio",
+      "type": "git",
+      "dir": "src",
+      "ref": "57f5d47f2533fd0c3dcd025a86cb86c0dfa0b6d2",
+      "url": "https://gitlab.com/haxe-grig/grig.audio.git"
+    },
+    {
+      "name": "FlxPartialSound",
+      "type": "git",
+      "dir": null,
+      "ref": "f986332ba5ab02abd386ce662578baf04904604a",
+      "url": "https://github.com/FunkinCrew/FlxPartialSound.git"
+>>>>>>> Stashed changes
     }
   ]
 }

@@ -29,8 +29,13 @@ class FlxAnimateFunctions
 			var spr:FlxAnimate = PlayState.instance.variables.get(tag);
 			if(spr != null) Paths.loadAnimateAtlas(spr, folderOrImg, spriteJson, animationJson);
 		});
+<<<<<<< Updated upstream
 		
 		Lua_helper.add_callback(lua, "addAnimationBySymbol", function(tag:String, name:String, symbol:String, ?framerate:Float = 24, ?loop:Bool = false, ?matX:Float = 0, ?matY:Float = 0)
+=======
+
+		funk.set("addAnimationBySymbol", function(tag:String, name:String, symbol:String, ?framerate:Float = 24, ?loop:Bool = false, ?matX:Float = 0, ?matY:Float = 0)
+>>>>>>> Stashed changes
 		{
 			var obj:Dynamic = PlayState.instance.variables.get(tag);
 			if(cast (obj, FlxAnimate) == null) return false;

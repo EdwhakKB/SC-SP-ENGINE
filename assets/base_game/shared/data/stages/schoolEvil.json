@@ -1,0 +1,39 @@
+{
+	"directory": "week6",
+	"defaultZoom": 1.05,
+	"isPixelStage": true,
+
+	"boyfriend": [970, 320],
+	"girlfriend": [580, 430],
+	"opponent": [100, 100],
+
+	"hide_girlfriend": false,
+
+	"camera_boyfriend": [-100, -100],
+	"camera_opponent": [0, 0],
+	"camera_girlfriend": [0, 0],
+	"camera_speed": 1,
+
+	"ratingSkin": ["pixelUI/", "-pixel"],
+	"countDownAssets": ["pixelUI/ready-pixel", "pixelUI/set-pixel", "pixelUI/date-pixel"],
+	"introSoundsSuffix": "-pixel",
+	"introSoundsPrefix": "",
+
+<<<<<<< Updated upstream:assets/shared/stages/schoolEvil.json
+	"cameraXYMovement": [20, 30]
+=======
+	"cameraXYMovement": [20, 30],
+
+	"preload": {
+		"images/weeb/animatedEvilSchool_low": 1,
+		"images/weeb/animatedEvilSchool": 2,
+		"images/weeb/bgGhouls": 2
+	},
+
+	"_editorMeta": {
+		"dad": "spirit",
+		"boyfriend": "bf-pixel",
+		"gf": "gf-pixel"
+	}
+>>>>>>> Stashed changes:assets/base_game/shared/data/stages/schoolEvil.json
+}

@@ -25,7 +25,7 @@
 		'songName', "String", "Song Id", "Song's name", --Grabs PlayState.SONG.songId;
 		'songPath', "String", "Song's path", "Song's formatted path", --Grabs Paths.formatToSongPath(PlayState.SONG.songId);
 		'startedCountDown', "Boolean", "false", "if count down has started",
-		'curStage', "String", "stage", "PlayState's SONG Stage", --Grabs PlayState.SONG.stage;
+		'curStage', "String", "mainStage", "PlayState's SONG Stage", --Grabs PlayState.SONG.stage;
 
 		'isStoryMode', "Boolean", "false", "PlayState is in storyMode", --Grabs PlayState.isStoryMode;
 		'difficulty', "Int", "0", "PlayState's story difficulty", --Grabs PlayState.storyDifficutly;
@@ -103,7 +103,7 @@
 	end
 
 --Default character
-	local characterPos = { 
+	local characterPos = {
 		'defaultBoyfriendX', "Float", "770", "Default boyfriend X pos", --Grabs game.BF_X;
 		'defaultBoyfriendY', "Float", "450", "Default boyfriend Y pos", --Grabs game.BF_Y;
 		'defaultOpponentX', "Float", "100", "Default opponent X pos", --Grabs game.DAD_X;
@@ -154,7 +154,7 @@
 
 --Some more song stuff
 	local songStuff = {
-		'songPos', "Float", "0", "The current song pos", --Grabs Conductor.songPosition
+		'songPos', "Float", "0", "The current song pos", --Grabs Conductor.instance.songPosition
 		'hudZoom', "Float", "1", "The hud's zoom", --Grabs game.camHUD.zoom;
 		'cameraZoom', "Float", "1", "The camera's zoom", --Grabs FlxG.camera.zoom;
 		'buildTarget', "String", "", "The main target for building" --Grabs getBuildTarget();
@@ -333,9 +333,7 @@ makeAnimatedLuaSprite(tag, image, x, y, spriteType)
 
 --makeParallaxSprite(tag, image, x, y)  if you have parallax use it! (Versions 4.11.0 flixel && flixel > "5.2.0")
 
---flxateParallaxSprite(obj, anchorX, anchorY, scrollOneX, scrollOneY, scrollTwoX, scrollTwoY, direct) if you have parallax use it! (Versions 4.11.0 flixel && flixel > "5.2.0")
-
-makeLuaSkewedSprite(tag, image, x, y, skewX, skewY)
+--flxateParallaxSprite(obj, anchorX, anchorY, scrollOneX, scrollOneY, scrollTwoX, scrollTwoY, direct) if you have parallax use it! (Versions 4.11.0 flixel && flixel > "5.2.0"
 
 makeGraphic(obj, width, height, color)
 
@@ -741,6 +739,7 @@ changeNotes2(style, character, postfix)
 changeIndividualNotes(style, i, postfix)
 
 playStrumAnim(isDad, id, time)
+<<<<<<< Updated upstream
 
 setActorWaveCircleShader(id, speed, frequency, amplitude)
 
@@ -777,3 +776,5 @@ getCustomShaderProperty(id, property)
 setCustomShaderProperty(id, property, value)
 
 tweenCustomShaderProperty(shaderName, prop, value, time, easeStr)
+=======
+>>>>>>> Stashed changes

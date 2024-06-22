@@ -1,0 +1,36 @@
+{
+  "directory": "",
+  "defaultZoom": 0.75,
+  "isPixelStage": false,
+
+  "boyfriend": [950, 110],
+  "girlfriend": [420, 100],
+  "opponent": [160, 100],
+
+  "hide_girlfriend": false,
+
+  "camera_boyfriend": [-145, -40],
+  "camera_opponent": [0, 0],
+  "camera_girlfriend": [0, 0],
+  "camera_speed": 1,
+
+  "ratingSkin": ["", ""],
+  "countDownAssets": ["ready", "set", "go"],
+  "introSoundsSuffix": "",
+  "introSoundsPrefix": "",
+
+  "cameraXYMovement": [50, 60],
+
+  "preload": {
+    "images/stageback": 3,
+    "images/stagefront": 3,
+    "images/stagecurtains": 2,
+    "images/stage_light": 2
+  },
+
+  "_editorMeta": {
+    "dad": "dad",
+    "boyfriend": "bf",
+    "gf": "gf"
+  }
+}

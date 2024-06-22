@@ -1,7 +1,6 @@
 {
-	"name": "Name",
-	"description": "Description",
+	"name": "Mod Name",
+	"description": "Mod description",
 	"restart":false,
-	"runsGlobally": false,
 	"color": [170, 0, 255]
 }

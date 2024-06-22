@@ -41,6 +41,32 @@ function sectionHit()
 	--triggered 1 time per section (16 steps or 4 beats)
 end
 
+--for stage scripts
+function stageStepHit()
+	-- triggered 4 times per section
+end
+
+function stageBeatHit()
+	-- triggered 16 times per section
+end
+
+function stageSectionHit()
+	--triggered 1 time per section (16 steps or 4 beats)
+end
+
+
+function onStageStepHit()
+	-- triggered 4 times per section
+end
+
+function onStageBeatHit()
+	-- triggered 16 times per section
+end
+
+function onStageSectionHit()
+	--triggered 1 time per section (16 steps or 4 beats)
+end
+
 function onUpdate(elapsed)
 	-- start of "update", some variables weren't updated yet
 end
@@ -129,7 +155,7 @@ end
 -- Note miss/hit
 function goodNoteHit(id, direction, noteType, isSustainNote)
 	-- Function called when you hit a note (***before*** note hit calculations)
-	-- id: The note member id, you can get whatever variable you want from this note, example: "getPropertyFromGroup('notes', id, 'strumTime')"
+	-- id: The note member id, you can get whatever variable you want from this note, example: "getPropertyFromGroup('notes', id, 'time')"
 	-- noteData: 0 = Left, 1 = Down, 2 = Up, 3 = Right
 	-- noteType: The note type string/tag
 	-- isSustainNote: If it's a hold note, can be either true or false
@@ -168,14 +194,22 @@ end
 
 -- There are 14 values for each not 2 anymore!
 -- Event notes hooks
+<<<<<<< Updated upstream
 function onEvent(name, value1, value2)
+=======
+function onEvent(name, eventParams, eventTime)
+>>>>>>> Stashed changes
 	-- event note triggered
 	-- triggerEvent() does not call this function!!
 
 	-- print('Event triggered: ', name, value1, value2);
 end
 
+<<<<<<< Updated upstream
 function eventEarlyTrigger(name)
+=======
+function eventEarlyTrigger(name, eventParams, eventTime)
+>>>>>>> Stashed changes
 	--[[
 	Here's a port of the Kill Henchmen early trigger but on Lua instead of Haxe:
 
@@ -188,7 +222,38 @@ function eventEarlyTrigger(name)
 	-- write your shit under this line, the new return value will override the ones hardcoded on the engine
 end
 
+<<<<<<< Updated upstream
 function onEventPushed(name)
+=======
+function onEventPushed(name, eventParams, eventTime)
+	-- Works like a preloader for events such for "Change Character"
+end
+
+--Added the values 1-14 like (name, value1, value2, etc..)
+function onEventLegacy(name, etc, eventTime)
+	-- event note triggered
+	-- triggerEventLegacy() calls this function!!
+
+	-- print('Event triggered: ', name, eventParams);
+end
+
+--Added the values 1-14 like (name, value1, value2, etc..)
+function eventEarlyTriggerLegacy(name, etc, eventTime)
+	--[[
+	Here's a port of the Kill Henchmen early trigger but on Lua instead of Haxe:
+
+	if name == 'Kill Henchmen'
+		return 280;
+
+	This makes the "Kill Henchmen" event be triggered 280 miliseconds earlier so that the kill sound is perfectly timed with the song
+	]]--
+
+	-- write your shit under this line, the new return value will override the ones hardcoded on the engine
+end
+
+--Added the values 1-14 like (name, value1, value2, etc..)
+function onEventPushedLegacy(name, etc, eventTime)
+>>>>>>> Stashed changes
 	-- Works like a preloader for events such for "Change Character"
 end
 
@@ -205,6 +270,12 @@ end
 
 --SCE extra Doc functions or Functions not mentioned originally
 function onStrumNote(membersIndex, playerNumber, ID)
+	--membersIndex of the strums
+	--plyaerNumber of what strum number "playerNumber ? 0 : 1" -- haxe form
+	--ID number ID of strum as in noteData
+end
+
+function onSpawnNotePost(membersIndex, playerNumber, ID)
 	--membersIndex of the strums
 	--plyaerNumber of what strum number "playerNumber ? 0 : 1" -- haxe form
 	--ID number ID of strum as in noteData
@@ -248,16 +319,6 @@ end
 
 function onMoveCamera(character)
 	--On Character Bro
-end
-
-function onCameraMovement(char, usesNoteData, isOP, isGF, note, intensity1, intensity2)
-	--Char = character 
-	--usesNoteData is the character null with frames / has not frames so uses notes to move camera
-	--isOP = is Dad the character
-	--isGF = is the character GF
-	--note = noteData
-	--intensity1 = the first intensity used for XY of the cameraFollow
-	--intensity2 - the second intensity used for XY of the cameraFollow 
 end
 
 function onGhostTap(key)

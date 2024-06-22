@@ -1,59 +1,45 @@
 package substates;
 
 import flixel.FlxSubState;
-
 import shaders.IndieDiamondTransShader;
 
-class IndieDiamondTransSubState extends MusicBeatSubstate
+class IndieDiamondTransSubState extends MusicBeatSubState
 {
-    public static var finishCallback:Void->Void;
-    private var tween:FlxTween = null;
-    var shader:IndieDiamondTransShader;
+  public static var finishCallback:Void->Void;
 
-    var fadeInState:Bool = true;
+  private var tween:FlxTween = null;
+  var shader:IndieDiamondTransShader;
 
-    var rect:FlxSprite;
-    public static var placedZoom:Float;
-    public static var divideZoom:Bool = true; //Divide = true, multiple = false
+  var fadeInState:Bool = true;
 
-    var duration:Float;
-	public function new(duration:Float, fadeInState:Bool, zoom:Float)
-	{
-		this.duration = duration;
-		this.fadeInState = fadeInState;
-        if (placedZoom > 0)
-            placedZoom = zoom;
-        super();
-    }
+  var rect:FlxSprite;
 
-    var cameraTrans:FlxCamera = null;
+  public static var placedZoom:Float;
+  public static var divideZoom:Bool = true; // Divide = true, multiple = false
 
-    override public function create()
-    {
-        cameraTrans = new FlxCamera();
-        cameraTrans.bgColor.alpha = 0;
+  var duration:Float;
 
-        FlxG.cameras.add(cameraTrans, false);
+  public function new(duration:Float, fadeInState:Bool, zoom:Float)
+  {
+    this.duration = duration;
+    this.fadeInState = fadeInState;
+    if (placedZoom > 0) placedZoom = zoom;
+    super();
+  }
 
-		var width:Int = divideZoom ? Std.int(FlxG.width / Math.max(camera.zoom, 0.001)) : Std.int(FlxG.width * Math.max(camera.zoom, 0.001));
-		var height:Int = divideZoom ? Std.int(FlxG.height / Math.max(camera.zoom, 0.001)) : Std.int(FlxG.width * Math.max(camera.zoom, 0.001));
+  var cameraTrans:FlxCamera = null;
 
-        shader = new IndieDiamondTransShader();
+  override public function create()
+  {
+    cameraTrans = new FlxCamera();
+    cameraTrans.bgColor.alpha = 0;
 
-        shader.progress.value = [0.0];
-        shader.reverse.value = [false];
+    FlxG.cameras.add(cameraTrans, false);
 
-        rect = new FlxSprite(0, 0);
-        rect.makeGraphic(1, 1, 0xFF000000);
-        rect.scale.set(width + 400, height + 400);
-        rect.scrollFactor.set();
-        rect.shader = shader;
-        rect.visible = false;
-        rect.cameras = [cameraTrans];
-        rect.updateHitbox();
-        rect.screenCenter(X);
-        add(rect);
+    var width:Int = divideZoom ? Std.int(FlxG.width / Math.max(camera.zoom, 0.001)) : Std.int(FlxG.width * Math.max(camera.zoom, 0.001));
+    var height:Int = divideZoom ? Std.int(FlxG.height / Math.max(camera.zoom, 0.001)) : Std.int(FlxG.width * Math.max(camera.zoom, 0.001));
 
+<<<<<<< Updated upstream
         rect.visible = true;
         shader.progress.value = [0.0];
         shader.reverse.value = [fadeInState ? true : false];
@@ -72,22 +58,63 @@ class IndieDiamondTransSubState extends MusicBeatSubstate
         {
             shader.progress.value = [num];
         });
+=======
+    shader = new IndieDiamondTransShader();
+>>>>>>> Stashed changes
 
-        super.create();
+    shader.progress.value = [0.0];
+    shader.reverse.value = [false];
 
-        cameras = [cameraTrans];
-    }
+    rect = new FlxSprite(0, 0);
+    rect.makeGraphic(1, 1, 0xFF000000);
+    rect.scale.set(width + 400, height + 400);
+    rect.scrollFactor.set();
+    rect.shader = shader;
+    rect.visible = false;
+    rect.cameras = [cameraTrans];
+    rect.updateHitbox();
+    rect.screenCenter(X);
+    add(rect);
 
-    override function update(elapsed:Float) {
-		super.update(elapsed);
-	}
-    
-    override function destroy()
-    {
-        if (tween != null)
-        {
-            tween.cancel();
+    rect.visible = true;
+    shader.progress.value = [0.0];
+    shader.reverse.value = [fadeInState ? true : false];
+
+    tween = FlxTween.num(0.0, 1.0, duration,
+      {
+        ease: FlxEase.linear,
+        onComplete: function(_) {
+          new FlxTimer().start(duration, function(twn:FlxTimer) {
+            if (fadeInState) close();
+            else
+            {
+              if (finishCallback != null)
+              {
+                finishCallback();
+              }
+            }
+          });
         }
-        super.destroy();
+      }, function(num:Float) {
+        shader.progress.value = [num];
+      });
+
+    super.create();
+
+    cameras = [cameraTrans];
+  }
+
+  override function update(elapsed:Float)
+  {
+    super.update(elapsed);
+  }
+
+  override function destroy()
+  {
+    if (tween != null)
+    {
+      tween.cancel();
     }
+    super.destroy();
+  }
 }

@@ -1,0 +1,34 @@
+{
+  "directory": "week2",
+  "defaultZoom": 1.05,
+  "isPixelStage": false,
+
+  "boyfriend": [770, 100],
+  "girlfriend": [400, 130],
+  "opponent": [100, 100],
+
+  "hide_girlfriend": false,
+
+  "camera_boyfriend": [-40, -20],
+  "camera_opponent": [0, 0],
+  "camera_girlfriend": [0, 0],
+  "camera_speed": 1,
+
+  "ratingSkin": ["", ""],
+  "countDownAssets": ["ready", "set", "go"],
+  "introSoundsSuffix": "",
+  "introSoundsPrefix": "",
+
+  "cameraXYMovement": [40, 40],
+
+  "preload": {
+    "images/halloween_bg": 2,
+    "images/halloween_bg_low": 1
+  },
+
+  "_editorMeta": {
+    "dad": "spooky",
+    "boyfriend": "bf",
+    "gf": "gf"
+  }
+}

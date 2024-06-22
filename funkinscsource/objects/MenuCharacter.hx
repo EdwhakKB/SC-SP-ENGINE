@@ -3,6 +3,7 @@ package objects;
 import openfl.utils.Assets;
 import tjson.TJSON as Json;
 
+<<<<<<< Updated upstream
 typedef MenuCharacterFile = {
 	var image:String;
 	var scale:Float;
@@ -10,33 +11,48 @@ typedef MenuCharacterFile = {
 	var idle_anim:String;
 	var confirm_anim:String;
 	var flipX:Bool;
+=======
+typedef MenuCharacterFile =
+{
+  var image:String;
+  var scale:Float;
+  var position:Array<Int>;
+  var idle_anim:String;
+  var confirm_anim:String;
+  var flipX:Bool;
+  var antialiasing:Null<Bool>;
+>>>>>>> Stashed changes
 }
 
 class MenuCharacter extends FlxSprite
 {
-	public var character:String;
-	public var hasConfirmAnimation:Bool = false;
-	private static var DEFAULT_CHARACTER:String = 'bf';
+  public var character:String;
+  public var hasConfirmAnimation:Bool = false;
 
-	public function new(x:Float, character:String = 'bf')
-	{
-		super(x);
+  private static var DEFAULT_CHARACTER:String = 'bf';
 
+<<<<<<< Updated upstream
 		antialiasing = ClientPrefs.data.antialiasing;
 		changeCharacter(character);
 	}
+=======
+  public function new(x:Float, character:String = 'bf')
+  {
+    super(x);
+>>>>>>> Stashed changes
 
-	public function changeCharacter(?character:String = 'bf') {
-		if(character == null) character = '';
-		if(character == this.character) return;
+    changeCharacter(character);
+  }
 
-		this.character = character;
-		visible = true;
+  public function changeCharacter(?character:String = 'bf')
+  {
+    if (character == null) character = '';
+    if (character == this.character) return;
 
-		var dontPlayAnim:Bool = false;
-		scale.set(1, 1);
-		updateHitbox();
+    this.character = character;
+    visible = true;
 
+<<<<<<< Updated upstream
 		hasConfirmAnimation = false;
 		switch(character) {
 			case '':
@@ -87,4 +103,73 @@ class MenuCharacter extends FlxSprite
 				animation.play('idle');
 		}
 	}
+=======
+    var dontPlayAnim:Bool = false;
+    scale.set(1, 1);
+    updateHitbox();
+
+    color = FlxColor.WHITE;
+    alpha = 1;
+
+    hasConfirmAnimation = false;
+    switch (character)
+    {
+      case '':
+        visible = false;
+        dontPlayAnim = true;
+      default:
+        var characterPath:String = 'images/menucharacters/' + character + '.json';
+
+        var path:String = Paths.getPath(characterPath, TEXT);
+
+        #if MODS_ALLOWED
+        if (!FileSystem.exists(path))
+        #else
+        if (!Assets.exists(path))
+        #end
+        {
+          path = Paths.getSharedPath('data/characters/' + DEFAULT_CHARACTER +
+            '.json'); // If a character couldn't be found, change him to BF just to prevent a crash
+          color = FlxColor.BLACK;
+          alpha = 0.6;
+        }
+
+        var charFile:MenuCharacterFile = null;
+        try
+        {
+          #if MODS_ALLOWED
+          charFile = Json.parse(File.getContent(path));
+          #else
+          charFile = Json.parse(Assets.getText(path));
+          #end
+        }
+        catch (e:Dynamic)
+        {
+          Debug.logInfo('Error loading menu character file of "$character": $e');
+        }
+
+        frames = Paths.getSparrowAtlas('menucharacters/' + charFile.image);
+        animation.addByPrefix('idle', charFile.idle_anim, 24);
+
+        var confirmAnim:String = charFile.confirm_anim;
+        if (confirmAnim != null && confirmAnim.length > 0 && confirmAnim != charFile.idle_anim)
+        {
+          animation.addByPrefix('confirm', confirmAnim, 24, false);
+          if (animation.getByName('confirm') != null) // check for invalid animation
+            hasConfirmAnimation = true;
+        }
+        flipX = (charFile.flipX == true);
+
+        if (charFile.scale != 1)
+        {
+          scale.set(charFile.scale, charFile.scale);
+          updateHitbox();
+        }
+        offset.set(charFile.position[0], charFile.position[1]);
+        animation.play('idle');
+
+        antialiasing = (charFile.antialiasing != false && ClientPrefs.data.antialiasing);
+    }
+  }
+>>>>>>> Stashed changes
 }

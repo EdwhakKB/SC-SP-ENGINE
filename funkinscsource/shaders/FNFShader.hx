@@ -6,11 +6,11 @@ import flixel.addons.display.FlxRuntimeShader;
 
 class FNFShader #if (!flash && sys) extends FlxRuntimeShader #end
 {
-	public var name = null;
+  public var name = null;
 
-	public function new(name:String, frag:String, vertex:String)
-	{
-		super(frag, vertex);
-		this.name = name;
-	}
+  public function new(name:String, frag:String, vertex:String)
+  {
+    super(frag, vertex);
+    this.name = name;
+  }
 }

@@ -1,0 +1,64 @@
+{
+  "songData": {
+    "playData": {
+      "version": "2.2.2",
+      "songName": "Darnell",
+      "songVariations": [],
+      "difficulties": ["easy", "normal", "hard"],
+      "characters": {
+        "player": "pico-playable",
+        "girlfriend": "nene",
+        "opponent": "darnell",
+        "instrumental": "",
+        "altInstrumentals": []
+      },
+      "stage": "phillyStreets",
+      "gameOverData": {
+        "gameOverChart": "bf-dead",
+        "gameOverSound": "fnf_loss_sfx",
+        "gameOverLoop": "gameOver",
+        "gameOverEnd": "gameOverEnd"
+      },
+      "options": {
+        "disableNoteRGB": false,
+        "disableNoteQuantRGB": false,
+        "disableStrumRGB": false,
+        "disableSplashRGB": false,
+        "disableHoldCoverRGB": false,
+        "disableHoldCover": false,
+        "disableCaching": false,
+        "notITG": false,
+        "usesHUD": false,
+        "oldBaSystem": false,
+        "rightScroll": false,
+        "middleScroll": false,
+        "blockOpponentMode": false,
+        "arrowSkin": null,
+        "splashSkin": "",
+        "holdCoverSkin": "",
+        "opponentNoteStyle": "",
+        "playerNoteStyle": "",
+        "vocalsPrefix": "",
+        "vocalsSuffix": "",
+        "instrumentalPrefix": "",
+        "instrumentalSuffix": ""
+      },
+      "ratings": { "easy": 2, "normal": 3, "hard": 4 },
+      "timeChanges": [
+        { "t": 0, "b": 0, "bpm": 155, "n": 4, "d": 4, "bt": [4, 4, 4, 4] }
+      ]
+    },
+    "inclusiveData": {
+      "generatedBy": "Chart Editor Import (FNF Legacy)",
+      "timeFormat": "ms",
+      "artist": "Kawai Sprite",
+      "charter": "fabs",
+      "divisions": 96,
+      "looped": false,
+      "offsets": { "instrumental": 0, "altInstrumentals": {}, "vocals": {} },
+      "album": "volume3",
+      "previewStart": 0,
+      "previewEnd": 15000
+    }
+  }
+}

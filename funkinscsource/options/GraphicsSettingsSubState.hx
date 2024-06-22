@@ -4,6 +4,7 @@ import objects.Character;
 
 class GraphicsSettingsSubState extends BaseOptionsMenu
 {
+<<<<<<< Updated upstream
 	var antialiasingOption:Int;
 	var boyfriend:Character = null;
 	public function new()
@@ -63,19 +64,72 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 			'framerate',
 			'int');
 		addOption(option);
+=======
+  var antialiasingOption:Int;
+  var boyfriend:Character = null;
 
-		final refreshRate:Int = FlxG.stage.application.window.displayMode.refreshRate;
-		option.minValue = 60;
-		option.maxValue = 240;
-		option.defaultValue = Std.int(FlxMath.bound(refreshRate, option.minValue, option.maxValue));
-		option.displayFormat = '%v FPS';
-		option.onChange = onChangeFramerate;
-		#end
+  public function new()
+  {
+    title = Language.getPhrase('graphics_menu', 'Graphics Settings');
+    rpcTitle = 'Graphics Settings Menu'; // for Discord Rich Presence
 
-		super();
-		insert(1, boyfriend);
-	}
+    boyfriend = new Character(840, 170, 'bf', true);
+    boyfriend.forOption(false, false);
 
+    // I'd suggest using "Low Quality" as an example for making your own option since it is the simplest here
+    var option:Option = new Option('Low Quality', // Name
+      'If checked, disables some background details,\ndecreases loading times and improves performance.', // Description
+      'lowQuality', // Save data variable name
+      BOOL); // Variable type
+    addOption(option);
+
+    var option:Option = new Option('Background', // Name
+      'If checked, enables the stage to load.', // Description
+      'background', // Save data variable name
+      BOOL); // Variable type
+    addOption(option);
+
+    var option:Option = new Option('Characters', // Name
+      'If checked, enables the characters functions, changing, visible.', // Description
+      'characters', // Save data variable name
+      BOOL); // Variable type
+    addOption(option);
+
+    var option:Option = new Option('Anti-Aliasing', 'If unchecked, disables anti-aliasing, increases performance\nat the cost of sharper visuals.',
+      'antialiasing', BOOL);
+    option.onChange = onChangeAntiAliasing; // Changing onChange is only needed if you want to make a special interaction after it changes the value
+    addOption(option);
+    antialiasingOption = optionsArray.length - 1;
+
+    var option:Option = new Option('Shaders', // Name
+      "If unchecked, disables shaders.\nIt's used for some visual effects, and also CPU intensive for weaker PCs.", // Description
+      'shaders', BOOL);
+    addOption(option);
+
+    var option:Option = new Option('Color Filter: ', 'Choose your color blindness filter of your choice.', 'colorFilter', STRING,
+      ['NONE', "DEUTERANOPIA", "PROTANOPIA", "TRITANOPIA"]);
+    option.onChange = onChangeColorFilter;
+    addOption(option);
+
+    var option:Option = new Option('GPU Caching', // Name
+      "If checked, allows the GPU to be used for caching textures, decreasing RAM usage.\nDon't turn this on if you have a shitty Graphics Card.", // Description
+      'cacheOnGPU', BOOL);
+    addOption(option);
+>>>>>>> Stashed changes
+
+    #if !html5 // Apparently other framerates isn't correctly supported on Browser? Probably it has some V-Sync shit enabled by default, idk
+    var option:Option = new Option('Framerate', "Pretty self explanatory, isn't it?", 'framerate', INT);
+    addOption(option);
+
+    final refreshRate:Int = FlxG.stage.application.window.displayMode.refreshRate;
+    option.minValue = 60;
+    option.maxValue = 240;
+    option.defaultValue = Std.int(FlxMath.bound(refreshRate, option.minValue, option.maxValue));
+    option.displayFormat = '%v FPS';
+    option.onChange = onChangeFramerate;
+    #end
+
+<<<<<<< Updated upstream
 	function onChangeAntiAliasing()
 	{
 		for (sprite in members)
@@ -86,24 +140,55 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 			}
 		}
 	}
+=======
+    super();
+    insert(1, boyfriend);
+  }
 
-	function onChangeFramerate()
-	{
-		if(ClientPrefs.data.framerate > FlxG.drawFramerate)
-		{
-			FlxG.updateFramerate = ClientPrefs.data.framerate;
-			FlxG.drawFramerate = ClientPrefs.data.framerate;
-		}
-		else
-		{
-			FlxG.drawFramerate = ClientPrefs.data.framerate;
-			FlxG.updateFramerate = ClientPrefs.data.framerate;
-		}
-	}
+  function onChangeColorFilter()
+  {
+    backend.ColorBlindness.setFilter();
+  }
+>>>>>>> Stashed changes
 
+  function onChangeAntiAliasing()
+  {
+    for (sprite in members)
+    {
+      var sprite:FlxSprite = cast sprite;
+      if (sprite != null && (sprite is FlxSprite) && !(sprite is FlxText))
+      {
+        sprite.antialiasing = ClientPrefs.data.antialiasing;
+      }
+    }
+  }
+
+<<<<<<< Updated upstream
 	override function changeSelection(change:Int = 0)
 	{
 		super.changeSelection(change);
 		boyfriend.visible = (antialiasingOption == curSelected);
 	}
 }
+=======
+  function onChangeFramerate()
+  {
+    if (ClientPrefs.data.framerate > FlxG.drawFramerate)
+    {
+      FlxG.updateFramerate = ClientPrefs.data.framerate;
+      FlxG.drawFramerate = ClientPrefs.data.framerate;
+    }
+    else
+    {
+      FlxG.drawFramerate = ClientPrefs.data.framerate;
+      FlxG.updateFramerate = ClientPrefs.data.framerate;
+    }
+  }
+
+  override function changeSelection(change:Int = 0)
+  {
+    super.changeSelection(change);
+    boyfriend.forOption(true, (antialiasingOption == curSelected));
+  }
+}
+>>>>>>> Stashed changes

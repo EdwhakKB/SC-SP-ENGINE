@@ -20,7 +20,7 @@ import flixel.util.FlxDestroyUtil;
  * Copyright (c) 2009 Martín Sebastián Wain
  * License: Creative Commons Attribution 3.0 United States
  * @link http://creativecommons.org/licenses/by/3.0/us/
- * 
+ *
  */
 class FlxInputText extends FlxText
 {
@@ -332,7 +332,7 @@ class FlxInputText extends FlxText
 		}
 		return false;
 	}
-	
+
 
 	/**
 	 * Handles keypresses generated on the stage.

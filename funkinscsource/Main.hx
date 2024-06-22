@@ -1,17 +1,24 @@
 package;
 
+<<<<<<< Updated upstream
 
 #if android
 import android.content.Context;
 #end
 
+=======
+import backend.ColorBlindness;
+>>>>>>> Stashed changes
 import flixel.input.keyboard.FlxKey;
 import flixel.system.scaleModes.*;
 import flixel.graphics.FlxGraphic;
 import flixel.FlxGame;
 import flixel.system.FlxAssets.FlxShader;
+<<<<<<< Updated upstream
 
 
+=======
+>>>>>>> Stashed changes
 import openfl.Assets;
 import openfl.Lib;
 #if CRASH_HANDLER
@@ -22,22 +29,24 @@ import openfl.events.Event;
 import openfl.display.StageScaleMode;
 import openfl.filters.ShaderFilter;
 import openfl.display.StageQuality;
-
 import debug.FPSCounter;
-
 import lime.app.Application;
-
-//crash handler stuff
+// crash handler stuff
 #if CRASH_HANDLER
 import haxe.CallStack;
 import haxe.io.Path;
 #end
+<<<<<<< Updated upstream
 
 //Other Things
 import gamejolt.GameJolt.GJToastManager;
+=======
+// Other Things
+import gamejolt.GameJoltGroup.GJToastManager;
+>>>>>>> Stashed changes
 import gamejolt.*;
-
 import states.TitleState;
+<<<<<<< Updated upstream
 
 	// #if linux
 	// @:cppInclude('./external/gamemode_client.h')
@@ -57,24 +66,47 @@ class Main extends Sprite
 		skipSplash: false, // if the default flixel splash screen should be skipped
 		startFullscreen: false // if the game should start at fullscreen mode
 	};
+=======
+import haxe.ui.Toolkit;
 
-	public static var focused:Bool = true;
-	public static var fpsVar:FPSCounter;
+class Main extends Sprite
+{
+  public static var game =
+    {
+      width: 1280, // WINDOW width
+      height: 720, // WINDOW height
+      initialState: TitleState, // initial game state
+      zoom: -1.0, // game state bounds
+      framerate: 60, // default framerate
+      skipSplash: true, // if the default flixel splash screen should be skipped
+      startFullscreen: false // if the game should start at fullscreen mode
+    };
+>>>>>>> Stashed changes
 
+  public static var focused:Bool = true;
+  public static var fpsVar:FPSCounter;
+
+<<<<<<< Updated upstream
 	public static var appName:String = ''; // Application name.
+=======
+  public static var colorFilter:ColorBlindness;
 
-	public static var gameContainer:Main = null; // Main instance to access when needed.
+  public static var appName:String = ''; // Application name.
+>>>>>>> Stashed changes
 
-	public static var gjToastManager:GJToastManager;
+  public static var gameContainer:Main = null; // Main instance to access when needed.
 
-	public static var muteKeys:Array<FlxKey> = [FlxKey.ZERO];
-	public static var volumeDownKeys:Array<FlxKey> = [FlxKey.NUMPADMINUS, FlxKey.MINUS];
-	public static var volumeUpKeys:Array<FlxKey> = [FlxKey.NUMPADPLUS, FlxKey.PLUS];
+  public static var gjToastManager:GJToastManager;
 
-	public function new()
-	{
-		super();
+  public static var muteKeys:Array<FlxKey> = [FlxKey.ZERO];
+  public static var volumeDownKeys:Array<FlxKey> = [FlxKey.NUMPADMINUS, FlxKey.MINUS];
+  public static var volumeUpKeys:Array<FlxKey> = [FlxKey.NUMPADPLUS, FlxKey.PLUS];
 
+  public function new()
+  {
+    super();
+
+<<<<<<< Updated upstream
 		// Credits to MAJigsaw77 (he's the og author for this code)
 		#if android
 		Sys.setCwd(Path.addTrailingSlash(Context.getExternalFilesDir()));
@@ -84,12 +116,23 @@ class Main extends Sprite
 
 		setupGame();
 	}
+=======
+    setupGame();
+  }
 
-	var oldVol:Float = 1.0;
-	var newVol:Float = 0.2;
+  var oldVol:Float = 1.0;
+  var newVol:Float = 0.2;
+>>>>>>> Stashed changes
 
-	public static var focusMusicTween:FlxTween;
+  public static var focusMusicTween:FlxTween;
 
+  private function setupGame():Void
+  {
+    Toolkit.init();
+    Toolkit.theme = "dark";
+    Toolkit.autoScale = false;
+
+<<<<<<< Updated upstream
 	private function setupGame():Void {
 		addChild(new FlxGame(game.width, game.height, Init, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
 
@@ -100,80 +143,84 @@ class Main extends Sprite
 		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
 		FlxG.scaleMode = new FillScaleMode();
 		#end
+=======
+    haxe.ui.focus.FocusManager.instance.autoFocus = false;
+    input.Cursor.registerHaxeUICursors();
+    haxe.ui.tooltips.ToolTipManager.defaultDelay = 200;
 
-		gjToastManager = new GJToastManager();
-		addChild(gjToastManager);
+    addChild(new FlxGame(game.width, game.height, Init, game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
 
-		gameContainer = this;
+    gjToastManager = new GJToastManager();
+    addChild(gjToastManager);
+>>>>>>> Stashed changes
 
+    gameContainer = this;
+
+    #if HSCRIPT_ALLOWED
+    codenameengine.scripting.GlobalScript.init();
+    #end
+    Paths.init();
+
+<<<<<<< Updated upstream
 		#if !(flixel >= "5.4.0")
 		FlxG.fixedTimestep = false;
 		#end
+=======
+    FlxGraphic.defaultPersist = false;
+    FlxG.signals.preStateSwitch.add(function() {
+      if (Type.getClass(FlxG.state) != TitleState) // Resetting title state makes this unstable so we make it only for other states!
+      {
+        // i tihnk i finally fixed it
+        @:privateAccess
+        for (key in FlxG.bitmap._cache.keys())
+        {
+          var obj = FlxG.bitmap._cache.get(key);
+          if (obj != null)
+          {
+            lime.utils.Assets.cache.image.remove(key);
+            openfl.Assets.cache.removeBitmapData(key);
+            FlxG.bitmap._cache.remove(key);
+          }
+        }
+>>>>>>> Stashed changes
 
-		FlxGraphic.defaultPersist = false;
-		FlxG.signals.preStateSwitch.add(function()
-		{
-			if (Type.getClass(FlxG.state) != TitleState) //Resetting title state makes this unstable so we make it only for other states!
-			{
-				//i tihnk i finally fixed it
-				@:privateAccess
-				for (key in FlxG.bitmap._cache.keys())
-				{
-					var obj = FlxG.bitmap._cache.get(key);
-					if (obj != null)
-					{
-						lime.utils.Assets.cache.image.remove(key);
-						openfl.Assets.cache.removeBitmapData(key);
-						FlxG.bitmap._cache.remove(key);
-					}
-				}
+        // idk if this helps because it looks like just clearing it does the same thing
+        for (k => f in lime.utils.Assets.cache.font)
+          lime.utils.Assets.cache.font.remove(k);
+        for (k => s in lime.utils.Assets.cache.audio)
+          lime.utils.Assets.cache.audio.remove(k);
+      }
 
-				//idk if this helps because it looks like just clearing it does the same thing
-				for (k => f in lime.utils.Assets.cache.font)
-					lime.utils.Assets.cache.font.remove(k);
-				for (k => s in lime.utils.Assets.cache.audio)
-					lime.utils.Assets.cache.audio.remove(k);
-			}
+      lime.utils.Assets.cache.clear();
 
-			lime.utils.Assets.cache.clear();
+      openfl.Assets.cache.clear();
 
-			openfl.Assets.cache.clear();
-	
-			FlxG.bitmap.dumpCache();
+      FlxG.bitmap.dumpCache();
 
-			#if cpp
-			cpp.vm.Gc.enable(true);
-			#end
-	
-			#if sys
-			openfl.system.System.gc();	
-			#end
-		});
+      #if cpp
+      cpp.vm.Gc.enable(true);
+      #end
 
-		FlxG.signals.postStateSwitch.add(function()
-		{
-			#if cpp
-			cpp.vm.Gc.enable(true);
-			#end
-	
-			#if sys
-			openfl.system.System.gc();	
-			#end
-		});
+      #if sys
+      openfl.system.System.gc();
+      #end
+    });
 
-		#if CRASH_HANDLER
-		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
-		#end
+    FlxG.signals.postStateSwitch.add(function() {
+      #if cpp
+      cpp.vm.Gc.enable(true);
+      #end
 
-		#if desktop
+      #if sys
+      openfl.system.System.gc();
+      #end
+    });
 
-		// Get first window in case the coder creates more windows.
-		@:privateAccess
-		appName = openfl.Lib.application.windows[0].__backend.parent.__attributes.title;
-		Application.current.window.onFocusIn.add(onWindowFocusIn);
-		Application.current.window.onFocusOut.add(onWindowFocusOut);
-		#end
+    #if CRASH_HANDLER
+    Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
+    #end
 
+<<<<<<< Updated upstream
 		// shader coords fix
 		FlxG.signals.gameResized.add(function(w, h)
 		{	
@@ -206,80 +253,104 @@ class Main extends Sprite
 			#end
 		}
 	}
+=======
+    #if desktop
+    // Get first window in case the coder creates more windows.
+    @:privateAccess
+    appName = openfl.Lib.application.windows[0].__backend.parent.__attributes.title;
+    Application.current.window.onFocusIn.add(onWindowFocusIn);
+    Application.current.window.onFocusOut.add(onWindowFocusOut);
+    #end
 
-	public static function checkGJKeysAndId():Bool
-	{
-		var result:Bool = false;
-		if (GJKeys.key != '' && GJKeys.id != 0) result = true;
-		return result;
-	}
+    // shader coords fix
+    FlxG.signals.gameResized.add(function(w, h) {
+      resetSpriteCache(Main.gameContainer);
 
-	// Code was entirely made by sqirra-rng for their fnf engine named "Izzy Engine", big props to them!!!
-	// very cool person for real they don't get enough credit for their work
-	#if CRASH_HANDLER
-		
-	static final quotes:Array<String> = 
-	[
-		"Ha, a null object reference?", // Slushi
-        "What the fuck you did!?", //Edwhak
-		"CAGASTE.", // Slushi
-		"It was Bolo!" //Glowsoony
-	];
-	
-	function onCrash(e:UncaughtErrorEvent):Void
-	{
-		updateScreenBeforeCrash(FlxG.fullscreen);
+      if (FlxG.game != null) resetSpriteCache(FlxG.game);
 
-		var errMsg:String = "Call Stack:\n";
-		var errMsgPrint:String = "";
-		var path:String;
-		var callStack:Array<StackItem> = CallStack.exceptionStack(true);
-		var dateNow:String = Date.now().toString();
-		var build = Sys.systemName();
+      if (FlxG.cameras != null)
+      {
+        for (cam in FlxG.cameras.list)
+          if (cam != null && cam.filters != null) resetSpriteCache(cam.flashSprite);
+      }
+    });
+  }
+>>>>>>> Stashed changes
 
-		dateNow = dateNow.replace(" ", "_");
-		dateNow = dateNow.replace(":", "'");
+  static function resetSpriteCache(sprite:Sprite):Void
+  {
+    if (sprite == null) return;
+    @:privateAccess {
+      sprite.__cacheBitmap = null;
+      sprite.__cacheBitmapData = null;
+      sprite.__cacheBitmapData2 = null;
+      sprite.__cacheBitmapData3 = null;
+      sprite.__cacheBitmapColorTransform = null;
+    }
+  }
 
-		path = "./crash/" + "SCEngine_" + dateNow + ".txt";
+  public static function checkGJKeysAndId():Bool
+  {
+    var result:Bool = (GJKeys.key != '' && GJKeys.id != 0);
+    return result;
+  }
 
-		for (stackItem in callStack)
-		{
-			switch (stackItem)
-			{
-				case FilePos(s, file, line, column):
-					errMsg += file + " (line " + line + ")\n";
-					errMsgPrint += file + ":" + line + "\n"; // if you Ctrl+Mouse Click its go to the line. -Luis
-				default:
-					Sys.println(stackItem);
-			}
-		}
+  // Code was entirely made by sqirra-rng for their fnf engine named "Izzy Engine", big props to them!!!
+  // very cool person for real they don't get enough credit for their work
+  #if CRASH_HANDLER
+  static final quotes:Array<String> = [
+    "Ha, a null object reference?", // Slushi
+    "What the fuck you did!?", // Edwhak
+    "CAGASTE.", // Slushi
+    "It was Bolo!" // Glowsoony
+  ];
 
-		errMsg += 
-			"\n---------------------"
-			+ "\n" + quotes[Std.random(quotes.length)]
-			+ "\n---------------------"
-			+ "\n\nThis build is running in " + build + "\n(SCE v" + states.MainMenuState.SCEVersion + ")" 
-		 	+ "\nPlease report this error to Github page: https://github.com/EdwhakKB/SC-SP-ENGINE"	 
-			+ "\n\n"
-			+ "Uncaught Error:\n"
-			+ e.error;
-		// Structure of the error message by Slushi
-		
-		if (!FileSystem.exists("./crash/"))
-			FileSystem.createDirectory("./crash/");
+  function onCrash(e:UncaughtErrorEvent):Void
+  {
+    updateScreenBeforeCrash(FlxG.fullscreen);
 
-		File.saveContent(path, errMsg + "\n");
+    var errMsg:String = "Call Stack:\n";
+    var errMsgPrint:String = "";
+    var path:String;
+    var callStack:Array<StackItem> = CallStack.exceptionStack(true);
+    var dateNow:String = Date.now().toString();
+    var build = Sys.systemName();
 
-		Sys.println(errMsgPrint);
-		Sys.println(errMsg);
-		Sys.println("Crash dump saved in " + Path.normalize(path));
+    dateNow = dateNow.replace(" ", "_");
+    dateNow = dateNow.replace(":", "'");
 
-		var crashDialoguePath:String = "SCE-CrashDialog";
-	
-		#if windows
-		crashDialoguePath += ".exe";
-		#end
+    path = "./crash/" + "SCEngine_" + dateNow + ".txt";
 
+    for (stackItem in callStack)
+    {
+      switch (stackItem)
+      {
+        case FilePos(s, file, line, column):
+          errMsg += file + " (line " + line + ")\n";
+          errMsgPrint += file + ":" + line + "\n"; // if you Ctrl+Mouse Click its go to the line. -Luis
+        default:
+          Sys.println(stackItem);
+      }
+    }
+
+    errMsg += "\n---------------------"
+      + "\n"
+      + quotes[Std.random(quotes.length)]
+      + "\n---------------------"
+      + "\n\nThis build is running in "
+      + build
+      + "\n(SCE v"
+      + states.MainMenuState.SCEVersion
+      + ")"
+      + "\nPlease report this error to Github page: https://github.com/EdwhakKB/SC-SP-ENGINE"
+      + "\n\n"
+      + "Uncaught Error:\n"
+      + e.error;
+    // Structure of the error message by Slushi
+
+    if (!FileSystem.exists("./crash/")) FileSystem.createDirectory("./crash/");
+
+<<<<<<< Updated upstream
 		if (FileSystem.exists(crashDialoguePath))
 		{
 			Debug.logInfo("\nFound crash dialog program " + "[" + crashDialoguePath + "]");
@@ -290,79 +361,101 @@ class Main extends Sprite
 			Debug.logInfo("No crash dialog found! Making a simple alert instead...");
 			Application.current.window.alert(errMsg, "Oh no... SC Engine has crashed!");
 		}
+=======
+    File.saveContent(path, errMsg + "\n");
+>>>>>>> Stashed changes
 
-		#if DISCORD_ALLOWED
-		DiscordClient.shutdown();
-		#end
-		Sys.exit(1);
-	}
-	#end
+    Sys.println(errMsgPrint);
+    Sys.println(errMsg);
+    Sys.println("Crash dump saved in " + Path.normalize(path));
 
-	public function updateScreenBeforeCrash(isFullScreen:Bool)
-	{
-		FlxG.resizeWindow(1280, 720);
-		
-		@:privateAccess
-		{
-			FlxG.width = 1280;
-			FlxG.height = 720;
-		}
+    var crashDialoguePath:String = "SCE-CrashDialog";
 
+<<<<<<< Updated upstream
 		if (!(FlxG.scaleMode is RatioScaleMode)) // just to be sure yk.
 			FlxG.scaleMode = new RatioScaleMode();
+=======
+    #if windows
+    crashDialoguePath += ".exe";
+    #end
+>>>>>>> Stashed changes
 
-		Application.current.window.width = 1280; 
-		Application.current.window.height = 720;
-		Application.current.window.borderless = false;
+    if (FileSystem.exists(crashDialoguePath))
+    {
+      Debug.logInfo("\nFound crash dialog program " + "[" + crashDialoguePath + "]");
+      new Process(crashDialoguePath, ["xd ", path]);
+    }
+    else
+    {
+      Debug.logInfo("No crash dialog found! Making a simple alert instead...");
+      lime.app.Application.current.window.alert(errMsg, "Oh no... SC Engine has crashed!");
+    }
 
-		//Add all this just in case it's not 1280 x 720 even without fullscreen
-		if (isFullScreen)
-		{
-			FlxG.fullscreen = false;
-		}
-	}
+    #if DISCORD_ALLOWED
+    DiscordClient.shutdown();
+    #end
+    Sys.exit(1);
+  }
+  #end
 
-	function onWindowFocusOut(){
-		focused = false;
+  public function updateScreenBeforeCrash(isFullScreen:Bool)
+  {
+    FlxG.resizeWindow(1280, 720);
 
-		if (Type.getClass(FlxG.state) != PlayState)
-		{
-			oldVol = FlxG.sound.volume;
-			if (oldVol > 0.3)
-			{
-				newVol = 0.3;
-			}
-			else
-			{
-				if (oldVol > 0.1)
-				{
-					newVol = 0.1;
-				}
-				else
-				{
-					newVol = 0;
-				}
-			}
-	
-			if (focusMusicTween != null)
-				focusMusicTween.cancel();
-			focusMusicTween = FlxTween.tween(FlxG.sound, {volume: newVol}, 0.5);
-		}
-	}
+    @:privateAccess
+    {
+      FlxG.width = 1280;
+      FlxG.height = 720;
+    }
 
-	function onWindowFocusIn(){
-		new FlxTimer().start(0.2, function(tmr:FlxTimer)
-		{
-			focused = true;
-		});
+    if (!(FlxG.scaleMode is flixel.system.scaleModes.RatioScaleMode)) // just to be sure yk.
+      FlxG.scaleMode = new flixel.system.scaleModes.RatioScaleMode();
 
-		if (Type.getClass(FlxG.state) != PlayState)
-		{
-			// Normal global volume when focused
-			if (focusMusicTween != null)
-				focusMusicTween.cancel();
-	
-			focusMusicTween = FlxTween.tween(FlxG.sound, {volume: oldVol}, 0.5);
-		}
-	}
+    Application.current.window.width = 1280;
+    Application.current.window.height = 720;
+    Application.current.window.borderless = false;
+
+    // Add all this just in case it's not 1280 x 720 even without fullscreen
+    if (isFullScreen)
+    {
+      FlxG.fullscreen = false;
+    }
+  }
+
+  function onWindowFocusOut()
+  {
+    focused = false;
+
+    oldVol = FlxG.sound.volume;
+    if (oldVol > 0.3)
+    {
+      newVol = 0.3;
+    }
+    else
+    {
+      if (oldVol > 0.1)
+      {
+        newVol = 0.1;
+      }
+      else
+      {
+        newVol = 0;
+      }
+    }
+
+    if (focusMusicTween != null) focusMusicTween.cancel();
+    focusMusicTween = FlxTween.tween(FlxG.sound, {volume: newVol}, 0.5);
+  }
+
+  function onWindowFocusIn()
+  {
+    new FlxTimer().start(0.2, function(tmr:FlxTimer) {
+      focused = true;
+    });
+
+    // Normal global volume when focused
+    if (focusMusicTween != null) focusMusicTween.cancel();
+
+    focusMusicTween = FlxTween.tween(FlxG.sound, {volume: oldVol}, 0.5);
+  }
 }

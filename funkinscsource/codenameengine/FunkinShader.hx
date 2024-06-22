@@ -4,15 +4,11 @@ import haxe.Exception;
 import flixel.graphics.tile.FlxGraphicsShader;
 import openfl.display3D.Program3D;
 import flixel.system.FlxAssets.FlxShader;
-
 import openfl.display.BitmapData;
 import openfl.display.ShaderParameter;
 import openfl.display.ShaderParameterType;
 import openfl.display.ShaderInput;
 import lime.utils.Float32Array;
-
-using StringTools;
-
 import openfl.display.ShaderParameter;
 import openfl.display.BitmapData;
 import openfl.display.ShaderInput;
@@ -21,346 +17,394 @@ import openfl.display.ShaderInput;
 @:access(openfl.display3D.Program3D)
 @:access(openfl.display.ShaderInput)
 @:access(openfl.display.ShaderParameter)
+<<<<<<< Updated upstream:funkinscsource/codenameengine/FunkinShader.hx
 class FunkinShader extends FlxShader {
 	private static var __instanceFields = Type.getInstanceFields(FunkinShader);
+=======
+class FunkinShader extends FlxShader implements IHScriptCustomBehaviour
+{
+  private static var __instanceFields = Type.getInstanceFields(FunkinShader);
+>>>>>>> Stashed changes:funkinscsource/codenameengine/shaders/FunkinShader.hx
 
-	public var glslVer:String = "120";
+  public var glslVer:String = "120";
 
-	/**
-	 * Creates a new shader from the specified fragment and vertex source.
-	 * Accepts `#pragma header`.
-	 * @param frag Fragment source (pass `null` to use default)
-	 * @param vert Vertex source (pass `null` to use default)
-	 * @param glslVer Version of GLSL to use (defaults to 120)
-	 */
-	public override function new(frag:String, vert:String, glslVer:String = "120") {
-		if (frag == null) frag = ShaderTemplates.defaultFragmentSource;
-		if (vert == null) vert = ShaderTemplates.defaultVertexSource;
-		this.glFragmentSource = frag;
-		this.glVertexSource = vert;
+  /**
+   * Creates a new shader from the specified fragment and vertex source.
+   * Accepts `#pragma header`.
+   * @param frag Fragment source (pass `null` to use default)
+   * @param vert Vertex source (pass `null` to use default)
+   * @param glslVer Version of GLSL to use (defaults to 120)
+   */
+  public override function new(frag:String, vert:String, glslVer:String = "120")
+  {
+    if (frag == null) frag = ShaderTemplates.defaultFragmentSource;
+    if (vert == null) vert = ShaderTemplates.defaultVertexSource;
+    this.glFragmentSource = frag;
+    this.glVertexSource = vert;
 
-		this.glslVer = glslVer;
-		super();
-	}
+    this.glslVer = glslVer;
+    super();
+  }
 
-	@:noCompletion override private function set_glFragmentSource(value:String):String
-	{
-		if(value == null)
-			value = ShaderTemplates.defaultFragmentSource;
-		value = value.replace("#pragma header", ShaderTemplates.fragHeader).replace("#pragma body", ShaderTemplates.fragBody);
-		if (value != __glFragmentSource)
-		{
-			__glSourceDirty = true;
-		}
+  @:noCompletion override private function set_glFragmentSource(value:String):String
+  {
+    if (value == null) value = ShaderTemplates.defaultFragmentSource;
+    value = value.replace("#pragma header", ShaderTemplates.fragHeader).replace("#pragma body", ShaderTemplates.fragBody);
+    if (value != __glFragmentSource)
+    {
+      __glSourceDirty = true;
+    }
 
-		return __glFragmentSource = value;
-	}
+    return __glFragmentSource = value;
+  }
 
-	@:noCompletion override private function set_glVertexSource(value:String):String
-	{
-		if(value == null)
-			value = ShaderTemplates.defaultVertexSource;
-		value = value.replace("#pragma header", ShaderTemplates.vertHeader).replace("#pragma body", ShaderTemplates.vertBody);
-		if (value != __glVertexSource)
-		{
-			__glSourceDirty = true;
-		}
+  @:noCompletion override private function set_glVertexSource(value:String):String
+  {
+    if (value == null) value = ShaderTemplates.defaultVertexSource;
+    value = value.replace("#pragma header", ShaderTemplates.vertHeader).replace("#pragma body", ShaderTemplates.vertBody);
+    if (value != __glVertexSource)
+    {
+      __glSourceDirty = true;
+    }
 
-		return __glVertexSource = value;
-	}
+    return __glVertexSource = value;
+  }
 
-	@:noCompletion private override function __initGL():Void
-	{
-		if (__glSourceDirty || __paramBool == null)
-		{
-			__glSourceDirty = false;
-			program = null;
+  @:noCompletion private override function __initGL():Void
+  {
+    if (__glSourceDirty || __paramBool == null)
+    {
+      __glSourceDirty = false;
+      program = null;
 
-			__inputBitmapData = new Array();
-			__paramBool = new Array();
-			__paramFloat = new Array();
-			__paramInt = new Array();
+      __inputBitmapData = new Array();
+      __paramBool = new Array();
+      __paramFloat = new Array();
+      __paramInt = new Array();
 
-			__processGLData(glVertexSource, "attribute");
-			__processGLData(glVertexSource, "uniform");
-			__processGLData(glFragmentSource, "uniform");
-		}
+      __processGLData(glVertexSource, "attribute");
+      __processGLData(glVertexSource, "uniform");
+      __processGLData(glFragmentSource, "uniform");
+    }
 
-		if (__context != null && program == null)
-		{
-			var prefix = '#version ${glslVer}\n';
+    if (__context != null && program == null)
+    {
+      var prefix = '#version ${glslVer}\n';
 
-			var gl = __context.gl;
+      var gl = __context.gl;
 
-			prefix += "#ifdef GL_ES
+      prefix += "#ifdef GL_ES
 				"
-				+ (precisionHint == FULL ? "#ifdef GL_FRAGMENT_PRECISION_HIGH
+        + (precisionHint == FULL ? "#ifdef GL_FRAGMENT_PRECISION_HIGH
 				precision highp float;
 				#else
 				precision mediump float;
 				#endif" : "precision lowp float;")
-				+ "
+        + "
 				#endif
 				";
 
-			var vertex = prefix + glVertexSource;
-			var fragment = prefix + glFragmentSource;
+      var vertex = prefix + glVertexSource;
+      var fragment = prefix + glFragmentSource;
 
-			var id = vertex + fragment;
+      var id = vertex + fragment;
 
-			if (__context.__programs.exists(id))
-			{
-				program = __context.__programs.get(id);
-			}
-			else
-			{
-				program = __context.createProgram(GLSL);
+      if (__context.__programs.exists(id))
+      {
+        program = __context.__programs.get(id);
+      }
+      else
+      {
+        program = __context.createProgram(GLSL);
 
-				program.__glProgram = __createGLProgram(vertex, fragment);
+        program.__glProgram = __createGLProgram(vertex, fragment);
 
-				__context.__programs.set(id, program);
-			}
+        __context.__programs.set(id, program);
+      }
 
-			if (program != null)
-			{
-				glProgram = program.__glProgram;
+      if (program != null)
+      {
+        glProgram = program.__glProgram;
 
-				for (input in __inputBitmapData)
-				{
+        for (input in __inputBitmapData)
+        {
+          if (input.__isUniform)
+          {
+            input.index = gl.getUniformLocation(glProgram, input.name);
+          }
+          else
+          {
+            input.index = gl.getAttribLocation(glProgram, input.name);
+          }
+        }
 
-					if (input.__isUniform)
-					{
-						input.index = gl.getUniformLocation(glProgram, input.name);
-					}
-					else
-					{
-						input.index = gl.getAttribLocation(glProgram, input.name);
-					}
-				}
+        for (parameter in __paramBool)
+        {
+          if (parameter.__isUniform)
+          {
+            parameter.index = gl.getUniformLocation(glProgram, parameter.name);
+          }
+          else
+          {
+            parameter.index = gl.getAttribLocation(glProgram, parameter.name);
+          }
+        }
 
-				for (parameter in __paramBool)
-				{
+        for (parameter in __paramFloat)
+        {
+          if (parameter.__isUniform)
+          {
+            parameter.index = gl.getUniformLocation(glProgram, parameter.name);
+          }
+          else
+          {
+            parameter.index = gl.getAttribLocation(glProgram, parameter.name);
+          }
+        }
 
-					if (parameter.__isUniform)
-					{
-						parameter.index = gl.getUniformLocation(glProgram, parameter.name);
-					}
-					else
-					{
-						parameter.index = gl.getAttribLocation(glProgram, parameter.name);
-					}
-				}
+        for (parameter in __paramInt)
+        {
+          if (parameter.__isUniform)
+          {
+            parameter.index = gl.getUniformLocation(glProgram, parameter.name);
+          }
+          else
+          {
+            parameter.index = gl.getAttribLocation(glProgram, parameter.name);
+          }
+        }
+      }
+      // initInstance(vertex, fragment); // btw make sure to disable the prefixes for ._isInstance
+    }
+  }
 
-				for (parameter in __paramFloat)
-				{
+  @:noCompletion private override function __processGLData(source:String, storageType:String):Void
+  {
+    var lastMatch = 0, position, regex, name, type;
 
-					if (parameter.__isUniform)
-					{
-						parameter.index = gl.getUniformLocation(glProgram, parameter.name);
-					}
-					else
-					{
-						parameter.index = gl.getAttribLocation(glProgram, parameter.name);
-					}
-				}
+    if (storageType == "uniform")
+    {
+      regex = ~/uniform ([A-Za-z0-9]+) ([A-Za-z0-9_]+)/;
+    }
+    else
+    {
+      regex = ~/attribute ([A-Za-z0-9]+) ([A-Za-z0-9_]+)/;
+    }
 
-				for (parameter in __paramInt)
-				{
+    while (regex.matchSub(source, lastMatch))
+    {
+      type = regex.matched(1);
+      name = regex.matched(2);
 
-					if (parameter.__isUniform)
-					{
+      if (StringTools.startsWith(name, "gl_"))
+      {
+        continue;
+      }
 
-						parameter.index = gl.getUniformLocation(glProgram, parameter.name);
-					}
-					else
-					{
+      var isUniform = (storageType == "uniform");
 
-						parameter.index = gl.getAttribLocation(glProgram, parameter.name);
-					}
-				}
-			}
-			// initInstance(vertex, fragment); // btw make sure to disable the prefixes for ._isInstance
-		}
-	}
+      if (StringTools.startsWith(type, "sampler"))
+      {
+        var input = new ShaderInput<BitmapData>();
+        input.name = name;
+        @:privateAccess
+        input.__isUniform = isUniform;
+        __inputBitmapData.push(input);
 
-	@:noCompletion private override function __processGLData(source:String, storageType:String):Void
-	{
-		var lastMatch = 0, position, regex, name, type;
+        switch (name)
+        {
+          case "openfl_Texture":
+            __texture = input;
+          case "bitmap":
+            __bitmap = input;
+          default:
+        }
 
-		if (storageType == "uniform")
-		{
-			regex = ~/uniform ([A-Za-z0-9]+) ([A-Za-z0-9_]+)/;
-		}
-		else
-		{
-			regex = ~/attribute ([A-Za-z0-9]+) ([A-Za-z0-9_]+)/;
-		}
+        Reflect.setField(__data, name, input);
+        try
+        {
+          Reflect.setField(this, name, input);
+        }
+        catch (e) {}
+      }
+      else if (!Reflect.hasField(__data, name) || Reflect.field(__data, name) == null)
+      {
+        var parameterType:ShaderParameterType = switch (type)
+        {
+          case "bool": BOOL;
+          case "double", "float": FLOAT;
+          case "int", "uint": INT;
+          case "bvec2": BOOL2;
+          case "bvec3": BOOL3;
+          case "bvec4": BOOL4;
+          case "ivec2", "uvec2": INT2;
+          case "ivec3", "uvec3": INT3;
+          case "ivec4", "uvec4": INT4;
+          case "vec2", "dvec2": FLOAT2;
+          case "vec3", "dvec3": FLOAT3;
+          case "vec4", "dvec4": FLOAT4;
+          case "mat2", "mat2x2": MATRIX2X2;
+          case "mat2x3": MATRIX2X3;
+          case "mat2x4": MATRIX2X4;
+          case "mat3x2": MATRIX3X2;
+          case "mat3", "mat3x3": MATRIX3X3;
+          case "mat3x4": MATRIX3X4;
+          case "mat4x2": MATRIX4X2;
+          case "mat4x3": MATRIX4X3;
+          case "mat4", "mat4x4": MATRIX4X4;
+          default: null;
+        }
 
-		while (regex.matchSub(source, lastMatch))
-		{
-			type = regex.matched(1);
-			name = regex.matched(2);
+        var length = switch (parameterType)
+        {
+          case BOOL2, INT2, FLOAT2: 2;
+          case BOOL3, INT3, FLOAT3: 3;
+          case BOOL4, INT4, FLOAT4, MATRIX2X2: 4;
+          case MATRIX3X3: 9;
+          case MATRIX4X4: 16;
+          default: 1;
+        }
 
-			if (StringTools.startsWith(name, "gl_"))
-			{
-				continue;
-			}
+        var arrayLength = switch (parameterType)
+        {
+          case MATRIX2X2: 2;
+          case MATRIX3X3: 3;
+          case MATRIX4X4: 4;
+          default: 1;
+        }
 
-			var isUniform = (storageType == "uniform");
+        switch (parameterType)
+        {
+          case BOOL, BOOL2, BOOL3, BOOL4:
+            var parameter = new ShaderParameter<Bool>();
+            parameter.name = name;
+            @:privateAccess
+            parameter.type = parameterType;
+            @:privateAccess
+            parameter.__arrayLength = arrayLength;
+            @:privateAccess
+            parameter.__isBool = true;
+            @:privateAccess
+            parameter.__isUniform = isUniform;
+            @:privateAccess
+            parameter.__length = length;
+            __paramBool.push(parameter);
 
-			if (StringTools.startsWith(type, "sampler"))
-			{
-				var input = new ShaderInput<BitmapData>();
-				input.name = name;
-				@:privateAccess
-				input.__isUniform = isUniform;
-				__inputBitmapData.push(input);
+            if (name == "openfl_HasColorTransform")
+            {
+              __hasColorTransform = parameter;
+            }
 
-				switch (name)
-				{
-					case "openfl_Texture":
-						__texture = input;
-					case "bitmap":
-						__bitmap = input;
-					default:
-				}
+            Reflect.setField(__data, name, parameter);
+            try
+            {
+              Reflect.setField(this, name, parameter);
+            }
+            catch (e) {}
 
-				Reflect.setField(__data, name, input);
-				try{Reflect.setField(this, name, input);} catch(e) {}
-			}
-			else if (!Reflect.hasField(__data, name) || Reflect.field(__data, name) == null)
-			{
-				var parameterType:ShaderParameterType = switch (type)
-				{
-					case "bool": BOOL;
-					case "double", "float": FLOAT;
-					case "int", "uint": INT;
-					case "bvec2": BOOL2;
-					case "bvec3": BOOL3;
-					case "bvec4": BOOL4;
-					case "ivec2", "uvec2": INT2;
-					case "ivec3", "uvec3": INT3;
-					case "ivec4", "uvec4": INT4;
-					case "vec2", "dvec2": FLOAT2;
-					case "vec3", "dvec3": FLOAT3;
-					case "vec4", "dvec4": FLOAT4;
-					case "mat2", "mat2x2": MATRIX2X2;
-					case "mat2x3": MATRIX2X3;
-					case "mat2x4": MATRIX2X4;
-					case "mat3x2": MATRIX3X2;
-					case "mat3", "mat3x3": MATRIX3X3;
-					case "mat3x4": MATRIX3X4;
-					case "mat4x2": MATRIX4X2;
-					case "mat4x3": MATRIX4X3;
-					case "mat4", "mat4x4": MATRIX4X4;
-					default: null;
-				}
+          case INT, INT2, INT3, INT4:
+            var parameter = new ShaderParameter<Int>();
+            parameter.name = name;
+            @:privateAccess
+            parameter.type = parameterType;
+            @:privateAccess
+            parameter.__arrayLength = arrayLength;
+            @:privateAccess
+            parameter.__isInt = true;
+            @:privateAccess
+            parameter.__isUniform = isUniform;
+            @:privateAccess
+            parameter.__length = length;
+            @:privateAccess
+            __paramInt.push(parameter);
+            Reflect.setField(__data, name, parameter);
+            try
+            {
+              Reflect.setField(this, name, parameter);
+            }
+            catch (e) {}
 
-				var length = switch (parameterType)
-				{
-					case BOOL2, INT2, FLOAT2: 2;
-					case BOOL3, INT3, FLOAT3: 3;
-					case BOOL4, INT4, FLOAT4, MATRIX2X2: 4;
-					case MATRIX3X3: 9;
-					case MATRIX4X4: 16;
-					default: 1;
-				}
+          default:
+            var parameter = new ShaderParameter<Float>();
+            parameter.name = name;
+            @:privateAccess
+            parameter.type = parameterType;
+            @:privateAccess
+            parameter.__arrayLength = arrayLength;
+            #if lime
+            @:privateAccess
+            if (arrayLength > 0) parameter.__uniformMatrix = new Float32Array(arrayLength * arrayLength);
+            #end
+            @:privateAccess
+            parameter.__isFloat = true;
+            @:privateAccess
+            parameter.__isUniform = isUniform;
+            @:privateAccess
+            parameter.__length = length;
+            __paramFloat.push(parameter);
 
-				var arrayLength = switch (parameterType)
-				{
-					case MATRIX2X2: 2;
-					case MATRIX3X3: 3;
-					case MATRIX4X4: 4;
-					default: 1;
-				}
+            if (StringTools.startsWith(name, "openfl_"))
+            {
+              switch (name)
+              {
+                case "openfl_Alpha": __alpha = parameter;
+                case "openfl_ColorMultiplier": __colorMultiplier = parameter;
+                case "openfl_ColorOffset": __colorOffset = parameter;
+                case "openfl_Matrix": __matrix = parameter;
+                case "openfl_Position": __position = parameter;
+                case "openfl_TextureCoord": __textureCoord = parameter;
+                case "openfl_TextureSize": __textureSize = parameter;
+                default:
+              }
+            }
 
-				switch (parameterType)
-				{
-					case BOOL, BOOL2, BOOL3, BOOL4:
-						var parameter = new ShaderParameter<Bool>();
-						parameter.name = name;
-						@:privateAccess
-						parameter.type = parameterType;
-						@:privateAccess
-						parameter.__arrayLength = arrayLength;
-						@:privateAccess
-						parameter.__isBool = true;
-						@:privateAccess
-						parameter.__isUniform = isUniform;
-						@:privateAccess
-						parameter.__length = length;
-						__paramBool.push(parameter);
+            Reflect.setField(__data, name, parameter);
+            try
+            {
+              Reflect.setField(this, name, parameter);
+            }
+            catch (e) {}
+        }
+      }
 
-						if (name == "openfl_HasColorTransform")
-						{
-							__hasColorTransform = parameter;
-						}
+      position = regex.matchedPos();
+      lastMatch = position.pos + position.len;
+    }
+  }
 
-						Reflect.setField(__data, name, parameter);
-						try{Reflect.setField(this, name, parameter);} catch(e) {}
+  // USE THESE IN HSCRIPT FOR SETTING AND GETTING PROPERTY'S!
+  public function hget(name:String):Dynamic
+  {
+    if (__instanceFields.contains(name) || __instanceFields.contains('get_${name}'))
+    {
+      return Reflect.getProperty(this, name);
+    }
+    if (!Reflect.hasField(data, name)) return null;
+    var field = Reflect.field(data, name);
+    var cl = Type.getClassName(Type.getClass(field));
 
-					case INT, INT2, INT3, INT4:
-						var parameter = new ShaderParameter<Int>();
-						parameter.name = name;
-						@:privateAccess
-						parameter.type = parameterType;
-						@:privateAccess
-						parameter.__arrayLength = arrayLength;
-						@:privateAccess
-						parameter.__isInt = true;
-						@:privateAccess
-						parameter.__isUniform = isUniform;
-						@:privateAccess
-						parameter.__length = length;
-						@:privateAccess
-						__paramInt.push(parameter);
-						Reflect.setField(__data, name, parameter);
-						try{Reflect.setField(this, name, parameter);} catch(e) {}
+    // little problem we are facing boys...
 
-					default:
-						var parameter = new ShaderParameter<Float>();
-						parameter.name = name;
-						@:privateAccess
-						parameter.type = parameterType;
-						@:privateAccess
-						parameter.__arrayLength = arrayLength;
-						#if lime
-						@:privateAccess
-						if (arrayLength > 0) parameter.__uniformMatrix = new Float32Array(arrayLength * arrayLength);
-						#end
-						@:privateAccess
-						parameter.__isFloat = true;
-						@:privateAccess
-						parameter.__isUniform = isUniform;
-						@:privateAccess
-						parameter.__length = length;
-						__paramFloat.push(parameter);
+    // cant do "field is ShaderInput" because ShaderInput has the @:generic metadata
+    // aka instead of ShaderInput<Float> it gets built as ShaderInput_Float
+    // this should be fine tho because we check the class, and the fields dont vary based on the type
 
-						if (StringTools.startsWith(name, "openfl_"))
-						{
-							switch (name)
-							{
-								case "openfl_Alpha": __alpha = parameter;
-								case "openfl_ColorMultiplier": __colorMultiplier = parameter;
-								case "openfl_ColorOffset": __colorOffset = parameter;
-								case "openfl_Matrix": __matrix = parameter;
-								case "openfl_Position": __position = parameter;
-								case "openfl_TextureCoord": __textureCoord = parameter;
-								case "openfl_TextureSize": __textureSize = parameter;
-								default:
-							}
-						}
+    // thanks for looking in the code cne fans :D!! -lunar
 
-						Reflect.setField(__data, name, parameter);
-						try{Reflect.setField(this, name, parameter);} catch(e) {}
-				}
-			}
+    if (cl.startsWith("openfl.display.ShaderParameter")) return (field.__length > 1) ? field.value : field.value[0];
+    else if (cl.startsWith("openfl.display.ShaderInput")) return field.input;
+    return field;
+  }
 
-			position = regex.matchedPos();
-			lastMatch = position.pos + position.len;
-		}
-	}
+  public function hset(name:String, val:Dynamic):Dynamic
+  {
+    if (__instanceFields.contains(name) || __instanceFields.contains('set_${name}'))
+    {
+      Reflect.setProperty(this, name, val);
+      return val;
+    }
 
+<<<<<<< Updated upstream:funkinscsource/codenameengine/FunkinShader.hx
 	//USE THESE IN HSCRIPT FOR SETTING AND GETTING PROPERTY'S!
 	public function get(name:String):Dynamic {
 		if (__instanceFields.contains(name) || __instanceFields.contains('get_${name}')) {
@@ -434,10 +478,75 @@ class FunkinShader extends FlxShader {
 
 		return val;
 	}
+=======
+    if (!Reflect.hasField(data, name))
+    {
+      Reflect.setField(data, name, val);
+      return val;
+    }
+    else
+    {
+      var field = Reflect.field(data, name);
+      var cl = Type.getClassName(Type.getClass(field));
+      // cant do "field is ShaderInput" for some reason
+      if (cl.startsWith("openfl.display.ShaderParameter"))
+      {
+        @:privateAccess
+        if (field.__length <= 1)
+        {
+          // that means we wait for a single number, instead of an array
+          @:privateAccess
+          if (field.__isInt && !(val is Int))
+          {
+            throw new ShaderTypeException(name, Type.getClass(val), 'Int');
+            return null;
+          }
+          else
+            @:privateAccess
+            if (field.__isBool && !(val is Bool))
+            {
+              throw new ShaderTypeException(name, Type.getClass(val), 'Bool');
+              return null;
+            }
+            else
+              @:privateAccess
+              if (field.__isFloat && !(val is Float))
+              {
+                throw new ShaderTypeException(name, Type.getClass(val), 'Float');
+                return null;
+              }
+          return field.value = [val];
+        }
+        else
+        {
+          if (!(val is Array))
+          {
+            throw new ShaderTypeException(name, Type.getClass(val), Array);
+            return null;
+          }
+          return field.value = val;
+        }
+      }
+      else if (cl.startsWith("openfl.display.ShaderInput"))
+      {
+        // shader input!!
+        if (!(val is BitmapData))
+        {
+          throw new ShaderTypeException(name, Type.getClass(val), BitmapData);
+          return null;
+        }
+        field.input = cast val;
+      }
+    }
+
+    return val;
+  }
+>>>>>>> Stashed changes:funkinscsource/codenameengine/shaders/FunkinShader.hx
 }
 
-class ShaderTemplates {
-	public static final fragHeader:String = "varying float openfl_Alphav;
+class ShaderTemplates
+{
+  public static final fragHeader:String = "varying float openfl_Alphav;
 varying vec4 openfl_ColorMultiplierv;
 varying vec4 openfl_ColorOffsetv;
 varying vec2 openfl_TextureCoordv;
@@ -502,7 +611,7 @@ vec4 textureCam(sampler2D bitmap, vec2 pos) {
 	return flixel_texture2D(bitmap, camToOg(pos));
 }";
 
-	public static final fragBody:String = "vec4 color = texture2D (bitmap, openfl_TextureCoordv);
+  public static final fragBody:String = "vec4 color = texture2D (bitmap, openfl_TextureCoordv);
 
 if (color.a == 0.0) {
 
@@ -535,7 +644,7 @@ if (color.a == 0.0) {
 	gl_FragColor = color * openfl_Alphav;
 
 }";
-	public static final vertHeader:String = "attribute float openfl_Alpha;
+  public static final vertHeader:String = "attribute float openfl_Alpha;
 attribute vec4 openfl_ColorMultiplier;
 attribute vec4 openfl_ColorOffset;
 attribute vec4 openfl_Position;
@@ -550,7 +659,7 @@ uniform mat4 openfl_Matrix;
 uniform bool openfl_HasColorTransform;
 uniform vec2 openfl_TextureSize;";
 
-	public static final vertBody:String = "openfl_Alphav = openfl_Alpha;
+  public static final vertBody:String = "openfl_Alphav = openfl_Alpha;
 openfl_TextureCoordv = openfl_TextureCoord;
 
 if (openfl_HasColorTransform) {
@@ -562,8 +671,7 @@ if (openfl_HasColorTransform) {
 
 gl_Position = openfl_Matrix * openfl_Position;";
 
-
-	public static final defaultVertexSource:String = "#pragma header
+  public static final defaultVertexSource:String = "#pragma header
 
 attribute float alpha;
 attribute vec4 colorMultiplier;
@@ -583,9 +691,8 @@ void main(void)
 	}
 }";
 
-
-	// TODO: camera stuff
-	public static final defaultFragmentSource:String = "#pragma header
+  // TODO: camera stuff
+  public static final defaultFragmentSource:String = "#pragma header
 
 void main(void)
 {
@@ -593,15 +700,17 @@ void main(void)
 }";
 }
 
-class ShaderTypeException extends Exception {
-	var has:Class<Dynamic>;
-	var want:Class<Dynamic>;
-	var name:String;
+class ShaderTypeException extends Exception
+{
+  var has:Class<Dynamic>;
+  var want:Class<Dynamic>;
+  var name:String;
 
-	public function new(name:String, has:Class<Dynamic>, want:Dynamic) {
-		this.has = has;
-		this.want = want;
-		this.name = name;
-		super('ShaderTypeException - Tried to set the shader uniform "${name}" as a ${Type.getClassName(has)}, but the shader uniform is a ${Std.string(want)}.');
-	}
+  public function new(name:String, has:Class<Dynamic>, want:Dynamic)
+  {
+    this.has = has;
+    this.want = want;
+    this.name = name;
+    super('ShaderTypeException - Tried to set the shader uniform "${name}" as a ${Type.getClassName(has)}, but the shader uniform is a ${Std.string(want)}.');
+  }
 }

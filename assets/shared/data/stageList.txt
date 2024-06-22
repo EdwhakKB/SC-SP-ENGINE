@@ -1,9 +1,9 @@
-stage
-spooky
-philly
-limo
-mall
+mainStage
+spookyMansion
+phillyTrain
+limoRide
+mallXmas
 mallEvil
 school
 schoolEvil
-tank
+tankmanBattlefield

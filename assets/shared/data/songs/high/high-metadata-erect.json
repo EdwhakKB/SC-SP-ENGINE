@@ -1,0 +1,76 @@
+{
+  "songData": {
+    "playData": {
+      "version": "2.2.2",
+      "songName": "High",
+      "songVariations": [],
+      "difficulties": ["erect", "nightmare"],
+      "characters": {
+        "player": "bf-car",
+        "girlfriend": "gf-car",
+        "opponent": "mom-car",
+        "instrumental": "erect"
+      },
+      "stage": "limoRide",
+      "gameOverData": {
+        "gameOverChart": "bf-dead",
+        "gameOverSound": "fnf_loss_sfx",
+        "gameOverLoop": "gameOver",
+        "gameOverEnd": "gameOverEnd"
+      },
+      "options": {
+        "disableNoteRGB": false,
+        "disableNoteQuantRGB": false,
+        "disableStrumRGB": false,
+        "disableSplashRGB": false,
+        "disableHoldCoverRGB": false,
+        "disableHoldCover": false,
+        "disableCaching": false,
+        "notITG": false,
+        "usesHUD": false,
+        "oldBaSystem": false,
+        "rightScroll": false,
+        "middleScroll": false,
+        "blockOpponentMode": false,
+        "arrowSkin": null,
+        "splashSkin": "",
+        "holdCoverSkin": "",
+        "opponentNoteStyle": "",
+        "playerNoteStyle": "",
+        "vocalsPrefix": "",
+        "vocalsSuffix": "",
+        "instrumentalPrefix": "",
+        "instrumentalSuffix": ""
+      },
+      "ratings": {
+        "nightmare": 8,
+        "erect": 7
+      },
+      "timeChanges": [
+        {
+          "t": 0,
+          "b": 0,
+          "bpm": 125,
+          "n": 4,
+          "d": 4,
+          "bt": [4, 4, 4, 4]
+        }
+      ]
+    },
+    "inclusiveData": {
+      "divisions": 96,
+      "looped": false,
+      "offsets": {
+        "instrumental": 0,
+        "altInstrumentals": {},
+        "vocals": {}
+      },
+      "generatedBy": "Friday Night Funkin' - v0.3.0 (rewrite/master : 9c19d95) PROTOTYPE",
+      "timeFormat": "ms",
+      "previewStart": 0,
+      "previewEnd": 0,
+      "artist": "Kohta Takahashi (feat. Kawai Sprite)",
+      "charter": "PhantomArcade + fabs + SpazKid"
+    }
+  }
+}

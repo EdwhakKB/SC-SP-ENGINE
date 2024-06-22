@@ -1,0 +1,62 @@
+{
+  "songData": {
+    "playData": {
+      "songName": "Cocoa",
+      "version": "2.2.1",
+      "stage": "mallXmas",
+      "characters": {
+        "player": "bf-christmas",
+        "girlfriend": "gf-christmas",
+        "opponent": "parents-christmas"
+      },
+      "songVariations": [],
+      "difficulties": ["easy", "normal", "hard"],
+      "ratings": {
+        "easy": 1,
+        "normal": 1,
+        "hard": 2
+      },
+      "gameOverData": {
+        "gameOverChart": "bf-dead",
+        "gameOverSound": "fnf_loss_sfx",
+        "gameOverLoop": "gameOver",
+        "gameOverEnd": "gameOverEnd"
+      },
+      "options": {
+        "disableNoteRGB": false,
+        "disableNoteQuantRGB": false,
+        "disableStrumRGB": false,
+        "disableSplashRGB": false,
+        "disableHoldCoverRGB": false,
+        "disableHoldCover": false,
+        "disableCaching": false,
+        "notITG": false,
+        "usesHUD": false,
+        "oldBaSystem": false,
+        "rightScroll": false,
+        "middleScroll": false,
+        "blockOpponentMode": false,
+        "arrowSkin": null,
+        "splashSkin": "",
+        "holdCoverSkin": "",
+        "opponentNoteStyle": "",
+        "playerNoteStyle": "",
+        "vocalsPrefix": "",
+        "vocalsSuffix": "",
+        "instrumentalPrefix": "",
+        "instrumentalSuffix": ""
+      },
+      "timeChanges": [
+        { "d": 4, "n": 4, "t": -1, "bt": [4, 4, 4, 4], "bpm": 100 }
+      ]
+    },
+    "inclusiveData": {
+      "generatedBy": "Chart Editor Import (FNF Legacy)",
+      "looped": false,
+      "timeFormat": "ms",
+      "artist": "Kawai Sprite",
+      "charter": "ninjamuffin99 + MtH",
+      "album": "volume1"
+    }
+  }
+}
