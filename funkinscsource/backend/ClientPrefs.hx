@@ -176,11 +176,7 @@ import charting.ChartEditorState.ChartEditorLiveInputStyle;
   // Started Freeplay Warn!
   public var freeplayWarn:Bool = false;
 
-<<<<<<< Updated upstream
-	public var guitarHeroSustains:Bool = true;
-=======
   public var newSustainBehavior:Bool = true;
->>>>>>> Stashed changes
 
   public var coloredText:Bool = false;
 
@@ -194,19 +190,10 @@ import charting.ChartEditorState.ChartEditorLiveInputStyle;
 
   public var iconMovement:String = 'None';
 
-<<<<<<< Updated upstream
-	public var skipInitialCaching:Bool = true;
-
-	public var gradientSystemForOldBars:Bool = false;
-=======
   public var gradientSystemForOldBars:Bool = false;
->>>>>>> Stashed changes
 
   public var heyIntro:Bool = false;
 
-<<<<<<< Updated upstream
-	public var pauseCountDown:Bool = false;
-=======
   public var pauseCountDown:Bool = false;
 
   public var colorFilter:String = "NONE";
@@ -234,7 +221,6 @@ import charting.ChartEditorState.ChartEditorLiveInputStyle;
 
   public var inputOffset:Int = 0;
   public var audioVisualOffset:Int = 0;
->>>>>>> Stashed changes
 }
 
 class ClientPrefs
@@ -356,12 +342,6 @@ class ClientPrefs
     }
     #end
 
-<<<<<<< Updated upstream
-		#if DISCORD_ALLOWED
-		DiscordClient.check();
-		#end
-	}
-=======
     if (data.framerate > FlxG.drawFramerate)
     {
       FlxG.updateFramerate = data.framerate;
@@ -372,7 +352,6 @@ class ClientPrefs
       FlxG.drawFramerate = data.framerate;
       FlxG.updateFramerate = data.framerate;
     }
->>>>>>> Stashed changes
 
     if (FlxG.save.data.gameplaySettings != null)
     {

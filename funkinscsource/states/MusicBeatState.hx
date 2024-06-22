@@ -2,11 +2,6 @@ package states;
 
 import flixel.FlxState;
 import flixel.FlxSubState;
-<<<<<<< Updated upstream
-import flixel.addons.ui.FlxUIState;
-import flixel.addons.transition.FlxTransitionableState;
-=======
->>>>>>> Stashed changes
 import flixel.addons.transition.TransitionData;
 import flixel.addons.transition.Transition;
 import backend.PsychCamera;
@@ -66,19 +61,10 @@ class MusicBeatState extends #if SCEModchartingTools modcharting.ModchartMusicBe
         subState = null;
       }
 
-<<<<<<< Updated upstream
-	override function create()
-	{
-		destroySubStates = false;
-		FlxG.mouse.visible = true;
-		var skip:Bool = FlxTransitionableState.skipNextTransOut;
-		#if MODS_ALLOWED Mods.updatedOnState = false; #end
-=======
       subStates.resize(0);
     }
 
     super.destroy();
->>>>>>> Stashed changes
 
     Conductor.beatHit.remove(this.beatHit);
     Conductor.stepHit.remove(this.stepHit);
@@ -94,19 +80,12 @@ class MusicBeatState extends #if SCEModchartingTools modcharting.ModchartMusicBe
   public static function getVariables()
     return getState().variables;
 
-<<<<<<< Updated upstream
-		if (oldStep != curStep)
-		{
-			if(curStep > 0)
-				stepHit();
-=======
   override function create()
   {
     destroySubStates = false;
     FlxG.mouse.visible = true;
     var skip:Bool = FlxTransitionableState.skipNextTransOut;
     #if MODS_ALLOWED Mods.updatedOnState = false; #end
->>>>>>> Stashed changes
 
     if (!_psychCameraInitialized) initPsychCamera();
 
@@ -194,81 +173,8 @@ class MusicBeatState extends #if SCEModchartingTools modcharting.ModchartMusicBe
 
   public function sectionHit():Void {}
 
-<<<<<<< Updated upstream
-		var shit = ((Conductor.songPosition - ClientPrefs.data.noteOffset) - lastChange.songTime) / lastChange.stepCrochet;
-		curDecStep = lastChange.stepTime + shit;
-		curStep = lastChange.stepTime + Math.floor(shit);
-	}
-
-	public static function switchState(nextState:FlxState = null, ?time:Float = 0.75) {
-		if(nextState == null) nextState = FlxG.state;
-		if(nextState == FlxG.state)
-		{
-			resetState();
-			return;
-		}
-
-		if(FlxTransitionableState.skipNextTransIn) FlxG.switchState(nextState);
-		else startTransition(nextState, time);
-		FlxTransitionableState.skipNextTransIn = false;
-	}
-
-	public static function resetState() {
-		if(FlxTransitionableState.skipNextTransIn) FlxG.resetState();
-		else startTransition();
-		FlxTransitionableState.skipNextTransIn = false;
-	}
-
-	// Custom made Trans in
-	public static function startTransition(nextState:FlxState = null, ?time:Float = 0.75)
-	{
-		if(nextState == null)
-			nextState = FlxG.state;
-
-		FlxG.state.openSubState(new IndieDiamondTransSubState(time, false, FlxG.camera.zoom));
-		if(nextState == FlxG.state) IndieDiamondTransSubState.finishCallback = function() FlxG.resetState();
-		else IndieDiamondTransSubState.finishCallback = function() FlxG.switchState(nextState);
-	}
-
-	public static function getState():MusicBeatState {
-		return cast (FlxG.state, MusicBeatState);
-	}
-
-	public function getNoteSkinPostfix()
-	{
-		var skin:String = '';
-		if(ClientPrefs.data.noteSkin != ClientPrefs.defaultData.noteSkin)
-			skin = '-' + ClientPrefs.data.noteSkin.trim().toLowerCase().replace(' ', '_');
-		return skin;
-	}
-
-	public function stepHit():Void
-	{
-		if (curStep % 4 == 0)
-			beatHit();
-	}
-
-	public function beatHit():Void
-	{
-		//Debug.logTrace('Beat: ' + curBeat);
-	}
-
-	public function sectionHit():Void
-	{
-		//Debug.logTrace('Section: ' + curSection + ', Beat: ' + curBeat + ', Step: ' + curStep);
-	}
-
-
-	function getBeatsOnSection()
-	{
-		var val:Null<Float> = 4;
-		if(PlayState.SONG != null && PlayState.SONG.notes[curSection] != null) val = PlayState.SONG.notes[curSection].sectionBeats;
-		return val == null ? 4 : val;
-	}
-=======
   public function refresh()
   {
     sort(utils.SortUtil.byZIndex, flixel.util.FlxSort.ASCENDING);
   }
->>>>>>> Stashed changes
 }

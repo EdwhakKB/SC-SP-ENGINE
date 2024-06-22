@@ -15,26 +15,6 @@ import objects.MenuCharacter;
 
 class MenuCharacterEditorState extends MusicBeatState
 {
-<<<<<<< Updated upstream
-	var grpWeekCharacters:FlxTypedGroup<MenuCharacter>;
-	var characterFile:MenuCharacterFile = null;
-	var txtOffsets:FlxText;
-	var defaultCharacters:Array<String> = ['dad', 'bf', 'gf'];
-
-	override function create() {
-		characterFile = {
-			image: 'Menu_Dad',
-			scale: 1,
-			position: [0, 0],
-			idle_anim: 'M Dad Idle',
-			confirm_anim: 'M Dad Idle',
-			flipX: false
-		};
-		#if DISCORD_ALLOWED
-		// Updating Discord Rich Presence
-		DiscordClient.changePresence("Menu Character Editor", "Editting: " + characterFile.image);
-		#end
-=======
   var grpWeekCharacters:FlxTypedGroup<MenuCharacter>;
   var characterFile:MenuCharacterFile = null;
   var txtOffsets:FlxText;
@@ -57,7 +37,6 @@ class MenuCharacterEditorState extends MusicBeatState
     // Updating Discord Rich Presence
     DiscordClient.changePresence("Menu Character Editor", "Editting: " + characterFile.image);
     #end
->>>>>>> Stashed changes
 
     grpWeekCharacters = new FlxTypedGroup<MenuCharacter>();
     for (char in 0...3)
@@ -93,18 +72,6 @@ class MenuCharacterEditorState extends MusicBeatState
   var UI_mainbox:FlxUITabMenu;
   var blockPressWhileTypingOn:Array<FlxUIInputText> = [];
 
-<<<<<<< Updated upstream
-		var tabs = [
-			{name: 'Character', label: 'Character'},
-		];
-		UI_mainbox = new FlxUITabMenu(null, tabs, true);
-		UI_mainbox.resize(240, 180);
-		UI_mainbox.x = FlxG.width - UI_mainbox.width - 100;
-		UI_mainbox.y = FlxG.height - UI_mainbox.height - 50;
-		UI_mainbox.scrollFactor.set();
-		addCharacterUI();
-		add(UI_mainbox);
-=======
   function addEditorBox()
   {
     var tabs = [
@@ -116,7 +83,6 @@ class MenuCharacterEditorState extends MusicBeatState
     UI_typebox.scrollFactor.set();
     addTypeUI();
     add(UI_typebox);
->>>>>>> Stashed changes
 
     var tabs = [
       {name: 'Character', label: 'Character'},];
@@ -159,29 +125,11 @@ class MenuCharacterEditorState extends MusicBeatState
       updateCharTypeBox();
     };
 
-<<<<<<< Updated upstream
-	var imageInputText:FlxUIInputText;
-	var idleInputText:FlxUIInputText;
-	var confirmInputText:FlxUIInputText;
-	var scaleStepper:FlxUINumericStepper;
-	var flipXCheckbox:FlxUICheckBox;
-	function addCharacterUI() {
-		var tab_group = new FlxUI(null, UI_mainbox);
-		tab_group.name = "Character";
-		
-		imageInputText = new FlxUIInputText(10, 20, 80, characterFile.image, 8);
-		blockPressWhileTypingOn.push(imageInputText);
-		idleInputText = new FlxUIInputText(10, imageInputText.y + 35, 100, characterFile.idle_anim, 8);
-		blockPressWhileTypingOn.push(idleInputText);
-		confirmInputText = new FlxUIInputText(10, idleInputText.y + 35, 100, characterFile.confirm_anim, 8);
-		blockPressWhileTypingOn.push(confirmInputText);
-=======
     boyfriendCheckbox = new FlxUICheckBox(opponentCheckbox.x, opponentCheckbox.y + 40, null, null, "Boyfriend", 100);
     boyfriendCheckbox.callback = function() {
       curTypeSelected = 1;
       updateCharTypeBox();
     };
->>>>>>> Stashed changes
 
     girlfriendCheckbox = new FlxUICheckBox(boyfriendCheckbox.x, boyfriendCheckbox.y + 40, null, null, "Girlfriend", 100);
     girlfriendCheckbox.callback = function() {
@@ -189,27 +137,6 @@ class MenuCharacterEditorState extends MusicBeatState
       updateCharTypeBox();
     };
 
-<<<<<<< Updated upstream
-		var reloadImageButton:FlxButton = new FlxButton(140, confirmInputText.y + 30, "Reload Char", function() {
-			reloadSelectedCharacter();
-		});
-		
-		scaleStepper = new FlxUINumericStepper(140, imageInputText.y, 0.05, 1, 0.1, 30, 2);
-
-		var confirmDescText = new FlxText(10, confirmInputText.y - 18, 0, 'Start Press animation on the .XML:');
-		tab_group.add(new FlxText(10, imageInputText.y - 18, 0, 'Image file name:'));
-		tab_group.add(new FlxText(10, idleInputText.y - 18, 0, 'Idle animation on the .XML:'));
-		tab_group.add(new FlxText(scaleStepper.x, scaleStepper.y - 18, 0, 'Scale:'));
-		tab_group.add(flipXCheckbox);
-		tab_group.add(reloadImageButton);
-		tab_group.add(confirmDescText);
-		tab_group.add(imageInputText);
-		tab_group.add(idleInputText);
-		tab_group.add(confirmInputText);
-		tab_group.add(scaleStepper);
-		UI_mainbox.addGroup(tab_group);
-	}
-=======
     tab_group.add(opponentCheckbox);
     tab_group.add(boyfriendCheckbox);
     tab_group.add(girlfriendCheckbox);
@@ -227,7 +154,6 @@ class MenuCharacterEditorState extends MusicBeatState
   {
     var tab_group = new FlxUI(null, UI_mainbox);
     tab_group.name = "Character";
->>>>>>> Stashed changes
 
     imageInputText = new FlxUIInputText(10, 20, 80, characterFile.image, 8);
     blockPressWhileTypingOn.push(imageInputText);
@@ -270,24 +196,6 @@ class MenuCharacterEditorState extends MusicBeatState
     UI_mainbox.addGroup(tab_group);
   }
 
-<<<<<<< Updated upstream
-	override function getEvent(id:String, sender:Dynamic, data:Dynamic, ?params:Array<Dynamic>) {
-		if(id == FlxUIInputText.CHANGE_EVENT && (sender is FlxUIInputText)) {
-			if(sender == imageInputText) {
-				characterFile.image = imageInputText.text;
-			} else if(sender == idleInputText) {
-				characterFile.idle_anim = idleInputText.text;
-			} else if(sender == confirmInputText) {
-				characterFile.confirm_anim = confirmInputText.text;
-			}
-		} else if(id == FlxUINumericStepper.CHANGE_EVENT && (sender is FlxUINumericStepper)) {
-			if (sender == scaleStepper) {
-				characterFile.scale = scaleStepper.value;
-				reloadSelectedCharacter();
-			}
-		}
-	}
-=======
   function updateCharTypeBox()
   {
     opponentCheckbox.checked = false;
@@ -303,7 +211,6 @@ class MenuCharacterEditorState extends MusicBeatState
       case 2:
         girlfriendCheckbox.checked = true;
     }
->>>>>>> Stashed changes
 
     updateCharacters();
   }
@@ -320,18 +227,9 @@ class MenuCharacterEditorState extends MusicBeatState
     reloadSelectedCharacter();
   }
 
-<<<<<<< Updated upstream
-		if(!blockInput) {
-			ClientPrefs.toggleVolumeKeys(true);
-			if(FlxG.keys.justPressed.ESCAPE) {
-				MusicBeatState.switchState(new states.editors.MasterEditorMenu());
-				FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
-			}
-=======
   function reloadSelectedCharacter()
   {
     var char:MenuCharacter = grpWeekCharacters.members[curTypeSelected];
->>>>>>> Stashed changes
 
     char.alpha = 1;
     char.frames = Paths.getSparrowAtlas('menucharacters/' + characterFile.image);

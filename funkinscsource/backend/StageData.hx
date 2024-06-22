@@ -1,49 +1,6 @@
 package backend;
 
 import openfl.utils.Assets;
-<<<<<<< Updated upstream
-import backend.Song;
-
-typedef StageFile = {
-	var directory:String;
-	var defaultZoom:Float;
-	var isPixelStage:Bool;
-	var stageUI:String;
-
-	var boyfriend:Array<Dynamic>;
-	var girlfriend:Array<Dynamic>;
-	var opponent:Array<Dynamic>;
-	var opponent2:Array<Dynamic>;
-	var hide_girlfriend:Bool;
-
-	var camera_boyfriend:Array<Float>;
-	var camera_opponent:Array<Float>;
-	var camera_opponent2:Array<Float>;
-	var camera_girlfriend:Array<Float>;
-	var camera_speed:Null<Float>;
-
-	var ratingSkin:Array<String>;
-	var countDownAssets:Array<String>;
-	var has3rdIntroAsset:Bool;
-
-	var introSoundsPrefix:String;
-	var introSoundsSuffix:String;
-
-	var cameraXYMovement:Array<Float>;
-
-	var ratingOffsets:Array<Array<Float>>;
-
-	var introSpriteScales:Array<Array<Float>>;
-}
-
-class StageData {
-	public static function dummy():StageFile {
-		return {
-			directory: "",
-			defaultZoom: 0.9,
-			isPixelStage: false,
-			stageUI: "normal",
-=======
 import backend.song.Song;
 import psychlua.ModchartSprite;
 
@@ -139,7 +96,6 @@ class StageData
       directory: "",
       defaultZoom: 0.9,
       stageUI: "normal",
->>>>>>> Stashed changes
 
       boyfriend: [770, 100],
       girlfriend: [400, 130],
@@ -164,11 +120,6 @@ class StageData
 
       ratingOffsets: [[0, 0], [0, 0]],
 
-<<<<<<< Updated upstream
-			introSpriteScales: [[1, 1], [1, 1], [1, 1], [1, 1]]
-		};
-	}
-=======
       introSpriteScales: [[1, 1], [1, 1], [1, 1], [1, 1]],
 
       _editorMeta:
@@ -179,58 +130,9 @@ class StageData
         }
     };
   }
->>>>>>> Stashed changes
 
   public static var forceNextDirectory:String = null;
 
-<<<<<<< Updated upstream
-		var stageFile:StageFile = getStageFile(stage);
-		if (stageFile == null) forceNextDirectory = ''; // preventing crashes
-		else forceNextDirectory = stageFile.directory;
-	}
-
-	public static function getStageFile(stage:String):StageFile {
-		var rawJson:String = null;
-		var path:String = Paths.getSharedPath('stages/' + stage + '.json');
-
-		#if sys
-		#if MODS_ALLOWED
-		var modPath:String = Paths.modFolders('stages/' + stage + '.json');
-		if (FileSystem.exists(modPath)) rawJson = File.getContent(modPath);
-		else
-		#end
-		if (FileSystem.exists(path)) rawJson = File.getContent(path);
-		else
-		#end
-		if (Assets.exists(path)) rawJson = Assets.getText(path);
-		else return null;
-		return cast tjson.TJSON.parse(rawJson);
-	}
-
-	public static function vanillaSongStage(songName):String
-	{
-		switch (songName)
-		{
-			case 'spookeez' | 'south' | 'monster':
-				return 'spooky';
-			case 'pico' | 'blammed' | 'philly' | 'philly-nice':
-				return 'philly';
-			case 'milf' | 'satin-panties' | 'high':
-				return 'limo';
-			case 'cocoa' | 'eggnog':
-				return 'mall';
-			case 'winter-horrorland':
-				return 'mallEvil';
-			case 'senpai' | 'roses':
-				return 'school';
-			case 'thorns':
-				return 'schoolEvil';
-			case 'ugh' | 'guns' | 'stress':
-				return 'tank';
-		}
-		return 'stage';
-	}
-=======
   public static function loadDirectory()
   {
     var stage:String = '';
@@ -394,5 +296,4 @@ class StageData
     return ((ClientPrefs.data.lowQuality && (filters & LOW_QUALITY) == LOW_QUALITY)
       || (!ClientPrefs.data.lowQuality && (filters & HIGH_QUALITY) == HIGH_QUALITY));
   }
->>>>>>> Stashed changes
 }

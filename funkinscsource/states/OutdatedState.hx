@@ -28,31 +28,6 @@ class OutdatedState extends MusicBeatState
     add(warnText);
   }
 
-<<<<<<< Updated upstream
-	override function update(elapsed:Float)
-	{
-		if(!leftState) {
-			if (controls.ACCEPT) {
-				leftState = true;
-				CoolUtil.browserLoad("https://gamebanana.com/tools/15266");
-			}
-			else if(controls.BACK) {
-				leftState = true;
-			}
-
-			if(leftState)
-			{
-				FlxG.sound.play(Paths.sound('cancelMenu'));
-				FlxTween.tween(warnText, {alpha: 0}, 1, {
-					onComplete: function (twn:FlxTween) {
-						MusicBeatState.switchState(new MainMenuState());
-					}
-				});
-			}
-		}
-		super.update(elapsed);
-	}
-=======
   override function update(elapsed:Float)
   {
     if (!leftState)
@@ -79,5 +54,4 @@ class OutdatedState extends MusicBeatState
     }
     super.update(elapsed);
   }
->>>>>>> Stashed changes
 }

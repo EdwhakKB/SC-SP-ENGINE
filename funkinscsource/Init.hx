@@ -2,20 +2,8 @@ package;
 
 import flixel.graphics.FlxGraphic;
 import flixel.FlxState;
-<<<<<<< Updated upstream
-import flixel.addons.transition.FlxTransitionableState;
-
 import states.TitleState;
 import states.FlashingState;
-
-#if (cpp && windows)
-import cpp.CPPInterface;
-#end
-
-=======
-import states.TitleState;
-import states.FlashingState;
->>>>>>> Stashed changes
 import debug.FPSCounter;
 import openfl.Lib;
 import backend.Highscore;
@@ -24,11 +12,7 @@ import lime.app.Application;
 
 class Init extends FlxState
 {
-<<<<<<< Updated upstream
-	var mouseCursor:FlxSprite;
-=======
   public static var mouseCursor:FlxSprite;
->>>>>>> Stashed changes
 
   override function create()
   {
@@ -65,16 +49,6 @@ class Init extends FlxState
 
     FlxG.save.bind('funkin', CoolUtil.getSavePath());
 
-<<<<<<< Updated upstream
-		ClientPrefs.loadPrefs();
-		ClientPrefs.keybindSaveLoad();
-
-		#if !(flixel >= "5.4.0")
-		FlxG.fixedTimestep = false;
-		#end
-		FlxG.game.focusLostFramerate = 60;
-		FlxG.keys.preventDefaultKeys = [TAB];
-=======
     ClientPrefs.loadPrefs();
     ClientPrefs.keybindSaveLoad();
     Language.reloadPhrases();
@@ -83,7 +57,6 @@ class Init extends FlxState
     Debug.logInfo('READING SONGS');
     backend.song.data.SongRegistry.instance.loadEntries();
     Debug.logInfo('READ SONGS');
->>>>>>> Stashed changes
 
     FlxG.fixedTimestep = false;
     FlxG.game.focusLostFramerate = 60;
@@ -126,16 +99,8 @@ class Init extends FlxState
     cpp.NativeGc.run(true);
     #end
 
-<<<<<<< Updated upstream
-		if (Main.checkGJKeysAndId())
-		{
-			GameJoltAPI.connect();
-			GameJoltAPI.authDaUser(ClientPrefs.data.gjUser, ClientPrefs.data.gjToken);
-		}
-=======
     // Finish up loading debug tools.
     Debug.onGameStart();
->>>>>>> Stashed changes
 
     if (Main.checkGJKeysAndId())
     {
@@ -143,22 +108,6 @@ class Init extends FlxState
       GameJoltAPI.authDaUser(ClientPrefs.data.gjUser, ClientPrefs.data.gjToken, true);
     }
 
-<<<<<<< Updated upstream
-		if(FlxG.save.data.flashing == null && !FlashingState.leftState) {
-			FlxTransitionableState.skipNextTransIn = true;
-			FlxTransitionableState.skipNextTransOut = true;
-			MusicBeatState.switchState(new FlashingState());
-		} else {
-			if (!ClientPrefs.data.skipInitialCaching) FlxG.switchState(new InitialCachingState());
-			else FlxG.switchState(Type.createInstance(Main.game.initialState, []));
-		}
-
-		#if (cpp && windows)
-		CPPInterface.darkMode();
-		#end
-	}
-}
-=======
     if (FlxG.save.data != null && FlxG.save.data.fullscreen) FlxG.fullscreen = FlxG.save.data.fullscreen;
 
     if (FlxG.save.data.flashing == null && !FlashingState.leftState)
@@ -175,4 +124,3 @@ class Init extends FlxState
     if (ClientPrefs.data.gjUser.toLowerCase() == 'glowsoony') FlxG.scaleMode = new flixel.system.scaleModes.FillScaleMode();
   }
 }
->>>>>>> Stashed changes

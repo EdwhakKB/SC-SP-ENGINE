@@ -5,13 +5,7 @@ import flixel.addons.ui.interfaces.IFlxUIClickable;
 import flixel.addons.ui.interfaces.IFlxUIWidget;
 import flixel.addons.ui.interfaces.IHasParams;
 import flixel.ui.FlxButton;
-<<<<<<< Updated upstream
-
 import flixel.util.FlxDestroyUtil;
-import flixel.util.FlxStringUtil;
-=======
-import flixel.util.FlxDestroyUtil;
->>>>>>> Stashed changes
 import flixel.addons.ui.FlxUIGroup;
 import flixel.addons.ui.FlxUIText;
 import flixel.addons.ui.FlxUIButton;

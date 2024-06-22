@@ -68,17 +68,6 @@ class RGBShaderReference
     _original = ref;
     owner.shader = ref.shader;
 
-<<<<<<< Updated upstream
-			parent = new RGBPalette();
-			parent.r = _original.r;
-			parent.g = _original.g;
-			parent.b = _original.b;
-			parent.mult = _original.mult;
-			_owner.shader = parent.shader;
-			//Debug.logTrace('created new shader');
-		}
-	}
-=======
     @:bypassAccessor
     {
       r = parent.r;
@@ -135,7 +124,6 @@ class RGBShaderReference
       _owner.shader = parent.shader;
     }
   }
->>>>>>> Stashed changes
 }
 
 class RGBPaletteShader extends FlxFixedShader

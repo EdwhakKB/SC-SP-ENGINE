@@ -255,21 +255,6 @@ class NoteSplashDebugState extends MusicBeatState
       if (visibleTime <= 0) savedText.visible = false;
     }
 
-<<<<<<< Updated upstream
-		if(updatedFrame)
-		{
-			if(forceFrame < 0) forceFrame = 0;
-			else if(forceFrame >= maxFrame) forceFrame = maxFrame - 1;
-			//Debug.logTrace('curFrame: $forceFrame');
-			
-			curFrameText.text = 'Force Frame: ${forceFrame+1} / $maxFrame\n(Press Q/E to change)';
-			splashes.forEachAlive(function(spr:FlxSprite) {
-				spr.animation.curAnim.paused = true;
-				spr.animation.curAnim.curFrame = forceFrame;
-			});
-		}
-	}
-=======
     if (FlxG.keys.justPressed.ENTER)
     {
       savedText.text = 'Press ENTER again to save.';
@@ -292,7 +277,6 @@ class NoteSplashDebugState extends MusicBeatState
     if (FlxG.keys.justPressed.SPACE) changeAnim();
     else if (FlxG.keys.justPressed.S) changeAnim(-1);
     else if (FlxG.keys.justPressed.W) changeAnim(1);
->>>>>>> Stashed changes
 
     // Force frame
     var updatedFrame:Bool = false;
@@ -322,45 +306,12 @@ class NoteSplashDebugState extends MusicBeatState
   var texturePath:String = '';
   var copiedArray:Array<Float> = null;
 
-<<<<<<< Updated upstream
-		var pathSplit:Array<String> = (Paths.getPath('images/$texturePath.png', IMAGE, true).split('.png')[0] + '.txt').split(':');
-		var path:String = pathSplit[pathSplit.length-1].trim();
-		savedText.text = 'Saved to: $path';
-		File.saveContent(path, strToSave);
-
-		//Debug.logTrace(strToSave);
-		#else
-		savedText.text = 'Can\'t save on this platform, too bad.';
-		#end
-	}
-	
-	override function getEvent(id:String, sender:Dynamic, data:Dynamic, ?params:Array<Dynamic>)
-	{
-		if (id == FlxUINumericStepper.CHANGE_EVENT && (sender is FlxUINumericStepper))
-		{
-			var nums:FlxUINumericStepper = cast sender;
-			var wname = nums.name;
-			switch(wname)
-			{
-				case 'min_fps':
-					if(nums.value > stepperMaxFps.value)
-						stepperMaxFps.value = nums.value;
-				case 'max_fps':
-					if(nums.value < stepperMinFps.value)
-						stepperMinFps.value = nums.value;
-			}
-			config.minFps = Std.int(stepperMinFps.value);
-			config.maxFps = Std.int(stepperMaxFps.value);
-		}
-	}
-=======
   function loadFrames()
   {
     texturePath = textureName; // no need for "noteSplashes/" because has autoSupport
     splashes.forEachAlive(function(spr:FlxSprite) {
       spr.frames = Paths.getSparrowAtlas(texturePath);
     });
->>>>>>> Stashed changes
 
     // Initialize config
     NoteSplash.configs.clear();
@@ -398,14 +349,6 @@ class NoteSplashDebugState extends MusicBeatState
     #end
   }
 
-<<<<<<< Updated upstream
-	function changeSelection(change:Int = 0)
-	{
-		var max:Int = Note.colArray.length;
-		curSelected += change;
-		if(curSelected < 0) curSelected = max - 1;
-		else if(curSelected >= max) curSelected = 0;
-=======
   /*override function getEvent(id:String, sender:Dynamic, data:Dynamic, ?params:Array<Dynamic>)
     {
       if (id == FlxUINumericStepper.CHANGE_EVENT && (sender is FlxUINumericStepper))
@@ -426,7 +369,6 @@ class NoteSplashDebugState extends MusicBeatState
       }
   }*/
   var maxAnims:Int = 0;
->>>>>>> Stashed changes
 
   function reloadAnims()
   {

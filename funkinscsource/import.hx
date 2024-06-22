@@ -19,19 +19,11 @@ import backend.Conductor;
 import backend.Difficulty;
 import backend.Mods;
 import backend.Debug;
-<<<<<<< Updated upstream
-
-import objects.Alphabet;
-import objects.BGSprite;
-import objects.Stage;
-
-=======
 import backend.Language;
 import objects.Alphabet;
 import objects.BGSprite;
 import objects.Stage;
 import objects.FunkinSCSprite;
->>>>>>> Stashed changes
 import states.PlayState;
 import states.LoadingState;
 import states.MusicBeatState;
@@ -54,27 +46,16 @@ import flixel.group.FlxSpriteGroup;
 import flixel.group.FlxGroup;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.sound.FlxSound;
-<<<<<<< Updated upstream
-
-//Flixel Addons
-=======
 // Flixel Addons
 import flixel.addons.transition.FlxTransitionableState;
->>>>>>> Stashed changes
 import flixel.addons.effects.FlxSkewedSprite as FlxSkewed;
 #if flxanimate
 import flxanimate.*;
 #else
 import animateatlas.AtlasFrameMaker;
 #end
-<<<<<<< Updated upstream
-
-#if modchartingTools
-import modchartingTools.modcharting.*;
-=======
 #if SCEModchartingTools
 import fnf_modcharting_tools.modcharting.*;
->>>>>>> Stashed changes
 #else
 import modcharting.*;
 #end

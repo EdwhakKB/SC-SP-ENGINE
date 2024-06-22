@@ -2,11 +2,6 @@ package states;
 
 import flixel.FlxSubState;
 import flixel.effects.FlxFlicker;
-<<<<<<< Updated upstream
-import flixel.addons.transition.FlxTransitionableState;
-
-=======
->>>>>>> Stashed changes
 import lime.app.Application;
 
 class FlashingState extends MusicBeatState
@@ -32,39 +27,6 @@ class FlashingState extends MusicBeatState
     add(warnText);
   }
 
-<<<<<<< Updated upstream
-	override function update(elapsed:Float)
-	{
-		if(!leftState) {
-			var back:Bool = controls.BACK;
-			if (controls.ACCEPT || back) {
-				leftState = true;
-				FlxTransitionableState.skipNextTransIn = true;
-				FlxTransitionableState.skipNextTransOut = true;
-				if(!back) {
-					ClientPrefs.data.flashing = false;
-					ClientPrefs.saveSettings();
-					FlxG.sound.play(Paths.sound('confirmMenu'));
-					FlxFlicker.flicker(warnText, 1, 0.1, false, true, function(flk:FlxFlicker) {
-						new FlxTimer().start(0.5, function (tmr:FlxTimer) {
-							if (!ClientPrefs.data.skipInitialCaching) FlxG.switchState(new InitialCachingState());
-							else MusicBeatState.switchState(new TitleState());
-						});
-					});
-				} else {
-					FlxG.sound.play(Paths.sound('cancelMenu'));
-					FlxTween.tween(warnText, {alpha: 0}, 1, {
-						onComplete: function (twn:FlxTween) {
-							if (!ClientPrefs.data.skipInitialCaching) FlxG.switchState(new InitialCachingState());
-							else MusicBeatState.switchState(new TitleState());
-						}
-					});
-				}
-			}
-		}
-		super.update(elapsed);
-	}
-=======
   override function update(elapsed:Float)
   {
     if (!leftState)
@@ -100,5 +62,4 @@ class FlashingState extends MusicBeatState
     }
     super.update(elapsed);
   }
->>>>>>> Stashed changes
 }

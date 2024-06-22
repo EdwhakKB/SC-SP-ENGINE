@@ -25,13 +25,7 @@ class DialogueBox extends FlxSpriteGroup
   var handSelect:FlxSprite;
   var bgFade:FlxSprite;
 
-<<<<<<< Updated upstream
-	public function new(talkingRight:Bool = true, ?dialogueList:Array<String>)
-	{
-		super();
-=======
   var songName:String = PlayState.currentChart.songName;
->>>>>>> Stashed changes
 
   public function new(talkingRight:Bool = true, ?dialogueList:Array<String>)
   {
@@ -42,30 +36,10 @@ class DialogueBox extends FlxSpriteGroup
     bgFade.alpha = 0;
     add(bgFade);
 
-<<<<<<< Updated upstream
-		box = new FlxSprite(-20, 45);
-		
-		var hasDialog = true;
-		switch (PlayState.SONG.songId.toLowerCase())
-		{
-			case 'senpai':
-				box.frames = Paths.getSparrowAtlas('weeb/pixelUI/dialogueBox-pixel');
-				box.animation.addByPrefix('normalOpen', 'Text Box Appear', 24, false);
-				box.animation.addByIndices('normal', 'Text Box Appear instance 1', [4], "", 24);
-			case 'roses':
-				box.frames = Paths.getSparrowAtlas('weeb/pixelUI/dialogueBox-senpaiMad');
-				box.animation.addByPrefix('normalOpen', 'SENPAI ANGRY IMPACT SPEECH', 24, false);
-				box.animation.addByIndices('normal', 'SENPAI ANGRY IMPACT SPEECH instance 1', [4], "", 24);
-			case 'thorns':
-				box.frames = Paths.getSparrowAtlas('weeb/pixelUI/dialogueBox-evil');
-				box.animation.addByPrefix('normalOpen', 'Spirit Textbox spawn', 24, false);
-				box.animation.addByIndices('normal', 'Spirit Textbox spawn instance 1', [11], "", 24);
-=======
     new FlxTimer().start(0.83, function(tmr:FlxTimer) {
       bgFade.alpha += (1 / 5) * 0.7;
       if (bgFade.alpha > 0.7) bgFade.alpha = 0.7;
     }, 5);
->>>>>>> Stashed changes
 
     box = new FlxSprite(-20, 45);
 
@@ -114,19 +88,6 @@ class DialogueBox extends FlxSpriteGroup
     add(portraitRight);
     portraitRight.visible = false;
 
-<<<<<<< Updated upstream
-		dropText = new FlxText(242, 502, Std.int(FlxG.width * 0.6), "", 32);
-		dropText.font = 'Pixel Arial 11 Bold';
-		dropText.color = 0xFFD89494;
-		add(dropText);
-
-		swagDialogue = new FlxTypeText(240, 500, Std.int(FlxG.width * 0.6), "", 32);
-		swagDialogue.font = 'Pixel Arial 11 Bold';
-		swagDialogue.color = 0xFF3F2021;
-		swagDialogue.sounds = [FlxG.sound.load(Paths.sound('pixelText'), 0.6)];
-		add(swagDialogue);
-	}
-=======
     box.animation.play('normalOpen');
     box.setGraphicSize(Std.int(box.width * PlayState.daPixelZoom * 0.9));
     box.updateHitbox();
@@ -134,7 +95,6 @@ class DialogueBox extends FlxSpriteGroup
 
     box.screenCenter(X);
     portraitLeft.screenCenter(X);
->>>>>>> Stashed changes
 
     handSelect = new FlxSprite(1042, 590).loadGraphic(Paths.image('weeb/pixelUI/hand_textbox'));
     handSelect.setGraphicSize(Std.int(handSelect.width * PlayState.daPixelZoom * 0.9));
@@ -142,19 +102,6 @@ class DialogueBox extends FlxSpriteGroup
     handSelect.visible = false;
     add(handSelect);
 
-<<<<<<< Updated upstream
-	override function update(elapsed:Float)
-	{
-		// HARD CODING CUZ IM STUPDI
-		if (PlayState.SONG.songId.toLowerCase() == 'roses')
-			portraitLeft.visible = false;
-		if (PlayState.SONG.songId.toLowerCase() == 'thorns')
-		{
-			portraitLeft.visible = false;
-			swagDialogue.color = FlxColor.WHITE;
-			dropText.color = FlxColor.BLACK;
-		}
-=======
     if (!talkingRight)
     {
       // box.flipX = true;
@@ -164,7 +111,6 @@ class DialogueBox extends FlxSpriteGroup
     dropText.font = Paths.font('pixel-latin.ttf');
     dropText.color = 0xFFD89494;
     add(dropText);
->>>>>>> Stashed changes
 
     swagDialogue = new FlxTypeText(240, 500, Std.int(FlxG.width * 0.6), "", 32);
     swagDialogue.font = Paths.font('pixel-latin.ttf');
@@ -173,20 +119,9 @@ class DialogueBox extends FlxSpriteGroup
     add(swagDialogue);
   }
 
-<<<<<<< Updated upstream
-		if (box.animation.curAnim != null)
-		{
-			if (box.animation.curAnim.name == 'normalOpen' && box.animation.curAnim.finished)
-			{
-				box.animation.play('normal');
-				dialogueOpened = true;
-			}
-		}
-=======
   var dialogueOpened:Bool = false;
   var dialogueStarted:Bool = false;
   var dialogueEnded:Bool = false;
->>>>>>> Stashed changes
 
   override function update(elapsed:Float)
   {
@@ -203,12 +138,7 @@ class DialogueBox extends FlxSpriteGroup
         dropText.color = FlxColor.BLACK;
     }
 
-<<<<<<< Updated upstream
-						if (PlayState.SONG.songId.toLowerCase() == 'senpai' || PlayState.SONG.songId.toLowerCase() == 'thorns')
-							FlxG.sound.music.fadeOut(1.5, 0);
-=======
     dropText.text = swagDialogue.text;
->>>>>>> Stashed changes
 
     if (box.animation.curAnim != null && box.animation.curAnim.name == 'normalOpen' && box.animation.curAnim.finished)
     {
@@ -216,41 +146,11 @@ class DialogueBox extends FlxSpriteGroup
       dialogueOpened = true;
     }
 
-<<<<<<< Updated upstream
-						new FlxTimer().start(1.5, function(tmr:FlxTimer)
-						{
-							finishThing();
-							kill();
-						});
-					}
-				}
-				else
-				{
-					dialogueList.remove(dialogueList[0]);
-					startDialogue();
-					FlxG.sound.play(Paths.sound('clickText'), 0.8);
-				}
-			}
-			else if (dialogueStarted)
-			{
-				FlxG.sound.play(Paths.sound('clickText'), 0.8);
-				swagDialogue.skip();
-				
-				if(skipDialogueThing != null) {
-					skipDialogueThing();
-				}
-			}
-		}
-		
-		super.update(elapsed);
-	}
-=======
     if (dialogueOpened && !dialogueStarted)
     {
       startDialogue();
       dialogueStarted = true;
     }
->>>>>>> Stashed changes
 
     if (Controls.instance.ACCEPT)
     {
@@ -275,31 +175,6 @@ class DialogueBox extends FlxSpriteGroup
               dropText.alpha = swagDialogue.alpha;
             }, 5);
 
-<<<<<<< Updated upstream
-		handSelect.visible = false;
-		dialogueEnded = false;
-		switch (curCharacter)
-		{
-			case 'dad':
-				portraitRight.visible = false;
-				if (!portraitLeft.visible)
-				{
-					if (PlayState.SONG.songId.toLowerCase() == 'senpai') portraitLeft.visible = true;
-					portraitLeft.animation.play('enter');
-				}
-			case 'bf':
-				portraitLeft.visible = false;
-				if (!portraitRight.visible)
-				{
-					portraitRight.visible = true;
-					portraitRight.animation.play('enter');
-				}
-		}
-		if(nextDialogueThing != null) {
-			nextDialogueThing();
-		}
-	}
-=======
             new FlxTimer().start(1.5, function(tmr:FlxTimer) {
               finishThing();
               kill();
@@ -317,7 +192,6 @@ class DialogueBox extends FlxSpriteGroup
       {
         FlxG.sound.play(Paths.sound('clickText'), 0.8);
         swagDialogue.skip();
->>>>>>> Stashed changes
 
         if (skipDialogueThing != null)
         {

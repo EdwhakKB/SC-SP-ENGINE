@@ -11,12 +11,6 @@ class ModchartAnimateSprite extends FlxAnimate
     antialiasing = ClientPrefs.data.antialiasing;
   }
 
-<<<<<<< Updated upstream
-	public function addOffset(name:String, x:Float, y:Float)
-	{
-		animOffsets.set(name, [x, y]);
-	}
-=======
   public function playAnim(name:String, forced:Bool = false, ?reverse:Bool = false, ?startFrame:Int = 0)
   {
     anim.play(name, forced, reverse, startFrame);
@@ -34,6 +28,5 @@ class ModchartAnimateSprite extends FlxAnimate
   {
     animOffsets.remove(name);
   }
->>>>>>> Stashed changes
 }
 #end

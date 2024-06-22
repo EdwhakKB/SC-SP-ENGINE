@@ -18,29 +18,6 @@ class ModSettingsSubState extends BaseOptionsMenu
     // title = name;
     rpcTitle = 'Mod Settings ($name)'; // for Discord Rich Presence
 
-<<<<<<< Updated upstream
-		//save = []; //reset for debug purposes
-		try
-		{
-			for (option in options)
-			{
-				var newOption = new Option(
-					option.name != null ? option.name : option.save,
-					option.description != null ? option.description : 'No description provided.',
-					option.save,
-					option.type,
-					option.options
-				);
-
-				switch(newOption.type)
-				{
-					case 'keybind':
-						//Defaulting and error checking
-						var keyboardStr:String = option.keyboard;
-						var gamepadStr:String = option.gamepad;
-						if(keyboardStr == null) keyboardStr = 'NONE';
-						if(gamepadStr == null) gamepadStr = 'NONE';
-=======
     if (FlxG.save.data.modSettings == null) FlxG.save.data.modSettings = new Map<String, Dynamic>();
     else
     {
@@ -55,7 +32,6 @@ class ModSettingsSubState extends BaseOptionsMenu
       {
         var newOption = new Option(option.name != null ? option.name : option.save,
           option.description != null ? option.description : 'No description provided.', option.save, convertType(option.type), option.options);
->>>>>>> Stashed changes
 
         switch (newOption.type)
         {
@@ -101,21 +77,12 @@ class ModSettingsSubState extends BaseOptionsMenu
           default:
             if (option.value != null) newOption.defaultValue = option.value;
 
-<<<<<<< Updated upstream
-				if(option.type != 'keybind')
-				{
-					if(option.format != null) newOption.displayFormat = option.format;
-					if(option.min != null) newOption.minValue = option.min;
-					if(option.max != null) newOption.maxValue = option.max;
-					if(option.step != null) newOption.changeValue = option.step;
-=======
             @:privateAccess
             {
               newOption.getValue = function() return save.get(newOption.variable);
               newOption.setValue = function(value:Dynamic) save.set(newOption.variable, value);
             }
         }
->>>>>>> Stashed changes
 
         if (option.type != KEYBIND)
         {
@@ -124,46 +91,6 @@ class ModSettingsSubState extends BaseOptionsMenu
           if (option.max != null) newOption.maxValue = option.max;
           if (option.step != null) newOption.changeValue = option.step;
 
-<<<<<<< Updated upstream
-					var myValue:Dynamic = null;
-					if(save.get(option.save) != null)
-					{
-						myValue = save.get(option.save);
-						if(newOption.type != 'keybind') newOption.setValue(myValue);
-						else newOption.setValue(!Controls.instance.controllerMode ? myValue.keyboard : myValue.gamepad);
-					}
-					else
-					{
-						myValue = newOption.getValue();
-						if(myValue == null) myValue = newOption.defaultValue;
-					}
-
-					switch(newOption.type)
-					{
-						case 'string':
-							var num:Int = newOption.options.indexOf(myValue);
-							if(num > -1) newOption.curOption = num;
-					}
-
-					save.set(option.save, myValue);
-				}
-				addOption(newOption);
-				//updateTextFrom(newOption);
-			}
-		}
-		catch(e:Dynamic)
-		{
-			var errorTitle = 'Mod name: ' + folder;
-			var errorMsg = 'An error occurred: $e';
-			#if windows
-			lime.app.Application.current.window.alert(errorMsg, errorTitle);
-			#end
-			trace('$errorTitle - $errorMsg');
-			_crashed = true;
-			close();
-			return;
-		}
-=======
           if (option.scroll != null) newOption.scrollSpeed = option.scroll;
           if (option.decimals != null) newOption.decimals = option.decimals;
 
@@ -188,7 +115,6 @@ class ModSettingsSubState extends BaseOptionsMenu
               if (num > -1) newOption.curOption = num;
             default:
           }
->>>>>>> Stashed changes
 
           save.set(option.save, myValue);
         }
@@ -211,17 +137,6 @@ class ModSettingsSubState extends BaseOptionsMenu
 
     super();
 
-<<<<<<< Updated upstream
-	override public function update(elapsed:Float)
-	{
-		if(_crashed)
-		{
-			close();
-			return;
-		}
-		super.update(elapsed);
-	}
-=======
     bg.alpha = 0.75;
     bg.color = FlxColor.WHITE;
     reloadCheckboxes();
@@ -247,7 +162,6 @@ class ModSettingsSubState extends BaseOptionsMenu
     FlxG.log.error("Could not find option type: " + str);
     return BOOL;
   }
->>>>>>> Stashed changes
 
   override public function update(elapsed:Float)
   {

@@ -19,47 +19,10 @@ class StrumArrow extends FlxSkewed
 
   public var laneFollowsReceptor:Bool = true;
 
-<<<<<<< Updated upstream
-	public var z:Float = 0;
-
-	public var bgLane:FlxSkewed;
-	
-	public var texture(default, set):String = null;
-	private function set_texture(value:String):String {
-		changedSkin = true;
-		reloadNote(value);
-		return value;
-	}
-=======
   public var bgLane:FlxSkewed;
->>>>>>> Stashed changes
 
   public var texture(default, set):String = null;
 
-<<<<<<< Updated upstream
-	public var quantizedNotes:Bool = false;
-	
-	public function new(x:Float, y:Float, leData:Int, player:Int, ?style:String, ?quantizedNotes:Bool) {
-		#if (flixel >= "5.5.0")
-		animation = new backend.animation.PsychAnimationController(this);
-		#end
-		rgbShader = new RGBShaderReference(this, !quantizedNotes ? Note.initializeGlobalRGBShader(leData) : Note.initializeGlobalQuantRGBShader(leData));
-		rgbShader.enabled = false;
-		if(PlayState.SONG != null && PlayState.SONG.disableStrumRGB) useRGBShader = false;
-		
-		var arr:Array<FlxColor> = !quantizedNotes ? ClientPrefs.data.arrowRGB[leData] : ClientPrefs.data.arrowRGBQuantize[leData];
-		if(texture.contains('pixel') || style.contains('pixel') || containsPixelTexture) arr = ClientPrefs.data.arrowRGBPixel[leData];
-		
-		if(leData <= arr.length)
-		{
-			@:bypassAccessor
-			{
-				rgbShader.r = arr[0];
-				rgbShader.g = arr[1];
-				rgbShader.b = arr[2];
-			}
-		}
-=======
   private function set_texture(value:String):String
   {
     changedSkin = true;
@@ -68,7 +31,6 @@ class StrumArrow extends FlxSkewed
   }
 
   public var useRGBShader:Bool = true;
->>>>>>> Stashed changes
 
   public var quantizedNotes:Bool = false;
 
@@ -111,73 +73,6 @@ class StrumArrow extends FlxSkewed
     else
       skin = Note.defaultNoteSkin;
 
-<<<<<<< Updated upstream
-		switch (style)
-		{
-			default:
-					if((texture.contains('pixel') || style.contains('pixel') || daStyle.contains('pixel') || containsPixelTexture) && !FileSystem.exists(Paths.modsXml(style)))
-					{
-						if (FileSystem.exists(Paths.modsImages('notes/' + style)) || FileSystem.exists(Paths.getSharedPath('images/notes/' + style)) || Assets.exists('notes/' + style))
-						{
-							loadGraphic(Paths.image(style != "" ? 'notes/' + style : ('pixelUI/' + style)));
-							width = width / 4;
-							height = height / 5;
-							loadGraphic(Paths.image(style != "" ? 'notes/' + style : ('pixelUI/' + style)), true, Math.floor(width), Math.floor(height));
-
-							addAnims(true);
-						}
-						else if (FileSystem.exists(Paths.modsImages(style)) || FileSystem.exists(Paths.getSharedPath('images/' + style)) || Assets.exists(style))
-						{
-							loadGraphic(Paths.image(style != "" ? style : ('pixelUI/' + style)));
-							width = width / 4;
-							height = height / 5;
-							loadGraphic(Paths.image(style != "" ? style : ('pixelUI/' + style)), true, Math.floor(width), Math.floor(height));
-
-							addAnims(true);
-						}
-						else
-						{
-							if (PlayState.SONG != null && PlayState.SONG.disableStrumRGB)
-							{
-								loadGraphic(Paths.image('pixelUI/NOTE_assets'));
-								width = width / 4;
-								height = height / 5;
-								loadGraphic(Paths.image('pixelUI/NOTE_assets'), true, Math.floor(width), Math.floor(height));
-							}else{
-								loadGraphic(Paths.image('pixelUI/noteSkins/NOTE_assets' + Note.getNoteSkinPostfix()));
-								width = width / 4;
-								height = height / 5;
-								loadGraphic(Paths.image('pixelUI/noteSkins/NOTE_assets' + Note.getNoteSkinPostfix()), true, Math.floor(width), Math.floor(height));
-							}
-
-							addAnims(true);
-						}
-					}
-					else
-					{
-						if (FileSystem.exists(Paths.modsImages('notes/' + style)) || FileSystem.exists(Paths.getSharedPath('images/notes/' + style)) || Assets.exists('notes/' + style))
-						{
-							frames = Paths.getSparrowAtlas('notes/' + style, null, !ClientPrefs.data.cacheOnGPU);
-							addAnims();
-						}
-						else if (FileSystem.exists(Paths.modsImages(style)) || FileSystem.exists(Paths.getSharedPath('images/' + style)) || Assets.exists(style))
-						{
-							frames = Paths.getSparrowAtlas(style, null, !ClientPrefs.data.cacheOnGPU);
-							addAnims();
-						}
-						else
-						{
-							if (PlayState.SONG != null && PlayState.SONG.disableStrumRGB)
-							{
-								frames = Paths.getSparrowAtlas('NOTE_assets', null, !ClientPrefs.data.cacheOnGPU);
-							}else{
-								frames = Paths.getSparrowAtlas('noteSkins/NOTE_assets' + Note.getNoteSkinPostfix(), null, !ClientPrefs.data.cacheOnGPU);
-							}
-							addAnims();
-						}
-					}
-		}
-=======
     var customSkin:String = skin + Note.getNoteSkinPostfix();
     if (Paths.fileExists('images/$customSkin.png', IMAGE)) skin = customSkin;
     if (style == null)
@@ -186,7 +81,6 @@ class StrumArrow extends FlxSkewed
       daStyle = skin;
     }
     scrollFactor.set();
->>>>>>> Stashed changes
 
     if (texture.contains('pixel') || style.contains('pixel') || daStyle.contains('pixel')) containsPixelTexture = true;
     loadNoteAnims(style != "" ? style : skin, true);
@@ -200,23 +94,7 @@ class StrumArrow extends FlxSkewed
 
   var confirmHoldTimer:Float = -1;
 
-<<<<<<< Updated upstream
-			setGraphicSize(Std.int(width * PlayState.daPixelZoom));
-			antialiasing = false;
-			
-			animation.add('static', [0 + noteData]);
-			animation.add('pressed', [4 + noteData, 8 + noteData], 12, false);
-			animation.add('confirm', [12 + noteData, 16 + noteData], 24, false);
-		}
-		else
-		{	
-			isPixel = false;
-
-			antialiasing = ClientPrefs.data.antialiasing;
-			setGraphicSize(Std.int(width * 0.7));
-=======
   static final CONFIRM_HOLD_TIME:Float = 0.15;
->>>>>>> Stashed changes
 
   public function reloadNote(style:String)
   {
@@ -256,18 +134,6 @@ class StrumArrow extends FlxSkewed
   public var strumPositionData:modcharting.NotePositionData;
   #end
 
-<<<<<<< Updated upstream
-	public function playAnim(anim:String, ?force:Bool = false) {
-		animation.play(anim, force);
-		if(animation.curAnim != null)
-		{
-			centerOffsets();
-			centerOrigin();
-		}
-		if(useRGBShader) rgbShader.enabled = (animation.curAnim != null && animation.curAnim.name != 'static');
-	}
-}
-=======
   public function loadNoteAnims(style:String, ?first:Bool = false)
   {
     daStyle = style;
@@ -484,4 +350,3 @@ class StrumArrow extends FlxSkewed
     if (useRGBShader) rgbShader.enabled = (animation.curAnim != null && animation.curAnim.name != 'static');
   }
 }
->>>>>>> Stashed changes

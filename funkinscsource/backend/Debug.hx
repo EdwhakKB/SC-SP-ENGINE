@@ -3,11 +3,6 @@ package backend;
 import lime.app.Application;
 import flixel.system.debug.log.LogStyle;
 import flixel.system.debug.watch.Tracker.TrackerProfile;
-<<<<<<< Updated upstream
-import flixel.util.FlxStringUtil;
-
-=======
->>>>>>> Stashed changes
 import haxe.Log;
 import haxe.PosInfos;
 

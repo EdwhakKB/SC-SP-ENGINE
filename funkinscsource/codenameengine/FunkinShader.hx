@@ -17,14 +17,9 @@ import openfl.display.ShaderInput;
 @:access(openfl.display3D.Program3D)
 @:access(openfl.display.ShaderInput)
 @:access(openfl.display.ShaderParameter)
-<<<<<<< Updated upstream:funkinscsource/codenameengine/FunkinShader.hx
-class FunkinShader extends FlxShader {
-	private static var __instanceFields = Type.getInstanceFields(FunkinShader);
-=======
 class FunkinShader extends FlxShader implements IHScriptCustomBehaviour
 {
   private static var __instanceFields = Type.getInstanceFields(FunkinShader);
->>>>>>> Stashed changes:funkinscsource/codenameengine/shaders/FunkinShader.hx
 
   public var glslVer:String = "120";
 
@@ -404,81 +399,6 @@ class FunkinShader extends FlxShader implements IHScriptCustomBehaviour
       return val;
     }
 
-<<<<<<< Updated upstream:funkinscsource/codenameengine/FunkinShader.hx
-	//USE THESE IN HSCRIPT FOR SETTING AND GETTING PROPERTY'S!
-	public function get(name:String):Dynamic {
-		if (__instanceFields.contains(name) || __instanceFields.contains('get_${name}')) {
-			return Reflect.getProperty(this, name);
-		}
-		if (!Reflect.hasField(data, name)) return null;
-		var field = Reflect.field(data, name);
-		var cl = Type.getClassName(Type.getClass(field));
-
-		// cant do "field is ShaderInput" for some reason
-		if (cl.startsWith("openfl.display.ShaderParameter")) {
-			var sp = cast(field, ShaderParameter<Dynamic>);
-			@:privateAccess
-			return (sp.__length > 1) ? sp.value : sp.value[0];
-		} else if (cl.startsWith("openfl.display.ShaderInput")) {
-			var si = cast(field, ShaderInput<Dynamic>);
-			return si.input;
-		}
-		return field;
-	}
-
-	public function set(name:String, val:Dynamic):Dynamic {
-		if (__instanceFields.contains(name) || __instanceFields.contains('set_${name}')) {
-			Reflect.setProperty(this, name, val);
-			return val;
-		}
-
-		if (!Reflect.hasField(data, name)) {
-			Reflect.setField(data, name, val);
-			return val;
-		} else {
-			var field = Reflect.field(data, name);
-			var cl = Type.getClassName(Type.getClass(field));
-			// cant do "field is ShaderInput" for some reason
-			if (cl.startsWith("openfl.display.ShaderParameter")) {
-				@:privateAccess
-				if (field.__length <= 1) {
-					// that means we wait for a single number, instead of an array
-					@:privateAccess
-					if (field.__isInt && !(val is Int)) {
-						throw new ShaderTypeException(name, Type.getClass(val), 'Int');
-						return null;
-					} else
-					@:privateAccess
-					if (field.__isBool && !(val is Bool)) {
-						throw new ShaderTypeException(name, Type.getClass(val), 'Bool');
-						return null;
-					} else
-					@:privateAccess
-					if (field.__isFloat && !(val is Float)) {
-						throw new ShaderTypeException(name, Type.getClass(val), 'Float');
-						return null;
-					}
-					return field.value = [val];
-				} else {
-					if (!(val is Array)) {
-						throw new ShaderTypeException(name, Type.getClass(val), Array);
-						return null;
-					}
-					return field.value = val;
-				}
-			} else if (cl.startsWith("openfl.display.ShaderInput")) {
-				// shader input!!
-				if (!(val is BitmapData)) {
-					throw new ShaderTypeException(name, Type.getClass(val), BitmapData);
-					return null;
-				}
-				field.input = cast val;
-			}
-		}
-
-		return val;
-	}
-=======
     if (!Reflect.hasField(data, name))
     {
       Reflect.setField(data, name, val);
@@ -541,7 +461,6 @@ class FunkinShader extends FlxShader implements IHScriptCustomBehaviour
 
     return val;
   }
->>>>>>> Stashed changes:funkinscsource/codenameengine/shaders/FunkinShader.hx
 }
 
 class ShaderTemplates

@@ -33,22 +33,9 @@ class NoteTypesConfig
         if (sep < 0) continue;
       }
 
-<<<<<<< Updated upstream
-			var newProp:NoteTypeProperty = {
-				property: arr,
-				value: _interpretValue(line.substr(sep + 1).trim())
-			}
-			//Debug.logTrace('pushing $newProp');
-			parsed.push(newProp);
-		}
-		noteTypesData.set(name, parsed);
-		return parsed;
-	}
-=======
       var arr:Array<String> = line.substr(0, sep).trim().split('.');
       for (i in 0...arr.length)
         arr[i] = arr[i].trim();
->>>>>>> Stashed changes
 
       var newProp:NoteTypeProperty =
         {
@@ -78,37 +65,11 @@ class NoteTypesConfig
           continue;
         }
 
-<<<<<<< Updated upstream
-	private static function _propCheckArray(obj:Dynamic, slice:String, setProp:Bool = false, valueToSet:Dynamic = null)
-	{
-		var propArray:Array<String> = slice.split('[');
-		if(propArray.length > 1)
-		{
-			for (i in 0...propArray.length)
-			{
-				var str:Dynamic = propArray[i];
-				var id:Int = Std.parseInt(str.substr(0, str.length-1).trim());
-				if(i < propArray.length-1) obj = obj[id]; //middles
-				else if (setProp) return obj[id] = valueToSet; //last
-			}
-			return obj;
-		}
-		else if(setProp)
-		{
-			//Debug.logTrace('setProp: $slice');
-			Reflect.setProperty(obj, slice, valueToSet);
-			return valueToSet;
-		}
-		//Debug.logTrace('getting prop: $slice');
-		return Reflect.getProperty(obj, slice);
-	}
-=======
         switch (split[0]) // special cases
         {
           case 'extraData':
             note.extraData.set(split[1], line.value);
             continue;
->>>>>>> Stashed changes
 
           case 'noteType':
             continue;

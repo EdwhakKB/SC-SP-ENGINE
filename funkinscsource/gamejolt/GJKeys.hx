@@ -10,14 +10,6 @@ package gamejolt;
  * source/gamejolt/GJKeys.hx
  * ```
  */
-<<<<<<< Updated upstream
-class GJKeys {
-	/** Your Game ID from GameJolt **/
-	public static var id:Int = 0;
-
-	/** Your Game Private Key from GameJolt **/
-	public static var key:String = '';
-=======
 class GJKeys
 {
   /** Your Game ID from GameJolt **/
@@ -25,5 +17,4 @@ class GJKeys
 
   /** Your Game Private Key from GameJolt, If key is updated with this file, it will be changed to still be private. **/
   public static var key:String = 'ff97f88d23ba21ef5b32a6f39ee5ede0';
->>>>>>> Stashed changes
 }

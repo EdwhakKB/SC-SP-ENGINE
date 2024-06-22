@@ -115,34 +115,6 @@ class ControlsSubState extends MusicBeatSubState
     text.setScale(0.4);
     add(text);
 
-<<<<<<< Updated upstream
-		var myID:Int = 0;
-		for (i in 0...options.length)
-		{
-			var option:Array<Dynamic> = options[i];
-			if(option[0] || onKeyboardMode)
-			{
-				if(option.length > 1)
-				{
-					var isCentered:Bool = (option.length < 3);
-					var isDefaultKey:Bool = (option[1] == defaultKey);
-					var isDisplayKey:Bool = (isCentered && !isDefaultKey);
-
-					var text:Alphabet = new Alphabet(200, 300, option[1], !isDisplayKey);
-					text.isMenuItem = true;
-					text.changeX = false;
-					text.distancePerItem.y = 60;
-					text.targetY = myID;
-					if(isDisplayKey)
-						grpDisplay.add(text);
-					else {
-						grpOptions.add(text);
-						curOptions.push(i);
-						curOptionsValid.push(myID);
-					}
-					text.ID = myID;
-					lastID = myID;
-=======
     cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
   }
 
@@ -150,7 +122,6 @@ class ControlsSubState extends MusicBeatSubState
   {
     createTexts();
   }
->>>>>>> Stashed changes
 
   var lastID:Int = 0;
 
@@ -297,21 +268,11 @@ class ControlsSubState extends MusicBeatSubState
     attach.scaleX = Math.min(1, 230 / attach.width);
     // attach.text = text;
 
-<<<<<<< Updated upstream
-					bindingText = new Alphabet(FlxG.width / 2, 160, "Rebinding " + options[curOptions[curSelected]][3], false);
-					bindingText.alignment = CENTERED;
-					add(bindingText);
-					
-					bindingText2 = new Alphabet(FlxG.width / 2, 340, "Hold ESC to Cancel\nHold Backspace to Delete", true);
-					bindingText2.alignment = CENTERED;
-					add(bindingText2);
-=======
     bind.kill();
     grpBinds.remove(bind);
     grpBinds.insert(num, attach);
     bind.destroy();
   }
->>>>>>> Stashed changes
 
   var binding:Bool = false;
   var holdingEsc:Float = 0;
@@ -373,18 +334,6 @@ class ControlsSubState extends MusicBeatSubState
           bindingText2.alignment = CENTERED;
           add(bindingText2);
 
-<<<<<<< Updated upstream
-	function updateText(?move:Int = 0)
-	{
-		if(move != 0)
-		{
-			//var dir:Int = Math.round(move / Math.abs(move));
-			curSelected += move;
-
-			if(curSelected < 0) curSelected = curOptions.length - 1;
-			else if (curSelected >= curOptions.length) curSelected = 0;
-		}
-=======
           binding = true;
           holdingEsc = 0;
           ClientPrefs.toggleVolumeKeys(false);
@@ -436,7 +385,6 @@ class ControlsSubState extends MusicBeatSubState
         var changed:Bool = false;
         var curKeys:Array<FlxKey> = ClientPrefs.keyBinds.get(curOption[2]);
         var curButtons:Array<FlxGamepadInputID> = ClientPrefs.gamepadBinds.get(curOption[2]);
->>>>>>> Stashed changes
 
         if (onKeyboardMode)
         {
@@ -505,14 +453,6 @@ class ControlsSubState extends MusicBeatSubState
             if (curButtons[altNum] == curButtons[1 - altNum]) curButtons[1 - altNum] = FlxGamepadInputID.NONE;
           }
 
-<<<<<<< Updated upstream
-	var colorTween:FlxTween;
-	function swapMode()
-	{
-		if(colorTween != null) colorTween.destroy();
-		colorTween = FlxTween.color(bg, 0.5, bg.color, onKeyboardMode ? gamepadColor : keyboardColor, {ease: FlxEase.linear});
-		onKeyboardMode = !onKeyboardMode;
-=======
           var option:String = options[curOptions[curSelected]][2];
           ClientPrefs.clearInvalidKeys(option);
           for (n in 0...2)
@@ -537,7 +477,6 @@ class ControlsSubState extends MusicBeatSubState
     }
     super.update(elapsed);
   }
->>>>>>> Stashed changes
 
   function closeBinding()
   {

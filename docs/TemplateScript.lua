@@ -194,22 +194,14 @@ end
 
 -- There are 14 values for each not 2 anymore!
 -- Event notes hooks
-<<<<<<< Updated upstream
-function onEvent(name, value1, value2)
-=======
 function onEvent(name, eventParams, eventTime)
->>>>>>> Stashed changes
 	-- event note triggered
 	-- triggerEvent() does not call this function!!
 
 	-- print('Event triggered: ', name, value1, value2);
 end
 
-<<<<<<< Updated upstream
-function eventEarlyTrigger(name)
-=======
 function eventEarlyTrigger(name, eventParams, eventTime)
->>>>>>> Stashed changes
 	--[[
 	Here's a port of the Kill Henchmen early trigger but on Lua instead of Haxe:
 
@@ -222,9 +214,6 @@ function eventEarlyTrigger(name, eventParams, eventTime)
 	-- write your shit under this line, the new return value will override the ones hardcoded on the engine
 end
 
-<<<<<<< Updated upstream
-function onEventPushed(name)
-=======
 function onEventPushed(name, eventParams, eventTime)
 	-- Works like a preloader for events such for "Change Character"
 end
@@ -253,7 +242,6 @@ end
 
 --Added the values 1-14 like (name, value1, value2, etc..)
 function onEventPushedLegacy(name, etc, eventTime)
->>>>>>> Stashed changes
 	-- Works like a preloader for events such for "Change Character"
 end
 

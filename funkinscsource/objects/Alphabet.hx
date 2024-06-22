@@ -178,22 +178,9 @@ class Alphabet extends FlxSpriteGroup
 
   private static var Y_PER_ROW:Float = 85;
 
-<<<<<<< Updated upstream
-		var xPos:Float = 0;
-		var rowData:Array<Float> = [];
-		rows = 0;
-		for (character in newText.split(''))
-		{
-			
-			if(character != '\n')
-			{
-				var spaceChar:Bool = (character == " " || (bold && character == "_"));
-				if (spaceChar) consecutiveSpaces++;
-=======
   private function createLetters(newText:String)
   {
     var consecutiveSpaces:Int = 0;
->>>>>>> Stashed changes
 
     var xPos:Float = 0;
     var rowData:Array<Float> = [];
@@ -280,68 +267,6 @@ class AlphaCharacter extends FlxSprite
 
   public static var allLetters:Map<String, Null<Letter>>;
 
-<<<<<<< Updated upstream
-	public static var allLetters:Map<String, Null<Letter>> = [
-		//alphabet
-		'a'  => null, 'b'  => null, 'c'  => null, 'd'  => null, 'e'  => null, 'f'  => null,
-		'g'  => null, 'h'  => null, 'i'  => null, 'j'  => null, 'k'  => null, 'l'  => null,
-		'm'  => null, 'n'  => null, 'o'  => null, 'p'  => null, 'q'  => null, 'r'  => null,
-		's'  => null, 't'  => null, 'u'  => null, 'v'  => null, 'w'  => null, 'x'  => null,
-		'y'  => null, 'z'  => null,
-
-		//additional alphabet
-		'á'  => null, 'é'  => null, 'í'  => null, 'ó'  => null, 'ú'  => null,
-		'à'  => null, 'è'  => null, 'ì'  => null, 'ò'  => null, 'ù'  => null,
-		'â'  => null, 'ê'  => null, 'î'  => null, 'ô'  => null, 'û'  => null,
-		'ã'  => null, 'ë'  => null, 'ï'  => null, 'õ'  => null, 'ü'  => null,
-		'ä'  => null, 'ö'  => null, 'å'  => null, 'ø'  => null, 'æ'  => null,
-		'ñ'  => null, 'ç'  => {offsetsBold: [0, -11]}, 'š'  => null, 'ž'  => null, 'ý'  => null, 'ÿ'  => null,
-		'ß'  => null,
-		
-		//numbers
-		'0'  => null, '1'  => null, '2'  => null, '3'  => null, '4'  => null,
-		'5'  => null, '6'  => null, '7'  => null, '8'  => null, '9'  => null,
-
-		//symbols
-		'&'  => {offsetsBold: [0, 2]},
-		'('  => {offsetsBold: [0, 0]},
-		')'  => {offsetsBold: [0, 0]},
-		'['  => null,
-		']'  => {offsets: [0, -1]},
-		'*'  => {offsets: [0, 28], offsetsBold: [0, 40]},
-		'+'  => {offsets: [0, 7], offsetsBold: [0, 12]},
-		'-'  => {offsets: [0, 16], offsetsBold: [0, 16]},
-		'<'  => {offsetsBold: [0, -2]},
-		'>'  => {offsetsBold: [0, -2]},
-		'\'' => {anim: 'apostrophe', offsets: [0, 32], offsetsBold: [0, 40]},
-		'"'  => {anim: 'quote', offsets: [0, 32], offsetsBold: [0, 40]},
-		'!'  => {anim: 'exclamation'},
-		'?'  => {anim: 'question'}, //also used for "unknown"
-		'.'  => {anim: 'period'},
-		'❝'  => {anim: 'start quote', offsets: [0, 24], offsetsBold: [0, 40]},
-		'❞'  => {anim: 'end quote', offsets: [0, 24], offsetsBold: [0, 40]},
-		'_'  => null,
-		'#'  => null,
-		'$'  => null,
-		'%'  => null,
-		':'  => {offsets: [0, 2], offsetsBold: [0, 8]},
-		';'  => {offsets: [0, -2], offsetsBold: [0, 4]},
-		'@'  => null,
-		'^'  => {offsets: [0, 28], offsetsBold: [0, 38]},
-		','  => {anim: 'comma', offsets: [0, -6], offsetsBold: [0, -4]},
-		'\\' => {anim: 'back slash', offsets: [0, 0]},
-		'/'  => {anim: 'forward slash', offsets: [0, 0]},
-		'|'  => null,
-		'~'  => {offsets: [0, 16], offsetsBold: [0, 20]},
-
-		//additional symbols
-		'¡'  => {anim: 'inverted exclamation', offsets: [0, -20], offsetsBold: [0, -20]},
-		'¿'  => {anim: 'inverted question', offsets: [0, -20], offsetsBold: [0, -20]},
-		'{'  => null,
-		'}'  => null,
-		'•'  => {anim: 'bullet', offsets: [0, 18], offsetsBold: [0, 20]}
-	];
-=======
   public static function loadAlphabetData(request:String = 'alphabet')
   {
     var path:String = Paths.getPath('images/$request.json');
@@ -394,7 +319,6 @@ class AlphaCharacter extends FlxSprite
   }
 
   var parent:Alphabet;
->>>>>>> Stashed changes
 
   public var alignOffset:Float = 0; // Don't change this
   public var letterOffset:Array<Float> = [0, 0];
@@ -410,48 +334,13 @@ class AlphaCharacter extends FlxSprite
     antialiasing = ClientPrefs.data.antialiasing;
   }
 
-<<<<<<< Updated upstream
-			var suffix:String = '';
-			if(!bold)
-			{
-				if(isTypeAlphabet(lowercase))
-				{
-					if(lowercase != this.character)
-						suffix = ' uppercase';
-					else
-						suffix = ' lowercase';
-				}
-				else suffix = ' normal';
-			}
-			else suffix = ' bold';
-=======
   public var curLetter:Letter = null;
->>>>>>> Stashed changes
 
   public function setupAlphaCharacter(x:Float, y:Float, ?character:String = null, ?bold:Null<Bool> = null)
   {
     this.x = x;
     this.y = y;
 
-<<<<<<< Updated upstream
-			var anim:String = alphaAnim + suffix;
-			animation.addByPrefix(anim, anim, 24);
-			animation.play(anim, true);
-			if(animation.curAnim == null)
-			{
-				if(suffix != ' bold') suffix = ' normal';
-				anim = 'question' + suffix;
-				animation.addByPrefix(anim, anim, 24);
-				animation.play(anim, true);
-			}
-		}
-		updateHitbox();
-	}
-
-	var prevY:Float = 0;
-	var elapsedTotal:Float = 0;
-	var number:Int = 0;
-=======
     if (parent != null)
     {
       if (bold == null) bold = parent.bold;
@@ -467,7 +356,6 @@ class AlphaCharacter extends FlxSprite
       if (allLetters.exists(lowercase)) curLetter = allLetters.get(lowercase);
       else
         curLetter = allLetters.get('?');
->>>>>>> Stashed changes
 
       var postfix:String = '';
       if (!bold)
@@ -516,15 +404,6 @@ class AlphaCharacter extends FlxSprite
     }
   }
 
-<<<<<<< Updated upstream
-	public function updateLetterOffset()
-	{
-		if (animation.curAnim == null)
-		{
-			Debug.logTrace(character);
-			return;
-		}
-=======
   public function displacementFormula()
   {
     elapsedTotal += FlxG.elapsed;
@@ -534,7 +413,6 @@ class AlphaCharacter extends FlxSprite
     y = prevY + formula;
     prevY -= y + formula;
   }
->>>>>>> Stashed changes
 
   public static function isTypeAlphabet(c:String) // thanks kade
   {

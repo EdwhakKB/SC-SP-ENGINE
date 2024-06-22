@@ -6,23 +6,11 @@ import objects.Alphabet;
 
 class VisualsUISubState extends BaseOptionsMenu
 {
-<<<<<<< Updated upstream:funkinscsource/options/VisualsUISubState.hx
-	var noteOptionID:Int = -1;
-	var notes:FlxTypedGroup<StrumArrow>;
-	var notesTween:Array<FlxTween> = [];
-	var noteY:Float = 90;
-	var stringedNote:String = '';
-	public function new()
-	{
-		title = 'Visuals and UI';
-		rpcTitle = 'Visuals & UI Settings Menu'; //for Discord Rich Presence
-=======
   var noteOptionID:Int = -1;
   var notes:FlxTypedGroup<StrumArrow>;
   var notesTween:Array<FlxTween> = [];
   var noteY:Float = 90;
   var stringedNote:String = '';
->>>>>>> Stashed changes:funkinscsource/options/VisualsSettingsSubState.hx
 
   public function new()
   {
@@ -51,225 +39,6 @@ class VisualsUISubState extends BaseOptionsMenu
 
     // options
 
-<<<<<<< Updated upstream:funkinscsource/options/VisualsUISubState.hx
-			noteSkins.insert(0, ClientPrefs.defaultData.noteSkin); //Default skin always comes first
-			var option:Option = new Option('Note Skins:',
-				"Select your prefered Note skin.",
-				'noteSkin',
-				'string',
-				noteSkins);
-			addOption(option);
-			option.onChange = onChangeNoteSkin;
-			noteOptionID = optionsArray.length - 1;
-		}
-		
-		var noteSplashes:Array<String> = Mods.mergeAllTextsNamed('images/noteSplashes/list.txt');
-		if(noteSplashes.length > 0)
-		{
-			if(!noteSplashes.contains(ClientPrefs.data.splashSkin))
-				ClientPrefs.data.splashSkin = ClientPrefs.defaultData.splashSkin; //Reset to default if saved splashskin couldnt be found
-
-			noteSplashes.insert(0, ClientPrefs.defaultData.splashSkin); //Default skin always comes first
-			var option:Option = new Option('Note Splashes:',
-				"Select your prefered Note Splash variation or turn it off.",
-				'splashSkin',
-				'string',
-				noteSplashes);
-			addOption(option);
-		}
-
-		var option:Option = new Option('Note Splash Opacity',
-			'How much transparent should the Note Splashes be.',
-			'splashAlpha',
-			'percent');
-		option.scrollSpeed = 1.6;
-		option.minValue = 0.0;
-		option.maxValue = 1;
-		option.changeValue = 0.1;
-		option.decimals = 1;
-		addOption(option);
-
-		var option:Option = new Option('Note Lanes Opacity',
-			'How much transparent should the lanes under the notes be?',
-			'laneTransparency',
-			'percent');
-		option.scrollSpeed = 1.6;
-		option.minValue = 0.0;
-		option.maxValue = 1;
-		option.changeValue = 0.1;
-		option.decimals = 1;
-		addOption(option);
-
-		var option:Option = new Option('Note Splash Opacity As Strum Opacity',
-			'Should splashes be transparent as strums?',
-			'splashAlphaAsStrumAlpha',
-			'bool');
-		addOption(option);
-
-		var option:Option = new Option('Hide HUD',
-			'If checked, hides most HUD elements.',
-			'hideHud',
-			'bool');
-		addOption(option);
-
-		var option:Option = new Option('HUD style:',
-			"What HUD you like more??.",
-			'hudStyle',
-			'string',
-			['PSYCH', 'GLOW_KADE', 'HITMANS', 'CLASSIC']);
-		addOption(option);
-		
-		var option:Option = new Option('Time Bar:',
-			"What should the Time Bar display?",
-			'timeBarType',
-			'string',
-			['Time Left', 'Time Elapsed', 'Song Name', 'Disabled']);
-		addOption(option);
-
-		var option:Option = new Option('Time Bar Color:',
-			"What colors should the Time Bar display?",
-			'colorBarType',
-			'string',
-			['No Colors', 'Main Colors', 'Reversed Colors']);
-		addOption(option);
-
-		var option:Option = new Option('Flashing Lights',
-			"Uncheck this if you're sensitive to flashing lights!",
-			'flashing',
-			'bool');
-		addOption(option);
-
-		var option:Option = new Option('Camera Zooms',
-			"If unchecked, the camera won't zoom in on a beat hit.",
-			'camZooms',
-			'bool');
-		addOption(option);
-
-		var option:Option = new Option('Score Text Zoom on Hit',
-			"If unchecked, disables the Score text zooming\neverytime you hit a note.",
-			'scoreZoom',
-			'bool');
-		addOption(option);
-
-		
-		var option:Option = new Option('Health Colors',
-			"If unchecked, No health colors, Back to normal funkin colors",
-			'healthColor',
-			'bool');
-		addOption(option);
-
-		var option:Option = new Option('Health Bar Opacity',
-			'How much transparent should the health bar and icons be.',
-			'healthBarAlpha',
-			'percent');
-		option.scrollSpeed = 1.6;
-		option.minValue = 0.0;
-		option.maxValue = 1;
-		option.changeValue = 0.1;
-		option.decimals = 1;
-		addOption(option);
-		
-		var option:Option = new Option('Pause Screen Song:',
-			"What song do you prefer for the Pause Screen?",
-			'pauseMusic',
-			'string',
-			['None', 'Breakfast', 'Tea Time']);
-		addOption(option);
-		option.onChange = onChangePauseMusic;
-		
-		var option:Option = new Option('Check for Updates',
-			'On Release builds, turn this on to check for updates when you start the game.',
-			'checkForUpdates',
-			'bool');
-		addOption(option);
-
-		#if DISCORD_ALLOWED
-		var option:Option = new Option('Discord Rich Presence',
-			"Uncheck this to prevent accidental leaks, it will hide the Application from your \"Playing\" box on Discord",
-			'discordRPC',
-			'bool');
-		addOption(option);
-		#end
-
-		var option:Option = new Option('Combo Stacking',
-			"If unchecked, Ratings and Combo won't stack, saving on System Memory and making them easier to read",
-			'comboStacking',
-			'bool');
-		addOption(option);
-
-		var option:Option = new Option('Judgement Counter',
-			"If checked, A Judgement Counter is shown",
-			'judgementCounter',
-			'bool');
-		addOption(option);
-
-		var option:Option = new Option('Game Combo',
-			"If checked, Combo UI will be automated to camGame (stage, pl, op, gf)",
-			'gameCombo',
-			'bool');
-		addOption(option);
-
-		var option:Option = new Option('Show Combo',
-			"If checked, Combo Sprite will appear when note is hit.",
-			'showCombo',
-			'bool');
-		addOption(option);
-
-		var option:Option = new Option('Show Combo Num',
-			"If checked, Combo Number Sprite will appear when note is hit.",
-			'showComboNum',
-			'bool');
-		addOption(option);
-
-		var option:Option = new Option('Show Rating',
-			"If checked, Rating Sprite will appear when note is hit.",
-			'showRating',
-			'bool');
-		addOption(option);
-
-		var option:Option = new Option('Voiid Chronicles BreakTimer',
-			"If checked, A timer will appear to tell you when next notes are.",
-			'breakTimer',
-			'bool');
-		addOption(option);
-
-		var option:Option = new Option('Lights Opponent Strums Notes',
-			'If unchecked, opponent Strums wont light up.',
-			'LightUpStrumsOP',
-			'bool');
-		addOption(option);
-
-		var option:Option = new Option('Icon Movement',
-			"Do you want Icon to have some movement?",
-			'iconMovement',
-			'string',
-			['None', 'Angled']);
-		addOption(option);
-
-		var option:Option = new Option('Gradient System For Old Bars.',
-			'A gradient system will be used if the old bar system is activated in PlayState.',
-			'gradientSystemForOldBars',
-			'bool');
-		addOption(option);
-
-		var option:Option = new Option('Colored Changing Text.',
-			'Mainly all text in playstate will change color on character change and will start with dad\'s character color.',
-			'coloredText',
-			'bool');
-		addOption(option);
-
-		var option:Option = new Option('Note Splashes',
-			"If checked, on rating swag or sick will give a splash effect.",
-			'noteSplashes',
-			'bool');
-		addOption(option);
-
-		var option:Option = new Option('Note Splashes Opponent',
-			"If checked, on a note being hit it will give a splash effect.",
-			'noteSplashesOP',
-			'bool');
-		addOption(option);
-=======
     var noteSkins:Array<String> = Mods.mergeAllTextsNamed('images/noteSkins/list.txt');
     if (noteSkins.length > 0)
     {
@@ -387,18 +156,10 @@ class VisualsUISubState extends BaseOptionsMenu
 
     var option:Option = new Option('Lights Opponent Strums Notes', 'If unchecked, opponent Strums wont light up.', 'LightUpStrumsOP', BOOL);
     addOption(option);
->>>>>>> Stashed changes:funkinscsource/options/VisualsSettingsSubState.hx
 
     var option:Option = new Option('Icon Movement', "Do you want Icon to have some movement?", 'iconMovement', STRING, ['None', 'Angled']);
     addOption(option);
 
-<<<<<<< Updated upstream:funkinscsource/options/VisualsUISubState.hx
-	override function changeSelection(change:Int = 0)
-	{
-		super.changeSelection(change);
-		
-		if(noteOptionID < 0) return;
-=======
     var option:Option = new Option('Gradient System For Old Bars.', 'A gradient system will be used if the old bar system is activated in PlayState.',
       'gradientSystemForOldBars', BOOL);
     addOption(option);
@@ -406,7 +167,6 @@ class VisualsUISubState extends BaseOptionsMenu
     var option:Option = new Option('Colored Changing Text.',
       'Mainly all text in playstate will change color on character change and will start with dad\'s character color.', 'coloredText', BOOL);
     addOption(option);
->>>>>>> Stashed changes:funkinscsource/options/VisualsSettingsSubState.hx
 
     var option:Option = new Option('Note Splashes', "If checked, on rating swag or sick will give a splash effect.", 'noteSplashes', BOOL);
     addOption(option);

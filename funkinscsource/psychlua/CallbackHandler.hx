@@ -3,37 +3,6 @@ package psychlua;
 #if LUA_ALLOWED
 class CallbackHandler
 {
-<<<<<<< Updated upstream
-	public static inline function call(l:State, fname:String):Int
-	{
-		try
-		{
-			//Debug.logTrace('calling $fname');
-			var cbf:Dynamic = Lua_helper.callbacks.get(fname);
-
-			//Local functions have the lowest priority
-			//This is to prevent a "for" loop being called in every single operation,
-			//so that it only loops on reserved/special functions
-			if(cbf == null) 
-			{
-				//Debug.logTrace('checking last script');
-				var last:FunkinLua = FunkinLua.lastCalledScript;
-				if(last == null || last.lua != l)
-				{
-					//Debug.logTrace('looping thru scripts');
-					for (script in PlayState.instance.luaArray)
-						if(script != FunkinLua.lastCalledScript && script != null && script.lua == l)
-						{
-							//Debug.logTrace('found script');
-							cbf = script.callbacks.get(fname);
-							break;
-						}
-				}
-				else cbf = last.callbacks.get(fname);
-			}
-			
-			if(cbf == null) return 0;
-=======
   public static inline function call(l:State, fname:String):Int
   {
     try
@@ -58,7 +27,6 @@ class CallbackHandler
         else
           cbf = last.callbacks.get(fname);
       }
->>>>>>> Stashed changes
 
       if (cbf == null) return 0;
 

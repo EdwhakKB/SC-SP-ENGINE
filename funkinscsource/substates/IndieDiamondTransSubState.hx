@@ -39,28 +39,7 @@ class IndieDiamondTransSubState extends MusicBeatSubState
     var width:Int = divideZoom ? Std.int(FlxG.width / Math.max(camera.zoom, 0.001)) : Std.int(FlxG.width * Math.max(camera.zoom, 0.001));
     var height:Int = divideZoom ? Std.int(FlxG.height / Math.max(camera.zoom, 0.001)) : Std.int(FlxG.width * Math.max(camera.zoom, 0.001));
 
-<<<<<<< Updated upstream
-        rect.visible = true;
-        shader.progress.value = [0.0];
-        shader.reverse.value = [fadeInState ? true : false];
-    
-        tween = FlxTween.num(0.0, 1.0, duration, {ease: FlxEase.linear, onComplete: function(_)
-        {
-            new FlxTimer().start(duration, function(twn:FlxTimer) {
-                if (fadeInState)
-				    close();
-                else{
-                    if(finishCallback != null) finishCallback();
-                    finishCallback = null;
-                }
-			});
-        }}, function(num:Float)
-        {
-            shader.progress.value = [num];
-        });
-=======
     shader = new IndieDiamondTransShader();
->>>>>>> Stashed changes
 
     shader.progress.value = [0.0];
     shader.reverse.value = [false];

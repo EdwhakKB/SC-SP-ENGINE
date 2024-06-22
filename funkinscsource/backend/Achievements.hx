@@ -10,16 +10,6 @@ import psychlua.FunkinLua;
 
 typedef Achievement =
 {
-<<<<<<< Updated upstream
-	var name:String;
-	var description:String;
-	@:optional var hidden:Bool;
-	@:optional var maxScore:Float;
-	@:optional var maxDecimals:Int;
-	//handled automatically, ignore these two
-	@:optional var mod:String;
-	@:optional var ID:Int;
-=======
   var name:String;
   var description:String;
   var ?hidden:Bool;
@@ -28,7 +18,6 @@ typedef Achievement =
   // handled automatically, ignore these two
   var ?mod:String;
   var ?ID:Int;
->>>>>>> Stashed changes
 }
 
 class Achievements
@@ -185,28 +174,9 @@ class Achievements
     Achievements.save();
     FlxG.save.flush();
 
-<<<<<<< Updated upstream
-		var newPop:AchievementPopup = new AchievementPopup(achieve, endFunc);
-		_popups.push(newPop);
-		//Debug.logTrace('Giving achievement ' + achieve);
-	}
-	
-	
-	// Map sorting cuz haxe is physically incapable of doing that by itself
-	static var _sortID = 0;
-	static var _originalLength = -1;
-	public static function createAchievement(name:String, data:Achievement, ?mod:String = null)
-	{
-		data.ID = _sortID;
-		data.mod = mod;
-		achievements.set(name, data);
-		_sortID++;
-	}
-=======
     if (autoStartPopup) startPopup(name);
     return name;
   }
->>>>>>> Stashed changes
 
   inline public static function isUnlocked(name:String)
     return achievementsUnlocked.contains(name);
@@ -219,53 +189,6 @@ class Achievements
   public static function get_showingPopups()
     return _popups.length > 0;
 
-<<<<<<< Updated upstream
-				if(addMods && retVal != null)
-				{
-					for (i in 0...retVal.length)
-					{
-						var achieve:Dynamic = retVal[i];
-						if(achieve == null)
-						{
-							var errorTitle = 'Mod name: ' + Mods.currentModDirectory != null ? Mods.currentModDirectory : "None";
-							var errorMsg = 'Achievement #${i+1} is invalid.';
-							#if windows
-							lime.app.Application.current.window.alert(errorMsg, errorTitle);
-							#end
-							trace('$errorTitle - $errorMsg');
-							continue;
-						}
-
-						var key:String = achieve.save;
-						if(key == null || key.trim().length < 1)
-						{
-							var errorTitle = 'Error on Achievement: ' + (achieve.name != null ? achieve.name : achieve.save);
-							var errorMsg = 'Missing valid "save" value.';
-							#if windows
-							lime.app.Application.current.window.alert(errorMsg, errorTitle);
-							#end
-							trace('$errorTitle - $errorMsg');
-							continue;
-						}
-						key = key.trim();
-						if(achievements.exists(key)) continue;
-
-						createAchievement(key, achieve, Mods.currentModDirectory);
-					}
-				}
-			} catch(e:Dynamic) {
-				var errorTitle = 'Mod name: ' + Mods.currentModDirectory != null ? Mods.currentModDirectory : "None";
-				var errorMsg = 'Error loading achievements.json: $e';
-				#if windows
-				lime.app.Application.current.window.alert(errorMsg, errorTitle);
-				#end
-				trace('$errorTitle - $errorMsg');
-			}
-		}
-		return retVal;
-	}
-	#end
-=======
   public static function startPopup(achieve:String, endFunc:Void->Void = null)
   {
     for (popup in _popups)
@@ -281,7 +204,6 @@ class Achievements
   // Map sorting cuz haxe is physically incapable of doing that by itself
   static var _sortID = 0;
   static var _originalLength = -1;
->>>>>>> Stashed changes
 
   public static function createAchievement(name:String, data:Achievement, ?mod:String = null)
   {

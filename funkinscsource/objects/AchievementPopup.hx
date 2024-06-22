@@ -46,22 +46,11 @@ class AchievementPopup extends openfl.display.Sprite
     var sizeX = 100;
     var sizeY = 100;
 
-<<<<<<< Updated upstream
-		// achievement name/description
-		var name:String = 'Unknown';
-		var desc:String = 'Description not found';
-		if(achievement != null)
-		{
-			if(achievement.name != null) name = achievement.name;
-			if(achievement.description != null)  desc = achievement.description;
-		}
-=======
     var imgX = 15;
     var imgY = 15;
     var image = graphic.bitmap;
     graphics.beginBitmapFill(image, new Matrix(sizeX / image.width, 0, 0, sizeY / image.height, imgX, imgY), false, hasAntialias);
     graphics.drawRect(imgX, imgY, sizeX + 10, sizeY + 10);
->>>>>>> Stashed changes
 
     // achievement name/description
     var name:String = 'Unknown';
@@ -113,16 +102,9 @@ class AchievementPopup extends openfl.display.Sprite
     graphics.drawRect(textX, textY, text.width + textX, text.height + textY);
   }
 
-<<<<<<< Updated upstream
-		var time = Lib.getTimer();
-		var elapsed:Float = (time - timePassed) / 1000;
-		timePassed = time;
-		//Debug.logTrace('update called! $elapsed');
-=======
   var lerpTime:Float = 0;
   var countedTime:Float = 0;
   var timePassed:Float = -1;
->>>>>>> Stashed changes
 
   public var intendedY:Float = 0;
 
@@ -140,12 +122,6 @@ class AchievementPopup extends openfl.display.Sprite
 
     if (elapsed >= 0.5) return; // most likely passed through a loading
 
-<<<<<<< Updated upstream
-	public function destroy()
-	{
-		Achievements._popups.remove(this);
-		//Debug.logTrace('destroyed achievement, new count: ' + Achievements._popups.length);
-=======
     countedTime += elapsed;
     if (countedTime < 3)
     {
@@ -158,7 +134,6 @@ class AchievementPopup extends openfl.display.Sprite
       if (y <= -130 * lastScale) destroy();
     }
   }
->>>>>>> Stashed changes
 
   private function onResize(e:Event)
   {

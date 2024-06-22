@@ -1,24 +1,11 @@
 package;
 
-<<<<<<< Updated upstream
-
-#if android
-import android.content.Context;
-#end
-
-=======
 import backend.ColorBlindness;
->>>>>>> Stashed changes
 import flixel.input.keyboard.FlxKey;
 import flixel.system.scaleModes.*;
 import flixel.graphics.FlxGraphic;
 import flixel.FlxGame;
 import flixel.system.FlxAssets.FlxShader;
-<<<<<<< Updated upstream
-
-
-=======
->>>>>>> Stashed changes
 import openfl.Assets;
 import openfl.Lib;
 #if CRASH_HANDLER
@@ -36,37 +23,10 @@ import lime.app.Application;
 import haxe.CallStack;
 import haxe.io.Path;
 #end
-<<<<<<< Updated upstream
-
-//Other Things
-import gamejolt.GameJolt.GJToastManager;
-=======
 // Other Things
 import gamejolt.GameJoltGroup.GJToastManager;
->>>>>>> Stashed changes
 import gamejolt.*;
 import states.TitleState;
-<<<<<<< Updated upstream
-
-	// #if linux
-	// @:cppInclude('./external/gamemode_client.h')
-	// @:cppFileCode('
-	// 	#define GAMEMODE_AUTO
-	// ')
-	// #end
-
-class Main extends Sprite
-{
-	public static var game = {
-		width: 1280, // WINDOW width
-		height: 720, // WINDOW height
-		initialState: TitleState, // initial game state
-		zoom: -1.0, // game state bounds
-		framerate: 60, // default framerate
-		skipSplash: false, // if the default flixel splash screen should be skipped
-		startFullscreen: false // if the game should start at fullscreen mode
-	};
-=======
 import haxe.ui.Toolkit;
 
 class Main extends Sprite
@@ -81,18 +41,13 @@ class Main extends Sprite
       skipSplash: true, // if the default flixel splash screen should be skipped
       startFullscreen: false // if the game should start at fullscreen mode
     };
->>>>>>> Stashed changes
 
   public static var focused:Bool = true;
   public static var fpsVar:FPSCounter;
 
-<<<<<<< Updated upstream
-	public static var appName:String = ''; // Application name.
-=======
   public static var colorFilter:ColorBlindness;
 
   public static var appName:String = ''; // Application name.
->>>>>>> Stashed changes
 
   public static var gameContainer:Main = null; // Main instance to access when needed.
 
@@ -106,23 +61,11 @@ class Main extends Sprite
   {
     super();
 
-<<<<<<< Updated upstream
-		// Credits to MAJigsaw77 (he's the og author for this code)
-		#if android
-		Sys.setCwd(Path.addTrailingSlash(Context.getExternalFilesDir()));
-		#elseif ios
-		Sys.setCwd(lime.system.System.applicationStorageDirectory);
-		#end
-
-		setupGame();
-	}
-=======
     setupGame();
   }
 
   var oldVol:Float = 1.0;
   var newVol:Float = 0.2;
->>>>>>> Stashed changes
 
   public static var focusMusicTween:FlxTween;
 
@@ -132,18 +75,6 @@ class Main extends Sprite
     Toolkit.theme = "dark";
     Toolkit.autoScale = false;
 
-<<<<<<< Updated upstream
-	private function setupGame():Void {
-		addChild(new FlxGame(game.width, game.height, Init, #if (flixel < "5.0.0") game.zoom, #end game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
-
-		FlxG.sound.volume = 0.2;
-
-		#if !mobile
-		Lib.current.stage.align = "tl";
-		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
-		FlxG.scaleMode = new FillScaleMode();
-		#end
-=======
     haxe.ui.focus.FocusManager.instance.autoFocus = false;
     input.Cursor.registerHaxeUICursors();
     haxe.ui.tooltips.ToolTipManager.defaultDelay = 200;
@@ -152,7 +83,6 @@ class Main extends Sprite
 
     gjToastManager = new GJToastManager();
     addChild(gjToastManager);
->>>>>>> Stashed changes
 
     gameContainer = this;
 
@@ -161,11 +91,6 @@ class Main extends Sprite
     #end
     Paths.init();
 
-<<<<<<< Updated upstream
-		#if !(flixel >= "5.4.0")
-		FlxG.fixedTimestep = false;
-		#end
-=======
     FlxGraphic.defaultPersist = false;
     FlxG.signals.preStateSwitch.add(function() {
       if (Type.getClass(FlxG.state) != TitleState) // Resetting title state makes this unstable so we make it only for other states!
@@ -182,7 +107,6 @@ class Main extends Sprite
             FlxG.bitmap._cache.remove(key);
           }
         }
->>>>>>> Stashed changes
 
         // idk if this helps because it looks like just clearing it does the same thing
         for (k => f in lime.utils.Assets.cache.font)
@@ -220,40 +144,6 @@ class Main extends Sprite
     Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
     #end
 
-<<<<<<< Updated upstream
-		// shader coords fix
-		FlxG.signals.gameResized.add(function(w, h)
-		{	
-			if (FlxG.cameras != null) {
-				for (cam in FlxG.cameras.list) {
-			  		#if (flixel >= "5.4.0")
-						if (cam != null && cam.filters != null)
-							resetSpriteCache(cam.flashSprite);
-					#else
-					@:privateAccess
-					if (cam != null && cam._filters != null)
-						resetSpriteCache(cam.flashSprite);
-					#end
-				}
-	  		}
-
-			if (FlxG.game != null)
-				resetSpriteCache(FlxG.game);
-		});
-	}
-
-	static function resetSpriteCache(sprite:Sprite):Void {
-		@:privateAccess {
-			sprite.__cacheBitmap = null;
-			sprite.__cacheBitmapData = null;
-			#if (flixel < "5.4.1")
-			sprite.__cacheBitmapData2 = null;
-			sprite.__cacheBitmapData3 = null;
-			sprite.__cacheBitmapColorTransform = null;
-			#end
-		}
-	}
-=======
     #if desktop
     // Get first window in case the coder creates more windows.
     @:privateAccess
@@ -275,7 +165,6 @@ class Main extends Sprite
       }
     });
   }
->>>>>>> Stashed changes
 
   static function resetSpriteCache(sprite:Sprite):Void
   {
@@ -350,20 +239,7 @@ class Main extends Sprite
 
     if (!FileSystem.exists("./crash/")) FileSystem.createDirectory("./crash/");
 
-<<<<<<< Updated upstream
-		if (FileSystem.exists(crashDialoguePath))
-		{
-			Debug.logInfo("\nFound crash dialog program " + "[" + crashDialoguePath + "]");
-			new Process(crashDialoguePath, ["xd ", path]);
-		}
-		else
-		{
-			Debug.logInfo("No crash dialog found! Making a simple alert instead...");
-			Application.current.window.alert(errMsg, "Oh no... SC Engine has crashed!");
-		}
-=======
     File.saveContent(path, errMsg + "\n");
->>>>>>> Stashed changes
 
     Sys.println(errMsgPrint);
     Sys.println(errMsg);
@@ -371,14 +247,9 @@ class Main extends Sprite
 
     var crashDialoguePath:String = "SCE-CrashDialog";
 
-<<<<<<< Updated upstream
-		if (!(FlxG.scaleMode is RatioScaleMode)) // just to be sure yk.
-			FlxG.scaleMode = new RatioScaleMode();
-=======
     #if windows
     crashDialoguePath += ".exe";
     #end
->>>>>>> Stashed changes
 
     if (FileSystem.exists(crashDialoguePath))
     {

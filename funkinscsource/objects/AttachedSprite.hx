@@ -12,21 +12,6 @@ class AttachedSprite extends FlxSprite
   public var copyAlpha:Bool = true;
   public var copyVisible:Bool = false;
 
-<<<<<<< Updated upstream
-	public function new(?file:String = null, ?anim:String = null, ?library:String = null, ?loop:Bool = false)
-	{
-		super();
-		if(anim != null) {
-			frames = Paths.getSparrowAtlas(file, library);
-			animation.addByPrefix('idle', anim, 24, loop);
-			animation.play('idle');
-		} else if(file != null) {
-			loadGraphic(Paths.image(file));
-		}
-		antialiasing = ClientPrefs.data.antialiasing;
-		scrollFactor.set();
-	}
-=======
   public function new(?file:String = null, ?anim:String = null, ?parentfolder:String = null, ?loop:Bool = false)
   {
     super();
@@ -43,7 +28,6 @@ class AttachedSprite extends FlxSprite
     antialiasing = ClientPrefs.data.antialiasing;
     scrollFactor.set();
   }
->>>>>>> Stashed changes
 
   override function update(elapsed:Float)
   {

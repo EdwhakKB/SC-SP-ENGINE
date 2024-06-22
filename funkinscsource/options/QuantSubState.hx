@@ -72,17 +72,10 @@ class QuantSubState extends MusicBeatSubState
     modeBG.alpha = 0.4;
     add(modeBG);
 
-<<<<<<< Updated upstream
-		notesBG = new FlxSprite(140, 190).makeGraphic(480, 425, FlxColor.BLACK);
-		notesBG.visible = false;
-		notesBG.alpha = 0.4;
-		add(notesBG);
-=======
     notesBG = new FlxSprite(20, 190).makeGraphic(710, 125, FlxColor.BLACK);
     notesBG.visible = false;
     notesBG.alpha = 0.4;
     add(notesBG);
->>>>>>> Stashed changes
 
     modeNotes = new FlxTypedGroup<FlxSprite>();
     add(modeNotes);
@@ -90,26 +83,12 @@ class QuantSubState extends MusicBeatSubState
     myNotes = new FlxTypedGroup<StrumArrow>();
     add(myNotes);
 
-<<<<<<< Updated upstream
-		var bg:FlxSprite = new FlxSprite(720).makeGraphic(FlxG.width - 720, FlxG.height, FlxColor.BLACK);
-		bg.alpha = 0.25;
-		add(bg);
-		var bg:FlxSprite = new FlxSprite(750, 160).makeGraphic(FlxG.width - 780, 540, FlxColor.BLACK);
-		bg.alpha = 0.25;
-		add(bg);
-		
-		var text:Alphabet = new Alphabet(50, 86, 'CTRL', false);
-		text.alignment = CENTERED;
-		text.setScale(0.4);
-		add(text);
-=======
     var bg:FlxSprite = new FlxSprite(720).makeGraphic(FlxG.width - 720, FlxG.height, FlxColor.BLACK);
     bg.alpha = 0.25;
     add(bg);
     var bg:FlxSprite = new FlxSprite(750, 160).makeGraphic(FlxG.width - 780, 540, FlxColor.BLACK);
     bg.alpha = 0.25;
     add(bg);
->>>>>>> Stashed changes
 
     copyButton = new FlxSprite(760, 50).loadGraphic(Paths.image('noteColorMenu/copy'));
     copyButton.alpha = 0.6;
@@ -157,18 +136,9 @@ class QuantSubState extends MusicBeatSubState
     hexTypeLine.visible = false;
     add(hexTypeLine);
 
-<<<<<<< Updated upstream
-		var tipX = 20;
-		var tipY = 660;
-		var tip:FlxText = new FlxText(tipX, tipY, 0, "Press RELOAD to Reset the selected Note Part.", 16);
-		tip.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-		tip.borderSize = 2;
-		add(tip);
-=======
     spawnNotes();
     updateNotes(true);
     FlxG.sound.play(Paths.sound('scrollMenu'), 0.6);
->>>>>>> Stashed changes
 
     var tipX = 20;
     var tipY = 660;
@@ -189,16 +159,9 @@ class QuantSubState extends MusicBeatSubState
     controllerPointer.alpha = 0.6;
     add(controllerPointer);
 
-<<<<<<< Updated upstream
-	function updateTip()
-	{
-		tipTxt.text = 'Hold ' + (!controls.controllerMode ? 'Shift' : 'Left Shoulder Button') + ' + Press RELOAD to fully reset the selected Note.';
-	}
-=======
     FlxG.mouse.visible = !controls.controllerMode;
     controllerPointer.visible = controls.controllerMode;
     _lastControllerMode = controls.controllerMode;
->>>>>>> Stashed changes
 
     cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
   }
@@ -218,465 +181,6 @@ class QuantSubState extends MusicBeatSubState
     NUMPADNINE => '9', A => 'A', B => 'B', C => 'C', D => 'D', E => 'E', F => 'F'
   ];
 
-<<<<<<< Updated upstream
-		// Early controller checking
-		if(FlxG.gamepads.anyJustPressed(ANY)) controls.controllerMode = true;
-		else if(FlxG.mouse.justPressed || FlxG.mouse.deltaScreenX != 0 || FlxG.mouse.deltaScreenY != 0) controls.controllerMode = false;
-		//
-		
-		var changedToController:Bool = false;
-		if(controls.controllerMode != _lastControllerMode)
-		{
-			//Debug.logTrace('changed controller mode');
-			FlxG.mouse.visible = !controls.controllerMode;
-			controllerPointer.visible = controls.controllerMode;
-
-			// changed to controller mid state
-			if(controls.controllerMode)
-			{
-				controllerPointer.x = FlxG.mouse.x;
-				controllerPointer.y = FlxG.mouse.y;
-				changedToController = true;
-			}
-			// changed to keyboard mid state
-			/*else
-			{
-				FlxG.mouse.x = controllerPointer.x;
-				FlxG.mouse.y = controllerPointer.y;
-			}
-			// apparently theres no easy way to change mouse position that i know, oh well
-			*/
-			_lastControllerMode = controls.controllerMode;
-			updateTip();
-		}
-
-		// controller things
-		var analogX:Float = 0;
-		var analogY:Float = 0;
-		var analogMoved:Bool = false;
-		if(controls.controllerMode && (changedToController || FlxG.gamepads.anyInput()))
-		{
-			for (gamepad in FlxG.gamepads.getActiveGamepads())
-			{
-				analogX = gamepad.getXAxis(LEFT_ANALOG_STICK);
-				analogY = gamepad.getYAxis(LEFT_ANALOG_STICK);
-				analogMoved = (analogX != 0 || analogY != 0);
-				if(analogMoved) break;
-			}
-			controllerPointer.x = Math.max(0, Math.min(FlxG.width, controllerPointer.x + analogX * 1000 * elapsed));
-			controllerPointer.y = Math.max(0, Math.min(FlxG.height, controllerPointer.y + analogY * 1000 * elapsed));
-		}
-		var controllerPressed:Bool = (controls.controllerMode && controls.ACCEPT);
-		//
-
-		/*if(FlxG.keys.justPressed.CONTROL)
-		{
-			onPixel = !onPixel;
-			spawnNotes();
-			updateNotes(true);
-			FlxG.sound.play(Paths.sound('scrollMenu'), 0.6);
-		}*/
-
-		if(hexTypeNum > -1)
-		{
-			var keyPressed:FlxKey = cast (FlxG.keys.firstJustPressed(), FlxKey);
-			hexTypeVisibleTimer += elapsed;
-			var changed:Bool = false;
-			if(changed = FlxG.keys.justPressed.LEFT)
-				hexTypeNum--;
-			else if(changed = FlxG.keys.justPressed.RIGHT)
-				hexTypeNum++;
-			else if(allowedTypeKeys.exists(keyPressed))
-			{
-				//Debug.logTrace('keyPressed: $keyPressed, lil str: ' + allowedTypeKeys.get(keyPressed));
-				var curColor:String = alphabetHex.text;
-				var newColor:String = curColor.substring(0, hexTypeNum) + allowedTypeKeys.get(keyPressed) + curColor.substring(hexTypeNum + 1);
-
-				var colorHex:FlxColor = FlxColor.fromString('#' + newColor);
-				setShaderColor(colorHex);
-				_storedColor = getShaderColor();
-				updateColors();
-				
-				// move you to next letter
-				hexTypeNum++;
-				changed = true;
-			}
-			else if(FlxG.keys.justPressed.ENTER)
-				hexTypeNum = -1;
-			
-			var end:Bool = false;
-			if(changed)
-			{
-				if (hexTypeNum > 5) //Typed last letter
-				{
-					hexTypeNum = -1;
-					end = true;
-					hexTypeLine.visible = false;
-				}
-				else
-				{
-					if(hexTypeNum < 0) hexTypeNum = 0;
-					else if(hexTypeNum > 5) hexTypeNum = 5;
-					centerHexTypeLine();
-					hexTypeLine.visible = true;
-				}
-				FlxG.sound.play(Paths.sound('scrollMenu'), 0.6);
-			}
-			if(!end) hexTypeLine.visible = Math.floor(hexTypeVisibleTimer * 2) % 2 == 0;
-		}
-		else
-		{
-			var add:Int = 0;
-			if(analogX == 0 && !changedToController)
-			{
-				if(controls.UI_LEFT_P) add = -1;
-				else if(controls.UI_RIGHT_P) add = 1;
-			}
-
-			if(analogY == 0 && !changedToController && (controls.UI_UP_P || controls.UI_DOWN_P))
-			{
-				onModeColumn = !onModeColumn;
-				modeBG.visible = onModeColumn;
-				notesBG.visible = !onModeColumn;
-			}
-	
-			if(add != 0)
-			{
-				if(onModeColumn) changeSelectionMode(add);
-				else changeSelectionNote(add);
-			}
-			hexTypeLine.visible = false;
-		}
-
-		// Copy/Paste buttons
-		var generalMoved:Bool = (FlxG.mouse.justMoved || analogMoved);
-		var generalPressed:Bool = (FlxG.mouse.justPressed || controllerPressed);
-		if(generalMoved)
-		{
-			copyButton.alpha = 0.6;
-			pasteButton.alpha = 0.6;
-		}
-
-		if(pointerOverlaps(copyButton))
-		{
-			copyButton.alpha = 1;
-			if(generalPressed)
-			{
-				Clipboard.text = getShaderColor().toHexString(false, false);
-				FlxG.sound.play(Paths.sound('scrollMenu'), 0.6);
-				Debug.logTrace('copied: ' + Clipboard.text);
-			}
-			hexTypeNum = -1;
-		}
-		else if (pointerOverlaps(pasteButton))
-		{
-			pasteButton.alpha = 1;
-			if(generalPressed)
-			{
-				var formattedText = Clipboard.text.trim().toUpperCase().replace('#', '').replace('0x', '');
-				var newColor:Null<FlxColor> = FlxColor.fromString('#' + formattedText);
-				//Debug.logTrace('#${Clipboard.text.trim().toUpperCase()}');
-				if(newColor != null && formattedText.length == 6)
-				{
-					setShaderColor(newColor);
-					FlxG.sound.play(Paths.sound('scrollMenu'), 0.6);
-					_storedColor = getShaderColor();
-					updateColors();
-				}
-				else //errored
-					FlxG.sound.play(Paths.sound('cancelMenu'), 0.6);
-			}
-			hexTypeNum = -1;
-		}
-
-		// Click
-		if(generalPressed)
-		{
-			hexTypeNum = -1;
-			if (pointerOverlaps(modeNotes))
-			{
-				modeNotes.forEachAlive(function(note:FlxSprite) {
-					if (curSelectedMode != note.ID && pointerOverlaps(note))
-					{
-						modeBG.visible = notesBG.visible = false;
-						curSelectedMode = note.ID;
-						onModeColumn = true;
-						updateNotes();
-						FlxG.sound.play(Paths.sound('scrollMenu'), 0.6);
-					}
-				});
-			}
-			else if (pointerOverlaps(myNotes))
-			{
-				myNotes.forEachAlive(function(note:StrumArrow) {
-					if (curSelectedNote != note.ID && pointerOverlaps(note))
-					{
-						modeBG.visible = notesBG.visible = false;
-						curSelectedNote = note.ID;
-						onModeColumn = false;
-						bigNote.rgbShader.parent = Note.globalQuantRgbShaders[note.ID];
-						bigNote.shader = Note.globalQuantRgbShaders[note.ID].shader;
-						updateNotes();
-						FlxG.sound.play(Paths.sound('scrollMenu'), 0.6);
-					}
-				});
-			}
-			else if (pointerOverlaps(colorWheel)) {
-				_storedColor = getShaderColor();
-				holdingOnObj = colorWheel;
-			}
-			else if (pointerOverlaps(colorGradient)) {
-				_storedColor = getShaderColor();
-				holdingOnObj = colorGradient;
-			}
-			else if (pointerOverlaps(colorPalette)) {
-				setShaderColor(colorPalette.pixels.getPixel32(
-					Std.int((pointerX() - colorPalette.x) / colorPalette.scale.x), 
-					Std.int((pointerY() - colorPalette.y) / colorPalette.scale.y)));
-				FlxG.sound.play(Paths.sound('scrollMenu'), 0.6);
-				updateColors();
-			}
-			/*else if (pointerOverlaps(skinNote))
-			{
-				onPixel = !onPixel;
-				spawnNotes();
-				updateNotes(true);
-				FlxG.sound.play(Paths.sound('scrollMenu'), 0.6);
-			}*/
-			else if(pointerY() >= hexTypeLine.y && pointerY() < hexTypeLine.y + hexTypeLine.height &&
-					Math.abs(pointerX() - 1000) <= 84)
-			{
-				hexTypeNum = 0;
-				for (letter in alphabetHex.letters)
-				{
-					if(letter.x - letter.offset.x + letter.width <= pointerX()) hexTypeNum++;
-					else break;
-				}
-				if(hexTypeNum > 5) hexTypeNum = 5;
-				hexTypeLine.visible = true;
-				centerHexTypeLine();
-			}
-			else holdingOnObj = null;
-		}
-		// holding
-		if(holdingOnObj != null)
-		{
-			if (FlxG.mouse.justReleased || (controls.controllerMode && controls.justReleased('accept')))
-			{
-				holdingOnObj = null;
-				_storedColor = getShaderColor();
-				updateColors();
-				FlxG.sound.play(Paths.sound('scrollMenu'), 0.6);
-			}
-			else if (generalMoved || generalPressed)
-			{
-				if (holdingOnObj == colorGradient)
-				{
-					var newBrightness = 1 - FlxMath.bound((pointerY() - colorGradient.y) / colorGradient.height, 0, 1);
-					_storedColor.alpha = 1;
-					if(_storedColor.brightness == 0) //prevent bug
-						setShaderColor(FlxColor.fromRGBFloat(newBrightness, newBrightness, newBrightness));
-					else
-						setShaderColor(FlxColor.fromHSB(_storedColor.hue, _storedColor.saturation, newBrightness));
-					updateColors(_storedColor);
-				}
-				else if (holdingOnObj == colorWheel)
-				{
-					var center:FlxPoint = new FlxPoint(colorWheel.x + colorWheel.width/2, colorWheel.y + colorWheel.height/2);
-					var mouse:FlxPoint = pointerFlxPoint();
-					var hue:Float = FlxMath.wrap(FlxMath.wrap(Std.int(mouse.degreesTo(center)), 0, 360) - 90, 0, 360);
-					var sat:Float = FlxMath.bound(mouse.dist(center) / colorWheel.width*2, 0, 1);
-					//Debug.logTrace('$hue, $sat');
-					if(sat != 0) setShaderColor(FlxColor.fromHSB(hue, sat, _storedColor.brightness));
-					else setShaderColor(FlxColor.fromRGBFloat(_storedColor.brightness, _storedColor.brightness, _storedColor.brightness));
-					updateColors();
-				}
-			} 
-		}
-		else if(controls.RESET && hexTypeNum < 0)
-		{
-			if(FlxG.keys.pressed.SHIFT || FlxG.gamepads.anyJustPressed(LEFT_SHOULDER))
-			{
-				for (i in 0...7)
-				{
-					var strumRGB:RGBShaderReference = myNotes.members[curSelectedNote].rgbShader;
-					var color:FlxColor = ClientPrefs.defaultData.arrowRGBQuantize[curSelectedNote][i];
-					switch(i)
-					{
-						case 0:
-							getShader().r = strumRGB.r = color;
-						case 1:
-							getShader().g = strumRGB.g = color;
-						case 2:
-							getShader().b = strumRGB.b = color;
-					}
-					dataArray[curSelectedNote][i] = color;
-				}
-			}
-			setShaderColor(ClientPrefs.defaultData.arrowRGBQuantize[curSelectedNote][curSelectedMode]);
-			FlxG.sound.play(Paths.sound('cancelMenu'), 0.6);
-			updateColors();
-		}
-	}
-
-	function pointerOverlaps(obj:Dynamic)
-	{
-		if (controls.controllerMode) return FlxG.overlap(controllerPointer, obj);
-		return FlxG.mouse.overlaps(obj);
-	}
-	function pointerX():Float
-	{
-		if (controls.controllerMode) return controllerPointer.x;
-		return FlxG.mouse.x;	
-	}
-	function pointerY():Float
-	{
-		if (controls.controllerMode) return controllerPointer.y;
-		return FlxG.mouse.y;	
-	}
-	function pointerFlxPoint():FlxPoint
-	{
-		if (controls.controllerMode) return controllerPointer.getScreenPosition();
-		return FlxG.mouse.getScreenPosition();
-	}
-
-	function centerHexTypeLine()
-	{
-		//Debug.logTrace(hexTypeNum);
-		if(hexTypeNum > 0)
-		{
-			var letter = alphabetHex.letters[hexTypeNum-1];
-			hexTypeLine.x = letter.x - letter.offset.x + letter.width;
-		}
-		else
-		{
-			var letter = alphabetHex.letters[0];
-			hexTypeLine.x = letter.x - letter.offset.x;
-		}
-		hexTypeLine.x += hexTypeLine.width;
-		hexTypeVisibleTimer = 0;
-	}
-
-	function changeSelectionMode(change:Int = 0) {
-		curSelectedMode += change;
-		if (curSelectedMode < 0)
-			curSelectedMode = 1;
-		if (curSelectedMode >= 2)
-			curSelectedMode = 0;
-
-		modeBG.visible = true;
-		notesBG.visible = false;
-		updateNotes();
-		FlxG.sound.play(Paths.sound('scrollMenu'));
-	}
-	function changeSelectionNote(change:Int = 0) {
-		curSelectedNote += change;
-		if (curSelectedNote < 0)
-			curSelectedNote = dataArray.length-1;
-		if (curSelectedNote >= dataArray.length)
-			curSelectedNote = 0;
-		
-		modeBG.visible = false;
-		notesBG.visible = true;
-		bigNote.rgbShader.parent = Note.globalQuantRgbShaders[curSelectedNote];
-		bigNote.shader = Note.globalQuantRgbShaders[curSelectedNote].shader;
-		updateNotes();
-		FlxG.sound.play(Paths.sound('scrollMenu'));
-	}
-
-	// alphabets
-	function makeColorAlphabet(x:Float = 0, y:Float = 0):Alphabet
-	{
-		var text:Alphabet = new Alphabet(x, y, '', true);
-		text.alignment = CENTERED;
-		text.setScale(0.6);
-		add(text);
-		return text;
-	}
-
-	// notes sprites functions
-	var skinNote:FlxSprite;
-	var modeNotes:FlxTypedGroup<FlxSprite>;
-	var myNotes:FlxTypedGroup<StrumArrow>;
-	var bigNote:Note;
-    var animationsForNotes:Array<String> = ['purple', 'blue', 'green', 'red', 'purple', 'blue', 'green', 'red'];
-	public function spawnNotes()
-	{
-		dataArray = ClientPrefs.data.arrowRGBQuantize;
-
-		// clear groups
-		modeNotes.forEachAlive(function(note:FlxSprite) {
-			note.kill();
-			note.destroy();
-		});
-		myNotes.forEachAlive(function(note:StrumArrow) {
-			note.kill();
-			note.destroy();
-		});
-		modeNotes.clear();
-		myNotes.clear();
-
-		if(skinNote != null)
-		{
-			remove(skinNote);
-			skinNote.destroy();
-		}
-		if(bigNote != null)
-		{
-			remove(bigNote);
-			bigNote.destroy();
-		}
-
-		// respawn stuff
-		var res:Int = 160;
-		skinNote = new FlxSprite(48, 24).loadGraphic(Paths.image('noteColorMenu/note'), true, res, res);
-		skinNote.antialiasing = ClientPrefs.data.antialiasing;
-		skinNote.setGraphicSize(68);
-		skinNote.updateHitbox();
-		skinNote.animation.add('anim', [0], 24, true);
-		skinNote.animation.play('anim', true);
-		add(skinNote);
-
-		var res:Int = 160;
-		for (i in 0...3)
-		{
-			var newNote:FlxSprite = new FlxSprite(210 + (100 * i), 100).loadGraphic(Paths.image('noteColorMenu/note'), true, res, res);
-			newNote.antialiasing = ClientPrefs.data.antialiasing;
-			newNote.setGraphicSize(85);
-			newNote.updateHitbox();
-			newNote.animation.add('anim', [i], 24, true);
-			newNote.animation.play('anim', true);
-			newNote.ID = i;
-			modeNotes.add(newNote);
-		}
-
-		Note.globalQuantRgbShaders = [];
-		for (i in 0...dataArray.length)
-		{
-			Note.initializeGlobalQuantRGBShader(i);
-			var newNote:StrumArrow = new StrumArrow(25 + (680 / dataArray.length * i), 200, i, 0, 'normal', true);
-			newNote.useRGBShader = true;
-			newNote.setGraphicSize(102);
-			newNote.updateHitbox();
-			newNote.ID = i;
-			myNotes.add(newNote);
-		}
-
-		bigNote = new Note(0, 0, 'normal', false, true);
-        bigNote.quantizedNotes = true;
-		bigNote.setPosition(250, 325);
-		bigNote.setGraphicSize(250);
-		bigNote.updateHitbox();
-		bigNote.rgbShader.parent = Note.globalQuantRgbShaders[curSelectedNote];
-		bigNote.shader = Note.globalQuantRgbShaders[curSelectedNote].shader;
-		for (i in 0...dataArray.length)
-		{
-			bigNote.animation.addByPrefix('note$i', 'green0', 24, true);
-		}
-		insert(members.indexOf(myNotes) + 1, bigNote);
-		_storedColor = getShaderColor();
-		PlayState.stageUI = "normal";
-=======
   override function update(elapsed:Float)
   {
     if (controls.BACK)
@@ -685,28 +189,14 @@ class QuantSubState extends MusicBeatSubState
       FlxG.sound.play(Paths.sound('cancelMenu'));
       close();
       return;
->>>>>>> Stashed changes
     }
 
     super.update(elapsed);
 
-<<<<<<< Updated upstream
-		for (note in myNotes)
-		{
-			var newAnim:String = curSelectedNote == note.ID ? 'confirm' : 'pressed';
-			note.alpha = (curSelectedNote == note.ID) ? 1 : 0.6;
-			if(note.animation.curAnim == null || note.animation.curAnim.name != newAnim) note.playAnim(newAnim, true);
-			if(instant) note.animation.curAnim.finish();
-		}
-		bigNote.animation.play('note$curSelectedNote', true);
-		updateColors();
-	}
-=======
     // Early controller checking
     if (FlxG.gamepads.anyJustPressed(ANY)) controls.controllerMode = true;
     else if (FlxG.mouse.justPressed || FlxG.mouse.deltaScreenX != 0 || FlxG.mouse.deltaScreenY != 0) controls.controllerMode = false;
     //
->>>>>>> Stashed changes
 
     var changedToController:Bool = false;
     if (controls.controllerMode != _lastControllerMode)
@@ -752,11 +242,6 @@ class QuantSubState extends MusicBeatSubState
     var controllerPressed:Bool = (controls.controllerMode && controls.ACCEPT);
     //
 
-<<<<<<< Updated upstream
-	function setShaderColor(value:FlxColor) dataArray[curSelectedNote][curSelectedMode] = value;
-	function getShaderColor() return dataArray[curSelectedNote][curSelectedMode];
-	function getShader() return Note.globalQuantRgbShaders[curSelectedNote];
-=======
     /*if(FlxG.keys.justPressed.CONTROL)
       {
         onPixel = !onPixel;
@@ -1224,5 +709,4 @@ class QuantSubState extends MusicBeatSubState
 
   function getShader()
     return Note.globalQuantRgbShaders[curSelectedNote];
->>>>>>> Stashed changes
 }

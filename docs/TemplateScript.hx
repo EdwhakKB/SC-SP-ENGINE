@@ -206,11 +206,12 @@ function opponentNoteHit(note:Note)
 
 function goodNoteHitPost(note:Note)
 {
-	// Function called when you hit a note (***after*** note hit calculations)
+  // Function called when you hit a note (***after*** note hit calculations)
 }
+
 function opponentNoteHitPost(note:Note)
 {
-	// Works the same as goodNoteHitPost, but for Opponent's notes being hit
+  // Works the same as goodNoteHitPost, but for Opponent's notes being hit
 }
 
 function noteMissPress(direction:Int)
@@ -247,26 +248,15 @@ function onMoveCamera(focus:String)
 }
 
 // Event notes hooks
-<<<<<<< Updated upstream
-function onEvent(name:String, value1:String, value2:String, strumTime:Float)
-=======
 function onEvent(name:String, eventParams:Array<String>, eventTime:Float)
->>>>>>> Stashed changes
 {
   // event note triggered
   // triggerEvent() does not call this function!!
 
-<<<<<<< Updated upstream
-	// print('Event triggered: ', name, value1, value2, strumTime);
-}
-
-function onEventPushed(name:String, value1:String, value2:String, strumTime:Float)
-=======
   // print('Event triggered: ', name, eventParams, eventTime);
 }
 
 function onEventPushed(name:String, eventParams:Array<String>, eventTime:Float)
->>>>>>> Stashed changes
 {
   // Called for every event note, recommended to precache assets
 }
@@ -285,8 +275,6 @@ function eventEarlyTrigger(name:String)
   // write your shit under this line, the new return value will override the ones hardcoded on the engine
 }
 
-<<<<<<< Updated upstream
-=======
 // Event notes hooks legacy
 // AFTER eventTime use ?value3:String, to 14 (?value14:String) in the function to make it work!
 function onEventLegacy(name:String, value1:String, value2:String, eventTime:Float, etc)
@@ -317,7 +305,6 @@ function eventEarlyTriggerLegacy(name:String, etc, eventTime:Float)
 
   // write your shit under this line, the new return value will override the ones hardcoded on the engine
 }
->>>>>>> Stashed changes
 
 // Custom Substates
 function onCustomSubstateCreate(name:String)

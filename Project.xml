@@ -112,12 +112,6 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<assets path="assets/week_assets"   library="week_assets"   rename="assets" exclude="*.ogg" if="web"/>
 	<assets path="assets/week_assets"   library="week_assets"   rename="assets" exclude="*.mp3" unless="web"/>
 
-<<<<<<< Updated upstream
-	<library name="videos"        preload="true" if="VIDEOS_ALLOWED"/>
-	<library name="songs"         preload="true" />
-	<library name="week_assets"   preload="true" />
-	
-=======
 	<section if="TRANSLATIONS_ALLOWED">
 		<assets path="assets/translations" rename="assets" exclude="*.ogg" if="web"/>
 		<assets path="assets/translations" rename="assets" exclude="*.mp3"  unless="web"/>
@@ -128,7 +122,6 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 		<assets path="assets/base_game" rename="assets" exclude="*.mp3"  unless="web"/>
 	</section>
 
->>>>>>> Stashed changes
 	<section if="MODS_ALLOWED">
 		<assets path='example_mods' rename='mods' embed='false'/>
 	</section>
@@ -144,20 +137,17 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	-->
 	<!-- _______________________________ Libraries ______________________________ -->
 
-	<haxelib name="flixel" /> 
+	<haxelib name="flixel" />
 	<haxelib name="flixel-ui" />
 	<haxelib name="flixel-addons" />
 	<haxelib name='tjson'/>
 
-	<haxedev set='webgl' if="html5"/>
-
 	<!--In case you want to use the addons package-->
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
 	<haxelib name="SScript" if="HSCRIPT_ALLOWED"/>
-	<haxelib name="hxCodec" if="VIDEOS_ALLOWED"/>
 	<!-- <haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>-->
 	<haxelib name="discord_rpc" if="DISCORD_ALLOWED"/>
-	
+
 	<!--Avoid memory leaks with for loops in HScript-->
 	<haxedef name="loop_unroll_max_cost" value="25" />
 
@@ -182,7 +172,7 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 
 	<!--In case you want to use the ui package-->
 	<haxelib name="faxe" if='switch'/>
-  
+
   	<!--Incase you want parallaxlt-->
 	<!-- <haxelib name="parallaxlt" /> -->
 
@@ -195,7 +185,7 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<!-- Enables a terminal log prompt on debug builds -->
 	<haxelib name="hxcpp-debug-server" if="debug"/>
 	<haxedef name="HXC_LIBVLC_LOGGING" if="VIDEOS_ALLOWED debug" />
-	
+
 	<haxelib name="hxtelemetry" if="telemetry"/>
 	<haxedef name="HXCPP_TELEMETRY"  if="telemetry"/>
 
@@ -222,10 +212,6 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<haxedef name="FLX_NO_MOUSE" if="mobile" />
 	<haxedef name="FLX_NO_KEYBOARD" if="mobile" />
 	<haxedef name="FLX_NO_TOUCH" if="desktop" />
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
 	<!--<haxedef name="FLX_NO_GAMEPAD" />-->
 
 	<!--Disable the Flixel core sound tray-->
@@ -245,9 +231,6 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 
 	<!--Enable this for Nape release builds for a serious peformance improvement-->
 	<haxedef name="NAPE_RELEASE_BUILD" unless="debug" />
-<<<<<<< Updated upstream
-	
-=======
 
 	<!--<haxedef name="HXCPP_GC_GENERATIONAL"/>-->
 
@@ -357,41 +340,14 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 
 	<haxedef name="message.reporting" value="pretty" />
 
->>>>>>> Stashed changes
 	<!--Used for Izzy Engine's crash handler-->
 	<haxedef name="HXCPP_STACK_TRACE" if="CRASH_HANDLER"/>  <!--if you want stack traces-->
 	<haxedef name="HXCPP_CHECK_POINTER" if="CRASH_HANDLER" />
 	<haxedef name="HXCPP_STACK_LINE" if="CRASH_HANDLER" />
 
-<<<<<<< Updated upstream
-	<!-- No deprecation warnings. -->
-	<haxedef name="no-deprecation-warnings"/>
-
-	<!--<haxedef name="HXCPP_GC_GENERATIONAL"/>-->
-
-	<haxedef name="queue_experimental_optimization"/>
-
-	<!-- <error value="Targets besides desktop are not supported" unless="desktop" />-->
-
-	<!--Macro fixes-->
-	<haxeflag name="--macro" value="allowPackage('flash')" />
-	<haxeflag name="--macro" value="include('my.pack')" />
-
-	<!-- _________________________________ Custom _______________________________ -->
-
-	<!--Place custom nodes like icons here (higher priority to override the HaxeFlixel icon)-->
-	
-	<icon path="assets/art/icon16.png" size='16'/>
-	<icon path="assets/art/icon32.png" size='32'/>
-	<icon path="assets/art/icon64.png" size='64'/>
-	<icon path="assets/art/iconOG.png" />
-
-	<config:hxtelemetry host="192.168.100.68" allocations="false" />
-=======
 	<haxeflag name="-D no-traces" unless="debug"/>
 
 	<haxedef name="hscriptPos" /> <!-- for logging -->
->>>>>>> Stashed changes
 
 	<!-- Enable this on platforms which do not support dropping files onto the window. -->
 	<haxedef name="FILE_DROP_UNSUPPORTED" if="mac" />

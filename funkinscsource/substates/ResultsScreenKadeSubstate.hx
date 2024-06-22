@@ -92,18 +92,6 @@ class ResultsScreenKadeSubstate extends substates.MusicBeatSubState
 
   var mean:Float = 0;
 
-<<<<<<< Updated upstream
-		camResults.follow(camFollow, LOCKON, 0);
-		camResults.zoom = FlxG.camera.zoom;
-		camResults.snapToTarget();
-
-		#if SCEFEATURES_ALLOWED
-		music = new FlxSound().loadEmbedded(Paths.inst((PlayState.SONG.instrumentalPrefix != null ? PlayState.SONG.instrumentalPrefix : ''), PlayState.SONG.songId, (PlayState.SONG.instrumentalSuffix != null ? PlayState.SONG.instrumentalSuffix : '')), true, true);
-		#else
-		music = new FlxSound().loadEmbedded(Paths.inst(PlayState.SONG.songId), true, true);
-		#end
-		music.volume = 0;
-=======
   override public function create()
   {
     camResults = new FlxCamera();
@@ -112,7 +100,6 @@ class ResultsScreenKadeSubstate extends substates.MusicBeatSubState
 
     camResults.follow(camFollow, LOCKON, 0);
     camResults.snapToTarget();
->>>>>>> Stashed changes
 
     music = new FlxSound()
       .loadEmbedded(Paths.inst((PlayState.currentChart.options.instrumentalPrefix != null ? PlayState.currentChart.options.instrumentalPrefix : ''),
@@ -135,224 +122,6 @@ class ResultsScreenKadeSubstate extends substates.MusicBeatSubState
 
     add(text);
 
-<<<<<<< Updated upstream
-		var score = game.songScore;
-		var acc = game.updateAcc;
-
-		if (PlayState.isStoryMode)
-		{
-			acc = PlayState.campaignAccuracy;
-			score = PlayState.campaignScore;
-		}
-
-		var swags = PlayState.isStoryMode ? PlayState.campaignSwags : PlayState.swags;
-		var sicks = PlayState.isStoryMode ? PlayState.campaignSicks : PlayState.sicks;
-		var goods = PlayState.isStoryMode ? PlayState.campaignGoods : PlayState.goods;
-		var bads = PlayState.isStoryMode ? PlayState.campaignBads : PlayState.bads;
-		var shits = PlayState.isStoryMode ? PlayState.campaignShits : PlayState.shits;
-
-		comboText.text = 'Judgements:\nSwags - ${swags}\nSicks - ${sicks}\nGoods - ${goods}\nBads - ${bads}\nShits - ${shits}\n\nCombo Breaks: ${PlayState.isStoryMode ? PlayState.campaignMisses : game.songMisses}\nHighest Combo: ${PlayState.highestCombo + 1}\nScore: $score\n${PlayState.isStoryMode ? 'Average Accuracy' : 'Accuracy'}: ${acc}% \nRank: ${game.comboLetterRank} - ${game.ratingFC} \nRate: ${game.playbackRate}x\n\nH - Replay song';
-
-		add(comboText);
-
-		#if mobile
-		contText.text = "Touch to continue";
-		#end
-
-		add(contText);
-
-		graph.update();
-
-		graphSprite = new OFLSprite(graph.xPos, graph.yPos, Std.int(graph._width), Std.int(graph._rectHeight), graph);
-		FlxSpriteUtil.drawRect(graphSprite, 0, 0, graphSprite.width, graphSprite.height, FlxColor.TRANSPARENT, {thickness: 1.5, color: FlxColor.WHITE});
-
-		graphSprite.scrollFactor.set();
-		graphSprite.alpha = 0;
-
-		add(graphSprite);
-
-		var swags = HelperFunctions.truncateFloat(PlayState.swags / PlayState.sicks, 1);
-		var sicks = HelperFunctions.truncateFloat(PlayState.sicks / PlayState.goods, 1);
-		var goods = HelperFunctions.truncateFloat(PlayState.goods / PlayState.bads, 1);
-
-		if (swags == Math.POSITIVE_INFINITY)
-			swags = 0;
-		if (sicks == Math.POSITIVE_INFINITY)
-			sicks = 0;
-		if (goods == Math.POSITIVE_INFINITY)
-			goods = 0;
-
-		if (swags == Math.POSITIVE_INFINITY || swags == Math.NaN)
-			swags = 0;
-		if (sicks == Math.POSITIVE_INFINITY || sicks == Math.NaN)
-			sicks = 0;
-		if (goods == Math.POSITIVE_INFINITY || goods == Math.NaN)
-			goods = 0;
-
-		var legitTimings:Bool = true;
-		for (rating in Rating.timingWindows)
-		{
-			if (rating.timingWindow != rating.defaultTimingWindow)
-			{
-				legitTimings = false;
-				break;
-			}
-		}
-
-		superMegaConditionShit = legitTimings
-			&& game.notITGMod
-			&& game.holdsActive
-			&& !game.cpuControlled
-			&& !game.practiceMode
-			&& !PlayState.chartingMode
-			&& !PlayState.modchartMode
-			&& HelperFunctions.truncateFloat(game.healthGain, 2) <= 1
-			&& HelperFunctions.truncateFloat(game.healthLoss, 2) >= 1;
-
-		if (superMegaConditionShit)
-		{
-			var percent:Float = game.ratingPercent;
-			if(Math.isNaN(percent)) percent = 0;
-			Highscore.saveScore(PlayState.SONG.songId, game.songScore, PlayState.storyDifficulty, percent);
-			Highscore.saveCombo(PlayState.SONG.songId, game.ratingFC, PlayState.storyDifficulty);
-			Highscore.saveLetter(PlayState.SONG.songId, game.comboLetterRank, PlayState.storyDifficulty);
-		}
-
-		mean = HelperFunctions.truncateFloat(mean / game.playerNotes, 2);
-		var acceptShit:String = (superMegaConditionShit ? '| Accepted' : '| Rejected');
-
-		#if debug
-		acceptShit = '| Debug';
-		#end
-
-		if (PlayState.isStoryMode)
-			acceptShit = '';
-
-		settingsText.text = 'Mean: ${mean}ms (';
-		var reverseWins = Rating.timingWindows.copy();
-		reverseWins.reverse();
-		for (i in 0...reverseWins.length)
-		{
-			var timing = reverseWins[i];
-			settingsText.text += '${timing.name.toUpperCase()}:${timing.timingWindow}ms';
-			if (i != reverseWins.length - 1)
-				settingsText.text += ',';
-		}
-		settingsText.text += ') $acceptShit';
-
-		add(settingsText);
-
-		FlxTween.tween(background, {alpha: 0.5}, 1.4);
-		FlxTween.tween(songText, {y: 65}, 1.4, {ease: FlxEase.expoInOut});
-		FlxTween.tween(activeMods, {y: FlxG.height - 400}, 1.4, {ease: FlxEase.expoInOut});
-		FlxTween.tween(text, {y: 20}, 1.4, {ease: FlxEase.expoInOut});
-		FlxTween.tween(comboText, {y: 145}, 1.4, {ease: FlxEase.expoInOut});
-		FlxTween.tween(contText, {y: FlxG.height - 70}, 1.4, {ease: FlxEase.expoInOut});
-		FlxTween.tween(settingsText, {y: FlxG.height - 35}, 1.4, {ease: FlxEase.expoInOut});
-		FlxTween.tween(graphSprite, {alpha: 1}, 1.4, {ease: FlxEase.expoInOut});
-
-		//cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
-	}
-
-	var frames = 0;
-	var fadingMusic = false;
-
-	override function update(elapsed:Float)
-	{
-		if (music != null && PlayState.inResults && !fadingMusic)
-			if (music.volume < 0.8) music.volume += 0.04 * elapsed;
-
-		// keybinds
-
-		if ((controls.ACCEPT || FlxG.mouse.pressed) && PlayState.inResults && !fadingMusic)
-		{
-			if (music != null){
-				fadingMusic = true;
-				music.fadeOut(0.3, 0, { 
-					onComplete ->
-					{
-						camResults.fade(FlxColor.BLACK, 0.5, false, () -> {
-							music.volume = 0;
-							music.destroy();
-							music = null;
-							PlayState.chartingMode = false;
-							PlayState.modchartMode = false;
-	
-							if (PlayState.isStoryMode)
-							{
-								FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
-								Conductor.bpm = 102;
-							}
-							close();
-							
-							if (PlayState.isStoryMode) MusicBeatState.switchState(new StoryMenuState());
-							else MusicBeatState.switchState(new FreeplayState());
-						}, true);
-					}
-				});
-			}
-		}
-
-		if (FlxG.keys.justPressed.H && PlayState.inResults && !fadingMusic)
-		{
-			if (music != null)
-			{
-				fadingMusic = true;
-				music.fadeOut(0.3, 0, {
-					onComplete ->
-					{
-						camResults.fade(FlxColor.BLACK, 0.5, false, () -> {
-							music.volume = 0;
-							music.destroy();
-							music = null;
-							PlayState.chartingMode = false;
-							PlayState.modchartMode = false;
-		
-							close();
-							PlayState.isStoryMode = false;
-							PlayState.storyDifficulty = PlayState.storyDifficulty;
-							LoadingState.loadAndSwitchState(new PlayState());
-						}, true);
-					}
-				});
-			}
-		}
-
-		super.update(elapsed);
-	}
-
-	public function registerHit(note:Note, isMiss:Bool = false, isBotPlay:Bool = false, missNote:Float)
-	{
-		var noteRating = note.rating;
-		var noteDiff = note.strumTime - Conductor.songPosition;
-		var noteStrumTime = note.strumTime;
-
-		if (isMiss)
-			noteDiff = missNote;
-
-		if (isBotPlay)
-			noteDiff = 0;
-		// judgement
-
-		if (noteDiff != missNote)
-			mean += noteDiff;
-
-		graph.addToHistory(noteDiff, noteRating, noteStrumTime);
-	}
-
-	override function destroy()
-	{
-		instance = null;
-		graph.destroy();
-		graph = null;
-		graphSprite.destroy();
-		super.destroy();
-	}
-
-	private function refresh()
-	{	
-	}
-=======
     add(songText);
 
     if (!PlayState.isStoryMode) songText.text = '';
@@ -565,5 +334,4 @@ class ResultsScreenKadeSubstate extends substates.MusicBeatSubState
   }
 
   override function refresh() {}
->>>>>>> Stashed changes
 }

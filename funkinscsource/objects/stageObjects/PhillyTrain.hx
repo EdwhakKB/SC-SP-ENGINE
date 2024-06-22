@@ -55,12 +55,6 @@ class PhillyTrain extends BGSprite
         frameTiming = 0;
       }
 
-<<<<<<< Updated upstream
-	public function beatHit(curBeat:Int):Void
-	{
-		if (!moving)
-			cooldown += 1;
-=======
       if (PlayState.finishedSong)
       {
         if (!tweend)
@@ -76,7 +70,6 @@ class PhillyTrain extends BGSprite
     }
     super.update(elapsed);
   }
->>>>>>> Stashed changes
 
   var tweend:Bool = false;
 

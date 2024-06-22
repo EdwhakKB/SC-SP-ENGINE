@@ -1,18 +1,10 @@
 package backend;
 
-<<<<<<< Updated upstream
-import flixel.util.FlxSave;
-
-=======
->>>>>>> Stashed changes
 import openfl.utils.Assets;
 import lime.utils.Assets as LimeAssets;
 import backend.DataType;
-<<<<<<< Updated upstream
-=======
 import objects.VideoSprite;
 import flixel.util.FlxSave;
->>>>>>> Stashed changes
 import flixel.text.FlxBitmapText;
 import flixel.graphics.frames.FlxBitmapFont;
 import flixel.text.FlxText.FlxTextBorderStyle;
@@ -66,16 +58,6 @@ class CoolUtil
     spr.centerOrigin();
   }
 
-<<<<<<< Updated upstream
-	public static inline function addZeros(str:String, num:Int) {
-		while(str.length < num) str = '0${str}';
-		return str;
-	}
-
-	inline public static function boundTo(value:Float, min:Float, max:Float):Float {
-		return Math.max(min, Math.min(max, value));
-	}
-=======
   /**
    * Add several zeros at the beginning of a string, so that `2` becomes `02`.
    * @param str String to add zeros
@@ -104,7 +86,6 @@ class CoolUtil
   {
     return Math.max(min, Math.min(max, value));
   }
->>>>>>> Stashed changes
 
   public static function coolTextFile2(path:String):Array<String>
   {
@@ -118,20 +99,6 @@ class CoolUtil
     return daList;
   }
 
-<<<<<<< Updated upstream
-	inline public static function coolTextFile(path:String):Array<String>
-	{
-		var daList:String = null;
-		#if (sys && MODS_ALLOWED)
-		var formatted:Array<String> = path.split(':'); //prevent "shared:", "preload:" and other library names on file path
-		path = formatted[formatted.length-1];
-		if(FileSystem.exists(path)) daList = File.getContent(path);
-		#else
-		if(Assets.exists(path)) daList = Assets.getText(path);
-		#end
-		return daList != null ? listFromString(daList) : [];
-	}
-=======
   inline public static function coolTextFile(path:String):Array<String>
   {
     var daList:String = null;
@@ -142,7 +109,6 @@ class CoolUtil
     #end
     return daList != null ? listFromString(daList) : [];
   }
->>>>>>> Stashed changes
 
   inline public static function colorFromString(color:String):FlxColor
   {
@@ -174,30 +140,9 @@ class CoolUtil
     for (i in 0...decimals)
       tempMult *= 10;
 
-<<<<<<< Updated upstream
-		var newValue:Float = Math.floor(value * tempMult);
-		return newValue / tempMult;
-	}
-	
-	inline public static function dominantColor(sprite:flixel.FlxSprite):Int
-	{
-		var countByColor:Map<Int, Int> = [];
-		for(col in 0...sprite.frameWidth) {
-			for(row in 0...sprite.frameHeight) {
-				var colorOfThisPixel:Int = sprite.pixels.getPixel32(col, row);
-				if(colorOfThisPixel != 0) {
-					if(countByColor.exists(colorOfThisPixel))
-						countByColor[colorOfThisPixel] = countByColor[colorOfThisPixel] + 1;
-					else if(countByColor[colorOfThisPixel] != 13520687 - (2*13520687))
-						countByColor[colorOfThisPixel] = 1;
-				}
-			}
-		}
-=======
     var newValue:Float = Math.floor(value * tempMult);
     return newValue / tempMult;
   }
->>>>>>> Stashed changes
 
   inline public static function dominantColor(sprite:FlxSprite):Int
   {
@@ -248,46 +193,6 @@ class CoolUtil
     folder = folder.replace('/', '\\');
     if (folder.endsWith('/')) folder.substr(0, folder.length - 1);
 
-<<<<<<< Updated upstream
-			#if linux
-			var command:String = '/usr/bin/xdg-open';
-			#else
-			var command:String = 'explorer.exe';
-			#end
-			Sys.command(command, [folder]);
-			trace('$command $folder');
-		#else
-			FlxG.error("Platform is not supported for CoolUtil.openFolder");
-		#end
-	}
-
-	/** Quick Function to Fix Save Files for Flixel 5
-		if you are making a mod, you are gonna wanna change "ShadowMario" to something else
-		so Base Psych saves won't conflict with yours
-		@BeastlyGabi
-	**/
-	/*inline public static function getSavePath(folder:String = 'ShadowMario'):String {
-		@:privateAccess
-		return #if (flixel < "5.0.0") folder #else FlxG.stage.application.meta.get('company')
-			+ '/'
-			+ FlxSave.validate(FlxG.stage.application.meta.get('file')) #end;
-	}*/
-
-	/**
-		Helper Function to Fix Save Files for Flixel 5
-		-- EDIT: [November 29, 2023] --
-		this function is used to get the save path, period.
-		since newer flixel versions are being enforced anyways.
-		@crowplexus
-	**/
-	@:access(flixel.util.FlxSave.validate)
-	inline public static function getSavePath():String {
-		final company:String = FlxG.stage.application.meta.get('company');
-		#if (flixel < "5.0.0") return company; #else
-		return '${company}/${flixel.util.FlxSave.validate(FlxG.stage.application.meta.get('file'))}';
-		#end
-	}
-=======
     #if linux
     var command:String = '/usr/bin/xdg-open';
     #else
@@ -299,7 +204,6 @@ class CoolUtil
     FlxG.error("Platform is not supported for CoolUtil.openFolder");
     #end
   }
->>>>>>> Stashed changes
 
   /**
     Helper Function to Fix Save Files for Flixel 5
@@ -374,38 +278,10 @@ class CoolUtil
     return FlxColor.WHITE;
   }
 
-<<<<<<< Updated upstream
-	/**
-	 * Add several zeros at the end of a string, so that `2` becomes `20`, useful for ms.
-	 * @param str String to add zeros
-	 * @param num The length required
-	 */
-	 public static inline function addEndZeros(str:String, num:Int) {
-		while(str.length < num) str = '${str}0';
-		return str;
-	}
-
-	/**
-	 * Returns a string representation of a size, following this format: `1.02 GB`, `134.00 MB`
-	 * @param size Size to convert ot string
-	 * @return String Result string representation
-	 */
-	public static function getSizeString(size:Float):String {
-		var labels = [" B", " KB", " MB", " GB", " TB"];
-		var rSize:Float = size;
-		var label:Int = 0;
-		while(rSize > 1024 && label < labels.length-1) {
-			label++;
-			rSize /= 1024;
-		}
-		return '${Std.int(rSize) + "." + addZeros(Std.string(Std.int((rSize % 1) * 100)), 2)}${labels[label]}';
-	}
-=======
   public static inline function exactSetGraphicSize(obj:Dynamic, width:Float, height:Float) // ACTULLY WORKS LMAO -lunar
   {
     obj.scale.set(Math.abs(((obj.width - width) / obj.width) - 1), Math.abs(((obj.height - height) / obj.height) - 1));
   }
->>>>>>> Stashed changes
 
   /**
    * Returns a string representation of a size, following this format: `1.02 GB`, `134.00 MB`
@@ -430,10 +306,6 @@ class CoolUtil
     var enums:Array<DataType> = DataType.createAll();
     var strs:Array<String> = [];
 
-<<<<<<< Updated upstream
-		return strs;
-	}
-=======
     for (_enum in enums)
     {
       strs[enums.indexOf(_enum)] = Std.string(_enum);
@@ -542,7 +414,6 @@ class CoolUtil
     }
     return null;
   }
->>>>>>> Stashed changes
 }
 
 /**

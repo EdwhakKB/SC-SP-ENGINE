@@ -3,15 +3,6 @@ package objects;
 import openfl.utils.Assets;
 import tjson.TJSON as Json;
 
-<<<<<<< Updated upstream
-typedef MenuCharacterFile = {
-	var image:String;
-	var scale:Float;
-	var position:Array<Int>;
-	var idle_anim:String;
-	var confirm_anim:String;
-	var flipX:Bool;
-=======
 typedef MenuCharacterFile =
 {
   var image:String;
@@ -21,7 +12,6 @@ typedef MenuCharacterFile =
   var confirm_anim:String;
   var flipX:Bool;
   var antialiasing:Null<Bool>;
->>>>>>> Stashed changes
 }
 
 class MenuCharacter extends FlxSprite
@@ -31,15 +21,9 @@ class MenuCharacter extends FlxSprite
 
   private static var DEFAULT_CHARACTER:String = 'bf';
 
-<<<<<<< Updated upstream
-		antialiasing = ClientPrefs.data.antialiasing;
-		changeCharacter(character);
-	}
-=======
   public function new(x:Float, character:String = 'bf')
   {
     super(x);
->>>>>>> Stashed changes
 
     changeCharacter(character);
   }
@@ -52,58 +36,6 @@ class MenuCharacter extends FlxSprite
     this.character = character;
     visible = true;
 
-<<<<<<< Updated upstream
-		hasConfirmAnimation = false;
-		switch(character) {
-			case '':
-				visible = false;
-				dontPlayAnim = true;
-			default:
-				var characterPath:String = 'images/menucharacters/' + character + '.json';
-				var rawJson = null;
-
-				#if MODS_ALLOWED
-				var path:String = Paths.modFolders(characterPath);
-				if (!FileSystem.exists(path)) {
-					path = Paths.getSharedPath(characterPath);
-				}
-
-				if(!FileSystem.exists(path)) {
-					path = Paths.getSharedPath('images/menucharacters/' + DEFAULT_CHARACTER + '.json');
-				}
-				rawJson = File.getContent(path);
-
-				#else
-				var path:String = Paths.getSharedPath(characterPath);
-				if(!Assets.exists(path)) {
-					path = Paths.getSharedPath('images/menucharacters/' + DEFAULT_CHARACTER + '.json');
-				}
-				rawJson = Assets.getText(path);
-				#end
-				
-				var charFile:MenuCharacterFile = cast Json.parse(rawJson);
-				frames = Paths.getSparrowAtlas('menucharacters/' + charFile.image);
-				animation.addByPrefix('idle', charFile.idle_anim, 24);
-
-				var confirmAnim:String = charFile.confirm_anim;
-				if(confirmAnim != null && confirmAnim.length > 0 && confirmAnim != charFile.idle_anim)
-				{
-					animation.addByPrefix('confirm', confirmAnim, 24, false);
-					if (animation.getByName('confirm') != null) //check for invalid animation
-						hasConfirmAnimation = true;
-				}
-
-				flipX = (charFile.flipX == true);
-
-				if(charFile.scale != 1) {
-					scale.set(charFile.scale, charFile.scale);
-					updateHitbox();
-				}
-				offset.set(charFile.position[0], charFile.position[1]);
-				animation.play('idle');
-		}
-	}
-=======
     var dontPlayAnim:Bool = false;
     scale.set(1, 1);
     updateHitbox();
@@ -171,5 +103,4 @@ class MenuCharacter extends FlxSprite
         antialiasing = (charFile.antialiasing != false && ClientPrefs.data.antialiasing);
     }
   }
->>>>>>> Stashed changes
 }

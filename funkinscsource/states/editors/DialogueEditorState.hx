@@ -27,18 +27,12 @@ class DialogueEditorState extends MusicBeatState
   var defaultLine:DialogueLine;
   var dialogueFile:DialogueFile = null;
 
-<<<<<<< Updated upstream
-	override function create() {
-		persistentUpdate = persistentDraw = true;
-		FlxG.camera.bgColor = FlxColor.fromHSL(0, 0, 0.5);
-=======
   var unsavedProgress:Bool = false;
 
   override function create()
   {
     persistentUpdate = persistentDraw = true;
     FlxG.camera.bgColor = FlxColor.fromHSL(0, 0, 0.5);
->>>>>>> Stashed changes
 
     defaultLine =
       {
@@ -216,61 +210,6 @@ class DialogueEditorState extends MusicBeatState
       case 'right':
         character.x = FlxG.width - character.width + DialogueBoxPsych.RIGHT_CHAR_X;
 
-<<<<<<< Updated upstream
-		#if DISCORD_ALLOWED
-		// Updating Discord Rich Presence
-		var rpcText:String = lineInputText.text;
-		if(rpcText == null || rpcText.length < 1) rpcText = '(Empty)';
-		if(rpcText.length < 3) rpcText += '   '; //Fixes a bug on RPC that triggers an error when the text is too short
-		DiscordClient.changePresence("Dialogue Editor", rpcText);
-		#end
-	}
-
-	override function getEvent(id:String, sender:Dynamic, data:Dynamic, ?params:Array<Dynamic>) {
-		if(id == FlxUIInputText.CHANGE_EVENT && (sender is FlxUIInputText)) {
-			if (sender == characterInputText)
-			{
-				character.reloadCharacterJson(characterInputText.text);
-				reloadCharacter();
-				if(character.jsonFile.animations.length > 0) {
-					curAnim = 0;
-					if(character.jsonFile.animations.length > curAnim && character.jsonFile.animations[curAnim] != null) {
-						character.playAnim(character.jsonFile.animations[curAnim].anim, daText.finishedText);
-						animText.text = 'Animation: ' + character.jsonFile.animations[curAnim].anim + ' (' + (curAnim + 1) +' / ' + character.jsonFile.animations.length + ') - Press W or S to scroll';
-					} else {
-						animText.text = 'ERROR! NO ANIMATIONS FOUND';
-					}
-					characterAnimSpeed();
-				}
-				dialogueFile.dialogue[curSelected].portrait = characterInputText.text;
-				reloadText(false);
-				updateTextBox();
-			}
-			else if(sender == lineInputText)
-			{
-				dialogueFile.dialogue[curSelected].text = lineInputText.text;
-
-				daText.text = lineInputText.text;
-				if(daText.text == null) daText.text = '';
-				reloadText(true);
-			}
-			else if(sender == soundInputText)
-			{
-				daText.finishText();
-				dialogueFile.dialogue[curSelected].sound = soundInputText.text;
-				daText.sound = soundInputText.text;
-				if(daText.sound == null) daText.sound = '';
-			}
-		} else if(id == FlxUINumericStepper.CHANGE_EVENT && (sender == speedStepper)) {
-			dialogueFile.dialogue[curSelected].speed = speedStepper.value;
-			if(Math.isNaN(dialogueFile.dialogue[curSelected].speed) || dialogueFile.dialogue[curSelected].speed == null || dialogueFile.dialogue[curSelected].speed < 0.001) {
-				dialogueFile.dialogue[curSelected].speed = 0.0;
-			}
-			daText.delay = dialogueFile.dialogue[curSelected].speed;
-			reloadText(false);
-		}
-	}
-=======
       case 'center':
         character.x = FlxG.width / 2;
         character.x -= character.width / 2;
@@ -299,7 +238,6 @@ class DialogueEditorState extends MusicBeatState
   private static var DEFAULT_TEXT:String = "coolswag";
   private static var DEFAULT_SPEED:Float = 0.05;
   private static var DEFAULT_BUBBLETYPE:String = "normal";
->>>>>>> Stashed changes
 
   function reloadText(skipDialogue:Bool)
   {
@@ -321,26 +259,6 @@ class DialogueEditorState extends MusicBeatState
     daText.y = DialogueBoxPsych.DEFAULT_TEXT_Y;
     if (daText.rows > 2) daText.y -= DialogueBoxPsych.LONG_TEXT_ADD;
 
-<<<<<<< Updated upstream
-		if(!blockInput) {
-			ClientPrefs.toggleVolumeKeys(true);
-			if(FlxG.keys.justPressed.SPACE) {
-				reloadText(false);
-			}
-			if(FlxG.keys.justPressed.ESCAPE) {
-				MusicBeatState.switchState(new states.editors.MasterEditorMenu());
-				FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"), 1);
-				transitioning = true;
-			}
-			var negaMult:Array<Int> = [1, -1];
-			var controlAnim:Array<Bool> = [FlxG.keys.justPressed.W, FlxG.keys.justPressed.S];
-			var controlText:Array<Bool> = [FlxG.keys.justPressed.D, FlxG.keys.justPressed.A];
-			for (i in 0...controlAnim.length) {
-				if(controlAnim[i] && character.jsonFile.animations.length > 0) {
-					curAnim -= negaMult[i];
-					if(curAnim < 0) curAnim = character.jsonFile.animations.length - 1;
-					else if(curAnim >= character.jsonFile.animations.length) curAnim = 0;
-=======
     #if DISCORD_ALLOWED
     // Updating Discord Rich Presence
     var rpcText:String = lineInputText.text;
@@ -349,7 +267,6 @@ class DialogueEditorState extends MusicBeatState
     DiscordClient.changePresence("Editing dialogue - Dialogue Editor", rpcText);
     #end
   }
->>>>>>> Stashed changes
 
   /*override function getEvent(id:String, sender:Dynamic, data:Dynamic, ?params:Array<Dynamic>) {
     if(id == FlxUICheckBox.CLICK_EVENT)
@@ -404,12 +321,6 @@ class DialogueEditorState extends MusicBeatState
   var blockPressWhileTypingOn:Array<FlxUIInputText> = [];
   var transitioning:Bool = false;
 
-<<<<<<< Updated upstream
-	function changeText(add:Int = 0) {
-		curSelected += add;
-		if(curSelected < 0) curSelected = dialogueFile.dialogue.length - 1;
-		else if(curSelected >= dialogueFile.dialogue.length) curSelected = 0;
-=======
   override function update(elapsed:Float)
   {
     if (transitioning)
@@ -417,7 +328,6 @@ class DialogueEditorState extends MusicBeatState
       super.update(elapsed);
       return;
     }
->>>>>>> Stashed changes
 
     if (character.animation.curAnim != null)
     {
@@ -488,23 +398,6 @@ class DialogueEditorState extends MusicBeatState
           if (curAnim < 0) curAnim = character.jsonFile.animations.length - 1;
           else if (curAnim >= character.jsonFile.animations.length) curAnim = 0;
 
-<<<<<<< Updated upstream
-		var leLength:Int = character.jsonFile.animations.length;
-		if(leLength > 0) {
-			for (i in 0...leLength) {
-				var leAnim:DialogueAnimArray = character.jsonFile.animations[i];
-				if(leAnim != null && leAnim.anim == curDialogue.expression) {
-					curAnim = i;
-					break;
-				}
-			}
-			character.playAnim(character.jsonFile.animations[curAnim].anim, daText.finishedText);
-			animText.text = 'Animation: ' + character.jsonFile.animations[curAnim].anim + ' (' + (curAnim + 1) +' / ' + leLength + ') - Press W or S to scroll';
-		} else {
-			animText.text = 'ERROR! NO ANIMATIONS FOUND';
-		}
-		characterAnimSpeed();
-=======
           var animToPlay:String = character.jsonFile.animations[curAnim].anim;
           if (character.dialogueAnimations.exists(animToPlay))
           {
@@ -524,7 +417,6 @@ class DialogueEditorState extends MusicBeatState
           changeText(negaMult[i]);
         }
       }
->>>>>>> Stashed changes
 
       if (FlxG.keys.justPressed.O)
       {

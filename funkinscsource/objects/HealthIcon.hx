@@ -6,19 +6,10 @@ import flixel.math.FlxMath;
 
 class HealthIcon extends FlxSprite
 {
-<<<<<<< Updated upstream
-	public var animOffsets:Map<String, Array<Dynamic>>;
-
-	public var isOldIcon:Bool = false;
-	public var isPlayer:Bool = false;
-	public var char:String = '';
-	public var iconOffset:Array<Float> = [0, 0];
-=======
   public var isOldIcon:Bool = false;
   public var isPlayer:Bool = false;
   public var char:String = '';
   public var iconOffset:Array<Float> = [0, 0];
->>>>>>> Stashed changes
 
   public var sprTracker:FlxSprite;
   public var hasWinning:Bool = true;
@@ -54,57 +45,14 @@ class HealthIcon extends FlxSprite
   public var percent20or80:Bool = false;
   public var percent80or20:Bool = false;
 
-<<<<<<< Updated upstream
-	private var animName:String = 'normal';
-
-	public var iconBopSpeed:Int = 2;
-	public var iconBopAngleSpeed:Int = 2;
-=======
   public var speedBopLerp:Float = 1;
   public var setIconScale:Float = 1.2;
->>>>>>> Stashed changes
 
   public var iconBopSpeed:Int = 2;
   public var iconBopAngleSpeed:Int = 2;
 
   public var overrideBeatBop:Bool = false;
 
-<<<<<<< Updated upstream
-	public function new(char:String = 'bf', isPlayer:Bool = false, isSizedState:Bool = false, ?allowGPU:Bool = true)
-	{
-		super();
-		animOffsets = new Map<String, Array<Dynamic>>();
-		isOldIcon = (char == 'bf-old');
-		this.isPlayer = isPlayer;
-		this.isSizedState = isSizedState;
-		changeIcon(char, allowGPU);
-		scrollFactor.set();
-	}
-
-	public var changedComplete:Bool = true;
-
-	public function changeIcon(char:String, ?allowGPU:Bool = true) {
-		changedComplete = false;
-		var name:String = 'icons/';
-		var iconSuffix:String = 'icon-';
-		if(!Paths.fileExists('images/' + name + char + '.png', IMAGE)) 
-		{
-			iconSuffix = '';
-		}
-
-		if (iconSuffix != '')
-		{
-			name = name + char;
-			if(!Paths.fileExists('images/' + name + '.png', IMAGE)) 
-			{
-				name = 'icons/' + iconSuffix + 'face';
-			}
-		}
-		else
-		{
-			name = name + 'icon-' + char;
-		}
-=======
   public var ableSizes:Array<String> = ['450', '600', '750', '900'];
   public var choosenDivisionMult:Int = 3;
 
@@ -124,7 +72,6 @@ class HealthIcon extends FlxSprite
     changeIcon(char, allowGPU);
     scrollFactor.set();
   }
->>>>>>> Stashed changes
 
   public function changeIcon(char:String, ?allowGPU:Bool = true)
   {
@@ -144,26 +91,6 @@ class HealthIcon extends FlxSprite
     else
       name = name + 'icon-' + char;
 
-<<<<<<< Updated upstream
-		var filePath:String = 'images/$frameName.json';
-		var path:String = Paths.getPath(filePath, TEXT, null, true);
-
-		// now with winning icon support
-		try
-		{
-			#if MODS_ALLOWED
-			if (FileSystem.exists(Paths.getPath('images/$frameName.xml', TEXT, null, true)))
-				loadIconFile(Json.parse(File.getContent(path)), frameName, name, allowGPU);
-			#else
-			if (Assets.exists(Paths.getPath('images/$frameName.xml', TEXT, null, true)))
-				loadIconFile(Json.parse(Assets.getText(path)), frameName, name, allowGPU);
-			#end
-			else loadGraphicIcon(name, allowGPU);
-		}
-		catch(e:Dynamic){
-			Debug.logInfo("Couldn't find image nor xml nor sprite to load!");
-		}
-=======
     if (animatedIcon && isSizedState)
     {
       setGraphicSize(Std.int(width * 0.7));
@@ -172,7 +99,6 @@ class HealthIcon extends FlxSprite
 
     var frameName:String = name;
     if (frameName.contains('.png')) frameName = frameName.substring(0, frameName.length - 4);
->>>>>>> Stashed changes
 
     var filePath:String = 'images/$frameName.json';
     var path:String = Paths.getPath(filePath, TEXT);
@@ -216,27 +142,6 @@ class HealthIcon extends FlxSprite
     for (size in 0...ableSizes.length)
       if (graphic.width == Std.parseFloat(ableSizes[size]) && graphic.height == 150) needAutoSize = false;
 
-<<<<<<< Updated upstream
-		findAutomaticSize = (((graphic.width <= 300 && graphic.height <= 150) || 
-			(graphic.width >= 300 && graphic.height >= 150)) && needAutoSize && !isOneSized); // Fucking fix somethings
-
-		if (!isOneSized)
-		{
-			if (findAutomaticSize || alreadySized) divisionMult = 2;
-			else divisionMult = choosenDivisionMult;
-		}
-		else divisionMult = 1;
-
-		loadGraphic(graphic, true, Math.floor(graphic.width / divisionMult), Math.floor(graphic.height));
-		iconOffset[0] = (width - 150) / divisionMult;
-		iconOffset[1] = (height - 150) / divisionMult;
-		if(divisionMult == 2)
-		{
-			hasWinning = false;
-			defaultSize = true;
-		}
-		else if (divisionMult >= 3) hasWinning = true;
-=======
     switch (graphic.width)
     {
       case 450:
@@ -252,7 +157,6 @@ class HealthIcon extends FlxSprite
     if (graphic.width == 300 && graphic.height == 150) alreadySized = true;
     else
       alreadySized = false;
->>>>>>> Stashed changes
 
     // Fixed icons that don't use perfect height and width with these!
     if (!isOneSized)
@@ -312,19 +216,11 @@ class HealthIcon extends FlxSprite
         animArray = [0];
     }
 
-<<<<<<< Updated upstream
-	public function loadIconFile(json:Dynamic, path:String, graphicIcon:String, gpuAllowed:Bool)
-	{
-		if (json.image != null) path = 'images/' + json.image + '.json';
-
-		frames = Paths.getSparrowAtlas(path, null, gpuAllowed);
-=======
     animation.add(char, animArray, 0, false, isPlayer);
     animation.play(char);
 
     antialiasing = (ClientPrefs.data.antialiasing && !char.endsWith('-pixel'));
   }
->>>>>>> Stashed changes
 
   public function loadIconFile(json:Dynamic, path:String, graphicIcon:String)
   {
@@ -346,15 +242,11 @@ class HealthIcon extends FlxSprite
       scale.set(1, 1);
       updateHitbox();
 
-<<<<<<< Updated upstream
-		flipX = (json.flip_x != isPlayer);
-=======
       if (json.scale != 1)
       {
         scale.set(json.scale, json.scale);
         updateHitbox();
       }
->>>>>>> Stashed changes
 
       if (json.graphicScale != 1)
       {
@@ -365,27 +257,8 @@ class HealthIcon extends FlxSprite
 
     flipX = (json.flip_x != null ? json.flip_x : isPlayer);
 
-<<<<<<< Updated upstream
-		//Let people override it to autoAnimateSetup
-		if (animations != null && animations.length > 0)
-		{
-			for (anim in animations)
-			{
-				var animAnim:String = '' + anim.anim;
-				var animName:String = '' + anim.name;
-				var animFps:Int = anim.fps;
-				var animLoop:Bool = !!anim.loop; // Bruh
-				var animFlipY:Bool = !!anim.flipY;
-				var animIndices:Array<Int> = anim.indices;
-				if (animIndices != null && animIndices.length > 0) animation.addByIndices(animAnim, animName, animIndices, "", animFps, animLoop, isPlayer, animFlipY);
-				else animation.addByPrefix(animAnim, animName, animFps, animLoop, isPlayer, animFlipY);
-	
-				var offsets:Array<Int> = anim.offsets;
-				var swagOffsets:Array<Int> = offsets;
-=======
     final noAntialiasing = (json.no_antialiasing == true);
     antialiasing = ClientPrefs.data.antialiasing ? !noAntialiasing && !char.endsWith('-pixel') : false;
->>>>>>> Stashed changes
 
     // animations
     final animations:Array<IconAnimations> = json.animations;
@@ -407,32 +280,9 @@ class HealthIcon extends FlxSprite
         var offsets:Array<Int> = anim.offsets;
         var swagOffsets:Array<Int> = offsets;
 
-<<<<<<< Updated upstream
-	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
-	{
-		animation.play(AnimName, Force, Reversed, Frame);
-
-		var daOffset = animOffsets.get(AnimName);
-
-		if (animOffsets.exists(AnimName))
-		{
-			offset.set(daOffset[0], daOffset[1]);
-		}
-	}
-
-	public function addOffset(name:String, x:Float = 0, y:Float = 0)
-	{
-		animOffsets[name] = [x, y];
-	}
-
-	public function getCharacter():String {
-		return char;
-	}
-=======
         if (swagOffsets != null && swagOffsets.length > 1) addOffset(anim.anim, swagOffsets[0], swagOffsets[1]);
       }
     }
->>>>>>> Stashed changes
 
     if (animOffsets.exists('losing')) hasLosingAnimated = true;
     if (animOffsets.exists('winning')) hasWinningAnimated = true;
@@ -445,106 +295,6 @@ class HealthIcon extends FlxSprite
     return char;
   }
 
-<<<<<<< Updated upstream
-		if (!iconStoppedBop)
-		{
-			var mult:Float = FlxMath.lerp((setIconScale-0.2), scale.x, Math.exp(-elapsed * 9 * speedBopLerp));
-			scale.set(mult, mult);
-			updateHitbox();
-		}
-		
-		if (!overrideIconOnUpdate)
-		{
-			if (!animatedIcon)
-			{
-				if (isPlayer)
-				{
-					if (percent20or80 && frames.frames.length > 0)
-					{
-						animation.curAnim.curFrame = 1;
-					}
-					else if (percent80or20 && hasWinning && frames.frames.length > 2)
-					{
-						animation.curAnim.curFrame = 2;
-					}
-					else
-					{
-						animation.curAnim.curFrame = 0;
-					}
-				}
-				else
-				{
-					if (percent20or80 && hasWinning && frames.frames.length > 2)
-					{
-						animation.curAnim.curFrame = 2;
-					}
-					else if (percent80or20 && frames.frames.length > 0)
-					{
-						animation.curAnim.curFrame = 1;
-					}
-					else
-					{
-						animation.curAnim.curFrame = 0;
-					}
-				}
-			}
-			else
-			{
-				if (isPlayer)
-				{
-					if (percent20or80 && hasLosingAnimated)
-					{
-						normalAnimation = false;
-						winningAnimation = false;
-						losingAnimation = true;
-
-						animName = 'losing';
-					}
-					else if (percent80or20 && hasWinningAnimated)
-					{
-						normalAnimation = false;
-						winningAnimation = true;
-						losingAnimation = false;
-
-						animName = 'winning';
-					}
-					else
-					{
-						normalAnimation = true;
-						winningAnimation = false;
-						losingAnimation = false;
-
-						animName = 'normal';
-					}
-				}
-				else
-				{
-					if (percent20or80 && hasWinningAnimated)
-					{
-						normalAnimation = false;
-						winningAnimation = true;
-						losingAnimation = false;
-
-						animName = 'normal';
-					}
-					else if (percent80or20 && hasLosingAnimated)
-					{
-						normalAnimation = false;
-						winningAnimation = true;
-						losingAnimation = false;
-
-						animName = 'winning';
-					}
-					else
-					{
-						normalAnimation = false;
-						winningAnimation = false;
-						losingAnimation = true;
-
-						animName = 'losing';
-					}
-				}
-=======
   override function updateHitbox()
   {
     super.updateHitbox();
@@ -569,7 +319,6 @@ class HealthIcon extends FlxSprite
       scale.set(mult, mult);
       updateHitbox();
     }
->>>>>>> Stashed changes
 
     if (!overrideIconOnUpdate)
     {
@@ -598,19 +347,6 @@ class HealthIcon extends FlxSprite
           winningAnimation = (percent80or20 && hasWinningAnimated);
           losingAnimation = (percent20or80 && hasLosingAnimated);
 
-<<<<<<< Updated upstream
- 	public function beatHit(curBeat:Int)
-	{
-		if (!overrideBeatBop)
-		{
-			if (curBeat % iconBopSpeed == 0)
-			{
-				if (!iconStoppedBop)
-				{
-					scale.set(setIconScale, setIconScale);
-					updateHitbox();
-				}
-=======
           animName = ((percent80or20 && hasWinningAnimated) ? 'winning' : ((percent20or80 && hasLosingAnimated) ? 'losing' : 'normal'));
         }
         else
@@ -618,7 +354,6 @@ class HealthIcon extends FlxSprite
           normalAnimation = (!(percent20or80 && hasWinningAnimated) && !(percent80or20 && hasLosingAnimated));
           winningAnimation = (percent20or80 && hasWinningAnimated);
           losingAnimation = (percent80or20 && hasLosingAnimated);
->>>>>>> Stashed changes
 
           animName = ((percent20or80 && hasWinningAnimated) ? 'winning' : ((percent80or20 && hasLosingAnimated) ? 'losing' : 'normal'));
         }
@@ -675,17 +410,6 @@ typedef IconData =
   var ?no_antialiasing:Bool;
 }
 
-<<<<<<< Updated upstream
-typedef IconAnimations = {
-	var name:String;
-	var anim:String;
-	var ?fps:Int;
-	var ?offsets:Array<Int>;
-	var ?loop:Bool;
-	var ?indices:Array<Int>;
-	var ?flipY:Bool;
-}
-=======
 typedef IconAnimations =
 {
   var name:String;
@@ -695,4 +419,3 @@ typedef IconAnimations =
   var ?loop:Bool;
   var ?indices:Array<Int>;
 }
->>>>>>> Stashed changes

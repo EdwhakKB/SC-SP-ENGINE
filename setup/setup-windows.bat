@@ -9,17 +9,6 @@ haxelib install flixel
 haxelib install tjson
 haxelib install flixel-addons
 haxelib install flixel-tools
-<<<<<<< Updated upstream
-haxelib install SScript
-haxelib install hxCodec
-haxelib install parallaxlt
-haxelib install hscript
-haxelib git linc_luajit https://github.com/superpowers04/linc_luajit
-haxelib git discord_rpc https://github.com/Aidan63/linc_discord-rpc
-haxelib git tentools https://github.com/TentaRJ/tentools.git
-haxelib git systools https://github.com/haya3218/systools
-haxelib run lime rebuild systools windows
-=======
 haxelib install flixel-ui
 haxelib install SScript 8.1.6
 haxelib install parallaxlt
@@ -45,7 +34,6 @@ haxelib git thx.core https://github.com/FunkinCrew/thx.core/tree/22605ff44f01971
 haxelib git thx.semver https://github.com/FunkinCrew/thx.semver/tree/cf8d213589a2c7ce4a59b0fdba9e8ff36bc029fa
 haxelib git json2object https://github.com/FunkinCrew/json2object/tree/a8c26f18463c98da32f744c214fe02273e1823fa
 haxelib git hxvlc https://github.com/MAJigsaw77/hxvlc/tree/main
->>>>>>> Stashed changes
 curl -# -O https://download.visualstudio.microsoft.com/download/pr/3105fcfe-e771-41d6-9a1c-fc971e7d03a7/8eb13958dc429a6e6f7e0d6704d43a55f18d02a253608351b6bf6723ffdaf24e/vs_Community.exe
 vs_Community.exe --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.Windows10SDK.19041 -p
 echo Finished!

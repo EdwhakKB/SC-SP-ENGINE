@@ -1,16 +1,5 @@
 package backend;
 
-<<<<<<< Updated upstream
-import backend.Song;
-
-typedef BPMChangeEvent =
-{
-	var stepTime:Int;
-	var songTime:Float;
-	var bpm:Float;
-	@:optional var stepCrochet:Float;
-}
-=======
 import utils.Constants;
 import flixel.util.FlxSignal;
 import flixel.math.FlxMath;
@@ -18,7 +7,6 @@ import backend.song.data.SongData.SongTimeChange;
 import backend.song.data.SongDataUtils;
 import haxe.Timer;
 import flixel.sound.FlxSound;
->>>>>>> Stashed changes
 
 /**
  * A core class which handles musical timing throughout the game,

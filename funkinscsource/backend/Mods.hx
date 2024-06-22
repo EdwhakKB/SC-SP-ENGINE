@@ -13,24 +13,6 @@ class Mods
 {
   static public var currentModDirectory:String = '';
 
-<<<<<<< Updated upstream
-	public static var ignoreModFolders:Array<String> = [
-		'custom_events',
-		'custom_notetypes',
-		'data',
-		'songs',
-		'music',
-		'sounds',
-		'shaders',
-		'videos',
-		'images',
-		'stages',
-		'weeks',
-		'fonts',
-		'scripts',
-		'achievements'
-	];
-=======
   public static final ignoreModFolders:Array<String> = [
     'custom_events',
     'custom_notetypes',
@@ -42,7 +24,6 @@ class Mods
     'images',
     'scripts'
   ];
->>>>>>> Stashed changes
 
   private static var globalMods:Array<String> = [];
 
@@ -60,31 +41,6 @@ class Mods
     return globalMods;
   }
 
-<<<<<<< Updated upstream
-	inline public static function getModDirectories():Array<String>
-	{
-		var list:Array<String> = [];
-		#if MODS_ALLOWED
-		var modsFolder:String = Paths.mods();
-		if(FileSystem.exists(modsFolder)) {
-			for (folder in FileSystem.readDirectory(modsFolder))
-			{
-				var path = haxe.io.Path.join([modsFolder, folder]);
-				if (FileSystem.isDirectory(path) && !ignoreModFolders.contains(folder.toLowerCase()) && !list.contains(folder))
-					list.push(folder);
-			}
-		}
-		#end
-		return list;
-	}
-	
-	inline public static function mergeAllTextsNamed(path:String, defaultDirectory:String = null, allowDuplicates:Bool = false)
-	{
-		if(defaultDirectory == null) defaultDirectory = Paths.getSharedPath();
-		defaultDirectory = defaultDirectory.trim();
-		if(!defaultDirectory.endsWith('/')) defaultDirectory += '/';
-		if(!defaultDirectory.startsWith('assets/')) defaultDirectory = 'assets/$defaultDirectory';
-=======
   inline public static function getModDirectories():Array<String>
   {
     var list:Array<String> = [];
@@ -101,7 +57,6 @@ class Mods
     #end
     return list;
   }
->>>>>>> Stashed changes
 
   inline public static function mergeAllTextsNamed(path:String, ?defaultDirectory:String = null, allowDuplicates:Bool = false):Array<String>
   {
@@ -188,16 +143,7 @@ class Mods
     return null;
   }
 
-<<<<<<< Updated upstream
-		#if MODS_ALLOWED
-		try {
-			for (mod in CoolUtil.coolTextFile('modsList.txt'))
-			{
-				//Debug.logTrace('Mod: $mod');
-				if(mod.trim().length < 1) continue;
-=======
   public static var updatedOnState:Bool = false;
->>>>>>> Stashed changes
 
   inline public static function parseList():ModsList
   {
@@ -211,13 +157,6 @@ class Mods
       {
         if (mod.trim().length < 1) continue;
 
-<<<<<<< Updated upstream
-		File.saveContent('modsList.txt', fileStr);
-		updatedOnState = true;
-		//Debug.logTrace('Saved modsList.txt');
-		#end
-	}
-=======
         var dat = mod.split("|");
         list.all.push(dat[0]);
         if (dat[1] == "1") list.enabled.push(dat[0]);
@@ -232,7 +171,6 @@ class Mods
     #end
     return list;
   }
->>>>>>> Stashed changes
 
   private static function updateModList()
   {

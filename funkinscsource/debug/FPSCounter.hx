@@ -6,12 +6,6 @@ import openfl.text.TextFormat;
 import openfl.Lib;
 import openfl.system.System;
 import haxe.Int64;
-<<<<<<< Updated upstream
-
-import flixel.util.FlxStringUtil;
-
-=======
->>>>>>> Stashed changes
 #if cpp
 import cpp.vm.Gc;
 #elseif hl
@@ -97,15 +91,10 @@ class FPSCounter extends TextField
     // setup the date
     if (ClientPrefs.data.dateDisplay) DateSetup.initDate();
 
-<<<<<<< Updated upstream
-		memoryMegas = Int64.make(0, System.totalMemory);
-		taskMemoryMegas = Int64.make(0, MemoryUtil.getMemoryfromProcess());
-=======
     text = "FPS: ";
 
     /*memoryMegas = Int64.make(0, System.totalMemory);
       taskMemoryMegas = Int64.make(0, MemoryUtil.getMemoryfromProcess()); */
->>>>>>> Stashed changes
 
     memoryMegas = MemoryUtil.currentMemUsage();
     if (taskMemoryMegas < memoryMegas) taskMemoryMegas = memoryMegas;
@@ -116,21 +105,11 @@ class FPSCounter extends TextField
     textColor = 0xFFFFFFFF;
     if (currentFPS < FlxG.updateFramerate * 0.5) textColor = 0xFFFF0000;
 
-<<<<<<< Updated upstream
-		text = 'FPS: $currentFPS'
-		+ (ClientPrefs.data.memoryDisplay ? '\nMemory: ${CoolUtil.getSizeString(memoryMegas)} (${CoolUtil.getSizeString(taskMemoryMegas)})' : '')
-		+ (ClientPrefs.data.dateDisplay ? '\nDate: $stringTimeToReturn' : '')
-
-		#if debug + '$stateText' + '$substateText'; #else ; #end
-	}
-=======
     text = 'FPS: $currentFPS'
       + (ClientPrefs.data.memoryDisplay ? '\nMemory: ${CoolUtil.getSizeString(memoryMegas)} / ${CoolUtil.getSizeString(taskMemoryMegas)}' : '')
       + (ClientPrefs.data.dateDisplay ? '\nDate: $stringTimeToReturn' : '')
       + '\nVersion: ${states.MainMenuState.psychEngineVersion}' #if debug + '$stateText$substateText'; #else; #end
-
   }
->>>>>>> Stashed changes
 }
 
 #if windows
@@ -194,17 +173,6 @@ class MemoryUtil
     #end
   }
 
-<<<<<<< Updated upstream
-	public static inline function currentMemUsage() {
-		#if cpp
-		return Gc.memInfo64(Gc.MEM_INFO_USAGE);
-		#elseif sys
-		return cast(cast(System.totalMemory, UInt), Float);
-		#else
-		return 0;
-		#end
-	}
-=======
   public static inline function currentMemUsage()
   {
     #if cpp
@@ -217,7 +185,6 @@ class MemoryUtil
     return 0;
     #end
   }
->>>>>>> Stashed changes
 }
 
 class DateSetup

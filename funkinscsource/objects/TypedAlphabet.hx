@@ -56,19 +56,10 @@ class TypedAlphabet extends Alphabet
     super.update(elapsed);
   }
 
-<<<<<<< Updated upstream
-		for (i in start...(upTo+1))
-		{
-			if(letters[i] != null) letters[i].visible = true;
-			//Debug.logTrace('test, showing: $i');
-		}
-	}
-=======
   public function showCharacterUpTo(upTo:Int)
   {
     var start:Int = _curLetter;
     if (start < 0) start = 0;
->>>>>>> Stashed changes
 
     for (i in start...(upTo + 1))
     {

@@ -16,23 +16,6 @@ class CustomSubstate extends MusicBeatSubState
   }
   #end
 
-<<<<<<< Updated upstream
-	public static function openCustomSubstate(name:String, ?pauseGame:Bool = false)
-	{
-		if(pauseGame)
-		{
-			FlxG.camera.followLerp = 0;
-			PlayState.instance.persistentUpdate = false;
-			PlayState.instance.persistentDraw = true;
-			PlayState.instance.paused = true;
-			if(FlxG.sound.music != null) FlxG.sound.music.pause();
-			PlayState.instance.vocals.pause();
-		}
-		PlayState.instance.openSubState(new CustomSubstate(name));
-		PlayState.instance.setOnHScript('customSubstate', instance);
-		PlayState.instance.setOnHScript('customSubstateName', name);
-	}
-=======
   public static function openCustomSubstate(name:String, ?pauseGame:Bool = false)
   {
     if (pauseGame)
@@ -50,7 +33,6 @@ class CustomSubstate extends MusicBeatSubState
     PlayState.instance.setOnHSI('customSubstate', instance);
     PlayState.instance.setOnHSI('customSubstateName', instance);
   }
->>>>>>> Stashed changes
 
   public static function closeCustomSubstate()
   {
@@ -63,23 +45,6 @@ class CustomSubstate extends MusicBeatSubState
     return false;
   }
 
-<<<<<<< Updated upstream
-	public static function insertToCustomSubstate(tag:String, ?pos:Int = -1)
-	{
-		if(instance != null)
-		{
-			var tagObject:FlxObject = cast (PlayState.instance.variables.get(tag), FlxObject);
-			#if LUA_ALLOWED if(tagObject == null) tagObject = cast (PlayState.instance.modchartSprites.get(tag), FlxObject); #end
-			if (tagObject != null)
-			{
-				if(pos < 0) instance.add(tagObject);
-				else instance.insert(pos, tagObject);
-				return true;
-			}
-		}
-		return false;
-	}
-=======
   public static function insertToCustomSubstate(tag:String, ?pos:Int = -1)
   {
     if (instance != null)
@@ -96,7 +61,6 @@ class CustomSubstate extends MusicBeatSubState
     }
     return false;
   }
->>>>>>> Stashed changes
 
   override function create()
   {
@@ -114,12 +78,6 @@ class CustomSubstate extends MusicBeatSubState
     cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
   }
 
-<<<<<<< Updated upstream
-		PlayState.instance.setOnHScript('customSubstate', null);
-		PlayState.instance.setOnHScript('customSubstateName', name);
-		super.destroy();
-	}
-=======
   override function update(elapsed:Float)
   {
     PlayState.instance.callOnScripts('onCustomSubstateUpdate', [name, elapsed]);
@@ -138,5 +96,4 @@ class CustomSubstate extends MusicBeatSubState
     PlayState.instance.setOnHSI('customSubstateName', name);
     super.destroy();
   }
->>>>>>> Stashed changes
 }

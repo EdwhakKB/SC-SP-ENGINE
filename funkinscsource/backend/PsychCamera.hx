@@ -16,15 +16,7 @@ class PsychCamera extends FlxCamera
     updateFlash(elapsed);
     updateFade(elapsed);
 
-<<<<<<< Updated upstream
-		#if (flixel >= "5.4.0")
-		flashSprite.filters = filtersEnabled ? filters : null;
-		#else
-		flashSprite.filters = filtersEnabled ? _filters : null;
-		#end
-=======
     flashSprite.filters = filtersEnabled ? filters : null;
->>>>>>> Stashed changes
 
     updateFlashSpritePosition();
     updateShake(elapsed);
@@ -57,33 +49,6 @@ class PsychCamera extends FlxCamera
           _scrollTarget.x -= viewWidth;
         }
 
-<<<<<<< Updated upstream
-				if (targetY >= viewBottom)
-				{
-					_scrollTarget.y += viewHeight;
-				}
-				else if (targetY + target.height < viewTop)
-				{
-					_scrollTarget.y -= viewHeight;
-				}
-				// without this we see weird behavior when switching to SCREEN_BY_SCREEN at arbitrary scroll positions
-				#if (flixel >= "5.4.0")
-				bindScrollPos(_scrollTarget);
-				#end
-			}
-			else
-			{
-				edge = targetX - deadzone.x;
-				if (_scrollTarget.x > edge)
-				{
-					_scrollTarget.x = edge;
-				}
-				edge = targetX + target.width - deadzone.x - deadzone.width;
-				if (_scrollTarget.x < edge)
-				{
-					_scrollTarget.x = edge;
-				}
-=======
         if (targetY >= viewBottom)
         {
           _scrollTarget.y += viewHeight;
@@ -107,7 +72,6 @@ class PsychCamera extends FlxCamera
         {
           _scrollTarget.x = edge;
         }
->>>>>>> Stashed changes
 
         edge = targetY - deadzone.y;
         if (_scrollTarget.y > edge)
@@ -135,19 +99,11 @@ class PsychCamera extends FlxCamera
       }
     }
 
-<<<<<<< Updated upstream
-		var mult:Float = 1 - Math.exp(-elapsed * followLerp);
-		scroll.x += (_scrollTarget.x - scroll.x) * mult;
-		scroll.y += (_scrollTarget.y - scroll.y) * mult;
-		//trace('lerp on this frame: $mult');
-	}
-=======
     var mult:Float = 1 - Math.exp(-elapsed * followLerp / (1 / 60));
     scroll.x += (_scrollTarget.x - scroll.x) * mult;
     scroll.y += (_scrollTarget.y - scroll.y) * mult;
     // trace('lerp on this frame: $mult');
   }
->>>>>>> Stashed changes
 
   override function set_followLerp(value:Float)
   {

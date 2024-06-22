@@ -4,22 +4,12 @@ class MenuItem extends FlxSprite
 {
   public var targetY:Float = 0;
 
-<<<<<<< Updated upstream
-	public function new(x:Float, y:Float, weekName:String = '')
-	{
-		super(x, y);
-		loadGraphic(Paths.image('storymenu/' + weekName));
-		antialiasing = ClientPrefs.data.antialiasing;
-		//Debug.logTrace('Test added: ' + WeekData.getWeekNumber(weekNum) + ' (' + weekNum + ')');
-	}
-=======
   public function new(x:Float, y:Float, weekName:String = '')
   {
     super(x, y);
     loadGraphic(Paths.image('storymenu/' + weekName));
     antialiasing = ClientPrefs.data.antialiasing;
   }
->>>>>>> Stashed changes
 
   public var isFlashing(default, set):Bool = false;
 

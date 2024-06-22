@@ -28,58 +28,6 @@ class Rating
   {
     var comboranking:String = "N/A";
 
-<<<<<<< Updated upstream
-		if (songMisses != 10 && songMisses > 10)
-		{
-			comboranking = "(Clear)";
-		}
-		else if (songMisses < 10) // Single Digit Combo Breaks
-			comboranking = "(SDCB)";
-		else
-		{
-			var reverseWindows = timingWindows.copy();
-			reverseWindows.reverse();
-			for (rate in reverseWindows)
-			{
-				if (rate.count > 0)
-				{
-					comboranking = '(${rate.comboRanking})';
-				}
-			}
-		}
-		return comboranking;
-	}
-
-	public static function generateComboLetter(updateAcc:Float):String
-	{
-		var letterRank:String = '?';
-
-		if(updateAcc == 100)
-			letterRank = 'P'; // return 10
-		else if(updateAcc >= 98)
-			letterRank = 'SSS'; // reutrn 9
-		else if(updateAcc >= 95)
-			letterRank = 'SS'; // return 8
-		else if(updateAcc >= 90)
-			letterRank = 'S'; // return 7
-		else if(updateAcc >= 85)
-			letterRank = 'A'; // return 6
-		else if(updateAcc >= 80)
-			letterRank = 'B'; // return 5
-		else if(updateAcc >= 70)
-			letterRank = 'C'; // return 4
-		else if(updateAcc >= 40)
-			letterRank = 'D'; // return 3
-		else if(updateAcc >= 20)
-			letterRank = 'E'; // return 2
-		else if(updateAcc > 0 && updateAcc < 20)
-			letterRank = 'F'; // return 1
-		else
-			letterRank = '?'; // return 0	
-
-		return letterRank;
-	}
-=======
     if (songMisses != 10 && songMisses > 10)
     {
       comboranking = "(Clear)";
@@ -119,7 +67,6 @@ class Rating
       return '?'; // return 0
     return 'Unknown Rating';
   }
->>>>>>> Stashed changes
 }
 
 class RatingWindow

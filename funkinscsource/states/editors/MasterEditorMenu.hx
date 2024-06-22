@@ -7,19 +7,6 @@ import states.FreeplayState;
 
 class MasterEditorMenu extends MusicBeatState
 {
-<<<<<<< Updated upstream
-	var options:Array<String> = [
-		'Chart Editor',
-		'Character Editor',
-		'Week Editor',
-		'Menu Character Editor',
-		'Dialogue Editor',
-		'Dialogue Portrait Editor',
-		'Note Splash Debug'
-	];
-	private var grpTexts:FlxTypedGroup<Alphabet>;
-	private var directories:Array<String> = [null];
-=======
   var options:Array<String> = [
     'Chart Editor',
     'Character Editor',
@@ -32,21 +19,11 @@ class MasterEditorMenu extends MusicBeatState
   ];
   private var grpTexts:FlxTypedGroup<Alphabet>;
   private var directories:Array<String> = [null];
->>>>>>> Stashed changes
 
   private var curSelected = 0;
   private var curDirectory = 0;
   private var directoryTxt:FlxText;
 
-<<<<<<< Updated upstream
-	override function create()
-	{
-		FlxG.camera.bgColor = FlxColor.BLACK;
-		#if DISCORD_ALLOWED
-		// Updating Discord Rich Presence
-		DiscordClient.changePresence("Editors Main Menu", null);
-		#end
-=======
   override function create()
   {
     FlxG.camera.bgColor = FlxColor.BLACK;
@@ -54,7 +31,6 @@ class MasterEditorMenu extends MusicBeatState
     // Updating Discord Rich Presence
     DiscordClient.changePresence("Looking at menus - Master Editor Menu", null);
     #end
->>>>>>> Stashed changes
 
     var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
     bg.scrollFactor.set();
@@ -94,51 +70,9 @@ class MasterEditorMenu extends MusicBeatState
     #end
     changeSelection();
 
-<<<<<<< Updated upstream
-		if (controls.BACK) MusicBeatState.switchState(new MainMenuState());
-		if (controls.ACCEPT)
-		{
-			switch(options[curSelected]) {
-				case 'Chart Editor'://felt it would be cool maybe
-					LoadingState.loadAndSwitchState(new ChartingState(), false);
-				case 'Character Editor':
-					LoadingState.loadAndSwitchState(new CharacterEditorState(Character.DEFAULT_CHARACTER, false));
-				case 'Week Editor':
-					MusicBeatState.switchState(new WeekEditorState());
-				case 'Menu Character Editor':
-					MusicBeatState.switchState(new MenuCharacterEditorState());
-				case 'Dialogue Editor':
-					LoadingState.loadAndSwitchState(new DialogueEditorState(), false);
-				case 'Dialogue Portrait Editor':
-					LoadingState.loadAndSwitchState(new DialogueCharacterEditorState(), false);
-				case 'Note Splash Debug':
-					MusicBeatState.switchState(new NoteSplashDebugState());
-			}
-			FlxG.sound.music.volume = 0;
-		}
-		
-		var bullShit:Int = 0;
-		for (item in grpTexts.members)
-		{
-			item.targetY = bullShit - curSelected;
-			bullShit++;
-
-			item.alpha = 0.6;
-			// item.setGraphicSize(Std.int(item.width * 0.8));
-
-			if (item.targetY == 0)
-			{
-				item.alpha = 1;
-				// item.setGraphicSize(Std.int(item.width));
-			}
-		}
-		super.update(elapsed);
-	}
-=======
     FlxG.mouse.visible = false;
     super.create();
   }
->>>>>>> Stashed changes
 
   override function update(elapsed:Float)
   {
@@ -161,15 +95,6 @@ class MasterEditorMenu extends MusicBeatState
     }
     #end
 
-<<<<<<< Updated upstream
-		curSelected += change;
-
-		if (curSelected < 0)
-			curSelected = options.length - 1;
-		if (curSelected >= options.length)
-			curSelected = 0;
-	}
-=======
     if (controls.BACK) MusicBeatState.switchState(new MainMenuState());
     if (controls.ACCEPT)
     {
@@ -194,7 +119,6 @@ class MasterEditorMenu extends MusicBeatState
           MusicBeatState.switchState(new NoteSplashDebugState());
       }
     }
->>>>>>> Stashed changes
 
     for (num => item in grpTexts.members)
     {

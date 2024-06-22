@@ -85,15 +85,6 @@ class GameOverSubstate extends MusicBeatSubState
       endBullshit();
     }
 
-<<<<<<< Updated upstream
-			if(boyfriend.animation.curAnim.name == 'firstDeath')
-			{
-				if(boyfriend.animation.curAnim.curFrame >= 12 && !moveCamera)
-				{
-					FlxG.camera.follow(camFollow, LOCKON, 0.6);
-					moveCamera = true;
-				}
-=======
     if (controls.BACK)
     {
       #if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
@@ -102,7 +93,6 @@ class GameOverSubstate extends MusicBeatSubState
       PlayState.seenCutscene = false;
       PlayState.chartingMode = false;
       PlayState.modchartMode = false;
->>>>>>> Stashed changes
 
       Mods.loadTopMod();
 

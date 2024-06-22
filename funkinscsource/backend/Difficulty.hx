@@ -2,37 +2,14 @@ package backend;
 
 class Difficulty
 {
-<<<<<<< Updated upstream
-	public static var defaultList(default, never):Array<String> = [
-		'Easy',
-		'Normal',
-		'Hard'
-	];
-	public static var list:Array<String> = [];
-	private static var defaultDifficulty(default, never):String = 'Normal'; //The chart that has no suffix and starting difficulty on Freeplay/Story Mode
-=======
   public static var defaultList(default, never):Array<String> = ['Easy', 'Normal', 'Hard', 'Erect', 'Nightmare'];
   public static var list:Array<String> = [];
   public static var defaultDifficulty:String = 'Normal'; // The chart that has no suffix and starting difficulty on Freeplay/Story Mode
->>>>>>> Stashed changes
 
   inline public static function getFilePath(num:Null<Int> = null)
   {
     if (num == null) num = PlayState.storyDifficulty;
 
-<<<<<<< Updated upstream
-		var fileSuffix:String = list[num].toLowerCase();
-		if(fileSuffix != defaultDifficulty.toLowerCase())
-		{
-			fileSuffix = '-' + fileSuffix;
-		}
-		else
-		{
-			fileSuffix = '';
-		}
-		return Paths.formatToSongPath(fileSuffix);
-	}
-=======
     var fileSuffix:String = list[num].toLowerCase();
     if (Paths.formatToSongPath(fileSuffix) != Paths.formatToSongPath(defaultDifficulty).toLowerCase())
     {
@@ -44,7 +21,6 @@ class Difficulty
     }
     return Paths.formatToSongPath(fileSuffix);
   }
->>>>>>> Stashed changes
 
   inline public static function loadFromWeek(week:WeekData = null)
   {
@@ -80,17 +56,10 @@ class Difficulty
     list = defaultList.copy();
   }
 
-<<<<<<< Updated upstream
-	inline public static function getString(num:Null<Int> = null):String
-	{
-		return list[num == null ? PlayState.storyDifficulty : num];
-	}
-=======
   inline public static function copyFrom(diffs:Array<String>)
   {
     list = diffs.copy();
   }
->>>>>>> Stashed changes
 
   inline public static function getString(?num:Null<Int> = null, ?canTranslate:Bool = true):String
   {
