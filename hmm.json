@@ -11,18 +11,6 @@
       "verion": null
     },
     {
-      "name": "flixel",
-      "type": "git",
-      "dir": null,
-      "ref": "Main-SCE",
-      "url": "https://github.com/glowsoony/flixel"
-    },
-    {
-      "name": "flixel-addons",
-      "type": "haxelib",
-      "version": null
-    },
-    {
       "name": "flixel-tools",
       "type": "haxelib",
       "version": null
@@ -99,11 +87,11 @@
       "url": "https://github.com/EdwhakKB/FNF-Modcharting-Tools"
     },
     {
-      "name": "discord_rpc",
+      "name": "hxdiscord_rpc",
       "type": "git",
       "dir": null,
-      "ref": "master",
-      "url": "https://github.com/Aidan63/linc_discord-rpc"
+      "ref": "main",
+      "url": "https://github.com/FNF-CNE-Devs/hxdiscord_rpc"
     },
     {
       "name": "flxanimate",
@@ -120,7 +108,7 @@
       "url": "https://github.com/superpowers04/linc_luajit"
     },
     {
-      "name": "tentools",
+      "name": "hscript-improved",
       "type": "git",
       "dir": null,
       "ref": "custom-classes",

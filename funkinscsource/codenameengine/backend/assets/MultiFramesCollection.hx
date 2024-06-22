@@ -41,11 +41,7 @@ class MultiFramesCollection extends FlxFramesCollection
   {
     if (collection == null || collection.frames == null) return;
 
-    #if (flixel >= version("5.6.0"))
     collection.parent.incrementUseCount();
-    #else
-    collection.parent.useCount++;
-    #end
     parentedFrames.push(collection);
 
     for (f in collection.frames)
@@ -66,11 +62,7 @@ class MultiFramesCollection extends FlxFramesCollection
       {
         if (collection != null)
         {
-          #if (flixel >= version("5.6.0"))
           collection.parent.decrementUseCount();
-          #else
-          collection.parent.useCount--;
-          #end
         }
       }
       parentedFrames = null;

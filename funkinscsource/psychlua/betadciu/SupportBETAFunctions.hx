@@ -1,4 +1,4 @@
-package psychlua;
+package psychlua.betadciu;
 
 import flixel.FlxObject;
 import flixel.util.FlxAxes;
