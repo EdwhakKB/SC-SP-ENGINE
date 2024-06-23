@@ -336,7 +336,7 @@ class StoryMenuState extends MusicBeatState
         PlayState.isStoryMode = true;
         selectedWeek = true;
 
-        var diffic = Difficulty.getFilePath(curDifficulty);
+        var diffic = Difficulty.getFilePath(curDifficulty).replace("-", "");
         if (diffic == null) diffic = '';
 
         PlayState.storyDifficulty = curDifficulty;
@@ -349,7 +349,7 @@ class StoryMenuState extends MusicBeatState
           Debug.logInfo('WARN: could not find song with id (${Paths.formatToSongPath(PlayState.storyPlaylist[0]).toLowerCase()})');
           return;
         }
-        targetDifficulty = diffic;
+        targetDifficulty = diffic == '' ? "normal" : diffic;
         targetVariation = targetSong.getFirstValidVariation(targetDifficulty);
       }
       catch (e:Dynamic)

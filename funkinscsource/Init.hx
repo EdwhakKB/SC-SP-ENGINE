@@ -54,10 +54,6 @@ class Init extends FlxState
     Language.reloadPhrases();
     backend.ColorBlindness.setFilter();
 
-    Debug.logInfo('READING SONGS');
-    backend.song.data.SongRegistry.instance.loadEntries();
-    Debug.logInfo('READ SONGS');
-
     FlxG.fixedTimestep = false;
     FlxG.game.focusLostFramerate = 60;
     FlxG.keys.preventDefaultKeys = [TAB];

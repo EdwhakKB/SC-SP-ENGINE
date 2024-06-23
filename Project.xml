@@ -285,6 +285,9 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<haxelib name="json2object"/>
 	<haxelib name="FlxPartialSound"/>
 
+	<!--Disable source traces for release builds-->
+	<haxeflag name="-D no-traces"/>
+
 	<!-- <error value="Targets besides desktop are not supported" unless="desktop" />-->
 
 	<!-- _________________________________ Custom _______________________________ -->

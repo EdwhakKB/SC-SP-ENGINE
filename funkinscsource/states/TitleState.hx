@@ -84,6 +84,10 @@ class TitleState extends MusicBeatState
     cpp.CPPInterface.darkMode();
     #end
 
+    Debug.logInfo('READING SONGS');
+    backend.song.data.SongRegistry.instance.loadEntries();
+    Debug.logInfo('READ SONGS');
+
     super.create();
 
     if (!skippedIntro && FlxG.sound.music != null) FlxG.sound.music = null;
