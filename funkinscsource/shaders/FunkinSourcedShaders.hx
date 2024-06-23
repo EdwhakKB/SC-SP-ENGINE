@@ -214,7 +214,9 @@ class ColorFillEffect extends ShaderEffectNew
 
 class ColorFillShader extends FlxFixedShader
 {
-  @:glFragmentSource('#pragmaheader uniform float red;
+  @:glFragmentSource('
+  #pragmaheader
+  uniform float red;
 uniform float green;
 uniform float blue;
 uniform float fade;

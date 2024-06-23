@@ -9,7 +9,7 @@ class TextFunctions
       LuaUtils.destroyObject(tag);
       var leText:FlxText = new FlxText(x, y, width, text, 16);
       leText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-      leText.cameras = [PlayState.instance.camHUD];
+      leText.cameras = [game.camHUD];
       leText.scrollFactor.set();
       leText.borderSize = 2;
       MusicBeatState.getVariables().set(tag, leText);
@@ -165,8 +165,11 @@ class TextFunctions
     });
 
     funk.set("addLuaText", function(tag:String) {
-      var text:FlxText = MusicBeatState.getVariables().get(tag);
-      if (text != null) LuaUtils.getTargetInstance().add(text);
+      if (MusicBeatState.getVariables().exists(tag))
+      {
+        var shit:FlxText = MusicBeatState.getVariables().get(tag);
+        LuaUtils.getTargetInstance().add(shit);
+      }
     });
     funk.set("removeLuaText", function(tag:String, destroy:Bool = true) {
       var variables = MusicBeatState.getVariables();

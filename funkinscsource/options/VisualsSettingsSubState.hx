@@ -174,12 +174,6 @@ class VisualsSettingsSubState extends BaseOptionsMenu
     var option:Option = new Option('Note Splashes Opponent', "If checked, on a note being hit it will give a splash effect.", 'noteSplashesOP', BOOL);
     addOption(option);
 
-    var option:Option = new Option('Hold Cover Animation And Splash', "If checked, A Splash and Hold Note animation will show.", 'holdCoverPlay', BOOL);
-    addOption(option);
-
-    var option:Option = new Option('Vanilla Strum Animations', "If checked, Strums animations play like vanilla FNF.", 'vanillaStrumAnimations', BOOL);
-    addOption(option);
-
     super();
     add(notes);
   }

@@ -12,6 +12,7 @@ import lime.utils.Float32Array;
 import openfl.display.ShaderParameter;
 import openfl.display.BitmapData;
 import openfl.display.ShaderInput;
+import hscript.IHScriptCustomBehaviour;
 
 @:access(openfl.display3D.Context3D)
 @:access(openfl.display3D.Program3D)

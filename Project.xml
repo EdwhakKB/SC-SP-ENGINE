@@ -77,6 +77,9 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<!-- Defines whether the if the achievements are allowed. -->
 	<define name="ACHIEVEMENTS_ALLOWED" />
 
+	<!-- Define whether translations are allowed or not.-->
+	<define name="TRANSLATIONS_ALLOWED" />
+
 	<!-- Defines whether the if discord is allowed. -->
 	<define name="DISCORD_ALLOWED" />
 
@@ -107,15 +110,22 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<!-- Defines whether the engine should have extra features -->
 	<define name="SCEFEATURES_ALLOWED"/> <!-- set this to 0.1 for extra sides Version of the engine. -->
 
+	<!-- Defines whether there is a loadingscreen or not-->
+	<define name="SHOW_LOADING_SCREEN" />
+
+	<!--Defines whether base game files are included-->
+	<define name="BASE_GAME_FILES"/>
+
 	<!-- Assets -->
 	<assets path="assets/art" />
 	<assets path="assets/images" />
 
 	<assets path="assets/shared"        exclude="*.ogg" if="web"/>
 	<assets path="assets/shared"        exclude="*.mp3" unless="web"/>
+	<assets path="assets/embed"         exclude="*.ogg" if="web" embed="true"/>
+	<assets path="assets/embed"         exclude="*.mp3" unless="web" embed="true"/>
 	<assets path="assets/videos"        library="videos"        if="VIDEOS_ALLOWED"/>
 	<assets path="assets/songs"         library="songs"         exclude="*.ogg" if="web"/>
-	<assets path="assets/songs"         library="songs"         exclude="*.mp3" unless="web"/>
 	<assets path="assets/songs"         library="songs"         exclude="*.mp3" unless="web"/>
 	<assets path="assets/week_assets"   library="week_assets"   rename="assets" exclude="*.ogg" if="web"/>
 	<assets path="assets/week_assets"   library="week_assets"   rename="assets" exclude="*.mp3" unless="web"/>
