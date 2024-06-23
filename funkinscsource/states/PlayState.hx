@@ -67,12 +67,16 @@ import audio.VoicesGroup;
 import backend.song.data.SongRegistry;
 
 /**
-  * Parameters used to initialize the PlayState.
-   /**
-    * The song to play.
+ * Parameters used to initialize the PlayState.
+ *
  */
 typedef PlayStateParams =
 {
+  /**
+   * The song to play.
+   */
+  targetSong:Song,
+
   /**
    * The difficulty to play the song on.
    * @default `Constants.DEFAULT_DIFFICULTY`

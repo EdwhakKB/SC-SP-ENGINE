@@ -2,7 +2,7 @@ package objects.stageobjects;
 
 import flixel.graphics.frames.FlxAtlasFrames;
 
-class BackgroundDancer extends FlxSprite
+class BackgroundDancer extends FunkinSCSprite
 {
   public function new(x:Float, y:Float)
   {

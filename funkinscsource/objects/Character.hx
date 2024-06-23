@@ -6,7 +6,7 @@ import openfl.utils.Assets;
 import haxe.Json;
 import objects.stageobjects.TankmenBG;
 
-class Character extends FlxSprite
+class Character extends FunkinSCSprite
 {
   /**
    * Default Character In case not finding the original or is just the default one.

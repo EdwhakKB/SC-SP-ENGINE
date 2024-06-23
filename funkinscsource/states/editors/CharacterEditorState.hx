@@ -17,6 +17,9 @@ import objects.Character;
 import objects.HealthIcon;
 import objects.Bar;
 
+@:bitmap("assets/images/debugger/cursorCross.png")
+class PointerGraphic extends openfl.display.BitmapData {}
+
 class CharacterEditorState extends MusicBeatState
 {
   var character:Character;

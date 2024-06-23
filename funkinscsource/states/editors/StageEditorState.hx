@@ -1,5 +1,3 @@
-package states;
-
 package states.editors;
 
 import backend.StageData;

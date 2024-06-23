@@ -6,7 +6,7 @@ import backend.song.Song;
 import flixel.graphics.FlxGraphic;
 import objects.MenuItem;
 import objects.MenuCharacter;
-import options.GameplayChangersSubstate;
+import substates.GameplayChangersSubstate;
 import substates.ResetScoreSubState;
 
 class StoryMenuState extends MusicBeatState

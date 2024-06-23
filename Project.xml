@@ -19,6 +19,9 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<!--Minimum without FLX_NO_GAMEPAD: 11.8, without FLX_NO_NATIVE_CURSOR: 11.2-->
 	<set name="SWF_VERSION" value="11.8" />
 
+	<!-- DO NOT REMOVE!! ALLOWS ME TO DO REGIONS LIKE IN C# AND KEEP CODE ORGANIZED. REMOVING IT WOULD BREAK THE ENGINE -->
+	<haxedef name="REGION" />
+
 	<!-- ____________________________ Window Settings ___________________________ -->
 
 	<!--These window settings apply to all targets-->
@@ -77,6 +80,12 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<!-- Defines whether the if discord is allowed. -->
 	<define name="DISCORD_ALLOWED" />
 
+		<!-- Define whether translations are allowed or not.-->
+	<define name="TRANSLATIONS_ALLOWED" />
+
+	<!-- Allow Base game files!-->
+	<define name="BASE_GAME_FILES" /> <!-- DELETE THIS TO REMOVE MOST BASE GAME FILES AND REDUCE FILE SIZE -->
+
 	<!-- Defines whether if videos are allowed. -->
 	<define name="VIDEOS_ALLOWED" if="windows || linux || android" unless="32bits"/>
 
@@ -100,7 +109,6 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 
 	<!-- Assets -->
 	<assets path="assets/art" />
-
 	<assets path="assets/images" />
 
 	<assets path="assets/shared"        exclude="*.ogg" if="web"/>
@@ -135,56 +143,21 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 		THEN UHHH I USED THE NAME OF THE FONT WITH SETFORMAT() ON THE TEXT!!!
 		NOT USING A DIRECT THING TO THE ASSET!!!
 	-->
-	<!-- _______________________________ Libraries ______________________________ -->
 
-	<haxelib name="flixel" />
-	<haxelib name="flixel-ui" />
-	<haxelib name="flixel-addons" />
-	<haxelib name='tjson'/>
 
-	<!--In case you want to use the addons package-->
-	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
-	<haxelib name="SScript" if="HSCRIPT_ALLOWED"/>
+	<!-- _______________________________ Defines (Most) And Custom_________________________ -->
+	<!-- Comment this out to prevent unused classes from being compiled.
+	Reduces compilation time at the cost of limited HScript flexibility. !-->
+	<define name="COMPILE_ALL_CLASSES" />
 
-	<!--Avoid memory leaks with for loops in HScript-->
-	<haxedef name="loop_unroll_max_cost" value="25" />
+	<!-- Comment this out to prevent extending classes in hscript.
+		Reduces compilation time at the cost of limited HScript flexibility. !-->
+	<define name="CUSTOM_CLASSES" />
 
-	<!--DIFINE YOUR SSCRIPT CALL THINGY -->
-		<!-- UN NULL WHAT WHAT TO USE FOR YOUR VERSION OF SSCRIPT AND NULL THE RESET-->
-		<!--For SScript Versions 8.1.6 through 6.1.8 use this one. -->
-			<define name="SScriptTeaCall"/>
-		<!--For SScript Versions older than that use this one.-->
-			<!--<define name="SScriptSCall"/>-->
-		<!--Completey higher versions tham 8.1.6 use this one-->
-			<!--<define name="SScriptTea"/>-->
-	<!--end-->
-
-	<!--if you don't need FlxAnimate for exporting or for a mod just null it-->
-	<haxelib name="flxanimate"/>
-
-	<!-- GameJolt Stuff -->
-
-	<!--In case you want to use the ui package-->
-	<haxelib name="faxe" if='switch'/>
-
-	<!-- Disable Discord IO Thread -->
-	<haxedef name="DISCORD_DISABLE_IO_THREAD" if="hxdiscord_rpc" />
-	<haxedef name="NO_PRECOMPILED_HEADERS" if="linux" />
-
-	<!-- Enables a terminal log prompt on debug builds -->
-	<haxelib name="hxcpp-debug-server" if="debug"/>
-	<haxedef name="HXC_LIBVLC_LOGGING" if="VIDEOS_ALLOWED debug" />
-
-	<haxelib name="hxtelemetry" if="telemetry"/>
-	<haxedef name="HXCPP_TELEMETRY"  if="telemetry"/>
-
-	<!-- <haxelib name="markdown" /> -->
-	<!-- <haxelib name="HtmlParser" /> -->
-
-	<!--In case you want to use nape with flixel-->
-	<!--<haxelib name="nape-haxe4" />-->
-
-	<haxedef name="CAN_OPEN_LINKS" unless="switch" />
+	<icon path="assets/art/icon16.png" size='16'/>
+	<icon path="assets/art/icon32.png" size='32'/>
+	<icon path="assets/art/icon64.png" size='64'/>
+	<icon path="assets/art/iconOG.png" />
 
 	<!-- ______________________________ Haxedefines _____________________________ -->
 
@@ -201,6 +174,7 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<haxedef name="FLX_NO_MOUSE" if="mobile" />
 	<haxedef name="FLX_NO_KEYBOARD" if="mobile" />
 	<haxedef name="FLX_NO_TOUCH" if="desktop" />
+
 	<!--<haxedef name="FLX_NO_GAMEPAD" />-->
 
 	<!--Disable the Flixel core sound tray-->
@@ -238,20 +212,16 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<haxedef name="NO_PRECOMPILED_HEADERS" if="linux" />
 
 	<haxelib name="flixel" />
-	<haxelib name="flixel-ui"/>
+	<haxelib name="flixel-ui" />
 	<haxelib name="flixel-addons" />
-
-	<haxelib name='tjson' />
+	<haxelib name='tjson'/>
 
 	<!--In case you want to use the addons package-->
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
 	<haxelib name="SScript" if="HSCRIPT_ALLOWED"/>
 
-	<!-- GameJolt Stuff -->
-	<haxelib name="hxgamejolt-api" />
-
-	<!--In case you want to use the ui package-->
-	<haxelib name="faxe" if='switch'/>
+	<!--Avoid memory leaks with for loops in HScript-->
+	<haxedef name="loop_unroll_max_cost" value="25" />
 
 	<haxelib name="hxvlc" if="VIDEOS_ALLOWED"/>
 	<haxelib name="format"/>
@@ -260,8 +230,19 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<haxelib name="flxanimate"/>
 	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>
 
+	<haxelib name="hxgamejolt-api"/>
 
-  	<!--Incase you want parallaxlt-->
+	<!--In case you want to use the ui package-->
+	<haxelib name="faxe" if='switch'/>
+
+	<!-- Enables a terminal log prompt on debug builds -->
+	<haxelib name="hxcpp-debug-server" if="debug"/>
+	<haxedef name="HXC_LIBVLC_LOGGING" if="VIDEOS_ALLOWED debug" />
+
+	<haxelib name="hxtelemetry" if="telemetry"/>
+	<haxedef name="HXCPP_TELEMETRY"  if="telemetry"/>
+
+  <!--Incase you want parallaxlt-->
 	<!-- <haxelib name="parallaxlt" /> -->
 
 	<haxelib name="fnf-modcharting-tools"/>
@@ -296,7 +277,6 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<haxelib name="thx.semver"/>
 	<haxelib name="json2object"/>
 	<haxelib name="FlxPartialSound"/>
-
 
 	<!-- <error value="Targets besides desktop are not supported" unless="desktop" />-->
 
@@ -333,8 +313,6 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<haxedef name="HXCPP_STACK_TRACE" if="CRASH_HANDLER"/>  <!--if you want stack traces-->
 	<haxedef name="HXCPP_CHECK_POINTER" if="CRASH_HANDLER" />
 	<haxedef name="HXCPP_STACK_LINE" if="CRASH_HANDLER" />
-
-	<haxeflag name="-D no-traces" unless="debug"/>
 
 	<haxedef name="hscriptPos" /> <!-- for logging -->
 

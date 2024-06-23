@@ -6,7 +6,7 @@ import backend.song.Song.FreeplaySongMetaData;
 import openfl.utils.Assets as OpenFlAssets;
 import objects.HealthIcon;
 import objects.MusicPlayer;
-import options.GameplayChangersSubstate;
+import substates.GameplayChangersSubstate;
 import substates.ResetScoreSubState;
 import flixel.addons.display.FlxBackdrop;
 import flixel.addons.display.FlxGridOverlay;

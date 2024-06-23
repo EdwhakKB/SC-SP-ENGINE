@@ -1,7 +1,5 @@
 package codenameengine.scripting;
 
-package codenameengine.scripting;
-
 class ScriptPack extends Script
 {
   public var scripts:Array<Script> = [];

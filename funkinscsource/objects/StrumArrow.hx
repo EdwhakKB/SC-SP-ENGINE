@@ -4,7 +4,7 @@ import shaders.RGBPalette;
 import shaders.RGBPalette.RGBShaderReference;
 import openfl.Assets;
 
-class StrumArrow extends FlxSkewed
+class StrumArrow extends FunkinSCSprite
 {
   public var rgbShader:RGBShaderReference;
   public var noteData:Int = 0;

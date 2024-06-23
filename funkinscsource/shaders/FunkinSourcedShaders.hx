@@ -28,8 +28,8 @@ class ShaderEffectNew
   }
 }
 
-/*class RGBPinEffect extends ShaderEffectNew
-  {
+class RGBPinEffect extends ShaderEffectNew
+{
   public var shader:RGBPinShader = new RGBPinShader();
 
   public var amount(default, set):Float = 0;
@@ -62,10 +62,10 @@ class ShaderEffectNew
     shader.distortionFactor.value = [distortionFactor];
     return v;
   }
-  }
+}
 
-  class RGBPinShader extends FlxShader
-  {
+class RGBPinShader extends FlxShader
+{
   @:glFragmentSource('
     #pragma header
 
@@ -90,10 +90,10 @@ class ShaderEffectNew
   {
     super();
   }
-  }
+}
 
-  class WaveCircleEffect extends ShaderEffectNew
-  {
+class WaveCircleEffect extends ShaderEffectNew
+{
   public var shader(default, null):WaveCircleShader = new WaveCircleShader();
 
   public var waveSpeed(default, set):Float = 0;
@@ -132,10 +132,10 @@ class ShaderEffectNew
     shader.uWaveAmplitude.value = [waveAmplitude];
     return v;
   }
-  }
+}
 
-  class WaveCircleShader extends FlxFixedShader
-  {
+class WaveCircleShader extends FlxFixedShader
+{
   @:glFragmentSource('
     #pragma header
     //uniform float tx, ty; // x,y waves phase
@@ -145,40 +145,40 @@ class ShaderEffectNew
 
     /**
      * How fast the waves move over time
- */
-uniform float uSpeed;
+    */
+    uniform float uSpeed;
 
-/**
- * Number of waves over time
- */
-uniform float uFrequency;
+    /**
+     * Number of waves over time
+     */
+    uniform float uFrequency;
 
-/**
- * How much the pixels are going to stretch over the waves
- */
-uniform float uWaveAmplitude;
+    /**
+     * How much the pixels are going to stretch over the waves
+     */
+    uniform float uWaveAmplitude;
 
-vec2 sineWave(vec2 pt)
-{
-  float
-  x = 0.0;
-  float
-  y = 0.0;
-  float
-  offsetX = sin(pt.y * uFrequency + uTime * uSpeed) * (uWaveAmplitude / pt.x * pt.y);
-  float
-  offsetY = sin(pt.x * uFrequency - uTime * uSpeed) * (uWaveAmplitude / pt.y * pt.x);
-  pt.x += offsetX; // * (pt.y - 1.0); // <- Uncomment to stop bottom part of the screen from moving
-  pt.y += offsetY;
-  return vec2(pt.x + x, pt.y + y);
-}
-void main()
-{
-  vec2
-  uv = sineWave(openfl_TextureCoordv);
-  gl_FragColor = texture2D(bitmap, uv);
-}
-')
+    vec2 sineWave(vec2 pt)
+    {
+    float
+    x = 0.0;
+    float
+    y = 0.0;
+    float
+    offsetX = sin(pt.y * uFrequency + uTime * uSpeed) * (uWaveAmplitude / pt.x * pt.y);
+    float
+    offsetY = sin(pt.x * uFrequency - uTime * uSpeed) * (uWaveAmplitude / pt.y * pt.x);
+    pt.x += offsetX; // * (pt.y - 1.0); // <- Uncomment to stop bottom part of the screen from moving
+    pt.y += offsetY;
+    return vec2(pt.x + x, pt.y + y);
+    }
+    void main()
+    {
+    vec2
+    uv = sineWave(openfl_TextureCoordv);
+    gl_FragColor = texture2D(bitmap, uv);
+    }
+  ')
   public function new()
   {
     super();
@@ -2484,9 +2484,8 @@ class GlitchNewShader extends FlxShader // https://www.shadertoy.com/view/XtyXzW
 {
   // Linux crashes due to GL_NV_non_square_matrices
   // and I haven' t found a way to set version to 130 // (importing Eric's PR (openfl/openfl#2577) to this repo caused more errors)
-// So for now, Linux users will have to disable shaders specifically for Libitina.
-
-@:glFragmentSource('
+  // So for now, Linux users will have to disable shaders specifically for Libitina.
+  @:glFragmentSource('
 	#extension GL_EXT_gpu_shader4 : enable
 	#extension GL_NV_non_square_matrices : enable
 
@@ -2764,11 +2763,13 @@ class GlitchNewShader extends FlxShader // https://www.shadertoy.com/view/XtyXzW
 	    gl_FragColor = vec4(color.r * alpha, color.g * alpha, color.b * alpha, alpha);
 	}
 	')
-public function new()
-{
-  super();
+  public function new()
+  {
+    super();
+  }
 }
-} class GlitchNewEffect extends ShaderEffectNew
+
+class GlitchNewEffect extends ShaderEffectNew
 {
   public var shader:GlitchNewShader = new GlitchNewShader();
 

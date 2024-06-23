@@ -1,6 +1,6 @@
 package objects.stageobjects;
 
-class BackgroundGirls extends FlxSprite
+class BackgroundGirls extends FunkinSCSprite
 {
   var isPissed:Bool = true;
 

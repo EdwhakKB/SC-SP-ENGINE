@@ -3,6 +3,7 @@ package objects;
 import flixel.group.FlxGroup;
 import flixel.ui.FlxBar;
 import states.FreeplayState;
+import flixel.util.FlxStringUtil;
 
 /**
  * Music player used for Freeplay

@@ -4,7 +4,7 @@ import haxe.Json as Json;
 import lime.utils.Assets;
 import flixel.math.FlxMath;
 
-class HealthIcon extends FlxSprite
+class HealthIcon extends FunkinSCSprite
 {
   public var isOldIcon:Bool = false;
   public var isPlayer:Bool = false;

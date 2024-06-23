@@ -6,10 +6,10 @@ import hscript.IHScriptCustomConstructor;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import flixel.FlxBasic;
 
-@:allow(codenameengine.scripting.ScriptPack)
 /**
  * Class used for scripting.
  */
+@:allow(codenameengine.scripting.ScriptPack)
 class Script extends FlxBasic implements IFlxDestroyable
 {
   /**
@@ -109,7 +109,6 @@ class Script extends FlxBasic implements IFlxDestroyable
       "DialogueBox" => cutscenes.DialogueBox,
       "DiaogueBoxPsych" => cutscenes.DialogueBoxPsych,
       "CutsceneHandler" => cutscenes.CutsceneHandler
-
     ];
   }
 

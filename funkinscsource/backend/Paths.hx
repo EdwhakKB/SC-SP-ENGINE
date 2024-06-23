@@ -31,6 +31,7 @@ import neko.vm.Gc;
 import backend.Mods;
 #end
 
+@:access(openfl.display.BitmapData)
 class Paths
 {
   inline public static var SOUND_EXT = #if web "mp3" #else "ogg" #end;

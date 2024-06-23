@@ -1,5 +1,7 @@
 package objects;
 
+import haxe.Json;
+
 enum Alignment
 {
   LEFT;

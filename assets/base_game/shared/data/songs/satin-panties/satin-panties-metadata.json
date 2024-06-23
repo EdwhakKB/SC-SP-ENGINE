@@ -1,0 +1,62 @@
+{
+  "songData": {
+    "playData": {
+      "version": "2.2.1",
+      "songName": "Satin Panties",
+      "timeChanges": [
+        { "t": 0, "bpm": 110, "n": 4, "d": 4, "bt": [4, 4, 4, 4] }
+      ],
+      "songVariations": ["erect"],
+      "difficulties": ["easy", "normal", "hard"],
+      "characters": {
+        "player": "bf-car",
+        "girlfriend": "gf-car",
+        "opponent": "mom-car"
+      },
+      "stage": "limoRide",
+      "ratings": {
+        "easy": 2,
+        "normal": 2,
+        "hard": 3
+      },
+      "gameOverData": {
+        "gameOverChart": "bf-dead",
+        "gameOverSound": "fnf_loss_sfx",
+        "gameOverLoop": "gameOver",
+        "gameOverEnd": "gameOverEnd"
+      },
+      "options": {
+        "disableNoteRGB": false,
+        "disableNoteQuantRGB": false,
+        "disableStrumRGB": false,
+        "disableSplashRGB": false,
+        "disableHoldCoverRGB": false,
+        "disableHoldCover": false,
+        "disableCaching": false,
+        "notITG": false,
+        "usesHUD": false,
+        "oldBaSystem": false,
+        "rightScroll": false,
+        "middleScroll": false,
+        "blockOpponentMode": false,
+        "arrowSkin": null,
+        "splashSkin": "",
+        "holdCoverSkin": "",
+        "opponentNoteStyle": "",
+        "playerNoteStyle": "",
+        "vocalsPrefix": "",
+        "vocalsSuffix": "",
+        "instrumentalPrefix": "",
+        "instrumentalSuffix": ""
+      }
+    },
+    "inclusiveData": {
+      "artist": "Kawai Sprite",
+      "charter": "ninjamuffin99 + MtH",
+      "timeFormat": "ms",
+      "looped": false,
+      "generatedBy": "MasterEric (by hand)",
+      "album": "volume1"
+    }
+  }
+}

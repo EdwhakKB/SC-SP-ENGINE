@@ -5,6 +5,7 @@ import flixel.system.debug.log.LogStyle;
 import flixel.system.debug.watch.Tracker.TrackerProfile;
 import haxe.Log;
 import haxe.PosInfos;
+import flixel.util.FlxStringUtil;
 
 /**
  * Hey you, developer!
