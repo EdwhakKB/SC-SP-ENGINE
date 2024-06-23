@@ -10,9 +10,9 @@ class Strumline extends FlxTypedGroup<StrumArrow>
     scrollSpeed = PlayState.instance?.songSpeed ?? 1.0;
   }
 
-  public function new()
+  public function new(limit:Int)
   {
     resetScrollSpeed();
-    super(4);
+    super(limit);
   }
 }

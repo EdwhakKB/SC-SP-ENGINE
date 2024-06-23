@@ -934,9 +934,9 @@ class PlayState extends MusicBeatState
     Stage.refresh();
 
     // INITIALIZE UI GROUPS
-    strumLineNotes = new Strumline();
-    comboGroup = new FlxSpriteGroup();
-    comboGroupOP = new FlxSpriteGroup();
+    strumLineNotes = new Strumline(8);
+    comboGroup = new FlxSpriteGroup(4);
+    comboGroupOP = new FlxSpriteGroup(4);
 
     arrowLanes = new FlxTypedGroup<FlxSprite>();
     arrowLanes.camera = usesHUD ? camHUD : camNoteStuff;
@@ -3832,8 +3832,7 @@ class PlayState extends MusicBeatState
       checkEventNote();
     }
 
-    if (strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong)
-      holdCovers.updateHold(elapsed);
+    if (strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong) holdCovers.updateHold(elapsed);
 
     #if debug
     if (!endingSong && !startingSong)
