@@ -384,7 +384,7 @@ class DialogueEditorState extends MusicBeatState
           transitioning = true;
         }
         else
-          openSubState(new ConfirmationPopupSubstate(function() transitioning = true));
+          openSubState(new substates.ConfirmationPopupSubstate(function() transitioning = true));
         return;
       }
       var negaMult:Array<Int> = [1, -1];

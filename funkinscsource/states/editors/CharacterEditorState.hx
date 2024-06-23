@@ -1315,7 +1315,7 @@ class CharacterEditorState extends MusicBeatState
         FlxG.sound.playMusic(Paths.music('freakyMenu'));
       }
       else
-        openSubState(new ConfirmationPopupSubstate());
+        openSubState(new substates.ConfirmationPopupSubstate());
       MusicBeatState.divideCameraZoom = true;
       return;
     }

@@ -9,7 +9,7 @@ class TextFunctions
       LuaUtils.destroyObject(tag);
       var leText:FlxText = new FlxText(x, y, width, text, 16);
       leText.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-      leText.cameras = [game.camHUD];
+      leText.cameras = [PlayState.instance.camHUD];
       leText.scrollFactor.set();
       leText.borderSize = 2;
       MusicBeatState.getVariables().set(tag, leText);

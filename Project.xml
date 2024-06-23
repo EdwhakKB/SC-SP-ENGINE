@@ -104,9 +104,6 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<!-- Defines what version of the engine. -->
 	<define name="PSYCHVERSION" value="0.7.3" />
 
-	<!-- Defines the SCE's version of modcharting Tools. -->
-	<define name="SCEModchartingTools"/>
-
 	<!-- Defines whether the engine should have extra features -->
 	<define name="SCEFEATURES_ALLOWED"/> <!-- set this to 0.1 for extra sides Version of the engine. -->
 
@@ -122,8 +119,8 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 
 	<assets path="assets/shared"        exclude="*.ogg" if="web"/>
 	<assets path="assets/shared"        exclude="*.mp3" unless="web"/>
-	<assets path="assets/embed"         exclude="*.ogg" if="web" embed="true"/>
-	<assets path="assets/embed"         exclude="*.mp3" unless="web" embed="true"/>
+	<!-- <assets path="assets/embed"         exclude="*.ogg" if="web" embed="true"/>
+	<assets path="assets/embed"         exclude="*.mp3" unless="web" embed="true"/> -->
 	<assets path="assets/videos"        library="videos"        if="VIDEOS_ALLOWED"/>
 	<assets path="assets/songs"         library="songs"         exclude="*.ogg" if="web"/>
 	<assets path="assets/songs"         library="songs"         exclude="*.mp3" unless="web"/>

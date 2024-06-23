@@ -474,7 +474,7 @@ class WeekEditorState extends MusicBeatState
           FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
         }
         else
-          openSubState(new ConfirmationPopupSubstate(function() unsavedProgress = false));
+          openSubState(new substates.ConfirmationPopupSubstate(function() unsavedProgress = false));
       }
     }
 
@@ -843,7 +843,7 @@ class WeekEditorFreeplayState extends MusicBeatState
         FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
       }
       else
-        openSubState(new ConfirmationPopupSubstate());
+        openSubState(new substates.ConfirmationPopupSubstate());
 
       if (controls.UI_UP_P) changeSelection(-1);
       if (controls.UI_DOWN_P) changeSelection(1);

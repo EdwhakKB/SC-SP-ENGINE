@@ -1,4 +1,7 @@
-package states.editors;
+package substates;
+
+import flixel.util.FlxAxes;
+import flixel.ui.FlxButton;
 
 class ConfirmationPopupSubstate extends MusicBeatSubState
 {
@@ -31,23 +34,20 @@ class ConfirmationPopupSubstate extends MusicBeatSubState
     add(txt);
 
     var btnY = 390;
-    var btn:PsychUIButton = new PsychUIButton(0, btnY, 'Exit', function() {
+    var btnY = 390;
+    var btn:FlxButton = new FlxButton(0, btnY, 'Exit', function() {
       FlxG.mouse.visible = false;
       MusicBeatState.switchState(new states.editors.MasterEditorMenu());
       FlxG.sound.playMusic(Paths.music('freakyMenu'));
       if (finishCallback != null) finishCallback();
     });
-    btn.normalStyle.bgColor = FlxColor.RED;
-    btn.normalStyle.textColor = FlxColor.WHITE;
     btn.screenCenter(X);
     btn.x -= 100;
-    btn.cameras = cameras;
     add(btn);
 
-    var btn:PsychUIButton = new PsychUIButton(0, btnY, 'Cancel', function() close());
+    var btn:FlxButton = new FlxButton(0, btnY, 'Cancel', function() close());
     btn.screenCenter(X);
     btn.x += 100;
-    btn.cameras = cameras;
     add(btn);
 
     FlxG.mouse.visible = true;

@@ -757,7 +757,7 @@ class DialogueCharacterEditorState extends MusicBeatState
           transitioning = true;
         }
         else
-          openSubState(new ConfirmationPopupSubstate(function() transitioning = true));
+          openSubState(new substates.ConfirmationPopupSubstate(function() transitioning = true));
       }
 
       ghostLoop.setPosition(character.x, character.y);

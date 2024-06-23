@@ -1347,7 +1347,7 @@ class StageEditorState extends MusicBeatState
         FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
       }
       else
-        openSubState(new ConfirmationPopupSubstate());
+        openSubState(new substates.ConfirmationPopupSubstate());
       return;
     }
 

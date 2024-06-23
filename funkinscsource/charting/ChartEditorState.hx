@@ -2603,7 +2603,6 @@ class ChartEditorState extends UIState // UIState derives from MusicBeatState
     healthIconBF = new HealthIcon(currentSongMetadata.songData.playData.characters.player, true);
     healthIconBF.scale.set(0.5, 0.5);
     healthIconBF.updateHitbox();
-    healthIconBF.flipX = true;
     add(healthIconBF);
     healthIconBF.zIndex = 30;
 
