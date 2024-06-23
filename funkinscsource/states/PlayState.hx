@@ -935,8 +935,8 @@ class PlayState extends MusicBeatState
 
     // INITIALIZE UI GROUPS
     strumLineNotes = new Strumline(8);
-    comboGroup = new FlxSpriteGroup(4);
-    comboGroupOP = new FlxSpriteGroup(4);
+    comboGroup = new FlxSpriteGroup();
+    comboGroupOP = new FlxSpriteGroup();
 
     arrowLanes = new FlxTypedGroup<FlxSprite>();
     arrowLanes.camera = usesHUD ? camHUD : camNoteStuff;
@@ -1222,8 +1222,8 @@ class PlayState extends MusicBeatState
     grpNoteSplashesCPU.add(splashCPU);
     splashCPU.alpha = 0.000001; // cant make it invisible or it won't allow precaching
 
-    opponentStrums = new Strumline();
-    playerStrums = new Strumline();
+    opponentStrums = new Strumline(4);
+    playerStrums = new Strumline(4);
 
     playerStrums.visible = false;
     opponentStrums.visible = false;
