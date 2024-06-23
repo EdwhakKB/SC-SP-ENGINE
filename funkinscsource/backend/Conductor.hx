@@ -644,7 +644,7 @@ class Conductor
         }
       }
 
-      var lastStepLengthMs:Float = ((Constants.SECS_PER_MIN / lastTimeChange.bpm) * Constants.MS_PER_SEC) / timeSignatureNumerator;
+      var lastStepLengthMs:Float = ((Constants.SECS_PER_MIN / lastTimeChange.bpm) * Constants.MS_PER_SEC);
       var resultFractionalStep:Float = (ms - lastTimeChange.timeStamp) / lastStepLengthMs;
       resultStep += resultFractionalStep;
 
@@ -726,6 +726,76 @@ class Conductor
 
       return resultMs;
     }
+  }
+
+  /**
+   * OLD CONDUCTOR FUNCTIONS!
+   */
+  public function timeSinceLastBPMChange(time:Float):Float
+  {
+    var lastTimeChange = getBPMFromSeconds(time);
+    return time - lastTimeChange.timeStamp;
+  }
+
+  public function getBeatSinceChange(time:Float):Float
+  {
+    var lastTimeBPMChange = getBPMFromSeconds(time);
+    return (time - lastTimeBPMChange.timeStamp) / (stepCrochet * 4);
+  }
+
+  public function getCrotchetAtTime(time:Float)
+  {
+    return stepCrochet * 4;
+  }
+
+  public function getBPMFromSeconds(time:Float)
+  {
+    var lastTimeChange:SongTimeChange = timeChanges[0];
+    for (timeChange in timeChanges)
+    {
+      if (time >= timeChange.timeStamp) lastTimeChange = timeChange;
+    }
+    return lastTimeChange;
+  }
+
+  public function getBPMFromStep(step:Float):SongTimeChange
+  {
+    var lastTimeChange:SongTimeChange = timeChanges[0];
+    for (timeChange in timeChanges)
+    {
+      if ((timeChange.beatTime * 4) <= step) lastTimeChange = timeChange;
+    }
+    return lastTimeChange;
+  }
+
+  public function beatToSeconds(beat:Float):Float
+  {
+    var step = beat * 4;
+    var lastTimeChange = getBPMFromStep(step);
+    return lastTimeChange.timeStamp
+      + ((step - (lastTimeChange.beatTime * 4)) / (lastTimeChange.bpm / 60) / 4) * 1000; // TODO: make less shit and take BPM into account PROPERLY
+  }
+
+  public function getStep(time:Float)
+  {
+    var lastTimeChange = getBPMFromSeconds(time);
+    return (lastTimeChange.beatTime * 4) + (time - lastTimeChange.timeStamp) / stepCrochet;
+  }
+
+  public function getStepRounded(time:Float)
+  {
+    var lastTimeChange = getBPMFromSeconds(time);
+    return (lastTimeChange.beatTime * 4) + Math.floor(time - lastTimeChange.timeStamp) / stepCrochet;
+  }
+
+  public function getBeat(time:Float)
+  {
+    return getStep(time) / 4;
+  }
+
+  public function getBeatRounded(time:Float):Int
+  {
+    return Math.floor(getStepRounded(time) / 4);
   }
 
   /**

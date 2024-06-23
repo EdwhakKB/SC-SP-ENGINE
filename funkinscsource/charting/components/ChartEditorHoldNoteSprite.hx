@@ -119,11 +119,11 @@ class ChartEditorHoldNoteSprite extends objects.SustainTrail
   {
     if (lerp)
     {
-      sustainLength = FlxMath.lerp(sustainLength, h / (getScrollSpeed() * 0.45), 0.25);
+      sustainLength = FlxMath.lerp(sustainLength, h / (getBaseScrollSpeed() * 0.45), 0.25);
     }
     else
     {
-      sustainLength = h / (getScrollSpeed() * 0.45);
+      sustainLength = h / (getBaseScrollSpeed() * 0.45);
     }
 
     fullSustainLength = sustainLength;

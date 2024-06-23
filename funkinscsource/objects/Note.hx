@@ -43,6 +43,15 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
   // We can now edit the time they spawn, useful for Modifiers (MT and non-MT)
   public var spawnTime:Float = 2500;
 
+  // Used in-game to control the scroll speed within a song
+  public var noteScrollSpeed:Float = 1.0;
+  public var parentStrumline:Strumline;
+
+  public function resetScrollSpeed():Void
+  {
+    noteScrollSpeed = parentStrumline?.scrollSpeed ?? PlayState.instance?.songSpeed ?? 1.0;
+  }
+
   public var holdNote:SustainTrail;
 
   public var extraData:Map<String, Dynamic> = new Map<String, Dynamic>();
@@ -483,7 +492,7 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
     if (noteSkin != skin && noteSkin != noteStyle) noteSkin = skin;
   }
 
-  function loadNoteTexture(noteStyleType:String, skinPostfix:String, skinPixel:String)
+  public function loadNoteTexture(noteStyleType:String, skinPostfix:String, skinPixel:String)
   {
     switch (noteStyleType)
     {
@@ -673,7 +682,7 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
     super.destroy();
   }
 
-  public function followStrumArrow(myStrum:StrumArrow, fakeCrochet:Float, songSpeed:Float = 1)
+  public function followStrumArrow(myStrum:StrumArrow, fakeCrochet:Float, songSpeed:Float = 1.0)
   {
     var strumX:Float = myStrum.x;
     var strumY:Float = myStrum.y;

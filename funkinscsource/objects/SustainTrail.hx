@@ -27,6 +27,7 @@ class SustainTrail extends FunkinSCSprite
   public var sustainLength(default, set):Float = 0; // millis
   public var fullSustainLength:Float = 0;
   public var noteData:Null<SongNoteData>;
+  public var parentStrumline:Strumline;
 
   public var cover:HoldCover = null;
 
@@ -150,11 +151,9 @@ class SustainTrail extends FunkinSCSprite
 
     // CALCULATE SIZE
     graphicWidth = graphic.width / 8 * zoom; // amount of notes * 2
-    graphicHeight = sustainHeight(sustainLength, getScrollSpeed());
+    graphicHeight = sustainHeight(sustainLength, parentStrumline?.scrollSpeed ?? 1.0);
     // instead of scrollSpeed, PlayState.SONG.speed
     flipY = ClientPrefs.data.downScroll;
-    // alpha = 0.6;
-    alpha = 1.0;
     // calls updateColorTransform(), which initializes processedGraphic!
     updateColorTransform();
 
@@ -205,9 +204,21 @@ class SustainTrail extends FunkinSCSprite
     return endingStyle;
   }
 
-  function getScrollSpeed():Float
+  function getBaseScrollSpeed()
   {
-    return PlayState?.currentChart?.scrollSpeed ?? 1.0;
+    return (PlayState.instance?.songSpeed ?? 1.0);
+  }
+
+  var previousScrollSpeed:Float = 1;
+
+  override function update(elapsed)
+  {
+    super.update(elapsed);
+    if (previousScrollSpeed != (parentStrumline?.scrollSpeed ?? 1.0))
+    {
+      triggerRedraw();
+    }
+    previousScrollSpeed = parentStrumline?.scrollSpeed ?? 1.0;
   }
 
   /**
@@ -226,11 +237,18 @@ class SustainTrail extends FunkinSCSprite
 
     if (sustainLength == s) return s;
 
-    graphicHeight = sustainHeight(s, getScrollSpeed());
+    graphicHeight = sustainHeight(s, parentStrumline?.scrollSpeed ?? 1.0);
     this.sustainLength = s;
     updateClipping();
     updateHitbox();
     return this.sustainLength;
+  }
+
+  function triggerRedraw()
+  {
+    graphicHeight = sustainHeight(sustainLength, parentStrumline?.scrollSpeed ?? 1.0);
+    updateClipping();
+    updateHitbox();
   }
 
   public override function updateHitbox():Void
@@ -248,11 +266,7 @@ class SustainTrail extends FunkinSCSprite
    */
   public function updateClipping(songTime:Float = 0):Void
   {
-    if (graphic == null)
-    {
-      return;
-    }
-    var clipHeight:Float = FlxMath.bound(sustainHeight(sustainLength - (songTime - strumTime), getScrollSpeed()), 0, graphicHeight);
+    var clipHeight:Float = FlxMath.bound(sustainHeight(sustainLength - (songTime - strumTime), parentStrumline?.scrollSpeed ?? 1.0), 0, graphicHeight);
     if (clipHeight <= 0.1)
     {
       visible = false;
