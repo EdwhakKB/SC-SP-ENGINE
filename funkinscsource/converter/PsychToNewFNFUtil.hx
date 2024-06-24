@@ -196,26 +196,13 @@ class PsychToNewFNFUtil
     {
       var sectionNotes:Array<Dynamic> = section?.sectionNotes;
 
-      var sectionMustHit:Null<Bool> = section?.mustHitSection;
-      if (sectionMustHit == null) sectionMustHit = false;
-
-      var sectionPlayerAlt:Null<Bool> = section?.playerAltAnim;
-      if (sectionPlayerAlt == null) sectionPlayerAlt = false;
-
-      var sectionCPUAlt:Null<Bool> = section?.cpuAltAnim;
-      if (sectionCPUAlt == null) sectionCPUAlt = false;
-
+      var sectionMustHit:Null<Bool> = section?.mustHitSection ?? false;
+      var sectionPlayerAlt:Null<Bool> = section?.playerAltAnim ?? false;
+      var sectionCPUAlt:Null<Bool> = section?.cpuAltAnim ?? false;
       var sectionAlt:Null<Bool> = section?.altAnim;
-      if (sectionAlt == null) sectionAlt = false;
-
-      var sectionPlayer4:Null<Bool> = section?.player4Section;
-      if (sectionPlayer4 == null) sectionPlayer4 = false;
-
-      var sectionGF:Null<Bool> = section?.gfSection;
-      if (sectionGF == null) sectionGF = false;
-
-      var sectionDType:Null<Int> = section?.dType;
-      if (sectionDType == null) sectionDType = 0;
+      var sectionPlayer4:Null<Bool> = section?.player4Section ?? false;
+      var sectionGF:Null<Bool> = section?.gfSection ?? false;
+      var sectionDType:Null<Int> = section?.dType ?? 0;
 
       sectionVariables.push(new SongSectionData(sectionMustHit, sectionPlayerAlt, sectionCPUAlt, sectionAlt, sectionPlayer4, sectionGF, sectionDType));
 
@@ -269,17 +256,52 @@ class PsychToNewFNFUtil
       }
     }
 
-    Reflect.setField(convertedChartTemplate.scrollSpeed, diff, chartObject.song.speed + 1.0);
+    Reflect.setField(convertedChartTemplate.scrollSpeed, diff, (chartObject?.song?.speed ?? 0.0) + 1.0);
     Reflect.setField(convertedChartTemplate.notes, diff, noteArray);
     Reflect.setField(convertedChartTemplate.sectionVariables, diff, sectionVariables);
     Reflect.setField(convertedChartTemplate.events, diff, eventsArray);
 
+    var gfVersion:String = chartObject?.song?.player3 ?? "not found";
+    if (gfVersion == "not found") gfVersion = chartObject?.song?.gfVersion ?? "gf";
+
     metaDataTemplate.songData.playData.songName = songNameToMetaData;
-    metaDataTemplate.songData.playData.stage = chartObject.song.stage;
-    metaDataTemplate.songData.playData.characters.player = chartObject.song.player1;
-    metaDataTemplate.songData.playData.characters.girlfriend = chartObject.song.player3;
-    metaDataTemplate.songData.playData.characters.opponent = chartObject.song.player2;
-    metaDataTemplate.songData.playData.timeChanges[0].bpm = chartObject.song.bpm;
+    metaDataTemplate.songData.playData.stage = chartObject?.song?.stage ?? "mainStage";
+    metaDataTemplate.songData.playData.characters.player = chartObject?.song?.player1 ?? "bf";
+    metaDataTemplate.songData.playData.characters.girlfriend = gfVersion;
+    metaDataTemplate.songData.playData.characters.opponent = chartObject?.song?.player2 ?? "dad";
+    metaDataTemplate.songData.playData.timeChanges[0].bpm = chartObject?.song?.bpm ?? 100;
+    metaDataTemplate.songData.playData.options =
+      {
+        disableNoteRGB: chartObject?.song?.disableNoteRGB ?? false,
+        disableNoteQuantRGB: chartObject?.song?.disableNoteQuantRGB ?? false,
+        disableStrumRGB: chartObject?.song?.disableStrumRGB ?? false,
+        disableSplashRGB: chartObject?.song?.disableSplashRGB ?? false,
+        disableHoldCoverRGB: chartObject?.song?.disableHoldCoverRGB ?? false,
+        disableHoldCover: chartObject?.song?.disableHoldCover ?? false,
+        disableCaching: chartObject?.song?.disableCaching ?? false,
+        notITG: chartObject?.song?.notITG ?? false,
+        usesHUD: chartObject?.song?.usesHUD ?? false,
+        oldBarSystem: chartObject?.song?.oldBarSystem ?? false,
+        rightScroll: chartObject?.song?.rightScroll ?? false,
+        middleScroll: chartObject?.song?.middleScroll ?? false,
+        blockOpponentMode: chartObject?.song?.blockOpponentMode ?? false,
+        arrowSkin: chartObject?.song?.arrowSkin ?? "",
+        splashSkin: chartObject?.song?.splashSkin ?? "",
+        holdCoverSkin: chartObject?.song?.holdCoverSkin ?? "",
+        opponentNoteStyle: chartObject?.song?.opponentNoteStyle ?? "",
+        playerNoteStyle: chartObject?.song?.playerNoteStyle ?? "",
+        vocalsPrefix: chartObject?.song?.vocalsPrefix ?? "",
+        vocalsSuffix: chartObject?.song?.vocalsSuffix ?? "",
+        instrumentalPrefix: chartObject?.song?.instrumentalPrefix ?? "",
+        instrumentalSuffix: chartObject?.song?.instrumentalSuffix ?? ""
+      };
+    metaDataTemplate.songData.playData.gameOverData =
+      {
+        gameOverChar: chartObject?.song?.gameOverChar ?? "bf-dead",
+        gameOverSound: chartObject?.song?.gameOverSound ?? "fnf_loss_sfx",
+        gameOverLoop: chartObject?.song?.gameOverLoop ?? "gameOver",
+        gameOverEnd: chartObject?.song?.gameOverEnd ?? "gameOverEnd"
+      };
     metaDataTemplate.songData.playData.difficulties.push(diff);
 
     try
