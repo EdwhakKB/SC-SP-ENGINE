@@ -136,6 +136,13 @@ class ChartConverterState extends MusicBeatState
   {
     super.update(elapsed);
 
+    if (FlxG.keys.justPressed.ESCAPE)
+    {
+      MusicBeatState.switchState(new states.editors.MasterEditorMenu());
+      FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
+      return;
+    }
+
     if (errorConverting)
     {
       if (!stopUpdate)
