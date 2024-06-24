@@ -199,7 +199,7 @@ class PsychToNewFNFUtil
       var sectionMustHit:Null<Bool> = section?.mustHitSection ?? false;
       var sectionPlayerAlt:Null<Bool> = section?.playerAltAnim ?? false;
       var sectionCPUAlt:Null<Bool> = section?.cpuAltAnim ?? false;
-      var sectionAlt:Null<Bool> = section?.altAnim;
+      var sectionAlt:Null<Bool> = section?.altAnim ?? false;
       var sectionPlayer4:Null<Bool> = section?.player4Section ?? false;
       var sectionGF:Null<Bool> = section?.gfSection ?? false;
       var sectionDType:Null<Int> = section?.dType ?? 0;
