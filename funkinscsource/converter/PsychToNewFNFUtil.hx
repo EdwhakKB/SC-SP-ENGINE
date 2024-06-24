@@ -188,8 +188,8 @@ class PsychToNewFNFUtil
     if (isNormal) diff = 'normal';
 
     var notes:Array<Dynamic> = chartObject?.song?.notes;
-    var noteArray:Array<SongNoteData> = [];
     var events:Array<Dynamic> = chartObject?.song?.events;
+    var noteArray:Array<SongNoteData> = [];
     var eventsArray:Array<SongEventData> = [];
     var sectionVariables:Array<SongSectionData> = [];
     for (section in notes)
@@ -258,8 +258,8 @@ class PsychToNewFNFUtil
 
     Reflect.setField(convertedChartTemplate.scrollSpeed, diff, (chartObject?.song?.speed ?? 0.0) + 1.0);
     Reflect.setField(convertedChartTemplate.notes, diff, noteArray);
-    Reflect.setField(convertedChartTemplate.sectionVariables, diff, sectionVariables);
     Reflect.setField(convertedChartTemplate.events, diff, eventsArray);
+    Reflect.setField(convertedChartTemplate.sectionVariables, diff, sectionVariables);
 
     var gfVersion:String = chartObject?.song?.player3 ?? "not found";
     if (gfVersion == "not found") gfVersion = chartObject?.song?.gfVersion ?? "gf";
@@ -269,6 +269,7 @@ class PsychToNewFNFUtil
     metaDataTemplate.songData.playData.characters.player = chartObject?.song?.player1 ?? "bf";
     metaDataTemplate.songData.playData.characters.girlfriend = gfVersion;
     metaDataTemplate.songData.playData.characters.opponent = chartObject?.song?.player2 ?? "dad";
+    metaDataTemplate.songData.playData.characters.secondOpponent = chartObject?.song?.player4 ?? "";
     metaDataTemplate.songData.playData.timeChanges[0].bpm = chartObject?.song?.bpm ?? 100;
     metaDataTemplate.songData.playData.options =
       {
