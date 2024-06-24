@@ -204,9 +204,9 @@ class SustainTrail extends FunkinSCSprite
     return endingStyle;
   }
 
-  function getBaseScrollSpeed()
+  function getBaseScrollSpeed():Float
   {
-    return (PlayState.instance?.songSpeed ?? 1.0);
+    return PlayState.currentChart?.scrollSpeed ?? 1.0;
   }
 
   var previousScrollSpeed:Float = 1;
@@ -219,6 +219,7 @@ class SustainTrail extends FunkinSCSprite
       triggerRedraw();
     }
     previousScrollSpeed = parentStrumline?.scrollSpeed ?? 1.0;
+    alpha = 0.6;
   }
 
   /**

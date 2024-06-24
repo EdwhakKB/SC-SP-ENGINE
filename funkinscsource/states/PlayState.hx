@@ -1526,13 +1526,21 @@ class PlayState extends MusicBeatState
   {
     if (generatedMusic)
     {
+      opponentStrums.scrollSpeed = value;
+      playerStrums.scrollSpeed = value;
       var ratio:Float = value / songSpeed; // funny word huh
       if (ratio != 1)
       {
         for (note in notes.members)
+        {
+          note.noteScrollSpeed = value;
           note.resizeByRatio(ratio);
+        }
         for (note in unspawnNotes)
+        {
+          note.noteScrollSpeed = value;
           note.resizeByRatio(ratio);
+        }
       }
     }
     songSpeed = value;
@@ -1548,13 +1556,22 @@ class PlayState extends MusicBeatState
       vocals.pitch = value;
       FlxG.sound.music.pitch = value;
 
+      playerStrums.scrollSpeed /= value;
+      opponentStrums.scrollSpeed /= value;
+
       var ratio:Float = playbackRate / value; // funny word huh
       if (ratio != 1)
       {
         for (note in notes.members)
+        {
+          note.noteScrollSpeed /= value;
           note.resizeByRatio(ratio);
+        }
         for (note in unspawnNotes)
+        {
+          note.noteScrollSpeed /= value;
           note.resizeByRatio(ratio);
+        }
       }
     }
     playbackRate = value;
@@ -2290,7 +2307,6 @@ class PlayState extends MusicBeatState
     if (ret == LuaUtils.Function_Stop) return;
 
     updateAcc = CoolUtil.floorDecimal(ratingPercent * 100, 2);
-    Debug.logInfo(Std.string(updateAcc));
 
     var str:String = Language.getPhrase('rating_$ratingName', ratingName);
     if (totalPlayed != 0)
@@ -2523,79 +2539,15 @@ class PlayState extends MusicBeatState
       add(redVignette);
     }
 
-    /*vocals = new FlxSound();
-      opponentVocals = new FlxSound();
-      try
-      {
-        if (songData.needsVoices)
-        {
-          var normalVocals = Paths.voices((songData.vocalsPrefix != null ? songData.vocalsPrefix : ''), songData.songId,
-            (songData.vocalsSuffix != null ? songData.vocalsSuffix : ''));
-          var externalPlayerVocals = Paths.voices((songData.vocalsPrefix != null ? songData.vocalsPrefix : ''), songData.songId,
-            (songData.vocalsSuffix != null ? songData.vocalsSuffix : ''), boyfriend.curCharacter);
-          var playerVocals = Paths.voices((songData.vocalsPrefix != null ? songData.vocalsPrefix : ''), songData.songId,
-            (songData.vocalsSuffix != null ? songData.vocalsSuffix : ''),
-            (boyfriend.vocalsFile == null || boyfriend.vocalsFile.length < 1) ? 'Player' : boyfriend.vocalsFile);
-          if (playerVocals == null && externalPlayerVocals != null) playerVocals = externalPlayerVocals;
-          vocals.loadEmbedded(playerVocals != null ? playerVocals : normalVocals);
-
-          var oppVocals = Paths.voices((songData.vocalsPrefix != null ? songData.vocalsPrefix : ''), songData.songId,
-            (songData.vocalsSuffix != null ? songData.vocalsSuffix : ''), (dad.vocalsFile == null || dad.vocalsFile.length < 1) ? 'Opponent' : dad.vocalsFile);
-          var externalOppVocals = Paths.voices((songData.vocalsPrefix != null ? songData.vocalsPrefix : ''), songData.songId,
-            (songData.vocalsSuffix != null ? songData.vocalsSuffix : ''), dad.curCharacter);
-          if (oppVocals == null && externalOppVocals != null) oppVocals = externalOppVocals;
-          if (oppVocals != null)
-          {
-            opponentVocals.loadEmbedded(oppVocals);
-            splitVocals = true;
-          }
-        }
-    }*/
-
     if (vocals != null) vocals.stop();
     vocals = currentChart.buildVocals();
 
     #if FLX_PITCH
     vocals.pitch = playbackRate;
-    // opponentVocals.pitch = playbackRate;
     #end
-
-    // FlxG.sound.list.add(vocals);
-    // FlxG.sound.list.add(opponentVocals);
 
     notes = new FlxTypedGroup<Note>();
     add(notes);
-
-    /* var difficultyEventsFound:Bool = false;
-      var file:String = Paths.json('songs/' + songName + '/events' + Difficulty.getString().toLowerCase());
-      #if MODS_ALLOWED
-      if (FileSystem.exists(Paths.modsJson('songs/' + songName + '/events' + Difficulty.getString().toLowerCase()))
-        || FileSystem.exists(file))
-      #else
-      if (OpenFlAssets.exists(file))
-      #end
-      {
-        var eventsData:Array<Dynamic> = Song.loadFromJson('events' + Difficulty.getString().toLowerCase(), songName).events;
-        for (event in eventsData) // Event Notes
-          for (i in 0...event[1].length)
-            makeEvent(event, i);
-        difficultyEventsFound = true;
-      }
-
-      var file:String = Paths.json('songs/' + songName + '/events');
-      #if MODS_ALLOWED
-      if (FileSystem.exists(Paths.modsJson('songs/' + songName + '/events')) || FileSystem.exists(file))
-      #else
-      if (OpenFlAssets.exists(file))
-      #end
-      {
-        if (!difficultyEventsFound)
-        {
-          var eventsData:Array<SongEventData> = Song.loadFromJson('events', songName).events;
-          for (event in eventsData) // Event Notes
-            makeEvent(event);
-        }
-    }*/
 
     var stuff:Array<String> = [];
 
@@ -2621,6 +2573,9 @@ class PlayState extends MusicBeatState
         }
       }
     }
+
+    playerStrums.scrollSpeed = songSpeed;
+    opponentStrums.scrollSpeed = songSpeed;
 
     for (songNote in currentChart.notes)
     {
@@ -2649,14 +2604,9 @@ class PlayState extends MusicBeatState
       var oldNote:Note = null;
       if (unspawnNotes.length > 0) oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
 
-      var swagNote:Note = new Note(strumTime, noteData, false, noteSkinUsed, oldNote, this);
-      swagNote.mustPress = gottaHitNote;
-      swagNote.strumLine = gottaHitNote ? 1 : 0;
+      var swagNote:Note = new Note(strumTime, noteData, false, noteSkinUsed, oldNote, this, songSpeed, gottaHitNote ? playerStrums : opponentStrums);
+      swagNote.setupNote(gottaHitNote, gottaHitNote ? 1 : 0, daSection, songNote.type);
       swagNote.sustainLength = songNote.length;
-      swagNote.noteType = songNote.type;
-      swagNote.noteSection = daSection;
-      swagNote.parentStrumline = gottaHitNote ? playerStrums : opponentStrums;
-      swagNote.resetScrollSpeed();
       for (section in currentChart.sectionVariables)
         swagNote.gfNote = (section.gfSection && (songNote.data < 4));
       for (section in currentChart.sectionVariables)
@@ -2666,7 +2616,7 @@ class PlayState extends MusicBeatState
       swagNote.scrollFactor.set();
       unspawnNotes.push(swagNote);
 
-      if (holdsActive) swagNote.sustainLength = songNote.length / playbackRate;
+      if (holdsActive) swagNote.sustainLength = songNote.length;
       else
         swagNote.sustainLength = 0;
 
@@ -2679,12 +2629,9 @@ class PlayState extends MusicBeatState
         {
           oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
 
-          var sustainNote:Note = new Note(strumTime + (Conductor.instance.stepCrochet * susNote), noteData, true, noteSkinUsed, oldNote, this);
-          sustainNote.mustPress = gottaHitNote;
-          sustainNote.strumLine = gottaHitNote ? 1 : 0;
-          sustainNote.noteType = songNote.type;
-          sustainNote.noteSection = daSection;
-          sustainNote.parentStrumline = gottaHitNote ? playerStrums : opponentStrums;
+          var sustainNote:Note = new Note(strumTime + (Conductor.instance.stepCrochet * susNote), noteData, true, noteSkinUsed, oldNote, this, songSpeed,
+            gottaHitNote ? playerStrums : opponentStrums);
+          sustainNote.setupNote(gottaHitNote, gottaHitNote ? 1 : 0, daSection, songNote.type);
           for (section in currentChart.sectionVariables)
             sustainNote.gfNote = (section.gfSection && (songNote.data < 4));
           for (section in currentChart.sectionVariables)
@@ -2697,7 +2644,6 @@ class PlayState extends MusicBeatState
             || noteSkinBF.contains('pixel'));
           sustainNote.scrollFactor.set();
           sustainNote.parent = swagNote;
-          sustainNote.resetScrollSpeed();
           unspawnNotes.push(sustainNote);
           swagNote.tail.push(sustainNote);
 
@@ -2757,7 +2703,7 @@ class PlayState extends MusicBeatState
       }
     }
     // Event Notes
-    for (event in currentChart.getEvents())
+    for (event in currentChart.events)
       makeEvent(event);
 
     unspawnNotes.sort(function(a:Note, b:Note):Int {
@@ -3780,7 +3726,7 @@ class PlayState extends MusicBeatState
               if (!daNote.mustPress) strumGroup = opponentStrums;
 
               var strum:StrumArrow = strumGroup.members[daNote.noteData];
-              daNote.followStrumArrow(strum, fakeCrochet, daNote.noteScrollSpeed / playbackRate);
+              daNote.followStrumArrow(strum, fakeCrochet);
 
               if (!isPixelNotes && daNote.noteSkin.contains('pixel')) isPixelNotes = true;
               else if (isPixelNotes && !daNote.noteSkin.contains('pixel')) isPixelNotes = false;
@@ -5138,7 +5084,6 @@ class PlayState extends MusicBeatState
 
     totalNotesHit += daRating.accuracyBonus;
     totalPlayed += 1;
-    Debug.logInfo(Std.string(totalNotesHit));
 
     note.rating = daRating;
 
@@ -7404,7 +7349,6 @@ class PlayState extends MusicBeatState
       {
         // Rating Percent
         ratingPercent = Math.min(1, Math.max(0, totalNotesHit / totalPlayed));
-        Debug.logInfo(Std.string(ratingPercent));
 
         // Rating Name
         ratingName = ratingStuff[ratingStuff.length - 1][0]; // Uses last string

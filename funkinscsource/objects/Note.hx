@@ -41,16 +41,7 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
   #end
 
   // We can now edit the time they spawn, useful for Modifiers (MT and non-MT)
-  public var spawnTime:Float = 2500;
-
-  // Used in-game to control the scroll speed within a song
-  public var noteScrollSpeed:Float = 1.0;
-  public var parentStrumline:Strumline;
-
-  public function resetScrollSpeed():Void
-  {
-    noteScrollSpeed = parentStrumline?.scrollSpeed ?? PlayState.instance?.songSpeed ?? 1.0;
-  }
+  public var spawnTime:Float = 2000;
 
   public var holdNote:SustainTrail;
 
@@ -266,7 +257,21 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
     return value;
   }
 
-  public function new(strumTime:Float, noteData:Int, sustainNote:Bool = false, noteSkin:String, ?prevNote:Note, ?createdFrom:Dynamic = null)
+  public var parentStrumline:Strumline;
+
+  // Used in-game to control the scroll speed within a song
+  public var noteScrollSpeed(default, set):Float = 1.0;
+  public var allowScrollSpeedOverride:Bool = true;
+
+  private function set_noteScrollSpeed(value:Float):Float
+  {
+    var overrideSpeed:Float = parentStrumline?.scrollSpeed ?? 1.0;
+    noteScrollSpeed = allowScrollSpeedOverride ? overrideSpeed : value;
+    return allowScrollSpeedOverride ? overrideSpeed : value;
+  }
+
+  public function new(strumTime:Float, noteData:Int, sustainNote:Bool = false, noteSkin:String, ?prevNote:Note, ?createdFrom:Dynamic = null,
+      ?scrollSpeed:Float, ?parentStrumline:Strumline)
   {
     super();
 
@@ -286,6 +291,8 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
     this.strumTime = strumTime;
 
     this.noteData = noteData;
+    this.parentStrumline = parentStrumline;
+    this.noteScrollSpeed = scrollSpeed;
 
     if (noteData > -1)
     {
@@ -329,7 +336,7 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
         prevNote.animation.play(colArray[prevNote.noteData % colArray.length] + 'hold');
 
         prevNote.scale.y *= Conductor.instance.stepCrochet / 100 * 1.05; // Because of how SCE works with sustains the value is static to 1.05 unless they break.
-        if (createdFrom != null && createdFrom.songSpeed != null) prevNote.scale.y *= createdFrom.songSpeed;
+        prevNote.scale.y *= noteScrollSpeed;
 
         // Let's see if I might un-null it!
         if (!changedSkin)
@@ -682,7 +689,7 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
     super.destroy();
   }
 
-  public function followStrumArrow(myStrum:StrumArrow, fakeCrochet:Float, songSpeed:Float = 1.0)
+  public function followStrumArrow(myStrum:StrumArrow, fakeCrochet:Float)
   {
     var strumX:Float = myStrum.x;
     var strumY:Float = myStrum.y;
@@ -691,7 +698,7 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
     var strumDirection:Float = myStrum.direction;
     var strumVisible:Bool = myStrum.visible;
 
-    distance = (0.45 * (Conductor.instance.songPosition - strumTime) * songSpeed * multSpeed);
+    distance = (0.45 * (Conductor.instance.songPosition - strumTime) * noteScrollSpeed * multSpeed);
     if (!myStrum.downScroll) distance *= -1;
 
     var angleDir = strumDirection * Math.PI / 180;

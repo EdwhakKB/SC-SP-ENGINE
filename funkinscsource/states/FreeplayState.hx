@@ -303,6 +303,7 @@ class FreeplayState extends MusicBeatState
   public static var curInstPlayingtxt:String = "N/A";
 
   public static var inst:FlxSound = null;
+  public static var allVocals:Map<String, FlxSound> = new Map<String, FlxSound>();
 
   public var instPlayingtxt:String = "N/A"; // its not really a text but who cares?
   public var canSelectSong:Bool = true;
@@ -523,9 +524,13 @@ class FreeplayState extends MusicBeatState
               allVocals.get(vocal).stop();
               allVocals.get(vocal).volume = 0;
               allVocals.get(vocal).time = 0;
-              allVocals.set(vocal, null);
             }
           }
+        }
+        if (allVocals != null)
+        {
+          allVocals.clear();
+          allVocals = null;
         }
       }
     }
@@ -565,13 +570,16 @@ class FreeplayState extends MusicBeatState
                 for (i in [bg, scoreBG, scoreText, helpText, opponentText, diffText, comboText])
                   FlxTween.tween(i, {alpha: 0}, llll / 1000);
                 if (inst != null) inst.fadeOut(llll / 1000, 0);
-                for (vocal in allVocals.keys())
+                if (allVocals != null)
                 {
-                  if (allVocals.exists(vocal))
+                  for (vocal in allVocals.keys())
                   {
-                    if (allVocals.get(vocal) != null)
+                    if (allVocals.exists(vocal))
                     {
-                      allVocals.get(vocal).fadeOut(llll / 1000, 0);
+                      if (allVocals.get(vocal) != null)
+                      {
+                        allVocals.get(vocal).fadeOut(llll / 1000, 0);
+                      }
                     }
                   }
                 }
@@ -616,8 +624,6 @@ class FreeplayState extends MusicBeatState
   var resetSong:Bool = false;
   var exit:Bool = true;
 
-  public static var allVocals:Map<String, FlxSound> = new Map<String, FlxSound>();
-
   private function playSong():Void
   {
     try
@@ -638,13 +644,16 @@ class FreeplayState extends MusicBeatState
           FlxG.sound.music.stop();
         }
         if (inst != null) inst.stop();
-        for (vocal in allVocals.keys())
+        if (allVocals != null)
         {
-          if (allVocals.exists(vocal))
+          for (vocal in allVocals.keys())
           {
-            if (allVocals.get(vocal) != null)
+            if (allVocals.exists(vocal))
             {
-              allVocals.get(vocal).stop();
+              if (allVocals.get(vocal) != null)
+              {
+                allVocals.get(vocal).stop();
+              }
             }
           }
         }
@@ -656,6 +665,7 @@ class FreeplayState extends MusicBeatState
             inst.destroy();
             inst = null;
           }
+          if (allVocals == null) allVocals = new Map<String, FlxSound>();
 
           Mods.currentModDirectory = songs[curSelected].folder;
 
@@ -757,17 +767,10 @@ class FreeplayState extends MusicBeatState
           inst.time = 0;
           remove(inst);
           inst.destroy();
-          for (vocal in allVocals.keys())
+          if (allVocals != null)
           {
-            if (allVocals.exists(vocal))
-            {
-              if (allVocals.get(vocal) != null)
-              {
-                allVocals.get(vocal).time = 0;
-                allVocals.get(vocal).destroy();
-                allVocals.remove(vocal);
-              }
-            }
+            allVocals.clear();
+            allVocals = null;
           }
           inst = null;
           completed = true;
@@ -810,15 +813,10 @@ class FreeplayState extends MusicBeatState
   public function acceptedSong()
   {
     if (inst != null) inst = null;
-    for (vocal in allVocals.keys())
+    if (allVocals != null)
     {
-      if (allVocals.exists(vocal))
-      {
-        if (allVocals.get(vocal) != null)
-        {
-          allVocals.set(vocal, null);
-        }
-      }
+      allVocals.clear();
+      allVocals = null;
     }
     Conductor.instance.update(0);
     player.playingMusic = false;

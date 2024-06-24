@@ -8,6 +8,7 @@ import states.FreeplayState;
 class MasterEditorMenu extends MusicBeatState
 {
   var options:Array<String> = [
+    'Special Chart Converter',
     'Chart Editor',
     'Character Editor',
     'Stage Editor',
@@ -101,6 +102,8 @@ class MasterEditorMenu extends MusicBeatState
       FlxG.sound.music.volume = 0;
       switch (options[curSelected])
       {
+        case 'Special Chart Converter':
+          LoadingState.loadAndSwitchState(new converter.ChartConverterState(), false);
         case 'Chart Editor': // felt it would be cool maybe
           LoadingState.loadAndSwitchState(new charting.ChartEditorState(), false);
         case 'Character Editor':
