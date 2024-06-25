@@ -13,6 +13,7 @@ import shaders.RGBPalette.RGBShaderReference;
  * A sprite that can be used to display the trail of a hold note in a chart.
  * Designed to be used and reused efficiently. Has no gameplay functionality.
  */
+@:access(funkin.ui.debug.charting.ChartEditorState)
 @:nullSafety
 class ChartEditorHoldNoteSprite extends objects.SustainTrail
 {
@@ -80,6 +81,11 @@ class ChartEditorHoldNoteSprite extends objects.SustainTrail
       endOffset = bottomClip = 1;
       antialiasing = false;
     }
+    else
+    {
+      endOffset = 0.5;
+      bottomClip = 0.9;
+    }
 
     zoom = 1.0;
     zoom *= isPixel ? 8.0 : 1.55;
@@ -98,6 +104,8 @@ class ChartEditorHoldNoteSprite extends objects.SustainTrail
     updateClipping();
 
     setup();
+
+    triggerRedraw();
   }
 
   public override function updateHitbox():Void

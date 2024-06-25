@@ -99,7 +99,7 @@ class ChartConverterState extends MusicBeatState
     subTextForFinalSongName.scrollFactor.set();
     add(subTextForFinalSongName);
 
-    var startBox:FlxButtonPlus = new FlxButtonPlus(0, 0, startConvertion, "Convert!!", 130, 150);
+    var startBox:FlxButtonPlus = new FlxButtonPlus(0, 0, startConvertion, "Convert!!", 180, 50);
     startBox.textNormal.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
     startBox.textHighlight.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
     startBox.color = FlxColor.GREEN;

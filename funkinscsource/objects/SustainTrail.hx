@@ -127,6 +127,11 @@ class SustainTrail extends FunkinSCSprite
       endOffset = bottomClip = 1;
       antialiasing = false;
     }
+    else
+    {
+      endOffset = 0.5;
+      bottomClip = 0.9;
+    }
 
     zoom = 1.0;
     zoom *= isPixel ? 8.0 : 1.55;
@@ -219,7 +224,7 @@ class SustainTrail extends FunkinSCSprite
       triggerRedraw();
     }
     previousScrollSpeed = parentStrumline?.scrollSpeed ?? 1.0;
-    alpha = 0.6;
+    alpha = 1;
   }
 
   /**
@@ -267,6 +272,11 @@ class SustainTrail extends FunkinSCSprite
    */
   public function updateClipping(songTime:Float = 0):Void
   {
+    if (graphic == null)
+    {
+      return;
+    }
+
     var clipHeight:Float = FlxMath.bound(sustainHeight(sustainLength - (songTime - strumTime), parentStrumline?.scrollSpeed ?? 1.0), 0, graphicHeight);
     if (clipHeight <= 0.1)
     {

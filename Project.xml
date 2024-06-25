@@ -77,17 +77,11 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<!-- Defines whether the if the achievements are allowed. -->
 	<define name="ACHIEVEMENTS_ALLOWED" />
 
-	<!-- Define whether translations are allowed or not.-->
-	<define name="TRANSLATIONS_ALLOWED" />
-
 	<!-- Defines whether the if discord is allowed. -->
 	<define name="DISCORD_ALLOWED" />
 
 		<!-- Define whether translations are allowed or not.-->
 	<define name="TRANSLATIONS_ALLOWED" />
-
-	<!-- Allow Base game files!-->
-	<define name="BASE_GAME_FILES" /> <!-- DELETE THIS TO REMOVE MOST BASE GAME FILES AND REDUCE FILE SIZE -->
 
 	<!-- Defines whether if videos are allowed. -->
 	<define name="VIDEOS_ALLOWED" if="windows || linux || android" unless="32bits"/>
@@ -111,7 +105,7 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<define name="SHOW_LOADING_SCREEN" />
 
 	<!--Defines whether base game files are included-->
-	<define name="BASE_GAME_FILES"/>
+	<define name="BASE_GAME_FILES"/> <!-- DELETE THIS TO REMOVE MOST BASE GAME FILES AND REDUCE FILE SIZE -->
 
 	<!-- Assets -->
 	<assets path="assets/art" />

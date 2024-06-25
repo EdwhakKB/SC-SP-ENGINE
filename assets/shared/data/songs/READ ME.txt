@@ -1,0 +1,2 @@
+Song go here!
+"data/songs/songName/" SongName would be your folder with the song name ofc.

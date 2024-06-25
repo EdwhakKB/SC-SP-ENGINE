@@ -54,12 +54,14 @@ class PsychToNewFNFUtil
     var convertedChartTemplate =
       {
         version: "2.0.0",
-        scrollSpeed: {"default": 1.0},
+        scrollSpeed: {},
         events: {},
         notes: {},
-        sectionVariables: {"normal": []},
+        sectionVariables: {},
         generatedBy: "Slushi Psych to new FNF converter"
       };
+
+    Debug.logInfo("passed chart template");
 
     var metaDataTemplate =
       {
@@ -146,10 +148,13 @@ class PsychToNewFNFUtil
           }
       };
 
+    Debug.logInfo("passed metadata template");
+
     var fileContent:String = "";
     try
     {
       fileContent = File.getContent(chartFile);
+      Debug.logInfo("found content of .json, content: " + fileContent);
     }
     catch (e)
     {
@@ -167,7 +172,8 @@ class PsychToNewFNFUtil
     var chartObject:Dynamic = null;
     try
     {
-      chartObject = Json.parse(fileContent);
+      chartObject = cast Json.parse(fileContent);
+      Debug.logInfo("found chartObject, " + chartObject);
     }
     catch (e)
     {
@@ -187,84 +193,113 @@ class PsychToNewFNFUtil
     var isNormal:Bool = fileSplit.length == 1;
     if (isNormal) diff = 'normal';
 
-    var notes:Array<Dynamic> = chartObject?.song?.notes;
-    var events:Array<Dynamic> = chartObject?.song?.events;
-    var noteArray:Array<SongNoteData> = [];
+    var notes:Array<Dynamic> = chartObject?.song?.notes ?? [];
+    var events:Array<Dynamic> = chartObject?.song?.events ?? [];
+    var noteArray:Array<Dynamic> = [];
     var eventsArray:Array<SongEventData> = [];
     var sectionVariables:Array<SongSectionData> = [];
-    for (section in notes)
+
+    Debug.logInfo("passed variable creations for arrays");
+
+    if (notes != null && notes?.length > 0)
     {
-      var sectionNotes:Array<Dynamic> = section?.sectionNotes;
-
-      var sectionMustHit:Null<Bool> = section?.mustHitSection ?? false;
-      var sectionPlayerAlt:Null<Bool> = section?.playerAltAnim ?? false;
-      var sectionCPUAlt:Null<Bool> = section?.cpuAltAnim ?? false;
-      var sectionAlt:Null<Bool> = section?.altAnim ?? false;
-      var sectionPlayer4:Null<Bool> = section?.player4Section ?? false;
-      var sectionGF:Null<Bool> = section?.gfSection ?? false;
-      var sectionDType:Null<Int> = section?.dType ?? 0;
-
-      sectionVariables.push(new SongSectionData(sectionMustHit, sectionPlayerAlt, sectionCPUAlt, sectionAlt, sectionPlayer4, sectionGF, sectionDType));
-
-      for (note in sectionNotes)
+      for (section in notes)
       {
-        if (note[1] != -1)
+        var sectionNotes:Array<Dynamic> = section?.sectionNotes;
+
+        var sectionMustHit:Null<Bool> = section?.mustHitSection ?? false;
+        var sectionPlayerAlt:Null<Bool> = section?.playerAltAnim ?? false;
+        var sectionCPUAlt:Null<Bool> = section?.CPUAltAnim ?? false;
+        var sectionAlt:Null<Bool> = section?.altAnim ?? false;
+        var sectionPlayer4:Null<Bool> = section?.player4Section ?? false;
+        var sectionGF:Null<Bool> = section?.gfSection ?? false;
+        var sectionDType:Null<Int> = section?.dType ?? 0;
+
+        sectionVariables.push(new SongSectionData(sectionMustHit, sectionPlayerAlt, sectionCPUAlt, sectionAlt, sectionPlayer4, sectionGF, sectionDType));
+        Debug.logInfo("section stuff");
+
+        for (note in sectionNotes)
         {
-          var data:Int = note[1];
-          if (!sectionMustHit)
-          { // BF notes always go first
-            if (data < 4) data += 4;
-            else if (data >= 4) data -= 4;
+          if (note[1] != -1)
+          {
+            Debug.logInfo("noteStuff");
+            var data:Int = note[1];
+            if (!sectionMustHit)
+            { // BF notes always go first
+              if (data < 4) data += 4;
+              else if (data >= 4) data -= 4;
+            }
+            var type:String = "";
+            if (Std.isOfType(note[3], Int)) type = objects.Note.noteTypeList[note[3]];
+            else if (Std.isOfType(note[3], String)) type = note[3];
+            noteArray.push(
+              {
+                t: note[0],
+                d: data,
+                l: note[2],
+                k: type
+              });
           }
-          var type:String = "";
-          if (Std.isOfType(note[3], Int)) type = objects.Note.noteTypeList[note[3]];
-          else if (Std.isOfType(note[3], String)) type = note[3];
-          noteArray.push(new SongNoteData(note[0], data, note[2], type));
-        }
-        else
-        {
-          var eventTime:Float = 0.0;
-          if (Std.isOfType(note[0], Float)) eventTime = note[0];
+          else
+          {
+            Debug.logInfo("eventStuff");
+            var eventTime:Float = 0.0;
+            if (Std.isOfType(note[0], Float)) eventTime = note[0];
 
-          var eventName:String = "";
-          if (Std.isOfType(note[2], String)) eventName = note[2];
+            var eventName:String = "";
+            if (Std.isOfType(note[2], String)) eventName = note[2];
 
-          var eventParam1:String = "";
-          if (note[3] != null && Std.isOfType(note[3], String)) eventParam1 = note[3];
+            var eventParam1:String = "";
+            if (note[3] != null && Std.isOfType(note[3], String)) eventParam1 = note[3];
 
-          var eventParam2:String = "";
-          if (note[4] != null && Std.isOfType(note[4], String)) eventParam2 = note[4];
+            var eventParam2:String = "";
+            if (note[4] != null && Std.isOfType(note[4], String)) eventParam2 = note[4];
 
-          eventsArray.push(new SongEventData(eventTime, eventName, [eventParam1, eventParam2, "", "", "", "", "", "", "", "", "", "", "", ""]));
+            eventsArray.push(new SongEventData(eventTime, eventName, [eventParam1, eventParam2, "", "", "", "", "", "", "", "", "", "", "", ""]));
+          }
         }
       }
     }
 
-    for (event in events)
+    Debug.logInfo("passed section, notes, and maybe events data creation");
+
+    if (events != null && events?.length > 0)
     {
-      for (i in 0...event[1].length)
+      for (event in events)
       {
-        var eventTime:Float = event[0] + ClientPrefs.data.noteOffset;
-        var eventName:String = event[1][i][0];
+        Debug.logInfo(Std.string(event));
+        Debug.logInfo(Std.string(event[1]?.length));
+        for (i in 0...event[1]?.length)
+        {
+          var eventTime:Float = event[0] + ClientPrefs.data.noteOffset;
+          var eventName:String = event[1][i][0];
 
-        var params:Array<String> = [];
-        if (Std.isOfType(event[1][i][1], Array)) params = event[1][i][1];
-        else if (Std.isOfType(event[1][i][1], String)) for (j in 1...14)
-          params.push(event[1][i][j]);
+          var params:Array<String> = [];
+          if (Std.isOfType(event[1][i][1], Array)) params = event[1][i][1];
+          else if (Std.isOfType(event[1][i][1], String)) for (j in 1...14)
+            params.push(event[1][i][j]);
 
-        eventsArray.push(new SongEventData(eventTime, eventName, params));
+          eventsArray.push(new SongEventData(eventTime, eventName, params));
+        }
       }
     }
+
+    Debug.logInfo(events?.length > 0 ? "passed event data creation" : "passed event data, but no events");
 
     Reflect.setField(convertedChartTemplate.scrollSpeed, diff, (chartObject?.song?.speed ?? 0.0) + 1.0);
     Reflect.setField(convertedChartTemplate.notes, diff, noteArray);
     Reflect.setField(convertedChartTemplate.events, diff, eventsArray);
     Reflect.setField(convertedChartTemplate.sectionVariables, diff, sectionVariables);
 
+    Debug.logInfo("passed chart template data");
+
     var gfVersion:String = chartObject?.song?.player3 ?? "not found";
     if (gfVersion == "not found") gfVersion = chartObject?.song?.gfVersion ?? "gf";
 
-    metaDataTemplate.songData.playData.songName = songNameToMetaData;
+    var songName:String = chartObject?.song?.song ?? "not found";
+    if (songName == "not found") chartObject?.song?.songId ?? "test";
+
+    metaDataTemplate.songData.playData.songName = songName;
     metaDataTemplate.songData.playData.stage = chartObject?.song?.stage ?? "mainStage";
     metaDataTemplate.songData.playData.characters.player = chartObject?.song?.player1 ?? "bf";
     metaDataTemplate.songData.playData.characters.girlfriend = gfVersion;
@@ -303,7 +338,11 @@ class PsychToNewFNFUtil
         gameOverLoop: chartObject?.song?.gameOverLoop ?? "gameOver",
         gameOverEnd: chartObject?.song?.gameOverEnd ?? "gameOverEnd"
       };
+    metaDataTemplate.songData.playData.needsVoices = chartObject?.song?.needsVoices ?? false;
+    metaDataTemplate.songData.playData.separateVocals = chartObject?.song?.separateVocals ?? false;
     metaDataTemplate.songData.playData.difficulties.push(diff);
+
+    Debug.logInfo("passed metadata template data");
 
     try
     {

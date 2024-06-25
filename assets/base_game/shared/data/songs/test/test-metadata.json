@@ -1,0 +1,76 @@
+{
+  "songData": {
+    "playData": {
+      "stage": "mainStage",
+      "songVariations": [],
+      "options": {
+        "instrumentalPrefix": "",
+        "disableStrumRGB": false,
+        "splashSkin": "",
+        "playerNoteStyle": "",
+        "rightScroll": false,
+        "oldBarSystem": false,
+        "disableHoldCover": false,
+        "holdCoverSkin": "",
+        "disableHoldCoverRGB": false,
+        "arrowSkin": "",
+        "vocalsSuffix": "",
+        "disableCaching": false,
+        "vocalsPrefix": "",
+        "notITG": true,
+        "disableNoteQuantRGB": false,
+        "disableNoteRGB": false,
+        "opponentNoteStyle": "",
+        "middleScroll": false,
+        "blockOpponentMode": false,
+        "disableSplashRGB": false,
+        "usesHUD": false,
+        "instrumentalSuffix": ""
+      },
+      "separateVocals": false,
+      "difficulties": ["normal"],
+      "needsVoices": true,
+      "songName": "Test",
+      "timeChanges": [
+        {
+          "d": 4,
+          "n": 4,
+          "t": -1,
+          "bt": [4, 4, 4, 4],
+          "bpm": 150
+        }
+      ],
+      "characters": {
+        "altInstrumentals": [""],
+        "girlfriend": "gf",
+        "instrumental": "",
+        "opponent": "bf-pixel-opponent",
+        "secondOpponent": "",
+        "player": "bf"
+      },
+      "gameOverData": {
+        "gameOverEnd": "gameOverEnd",
+        "gameOverSound": "fnf_loss_sfx",
+        "gameOverChar": "bf-dead",
+        "gameOverLoop": "gameOver"
+      },
+      "version": "2.2.3"
+    },
+    "inclusiveData": {
+      "timeFormat": "ms",
+      "artist": "",
+      "previewStart": 0,
+      "charter": "",
+      "offsets": {
+        "altInstrumentals": {},
+        "instrumental": 0,
+        "vocals": {}
+      },
+      "album": "volume3",
+      "previewEnd": 15000,
+      "generatedBy": "Slushi Psych to new FNF converter",
+      "looped": false,
+      "divisions": 96
+    }
+  }
+}
