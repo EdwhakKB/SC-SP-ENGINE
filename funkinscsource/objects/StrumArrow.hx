@@ -255,7 +255,7 @@ class StrumArrow extends FunkinSCSprite
 
   public function postAddedToGroup()
   {
-    playAnim('static', true);
+    playAnim('static');
     x += Note.swagWidth * noteData;
     x += 50;
     x += ((FlxG.width / 2) * player);
@@ -285,7 +285,7 @@ class StrumArrow extends FunkinSCSprite
         resetAnim -= elapsed;
         if (resetAnim <= 0)
         {
-          playAnim('static', true);
+          playAnim('static');
           resetAnim = 0;
         }
       }

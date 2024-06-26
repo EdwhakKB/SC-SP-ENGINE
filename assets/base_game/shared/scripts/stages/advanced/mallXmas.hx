@@ -1,3 +1,5 @@
+import objects.stageobjects.MallCrowd;
+
 function onCreate()
 {
   var bg:BGSprite = new BGSprite('christmas/bgWalls', -1000, -500, 0.2, 0.2);
@@ -22,15 +24,14 @@ function onCreate()
   var tree:BGSprite = new BGSprite('christmas/christmasTree', 370, -250, 0.40, 0.40);
   stageSpriteHandler(tree, -1, 'tree');
 
-  var bottomBoppers = new MallCrowd(-300, 140);
-  swagBacks['bottomBoppers'] = bottomBoppers;
+  var bottomBoppers:MallCrowed = new MallCrowd(-300, 140);
   stageSpriteHandler(bottomBoppers, -1, 'bottomBoppers');
   addAnimatedBack(bottomBoppers);
 
   var fgSnow:BGSprite = new BGSprite('christmas/fgSnow', -600, 700);
   stageSpriteHandler(fgSnow, -1, 'fgSnow');
 
-  var santa = new BGSprite('christmas/santa', -840, 150, 1, 1, ['santa idle in fear']);
+  var santa:BGSprite = new BGSprite('christmas/santa', -840, 150, 1, 1, ['santa idle in fear']);
   stageSpriteHandler(santa, -1, 'santa');
   addAnimatedBacked(santa);
   Paths.sound('Lights_Shut_off');

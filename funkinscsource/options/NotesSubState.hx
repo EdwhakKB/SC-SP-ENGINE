@@ -638,7 +638,7 @@ class NotesSubState extends MusicBeatSubState
     for (i in 0...dataArray.length)
     {
       Note.initializeGlobalRGBShader(i);
-      var newNote:StrumArrow = new StrumArrow(150 + (480 / dataArray.length * i), 200, 0, i, simpleNoteskin);
+      var newNote:StrumArrow = new StrumArrow(150 + (480 / dataArray.length * i), 200, i, 0, simpleNoteskin);
       newNote.daStyle = simpleNoteskin;
       newNote.texture = simpleNoteskin;
       newNote.reloadNote(simpleNoteskin);

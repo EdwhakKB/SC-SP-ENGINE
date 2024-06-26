@@ -679,7 +679,7 @@ class FreeplayState extends MusicBeatState
           targetSong = backend.song.data.SongRegistry.instance.fetchEntry(Paths.formatToSongPath(songs[curSelected].songName));
           if (targetSong == null)
           {
-            Debug.logInfo('WARN: could not find song with id (${songs[curSelected].songName})');
+            Debug.logWarn('Could not find song with id (${songs[curSelected].songName})');
             return;
           }
           var targetedDifficulty:String = Difficulty.getFilePath(curDifficulty).replace('-', "");
@@ -687,6 +687,14 @@ class FreeplayState extends MusicBeatState
           targetVariation = targetSong.getFirstValidVariation(targetDifficulty);
           targetSongDifficulty = targetSong.getDifficulty(targetedDifficulty == '' ? 'normal' : targetedDifficulty, targetVariation);
           Debug.logInfo('song is null for playing? ${targetSong == null}, difficulty, $targetDifficulty, variation, $targetVariation, songDifficulty is null for playing? ${targetSongDifficulty == null}');
+          if (targetSongDifficulty == null)
+          {
+            Debug.logWarn('Song Difficulty Is NULL!!');
+            allVocals.clear();
+            allVocals = null;
+            inst = null;
+            return;
+          }
 
           curInstPlayingtxt = instPlayingtxt = songs[curSelected].songName.toLowerCase();
 
@@ -772,29 +780,32 @@ class FreeplayState extends MusicBeatState
 
         exit = false;
 
-        inst.onComplete = function() {
-          inst.time = 0;
-          remove(inst);
-          inst.destroy();
-          if (allVocals != null)
-          {
-            allVocals.clear();
-            allVocals = [];
-          }
-          allVocals = null;
-          inst = null;
-          completed = true;
-          exit = false;
+        if (inst != null)
+        {
+          inst.onComplete = function() {
+            inst.time = 0;
+            remove(inst);
+            inst.destroy();
+            if (allVocals != null)
+            {
+              allVocals.clear();
+              allVocals = [];
+            }
+            allVocals = null;
+            inst = null;
+            completed = true;
+            exit = false;
 
-          player.curTime = 0;
-          player.playingMusic = false;
-          player.switchPlayMusic();
+            player.curTime = 0;
+            player.playingMusic = false;
+            player.switchPlayMusic();
 
-          for (i in 0...iconArray.length)
-          {
-            iconArray[i].scale.set(1, 1);
-            iconArray[i].updateHitbox();
-            iconArray[i].angle = 0;
+            for (i in 0...iconArray.length)
+            {
+              iconArray[i].scale.set(1, 1);
+              iconArray[i].updateHitbox();
+              iconArray[i].angle = 0;
+            }
           }
         }
       }
@@ -886,7 +897,7 @@ class FreeplayState extends MusicBeatState
         // TODO: Make these an option! It's currently only accessible via chart editor.
         // startTimestamp: 0.0,
       }, true);
-    #if !SHOW_LOADING_SCREEN FlxG.sound.music.volume = 0; #end
+    #if !SHOW_LOADING_SCREEN if (FlxG.sound.music != null) FlxG.sound.music.volume = 0; #end
     stopMusicPlay = true;
   }
 
