@@ -21,17 +21,8 @@ class PsychToNewFNFUtil
     }
     else
     {
-      if (isInChartConverterState)
-      {
-        ChartConverterState.updateTermText("File not found: " + file);
-        ChartConverterState.errorConverting = true;
-        Debug.logError("File not found: " + file);
-        return;
-      }
-      else
-      {
-        Debug.logError("File not found: " + file);
-      }
+      generateInfo('Failed Reading Without Error', file);
+      if (isInChartConverterState) return;
     }
   }
 
@@ -47,9 +38,8 @@ class PsychToNewFNFUtil
 
     nameFileToSave = result.toLowerCase();
 
-    Debug.logInfo('Converted name from [$chartFile] to [$nameFileToSave]');
-
-    Debug.logInfo("Converting: " + chartFile);
+    generateInfo('Write Mes', 'Converted name from [$chartFile] to [$nameFileToSave]', isInChartConverterState);
+    generateInfo('Write Mes', "Converting: " + chartFile, isInChartConverterState);
 
     var convertedChartTemplate =
       {
@@ -61,7 +51,7 @@ class PsychToNewFNFUtil
         generatedBy: "Slushi Psych to new FNF converter"
       };
 
-    Debug.logInfo("passed chart template");
+    generateInfo('Write Mes', "passed chart template", isInChartConverterState);
 
     var metaDataTemplate =
       {
@@ -148,24 +138,17 @@ class PsychToNewFNFUtil
           }
       };
 
-    Debug.logInfo("passed metadata template");
+    generateInfo('Write Mes', "passed metadata template", isInChartConverterState);
 
     var fileContent:String = "";
     try
     {
       fileContent = File.getContent(chartFile);
-      Debug.logInfo("found content of .json, content: " + fileContent);
+      generateInfo('Write Mes', "File Contains Readable Content", isInChartConverterState);
     }
-    catch (e)
+    catch (e:Dynamic)
     {
-      if (isInChartConverterState)
-      {
-        ChartConverterState.updateTermText('Could not read file [$chartFile]: $e');
-        ChartConverterState.errorConverting = true;
-        Debug.logError('Could not read file [$chartFile]: $e');
-        return;
-      }
-      Debug.logError('Could not read file [$chartFile]: $e');
+      generateInfo('Failed Reading', chartFile, e, isInChartConverterState);
       return;
     }
 
@@ -173,17 +156,11 @@ class PsychToNewFNFUtil
     try
     {
       chartObject = cast Json.parse(fileContent);
-      Debug.logInfo("found chartObject, " + chartObject);
+      generateInfo("Write Mes", "Found Json", isInChartConverterState);
     }
-    catch (e)
+    catch (e:Dynamic)
     {
-      if (isInChartConverterState)
-      {
-        ChartConverterState.updateTermText('Could not parse file [$chartFile]: $e');
-        ChartConverterState.errorConverting = true;
-        return;
-        Debug.logError('Could not parse file [$chartFile]: $e');
-      }
+      generateInfo('Failed Parse', chartFile, e, isInChartConverterState);
       return;
     }
 
@@ -196,10 +173,10 @@ class PsychToNewFNFUtil
     var notes:Array<Dynamic> = chartObject?.song?.notes ?? [];
     var events:Array<Dynamic> = chartObject?.song?.events ?? [];
     var noteArray:Array<Dynamic> = [];
-    var eventsArray:Array<SongEventData> = [];
+    var eventsArray:Array<Dynamic> = [];
     var sectionVariables:Array<SongSectionData> = [];
 
-    Debug.logInfo("passed variable creations for arrays");
+    generateInfo('Write Mes', "passed variable creations for arrays", isInChartConverterState);
 
     if (notes != null && notes?.length > 0)
     {
@@ -216,13 +193,11 @@ class PsychToNewFNFUtil
         var sectionDType:Null<Int> = section?.dType ?? 0;
 
         sectionVariables.push(new SongSectionData(sectionMustHit, sectionPlayerAlt, sectionCPUAlt, sectionAlt, sectionPlayer4, sectionGF, sectionDType));
-        Debug.logInfo("section stuff");
 
         for (note in sectionNotes)
         {
           if (note[1] != -1)
           {
-            Debug.logInfo("noteStuff");
             var data:Int = note[1];
             if (!sectionMustHit)
             { // BF notes always go first
@@ -242,7 +217,6 @@ class PsychToNewFNFUtil
           }
           else
           {
-            Debug.logInfo("eventStuff");
             var eventTime:Float = 0.0;
             if (Std.isOfType(note[0], Float)) eventTime = note[0];
 
@@ -255,20 +229,18 @@ class PsychToNewFNFUtil
             var eventParam2:String = "";
             if (note[4] != null && Std.isOfType(note[4], String)) eventParam2 = note[4];
 
-            eventsArray.push(new SongEventData(eventTime, eventName, [eventParam1, eventParam2, "", "", "", "", "", "", "", "", "", "", "", ""]));
+            eventsArray.push({t: eventTime, e: eventName, v: [eventParam1, eventParam2, "", "", "", "", "", "", "", "", "", "", "", ""]});
           }
         }
       }
     }
 
-    Debug.logInfo("passed section, notes, and maybe events data creation");
+    generateInfo('Write Mes', "passed section, notes, and maybe events data creation", isInChartConverterState);
 
     if (events != null && events?.length > 0)
     {
       for (event in events)
       {
-        Debug.logInfo(Std.string(event));
-        Debug.logInfo(Std.string(event[1]?.length));
         for (i in 0...event[1]?.length)
         {
           var eventTime:Float = event[0] + ClientPrefs.data.noteOffset;
@@ -279,19 +251,19 @@ class PsychToNewFNFUtil
           else if (Std.isOfType(event[1][i][1], String)) for (j in 1...14)
             params.push(event[1][i][j]);
 
-          eventsArray.push(new SongEventData(eventTime, eventName, params));
+          eventsArray.push({t: eventTime, e: eventName, v: params});
         }
       }
     }
 
-    Debug.logInfo(events?.length > 0 ? "passed event data creation" : "passed event data, but no events");
+    generateInfo('Write Mes', events?.length > 0 ? "passed event data creation" : "passed event data, but no events", isInChartConverterState);
 
     Reflect.setField(convertedChartTemplate.scrollSpeed, diff, (chartObject?.song?.speed ?? 0.0) + 1.0);
     Reflect.setField(convertedChartTemplate.notes, diff, noteArray);
     Reflect.setField(convertedChartTemplate.events, diff, eventsArray);
     Reflect.setField(convertedChartTemplate.sectionVariables, diff, sectionVariables);
 
-    Debug.logInfo("passed chart template data");
+    generateInfo('Write Mes', "passed chart template data", isInChartConverterState);
 
     var gfVersion:String = chartObject?.song?.player3 ?? "not found";
     if (gfVersion == "not found") gfVersion = chartObject?.song?.gfVersion ?? "gf";
@@ -342,7 +314,7 @@ class PsychToNewFNFUtil
     metaDataTemplate.songData.playData.separateVocals = chartObject?.song?.separateVocals ?? false;
     metaDataTemplate.songData.playData.difficulties.push(diff);
 
-    Debug.logInfo("passed metadata template data");
+    generateInfo('Write Mes', "passed metadata template data");
 
     try
     {
@@ -351,16 +323,9 @@ class PsychToNewFNFUtil
         File.saveContent(pathOutput + '/' + nameFileToSave + '-chart.json', Json.stringify(convertedChartTemplate, null, "\t"));
       }
     }
-    catch (e)
+    catch (e:Dynamic)
     {
-      if (isInChartConverterState)
-      {
-        ChartConverterState.updateTermText('Could not write and save file [$chartFile]: $e');
-        ChartConverterState.errorConverting = true;
-        Debug.logError('Could not write and save file [$chartFile]: $e');
-        return;
-      }
-      Debug.logError('Could not write and save file [$chartFile]: $e');
+      generateInfo("Failed Save", chartFile, e, isInChartConverterState);
       return;
     }
 
@@ -371,25 +336,59 @@ class PsychToNewFNFUtil
         File.saveContent(pathOutput + '/' + nameFileToSave + '-metadata.json', Json.stringify(metaDataTemplate, null, "\t"));
       }
     }
-    catch (e)
+    catch (e:Dynamic)
     {
-      if (isInChartConverterState)
-      {
-        ChartConverterState.updateTermText('Could not write and save file [$chartFile]: $e');
-        ChartConverterState.errorConverting = true;
-        Debug.logError('Could not write and save file [$chartFile]: $e');
-        return;
-      }
-      Debug.logError('Could not write and save file [$chartFile]: $e');
+      generateInfo('Failed Save', chartFile, e, isInChartConverterState);
       return;
     }
 
-    if (isInChartConverterState)
+    generateInfo('Created Files', chartFile, isInChartConverterState);
+  }
+
+  public static function generateInfo(mes:String, file:String = null, errorMes:String = null, isInChartConverterState:Bool = false)
+  {
+    switch (mes)
     {
-      ChartConverterState.updateTermText('Converted: [' + nameFileToSave + '] to [' + nameFileToSave + '-chart.json] and [' + nameFileToSave
-        + '-metadata.json]\n\nDone!');
-      Debug.logInfo("Converted: [" + nameFileToSave + "] to [" + nameFileToSave + "-chart.json] and [" + nameFileToSave + "-metadata.json]");
-      return;
+      case 'Created Files':
+        if (isInChartConverterState)
+        {
+          ChartConverterState.updateTermText('\n\nConverted: [' + file + '] to [' + file + '-chart.json] and [' + file + '-metadata.json]\n\nDone!');
+        }
+        Debug.logInfo("Converted: [" + file + "] to [" + file + "-chart.json] and [" + file + "-metadata.json]");
+      case 'Failed Save':
+        if (isInChartConverterState)
+        {
+          ChartConverterState.updateTermText('\n\nCould not write and save file [$file]: $errorMes');
+          ChartConverterState.errorConverting = true;
+        }
+        Debug.logError('Could not write and save file [$file]: $errorMes');
+      case 'Failed Parse':
+        if (isInChartConverterState)
+        {
+          ChartConverterState.updateTermText('\n\nCould not parse file [$file]: $errorMes');
+          ChartConverterState.errorConverting = true;
+        }
+        Debug.logError('Could not parse file [$file]: $errorMes');
+      case 'Failed Reading':
+        if (isInChartConverterState)
+        {
+          ChartConverterState.updateTermText('\n\nCould not read file [$file]: $errorMes');
+          ChartConverterState.errorConverting = true;
+        }
+        Debug.logError('Could not read file [$file]: $errorMes');
+      case 'Failed Reading Without Error':
+        if (isInChartConverterState)
+        {
+          ChartConverterState.updateTermText("File not found: " + file);
+          ChartConverterState.errorConverting = true;
+        }
+        Debug.logError("File not found: " + file);
+      case 'Write Mes':
+        if (isInChartConverterState)
+        {
+          ChartConverterState.updateTermText('\n\n$file');
+        }
+        Debug.logError('\n\n$file');
     }
   }
 }

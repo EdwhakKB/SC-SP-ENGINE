@@ -6,7 +6,7 @@ import flixel.addons.transition.TransitionData;
 import flixel.addons.transition.Transition;
 import backend.PsychCamera;
 
-class MusicBeatState extends #if SCEModchartingTools modcharting.ModchartMusicBeatState #else FlxTransitionableState #end
+class MusicBeatState extends #if SCEModchartingTools modcharting.ModchartMusicBeatState #else flixel.addons.ui.FlxUIState #end
 {
   public var controls(get, never):Controls;
 
