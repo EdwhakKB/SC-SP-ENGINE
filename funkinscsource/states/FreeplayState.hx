@@ -783,8 +783,8 @@ class FreeplayState extends MusicBeatState
         if (inst != null)
         {
           inst.onComplete = function() {
-            inst.time = 0;
             remove(inst);
+            inst.time = 0;
             inst.destroy();
             if (allVocals != null)
             {
