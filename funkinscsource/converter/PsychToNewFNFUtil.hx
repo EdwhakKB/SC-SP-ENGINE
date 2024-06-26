@@ -251,6 +251,17 @@ class PsychToNewFNFUtil
           else if (Std.isOfType(event[1][i][1], String)) for (j in 1...14)
             params.push(event[1][i][j]);
 
+          if (params.length != 0 && params.length == 14)
+          {
+            for (param in params)
+            {
+              if (param == null)
+              {
+                param = "";
+              }
+            }
+          }
+          else if (params.length < 1) params = ["", "", "", "", "", "", "", "", "", "", "", "", "", ""];
           eventsArray.push({t: eventTime, e: eventName, v: params});
         }
       }
@@ -388,7 +399,7 @@ class PsychToNewFNFUtil
         {
           ChartConverterState.updateTermText('\n\n$file');
         }
-        Debug.logError('\n\n$file');
+        Debug.logInfo('\n\n$file');
     }
   }
 }
