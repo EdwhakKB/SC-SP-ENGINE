@@ -688,7 +688,7 @@ class SongDifficulty
     FlxG.sound.list.remove(FlxG.sound.music);
   }
 
-  public function playFreeplayInst(volume:Float = 1.0, looped:Bool = false):FunkinSound
+  public function playFreeplayInst(volume:Float = 1.0, looped:Bool = false, ?autoDestroy:Bool = false):FunkinSound
   {
     var suffix:String = (variation != null && variation != '' && variation != 'default') ? '-$variation-${options.instrumentalSuffix}' : options.instrumentalSuffix;
     if (suffix.contains('-') && options.instrumentalSuffix == '')
@@ -696,7 +696,7 @@ class SongDifficulty
       suffix = suffix.replace('-', '');
       suffix = '-$suffix';
     }
-    return FunkinSound.loadASound(Paths.inst(options.instrumentalPrefix, this.song.id, suffix), volume, looped, false, true);
+    return FunkinSound.loadASound(Paths.inst(options.instrumentalPrefix, this.song.id, suffix), volume, looped, autoDestroy, true);
   }
 
   /**

@@ -11,27 +11,27 @@ class DataError
     switch (error)
     {
       case IncorrectType(vari, expected, pos):
-        trace('  Expected field "$vari" to be of type "$expected".');
+        Debug.logError('  Expected field "$vari" to be of type "$expected".');
         printPos(pos);
       case IncorrectEnumValue(value, expected, pos):
-        trace('  Invalid enum value (expected "$expected", got "$value")');
+        Debug.logError('  Invalid enum value (expected "$expected", got "$value")');
         printPos(pos);
       case InvalidEnumConstructor(value, expected, pos):
-        trace('  Invalid enum constructor (epxected "$expected", got "$value")');
+        Debug.logError('  Invalid enum constructor (epxected "$expected", got "$value")');
         printPos(pos);
       case UninitializedVariable(vari, pos):
-        trace('  Uninitialized variable "$vari"');
+        Debug.logError('  Uninitialized variable "$vari"');
         printPos(pos);
       case UnknownVariable(vari, pos):
-        trace('  Unknown variable "$vari"');
+        Debug.logError('  Unknown variable "$vari"');
         printPos(pos);
       case ParserError(message, pos):
-        trace('  Parsing error: ${message}');
+        Debug.logError('  Parsing error: ${message}');
         printPos(pos);
       case CustomFunctionException(e, pos):
         if (Std.isOfType(e, String))
         {
-          trace('  ${e}');
+          Debug.logError('  ${e}');
         }
         else
         {
@@ -48,11 +48,11 @@ class DataError
     switch (Type.typeof(e))
     {
       case TClass(c):
-        trace('  [${Type.getClassName(c)}] ${e.toString()}');
+        Debug.logError('  [${Type.getClassName(c)}] ${e.toString()}');
       case TEnum(c):
-        trace('  [${Type.getEnumName(c)}] ${e.toString()}');
+        Debug.logError('  [${Type.getEnumName(c)}] ${e.toString()}');
       default:
-        trace('  [${Type.typeof(e)}] ${e.toString()}');
+        Debug.logError('  [${Type.typeof(e)}] ${e.toString()}');
     }
   }
 
@@ -65,11 +65,11 @@ class DataError
   {
     if (pos.lines[0].number == pos.lines[pos.lines.length - 1].number)
     {
-      trace('    at ${(pos.file == '') ? 'line ' : '${pos.file}:'}${pos.lines[0].number}');
+      Debug.logError('    at ${(pos.file == '') ? 'line ' : '${pos.file}:'}${pos.lines[0].number}');
     }
     else
     {
-      trace('    at ${(pos.file == '') ? 'line ' : '${pos.file}:'}${pos.lines[0].number}-${pos.lines[pos.lines.length - 1].number}');
+      Debug.logError('    at ${(pos.file == '') ? 'line ' : '${pos.file}:'}${pos.lines[0].number}-${pos.lines[pos.lines.length - 1].number}');
     }
   }
 }

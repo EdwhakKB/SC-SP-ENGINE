@@ -1,11 +1,8 @@
 {
   "songData": {
     "playData": {
-      "songName": "Eggnog",
-      "timeChanges": [
-        { "d": 4, "n": 4, "t": -1, "bt": [4, 4, 4, 4], "bpm": 150 }
-      ],
       "version": "2.2.1",
+      "songName": "Eggnog",
       "stage": "mallXmas",
       "characters": {
         "player": "bf-christmas",
@@ -20,7 +17,7 @@
         "hard": 3
       },
       "gameOverData": {
-        "gameOverChart": "bf-dead",
+        "gameOverChar": "bf-dead",
         "gameOverSound": "fnf_loss_sfx",
         "gameOverLoop": "gameOver",
         "gameOverEnd": "gameOverEnd"
@@ -48,7 +45,10 @@
         "vocalsSuffix": "",
         "instrumentalPrefix": "",
         "instrumentalSuffix": ""
-      }
+      },
+      "timeChanges": [
+        { "d": 4, "n": 4, "t": -1, "bt": [4, 4, 4, 4], "bpm": 150 }
+      ]
     },
     "inclusiveData": {
       "timeFormat": "ms",

@@ -16,7 +16,7 @@
       "difficulties": ["easy", "normal", "hard"],
       "ratings": { "easy": 1, "normal": 2, "hard": 3 },
       "gameOverData": {
-        "gameOverChart": "bf-dead",
+        "gameOverChar": "bf-dead",
         "gameOverSound": "fnf_loss_sfx",
         "gameOverLoop": "gameOver",
         "gameOverEnd": "gameOverEnd"

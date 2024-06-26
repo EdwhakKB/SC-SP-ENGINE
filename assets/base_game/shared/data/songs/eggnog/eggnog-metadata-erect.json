@@ -13,7 +13,7 @@
       },
       "stage": "mallXmas",
       "gameOverData": {
-        "gameOverChart": "bf-dead",
+        "gameOverChar": "bf-dead",
         "gameOverSound": "fnf_loss_sfx",
         "gameOverLoop": "gameOver",
         "gameOverEnd": "gameOverEnd"
@@ -64,14 +64,21 @@
           "bt": [4, 4, 4, 4]
         }
       ]
+    },
+    "inclusiveData": {
+      "artist": "Saruky",
+      "charter": "fabs + Spazkid",
+      "previewStart": 0,
+      "previewEnd": 15000,
+      "divisions": 96,
+      "looped": false,
+      "offsets": {
+        "instrumental": 0,
+        "altInstrumentals": {},
+        "vocals": {}
+      },
+      "generatedBy": "Friday Night Funkin' - v0.3.2 (rewrite/master : 2f96429 : MODIFIED)",
+      "timeFormat": "ms"
     }
-  },
-  "inclusiveData": {
-    "artist": "Saruky",
-    "charter": "fabs + Spazkid",
-    "previewStart": 0,
-    "previewEnd": 15000,
-    "generatedBy": "Friday Night Funkin' - v0.3.2 (rewrite/master : 2f96429 : MODIFIED)",
-    "timeFormat": "ms"
   }
 }

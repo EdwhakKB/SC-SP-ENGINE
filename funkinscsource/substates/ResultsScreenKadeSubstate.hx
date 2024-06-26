@@ -101,12 +101,7 @@ class ResultsScreenKadeSubstate extends substates.MusicBeatSubState
     camResults.follow(camFollow, LOCKON, 0);
     camResults.snapToTarget();
 
-    music = new FlxSound()
-      .loadEmbedded(Paths.inst((PlayState.currentChart.options.instrumentalPrefix != null ? PlayState.currentChart.options.instrumentalPrefix : ''),
-        PlayState.currentChart.songName,
-      (PlayState.currentChart.options.instrumentalSuffix != null ? PlayState.currentChart.options.instrumentalSuffix : '')),
-      true, true);
-    music.volume = 0;
+    music = PlayState.currentChart.playFreeplayInst(0, true, true);
 
     add(background);
     if (PlayState.inResults)

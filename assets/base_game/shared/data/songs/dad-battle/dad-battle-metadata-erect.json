@@ -4,7 +4,7 @@
       "version": "2.2.1",
       "songName": "Dad Battle",
       "songVariations": [],
-      "difficulties": ["erect", "nightmare", "normal", "hard"],
+      "difficulties": ["erect", "nightmare"],
       "characters": {
         "player": "bf",
         "girlfriend": "gf",
@@ -13,7 +13,7 @@
       },
       "stage": "mainStage",
       "gameOverData": {
-        "gameOverChart": "bf-dead",
+        "gameOverChar": "bf-dead",
         "gameOverSound": "fnf_loss_sfx",
         "gameOverLoop": "gameOver",
         "gameOverEnd": "gameOverEnd"

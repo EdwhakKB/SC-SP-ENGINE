@@ -12,7 +12,7 @@
       "songVariations": [],
       "difficulties": ["easy", "normal", "hard"],
       "gameOverData": {
-        "gameOverChart": "bf-dead",
+        "gameOverChar": "bf-dead",
         "gameOverSound": "fnf_loss_sfx",
         "gameOverLoop": "gameOver",
         "gameOverEnd": "gameOverEnd"

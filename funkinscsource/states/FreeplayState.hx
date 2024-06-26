@@ -510,11 +510,12 @@ class FreeplayState extends MusicBeatState
 
         if (inst != null)
         {
+          remove(inst);
           inst.stop();
           inst.volume = 0;
           inst.time = 0;
-          inst = null;
         }
+        inst = null;
 
         for (vocal in allVocals.keys())
         {
@@ -531,8 +532,9 @@ class FreeplayState extends MusicBeatState
         if (allVocals != null)
         {
           allVocals.clear();
-          allVocals = null;
+          allVocals = [];
         }
+        allVocals = null;
       }
     }
 
@@ -666,7 +668,11 @@ class FreeplayState extends MusicBeatState
             inst.destroy();
             inst = null;
           }
-          if (allVocals == null) allVocals = new Map<String, FlxSound>();
+          if (allVocals != null)
+          {
+            allVocals.clear();
+            allVocals = null;
+          }
 
           Mods.currentModDirectory = songs[curSelected].folder;
 
@@ -686,6 +692,8 @@ class FreeplayState extends MusicBeatState
 
           var songPath:String = null;
           songPath = targetSongDifficulty.songName;
+
+          allVocals = new Map<String, FlxSound>();
 
           var vocalsList:Array<openfl.media.Sound> = [];
           if (targetSongDifficulty.buildVoiceListBySound().length > 0)
@@ -771,8 +779,9 @@ class FreeplayState extends MusicBeatState
           if (allVocals != null)
           {
             allVocals.clear();
-            allVocals = null;
+            allVocals = [];
           }
+          allVocals = null;
           inst = null;
           completed = true;
           exit = false;
@@ -813,12 +822,17 @@ class FreeplayState extends MusicBeatState
 
   public function acceptedSong()
   {
-    if (inst != null) inst = null;
+    if (inst != null)
+    {
+      remove(inst);
+    }
+    inst = null;
     if (allVocals != null)
     {
       allVocals.clear();
-      allVocals = null;
+      allVocals = [];
     }
+    allVocals = null;
     Conductor.instance.update(0);
     player.playingMusic = false;
     persistentUpdate = false;
