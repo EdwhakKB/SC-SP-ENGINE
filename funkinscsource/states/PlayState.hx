@@ -4066,7 +4066,7 @@ class PlayState extends MusicBeatState
       MusicBeatState.switchState(new modcharting.ModchartEditorState());
       modchartMode = true;
       chartingMode = false;
-      if (notITGMod && currentChart.options.notITG)
+      if (notITGMod && !currentChart.options.notITG)
       {
         Note.notITGNotes = true;
         StrumArrow.notITGStrums = true;

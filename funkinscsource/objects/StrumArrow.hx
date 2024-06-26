@@ -285,7 +285,7 @@ class StrumArrow extends FunkinSCSprite
         resetAnim -= elapsed;
         if (resetAnim <= 0)
         {
-          playAnim('static');
+          playAnim('static', true);
           resetAnim = 0;
         }
       }
