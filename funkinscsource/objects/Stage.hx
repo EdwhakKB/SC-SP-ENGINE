@@ -119,7 +119,7 @@ class Stage extends FlxSpriteGroup
     var missingJson:Bool = #if MODS_ALLOWED !FileSystem.exists(jsonPath) && #end!Assets.exists(jsonPath);
     if (missingJson)
     {
-      Debug.logInfo('oops we usin the default stage');
+      Debug.logWarn('Stage .json not found, using the default stage');
       curStage = 'mainStage'; // defaults to stage if we can't find the path
     }
 
@@ -653,7 +653,7 @@ class Stage extends FlxSpriteGroup
     }
     catch (e)
     {
-      Debug.logInfo('Error on loading Script!');
+      Debug.logError('Error on loading Script! $e');
     }
   }
   #end

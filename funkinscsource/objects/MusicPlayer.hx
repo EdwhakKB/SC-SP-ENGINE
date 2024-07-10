@@ -91,7 +91,7 @@ class MusicPlayer extends FlxGroup
       return;
     }
 
-    Conductor.instance.update(FreeplayState.inst.time);
+    Conductor.instance.update(FreeplayState.instance.inst.time);
 
     var songName:String = instance.songs[FreeplayState.curSelected].songName;
     if (playing && !wasPlaying) songTxt.text = Language.getPhrase('musicplayer_playing', 'PLAYING: {1}', [songName]);
@@ -106,12 +106,12 @@ class MusicPlayer extends FlxGroup
 
       pauseOrResume();
 
-      curTime = FreeplayState.inst.time - 1000;
+      curTime = FreeplayState.instance.inst.time - 1000;
       instance.holdTime = 0;
 
       if (curTime < 0) curTime = 0;
 
-      FreeplayState.inst.time = curTime;
+      FreeplayState.instance.inst.time = curTime;
       setVocalsTime(curTime);
     }
     if (controls.UI_RIGHT_P)
@@ -120,12 +120,12 @@ class MusicPlayer extends FlxGroup
 
       pauseOrResume();
 
-      curTime = FreeplayState.inst.time + 1000;
+      curTime = FreeplayState.instance.inst.time + 1000;
       instance.holdTime = 0;
 
-      if (curTime > FreeplayState.inst.length) curTime = FreeplayState.inst.length;
+      if (curTime > FreeplayState.instance.inst.length) curTime = FreeplayState.instance.inst.length;
 
-      FreeplayState.inst.time = curTime;
+      FreeplayState.instance.inst.time = curTime;
       setVocalsTime(curTime);
     }
 
@@ -137,17 +137,17 @@ class MusicPlayer extends FlxGroup
         curTime += 40000 * elapsed * (controls.UI_LEFT ? -1 : 1);
       }
 
-      var difference:Float = Math.abs(curTime - FreeplayState.inst.time);
-      if (curTime + difference > FreeplayState.inst.length) curTime = FreeplayState.inst.length;
+      var difference:Float = Math.abs(curTime - FreeplayState.instance.inst.time);
+      if (curTime + difference > FreeplayState.instance.inst.length) curTime = FreeplayState.instance.inst.length;
       else if (curTime - difference < 0) curTime = 0;
 
-      FreeplayState.inst.time = curTime;
+      FreeplayState.instance.inst.time = curTime;
       setVocalsTime(curTime);
     }
 
     if (controls.UI_LEFT_R || controls.UI_RIGHT_R)
     {
-      FreeplayState.inst.time = curTime;
+      FreeplayState.instance.inst.time = curTime;
       setVocalsTime(curTime);
 
       if (wasPlaying)
@@ -183,7 +183,7 @@ class MusicPlayer extends FlxGroup
       playbackRate = 1;
       setPlaybackRate();
 
-      FreeplayState.inst.time = 0;
+      FreeplayState.instance.inst.time = 0;
       setVocalsTime(0);
 
       updateTimeTxt();
@@ -191,28 +191,28 @@ class MusicPlayer extends FlxGroup
 
     if (playing && !fadingOut)
     {
-      if (FreeplayState.inst != null) FreeplayState.inst.volume = 0.8;
-      for (vocal in FreeplayState.allVocals.keys())
+      if (FreeplayState.instance.inst != null) FreeplayState.instance.inst.volume = 0.8;
+      for (vocal in FreeplayState.instance.allVocals.keys())
       {
-        if (FreeplayState.allVocals.exists(vocal))
+        if (FreeplayState.instance.allVocals.exists(vocal))
         {
-          if (FreeplayState.allVocals.get(vocal) != null)
+          if (FreeplayState.instance.allVocals.get(vocal) != null)
           {
-            FreeplayState.allVocals.get(vocal).volume = 0.8;
+            FreeplayState.instance.allVocals.get(vocal).volume = 0.8;
           }
         }
       }
-      for (vocal in FreeplayState.allVocals.keys())
+      for (vocal in FreeplayState.instance.allVocals.keys())
       {
-        if (FreeplayState.allVocals.exists(vocal))
+        if (FreeplayState.instance.allVocals.exists(vocal))
         {
-          if (FreeplayState.allVocals.get(vocal) != null)
+          if (FreeplayState.instance.allVocals.get(vocal) != null)
           {
-            var difference:Float = Math.abs(FreeplayState.inst.time - FreeplayState.allVocals.get(vocal).time);
+            var difference:Float = Math.abs(FreeplayState.instance.inst.time - FreeplayState.instance.allVocals.get(vocal).time);
             if (difference >= 5)
             {
               pauseOrResume();
-              FreeplayState.allVocals.get(vocal).time = FreeplayState.inst.time;
+              FreeplayState.instance.allVocals.get(vocal).time = FreeplayState.instance.inst.time;
               pauseOrResume(true);
             }
           }
@@ -227,13 +227,13 @@ class MusicPlayer extends FlxGroup
 
   function setVocalsTime(time:Float)
   {
-    for (vocal in FreeplayState.allVocals.keys())
+    for (vocal in FreeplayState.instance.allVocals.keys())
     {
-      if (FreeplayState.allVocals.exists(vocal))
+      if (FreeplayState.instance.allVocals.exists(vocal))
       {
-        if (FreeplayState.allVocals.get(vocal) != null)
+        if (FreeplayState.instance.allVocals.get(vocal) != null)
         {
-          FreeplayState.allVocals.get(vocal).time = time;
+          FreeplayState.instance.allVocals.get(vocal).time = time;
         }
       }
     }
@@ -243,28 +243,28 @@ class MusicPlayer extends FlxGroup
   {
     if (resume)
     {
-      if (!FreeplayState.inst.playing) FreeplayState.inst.resume();
-      for (vocal in FreeplayState.allVocals.keys())
+      if (!FreeplayState.instance.inst.playing) FreeplayState.instance.inst.resume();
+      for (vocal in FreeplayState.instance.allVocals.keys())
       {
-        if (FreeplayState.allVocals.exists(vocal))
+        if (FreeplayState.instance.allVocals.exists(vocal))
         {
-          if (FreeplayState.allVocals.get(vocal) != null && !FreeplayState.allVocals.get(vocal).playing)
+          if (FreeplayState.instance.allVocals.get(vocal) != null && !FreeplayState.instance.allVocals.get(vocal).playing)
           {
-            FreeplayState.allVocals.get(vocal).resume();
+            FreeplayState.instance.allVocals.get(vocal).resume();
           }
         }
       }
     }
     else
     {
-      FreeplayState.inst.pause();
-      for (vocal in FreeplayState.allVocals.keys())
+      FreeplayState.instance.inst.pause();
+      for (vocal in FreeplayState.instance.allVocals.keys())
       {
-        if (FreeplayState.allVocals.exists(vocal))
+        if (FreeplayState.instance.allVocals.exists(vocal))
         {
-          if (FreeplayState.allVocals.get(vocal) != null)
+          if (FreeplayState.instance.allVocals.get(vocal) != null)
           {
-            FreeplayState.allVocals.get(vocal).pause();
+            FreeplayState.instance.allVocals.get(vocal).pause();
           }
         }
       }
@@ -293,8 +293,8 @@ class MusicPlayer extends FlxGroup
       instance.downText.x = -210;
       positionSong();
 
-      progressBar.setRange(0, FreeplayState.inst.length);
-      progressBar.setParent(FreeplayState.inst, "time");
+      progressBar.setRange(0, FreeplayState.instance.inst.length);
+      progressBar.setParent(FreeplayState.instance.inst, "time");
       progressBar.numDivisions = 1600;
 
       updateTimeTxt();
@@ -371,20 +371,20 @@ class MusicPlayer extends FlxGroup
   {
     var text = FlxStringUtil.formatTime(FlxMath.roundDecimal(Conductor.instance.songPosition / 1000 / playbackRate, 2), false)
       + ' / '
-      + FlxStringUtil.formatTime(FlxMath.roundDecimal(FreeplayState.inst.length / 1000 / playbackRate, 2), false);
+      + FlxStringUtil.formatTime(FlxMath.roundDecimal(FreeplayState.instance.inst.length / 1000 / playbackRate, 2), false);
     timeTxt.text = '< ' + text + ' >';
   }
 
   function setPlaybackRate()
   {
-    FreeplayState.inst.pitch = playbackRate;
-    for (vocal in FreeplayState.allVocals.keys())
+    FreeplayState.instance.inst.pitch = playbackRate;
+    for (vocal in FreeplayState.instance.allVocals.keys())
     {
-      if (FreeplayState.allVocals.exists(vocal))
+      if (FreeplayState.instance.allVocals.exists(vocal))
       {
-        if (FreeplayState.allVocals.get(vocal) != null)
+        if (FreeplayState.instance.allVocals.get(vocal) != null)
         {
-          FreeplayState.allVocals.get(vocal).pitch = playbackRate;
+          FreeplayState.instance.allVocals.get(vocal).pitch = playbackRate;
         }
       }
     }
@@ -392,7 +392,7 @@ class MusicPlayer extends FlxGroup
 
   function get_playing():Bool
   {
-    return FreeplayState.inst.playing;
+    return FreeplayState.instance.inst.playing;
   }
 
   function set_playbackRate(value:Float):Float

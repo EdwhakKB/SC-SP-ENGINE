@@ -39,7 +39,7 @@ class SoundGroup extends FlxTypedGroup<FunkinSound>
 
     for (sndFile in files)
     {
-      var snd:FunkinSound = FunkinSound.load(Paths.voices(song, '$sndFile'));
+      var snd:FunkinSound = FunkinSound.loadASound(Paths.voices(song, '$sndFile'));
       result.add(snd); // adds it to main group for other shit
     }
 
@@ -178,9 +178,10 @@ class SoundGroup extends FlxTypedGroup<FunkinSound>
 
   function get_time():Float
   {
-    if (getFirstAlive() != null)
+    var firstAlive:Null<FunkinSound> = getFirstAlive();
+    if (firstAlive != null)
     {
-      return getFirstAlive().time;
+      return firstAlive.time;
     }
     else
     {
@@ -200,9 +201,10 @@ class SoundGroup extends FlxTypedGroup<FunkinSound>
 
   function get_playing():Bool
   {
-    if (getFirstAlive() != null)
+    var firstAlive:Null<FunkinSound> = getFirstAlive();
+    if (firstAlive != null)
     {
-      return getFirstAlive().playing;
+      return firstAlive.playing;
     }
     else
     {
@@ -212,9 +214,10 @@ class SoundGroup extends FlxTypedGroup<FunkinSound>
 
   function get_volume():Float
   {
-    if (getFirstAlive() != null)
+    var firstAlive:Null<FunkinSound> = getFirstAlive();
+    if (firstAlive != null)
     {
-      return getFirstAlive().volume;
+      return firstAlive.volume;
     }
     else
     {
@@ -251,7 +254,11 @@ class SoundGroup extends FlxTypedGroup<FunkinSound>
   function get_pitch():Float
   {
     #if FLX_PITCH
-    if (getFirstAlive() != null) return getFirstAlive().pitch;
+    var firstAlive:Null<FunkinSound> = getFirstAlive();
+    if (firstAlive != null)
+    {
+      return firstAlive.pitch;
+    }
     else
     #end
     return 1;
@@ -260,7 +267,7 @@ class SoundGroup extends FlxTypedGroup<FunkinSound>
   function set_pitch(val:Float):Float
   {
     #if FLX_PITCH
-    trace('Setting audio pitch to ' + val);
+    // Debug.logInfo('Setting audio pitch to ' + val);
     forEachAlive(function(snd:FunkinSound) {
       snd.pitch = val;
     });

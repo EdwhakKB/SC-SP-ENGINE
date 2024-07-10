@@ -91,7 +91,7 @@ class ChartEditorUploadVocalsDialog extends ChartEditorBaseDialog
         }
         else
         {
-          Debug.logInfo('Failed to load vocal track (${path.file}.${path.ext})');
+          Debug.logError('Failed to load vocal track (${path.file}.${path.ext})');
 
           chartEditorState.error('Failed to Load Vocals',
             'Failed to load vocal track (${path.file}.${path.ext}) for variation (${chartEditorState.selectedVariation})');
@@ -109,7 +109,7 @@ class ChartEditorUploadVocalsDialog extends ChartEditorBaseDialog
           {label: 'Audio File (.ogg)', extension: 'ogg'}], function(selectedFile) {
             if (selectedFile != null && selectedFile.bytes != null)
             {
-              Debug.logInfo('Selected file: ' + selectedFile.name);
+              Debug.logError('Selected file: ' + selectedFile.name);
 
               if (chartEditorState.loadVocalsFromBytes(selectedFile.bytes, charKey, this.instId, !this.hasClearedVocals))
               {
@@ -128,7 +128,7 @@ class ChartEditorUploadVocalsDialog extends ChartEditorBaseDialog
               }
               else
               {
-                Debug.logInfo('Failed to load vocal track (${selectedFile.fullPath})');
+                Debug.logError('Failed to load vocal track (${selectedFile.fullPath})');
 
                 chartEditorState.error('Failed to Load Vocals',
                   'Failed to load vocal track (${selectedFile.name}) for variation (${chartEditorState.selectedVariation})');

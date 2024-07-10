@@ -26,18 +26,12 @@ class WaveformDataParser
 
       if (soundBuffer == null)
       {
-        trace('[WAVEFORM] Failed to interpret FlxSound: ${sound}');
+        Debug.logError('[WAVEFORM] Failed to interpret FlxSound: ${sound}');
         return null;
       }
-      else
-      {
-        // trace('[WAVEFORM] Method 2 worked.');
-      }
+      else {}
     }
-    else
-    {
-      // trace('[WAVEFORM] Method 1 worked.');
-    }
+    else {}
 
     return interpretAudioBuffer(soundBuffer);
   }
@@ -56,17 +50,6 @@ class WaveformDataParser
     var soundDataRawLength:Int = soundData.length;
     var soundDataSampleCount:Int = Std.int(Math.ceil(soundDataRawLength / channels / (bitsPerSample == 16 ? 2 : 1)));
     var outputPointCount:Int = Std.int(Math.ceil(soundDataSampleCount / samplesPerPoint));
-
-    // trace('Interpreting audio buffer:');
-    // trace('  sampleRate: ${sampleRate}');
-    // trace('  channels: ${channels}');
-    // trace('  bitsPerSample: ${bitsPerSample}');
-    // trace('  samplesPerPoint: ${samplesPerPoint}');
-    // trace('  pointsPerSecond: ${pointsPerSecond}');
-    // trace('  soundDataRawLength: ${soundDataRawLength}');
-    // trace('  soundDataSampleCount: ${soundDataSampleCount}');
-    // trace('  soundDataRawLength/4: ${soundDataRawLength / 4}');
-    // trace('  outputPointCount: ${outputPointCount}');
 
     var minSampleValue:Int = bitsPerSample == 16 ? INT16_MIN : INT8_MIN;
     var maxSampleValue:Int = bitsPerSample == 16 ? INT16_MAX : INT8_MAX;
@@ -110,14 +93,14 @@ class WaveformDataParser
     var outputDataLength:Int = Std.int(outputData.length / channels / 2);
     var result = new WaveformData(null, channels, sampleRate, samplesPerPoint, bitsPerSample, outputPointCount, outputData);
 
-    trace('[WAVEFORM] Interpreted audio buffer in ${TimerUtil.seconds(perfStart)}.');
+    Debug.logInfo('[WAVEFORM] Interpreted audio buffer in ${TimerUtil.seconds(perfStart)}.');
 
     return result;
   }
 
   public static function parseWaveformData(path:String):Null<WaveformData>
   {
-    var rawJson:String = openfl.Assets.getText(path).trim();
+    var rawJson:String = sys.io.File.getContent(path).trim();
     return parseWaveformDataString(rawJson, path);
   }
 
@@ -125,7 +108,7 @@ class WaveformDataParser
   {
     var parser = new json2object.JsonParser<WaveformData>();
     parser.ignoreUnknownVariables = false;
-    trace('[WAVEFORM] Parsing waveform data: ${contents}');
+    Debug.logInfo('[WAVEFORM] Parsing waveform data: ${contents}');
     parser.fromJson(contents, fileName);
 
     if (parser.errors.length > 0)
@@ -138,7 +121,7 @@ class WaveformDataParser
 
   static function printErrors(errors:Array<json2object.Error>, id:String = ''):Void
   {
-    trace('[WAVEFORM] Failed to parse waveform data: ${id}');
+    Debug.logError('[WAVEFORM] Failed to parse waveform data: ${id}');
 
     for (error in errors)
       backend.data.DataError.printError(error);

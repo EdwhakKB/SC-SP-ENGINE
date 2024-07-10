@@ -227,12 +227,12 @@ class FunkinSound extends FlxSound implements ICloneable<FunkinSound>
     // already paused before we lost focus.
     if (_lostFocus && !_alreadyPaused)
     {
-      trace('Resuming audio (${this._label}) on focus!');
+      Debug.logInfo('Resuming audio (${this._label}) on focus!');
       resume();
     }
     else
     {
-      trace('Not resuming audio (${this._label}) on focus!');
+      Debug.logInfo('Not resuming audio (${this._label}) on focus!');
     }
     _lostFocus = false;
   }
@@ -242,7 +242,7 @@ class FunkinSound extends FlxSound implements ICloneable<FunkinSound>
    */
   override function onFocusLost():Void
   {
-    trace('Focus lost, pausing audio!');
+    Debug.logInfo('Focus lost, pausing audio!');
     _lostFocus = true;
     _alreadyPaused = _paused;
     pause();
@@ -568,7 +568,6 @@ class FunkinSound extends FlxSound implements ICloneable<FunkinSound>
   @:nullSafety(Off)
   public override function destroy():Void
   {
-    // trace('[FunkinSound] Destroying sound "${this._label}"');
     super.destroy();
     if (fadeTween != null)
     {

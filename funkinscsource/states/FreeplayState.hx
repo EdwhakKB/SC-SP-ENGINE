@@ -1,5 +1,6 @@
 package states;
 
+import audio.FunkinSound;
 import backend.WeekData;
 import backend.Highscore;
 import backend.song.Song.FreeplaySongMetaData;
@@ -20,6 +21,7 @@ import backend.song.Song;
 
 class FreeplayState extends MusicBeatState
 {
+  public static var instance:FreeplayState = null;
   private static var lastDifficultyName:String = Difficulty.getDefault();
   private static var curSelected:Int = 0;
 
@@ -27,10 +29,10 @@ class FreeplayState extends MusicBeatState
   private var curPlaying:Bool = false;
   private var iconArray:Array<HealthIcon> = [];
 
-  public static var rate:Float = 1.0;
-  public static var lastRate:Float = 1.0;
+  public var rate:Float = 1.0;
+  public var lastRate:Float = 1.0;
 
-  public static var curInstPlaying:Int = -1;
+  public var curInstPlaying:Int = -1;
 
   public var scoreBG:FlxSprite;
   public var scoreText:CoolText;
@@ -81,6 +83,7 @@ class FreeplayState extends MusicBeatState
 
   override function create()
   {
+    instance = this;
     Paths.clearStoredMemory();
     Paths.clearUnusedMemory();
 
@@ -165,6 +168,7 @@ class FreeplayState extends MusicBeatState
       songText.snapToPosition();
 
       Mods.currentModDirectory = songs[i].folder;
+      backend.song.data.SongRegistry.instance.pushNewEntries();
       var icon:HealthIcon = new HealthIcon(songs[i].songCharacter);
       icon.sprTracker = songText;
 
@@ -260,16 +264,51 @@ class FreeplayState extends MusicBeatState
       if (!FlxG.sound.music.playing) FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
     }
 
-    if (inst != null) inst = null;
+    if (FlxG.sound.music != null && !FlxG.sound.music.playing && !MainMenuState.freakyPlaying && !resetSong)
+    {
+      alreadyPlayingSong = false;
+      instPlaying = -1;
+
+      Conductor.instance.forceBPM(102.0);
+      Conductor.instance.update(0);
+
+      exit = true;
+      completed = false;
+
+      player.playingMusic = false;
+      player.switchPlayMusic();
+
+      if (inst != null)
+      {
+        remove(inst);
+        inst.stop();
+        inst.volume = 0;
+        inst.time = 0;
+      }
+      inst = null;
+
+      for (vocal in allVocals.keys())
+      {
+        if (allVocals.exists(vocal))
+        {
+          remove(allVocals.get(vocal));
+          if (allVocals.get(vocal) != null)
+          {
+            allVocals.get(vocal).stop();
+            allVocals.get(vocal).volume = 0;
+            allVocals.get(vocal).time = 0;
+          }
+        }
+      }
+      allVocals.clear();
+      allVocals = null;
+      playSong();
+    }
 
     changeSelection();
     updateTexts();
     super.create();
 
-    if (FlxG.sound.music != null && !FlxG.sound.music.playing && !MainMenuState.freakyPlaying && !resetSong)
-    {
-      playSong();
-    }
     #if HSCRIPT_ALLOWED
     freeplayScript.call('onCreatePost', []);
     #end
@@ -301,10 +340,10 @@ class FreeplayState extends MusicBeatState
       && (!StoryMenuState.weekCompleted.exists(leWeek.weekBefore) || !StoryMenuState.weekCompleted.get(leWeek.weekBefore)));
   }
 
-  public static var curInstPlayingtxt:String = "N/A";
+  public var curInstPlayingtxt:String = "N/A";
 
-  public static var inst:FlxSound = null;
-  public static var allVocals:Map<String, FlxSound> = new Map<String, FlxSound>();
+  public var inst:FunkinSound = null;
+  public var allVocals:Map<String, FunkinSound> = new Map<String, FunkinSound>();
 
   public var instPlayingtxt:String = "N/A"; // its not really a text but who cares?
   public var canSelectSong:Bool = true;
@@ -521,6 +560,7 @@ class FreeplayState extends MusicBeatState
         {
           if (allVocals.exists(vocal))
           {
+            remove(allVocals.get(vocal));
             if (allVocals.get(vocal) != null)
             {
               allVocals.get(vocal).stop();
@@ -529,11 +569,7 @@ class FreeplayState extends MusicBeatState
             }
           }
         }
-        if (allVocals != null)
-        {
-          allVocals.clear();
-          allVocals = [];
-        }
+        allVocals.clear();
         allVocals = null;
       }
     }
@@ -599,7 +635,7 @@ class FreeplayState extends MusicBeatState
       }
       catch (e:Dynamic)
       {
-        Debug.logTrace('ERROR! $e');
+        Debug.logError('ERROR! $e');
 
         var errorStr:String = e.toString();
         if (errorStr.startsWith('[lime.utils.Assets] ERROR:')) errorStr = 'Missing file: '
@@ -665,11 +701,21 @@ class FreeplayState extends MusicBeatState
           instPlaying = -1;
           if (inst != null)
           {
+            remove(inst);
             inst.destroy();
             inst = null;
           }
           if (allVocals != null)
           {
+            for (vocal in allVocals.keys())
+            {
+              if (allVocals.exists(vocal))
+              {
+                Debug.logInfo('was able to load $vocal');
+                remove(allVocals.get(vocal));
+                allVocals.get(vocal).destroy();
+              }
+            }
             allVocals.clear();
             allVocals = null;
           }
@@ -684,12 +730,23 @@ class FreeplayState extends MusicBeatState
           }
           var targetedDifficulty:String = Difficulty.getFilePath(curDifficulty).replace('-', "");
           targetDifficulty = targetedDifficulty;
-          targetVariation = targetSong.getFirstValidVariation(targetDifficulty);
+          targetVariation = targetSong.getFirstValidVariation(targetDifficulty, targetSong.getVariationsByCharId('bf'));
           targetSongDifficulty = targetSong.getDifficulty(targetedDifficulty == '' ? 'normal' : targetedDifficulty, targetVariation);
           Debug.logInfo('song is null for playing? ${targetSong == null}, difficulty, $targetDifficulty, variation, $targetVariation, songDifficulty is null for playing? ${targetSongDifficulty == null}');
           if (targetSongDifficulty == null)
           {
-            Debug.logWarn('Song Difficulty Is NULL!!');
+            Debug.logError('Song Difficulty Is NULL!!');
+            remove(inst);
+            inst.destroy();
+            for (vocal in allVocals.keys())
+            {
+              if (allVocals.exists(vocal))
+              {
+                Debug.logInfo('was able to load $vocal');
+                remove(allVocals.get(vocal));
+                allVocals.get(vocal).destroy();
+              }
+            }
             allVocals.clear();
             allVocals = null;
             inst = null;
@@ -701,7 +758,7 @@ class FreeplayState extends MusicBeatState
           var songPath:String = null;
           songPath = targetSongDifficulty.songName;
 
-          allVocals = new Map<String, FlxSound>();
+          allVocals = new Map<String, FunkinSound>();
 
           var vocalsList:Array<openfl.media.Sound> = [];
           if (targetSongDifficulty.buildVoiceListBySound().length > 0)
@@ -710,9 +767,7 @@ class FreeplayState extends MusicBeatState
           }
           for (vocal in 0...vocalsList.length)
           {
-            var vocals = new FlxSound().loadEmbedded(vocalsList[vocal]);
-            vocals.volume = 0;
-            allVocals.set('vocals-$vocal', vocals);
+            allVocals.set('vocals-$vocal', FunkinSound.loadASound(vocalsList[vocal], 0.0, false));
           }
 
           for (vocal in allVocals.keys())
@@ -734,7 +789,7 @@ class FreeplayState extends MusicBeatState
           }
           catch (e:Dynamic)
           {
-            Debug.logInfo(e);
+            Debug.logInfo('ERROR ! $e');
             remove(inst);
             inst = null;
           }
@@ -783,16 +838,27 @@ class FreeplayState extends MusicBeatState
         if (inst != null)
         {
           inst.onComplete = function() {
-            remove(inst);
-            inst.time = 0;
-            inst.destroy();
+            if (inst != null)
+            {
+              remove(inst);
+              inst.destroy();
+              inst.time = 0;
+              inst = null;
+            }
             if (allVocals != null)
             {
+              for (vocal in allVocals.keys())
+              {
+                if (allVocals.exists(vocal))
+                {
+                  Debug.logInfo('removed $vocal');
+                  remove(allVocals.get(vocal));
+                  allVocals.get(vocal).destroy();
+                }
+              }
               allVocals.clear();
-              allVocals = [];
+              allVocals = null;
             }
-            allVocals = null;
-            inst = null;
             completed = true;
             exit = false;
 
@@ -836,14 +902,23 @@ class FreeplayState extends MusicBeatState
     if (inst != null)
     {
       remove(inst);
+      inst.destroy();
+      inst = null;
     }
-    inst = null;
     if (allVocals != null)
     {
+      for (vocal in allVocals.keys())
+      {
+        if (allVocals.exists(vocal))
+        {
+          Debug.logInfo('was able to remove $vocal');
+          remove(allVocals.get(vocal));
+          allVocals.get(vocal).destroy();
+        }
+      }
       allVocals.clear();
-      allVocals = [];
+      allVocals = null;
     }
-    allVocals = null;
     Conductor.instance.update(0);
     player.playingMusic = false;
     persistentUpdate = false;
@@ -861,19 +936,19 @@ class FreeplayState extends MusicBeatState
       targetSong = backend.song.data.SongRegistry.instance.fetchEntry(songLowercase);
       if (targetSong == null)
       {
-        Debug.logInfo('WARN: could not find song with id (${songLowercase})');
+        Debug.logWarn('could not find song with id (${songLowercase})');
         return;
       }
       var targetedDifficulty:String = Difficulty.getFilePath(curDifficulty).replace('-', "");
       targetDifficulty = targetedDifficulty == '' ? 'normal' : targetedDifficulty;
-      targetVariation = targetSong.getFirstValidVariation(targetDifficulty);
+      targetVariation = targetSong.getFirstValidVariation(targetDifficulty, targetSong.getVariationsByCharId('bf'));
 
       Debug.logInfo('current song ${songs[curSelected].songName}');
       Debug.logInfo('difficulty, $targetDifficulty, variation, $targetVariation, song is null? ${targetSong == null}');
     }
     catch (e:Dynamic)
     {
-      Debug.logInfo('ERROR! $e');
+      Debug.logError('ERROR! $e');
 
       var errorStr:String = e.toString();
       if (errorStr.startsWith('[lime.utils.Assets] ERROR:')) errorStr = 'Missing file: '
@@ -959,8 +1034,7 @@ class FreeplayState extends MusicBeatState
     for (num => item in grpSongs.members)
     {
       var icon:HealthIcon = iconArray[num];
-      icon.alpha = (item.targetY == curSelected) ? 1 : 0.2;
-      item.alpha = (item.targetY == curSelected) ? 1 : 0.2;
+      icon.alpha = item.alpha = (item.targetY == curSelected) ? 1 : 0.2;
       if (icon.hasWinning) icon.animation.curAnim.curFrame = (icon == iconArray[curSelected]) ? 2 : 0;
     }
 
@@ -981,28 +1055,6 @@ class FreeplayState extends MusicBeatState
 
     changeDiff();
     _updateSongLastDifficulty();
-    /*var previewSong:Null<Song> = backend.song.data.SongRegistry.instance.fetchEntry(Paths.formatToSongPath(songs[curSelected].songName));
-      var difficulty:String = Difficulty.getFilePath(curDifficulty).replace('-', "");
-      difficulty = difficulty == '' ? 'normal' : difficulty;
-      var instSuffix:String = previewSong?.getDifficulty(difficulty, previewSong?.variations ?? Constants.DEFAULT_VARIATION_LIST)?.characters?.instrumental ?? '';
-      instSuffix = (instSuffix != '') ? '-$instSuffix' : '';
-      audio.FunkinSound.playMusic(Paths.formatToSongPath(songs[curSelected].songName),
-        {
-          startingVolume: 0.0,
-          overrideExisting: true,
-          restartTrack: false,
-          pathsFunction: INST,
-          suffix: instSuffix,
-          partialParams:
-            {
-              loadPartial: true,
-              start: 0.05,
-              end: 0.25
-            },
-          onLoad: function() {
-            FlxG.sound.music.fadeIn(2, 0, 0.4);
-          }
-    });*/
   }
 
   inline private function _updateSongLastDifficulty()
@@ -1138,13 +1190,26 @@ class FreeplayState extends MusicBeatState
 
   override function destroy()
   {
-    #if desktop
     if (inst != null)
     {
+      remove(inst);
       inst.destroy();
       inst = null;
     }
-    #end
+    if (allVocals != null)
+    {
+      for (vocal in allVocals.keys())
+      {
+        if (allVocals.exists(vocal))
+        {
+          Debug.logInfo('was able to load $vocal');
+          remove(allVocals.get(vocal));
+          allVocals.get(vocal).destroy();
+        }
+      }
+      allVocals.clear();
+      allVocals = null;
+    }
     super.destroy();
   }
 }

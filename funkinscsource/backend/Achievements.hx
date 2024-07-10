@@ -255,7 +255,7 @@ class Achievements
               #if windows
               Debug.displayAlert(errorMsg, errorTitle);
               #end
-              trace('$errorTitle - $errorMsg');
+              Debug.logError('$errorTitle - $errorMsg');
               continue;
             }
 
@@ -267,7 +267,7 @@ class Achievements
               #if windows
               Debug.displayAlert(errorMsg, errorTitle);
               #end
-              trace('$errorTitle - $errorMsg');
+              Debug.logError('$errorTitle - $errorMsg');
               continue;
             }
             key = key.trim();
@@ -284,7 +284,7 @@ class Achievements
         #if windows
         Debug.displayAlert(errorMsg, errorTitle);
         #end
-        trace('$errorTitle - $errorMsg');
+        Debug.logError('$errorTitle - $errorMsg');
       }
     }
     return retVal;

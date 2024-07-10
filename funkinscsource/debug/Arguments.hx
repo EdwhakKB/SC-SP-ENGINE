@@ -102,7 +102,7 @@ class Arguments
 
           var targetSong:Song = backend.song.data.SongRegistry.instance.fetchEntry(args[1]);
           var targetDifficulty:String = diff;
-          var targetVariation:String = targetSong.getFirstValidVariation(targetDifficulty);
+          var targetVariation:String = targetSong.getFirstValidVariation(targetDifficulty, targetSong.getVariationsByCharId('bf'));
           LoadingState.loadAndSwitchState(new PlayState(
             {
               targetSong: targetSong,

@@ -44,6 +44,7 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
   public var spawnTime:Float = 2000;
 
   public var holdNote:SustainTrail;
+  public var eventNote:EventNote;
 
   public var extraData:Map<String, Dynamic> = new Map<String, Dynamic>();
 
@@ -154,6 +155,9 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
   public static var notITGNotes:Bool = false;
 
   public var canSplash:Bool = true;
+
+  public var replacentAnimation:String = '';
+  public var skipAnimation:Bool = false;
 
   private function set_multSpeed(value:Float):Float
   {
@@ -701,16 +705,20 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
     distance = (0.45 * (Conductor.instance.songPosition - strumTime) * noteScrollSpeed * multSpeed);
     if (!myStrum.downScroll) distance *= -1;
 
-    var angleDir = strumDirection * Math.PI / 180;
     if (copyAngle) angle = strumDirection - 90 + strumAngle + offsetAngle;
 
     if (copyAlpha) alpha = strumAlpha * multAlpha;
 
-    if (copyX) x = strumX + offsetX + Math.cos(angleDir) * distance;
+    if (copyX)
+    {
+      @:privateAccess
+      x = strumX + offsetX + myStrum._dirCos * distance;
+    }
 
     if (copyY)
     {
-      y = strumY + offsetY + correctionOffset + Math.sin(angleDir) * distance;
+      @:privateAccess
+      y = strumY + offsetY + correctionOffset + myStrum._dirSin * distance;
       if (myStrum.downScroll && isSustainNote)
       {
         if (texture.contains('pixel') || noteSkin.contains('pixel') || containsPixelTexture)

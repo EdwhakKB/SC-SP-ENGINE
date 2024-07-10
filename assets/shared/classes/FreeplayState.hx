@@ -1,9 +1,9 @@
-import CoolUtil;
+import backend.CoolUtil;
 
 function onCreate()
 {
-	FreeplayState.scorecolorDifficulty.set('HARD', CoolUtil.returnColor('red'));
-	FreeplayState.scorecolorDifficulty.set('NORMAL', CoolUtil.returnColor('yellow'));
-	FreeplayState.scorecolorDifficulty.set('EASY', CoolUtil.returnColor('green'));
-	FreeplayState.scorecolorDifficulty.set('', CoolUtil.returnColor('transparent'));
+  scorecolorDifficulty.set('HARD', CoolUtil.returnColor('red'));
+  scorecolorDifficulty.set('NORMAL', CoolUtil.returnColor('yellow'));
+  scorecolorDifficulty.set('EASY', CoolUtil.returnColor('green'));
+  scorecolorDifficulty.set('', CoolUtil.returnColor('transparent'));
 }

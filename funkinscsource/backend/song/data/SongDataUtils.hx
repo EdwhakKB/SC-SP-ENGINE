@@ -230,7 +230,7 @@ class SongDataUtils
     parser.fromJson(notesString, 'clipboard');
     if (parser.errors.length > 0)
     {
-      Debug.logInfo('[SongDataUtils] Error parsing note JSON data from clipboard.');
+      Debug.logError('[SongDataUtils] Error parsing note JSON data from clipboard.');
       for (error in parser.errors)
         backend.data.DataError.printError(error);
       return {

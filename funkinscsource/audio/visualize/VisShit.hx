@@ -78,12 +78,6 @@ class VisShit
         final time = c / fs;
         final freq = indexToFreq(k);
         final power = s * s;
-        if (FlxG.keys.justPressed.I)
-        {
-          trace(k);
-
-          haxe.Log.trace('${time};${freq};${power}', null);
-        }
         if (freq < maxFreq) freqOutput[indexOfArray].push(power);
         //
       }
@@ -92,9 +86,6 @@ class VisShit
       // move to next (overlapping) chunk
       c += hop;
     }
-
-    if (FlxG.keys.justPressed.C) trace(freqOutput.length);
-
     return freqOutput;
   }
 
@@ -122,10 +113,6 @@ class VisShit
         // @:privateAccess
         audioData = cast buf.data; // jank and hacky lol! kinda busted on HTML5 also!!
         sampleRate = buf.sampleRate;
-
-        trace('got audio buffer shit');
-        trace(sampleRate);
-        trace(buf.bitsPerSample);
 
         setBuffer = true;
         numSamples = Std.int(audioData.length / 2);

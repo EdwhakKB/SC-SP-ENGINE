@@ -129,8 +129,8 @@ class GameJoltAPI // Connects to hxgamejolt.GameJolt
             Debug.logInfo('Added trophy');
           },
           onFail: function(message:String):Void {
-            Debug.logInfo(message);
-            Debug.logInfo('Could not add Trophy [$id]');
+            Debug.logError(message);
+            Debug.logWarn('Could not add Trophy [$id]');
           }
         });
     }
@@ -164,7 +164,7 @@ class GameJoltAPI // Connects to hxgamejolt.GameJolt
         onSucceed: function(data:Dynamic):Void {
         },
         onFail: function(message:String):Void {
-          Debug.logInfo(message);
+          Debug.logError(message);
         }
       });
     return returnable;
@@ -192,7 +192,7 @@ class GameJoltAPI // Connects to hxgamejolt.GameJolt
           Main.gjToastManager.createToast(GameJoltInfo.imagePath, "Score submitted!", retFormat, true);
         },
         onFail: function(message:String):Void {
-          Debug.logInfo(message);
+          Debug.logError(message);
         }
       });
     }
@@ -223,7 +223,7 @@ class GameJoltAPI // Connects to hxgamejolt.GameJolt
         onSucceed: function(data:Dynamic):Void {
           if (!data.exists('message'))
           {
-            Debug.logInfo('Could not pull High Score from Table [$id] :' + data.get('message'));
+            Debug.logWarn('Could not pull High Score from Table [$id] :' + data.get('message'));
             returnable = null;
           }
           else
@@ -233,7 +233,7 @@ class GameJoltAPI // Connects to hxgamejolt.GameJolt
           }
         },
         onFail: function(message:String):Void {
-          Debug.logInfo(message);
+          Debug.logError(message);
         }
       });
     return returnable;
@@ -252,7 +252,7 @@ class GameJoltAPI // Connects to hxgamejolt.GameJolt
           new FlxTimer().start(20, tmr -> pingSession(), 0);
         },
         onFail: function(message:String):Void {
-          Debug.logInfo(message);
+          Debug.logError(message);
         }
       });
   }

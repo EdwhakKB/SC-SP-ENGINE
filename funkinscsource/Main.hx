@@ -61,6 +61,11 @@ class Main extends Sprite
   {
     super();
 
+    #if CRASH_HANDLER
+    utils.logging.CrashHandler.initialize();
+    utils.logging.CrashHandler.queryStatus();
+    #end
+
     setupGame();
   }
 
@@ -140,10 +145,6 @@ class Main extends Sprite
       #end
     });
 
-    #if CRASH_HANDLER
-    Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
-    #end
-
     #if desktop
     // Get first window in case the coder creates more windows.
     @:privateAccess
@@ -182,115 +183,6 @@ class Main extends Sprite
   {
     var result:Bool = (GJKeys.key != '' && GJKeys.id != 0);
     return result;
-  }
-
-  // Code was entirely made by sqirra-rng for their fnf engine named "Izzy Engine", big props to them!!!
-  // very cool person for real they don't get enough credit for their work
-  #if CRASH_HANDLER
-  static final quotes:Array<String> = [
-    "Ha, a null object reference?", // Slushi
-    "What the fuck you did!?", // Edwhak
-    "CAGASTE.", // Slushi
-    "It was Bolo!" // Glowsoony
-  ];
-
-  function onCrash(e:UncaughtErrorEvent):Void
-  {
-    updateScreenBeforeCrash(FlxG.fullscreen);
-
-    var errMsg:String = "Call Stack:\n";
-    var errMsgPrint:String = "";
-    var path:String;
-    var callStack:Array<StackItem> = CallStack.exceptionStack(true);
-    var dateNow:String = Date.now().toString();
-    var build = Sys.systemName();
-
-    dateNow = dateNow.replace(" ", "_");
-    dateNow = dateNow.replace(":", "'");
-
-    path = "./crash/" + "SCEngine_" + dateNow + ".txt";
-
-    for (stackItem in callStack)
-    {
-      switch (stackItem)
-      {
-        case FilePos(s, file, line, column):
-          errMsg += file + " (line " + line + ")\n";
-          errMsgPrint += file + ":" + line + "\n"; // if you Ctrl+Mouse Click its go to the line. -Luis
-        default:
-          Sys.println(stackItem);
-      }
-    }
-
-    errMsg += "\n---------------------"
-      + "\n"
-      + quotes[Std.random(quotes.length)]
-      + "\n---------------------"
-      + "\n\nThis build is running in "
-      + build
-      + "\n(SCE v"
-      + states.MainMenuState.SCEVersion
-      + ")"
-      + "\nPlease report this error to Github page: https://github.com/EdwhakKB/SC-SP-ENGINE"
-      + "\n\n"
-      + "Uncaught Error:\n"
-      + e.error;
-    // Structure of the error message by Slushi
-
-    if (!FileSystem.exists("./crash/")) FileSystem.createDirectory("./crash/");
-
-    File.saveContent(path, errMsg + "\n");
-
-    Sys.println(errMsgPrint);
-    Sys.println(errMsg);
-    Sys.println("Crash dump saved in " + Path.normalize(path));
-
-    var crashDialoguePath:String = "SCE-CrashDialog";
-
-    #if windows
-    crashDialoguePath += ".exe";
-    #end
-
-    if (FileSystem.exists(crashDialoguePath))
-    {
-      Debug.logInfo("\nFound crash dialog program " + "[" + crashDialoguePath + "]");
-      new Process(crashDialoguePath, ["xd ", path]);
-    }
-    else
-    {
-      Debug.logInfo("No crash dialog found! Making a simple alert instead...");
-      lime.app.Application.current.window.alert(errMsg, "Oh no... SC Engine has crashed!");
-    }
-
-    #if DISCORD_ALLOWED
-    DiscordClient.shutdown();
-    #end
-    Sys.exit(1);
-  }
-  #end
-
-  public function updateScreenBeforeCrash(isFullScreen:Bool)
-  {
-    FlxG.resizeWindow(1280, 720);
-
-    @:privateAccess
-    {
-      FlxG.width = 1280;
-      FlxG.height = 720;
-    }
-
-    if (!(FlxG.scaleMode is flixel.system.scaleModes.RatioScaleMode)) // just to be sure yk.
-      FlxG.scaleMode = new flixel.system.scaleModes.RatioScaleMode();
-
-    Application.current.window.width = 1280;
-    Application.current.window.height = 720;
-    Application.current.window.borderless = false;
-
-    // Add all this just in case it's not 1280 x 720 even without fullscreen
-    if (isFullScreen)
-    {
-      FlxG.fullscreen = false;
-    }
   }
 
   function onWindowFocusOut()

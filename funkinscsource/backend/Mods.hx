@@ -194,9 +194,9 @@ class Mods
         }
       }
     }
-    catch (e)
+    catch (e:Dynamic)
     {
-      Debug.logTrace(e);
+      Debug.logError('ERROR! $e');
     }
 
     // Scan for folders that aren't on modsList.txt yet

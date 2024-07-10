@@ -61,7 +61,7 @@ class HScript extends SScript
   public static function hscriptTrace(text:String, color:FlxColor = FlxColor.WHITE)
   {
     if (states.PlayState.instance != null) states.PlayState.instance.addTextToDebug(text, color);
-    backend.Debug.logInfo(text);
+    Debug.logInfo(text);
   }
 
   public var origin:String;
@@ -349,7 +349,7 @@ class HScript extends SScript
         #end
         if (PlayState.instance != null) states.PlayState.instance.addTextToDebug('$origin - $msg', FlxColor.RED);
         else
-          backend.Debug.logInfo('$origin - $msg');
+          Debug.logError('$origin - $msg');
       }
     });
 
@@ -358,7 +358,7 @@ class HScript extends SScript
       if (code != null) new FunkinLua(code, stageLua, preloading, scriptName);
     });
     #end
-    set('CustomCodeShader', codenameengine.shaders.CustomShader);
+    set('CustomShader', codenameengine.shaders.CustomShader);
     set('StringTools', StringTools);
     #if LUA_ALLOWED
     set('parentLua', parentLua);
@@ -422,7 +422,6 @@ class HScript extends SScript
     set('SustainStrip', modcharting.SustainStrip);
 
     // Why?
-    set('BeatXModifier', modcharting.Modifier.BeatXModifier);
     if (PlayState.instance != null
       && PlayState.currentChart != null
       && !isHxStage
@@ -505,7 +504,6 @@ class HScript extends SScript
       {
         key = key.trim();
         var value = Reflect.field(varsToBring, key);
-        // trace('Key $key: $value');
         set(key, Reflect.field(varsToBring, key));
       }
       varsToBring = null;

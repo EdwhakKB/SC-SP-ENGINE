@@ -281,7 +281,7 @@ class StageData
 
         default:
           var err = '[Stage .JSON file] Unknown sprite type detected: ${data.type}';
-          trace(err);
+          Debug.logError(err);
           FlxG.log.error(err);
       }
     }

@@ -254,6 +254,7 @@ class ResultsScreenKadeSubstate extends substates.MusicBeatSubState
                 music = null;
                 PlayState.chartingMode = false;
                 PlayState.modchartMode = false;
+                PlayState.currentSong = null;
 
                 if (PlayState.isStoryMode)
                 {
@@ -261,7 +262,6 @@ class ResultsScreenKadeSubstate extends substates.MusicBeatSubState
                   Conductor.instance.forceBPM(102);
                 }
                 close();
-
                 if (PlayState.isStoryMode) MusicBeatState.switchState(new StoryMenuState());
                 else
                   MusicBeatState.switchState(new FreeplayState());

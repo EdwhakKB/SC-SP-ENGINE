@@ -84,7 +84,7 @@ class ChartEditorBaseDialog extends Dialog
 
     if (_overlay == null)
     {
-      Debug.logInfo('[WARN] Dialog overlay is null, skipping overlay fade...');
+      Debug.logWarn('Dialog overlay is null, skipping overlay fade...');
       return;
     }
 

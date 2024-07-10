@@ -82,6 +82,8 @@ class Song implements IRegistryEntry<SongMetaData>
   // key = variation id, value = metadata
   final _metadata:Map<String, SongMetaData>;
   final difficulties:Map<String, SongDifficulty>;
+  // key = character id, value = allowed variation ids
+  final charVariations:Map<String, Array<String>>;
 
   /**
    * The list of variations a song has.
@@ -152,7 +154,13 @@ class Song implements IRegistryEntry<SongMetaData>
 
     _data = _fetchData(id);
 
-    _metadata = _data == null ? [] : [Constants.DEFAULT_VARIATION => _data];
+    _metadata = new Map<String, SongMetaData>();
+    charVariations = new Map<String, Array<String>>();
+    if (_data != null)
+    {
+      _metadata.set(Constants.DEFAULT_VARIATION, _data);
+      charVariations.set(_data.songData.inclusiveData.campaignCharacter, [Constants.DEFAULT_VARIATION]);
+    }
 
     if (_data != null && _data.songData.playData != null)
     {
@@ -162,19 +170,28 @@ class Song implements IRegistryEntry<SongMetaData>
         if (variMeta != null)
         {
           _metadata.set(variMeta.songData.playData.variation, variMeta);
-          Debug.logInfo('  Loaded variation: $vari');
+          var variChar:Null<Array<String>> = charVariations.get(variMeta.songData.inclusiveData.campaignCharacter);
+          if (variChar != null)
+          {
+            variChar.push(variMeta.songData.playData.variation);
+          }
+          else
+          {
+            charVariations.set(variMeta.songData.inclusiveData.campaignCharacter, [variMeta.songData.playData.variation]);
+          }
+          // Debug.logInfo('Loaded variation: $vari');
         }
         else
         {
-          Debug.logInfo('[SONG] Failed to load variation metadata (${id}:${vari}), is the path correct?');
-          Debug.logInfo('  FAILED to load variation: $vari');
+          Debug.logError('[SONG] Failed to load variation metadata (${id}:${vari}), is the path correct?');
+          Debug.logError('FAILED to load variation: $vari');
         }
       }
     }
 
     if (_metadata.size() == 0)
     {
-      Debug.logInfo('[WARN] Could not find song meta data for songId: $id');
+      Debug.logWarn('Could not find song meta data for songId: $id');
       return;
     }
 
@@ -371,8 +388,6 @@ class Song implements IRegistryEntry<SongMetaData>
       difficulty.notes = chartNotes.get(diffId) ?? [];
       difficulty.events = chartEvents.get(diffId) ?? [];
       difficulty.sectionVariables = chartSections.get(diffId) ?? [];
-
-      Debug.logInfo('is section vars nullllllll ? ${chartSections.get(diffId)}');
     }
   }
 
@@ -430,15 +445,7 @@ class Song implements IRegistryEntry<SongMetaData>
   {
     if (charId == null) charId = Constants.DEFAULT_CHARACTER;
 
-    if (variations.contains(charId))
-    {
-      return [charId];
-    }
-    else
-    {
-      // TODO: How to exclude character variations while keeping other custom variations?
-      return variations;
-    }
+    return charVariations.get(charId) ?? [];
   }
 
   /**
@@ -525,7 +532,7 @@ class Song implements IRegistryEntry<SongMetaData>
 
   static function _fetchData(id:String):Null<SongMetaData>
   {
-    Debug.logInfo('Fetching song metadata for $id');
+    // Debug.logInfo('Fetching song metadata for $id');
     var version:Null<thx.semver.Version> = SongRegistry.instance.fetchEntryMetadataVersion(id);
     if (version == null) return null;
     return SongRegistry.instance.parseEntryMetadataWithMigration(id, Constants.DEFAULT_VARIATION, version);
@@ -677,12 +684,7 @@ class SongDifficulty
       suffix = '-$suffix';
     }
 
-    Debug.logInfo('suffix, $suffix, and prefix ${options.instrumentalPrefix}');
-
     FlxG.sound.music = FunkinSound.load(Paths.inst(options.instrumentalPrefix, this.song.id, suffix), volume, looped, false, true);
-    Debug.logInfo('is it null? ${FlxG.sound.music == null}');
-    Debug.logInfo('path ${Paths.getInstPath(this.song.id, [options.instrumentalPrefix, suffix, true])}');
-    Debug.logInfo('song length ${FlxG.sound.music.length}');
 
     // Workaround for a bug where FlxG.sound.music.update() was being called twice.
     FlxG.sound.list.remove(FlxG.sound.music);
@@ -1044,15 +1046,8 @@ class SongDifficulty
 
     if (voiceList.length == 0)
     {
-      Debug.logInfo('Could not find any voices for song ${this.song.id}');
+      Debug.logWarn('Could not find any voices for song ${this.song.id}');
       return result;
-    }
-
-    Debug.logInfo('length: ${voiceList.length}');
-
-    for (i in 0...voiceList.length)
-    {
-      Debug.logInfo(voiceList[i]);
     }
 
     // Add player vocals.
@@ -1088,15 +1083,8 @@ class SongDifficulty
 
     if (voiceList.length == 0)
     {
-      Debug.logInfo('Could not find any voices for song ${this.song.id}');
+      Debug.logWarn('Could not find any voices for song ${this.song.id}');
       return result;
-    }
-
-    Debug.logInfo('length: ${voiceList.length}');
-
-    for (i in 0...voiceList.length)
-    {
-      Debug.logInfo(voiceList[i]);
     }
 
     // Add player vocals.

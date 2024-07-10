@@ -60,11 +60,9 @@ class LanguageSubState extends MusicBeatSubState
       return 0;
     });
 
-    // trace(ClientPrefs.data.language);
     curSelected = languages.indexOf(ClientPrefs.data.language);
     if (curSelected < 0)
     {
-      // trace('Language not found: ' + ClientPrefs.data.language);
       ClientPrefs.data.language = ClientPrefs.defaultData.language;
       curSelected = Std.int(Math.max(0, languages.indexOf(ClientPrefs.data.language)));
     }
@@ -121,7 +119,6 @@ class LanguageSubState extends MusicBeatSubState
     {
       FlxG.sound.play(Paths.sound('confirmMenu'), 0.6);
       ClientPrefs.data.language = languages[curSelected];
-      // trace(ClientPrefs.data.language);
       ClientPrefs.saveSettings();
       Language.reloadPhrases();
       changedLanguage = true;

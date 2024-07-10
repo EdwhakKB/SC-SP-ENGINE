@@ -142,7 +142,7 @@ class ChartEditorNotificationHandler
     #if false
     // TODO: Implement notifications on Mac OS OR... make sure the null is handled properly on mac?
     return null;
-    Debug.logInfo('WARNING: Notifications are not supported on Mac OS.');
+    Debug.logWarn('Notifications are not supported on Mac OS.');
     #end
   }
 }

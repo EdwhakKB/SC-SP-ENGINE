@@ -51,7 +51,6 @@ class SafeNullArray
     }
     #end
     tempArray = [];
-    var charactersPushed:Array<String> = characters;
     return characters;
   }
 
@@ -242,6 +241,12 @@ class SafeNullArray
     #end
 
     return curNoteTypes;
+  }
+
+  public static function getModsList():Array<String>
+  {
+    var mods:Array<String> = Mods.parseList().all;
+    return mods;
   }
 
   public static function copyEventValue(values:Array<String>):Array<String>

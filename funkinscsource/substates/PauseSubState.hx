@@ -303,11 +303,11 @@ class PauseSubState extends MusicBeatSubState
             var targetSong:backend.song.Song = backend.song.data.SongRegistry.instance.fetchEntry(Paths.formatToSongPath(PlayState.currentChart.songName));
             if (targetSong == null)
             {
-              Debug.logInfo('WARN: could not find song with id (${PlayState.currentChart.songName.toLowerCase()})');
+              Debug.logWarn('Could not find song with id (${PlayState.currentChart.songName.toLowerCase()})');
               return;
             }
             var targetDifficulty:String = Difficulty.getFilePath(curSelected).replace('-', "");
-            var targetVariation:String = targetSong.getFirstValidVariation(targetDifficulty);
+            var targetVariation:String = targetSong.getFirstValidVariation(targetDifficulty, targetSong.getVariationsByCharId('bf'));
             LoadingState.loadAndSwitchState(new PlayState(
               {
                 targetSong: targetSong,
@@ -323,7 +323,7 @@ class PauseSubState extends MusicBeatSubState
         }
         catch (e:Dynamic)
         {
-          Debug.logTrace('ERROR! $e');
+          Debug.logError('ERROR! $e');
 
           var errorStr:String = e.toString();
           if (errorStr.startsWith('[lime.utils.Assets] ERROR:')) errorStr = 'Missing file: '
@@ -469,6 +469,7 @@ class PauseSubState extends MusicBeatSubState
         game.unspawnNotes = [];
         game.finishSong(true);
       case "Exit to menu":
+        PlayState.currentSong = null;
         #if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
         PlayState.deathCounter = 0;
         PlayState.seenCutscene = false;

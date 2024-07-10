@@ -8,7 +8,7 @@ class StrumArrow extends FunkinSCSprite
 {
   public var rgbShader:RGBShaderReference;
   public var noteData:Int = 0;
-  public var direction:Float = 90; // plan on doing scroll directions soon -bb
+  public var direction(default, set):Float; // plan on doing scroll directions soon -bb
   public var downScroll:Bool = false; // plan on doing scroll directions soon -bb
   public var sustainReduce:Bool = true;
   public var daStyle = 'style';
@@ -20,6 +20,18 @@ class StrumArrow extends FunkinSCSprite
   public var laneFollowsReceptor:Bool = true;
 
   public var bgLane:FlxSkewed;
+
+  private var _dirSin:Float;
+  private var _dirCos:Float;
+
+  private function set_direction(_fDir:Float):Float
+  {
+    // 0.01745329251 = Math.PI / 180
+    _dirSin = Math.sin(_fDir * 0.01745329251);
+    _dirCos = Math.cos(_fDir * 0.01745329251);
+
+    return direction = _fDir;
+  }
 
   public var texture(default, set):String = null;
 
@@ -42,6 +54,7 @@ class StrumArrow extends FunkinSCSprite
 
   public function new(x:Float, y:Float, leData:Int, player:Int, ?style:String, ?quantizedNotes:Bool)
   {
+    direction = 90;
     rgbShader = new RGBShaderReference(this, !quantizedNotes ? Note.initializeGlobalRGBShader(leData) : Note.initializeGlobalQuantRGBShader(leData));
     rgbShader.enabled = false;
     if (PlayState.currentChart != null && PlayState.currentChart.options.disableStrumRGB) useRGBShader = false;

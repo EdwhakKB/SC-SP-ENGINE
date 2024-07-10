@@ -6,7 +6,7 @@ import flixel.addons.transition.TransitionData;
 import flixel.addons.transition.Transition;
 import backend.PsychCamera;
 
-class MusicBeatState extends #if SCEModchartingTools modcharting.ModchartMusicBeatState #else flixel.addons.ui.FlxUIState #end
+class MusicBeatState extends #if SCEModchartingTools modcharting.ModchartMusicBeatState #else flixel.addons.transition.FlxTransitionableState #end
 {
   public var controls(get, never):Controls;
 
@@ -108,7 +108,6 @@ class MusicBeatState extends #if SCEModchartingTools modcharting.ModchartMusicBe
     FlxG.cameras.reset(camera);
     FlxG.cameras.setDefaultDrawTarget(camera, true);
     _psychCameraInitialized = true;
-    // trace('initialized psych camera ' + Sys.cpuTime());
     return camera;
   }
 

@@ -180,7 +180,6 @@ class Paths
       }
       /*if (!localTrackedAssets.contains(key) && !dumpExclusions.contains(key) && key != null)
         {
-          // trace('test: ' + dumpExclusions, key);
           OpenFlAssets.cache.clear(key);
           OpenFlAssets.cache.removeSound(key);
           currentTrackedSounds.remove(key);
@@ -279,7 +278,8 @@ class Paths
     }
     catch (e)
     {
-      Debug.logInfo('Error parsing JSON or JSON does not exist');
+      Debug.logError('ERROR! $e');
+      Debug.logError('Error parsing JSON or JSON does not exist');
       rawJson = null;
     }
 
@@ -295,14 +295,13 @@ class Paths
     try
     {
       // Attempt to parse and return the JSON data.
-      if (rawJson != null) return Json.parse(rawJson);
-
+      if (rawJson != null) return cast Json.parse(rawJson);
       return null;
     }
     catch (e)
     {
       Debug.logError("AN ERROR OCCURRED parsing a JSON file.");
-      Debug.logError(e.message);
+      Debug.logError('ERROR! ${e.message}');
 
       // Return null.
       return null;
@@ -484,11 +483,8 @@ class Paths
     if (bitmap == null)
     {
       var file:String = usePath ? getPath(key, IMAGE, parentfolder, true) : key;
-      #if MODS_ALLOWED
-      if (FileSystem.exists(file)) bitmap = BitmapData.fromFile(file);
-      #else
-      if (OpenFlAssets.exists(file, IMAGE)) bitmap = OpenFlAssets.getBitmapData(file);
-      #end
+      #if MODS_ALLOWED if (FileSystem.exists(file)) bitmap = BitmapData.fromFile(file);
+      else #end if (OpenFlAssets.exists(file, IMAGE)) bitmap = OpenFlAssets.getBitmapData(file);
 
       if (bitmap == null)
       {
@@ -714,7 +710,7 @@ class Paths
     var graph:FlxGraphic = FlxG.bitmap.add(hasNoEx, Unique, Key);
     if (graph == null)
     {
-      Debug.logInfo('SOMETHING IS WRONG WITH THE GRAPHIC!');
+      Debug.logError('SOMETHING IS WRONG WITH THE GRAPHIC!');
       return null;
     }
     return graph.imageFrame;

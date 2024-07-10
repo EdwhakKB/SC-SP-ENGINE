@@ -720,7 +720,7 @@ class FunkinLua
             if (!ignoreAlreadyRunning) for (script in game.hscriptArray)
               if (script.origin == foundScript)
               {
-                trace('Closing script ' + script.origin);
+                Debug.logInfo('Closing script ' + script.origin);
                 game.hscriptArray.remove(script);
                 script.destroy();
                 return true;
@@ -1590,7 +1590,6 @@ class FunkinLua
 
         if (Stage.instance.swagBacks.exists(obj))
         {
-          Debug.logInfo('oh shit we found it.');
           Stage.instance.setSwagGraphicSize(obj, x, updateHitbox);
           return;
         }
@@ -2257,7 +2256,7 @@ class FunkinLua
     catch (e:Dynamic)
     {
       Debug.displayAlert('Failed to catch error on script and error on loading script!', 'Error on loading...');
-      Debug.logInfo(e);
+      Debug.logInfo('ERROR! $e');
       return;
     }
     call('onCreate', []);

@@ -171,6 +171,14 @@ typedef LegacyNoteSection =
   // BPM changes
   public var ?changeBPM:Bool;
   public var ?bpm:Float;
+
+  public var ?sectionBeats:Float;
+  public var ?player4Section:Bool;
+  public var ?gfSection:Bool;
+  public var ?altAnim:Bool;
+  public var ?playerAltAnim:Bool;
+  public var ?CPUAltAnim:Bool;
+  public var ?dType:Int;
 }
 
 typedef LegacySectionsData =

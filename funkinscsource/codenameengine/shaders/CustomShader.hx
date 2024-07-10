@@ -2,7 +2,6 @@ package codenameengine.shaders;
 
 import haxe.Exception;
 import openfl.Assets;
-import hscript.IHScriptCustomBehaviour;
 
 /**
  * Class for custom shaders.
@@ -31,7 +30,7 @@ class CustomShader extends FunkinShader
 
     path = fragShaderPath + vertShaderPath;
 
-    if (fragCode == null && vertCode == null) Debug.logInfo('Shader "$name" couldn\'t be found.');
+    if (fragCode == null && vertCode == null) Debug.logWarn('Shader "$name" couldn\'t be found.');
 
     super(fragCode, vertCode, glslVersion);
   }

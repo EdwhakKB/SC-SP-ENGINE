@@ -36,7 +36,7 @@ class HaxeUISubState extends MusicBeatSubState
    */
   public function buildComponent(assetPath:String)
   {
-    trace('Building component $assetPath');
+    Debug.logInfo('Building component $assetPath');
     return RuntimeComponentBuilder.fromAsset(assetPath);
   }
 
@@ -45,7 +45,11 @@ class HaxeUISubState extends MusicBeatSubState
     super.update(elapsed);
 
     // Force quit.
-    if (FlxG.keys.justPressed.F4) FlxG.switchState(() -> new states.MainMenuState());
+    if (FlxG.keys.justPressed.F4)
+    {
+      FlxG.mouse.unload();
+      FlxG.switchState(() -> new states.MainMenuState());
+    }
 
     // Refresh the component.
     if (FlxG.keys.justPressed.F5)
@@ -56,36 +60,16 @@ class HaxeUISubState extends MusicBeatSubState
 
   function refreshComponent()
   {
-    /*
-      if (component != null)
-      {
-        remove(component);
-        component = null;
-      }
-
-      if (component != null)
-      {
-        trace('Success!');
-        add(component);
-      }
-      else
-      {
-        trace('Failed to build component $_componentKey');
-      }
-     */
-
     if (component == null)
     {
       component = buildComponent(_componentKey);
       add(component);
-      trace(component);
     }
     else
     {
       var component2 = buildComponent(_componentKey);
       component2.x += 100;
       add(component2);
-      trace(component2);
       remove(component);
     }
   }
@@ -99,7 +83,7 @@ class HaxeUISubState extends MusicBeatSubState
     if (target == null)
     {
       // Gracefully handle the case where the item can't be located.
-      trace('WARN: Could not locate menu item: $key');
+      Debug.logWarn(' Could not locate menu item: $key');
     }
     else
     {
@@ -116,7 +100,7 @@ class HaxeUISubState extends MusicBeatSubState
     if (target == null)
     {
       // Gracefully handle the case where the item can't be located.
-      trace('WARN: Could not locate menu item: $key');
+      Debug.logWarn(' Could not locate menu item: $key');
     }
     else
     {
@@ -134,7 +118,7 @@ class HaxeUISubState extends MusicBeatSubState
     if (target == null)
     {
       // Gracefully handle the case where the item can't be located.
-      trace('WARN: Could not locate menu item: $key');
+      Debug.logWarn(' Could not locate menu item: $key');
       return value;
     }
     else
@@ -163,7 +147,7 @@ class HaxeUISubState extends MusicBeatSubState
     }
 
     // Gracefully handle the case where the item can't be located.
-    trace('WARN: Could not locate check box: $key');
+    Debug.logWarn(' Could not locate check box: $key');
     return value;
   }
 

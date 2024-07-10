@@ -10,6 +10,11 @@ class RGBPalette
   public var b(default, set):FlxColor;
   public var mult(default, set):Float;
 
+  public var stealthGlow(default, set):Float;
+  public var stealthGlowRed(default, set):Float;
+  public var stealthGlowGreen(default, set):Float;
+  public var stealthGlowBlue(default, set):Float;
+
   private function set_r(color:FlxColor)
   {
     r = color;
@@ -38,12 +43,45 @@ class RGBPalette
     return mult;
   }
 
+  private function set_stealthGlow(value:Float)
+  {
+    stealthGlow = value;
+    shader._stealthGlow.value = [stealthGlow];
+    return value;
+  }
+
+  private function set_stealthGlowRed(value:Float)
+  {
+    stealthGlowRed = value;
+    shader._stealthR.value = [stealthGlowRed];
+    return value;
+  }
+
+  private function set_stealthGlowGreen(value:Float)
+  {
+    stealthGlowGreen = value;
+    shader._stealthG.value = [stealthGlowGreen];
+    return value;
+  }
+
+  private function set_stealthGlowBlue(value:Float)
+  {
+    stealthGlowBlue = value;
+    shader._stealthB.value = [stealthGlowBlue];
+    return value;
+  }
+
   public function new()
   {
     r = 0xFFFF0000;
     g = 0xFF00FF00;
     b = 0xFF0000FF;
     mult = 1.0;
+
+    stealthGlow = 0.0;
+    stealthGlowRed = 1.0;
+    stealthGlowGreen = 1.0;
+    stealthGlowBlue = 1.0;
   }
 }
 
@@ -55,6 +93,11 @@ class RGBShaderReference
   public var b(default, set):FlxColor;
   public var mult(default, set):Float;
   public var enabled(default, set):Bool = true;
+
+  public var stealthGlow(default, set):Float;
+  public var stealthGlowRed(default, set):Float;
+  public var stealthGlowGreen(default, set):Float;
+  public var stealthGlowBlue(default, set):Float;
 
   public var parent:RGBPalette;
 
@@ -74,6 +117,11 @@ class RGBShaderReference
       g = parent.g;
       b = parent.b;
       mult = parent.mult;
+
+      stealthGlow = parent.stealthGlow;
+      stealthGlowRed = parent.stealthGlowRed;
+      stealthGlowGreen = parent.stealthGlowGreen;
+      stealthGlowBlue = parent.stealthGlowBlue;
     }
   }
 
@@ -107,6 +155,30 @@ class RGBShaderReference
     return (enabled = value);
   }
 
+  private function set_stealthGlow(value:Float)
+  {
+    if (allowNew && value != _original.stealthGlow) cloneOriginal();
+    return (stealthGlow = parent.stealthGlow = value);
+  }
+
+  private function set_stealthGlowRed(value:Float)
+  {
+    if (allowNew && value != _original.stealthGlowRed) cloneOriginal();
+    return (stealthGlowRed = parent.stealthGlowRed = value);
+  }
+
+  private function set_stealthGlowGreen(value:Float)
+  {
+    if (allowNew && value != _original.stealthGlowGreen) cloneOriginal();
+    return (stealthGlowGreen = parent.stealthGlowGreen = value);
+  }
+
+  private function set_stealthGlowBlue(value:Float)
+  {
+    if (allowNew && value != _original.stealthGlowBlue) cloneOriginal();
+    return (stealthGlowBlue = parent.stealthGlowBlue = value);
+  }
+
   public var allowNew = true;
 
   private function cloneOriginal()
@@ -121,6 +193,12 @@ class RGBShaderReference
       parent.g = _original.g;
       parent.b = _original.b;
       parent.mult = _original.mult;
+
+      parent.stealthGlow = _original.stealthGlow;
+      parent.stealthGlowRed = _original.stealthGlowRed;
+      parent.stealthGlowGreen = _original.stealthGlowGreen;
+      parent.stealthGlowBlue = _original.stealthGlowBlue;
+
       _owner.shader = parent.shader;
     }
   }
@@ -136,6 +214,11 @@ class RGBPaletteShader extends FlxFixedShader
 		uniform vec3 b;
 		uniform float mult;
 
+    uniform float _stealthGlow;
+		uniform float _stealthR;
+		uniform float _stealthG;
+		uniform float _stealthB;
+
 		vec4 flixel_texture2DCustom(sampler2D bitmap, vec2 coord) {
 			vec4 color = flixel_texture2D(bitmap, coord);
 			if (!hasTransform || color.a == 0.0 || mult == 0.0) {
@@ -147,6 +230,10 @@ class RGBPaletteShader extends FlxFixedShader
 			newColor.a = color.a;
 
 			color = mix(color, newColor, mult);
+
+      vec4 glow = vec4(_stealthR,_stealthG,_stealthB,1.0);
+			glow *=  color.a;
+			color = mix(color, glow, _stealthGlow);
 
 			if(color.a > 0.0) {
 				return vec4(color.rgb, color.a);

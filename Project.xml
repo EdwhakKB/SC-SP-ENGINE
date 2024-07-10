@@ -113,13 +113,13 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 
 	<assets path="assets/shared"        exclude="*.ogg" if="web"/>
 	<assets path="assets/shared"        exclude="*.mp3" unless="web"/>
-	<!-- <assets path="assets/embed"         exclude="*.ogg" if="web" embed="true"/>
-	<assets path="assets/embed"         exclude="*.mp3" unless="web" embed="true"/> -->
-	<assets path="assets/videos"        library="videos"        if="VIDEOS_ALLOWED"/>
-	<assets path="assets/songs"         library="songs"         exclude="*.ogg" if="web"/>
-	<assets path="assets/songs"         library="songs"         exclude="*.mp3" unless="web"/>
-	<assets path="assets/week_assets"   library="week_assets"   rename="assets" exclude="*.ogg" if="web"/>
-	<assets path="assets/week_assets"   library="week_assets"   rename="assets" exclude="*.mp3" unless="web"/>
+	<assets path="assets/embed"         exclude="*.ogg" if="web" embed="true"/>
+	<assets path="assets/embed"         exclude="*.mp3" unless="web" embed="true"/>
+	<assets path="assets/videos"        if="VIDEOS_ALLOWED"/>
+	<assets path="assets/songs"         exclude="*.ogg" if="web"/>
+	<assets path="assets/songs"         exclude="*.mp3" unless="web"/>
+	<assets path="assets/week_assets"   rename="assets" exclude="*.ogg" if="web"/>
+	<assets path="assets/week_assets"   rename="assets" exclude="*.mp3" unless="web"/>
 
 	<section if="TRANSLATIONS_ALLOWED">
 		<assets path="assets/translations" rename="assets" exclude="*.ogg" if="web"/>
@@ -213,7 +213,6 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<haxedef name="NO_PRECOMPILED_HEADERS" if="linux" />
 
 	<haxelib name="flixel" />
-	<haxelib name="flixel-ui" />
 	<haxelib name="flixel-addons" />
 	<haxelib name='tjson'/>
 
@@ -324,6 +323,14 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<haxedef name="FILE_DROP_UNSUPPORTED" if="mac" />
 	<section unless="FILE_DROP_UNSUPPORTED">
 		<haxedef name="FILE_DROP_SUPPORTED" />
+	</section>
+
+	<section>
+		<!--
+			This flag enables the popup/crashlog error handler.
+			However, it also messes with breakpoints on some platforms.
+		-->
+		<haxedef name="openfl-enable-handle-error" />
 	</section>
 
 	<haxedef name="CAN_OPEN_LINKS" unless="switch" />

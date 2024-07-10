@@ -121,8 +121,6 @@ class PolygonSpectogram extends MeshRender
     {
       if (curTime != vis.snd.time)
       {
-        // trace("DOIN SHIT" + FlxG.random.int(0, 200));
-
         if (vis.snd.playing) curTime = vis.snd.time;
         else
         {

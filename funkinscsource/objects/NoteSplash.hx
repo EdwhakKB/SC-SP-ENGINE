@@ -14,7 +14,7 @@ typedef NoteSplashConfig =
   offsets:Array<Array<Float>>
 }
 
-class NoteSplash extends FlxSkewed
+class NoteSplash extends FunkinSCSprite
 {
   public var rgbShader:RGBPixelShaderReference;
 

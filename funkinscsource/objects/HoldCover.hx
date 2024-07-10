@@ -74,7 +74,6 @@ class CoverSprite extends FunkinSCSprite
         }
         else if (foundSecondPath)
         {
-          Debug.logInfo('NORMAL SPLASHES FOUND WITH FOLDER, HOLDSKIN AND COLORS');
           this.frames = Paths.getSparrowAtlas('HoldNoteEffect/$holdCoverSkin$hcolor');
         }
         else if (foundThirdPath)
@@ -127,10 +126,13 @@ class CoverSprite extends FunkinSCSprite
 class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 {
   public var enabled:Bool = true;
+  public var isPlayer:Bool = false;
 
-  public function new()
+  public function new(enabled:Bool, isPlayer:Bool)
   {
-    super(0, 0, 8);
+    this.enabled = enabled;
+    this.isPlayer = isPlayer;
+    super(0, 0, 4);
     for (i in 0...maxSize)
       addHolds(i);
   }
@@ -150,16 +152,16 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
     this.add(hold);
   }
 
-  public function spawnOnNoteHit(note:Note, isGoodHit:Bool):Void
+  public function spawnOnNoteHit(note:Note, isReady:Bool):Void
   {
     var noteData:Int = note.noteData;
     var isSus:Bool = note.isSustainNote;
     var isHoldEnd:Bool = note.isHoldEnd;
-    if (enabled)
+    if (enabled && isReady)
     {
       if (isSus)
       {
-        var data:Int = isGoodHit ? (!CoolUtil.opponentModeActive ? noteData + 4 : noteData) : (!CoolUtil.opponentModeActive ? noteData : noteData + 4);
+        var data:Int = noteData;
         this.members[data].shaderCopy(noteData, note);
         this.members[data].visible = true;
         if (this.members[data].isPlaying == false)
@@ -170,7 +172,7 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 
         if (isHoldEnd)
         {
-          if (isGoodHit)
+          if (isPlayer)
           {
             this.members[data].isPlaying = false;
             this.members[data].boom = true;
@@ -188,20 +190,20 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
     }
   }
 
-  public function despawnOnMiss(direciton:Int, ?note:Note = null):Void
+  public function despawnOnMiss(isReady:Bool, direciton:Int, ?note:Note = null):Void
   {
     var noteData:Int = (note != null ? note.noteData : direciton);
-    if (enabled)
+    if (enabled && isReady)
     {
-      var data:Int = (!CoolUtil.opponentModeActive ? noteData + 4 : noteData);
+      var data:Int = noteData;
       this.members[data].shaderCopy(noteData, note);
       this.members[data].isPlaying = this.members[data].boom = this.members[data].visible = false;
     }
   }
 
-  public function updateHold(elapsed:Float):Void
+  public function updateHold(elapsed:Float, isReady:Bool):Void
   {
-    if (enabled)
+    if (enabled && isReady)
     {
       for (i in 0...this.members.length)
       {
@@ -228,14 +230,16 @@ class HoldCover extends FlxTypedSpriteGroup<CoverSprite>
 
   function ni(note, info):Float
   {
-    if (!enabled) return 0;
-    var game:PlayState = PlayState.instance;
-    if (game == null) return 110;
-    else
+    if (enabled && PlayState.instance != null)
     {
-      if (info == "x") return game.strumLineNotes.members[note].x;
-      else if (info == "y") return game.strumLineNotes.members[note].y;
-      return game.strumLineNotes.members[note].alpha;
+      var game:PlayState = PlayState.instance;
+      if (game == null) return 110;
+      else
+      {
+        if (info == "x") return game.strumLineNotes.members[isPlayer ? note + 4 : note].x;
+        else if (info == "y") return game.strumLineNotes.members[isPlayer ? note + 4 : note].y;
+        return 0;
+      }
     }
     return 0;
   }

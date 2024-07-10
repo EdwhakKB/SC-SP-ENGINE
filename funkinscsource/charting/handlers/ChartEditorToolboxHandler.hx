@@ -97,12 +97,12 @@ class ChartEditorToolboxHandler
           onShowToolboxOpponentPreview(state, toolbox);
         default:
           // This happens if you try to load an unknown layout.
-          Debug.logInfo('ChartEditorToolboxHandler.showToolbox() - Unknown toolbox ID: $id');
+          Debug.logWarn('ChartEditorToolboxHandler.showToolbox() - Unknown toolbox ID: $id');
       }
     }
     else
     {
-      Debug.logInfo('ChartEditorToolboxHandler.showToolbox() - Could not retrieve toolbox: $id');
+      Debug.logWarn('ChartEditorToolboxHandler.showToolbox() - Could not retrieve toolbox: $id');
     }
   }
 
@@ -128,12 +128,12 @@ class ChartEditorToolboxHandler
           onHideToolboxOpponentPreview(state, toolbox);
         default:
           // This happens if you try to load an unknown layout.
-          Debug.logInfo('ChartEditorToolboxHandler.hideToolbox() - Unknown toolbox ID: $id');
+          Debug.logWarn('ChartEditorToolboxHandler.hideToolbox() - Unknown toolbox ID: $id');
       }
     }
     else
     {
-      Debug.logInfo('ChartEditorToolboxHandler.hideToolbox() - Could not retrieve toolbox: $id');
+      Debug.logWarn('ChartEditorToolboxHandler.hideToolbox() - Could not retrieve toolbox: $id');
     }
   }
 
@@ -149,7 +149,7 @@ class ChartEditorToolboxHandler
     }
     else
     {
-      Debug.logInfo('ChartEditorToolboxHandler.refreshToolbox() - Could not retrieve toolbox: $id');
+      Debug.logWarn('ChartEditorToolboxHandler.refreshToolbox() - Could not retrieve toolbox: $id');
     }
   }
 
@@ -208,7 +208,7 @@ class ChartEditorToolboxHandler
         toolbox = buildToolboxOpponentPreviewLayout(state);
       default:
         // This happens if you try to load an unknown layout.
-        Debug.logInfo('ChartEditorToolboxHandler.initToolbox() - Unknown toolbox ID: $id');
+        Debug.logWarn('ChartEditorToolboxHandler.initToolbox() - Unknown toolbox ID: $id');
         toolbox = null;
     }
 

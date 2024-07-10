@@ -59,6 +59,7 @@ abstract class BaseRegistry<T:(IRegistryEntry<J> & Constructible<EntryConstructo
   }
 
   /**
+   * Starts with loading the beginning entries.
    * TODO: Create a `loadEntriesAsync(onProgress, onComplete)` function.
    */
   public function loadEntries():Void
@@ -80,19 +81,24 @@ abstract class BaseRegistry<T:(IRegistryEntry<J> & Constructible<EntryConstructo
         var entry:T = createEntry(entryId);
         if (entry != null)
         {
-          Debug.logInfo('  Loaded entry data: ${entry}');
+          // Debug.logInfo('Loaded entry data: ${entry}');
           entries.set(entry.id, entry);
         }
       }
-      catch (e)
+      catch (e:Dynamic)
       {
         // Print the error.
-        Debug.logInfo('  Failed to load entry data: ${entryId}');
-        Debug.logInfo(e);
+        // Debug.logError('Failed to load entry data: ${entryId}');
+        // Debug.logError('ERROR! $e');
         continue;
       }
     }
   }
+
+  /**
+   * Used for adding new entries after already loading
+   */
+  public function pushNewEntries():Void {}
 
   /**
    * Retrieve a list of all entry IDs in this registry.
@@ -248,7 +254,7 @@ abstract class BaseRegistry<T:(IRegistryEntry<J> & Constructible<EntryConstructo
 
   function printErrors(errors:Array<json2object.Error>, id:String = ''):Void
   {
-    Debug.logInfo('[${registryId}] Failed to parse entry data: ${id}');
+    Debug.logError('[${registryId}] Failed to parse entry data: ${id}');
 
     for (error in errors)
     {

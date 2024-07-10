@@ -122,17 +122,13 @@ class NoteTimer extends FlxTypedSpriteGroup<FlxSprite>
       var targetAlpha:Float = 0.0;
       if (show)
       {
-        // trace('show timer');
         if (lastStartTime == FlxMath.MAX_VALUE_FLOAT && timeTillNextNote > 3000) lastStartTime = timeTillNextNote;
-
-        // trace(timeTillNextNote);
 
         if (lastStartTime != FlxMath.MAX_VALUE_FLOAT)
         {
           var secsLeft:Float = Math.ceil(timeTillNextNote * 0.001);
           var percent:Float = timeTillNextNote / lastStartTime;
           // timerCircle.amount = percent;
-          // trace(percent);
           if (percent <= 0.0)
           {
             lastStartTime = FlxMath.MAX_VALUE_FLOAT; // reset

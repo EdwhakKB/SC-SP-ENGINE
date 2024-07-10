@@ -190,7 +190,7 @@ class ChartEditorDifficultyToolbox extends ChartEditorBaseToolbox
 
     if (targetNode == null)
     {
-      Debug.logInfo('No target node!');
+      Debug.logWarn('No target node!');
       // Reset the user's selection.
       refreshTreeSelection();
       return;
@@ -214,7 +214,7 @@ class ChartEditorDifficultyToolbox extends ChartEditorBaseToolbox
       // case 'variation':
       default:
         // Reset the user's selection.
-        Debug.logInfo('Selected wrong node type, resetting selection.');
+        Debug.logWarn('Selected wrong node type, resetting selection.');
         refreshTreeSelection();
         chartEditorState.refreshToolbox(ChartEditorState.CHART_EDITOR_TOOLBOX_METADATA_LAYOUT);
     }

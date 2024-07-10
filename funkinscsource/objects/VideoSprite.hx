@@ -56,7 +56,7 @@ class VideoSprite extends FlxSpriteGroup
       videoSprite.bitmap.onEndReached.add(function() {
         if (alreadyDestroyed) return;
 
-        trace('Video destroyed');
+        Debug.logInfo('Video destroyed');
         if (cover != null)
         {
           remove(cover);
@@ -96,7 +96,7 @@ class VideoSprite extends FlxSpriteGroup
       return;
     }
 
-    trace('Video destroyed');
+    Debug.logInfo('Video destroyed');
     if (cover != null)
     {
       remove(cover);
@@ -130,7 +130,7 @@ class VideoSprite extends FlxSpriteGroup
         finishCallback = null;
         videoSprite.bitmap.onEndReached.dispatch();
         PlayState.instance.remove(this);
-        trace('Skipped video');
+        Debug.logInfo('Skipped video');
         return;
       }
     }

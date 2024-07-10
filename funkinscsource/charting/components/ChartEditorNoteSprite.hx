@@ -13,7 +13,7 @@ import flixel.math.FlxPoint;
  */
 @:nullSafety
 @:access(charting.ChartEditorState)
-class ChartEditorNoteSprite extends FunkinSCSprite
+class ChartEditorNoteSprite extends charting.ChartEditorState.FunkinSprite
 {
   /**
    * The list of available note skin to validate against.
@@ -124,7 +124,7 @@ class ChartEditorNoteSprite extends FunkinSCSprite
 
     // Pixel notes
     var graphicPixel = FlxG.bitmap.add(Paths.image('pixelUI/NOTE_assets', 'shared'), false, null);
-    if (graphicPixel == null) Debug.logInfo('ERROR: Could not load graphic: ' + Paths.getPath('images/pixelUI/NOTE_assets.png', IMAGE, 'shared'));
+    if (graphicPixel == null) Debug.logError('Could not load graphic: ' + Paths.getPath('images/pixelUI/NOTE_assets.png', IMAGE, 'shared'));
     var frameCollectionPixel = FlxTileFrames.fromGraphic(graphicPixel, new FlxPoint(17, 17));
     for (i in 0...frameCollectionPixel.frames.length)
     {

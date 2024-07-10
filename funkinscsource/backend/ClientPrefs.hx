@@ -29,6 +29,7 @@ import charting.ChartEditorState.ChartEditorLiveInputStyle;
   public var camZooms:Bool = true;
   public var hideHud:Bool = false;
   public var noteOffset:Int = 0;
+  public var audioVisualOffset:Int = 0;
   public var arrowRGB:Array<Array<FlxColor>> = [
     [0xFFC24B99, 0xFFFFFFFF, 0xFF3C1F56],
     [0xFF00FFFF, 0xFFFFFFFF, 0xFF1542B7],
@@ -218,9 +219,6 @@ import charting.ChartEditorState.ChartEditorLiveInputStyle;
     "chartEditorNoteQuant" => 3,
     "chartEditorLiveInputStyle" => ChartEditorLiveInputStyle.None
   ];
-
-  public var inputOffset:Int = 0;
-  public var audioVisualOffset:Int = 0;
 }
 
 class ClientPrefs
@@ -423,9 +421,10 @@ class ClientPrefs
 
   public static function toggleVolumeKeys(?turnOn:Bool = true)
   {
-    FlxG.sound.muteKeys = turnOn ? Main.muteKeys : [];
-    FlxG.sound.volumeDownKeys = turnOn ? Main.volumeDownKeys : [];
-    FlxG.sound.volumeUpKeys = turnOn ? Main.volumeUpKeys : [];
+    final emptyArray = [];
+    FlxG.sound.muteKeys = turnOn ? Main.muteKeys : emptyArray;
+    FlxG.sound.volumeDownKeys = turnOn ? Main.volumeDownKeys : emptyArray;
+    FlxG.sound.volumeUpKeys = turnOn ? Main.volumeUpKeys : emptyArray;
   }
 
   public static function getkeys(keyname:String, separator:String = ' | ') // for lazyness

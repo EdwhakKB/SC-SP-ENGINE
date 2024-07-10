@@ -191,12 +191,14 @@ class ChartEditorMetadataToolbox extends ChartEditorBaseToolbox
     inputSongCharter.value = chartEditorState.currentSongMetadata.songData.inclusiveData.charter;
     inputStage.value = chartEditorState.currentSongMetadata.songData.playData.stage;
     inputNoteStyle.value = chartEditorState.currentSongMetadata.songData.playData.options.arrowSkin;
-    inputBPM.value = chartEditorState.currentSongMetadata.songData.playData.timeChanges[0].bpm;
     inputDifficultyRating.value = chartEditorState.currentSongChartDifficultyRating;
     inputScrollSpeed.value = chartEditorState.currentSongChartScrollSpeed;
     labelScrollSpeed.text = 'Scroll Speed: ${chartEditorState.currentSongChartScrollSpeed}x';
     frameVariation.text = 'Variation: ${chartEditorState.selectedVariation.toTitleCase()}';
     frameDifficulty.text = 'Difficulty: ${chartEditorState.selectedDifficulty.toTitleCase()}';
+
+    Debug.logInfo('Setting BPM to ${chartEditorState.currentSongMetadata.songData.playData.timeChanges[0].bpm}');
+    inputBPM.value = chartEditorState.currentSongMetadata.songData.playData.timeChanges[0].bpm;
 
     var currentTimeSignature = '${chartEditorState.currentSongMetadata.songData.playData.timeChanges[0].timeSignatureNum}/${chartEditorState.currentSongMetadata.songData.playData.timeChanges[0].timeSignatureDen}';
     Debug.logInfo('Setting time signature to ${currentTimeSignature}');

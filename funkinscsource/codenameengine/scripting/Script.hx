@@ -72,7 +72,6 @@ class Script extends FlxBasic implements IFlxDestroyable
       "Paths" => backend.Paths,
       "Conductor" => backend.Conductor,
       "FunkinShader" => codenameengine.shaders.FunkinShader,
-      "CustomCodeShader" => codenameengine.shaders.CustomShader,
       "CustomShader" => codenameengine.shaders.CustomShader,
       #if flxanimate "FlxAnimate" => flxanimate.FlxAnimate, #end
       "Alphabet" => objects.Alphabet,
@@ -374,7 +373,6 @@ class Script extends FlxBasic implements IFlxDestroyable
     set('SustainStrip', modcharting.SustainStrip);
 
     // Why?
-    set('BeatXModifier', modcharting.Modifier.BeatXModifier);
     if (states.PlayState.instance != null
       && states.PlayState.currentChart.options != null
       && states.PlayState.currentChart.options.notITG
@@ -513,8 +511,8 @@ class Script extends FlxBasic implements IFlxDestroyable
    */
   public function error(text:String, ?additionalInfo:Dynamic):Void
   {
-    Debug.logInfo(fileName);
-    Debug.logInfo(text);
+    Debug.logError(fileName);
+    Debug.logError(text);
   }
 
   override public function toString():String

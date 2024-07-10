@@ -24,7 +24,7 @@ class VersionUtil
     try
     {
       var versionRaw:thx.semver.Version.SemVer = version;
-      Debug.logInfo('${versionRaw} satisfies (${versionRule})? ${version.satisfies(versionRule)}');
+      // Debug.logInfo('${versionRaw} satisfies (${versionRule})? ${version.satisfies(versionRule)}');
       return version.satisfies(versionRule);
     }
     catch (e)
@@ -57,12 +57,12 @@ class VersionUtil
       versionData.pre = preDataFixed;
 
       var fixedVersion:thx.semver.Version = versionData;
-      trace('[SAVE] Fixed version: ${fixedVersion}');
+      Debug.logInfo('[SAVE] Fixed version: ${fixedVersion}');
       return fixedVersion;
     }
     else
     {
-      trace('[SAVE] Version data repair not required (got ${version})');
+      Debug.logInfo('[SAVE] Version data repair not required (got ${version})');
       // No need for repair.
       return version;
     }

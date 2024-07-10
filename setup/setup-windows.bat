@@ -7,9 +7,7 @@ haxelib install lime
 haxelib install openfl
 haxelib install flixel
 haxelib install tjson
-haxelib install flixel-addons
 haxelib install flixel-tools
-haxelib install flixel-ui
 haxelib install SScript 8.1.6
 haxelib install parallaxlt
 haxelib install hscript
@@ -23,7 +21,7 @@ haxelib git haxeui-core https://github.com/haxeui/haxeui-core/tree/0212d8fdfcafe
 haxelib git flixel https://github.com/glowsoony/flixel/tree/Main-SCE
 haxelib git flixel-addons https://github.com/glowsoony/flixel-addons/tree/dev
 haxelib git FlxPartialSound https://github.com/FunkinCrew/FlxPartialSound/tree/f986332ba5ab02abd386ce662578baf04904604a
-haxelib git fnf-modcharting-tools https://github.com/EdwhakKB/FNF-Modcharting-Tools/tree/main-SCE
+haxelib git fnf-modcharting-tools https://github.com/glowsoony/FNF-Modcharting-Tools
 haxelib git linc_luajit https://github.com/superpowers04/linc_luajit
 haxelib git hscript-improved https://github.com/FNF-CNE-Devs/hscript-improved/tree/custom-classes
 haxelib git flxanimate https://github.com/ShadowMario/flxanimate/tree/dev

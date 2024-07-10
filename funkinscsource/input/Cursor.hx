@@ -540,7 +540,7 @@ class Cursor
 
   static function onCursorError(cursorMode:CursorMode, error:String):Void
   {
-    trace("Failed to load cursor graphic for cursor mode " + cursorMode + ": " + error);
+    Debug.logError("Failed to load cursor graphic for cursor mode " + cursorMode + ": " + error);
   }
 
   public static function registerHaxeUICursors():Void

@@ -24,6 +24,8 @@ import backend.Debug;
 import backend.Language;
 import backend.StageData;
 import backend.WeekData;
+// Psych-UI
+import backend.ui.*;
 // Song
 import backend.song.data.SongData.SongNoteData;
 import backend.song.data.SongData.SongEventData;

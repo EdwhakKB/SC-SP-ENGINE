@@ -226,7 +226,6 @@ class BaseOptionsMenu extends MusicBeatSubState
 
                     curOption.curOption = num;
                     curOption.setValue(curOption.options[num]);
-                  // trace(curOption.options[num]);
 
                   default:
                 }

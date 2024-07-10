@@ -17,7 +17,7 @@ import flixel.FlxObject;
  * Designed to be used and reused efficiently. Has no gameplay functionality.
  */
 @:nullSafety
-class ChartEditorEventSprite extends FunkinSCSprite
+class ChartEditorEventSprite extends charting.ChartEditorState.FunkinSprite
 {
   public static final DEFAULT_EVENT = 'Default';
 
@@ -124,7 +124,7 @@ class ChartEditorEventSprite extends FunkinSCSprite
   public function correctAnimationName(name:String):String
   {
     if (this.animation.exists(name)) return name;
-    Debug.logInfo('Warning: Invalid animation name "${name}" for song event. Using "${DEFAULT_EVENT}"');
+    // Debug.logWarn('Invalid animation name "${name}" for song event. Using "${DEFAULT_EVENT}"');
     return DEFAULT_EVENT;
   }
 

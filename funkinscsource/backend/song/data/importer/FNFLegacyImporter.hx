@@ -23,7 +23,7 @@ class FNFLegacyImporter
 
     if (parser.errors.length > 0)
     {
-      Debug.logInfo('[FNFLegacyImporter] Error parsing JSON data from ' + fileName + ':');
+      Debug.logError('[FNFLegacyImporter] Error parsing JSON data from ' + fileName + ':');
       for (error in parser.errors)
         backend.data.DataError.printError(error);
       return null;
@@ -87,11 +87,24 @@ class FNFLegacyImporter
         case Left(notes):
           // One difficulty of notes.
           songChartData.notes.set(difficulty, migrateNoteSections(notes));
+          songChartData.sectionVariables.set(difficulty, oldMigrateSections(notes));
         case Right(difficulties):
           var baseDifficulty = null;
-          if (difficulties.easy != null) songChartData.notes.set('easy', migrateNoteSections(difficulties.easy));
-          if (difficulties.normal != null) songChartData.notes.set('normal', migrateNoteSections(difficulties.normal));
-          if (difficulties.hard != null) songChartData.notes.set('hard', migrateNoteSections(difficulties.hard));
+          if (difficulties.easy != null)
+          {
+            songChartData.notes.set('easy', migrateNoteSections(difficulties.easy));
+            songChartData.sectionVariables.set('easy', oldMigrateSections(difficulties.easy));
+          }
+          if (difficulties.normal != null)
+          {
+            songChartData.notes.set('normal', migrateNoteSections(difficulties.normal));
+            songChartData.sectionVariables.set('normal', oldMigrateSections(difficulties.normal));
+          }
+          if (difficulties.hard != null)
+          {
+            songChartData.notes.set('hard', migrateNoteSections(difficulties.hard));
+            songChartData.sectionVariables.set('hard', oldMigrateSections(difficulties.hard));
+          }
       }
     }
 
@@ -117,12 +130,12 @@ class FNFLegacyImporter
       {
         case Left(sectionVariables):
           // One difficulty of events.
-          songChartData.sectionVariables.set(difficulty, migrateSections(sectionVariables));
+          songChartData.sectionVariables.set(difficulty, newMigrateSections(sectionVariables));
         case Right(difficulties):
           var baseDifficulty = null;
-          if (difficulties.easy != null) songChartData.sectionVariables.set('easy', migrateSections(difficulties.easy));
-          if (difficulties.normal != null) songChartData.sectionVariables.set('normal', migrateSections(difficulties.normal));
-          if (difficulties.hard != null) songChartData.sectionVariables.set('hard', migrateSections(difficulties.hard));
+          if (difficulties.easy != null) songChartData.sectionVariables.set('easy', newMigrateSections(difficulties.easy));
+          if (difficulties.normal != null) songChartData.sectionVariables.set('normal', newMigrateSections(difficulties.normal));
+          if (difficulties.hard != null) songChartData.sectionVariables.set('hard', newMigrateSections(difficulties.hard));
       }
     }
 
@@ -185,6 +198,7 @@ class FNFLegacyImporter
     for (section in input)
     {
       var mustHitSection = section.mustHitSection ?? false;
+
       for (note in section.sectionNotes)
       {
         // Handle the dumb logic for mustHitSection.
@@ -219,7 +233,7 @@ class FNFLegacyImporter
     return result;
   }
 
-  static function migrateSections(input:Array<LegacySectionsData>):Array<SongSectionData>
+  static function newMigrateSections(input:Array<LegacySectionsData>):Array<SongSectionData>
   {
     var result:Array<SongSectionData> = [];
     for (sections in input)
@@ -228,6 +242,24 @@ class FNFLegacyImporter
         result.push(new SongSectionData(section.mustHitSection, section.playerAltAnim, section.CPUAltAnim, section.altAnim, section.player4Section,
           section.gfSection, section.dType));
       }
+    return result;
+  }
+
+  static function oldMigrateSections(input:Array<LegacyNoteSection>):Array<SongSectionData>
+  {
+    var result:Array<SongSectionData> = [];
+    for (section in input)
+    {
+      var mustHitSection = section.mustHitSection ?? false;
+      var playerAlt = section.playerAltAnim ?? false;
+      var cpuAlt = section.CPUAltAnim ?? false;
+      var alt = section.altAnim ?? false;
+      var player4 = section.player4Section ?? false;
+      var gf = section.gfSection ?? false;
+      var dType = section.dType ?? 0;
+
+      result.push(new SongSectionData(mustHitSection, playerAlt, cpuAlt, alt, player4, gf, dType));
+    }
     return result;
   }
 }

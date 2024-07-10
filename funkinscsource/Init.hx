@@ -40,6 +40,14 @@ class Init extends FlxState
 
     FlxG.autoPause = false;
 
+    // Setup window events (like callbacks for onWindowClose)
+    // and fullscreen keybind setup - Not Used
+    utils.WindowUtil.initWindowEvents();
+    // Disable the thing on Windows where it tries to send a bug report to Microsoft because why do they care?
+    utils.WindowUtil.disableCrashHandler();
+
+    backend.song.data.SongRegistry.instance.loadEntries(); // Beginning entries
+
     FlxGraphic.defaultPersist = true;
 
     #if LUA_ALLOWED
@@ -60,14 +68,6 @@ class Init extends FlxState
 
     FlxG.updateFramerate = FlxG.drawFramerate = ClientPrefs.data.framerate;
 
-    switch (FlxG.random.int(0, 1))
-    {
-      case 0:
-        mouseCursor = new FlxSprite().loadGraphic(Paths.getSharedPath('images/Default/cursor'));
-      case 1:
-        mouseCursor = new FlxSprite().loadGraphic(Paths.getSharedPath('images/Default/noteCursor'));
-    }
-    FlxG.mouse.load(mouseCursor.pixels);
     FlxG.mouse.enabled = true;
     FlxG.mouse.visible = true;
 

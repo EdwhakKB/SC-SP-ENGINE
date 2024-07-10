@@ -36,7 +36,7 @@ class ChartEditorAudioHandler
     var fileBytes:Bytes = sys.io.File.getBytes(path.toString());
     return loadVocalsFromBytes(state, fileBytes, charId, instId, wipeFirst);
     #else
-    Debug.logInfo("[WARN] This platform can't load audio from a file path, you'll need to fetch the bytes some other way.");
+    Debug.logWarn("This platform can't load audio from a file path, you'll need to fetch the bytes some other way.");
     return false;
     #end
   }
@@ -88,7 +88,7 @@ class ChartEditorAudioHandler
     var fileBytes:Bytes = sys.io.File.getBytes(path.toString());
     return loadInstFromBytes(state, fileBytes, instId, wipeFirst);
     #else
-    Debug.logInfo("[WARN] This platform can't load audio from a file path, you'll need to fetch the bytes some other way.");
+    Debug.logWarn("This platform can't load audio from a file path, you'll need to fetch the bytes some other way.");
     return false;
     #end
   }
@@ -179,7 +179,7 @@ class ChartEditorAudioHandler
     if (instId == '') instId = 'default';
     var instTrackData:Null<Bytes> = state.audioInstTrackData.get(instId);
     var perfStart:Float = TimerUtil.start();
-    var instTrack:Null<FunkinSound> = SoundUtil.buildSoundFromBytes(instTrackData);
+    var instTrack:Null<FunkinSound> = SoundUtil.buildSoundFromBytes(instTrackData, 'chartEditor-inst${instId == '' ? '' : '-${instId}'}');
     Debug.logInfo('Built instrumental track in ${TimerUtil.seconds(perfStart)} seconds.');
     if (instTrack == null) return false;
 
@@ -209,7 +209,7 @@ class ChartEditorAudioHandler
     var trackId:String = '${charId}${instId == '' ? '' : '-${instId}'}';
     var vocalTrackData:Null<Bytes> = state.audioVocalTrackData.get(trackId);
     var perfStart:Float = TimerUtil.start();
-    var vocalTrack:Null<FunkinSound> = SoundUtil.buildSoundFromBytes(vocalTrackData);
+    var vocalTrack:Null<FunkinSound> = SoundUtil.buildSoundFromBytes(vocalTrackData, 'chartEditor-vocals-${charId}${instId == '' ? '' : '-${instId}'}');
     Debug.logInfo('Built vocal track in ${TimerUtil.seconds(perfStart)}.');
 
     if (state.audioVocalTrackGroup == null) state.audioVocalTrackGroup = new VoicesGroup();
@@ -239,7 +239,7 @@ class ChartEditorAudioHandler
           }
           else
           {
-            Debug.logInfo('[WARN] Failed to parse waveform data for vocal track.');
+            Debug.logWarn('Failed to parse waveform data for vocal track.');
           }
 
           state.audioVocalTrackGroup.playerVoicesOffset = state.currentVocalOffsetPlayer;
@@ -265,7 +265,7 @@ class ChartEditorAudioHandler
           }
           else
           {
-            Debug.logInfo('[WARN] Failed to parse waveform data for vocal track.');
+            Debug.logWarn('Failed to parse waveform data for vocal track.');
           }
 
           state.audioVocalTrackGroup.opponentVoicesOffset = state.currentVocalOffsetOpponent;
@@ -302,7 +302,7 @@ class ChartEditorAudioHandler
     var asset:Null<FlxSoundAsset> = FlxG.sound.cache(path);
     if (asset == null)
     {
-      Debug.logInfo('WARN: Failed to play sound $path, asset not found.');
+      Debug.logWarn('Failed to play sound $path, asset not found.');
       return;
     }
     var snd:Null<FunkinSound> = FunkinSound.load(asset);
@@ -341,7 +341,7 @@ class ChartEditorAudioHandler
         var data:Null<Bytes> = state.audioInstTrackData.get('default');
         if (data == null)
         {
-          Debug.logInfo('[WARN] Failed to access inst track ($key)');
+          Debug.logWarn('Failed to access inst track ($key)');
           continue;
         }
         zipEntries.push(FileUtil.makeZIPEntryFromBytes('Inst.ogg', data));
@@ -351,7 +351,7 @@ class ChartEditorAudioHandler
         var data:Null<Bytes> = state.audioInstTrackData.get(key);
         if (data == null)
         {
-          Debug.logInfo('[WARN] Failed to access inst track ($key)');
+          Debug.logWarn('ailed to access inst track ($key)');
           continue;
         }
         zipEntries.push(FileUtil.makeZIPEntryFromBytes('Inst-${key}.ogg', data));
@@ -376,7 +376,7 @@ class ChartEditorAudioHandler
       var data:Null<Bytes> = state.audioVocalTrackData.get(key);
       if (data == null)
       {
-        Debug.logInfo('[WARN] Failed to access vocal track ($key)');
+        Debug.logWarn('Failed to access vocal track ($key)');
         continue;
       }
       zipEntries.push(FileUtil.makeZIPEntryFromBytes('Voices-${key}.ogg', data));

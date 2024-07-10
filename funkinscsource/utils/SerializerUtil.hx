@@ -40,8 +40,8 @@ class SerializerUtil
     }
     catch (e)
     {
-      trace('An error occurred while parsing JSON from string data');
-      trace(e);
+      Debug.logInfo('An error occurred while parsing JSON from string data');
+      Debug.logInfo('ERROR! $e');
       return null;
     }
   }
@@ -57,8 +57,8 @@ class SerializerUtil
     }
     catch (e:Dynamic)
     {
-      trace('An error occurred while parsing JSON from byte data');
-      trace(e);
+      Debug.logInfo('An error occurred while parsing JSON from byte data');
+      Debug.logInfo('ERROR! $e');
       return null;
     }
   }
@@ -127,7 +127,7 @@ class FunkinTypeResolver
   {
     if (name == 'Dynamic')
     {
-      Debug.logInfo('Found invalid class type in save data, indicates partial save corruption.');
+      Debug.logWarn('Found invalid class type in save data, indicates partial save corruption.');
       return null;
     }
     return Type.resolveClass(name);

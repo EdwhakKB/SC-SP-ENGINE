@@ -81,7 +81,7 @@ class ChartManifestData
 
     if (parser.errors.length > 0)
     {
-      Debug.logInfo('[ChartManifest] Failed to parse chart file manifest');
+      Debug.logError('[ChartManifest] Failed to parse chart file manifest');
 
       for (error in parser.errors)
         backend.data.DataError.printError(error);

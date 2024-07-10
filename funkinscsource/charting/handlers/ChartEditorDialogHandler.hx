@@ -1330,7 +1330,7 @@ class ChartEditorDialogHandler
 
     dropHandlers.push(dropTarget);
     #else
-    Debug.logInfo('addDropHandler not implemented for this platform');
+    Debug.logWarn('addDropHandler not implemented for this platform');
     #end
   }
 

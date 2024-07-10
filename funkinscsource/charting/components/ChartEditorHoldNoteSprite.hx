@@ -104,8 +104,6 @@ class ChartEditorHoldNoteSprite extends objects.SustainTrail
     updateClipping();
 
     setup();
-
-    triggerRedraw();
   }
 
   public override function updateHitbox():Void

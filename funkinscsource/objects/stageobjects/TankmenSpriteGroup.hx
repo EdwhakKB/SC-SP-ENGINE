@@ -36,30 +36,38 @@ class TankmanSpriteGroup extends FlxTypedSpriteGroup<TankmenBG>
 
   function initTimemap()
   {
-    trace('Initializing Tankman timings...');
+    Debug.logInfo('Initializing Tankman timings...');
     tankmanTimes = [];
     // The tankmen's timings and directions are determined
     // by the chart, specifically the internal "picospeaker" difficulty.
-    /* var song:Array<Song> = backend.song.data.SongRegistry.instance.fetchEntry('picospeaker');
-      var songNotes:Null<SongDifficulty> = song.getDifficulty('');
-      try
-      {
-        for (note in noteData)
-          this.animationNotes.push(noteData);
-        this.animationNotes.sort(function(a:SongNoteData, b:SongNoteData):Int return FlxSort.byValues(FlxSort.ASCENDING, a.time, b.time));
-      }
-      catch (e:Dynamic) {}
+    var animChart:SongDifficulty = PlayState.currentSong.getDifficulty('picospeaker');
+    if (animChart == null)
+    {
+      Debug.logError('Skip initializing TankmanSpriteGroup: no picospeaker chart.');
+      return;
+    }
+    else
+    {
+      Debug.logInfo('Found picospeaker chart for TankmanSpriteGroup.');
+    }
+    var animNotes:Array<SongNoteData> = animChart.notes;
 
-      for (note in animationNotes)
+    // turns out sorting functions are completely useless in polymod right now and do nothing
+    // i had to sort the whole pico chart by hand im gonna go insane
+    animNotes.sort(function(a:SongNoteData, b:SongNoteData):Int {
+      return FlxSort.byValues(FlxSort.ASCENDING, a.time, b.time);
+    });
+
+    for (note in animNotes)
+    {
+      // Only one out of every 16 notes, on average, is a tankman.
+      if (FlxG.random.bool(6.25))
       {
-        // Only one out of every 16 notes, on average, is a tankman.
-        if (FlxG.random.bool(16))
-        {
-          tankmanTimes.push(note.time);
-          var goingRight:Bool = (note.data > 2) ? false : true;
-          tankmanDirs.push(goingRight);
-        }
-    }*/
+        tankmanTimes.push(note.time);
+        var goingRight:Bool = note.data == 3 ? false : true;
+        tankmanDirs.push(goingRight);
+      }
+    }
   }
 
   /**

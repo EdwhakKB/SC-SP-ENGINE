@@ -309,12 +309,12 @@ class AlphaCharacter extends FlxSprite
             && allLetters.exists(character)) allLetters.set(character, {anim: letterData.animation, offsets: letterData.normal, offsetsBold: letterData.bold});
         }
       }
-      trace('Reloaded letters successfully ($path)!');
+      Debug.logInfo('Reloaded letters successfully ($path)!');
     }
     catch (e:Dynamic)
     {
       FlxG.log.error('Error on loading alphabet data: $e');
-      trace('Error on loading alphabet data: $e');
+      Debug.logError('Error on loading alphabet data: $e');
     }
 
     if (!allLetters.exists('?')) allLetters.set('?', {anim: 'question'});
@@ -457,7 +457,7 @@ class AlphaCharacter extends FlxSprite
   {
     if (animation.curAnim == null)
     {
-      trace(character);
+      Debug.logInfo(character);
       return;
     }
 

@@ -2,8 +2,6 @@ package gamejolt;
 
 // GameJolt things && Login things && Toast things
 import hxgamejolt.GameJolt as GJApi;
-import flixel.addons.ui.FlxInputText;
-import flixel.addons.ui.FlxButtonPlus;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.ui.FlxBar;
 import openfl.display.BitmapData;
@@ -53,20 +51,20 @@ class GameJoltInfo extends MusicBeatSubState
    */
 }
 
-class GameJoltLogin extends MusicBeatState
+class GameJoltLogin extends MusicBeatState implements PsychUIEventHandler.PsychUIEvent
 {
   var loginTexts:FlxTypedGroup<FlxText>;
-  var loginBoxes:FlxTypedGroup<FlxInputText>;
-  var loginButtons:FlxTypedGroup<FlxButtonPlus>;
+  var loginBoxes:FlxTypedGroup<PsychUIInputText>;
+  var loginButtons:FlxTypedGroup<PsychUIButton>;
   var usernameText:FlxText;
   var tokenText:FlxText;
-  var usernameBox:FlxInputText;
-  var tokenBox:FlxInputText;
-  var signInBox:FlxButtonPlus;
-  var helpBox:FlxButtonPlus;
-  var logOutBox:FlxButtonPlus;
-  var cancelBox:FlxButtonPlus;
-  var showPassBox:FlxButtonPlus;
+  var usernameBox:PsychUIInputText;
+  var tokenBox:PsychUIInputText;
+  var signInBox:PsychUIButton;
+  var helpBox:PsychUIButton;
+  var logOutBox:PsychUIButton;
+  var cancelBox:PsychUIButton;
+  var showPassBox:PsychUIButton;
   // var profileIcon:FlxSprite;
   var username1:FlxText;
 
@@ -135,11 +133,11 @@ class GameJoltLogin extends MusicBeatState
       item.font = GameJoltInfo.font;
     });
 
-    loginBoxes = new FlxTypedGroup<FlxInputText>(2);
+    loginBoxes = new FlxTypedGroup<PsychUIInputText>(2);
     add(loginBoxes);
 
-    usernameBox = new FlxInputText(Math.floor(FlxG.width * 0.5) - 600, 250, Math.floor(FlxG.width * 0.4) + 20, '', 32);
-    tokenBox = new FlxInputText(Math.floor(FlxG.width * 0.5) - 600, 400, Math.floor(FlxG.width * 0.4) + 20, '', 32);
+    usernameBox = new PsychUIInputText(Math.floor(FlxG.width * 0.5) - 600, 250, Math.floor(FlxG.width * 0.4) + 20, '', 32);
+    tokenBox = new PsychUIInputText(Math.floor(FlxG.width * 0.5) - 600, 400, Math.floor(FlxG.width * 0.4) + 20, '', 32);
 
     var text2:Alphabet = new Alphabet(Math.floor(FlxG.width * 0.5) - 100, usernameBox.y - 100, 'User Name', true);
     add(text2);
@@ -151,24 +149,24 @@ class GameJoltLogin extends MusicBeatState
 
     loginBoxes.add(usernameBox);
     loginBoxes.add(tokenBox);
-    loginBoxes.forEach(function(item:FlxInputText) {
-      item.font = GameJoltInfo.font;
+    loginBoxes.forEach(function(item:PsychUIInputText) {
+      item.textObj.font = GameJoltInfo.font;
     });
 
-    loginButtons = new FlxTypedGroup<FlxButtonPlus>(4);
+    loginButtons = new FlxTypedGroup<PsychUIButton>(4);
     add(loginButtons);
 
-    showPassBox = new FlxButtonPlus(Math.floor(FlxG.width * 0.5), 100, function() {
-      tokenBox.passwordMode = !tokenBox.passwordMode;
-    }, "Show Password?", 200, 60);
+    showPassBox = new PsychUIButton(Math.floor(FlxG.width * 0.5), 100, "Show Password?", function() {
+      tokenBox.passwordMask = !tokenBox.passwordMask;
+    }, 200, 60);
     showPassBox.color = FlxColor.fromRGB(84, 155, 180);
 
-    signInBox = new FlxButtonPlus(Math.floor(FlxG.width * 0.5), showPassBox.y + 100, function() {
+    signInBox = new PsychUIButton(Math.floor(FlxG.width * 0.5), showPassBox.y + 100, "Sign In", function() {
       GameJoltAPI.authDaUser(usernameBox.text, tokenBox.text, true);
       ClientPrefs.saveSettings();
-    }, "Sign In", 200, 60);
+    }, 200, 60);
 
-    helpBox = new FlxButtonPlus(Math.floor(FlxG.width * 0.5), signInBox.y + 100, function() {
+    helpBox = new PsychUIButton(Math.floor(FlxG.width * 0.5), signInBox.y + 100, "GameJolt Token", function() {
       if (!GameJoltAPI.getStatus()) openLink('https://www.youtube.com/watch?v=T5-x7kAGGnE');
       else
       {
@@ -178,25 +176,25 @@ class GameJoltLogin extends MusicBeatState
           "Score submitting is now " + (ClientPrefs.data.gjleaderboardToggle ? "Enabled" : "Disabled"), false);
         ClientPrefs.saveSettings();
       }
-    }, "GameJolt Token", !GameJoltAPI.getStatus() ? 200 : 300, 60);
+    }, !GameJoltAPI.getStatus() ? 200 : 300, 60);
     helpBox.color = FlxColor.fromRGB(84, 155, 149);
 
-    logOutBox = new FlxButtonPlus(Math.floor(FlxG.width * 0.5), helpBox.y + 100, function() {
+    logOutBox = new PsychUIButton(Math.floor(FlxG.width * 0.5), helpBox.y + 100, "Log Out & Close", function() {
       GameJoltAPI.deAuthDaUser();
       GameJoltAPI.connect();
       GameJoltAPI.authDaUser(ClientPrefs.data.gjUser, ClientPrefs.data.gjToken);
       ClientPrefs.saveSettings();
       MusicBeatState.switchState(new options.OptionsState());
-    }, "Log Out & Close", 200, 60);
+    }, 200, 60);
     logOutBox.color = FlxColor.RED /*FlxColor.fromRGB(255,134,61)*/;
 
-    cancelBox = new FlxButtonPlus(Math.floor(FlxG.width * 0.5), logOutBox.y + 100, function() {
+    cancelBox = new PsychUIButton(Math.floor(FlxG.width * 0.5), logOutBox.y + 100, "Not Right Now", function() {
       FlxG.save.flush();
       FlxG.sound.play(Paths.sound('confirmMenu'), 0.2, false, null, true);
       FlxG.save.flush();
       MusicBeatState.switchState(new options.OptionsState());
       ClientPrefs.saveSettings();
-    }, "Not Right Now", 200, 60);
+    }, 200, 60);
 
     usernameBox.visible = !GameJoltAPI.getStatus();
     tokenBox.visible = !GameJoltAPI.getStatus();
@@ -210,16 +208,14 @@ class GameJoltLogin extends MusicBeatState
     }
     else
     {
-      cancelBox.text = "Back";
+      cancelBox.text.text = "Back";
       loginButtons.add(logOutBox);
     }
     loginButtons.add(helpBox);
     loginButtons.add(cancelBox);
     loginButtons.add(showPassBox);
 
-    loginButtons.forEach(function(item:FlxButtonPlus) {
-      item.textNormal.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-      item.textHighlight.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+    loginButtons.forEach(function(item:PsychUIButton) {
       // item.screenCenter(X);
       // item.setGraphicSize(Std.int(item.width) * 3);
       // item.x += baseX;
@@ -239,8 +235,8 @@ class GameJoltLogin extends MusicBeatState
       {
         username1.font = GameJoltInfo.font;
       }
-      loginBoxes.forEach(function(item:FlxInputText) {
-        item.font = GameJoltInfo.font;
+      loginBoxes.forEach(function(item:PsychUIInputText) {
+        item.textObj.font = GameJoltInfo.font;
       });
       loginTexts.forEach(function(item:FlxText) {
         item.font = GameJoltInfo.font;
@@ -252,21 +248,27 @@ class GameJoltLogin extends MusicBeatState
   {
     if (GameJoltAPI.getStatus())
     {
-      helpBox.text = "Leaderboards:\n" + (ClientPrefs.data.gjleaderboardToggle ? "Enabled" : "Disabled");
+      helpBox.text.text = "Leaderboards:\n" + (ClientPrefs.data.gjleaderboardToggle ? "Enabled" : "Disabled");
       helpBox.color = (ClientPrefs.data.gjleaderboardToggle ? FlxColor.GREEN : FlxColor.RED);
     }
 
-    var gameJoltInputText:Array<FlxInputText> = [usernameBox, tokenBox];
-    for (i in 0...gameJoltInputText.length)
+    if (PsychUIInputText.focusOn != null)
     {
-      if (gameJoltInputText[i].hasFocus)
+      ClientPrefs.toggleVolumeKeys(false);
+      super.update(elapsed);
+      return;
+    }
+    else
+    {
+      ClientPrefs.toggleVolumeKeys(true);
+      if (FlxG.keys.justPressed.ESCAPE)
       {
-        ClientPrefs.toggleVolumeKeys(false);
-        super.update(elapsed);
-        return;
+        FlxG.save.flush();
+        FlxG.mouse.visible = false;
+        MusicBeatState.switchState(new states.MainMenuState());
+        ClientPrefs.saveSettings();
       }
     }
-    ClientPrefs.toggleVolumeKeys(true);
 
     if (FlxG.sound.music != null) Conductor.instance.update(FlxG.sound.music.time);
 
@@ -275,22 +277,10 @@ class GameJoltLogin extends MusicBeatState
       FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
     }
 
-    for (i in 0...gameJoltInputText.length)
-    {
-      if (!gameJoltInputText[i].hasFocus)
-      {
-        if (FlxG.keys.justPressed.ESCAPE)
-        {
-          FlxG.save.flush();
-          FlxG.mouse.visible = false;
-          MusicBeatState.switchState(new states.MainMenuState());
-          ClientPrefs.saveSettings();
-        }
-      }
-    }
-
     super.update(elapsed);
   }
+
+  public function UIEvent(id:String, sender:Dynamic) {}
 
   override function beatHit()
   {

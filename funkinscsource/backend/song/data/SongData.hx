@@ -42,6 +42,7 @@ class SongMetaData implements ICloneable<SongMetaData>
     this.songData.inclusiveData.generatedBy = SongRegistry.DEFAULT_GENERATEDBY;
     this.songData.inclusiveData.artist = artist;
     this.songData.inclusiveData.charter = "";
+    this.songData.inclusiveData.campaignCharacter = "";
   }
 
   public function clone():SongMetaData
@@ -57,7 +58,8 @@ class SongMetaData implements ICloneable<SongMetaData>
     result.songData.inclusiveData.offsets = this.songData.inclusiveData.offsets != null ? this.songData.inclusiveData.offsets.clone() : new SongOffsets(); // if no song offsets found (aka null), so just create new ones
     result.songData.inclusiveData.looped = this.songData.inclusiveData.looped;
     result.songData.inclusiveData.generatedBy = this.songData.inclusiveData.generatedBy;
-    result.songData.inclusiveData.charter = "";
+    result.songData.inclusiveData.charter = this.songData.inclusiveData.charter;
+    result.songData.inclusiveData.campaignCharacter = this.songData.inclusiveData.campaignCharacter;
     return result;
   }
 
@@ -849,6 +851,10 @@ class SongInclusiveData implements ICloneable<SongInclusiveData>
   @:default(15000)
   public var previewEnd:Int;
 
+  @:optional
+  @:default(utils.Constants.DEFAULT_CHARACTER)
+  public var campaignCharacter:String;
+
   public function new()
   {
     this.artist = Constants.DEFAULT_ARTIST;
@@ -861,6 +867,7 @@ class SongInclusiveData implements ICloneable<SongInclusiveData>
     this.previewStart = 0;
     this.previewEnd = 15000;
     this.charter = Constants.DEFAULT_CHARTER;
+    this.campaignCharacter = Constants.DEFAULT_CHARACTER;
   }
 
   public function clone():SongInclusiveData
@@ -875,6 +882,7 @@ class SongInclusiveData implements ICloneable<SongInclusiveData>
     result.previewStart = this.previewStart;
     result.previewEnd = this.previewEnd;
     result.charter = this.charter;
+    result.campaignCharacter = this.campaignCharacter;
     return result;
   }
 }
@@ -1174,6 +1182,19 @@ abstract SongEventData(SongEventDataRaw) from SongEventDataRaw to SongEventDataR
   public function clone():SongEventData
   {
     return new SongEventData(this.time, this.name, this.value);
+  }
+
+  @:nullSafety(Off)
+  public function getValues():Array<String>
+  {
+    if (this.value.length > 0)
+    {
+      Debug.logInfo('Values found');
+      return this.value;
+    }
+    Debug.logWarn('Values RESET or NOT FOUND');
+    this.value = ["", "", "", "", "", "", "", "", "", "", "", "", "", ""];
+    return this.value;
   }
 
   @:op(A == B)

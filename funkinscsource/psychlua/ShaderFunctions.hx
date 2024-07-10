@@ -359,7 +359,7 @@ class ShaderFunctions
           if (spr != null) spr.shader = Reflect.getProperty(shad, 'shader');
           if (actor != null) actor.shader = Reflect.getProperty(shad, 'shader');
 
-          if (actor == null && spr == null) Debug.logInfo('Actor and spr are both null!');
+          if (actor == null && spr == null) Debug.logError('Actor and spr are both null!');
         }
       });
 

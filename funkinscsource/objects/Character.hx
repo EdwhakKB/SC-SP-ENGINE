@@ -288,7 +288,7 @@ class Character extends FunkinSCSprite
   public var defaultIdleBeat:Int = 1;
 
   /**
-   * Whether the player is an active character (Boyfriend) or not.
+   * Whether the player is an active character (char) or not.
    */
   public var characterType(default, set):CharacterType = OTHER;
 
@@ -306,6 +306,11 @@ class Character extends FunkinSCSprite
    * A characters Id. curCharacter to be exact.
    */
   public var characterId:String = "";
+
+  /**
+   * A special Tool
+   */
+  public var tools:Tools;
 
   override public function new(x:Float, y:Float, ?character:String = 'bf', ?isPlayer:Bool = false)
   {
@@ -332,6 +337,7 @@ class Character extends FunkinSCSprite
 
     healthIcon = character;
     curCharacter = character;
+    tools = new Tools();
     this.isPlayer = isPlayer;
 
     idleSuffix = "";
@@ -381,7 +387,7 @@ class Character extends FunkinSCSprite
     catch (e:Dynamic)
     {
       charNotPlaying = true;
-      Debug.logInfo('Error loading character file of "$character": $e');
+      Debug.logError('Error loading character file of "$character": $e');
     }
 
     if (charNotPlaying) // Leave the character without any animations and ability to dance!
@@ -534,7 +540,7 @@ class Character extends FunkinSCSprite
     }
     else
     {
-      Debug.logInfo("Character has no Frames!");
+      Debug.logError("Character has no Frames!");
       charNotPlaying = true;
     }
 
@@ -884,6 +890,89 @@ class Character extends FunkinSCSprite
     this.destroyAtlas();
     #end
     super.destroy();
+  }
+}
+
+class Tools
+{
+  public function new() {}
+
+  public function swapCharacter(char:Character, type:String, id:String, flipped:Bool)
+  {
+    var animationName:String = "no way anyone have an anim name this big";
+    var animationFrame:Int = 0;
+    if (char.playAnimationBeforeSwitch)
+    {
+      animationName = char.animation.curAnim.name;
+      animationFrame = char.animation.curAnim.curFrame;
+    }
+
+    char.resetAnimationVars();
+
+    if (PlayState.instance != null)
+    {
+      PlayState.instance?.removeObject(char);
+      PlayState.instance?.destroyObject(char);
+    }
+
+    var changeInFlip:Bool = switch (type)
+    {
+      case 'player', 'gf': !flipped;
+      default: flipped;
+    }
+
+    char = new Character(0, 0, id, changeInFlip);
+    char.flipMode = flipped;
+
+    var charX:Float = 0;
+    var charY:Float = 0;
+
+    switch (type)
+    {
+      case 'player':
+        charX = char.positionArray[0];
+        charY = char.positionArray[1] - 350;
+      default:
+        charX = char.positionArray[0];
+        charY = char.positionArray[1];
+    }
+
+    if (PlayState.instance != null)
+    {
+      switch (type)
+      {
+        case 'player', 'bf', 'boyfriend':
+          char.x = (PlayState.instance?.Stage?.bfXOffset ?? 0) + charX + (PlayState.instance?.BF_X ?? 0);
+          char.y = (PlayState.instance?.Stage?.bfYOffset ?? 0) + charY + (PlayState.instance?.BF_Y ?? 0);
+        case 'girlfriend', 'gf':
+          char.x = (PlayState.instance?.Stage?.gfXOffset ?? 0) + charX + (PlayState.instance?.GF_X ?? 0);
+          char.y = (PlayState.instance?.Stage?.gfYOffset ?? 0) + charY + (PlayState.instance?.GF_Y ?? 0);
+          char.scrollFactor.set(0.95, 0.95);
+        case 'opponent', 'dad':
+          char.x = (PlayState.instance?.Stage?.dadXOffset ?? 0) + charX + (PlayState.instance?.DAD_X ?? 0);
+          char.y = (PlayState.instance?.Stage?.dadYOffset ?? 0) + charY + (PlayState.instance?.DAD_Y ?? 0);
+        case 'secondOpponent', 'mom':
+          char.x = (PlayState.instance?.Stage?.momXOffset ?? 0) + charX + (PlayState.instance?.MOM_X ?? 0);
+          char.y = (PlayState.instance?.Stage?.momYOffset ?? 0) + charY + (PlayState.instance?.MOM_Y ?? 0);
+      }
+
+      PlayState.instance?.addObject(char);
+
+      switch (type)
+      {
+        case 'player':
+          PlayState.instance?.iconP1.changeIcon(char.healthIcon);
+        case 'opponent':
+          PlayState.instance?.iconP2.changeIcon(char.healthIcon);
+      }
+      PlayState.instance?.reloadHealthBarColors();
+      PlayState.instance?.startCharacterScripts(char.curCharacter);
+    }
+
+    if (char.playAnimationBeforeSwitch)
+    {
+      if (char.animOffsets.exists(animationName)) char.playAnim(animationName, true, false, animationFrame);
+    }
   }
 }
 

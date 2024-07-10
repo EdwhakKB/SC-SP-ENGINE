@@ -127,10 +127,14 @@ class StoryMenuState extends MusicBeatState
       grpWeekCharacters.add(weekCharacterThing);
     }
 
+    add(bgYellow);
+    add(bgSprite);
+    add(grpWeekCharacters);
+
     difficultySelectors = new FlxGroup();
     add(difficultySelectors);
 
-    leftArrow = new FlxSprite(grpWeekText.members[0].x + grpWeekText.members[0].width + 10, grpWeekText.members[0].y + 10);
+    leftArrow = new FlxSprite(450, 10);
     leftArrow.antialiasing = ClientPrefs.data.antialiasing;
     leftArrow.frames = ui_tex;
     leftArrow.animation.addByPrefix('idle', "arrow left");
@@ -162,10 +166,6 @@ class StoryMenuState extends MusicBeatState
     rightArrow.animation.addByPrefix('press', "arrow push right", 24, false);
     rightArrow.animation.play('idle');
     difficultySelectors.add(rightArrow);
-
-    add(bgYellow);
-    add(bgSprite);
-    add(grpWeekCharacters);
 
     var tracksSprite:FlxSprite = new FlxSprite(FlxG.width * 0.07 + 100, bgSprite.y + 425).loadGraphic(Paths.image('Menu_Tracks'));
     tracksSprite.antialiasing = ClientPrefs.data.antialiasing;
@@ -346,15 +346,15 @@ class StoryMenuState extends MusicBeatState
         targetSong = backend.song.data.SongRegistry.instance.fetchEntry(PlayState.storyPlaylist[0].toLowerCase());
         if (targetSong == null)
         {
-          Debug.logInfo('WARN: could not find song with id (${Paths.formatToSongPath(PlayState.storyPlaylist[0]).toLowerCase()})');
+          Debug.logWarn('Could not find song with id (${Paths.formatToSongPath(PlayState.storyPlaylist[0]).toLowerCase()})');
           return;
         }
         targetDifficulty = diffic == '' ? "normal" : diffic;
-        targetVariation = targetSong.getFirstValidVariation(targetDifficulty);
+        targetVariation = targetSong.getFirstValidVariation(targetDifficulty, targetSong.getVariationsByCharId('bf'));
       }
       catch (e:Dynamic)
       {
-        Debug.logInfo('ERROR! $e');
+        Debug.logError('ERROR! $e');
         return;
       }
 
@@ -495,7 +495,6 @@ class StoryMenuState extends MusicBeatState
       curDifficulty = 0;
 
     var newPos:Int = Difficulty.list.indexOf(lastDifficultyName);
-    // trace('Pos of ' + lastDifficultyName + ' is ' + newPos);
     if (newPos > -1)
     {
       curDifficulty = newPos;

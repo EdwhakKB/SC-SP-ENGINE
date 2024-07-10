@@ -269,7 +269,7 @@ class PsychToNewFNFUtil
 
     generateInfo('Write Mes', events?.length > 0 ? "passed event data creation" : "passed event data, but no events", isInChartConverterState);
 
-    Reflect.setField(convertedChartTemplate.scrollSpeed, diff, (chartObject?.song?.speed ?? 0.0) + 1.0);
+    Reflect.setField(convertedChartTemplate.scrollSpeed, diff, chartObject?.song?.speed ?? 1.0);
     Reflect.setField(convertedChartTemplate.notes, diff, noteArray);
     Reflect.setField(convertedChartTemplate.events, diff, eventsArray);
     Reflect.setField(convertedChartTemplate.sectionVariables, diff, sectionVariables);
@@ -282,7 +282,7 @@ class PsychToNewFNFUtil
     var songName:String = chartObject?.song?.song ?? "not found";
     if (songName == "not found") chartObject?.song?.songId ?? "test";
 
-    metaDataTemplate.songData.playData.songName = songName;
+    metaDataTemplate.songData.playData.songName = songNameToMetaData;
     metaDataTemplate.songData.playData.stage = chartObject?.song?.stage ?? "mainStage";
     metaDataTemplate.songData.playData.characters.player = chartObject?.song?.player1 ?? "bf";
     metaDataTemplate.songData.playData.characters.girlfriend = gfVersion;

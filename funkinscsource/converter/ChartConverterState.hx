@@ -1,8 +1,6 @@
 package converter;
 
 import converter.PsychToNewFNFUtil;
-import flixel.addons.ui.FlxInputText;
-import flixel.addons.ui.FlxButtonPlus;
 
 /*
  * A state that allows the user to convert JSON files from Psych Engine to new Friday Night Funkin' format in charts.
@@ -68,15 +66,10 @@ class ChartConverterState extends MusicBeatState
     mainText.screenCenter(X);
     add(mainText);
 
-    var inputForPath = new FlxInputText(0, mainText.y + 190, 740, "", 32, FlxColor.WHITE, FlxColor.WHITE, false);
-    inputForPath.setFormat("VCR OSD Mono", 32, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+    var inputForPath = new PsychUIInputText(0, mainText.y + 190, 740, "", 30);
     inputForPath.scrollFactor.set();
-    inputForPath.backgroundColor = FlxColor.WHITE;
-    inputForPath.hasFocus = false;
     inputForPath.screenCenter(X);
     inputForPath.maxLength = 2000;
-    inputForPath.size = 30;
-    inputForPath.borderSize = 0.1;
     add(inputForPath);
     var subTextForPath = new FlxText(inputForPath.x, inputForPath.y - 28, 0,
       "Enter the path of your JSON file here (name OF the file, with .json extension):", 15);
@@ -84,14 +77,9 @@ class ChartConverterState extends MusicBeatState
     subTextForPath.scrollFactor.set();
     add(subTextForPath);
 
-    var inputForFinalSongName = new FlxInputText(inputForPath.x, subTextForPath.y + 120, 460, "", 32, FlxColor.WHITE, FlxColor.WHITE, false);
-    inputForFinalSongName.setFormat("VCR OSD Mono", 32, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+    var inputForFinalSongName = new PsychUIInputText(inputForPath.x, subTextForPath.y + 120, 460, "", 30);
     inputForFinalSongName.scrollFactor.set();
-    inputForFinalSongName.backgroundColor = FlxColor.WHITE;
-    inputForFinalSongName.hasFocus = false;
     inputForFinalSongName.maxLength = 300;
-    inputForFinalSongName.size = 30;
-    inputForFinalSongName.borderSize = 0.1;
     add(inputForFinalSongName);
     var subTextForFinalSongName = new FlxText(inputForFinalSongName.x, inputForFinalSongName.y - 28, 0,
       "Enter the name of your song here (use name of the JSON file):", 15);
@@ -99,9 +87,7 @@ class ChartConverterState extends MusicBeatState
     subTextForFinalSongName.scrollFactor.set();
     add(subTextForFinalSongName);
 
-    var startBox:FlxButtonPlus = new FlxButtonPlus(0, 0, startConvertion, "Convert!!", 180, 50);
-    startBox.textNormal.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
-    startBox.textHighlight.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+    var startBox:PsychUIButton = new PsychUIButton(0, 0, "Convert!!", startConvertion, 180, 50);
     startBox.color = FlxColor.GREEN;
     startBox.screenCenter();
     startBox.y += 180;
@@ -117,14 +103,14 @@ class ChartConverterState extends MusicBeatState
     terminalOutput.alpha = 0;
     add(terminalOutput);
 
-    inputForPath.callback = function(text:String, event:String) {
+    inputForPath.onChange = function(text:String, event:String) {
       if (canEnterInput)
       {
         params.path = text;
       }
     }
 
-    inputForFinalSongName.callback = function(text:String, event:String) {
+    inputForFinalSongName.onChange = function(text:String, event:String) {
       if (canEnterInput)
       {
         params.songName = text;

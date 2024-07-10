@@ -232,7 +232,7 @@ class FileUtil
         {
           if (resource.data == null)
           {
-            trace('WARNING: File $filePath has no data or content. Skipping.');
+            Debug.logWarn('File $filePath has no data or content. Skipping.');
             continue;
           }
           else
@@ -248,7 +248,7 @@ class FileUtil
       }
       onSaveAll(paths);
     }
-    trace('Browsing for directory to save individual files to...');
+    Debug.logInfo('Browsing for directory to save individual files to...');
     #if mac
     defaultPath = null;
     #end
@@ -271,7 +271,7 @@ class FileUtil
     // Create a ZIP file.
     var zipBytes:Bytes = createZIPFromEntries(resources);
     var onSave:String->Void = function(path:String) {
-      trace('Saved ${resources.length} files to ZIP at "$path".');
+      Debug.logInfo('Saved ${resources.length} files to ZIP at "$path".');
       if (onSave != null) onSave([path]);
     };
     // Prompt the user to save the ZIP file.
@@ -288,7 +288,7 @@ class FileUtil
     // Create a ZIP file.
     var zipBytes:Bytes = createZIPFromEntries(resources);
     var onSave:String->Void = function(path:String) {
-      trace('Saved FNF file to "$path"');
+      Debug.logInfo('Saved FNF file to "$path"');
       if (onSave != null) onSave([path]);
     };
     // Prompt the user to save the ZIP file.
@@ -327,7 +327,7 @@ class FileUtil
     #if sys
     return sys.io.File.getContent(path);
     #else
-    trace('ERROR: readStringFromPath not implemented for this platform');
+    Debug.logError('ERROR: readStringFromPath not implemented for this platform');
     return null;
     #end
   }
@@ -369,10 +369,10 @@ class FileUtil
     var file = new FileReference();
     file.addEventListener(Event.SELECT, function(e) {
       var selectedFileRef:FileReference = e.target;
-      trace('Selected file: ' + selectedFileRef.name);
+      Debug.logInfo('Selected file: ' + selectedFileRef.name);
       selectedFileRef.addEventListener(Event.COMPLETE, function(e) {
         var loadedFileRef:FileReference = e.target;
-        trace('Loaded file: ' + loadedFileRef.name);
+        Debug.logInfo('Loaded file: ' + loadedFileRef.name);
         callback(loadedFileRef);
       });
       selectedFileRef.load();
@@ -387,13 +387,13 @@ class FileUtil
   {
     var file = new FileReference();
     file.addEventListener(Event.COMPLETE, function(e:Event) {
-      trace('Successfully wrote file.');
+      Debug.logInfo('Successfully wrote file.');
     });
     file.addEventListener(Event.CANCEL, function(e:Event) {
-      trace('Cancelled writing file.');
+      Debug.logWarn('Cancelled writing file.');
     });
     file.addEventListener(IOErrorEvent.IO_ERROR, function(e:IOErrorEvent) {
-      trace('IO error writing file.');
+      Debug.logError('IO error writing file.');
     });
     file.save(data, path);
   }
@@ -585,8 +585,8 @@ class FileUtil
 
   public static function readZIPFromBytes(input:Bytes):Array<Entry>
   {
-    trace('TEST: ' + input.length);
-    trace(input.sub(0, 30).toHex());
+    Debug.logInfo('TEST: ' + input.length);
+    Debug.logInfo(input.sub(0, 30).toHex());
     var bytesInput = new haxe.io.BytesInput(input);
     var zippedEntries = haxe.zip.Reader.readZip(bytesInput);
     var results:Array<Entry> = [];

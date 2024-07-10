@@ -101,7 +101,7 @@ class FunkinSCSprite extends FlxSkewed implements backend.interfaces.IOffsetSett
       catch (e:Dynamic)
       {
         this.failedLoadingAutoAtlas = true;
-        Debug.logInfo('Could not load atlas ${path}: $e');
+        Debug.logError('Could not load atlas ${path}: $e');
       }
     }
     #end

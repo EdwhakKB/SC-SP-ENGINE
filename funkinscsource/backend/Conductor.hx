@@ -270,30 +270,11 @@ class Conductor
   public var formatOffset:Float = 0;
 
   /**
-   * An offset set by the user to compensate for input lag.
-   * No matter if you're using a local conductor or not, this always loads
-   * to/from the save file
-   */
-  public var inputOffset(get, set):Int;
-
-  /**
    * An offset set by the user to compensate for audio/visual lag
    * No matter if you're using a local conductor or not, this always loads
    * to/from the save file
    */
   public var audioVisualOffset(get, set):Int;
-
-  function get_inputOffset():Int
-  {
-    return ClientPrefs.data != null ? ClientPrefs.data.inputOffset : 0;
-  }
-
-  function set_inputOffset(value:Int):Int
-  {
-    ClientPrefs.data.inputOffset = value;
-    ClientPrefs.flush();
-    return ClientPrefs.data.inputOffset;
-  }
 
   function get_audioVisualOffset():Int
   {
@@ -413,7 +394,7 @@ class Conductor
     }
     else
     {
-      Debug.logInfo('[CONDUCTOR] Resetting BPM to default');
+      Debug.logError('[CONDUCTOR] BPM Is NULL, Resetting BPM to default');
     }
 
     this.bpmOverride = bpm;
@@ -457,7 +438,7 @@ class Conductor
 
     if (currentTimeChange == null && bpmOverride == null && FlxG.sound.music != null)
     {
-      Debug.logInfo('WARNING: Conductor is broken, timeChanges is empty.');
+      Debug.logWarn('Conductor is broken, timeChanges is empty.');
     }
     else if (currentTimeChange != null && this.songPosition > 0.0)
     {
@@ -517,12 +498,9 @@ class Conductor
   public function getTimeWithDiff(?soundToCheck:FlxSound):Float
   {
     if (soundToCheck == null) soundToCheck = FlxG.sound.music;
-    // trace(this.songPosition);
 
     @:privateAccess
     this.songPosition = soundToCheck._channel.position;
-    // return this.songPosition + (Std.int(Timer.stamp() * 1000) - prevTimestamp);
-    // trace("\t--> " + this.songPosition);
     return this.songPosition;
   }
 

@@ -65,12 +65,14 @@ class SongRegistry extends BaseRegistry<Song, SongMetaData>
     //
     // UNSCRIPTED ENTRIES
     //
-    var entryIdList:Array<String> = DataAssets.listDataFilesInPath('songs/', '-metadata.json').map(function(songDataPath:String):String {
+    var entryIdList:Array<String> = DataAssets.listDataFilesInPath('songs/').map(function(songDataPath:String):String {
       return songDataPath.split('/')[0];
     });
     var unscriptedEntryIds:Array<String> = entryIdList.filter(function(entryId:String):Bool {
       return !entries.exists(entryId);
     });
+    if (unscriptedEntryIds.length == 0) return;
+
     log('Parsing ${unscriptedEntryIds.length} unscripted entries...');
     for (entryId in unscriptedEntryIds)
     {
@@ -79,15 +81,46 @@ class SongRegistry extends BaseRegistry<Song, SongMetaData>
         var entry:Null<Song> = createEntry(entryId);
         if (entry != null)
         {
-          Debug.logInfo('  Loaded entry data: ${entry}');
+          // Debug.logInfo('Loaded new entrys data: ${entry}');
           entries.set(entry.id, entry);
         }
       }
       catch (e:Dynamic)
       {
         // Print the error.
-        Debug.logInfo('  Failed to load entry data: ${entryId}');
-        Debug.logInfo(e);
+        // Debug.logError('Failed to new load entry data: ${entryId}');
+        // Debug.logError('ERROR! $e');
+        continue;
+      }
+    }
+  }
+
+  public override function pushNewEntries():Void
+  {
+    var entryIdList:Array<String> = DataAssets.listDataFilesInPath('songs/').map(function(songDataPath:String):String {
+      return songDataPath.split('/')[0];
+    });
+    var unscriptedEntryIds:Array<String> = entryIdList.filter(function(entryId:String):Bool {
+      return !entries.exists(entryId);
+    });
+    if (unscriptedEntryIds.length == 0) return;
+    log('Parsing New ${unscriptedEntryIds.length} unscripted entries...');
+    for (entryId in unscriptedEntryIds)
+    {
+      try
+      {
+        var entry:Null<Song> = createEntry(entryId);
+        if (entry != null)
+        {
+          // Debug.logInfo('Loaded new entrys data: ${entry}');
+          entries.set(entry.id, entry);
+        }
+      }
+      catch (e:Dynamic)
+      {
+        // Print the error.
+        // Debug.logError('Failed to new load entry data: ${entryId}');
+        // Debug.logError('ERROR! $e');
         continue;
       }
     }
@@ -402,7 +435,7 @@ class SongRegistry extends BaseRegistry<Song, SongMetaData>
     var entryFilePath:String = Paths.json('$dataFilePath/$id/$id-metadata${variation == Constants.DEFAULT_VARIATION ? '' : '-$variation'}');
     if (!FileSystem.exists(entryFilePath))
     {
-      Debug.logInfo('  [WARN] Could not locate file $entryFilePath');
+      Debug.logWarn('Could not locate file $entryFilePath');
       return null;
     }
     var rawJson:Null<String> = File.getContent(entryFilePath);

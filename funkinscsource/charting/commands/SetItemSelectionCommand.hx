@@ -41,7 +41,15 @@ class SetItemSelectionCommand implements ChartEditorCommand
         Debug.logInfo('Switching target event kind to match selection: ${state.eventKindToPlace} != ${eventSelected.name}');
         state.eventKindToPlace = eventSelected.name;
       }
-      state.eventDataToPlace = backend.SafeNullArray.copyEventValue(eventSelected.value);
+
+      var eventData = eventSelected.getValues();
+
+      var eventDataClone = Reflect.copy(eventData);
+
+      if (eventDataClone != null)
+      {
+        state.eventDataToPlace = eventDataClone;
+      }
 
       state.refreshToolbox(ChartEditorState.CHART_EDITOR_TOOLBOX_EVENT_DATA_LAYOUT);
     }

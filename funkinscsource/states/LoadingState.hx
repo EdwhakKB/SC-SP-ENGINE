@@ -146,7 +146,7 @@ class LoadingState extends MusicBeatState
       if (bitmap != null
         && Paths.cacheBitmap(originalBitmapKeys.get(key), bitmap) != null) Debug.logInfo('finished preloading image $key');
       else
-        Debug.logInfo('failed to cache image $key');
+        Debug.logError('failed to cache image $key');
     }
     requestedBitmaps.clear();
     originalBitmapKeys.clear();
@@ -417,8 +417,6 @@ class LoadingState extends MusicBeatState
         for (subfolder in Mods.directoriesWithFile(Paths.getSharedPath(), '$prefix/$folder'))
           for (file in FileSystem.readDirectory(subfolder))
             if (file.endsWith(ext)) arr.push(folder + file.substr(0, file.length - ext.length));
-
-        // trace('Folder detected! ' + folder);
       }
     }
 
@@ -429,12 +427,11 @@ class LoadingState extends MusicBeatState
       var myKey = '$prefix/$member$ext';
       if (parentfolder == 'songs') myKey = '$member$ext';
 
-      // trace('attempting on $prefix: $myKey');
       var doTrace:Bool = false;
       if (member.endsWith('/') || (!Paths.fileExists(myKey, type, false, parentfolder) && (doTrace = true)))
       {
         arr.remove(member);
-        if (doTrace) Debug.logInfo('Removed invalid $prefix: $member');
+        if (doTrace) Debug.logWarn('Removed invalid $prefix: $member');
       }
       else
         i++;
@@ -475,7 +472,7 @@ class LoadingState extends MusicBeatState
           #if MODS_ALLOWED
           else if (!FileSystem.exists(file))
           {
-            Debug.logInfo('no such image $image exists');
+            Debug.logError('no such image $image exists');
             mutex.release();
             loaded++;
             return;
@@ -485,7 +482,7 @@ class LoadingState extends MusicBeatState
           #else
           else if (!OpenFlAssets.exists(file, IMAGE))
           {
-            Debug.logInfo('no such image $image exists');
+            Debug.logError('no such image $image exists');
             mutex.release();
             loaded++;
             return;
@@ -501,12 +498,12 @@ class LoadingState extends MusicBeatState
             originalBitmapKeys.set(file, requestKey);
           }
           else
-            Debug.logInfo('oh no the image is null NOOOO ($image)');
+            Debug.logError('oh no the image is null NOOOO ($image)');
         }
         catch (e:Dynamic)
         {
           mutex.release();
-          Debug.logInfo('ERROR! fail on preloading image $image');
+          Debug.logError('ERROR! fail on preloading image $image');
         }
         loaded++;
       });
@@ -521,14 +518,14 @@ class LoadingState extends MusicBeatState
         var ret:Dynamic = func();
         mutex.release();
 
-        if (ret != null) Debug.logInfo('finished preloading $traceData');
+        if (ret != null) Debug.logError('finished preloading $traceData');
         else
-          Debug.logInfo('ERROR! fail on preloading $traceData');
+          Debug.logError('ERROR! fail on preloading $traceData');
       }
       catch (e:Dynamic)
       {
         mutex.release();
-        Debug.logInfo('ERROR! fail on preloading $traceData');
+        Debug.logError('ERROR! fail on preloading $traceData');
       }
       loaded++;
     });
@@ -583,6 +580,27 @@ class LoadingState extends MusicBeatState
     var playStateCtor:() -> PlayState = function() {
       return new PlayState(params);
     };
+    if (FreeplayState.instance != null)
+    {
+      if (FreeplayState.instance.inst != null)
+      {
+        FreeplayState.instance.inst.destroy();
+        FreeplayState.instance.inst = null;
+      }
+
+      if (FreeplayState.instance.allVocals != null)
+      {
+        for (vocal in FreeplayState.instance.allVocals.keys())
+        {
+          if (FreeplayState.instance.allVocals.exists(vocal))
+          {
+            FreeplayState.instance.allVocals.get(vocal).destroy();
+          }
+        }
+        FreeplayState.instance.allVocals.clear();
+        FreeplayState.instance.allVocals = null;
+      }
+    }
 
     Debug.logInfo('up hear listening to it loading!');
 

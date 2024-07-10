@@ -39,7 +39,7 @@ class HScript extends Script
       if (FileSystem.exists(rawPath)) code = sys.io.File.getContent(rawPath);
     }
     catch (e)
-      Debug.logInfo('Error while reading $path: ${Std.string(e)}');
+      Debug.logError('Error while reading $path: ${Std.string(e)}');
     parser = initParser();
     folderlessPath = Path.directory(path);
     __importedPaths = [path];
@@ -68,12 +68,12 @@ class HScript extends Script
     }
     catch (e:Error)
     {
-      Debug.logInfo('failed once');
+      Debug.logError('failed once');
       _errorHandler(e);
     }
     catch (e)
     {
-      Debug.logInfo('failed twice');
+      Debug.logError('failed twice');
       _errorHandler(new Error(ECustom(e.toString()), 0, 0, fileName, 0));
     }
 
@@ -124,8 +124,8 @@ class HScript extends Script
     var err = error.toString();
     if (err.startsWith(fn)) err = err.substr(fn.length);
 
-    Debug.logInfo(fn);
-    Debug.logInfo(err);
+    Debug.logError(fn);
+    Debug.logError(err);
 
     // Reminder that this is so amazing to see error in-game
     #if HSCRIPT_ALLOWED

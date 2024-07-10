@@ -11,7 +11,7 @@ import flixel.util.FlxSpriteUtil;
  * Handles the note scrollbar preview in the chart editor.
  */
 @:nullSafety
-class ChartEditorNotePreview extends FunkinSCSprite
+class ChartEditorNotePreview extends charting.ChartEditorState.FunkinSprite
 {
   //
   // Constants

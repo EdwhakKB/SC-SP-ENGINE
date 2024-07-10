@@ -197,7 +197,7 @@ class CoolUtil
     var command:String = 'explorer.exe';
     #end
     Sys.command(command, [folder]);
-    trace('$command $folder');
+    Debug.logInfo('$command $folder');
     #else
     FlxG.error("Platform is not supported for CoolUtil.openFolder");
     #end

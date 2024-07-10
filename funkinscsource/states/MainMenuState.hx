@@ -60,11 +60,8 @@ class MainMenuState extends MusicBeatState
 
     #if DISCORD_ALLOWED
     // Updating Discord Rich Presence
-    DiscordClient.changePresence("Waiting for an option - Main Menu", null);
+    DiscordClient.changePresence("Waiting for an menu option - Main Menu", null);
     #end
-
-    transIn = FlxTransitionableState.defaultTransIn;
-    transOut = FlxTransitionableState.defaultTransOut;
 
     Conductor.instance.forceBPM(128.0);
 

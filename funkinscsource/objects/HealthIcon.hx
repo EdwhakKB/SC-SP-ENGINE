@@ -116,7 +116,7 @@ class HealthIcon extends FunkinSCSprite
     }
     catch (e:Dynamic)
     {
-      Debug.logInfo("Couldn't find sprite and xml, nor single sprite to load!, Error: " + e);
+      Debug.logError("Couldn't find sprite and xml, nor single sprite to load!, Error: " + e);
     }
 
     changedComplete = true;

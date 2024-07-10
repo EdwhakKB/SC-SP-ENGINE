@@ -49,18 +49,18 @@ class DiscordClient
     else // New Discord IDs/Discriminator system
       message += '($user)';
 
-    trace(message);
+    Debug.logInfo(message);
     changePresence();
   }
 
   private static function onError(errorCode:Int, message:cpp.ConstCharStar):Void
   {
-    Debug.logInfo('Discord: Error ($errorCode: ${cast (message, String)})');
+    Debug.logError('Discord: Error ($errorCode: ${cast (message, String)})');
   }
 
   private static function onDisconnected(errorCode:Int, message:cpp.ConstCharStar):Void
   {
-    Debug.logInfo('Discord: Disconnected ($errorCode: ${cast (message, String)})');
+    Debug.logWarn('Discord: Disconnected ($errorCode: ${cast (message, String)})');
   }
 
   public static function initialize()
@@ -110,8 +110,6 @@ class DiscordClient
     presence.startTimestamp = Std.int(startTimestamp / 1000);
     presence.endTimestamp = Std.int(endTimestamp / 1000);
     updatePresence();
-
-    // trace('Discord RPC Updated. Arguments: $details, $state, $smallImageKey, $hasStartTimestamp, $endTimestamp');
   }
 
   public static function updatePresence()
@@ -145,7 +143,6 @@ class DiscordClient
     if (pack != null && pack.discordRPC != null && pack.discordRPC != clientID)
     {
       clientID = pack.discordRPC;
-      // trace('Changing clientID! $clientID, $_defaultID');
     }
   }
   #end

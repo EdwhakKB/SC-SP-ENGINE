@@ -37,8 +37,6 @@ class CPPWindows
 
     if (darkMode > 1 || darkMode < 0)
     {
-      trace("WindowColorMode Not Found...");
-
       return;
     }
 

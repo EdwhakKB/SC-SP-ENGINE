@@ -12,7 +12,6 @@ class Language
     #if TRANSLATIONS_ALLOWED
     var langFile:String = ClientPrefs.data.language;
     var loadedText:Array<String> = Mods.mergeAllTextsNamed('data/$langFile.lang');
-    // trace(loadedText);
 
     phrases.clear();
     var hasPhrases:Bool = false;
@@ -37,7 +36,6 @@ class Language
       n = value.indexOf('"');
       if (n < 0) continue;
 
-      // trace("Mapped to " + key);
       phrases.set(key, value.substring(n + 1, value.lastIndexOf('"')).replace('\\n', '\n'));
       hasPhrases = true;
     }
@@ -56,7 +54,6 @@ class Language
   inline public static function getPhrase(key:String, ?defaultPhrase:String, values:Array<Dynamic> = null):String
   {
     #if TRANSLATIONS_ALLOWED
-    // trace(formatKey(key));
     var str:String = phrases.get(formatKey(key));
     if (str == null) str = defaultPhrase;
     #else

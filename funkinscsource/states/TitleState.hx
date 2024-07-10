@@ -84,10 +84,6 @@ class TitleState extends MusicBeatState
     cpp.CPPInterface.darkMode();
     #end
 
-    Debug.logInfo('READING SONGS');
-    backend.song.data.SongRegistry.instance.loadEntries();
-    Debug.logInfo('READ SONGS');
-
     super.create();
 
     if (!skippedIntro && FlxG.sound.music != null) FlxG.sound.music = null;
@@ -422,13 +418,13 @@ class TitleState extends MusicBeatState
         Debug.logInfo('version online: ' + updateVersion + ', your version: ' + curVersion);
         if (updateVersion != curVersion)
         {
-          Debug.logInfo('versions arent matching!');
+          Debug.logWarn('versions arent matching!');
           mustUpdate = true;
         }
       }
 
       http.onError = function(error) {
-        Debug.logInfo('error: $error');
+        Debug.logError('error: $error');
       }
 
       http.request();
@@ -658,13 +654,13 @@ class TitleState extends MusicBeatState
           Debug.logInfo('CONNECTED');
         default: // error
           internetConnection = false;
-          Debug.logInfo('NO INTERNET CONNECTION');
+          Debug.logError('NO INTERNET CONNECTION');
       }
     };
 
     http.onError = function(e) {
       internetConnection = false;
-      Debug.logInfo('NO INTERNET CONNECTION');
+      Debug.logError('NO INTERNET CONNECTION');
     }
 
     http.request();

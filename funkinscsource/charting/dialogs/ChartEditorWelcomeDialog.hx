@@ -113,7 +113,7 @@ class ChartEditorWelcomeDialog extends ChartEditorBaseDialog
 
     if (!FileUtil.doesFileExist(chartPath))
     {
-      Debug.logInfo('Previously loaded chart file (${chartPath}) does not exist, disabling link...');
+      Debug.logWarn('Previously loaded chart file (${chartPath}) does not exist, disabling link...');
       linkRecentChart.disabled = true;
     }
 
@@ -149,7 +149,7 @@ class ChartEditorWelcomeDialog extends ChartEditorBaseDialog
       if (songName == null) songName = songData.getDifficulty()?.songName;
       if (songName == null) // Still null?
       {
-        Debug.logInfo('[WARN] Could not fetch song name for ${targetSongId}');
+        Debug.logWarn('Could not fetch song name for ${targetSongId}');
         continue;
       }
 

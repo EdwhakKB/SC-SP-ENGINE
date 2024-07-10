@@ -52,6 +52,8 @@ class ChartEditorEventDataToolbox extends ChartEditorBaseToolbox
 
   function initialize():Void
   {
+    buildEventDataFormFromNothing(toolboxEventsDataGrid, chartEditorState.eventKindToPlace);
+
     toolboxEventsEventKind.onChange = function(event:UIEvent) {
       var eventType:String = event.data.id;
 
@@ -59,8 +61,6 @@ class ChartEditorEventDataToolbox extends ChartEditorBaseToolbox
 
       // Edit the event data to place.
       chartEditorState.eventKindToPlace = eventType;
-
-      buildEventDataFormFromNothing(toolboxEventsDataGrid, chartEditorState.eventKindToPlace);
 
       if (!_initializing && chartEditorState.currentEventSelection.length > 0)
       {
@@ -99,7 +99,7 @@ class ChartEditorEventDataToolbox extends ChartEditorBaseToolbox
       toolboxEventsEventKind.value = newDropdownElement;
 
       Debug.logInfo('ChartEditorToolboxHandler.buildToolboxEventDataLayout() - Event kind changed: ${toolboxEventsEventKind.value.id} != ${newDropdownElement.id} != ${lastEventKind}, rebuilding form');
-      buildEventDataFormFromNothing(toolboxEventsDataGrid, chartEditorState.eventKindToPlace);
+      buildEventDataFormFromNothing(toolboxEventsDataGrid, chartEditorState.eventKindToPlace, true);
     }
     else
     {
@@ -122,7 +122,7 @@ class ChartEditorEventDataToolbox extends ChartEditorBaseToolbox
     }
   }
 
-  function buildEventDataFormFromNothing(target:Box, eventKind:String):Void
+  function buildEventDataFormFromNothing(target:Box, eventKind:String, resetDataOnly:Bool = false):Void
   {
     Debug.logInfo('Building event data form from schema for event kind: ${eventKind}');
     // Debug.logInfo(schema);
@@ -130,54 +130,69 @@ class ChartEditorEventDataToolbox extends ChartEditorBaseToolbox
     lastEventKind = eventKind ?? 'unknown';
 
     // Clear the frame.
-    target.removeAllComponents();
+    if (!resetDataOnly)
+    {
+      target.removeAllComponents();
+    }
 
     chartEditorState.eventDataToPlace = ["", "", "", "", "", "", "", "", "", "", "", "", "", ""];
 
-    for (field in 0...chartEditorState.eventDataToPlace.length)
+    if (!resetDataOnly)
     {
-      // Add a label for the data field.
-      var label:Label = new Label();
-      label.text = 'EF${field + 1}';
-      label.verticalAlign = "center";
-      target.addComponent(label);
+      for (field in 0...chartEditorState.eventDataToPlace.length)
+      {
+        // Add a label for the data field.
+        var label:Label = new Label();
+        label.text = 'EF${field + 1}';
+        label.verticalAlign = "center";
+        target.addComponent(label);
 
-      // Add an input field for the data field.
-      var input:TextField = new TextField();
-      input.id = 'ETF${field + 1}';
-      input.percentWidth = 100;
-      target.addComponent(input);
-      eventTextFields.push(input);
+        // Add an input field for the data field.
+        var input:TextField = new TextField();
+        input.id = 'ETF${field + 1}';
+        input.percentWidth = 100;
+        target.addComponent(input);
+        eventTextFields.push(input);
 
-      // Update the value of the event data.
-      input.onChange = function(event:UIEvent) {
-        var valid:Bool = event.target.text != null && event.target.text != '';
+        // Update the value of the event data.
+        input.onChange = function(event:UIEvent) {
+          var valid:Bool = event.target.text != null && event.target.text != '';
 
-        // Edit the event data to place.
-        if (valid)
-        {
-          Debug.logInfo('ChartEditorToolboxHandler.buildEventDataFormFromNothing() - ${event.target.id} = ${event.target.text} - $valid - found');
-          input.removeClass('invalid-value');
-          chartEditorState.eventDataToPlace[field] = event.target.text;
-        }
-        else
-        {
-          Debug.logInfo('ChartEditorToolboxHandler.buildEventDataFormFromNothing() - ${event.target.id} = null');
-          chartEditorState.eventDataToPlace[field] = "";
-        }
-
-        // Edit the event data of any existing events.
-        if (!_initializing && chartEditorState.currentEventSelection.length > 0)
-        {
-          for (songEvent in chartEditorState.currentEventSelection)
+          // Edit the event data to place.
+          if (valid)
           {
-            songEvent.name = chartEditorState.eventKindToPlace;
-            songEvent.value = backend.SafeNullArray.copyEventValue(chartEditorState.eventDataToPlace);
+            Debug.logInfo('ChartEditorToolboxHandler.buildEventDataFormFromNothing() - ${event.target.id} = ${event.target.text} - $valid - found');
+            input.removeClass('invalid-value');
+            var number:Int = Std.parseInt(input.id.replace("ETF", "")) - 1;
+            Debug.logInfo('field number $number');
+            chartEditorState.eventDataToPlace[number] = event.target.text;
+            Debug.logInfo('info is caught? ${chartEditorState.eventDataToPlace[field]}, compared to field ${event.target.text}');
           }
-          chartEditorState.saveDataDirty = true;
-          chartEditorState.noteDisplayDirty = true;
-          chartEditorState.notePreviewDirty = true;
-          chartEditorState.noteTooltipsDirty = true;
+          else
+          {
+            Debug.logError('ChartEditorToolboxHandler.buildEventDataFormFromNothing() - ${event.target.id} = null');
+            var number:Int = Std.parseInt(input.id.replace("ETF", "")) - 1;
+            Debug.logInfo('field number $number');
+            chartEditorState.eventDataToPlace[number] = "";
+            Debug.logInfo('info not is caught, ${chartEditorState.eventDataToPlace[field]}, compared to field *blank*');
+          }
+
+          // Edit the event data of any existing events.
+          if (!_initializing && chartEditorState.currentEventSelection.length > 0)
+          {
+            for (songEvent in chartEditorState.currentEventSelection)
+            {
+              songEvent.name = chartEditorState.eventKindToPlace;
+              @:nullSafety(Off)
+              {
+                songEvent.value = Reflect.copy(chartEditorState.eventDataToPlace);
+              }
+            }
+            chartEditorState.saveDataDirty = true;
+            chartEditorState.noteDisplayDirty = true;
+            chartEditorState.notePreviewDirty = true;
+            chartEditorState.noteTooltipsDirty = true;
+          }
         }
       }
     }

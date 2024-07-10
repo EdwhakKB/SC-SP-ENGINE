@@ -148,7 +148,7 @@ function goodNoteHitPre(id, direction, noteType, isSustainNote)
 	-- Values work the same as goodNoteHit
 end
 function opponentNoteHitPre(id, direction, noteType, isSustainNote)
-	-- Works the same as goodNoteHitPost, but for Opponent's notes being hit
+	-- Works the same as goodNoteHit, but for Opponent's notes being hit
 	-- Values work the same as goodNoteHit
 end
 
