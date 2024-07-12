@@ -38,6 +38,7 @@ class LuaUtils
 
   public static function getLuaTween(options:Dynamic)
   {
+    if (options == null) options = {}
     return {
       type: getTweenTypeByString(options.type),
       startDelay: options.startDelay,
@@ -439,8 +440,10 @@ class LuaUtils
         spr.frames = Paths.getPackerAtlas(image);
       case "xml":
         spr.frames = Paths.getXmlAtlas(image);
-      default:
+      case 'sparrow':
         spr.frames = Paths.getSparrowAtlas(image);
+      default:
+        spr.frames = Paths.getAtlas(image);
     }
   }
 
@@ -751,11 +754,9 @@ class LuaUtils
       }
 
       // modded cameras
-      if (Std.isOfType(MusicBeatState.getVariables().get(cam), FlxCamera))
-      {
-        return MusicBeatState.getVariables().get(cam);
-      }
-      return PlayState.instance.camGame;
+      var camera:Dynamic = MusicBeatState.getVariables().get(cam);
+      if (camera == null || !Std.isOfType(camera, FlxCamera)) camera = PlayState.instance.camGame;
+      return camera;
     }
     return camera.cam;
   }

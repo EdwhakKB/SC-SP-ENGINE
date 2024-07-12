@@ -3707,11 +3707,6 @@ class PlayState extends MusicBeatState
         ]);
         callOnBothHS('onSpawnNote', [dunceNote]);
 
-        // still has to be dunceNote.isSustainNote cause of how layering works!
-        if (usesHUD) dunceNote.camera = dunceNote.isSustainNote ? camHUD : camHUD;
-        else
-          dunceNote.camera = dunceNote.isSustainNote ? camNoteStuff : camNoteStuff;
-
         var index:Int = unspawnNotes.indexOf(dunceNote);
         unspawnNotes.splice(index, 1);
 

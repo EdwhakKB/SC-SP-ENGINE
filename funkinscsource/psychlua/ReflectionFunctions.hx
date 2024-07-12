@@ -39,25 +39,21 @@ class ReflectionFunctions
         var split:Array<String> = variable.split('.');
         if (Stage.instance.swagBacks.exists(split[0]))
         {
-          Stage.instance.setPropertyObject(variable, value);
-          return true;
+          return Stage.instance.setPropertyObject(variable, value);
         }
         if (split.length > 1)
         {
           if (Std.isOfType(LuaUtils.getObjectDirectly(split[0]), Character)
             && split[split.length - 1] == 'color') LuaUtils.setVarInArray(LuaUtils.getPropertyLoop(split), 'doMissThing', "false");
-
-          LuaUtils.setVarInArray(LuaUtils.getPropertyLoop(split, true, allowMaps), split[split.length - 1], value, allowMaps);
-          return true;
+          return LuaUtils.setVarInArray(LuaUtils.getPropertyLoop(split, true, allowMaps), split[split.length - 1], value, allowMaps);
         }
-        LuaUtils.setVarInArray(LuaUtils.getTargetInstance(), variable, value, allowMaps);
-        return true;
+        return LuaUtils.setVarInArray(LuaUtils.getTargetInstance(), variable, value, allowMaps);
       }
       catch (e)
       {
         Debug.displayAlert("Unknown 'Set' Variable: " + variable, "Variable Not Found");
       }
-      return false;
+      return;
     });
     funk.set("getPropertyFromClass", function(classVar:String, variable:String, ?allowMaps:Bool = false) {
       classVar = checkForOldClassVars(classVar);
@@ -86,7 +82,7 @@ class ReflectionFunctions
       var myClass:Dynamic = Type.resolveClass(classVar);
       if (myClass == null)
       {
-        FunkinLua.luaTrace('getPropertyFromClass: Class $classVar not found', false, false, FlxColor.RED);
+        FunkinLua.luaTrace('setPropertyFromClass: Class $classVar not found', false, false, FlxColor.RED);
         return null;
       }
 
@@ -182,7 +178,7 @@ class ReflectionFunctions
 
         if (myType == null)
         {
-          FunkinLua.luaTrace('createInstance: Variable $variableToSave is already being used and cannot be replaced!', false, false, FlxColor.RED);
+          FunkinLua.luaTrace('createInstance: Class $className not found.', false, false, FlxColor.RED);
           return false;
         }
 
@@ -249,7 +245,7 @@ class ReflectionFunctions
           myArg = myArg.substring(index + 2);
           var lastIndex:Int = myArg.lastIndexOf('::');
 
-          var split:Array<String> = (lastIndex > -1) ? myArg.substring(0, lastIndex).split('.') : myArg.split('.');
+          var split:Array<String> = lastIndex > -1 ? myArg.substring(0, lastIndex).split('.') : myArg.split('.');
           args[i] = (lastIndex > -1) ? Type.resolveClass(myArg.substring(lastIndex + 2)) : PlayState.instance;
           for (j in 0...split.length)
           {
@@ -286,7 +282,7 @@ class ReflectionFunctions
   {
     switch (classVar)
     {
-      case "StrumNote" | "StrumArrow":
+      case "StrumNote", "StrumArrow":
         classVar = "objects.StrumArrow";
       case "ClientPrefs":
         classVar = "backend.ClientPrefs";
