@@ -6,7 +6,7 @@ import flixel.util.FlxSpriteUtil;
 import flixel.util.FlxDestroyUtil;
 import flixel.addons.display.FlxGridOverlay;
 import lime.utils.Assets;
-import states.editors.EditorPlayState;
+// import states.editors.EditorPlayState;
 import substates.Prompt;
 import backend.StageData;
 import backend.Highscore;
