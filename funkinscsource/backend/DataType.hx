@@ -1,8 +1,9 @@
 package backend;
 
-enum DataType {
-	GENERICXML;
-	SPARROW;
-	PACKER;
-	JSON;
+enum DataType
+{
+  GENERICXML;
+  SPARROW;
+  PACKER;
+  JSON;
 }

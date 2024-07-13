@@ -6,166 +6,170 @@ import openfl.geom.Matrix;
 import openfl.display.BitmapData;
 import openfl.Lib;
 
-class AchievementPopup extends openfl.display.Sprite {
-	var lastScale:Float = 1;
-	public function new(achieve:String, onFinish:Void->Void)
-	{
-		super();
+class AchievementPopup extends openfl.display.Sprite
+{
+  var lastScale:Float = 1;
 
-		// bg
-		graphics.beginFill(FlxColor.BLACK);
-		graphics.drawRoundRect(0, 0, 420, 130, 16, 16);
+  public function new(achieve:String, onFinish:Void->Void)
+  {
+    super();
 
-		// achievement icon
-		var graphic = null;
-		var hasAntialias:Bool = ClientPrefs.data.antialiasing;
-		var image:String = 'achievements/$achieve';
+    // bg
+    graphics.beginFill(FlxColor.BLACK);
+    graphics.drawRoundRect(0, 0, 420, 130, 16, 16);
 
-		var achievement:Achievement = null;
-		if(Achievements.exists(achieve)) achievement = Achievements.get(achieve);
+    // achievement icon
+    var graphic = null;
+    var hasAntialias:Bool = ClientPrefs.data.antialiasing;
+    var image:String = 'achievements/$achieve';
 
-		#if MODS_ALLOWED
-		var lastMod = Mods.currentModDirectory;
-		if(achievement != null) Mods.currentModDirectory = achievement.mod != null ? achievement.mod : '';
-		#end
+    var achievement:Achievement = null;
+    if (Achievements.exists(achieve)) achievement = Achievements.get(achieve);
 
-		if(Paths.fileExists('images/$image-pixel.png', IMAGE))
-		{
-			graphic = Paths.image('$image-pixel', false);
-			hasAntialias = false;
-		}
-		else graphic = Paths.image(image, false);
+    #if MODS_ALLOWED
+    var lastMod = Mods.currentModDirectory;
+    if (achievement != null) Mods.currentModDirectory = achievement.mod != null ? achievement.mod : '';
+    #end
 
-		#if MODS_ALLOWED
-		Mods.currentModDirectory = lastMod;
-		#end
+    if (Paths.fileExists('images/$image-pixel.png', IMAGE))
+    {
+      graphic = Paths.image('$image-pixel', false);
+      hasAntialias = false;
+    }
+    else
+      graphic = Paths.image(image, false);
 
-		var sizeX = 100;
-		var sizeY = 100;
+    #if MODS_ALLOWED
+    Mods.currentModDirectory = lastMod;
+    #end
 
-		var imgX = 15;
-		var imgY = 15;
-		var image = graphic.bitmap;
-		graphics.beginBitmapFill(image, new Matrix(sizeX / image.width, 0, 0, sizeY / image.height, imgX, imgY), false, hasAntialias);
-		graphics.drawRect(imgX, imgY, sizeX + 10, sizeY + 10);
+    var sizeX = 100;
+    var sizeY = 100;
 
-		// achievement name/description
-		var name:String = 'Unknown';
-		var desc:String = 'Description not found';
-		if(achievement != null)
-		{
-			if(achievement.name != null) name = Language.getPhrase('achievement_$achieve', achievement.name);
-			if(achievement.description != null)  desc = Language.getPhrase('description_$achieve', achievement.description);
-		}
+    var imgX = 15;
+    var imgY = 15;
+    var image = graphic.bitmap;
+    graphics.beginBitmapFill(image, new Matrix(sizeX / image.width, 0, 0, sizeY / image.height, imgX, imgY), false, hasAntialias);
+    graphics.drawRect(imgX, imgY, sizeX + 10, sizeY + 10);
 
-		var textX = sizeX + imgX + 15;
-		var textY = imgY + 20;
+    // achievement name/description
+    var name:String = 'Unknown';
+    var desc:String = 'Description not found';
+    if (achievement != null)
+    {
+      if (achievement.name != null) name = Language.getPhrase('achievement_$achieve', achievement.name);
+      if (achievement.description != null) desc = Language.getPhrase('description_$achieve', achievement.description);
+    }
 
-		var text:FlxText = new FlxText(0, 0, 270, 'TEST!!!', 16);
-		text.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT);
-		drawTextAt(text, name, textX, textY);
-		drawTextAt(text, desc, textX, textY + 30);
-		graphics.endFill();
+    var textX = sizeX + imgX + 15;
+    var textY = imgY + 20;
 
-		text.graphic.bitmap.dispose();
-		text.graphic.bitmap.disposeImage();
-		text.destroy();
+    var text:FlxText = new FlxText(0, 0, 270, 'TEST!!!', 16);
+    text.setFormat(Paths.font("vcr.ttf"), 16, FlxColor.WHITE, LEFT);
+    drawTextAt(text, name, textX, textY);
+    drawTextAt(text, desc, textX, textY + 30);
+    graphics.endFill();
 
-		// other stuff
-		FlxG.stage.addEventListener(Event.RESIZE, onResize);
-		addEventListener(Event.ENTER_FRAME, update);
+    text.graphic.bitmap.dispose();
+    text.graphic.bitmap.disposeImage();
+    text.destroy();
 
-		FlxG.game.addChild(this); //Don't add it below mouse, or it will disappear once the game changes states
+    // other stuff
+    FlxG.stage.addEventListener(Event.RESIZE, onResize);
+    addEventListener(Event.ENTER_FRAME, update);
 
-		// fix scale
-		lastScale = (FlxG.stage.stageHeight / FlxG.height);
-		this.x = 20 * lastScale;
-		this.y = -130 * lastScale;
-		this.scaleX = lastScale;
-		this.scaleY = lastScale;
-		intendedY = 20;
-	}
+    FlxG.game.addChild(this); // Don't add it below mouse, or it will disappear once the game changes states
 
-	var bitmaps:Array<BitmapData> = [];
-	function drawTextAt(text:FlxText, str:String, textX:Float, textY:Float)
-	{
-		text.text = str;
-		text.updateHitbox();
+    // fix scale
+    lastScale = (FlxG.stage.stageHeight / FlxG.height);
+    this.x = 20 * lastScale;
+    this.y = -130 * lastScale;
+    this.scaleX = lastScale;
+    this.scaleY = lastScale;
+    intendedY = 20;
+  }
 
-		var clonedBitmap:BitmapData = text.graphic.bitmap.clone();
-		bitmaps.push(clonedBitmap);
-		graphics.beginBitmapFill(clonedBitmap, new Matrix(1, 0, 0, 1, textX, textY), false, false);
-		graphics.drawRect(textX, textY, text.width + textX, text.height + textY);
-	}
+  var bitmaps:Array<BitmapData> = [];
 
-	var lerpTime:Float = 0;
-	var countedTime:Float = 0;
-	var timePassed:Float = -1;
-	public var intendedY:Float = 0;
+  function drawTextAt(text:FlxText, str:String, textX:Float, textY:Float)
+  {
+    text.text = str;
+    text.updateHitbox();
 
-	function update(e:Event)
-	{
-		if(timePassed < 0) 
-		{
-			timePassed = Lib.getTimer();
-			return;
-		}
+    var clonedBitmap:BitmapData = text.graphic.bitmap.clone();
+    bitmaps.push(clonedBitmap);
+    graphics.beginBitmapFill(clonedBitmap, new Matrix(1, 0, 0, 1, textX, textY), false, false);
+    graphics.drawRect(textX, textY, text.width + textX, text.height + textY);
+  }
 
-		var time = Lib.getTimer();
-		var elapsed:Float = (time - timePassed) / 1000;
-		timePassed = time;
+  var lerpTime:Float = 0;
+  var countedTime:Float = 0;
+  var timePassed:Float = -1;
 
-		if(elapsed >= 0.5) return; //most likely passed through a loading
+  public var intendedY:Float = 0;
 
-		countedTime += elapsed;
-		if(countedTime < 3)
-		{
-			lerpTime = Math.min(1, lerpTime + elapsed);
-			y = ((FlxEase.elasticOut(lerpTime) * (intendedY + 130)) - 130) * lastScale;
-		}
-		else
-		{
-			y -= FlxG.height * 2 * elapsed * lastScale;
-			if(y <= -130 * lastScale)
-				destroy();
-		}
-	}
+  function update(e:Event)
+  {
+    if (timePassed < 0)
+    {
+      timePassed = Lib.getTimer();
+      return;
+    }
 
-	private function onResize(e:Event)
-	{
-		var mult = (FlxG.stage.stageHeight / FlxG.height);
-		scaleX = mult;
-		scaleY = mult;
+    var time = Lib.getTimer();
+    var elapsed:Float = (time - timePassed) / 1000;
+    timePassed = time;
 
-		x = (mult / lastScale) * x;
-		y = (mult / lastScale) * y;
-		lastScale = mult;
-	}
+    if (elapsed >= 0.5) return; // most likely passed through a loading
 
-	public function destroy()
-	{
-		Achievements._popups.remove(this);
+    countedTime += elapsed;
+    if (countedTime < 3)
+    {
+      lerpTime = Math.min(1, lerpTime + elapsed);
+      y = ((FlxEase.elasticOut(lerpTime) * (intendedY + 130)) - 130) * lastScale;
+    }
+    else
+    {
+      y -= FlxG.height * 2 * elapsed * lastScale;
+      if (y <= -130 * lastScale) destroy();
+    }
+  }
 
-		if (FlxG.game.contains(this))
-		{
-			FlxG.game.removeChild(this);
-		}
-		FlxG.stage.removeEventListener(Event.RESIZE, onResize);
-		removeEventListener(Event.ENTER_FRAME, update);
-		deleteClonedBitmaps();
-	}
+  private function onResize(e:Event)
+  {
+    var mult = (FlxG.stage.stageHeight / FlxG.height);
+    scaleX = mult;
+    scaleY = mult;
 
-	function deleteClonedBitmaps()
-	{
-		for (clonedBitmap in bitmaps)
-		{
-			if(clonedBitmap != null)
-			{
-				clonedBitmap.dispose();
-				clonedBitmap.disposeImage();
-			}
-		}
-		bitmaps = null;
-	}
+    x = (mult / lastScale) * x;
+    y = (mult / lastScale) * y;
+    lastScale = mult;
+  }
+
+  public function destroy()
+  {
+    Achievements._popups.remove(this);
+
+    if (FlxG.game.contains(this))
+    {
+      FlxG.game.removeChild(this);
+    }
+    FlxG.stage.removeEventListener(Event.RESIZE, onResize);
+    removeEventListener(Event.ENTER_FRAME, update);
+    deleteClonedBitmaps();
+  }
+
+  function deleteClonedBitmaps()
+  {
+    for (clonedBitmap in bitmaps)
+    {
+      if (clonedBitmap != null)
+      {
+        clonedBitmap.dispose();
+        clonedBitmap.disposeImage();
+      }
+    }
+    bitmaps = null;
+  }
 }
 #end

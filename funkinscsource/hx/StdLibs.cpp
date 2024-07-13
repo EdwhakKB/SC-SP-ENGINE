@@ -641,7 +641,7 @@ Dynamic __hxcpp_parse_int(const String &inString)
       result = strtoul(str,&end,16);
       if (neg) result = -result;
    }
-   else 
+   else
       result = strtol(str,&end,10);
    #ifdef HX_WINDOWS
    if (str==end && !isHex)

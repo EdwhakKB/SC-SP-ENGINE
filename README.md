@@ -10,7 +10,6 @@
 * Newer versions of flixel fixes by system32unknown [FlxRuntimerShader, FlxAnimationController, Main](https://github.com/ShadowMario/FNF-PsychEngine/pull/13422)
 * FlxCustomColor Stuff from TheLeerName [Thanks](https://github.com/ShadowMario/FNF-PsychEngine/pull/13323)
 * Most other fixes, noteskin support, char json edits, and more all by me *glowsoony*
-* Most new things include zoomFactor, initialZoom for sprites, much support coming newly from CNE [Engine](CodeNameEngine) [Many things borrowed from here!](https://github.com/FNF-CNE-Devs/CodenameEngine/tree/main)
 
 * [Input Rewrite! by this psych pull request!](https://github.com/ShadowMario/FNF-PsychEngine/pull/13448)
 
@@ -20,6 +19,33 @@ You must have [the most up-to-date version of Haxe](https://haxe.org/download/),
 open up a Command Prompt/PowerShell or Terminal, type `haxelib install hmm`
 
 after it finishes, simply type `haxelib run hmm install` in order to install all the needed libraries for *Psych Engine!*
+
+## HxCodec in Linux:
+
+some linux distros do not have certain libraries that we need to compile HxCodec on such distros, if you get this error:
+
+```cmd
+Link: ApplicationMain
+hxCodec/anyVersion/lib/vlc/lib/Linux/libvlc.so.5: file format not recognized; treating as linker script
+hxCodec/anyVersion/lib/vlc/lib/Linux/libvlc.so.5:0: syntax error collect2: error: ld returned 1 exit status
+```
+
+Use the following commands:
+
+```cmd
+sudo apt-get install libvlc-dev
+sudo apt-get install libvlccore-dev
+sudo apt-get install vlc-bin
+sudo apt-get install glibc-source
+sudo apt-get install libidn12
+sudo apt-get install libidn-dev
+```
+
+It doesn't matter if you already have some of those libraries, just use the command and retry the compile command (``lime test linux``?)
+
+I recommend using HxCodec version ``3.0.2``
+
+This was a product of my tests trying to compile SCE in Pop!_OS, maybe in other linux distros there are other errors that I don't know -- Slushi
 
 ## Customization:
 
@@ -34,19 +60,15 @@ same goes for *Lua Scripts*, comment out or delete the line with `LUA_ALLOWED`, 
 ## Credits:
 * Shadow Mario - Programmer
 * RiverOaken - Artist
-* Yoshubs - Assistant Programmer
 
 ## SCE Credits:
 * Glowsoony - Programmer
 * Edwhak_Killbot - Programmer (Leader of SCE)
 * Slushi - Programmer (Has helped with the Crash Handler and a few other things! he is also a beta tester for bugs! ***thanks***)!
 
-## Extra Credits:
-* Vortex2Oblivion - Helped with changing gamejolt code to hxgamejolt-api code.
-
 ### Special Thanks
 * bbpanzu - Ex-Programmer
-* Yoshubs - New Input System
+* crowplexus - New Input System
 * SqirraRNG - Crash Handler and Base code for Chart Editor's Waveform
 * KadeDev - Fixed some cool stuff on Chart Editor and other PRs
 * iFlicky - Composer of Psync and Tea Time, also made the Dialogue Sounds
@@ -101,7 +123,7 @@ _____________________________________
   * Alt Animation: Forces an alt animation to play, useful for songs like Ugh/Stress
   * Hey: Forces a "Hey" animation instead of the base Sing animation, if Boyfriend hits this note, Girlfriend will do a "Hey!" too.
   * You can use gf and mom notes to make the second opponent or gf play animations!
-* You can now use up to 14 values for each event! 
+* You can now use up to 14 values for each event!
 
 ## Multiple editors to assist you in making your own Mod
 ![Screenshot_3](https://user-images.githubusercontent.com/44785097/144629914-1fe55999-2f18-4cc1-bc70-afe616d74ae5.png)
@@ -133,4 +155,4 @@ _____________________________________
 * You can listen to a song or adjust Scroll Speed/Damage taken/etc. on Freeplay by pressing Space.
 * You can play on the opponent's side!
 * You can turn off the sustains!
-* You can do a show casing mode for gameplay, playing normally, or even for videos!
+* You can do a show casing mode for gameplay, playing normaly, or even for videos!

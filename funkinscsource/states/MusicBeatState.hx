@@ -2,284 +2,297 @@ package states;
 
 import flixel.FlxState;
 import flixel.FlxSubState;
-import flixel.addons.ui.FlxUIState;
 import flixel.addons.transition.TransitionData;
 import flixel.addons.transition.Transition;
-
 import backend.PsychCamera;
 
-class MusicBeatState extends #if SCEModchartingTools modcharting.ModchartMusicBeatState #else FlxUIState #end
+class MusicBeatState extends #if SCEModchartingTools modcharting.ModchartMusicBeatState #else flixel.addons.transition.FlxTransitionableState #end
 {
-	private var curSection:Int = 0;
-	private var stepsToDo:Int = 0;
+  public var curSection:Int = 0;
+  public var stepsToDo:Int = 0;
 
-	private var curStep:Int = 0;
-	private var curBeat:Int = 0;
+  public var curStep:Int = 0;
+  public var curBeat:Int = 0;
 
-	private var curDecStep:Float = 0;
-	private var curDecBeat:Float = 0;
-	public var controls(get, never):Controls;
+  public var curDecStep:Float = 0;
+  public var curDecBeat:Float = 0;
 
-	public static var subStates:Array<MusicBeatSubstate> = [];
+  public var controls(get, never):Controls;
 
-	//Cause OVERRIDE
-	public static var disableNextTransIn:Bool = false;
-	public static var disableNextTransOut:Bool = false;
-    
-    public var enableTransIn:Bool = true;
-    public var enableTransOut:Bool = true;
-    
-    var transOutRequested:Bool = false;
-    var finishedTransOut:Bool = false;
+  public static var subStates:Array<MusicBeatSubState> = [];
 
-	public static var divideCameraZoom:Bool = true;
-	public static var changedZoom:Float = 1;
+  // Cause OVERRIDE
+  public static var disableNextTransIn:Bool = false;
+  public static var disableNextTransOut:Bool = false;
 
-	private function get_controls()
-	{
-		return Controls.instance;
-	}
+  public var enableTransIn:Bool = true;
+  public var enableTransOut:Bool = true;
 
-	override public function destroy()
-	{
-		if (subStates != null)
-		{
-			while (subStates.length > 5)
-			{
-				var subState:MusicBeatSubstate = subStates[0];
-				if (subState != null)
-				{
-					Debug.logTrace('Destroying Substates!');
-					subStates.remove(subState);
-					subState.destroy();
-				}
-				subState = null;
-			}
+  var transOutRequested:Bool = false;
+  var finishedTransOut:Bool = false;
 
-			subStates.resize(0);
-		}
+  public static var divideCameraZoom:Bool = true;
+  public static var changedZoom:Float = 1;
 
-		super.destroy();
-	}
+  private function get_controls()
+  {
+    return Controls.instance;
+  }
 
-	var _psychCameraInitialized:Bool = false;
+  override public function destroy()
+  {
+    if (subStates != null)
+    {
+      while (subStates.length > 5)
+      {
+        var subState:MusicBeatSubState = subStates[0];
+        if (subState != null)
+        {
+          Debug.logTrace('Destroying Substates!');
+          subStates.remove(subState);
+          subState.destroy();
+        }
+        subState = null;
+      }
 
-	public static var time:Float = 0.7;
+      subStates.resize(0);
+    }
 
-	public var variables:Map<String, Dynamic> = new Map<String, Dynamic>();
-	public static function getVariables()
-		return getState().variables;
+    super.destroy();
+  }
 
-	override function create()
-	{
-		destroySubStates = false;
-		FlxG.mouse.visible = true;
-		var skip:Bool = FlxTransitionableState.skipNextTransOut;
-		#if MODS_ALLOWED Mods.updatedOnState = false; #end
+  var _psychCameraInitialized:Bool = false;
 
-		if(!_psychCameraInitialized) initPsychCamera();
+  public static var time:Float = 0.7;
 
-		super.create();
-		if(!skip) {
-			openSubState(new IndieDiamondTransSubState(time, true, FlxG.camera.zoom));
-		}
-		FlxTransitionableState.skipNextTransOut = false;
-		timePassedOnState = 0;
-	}
+  public var variables:Map<String, Dynamic> = new Map<String, Dynamic>();
 
-	public function initPsychCamera():PsychCamera
-	{
-		var camera = new PsychCamera();
-		FlxG.cameras.reset(camera);
-		FlxG.cameras.setDefaultDrawTarget(camera, true);
-		_psychCameraInitialized = true;
-		//trace('initialized psych camera ' + Sys.cpuTime());
-		return camera;
-	}
+  public static function getVariables()
+    return getState().variables;
 
-	public static var timePassedOnState:Float = 0;
-	override function update(elapsed:Float)
-	{
-		//everyStep();
-		var oldStep:Int = curStep;
-		timePassedOnState += elapsed;
+  override function create()
+  {
+    destroySubStates = false;
+    FlxG.mouse.visible = true;
+    var skip:Bool = FlxTransitionableState.skipNextTransOut;
+    #if MODS_ALLOWED Mods.updatedOnState = false; #end
 
-		updateCurStep();
-		updateBeat();
+    if (!_psychCameraInitialized) initPsychCamera();
 
-		if (oldStep != curStep)
-		{
-			if(curStep >= 0)
-				stepHit();
+    super.create();
+    if (!skip)
+    {
+      openSubState(new IndieDiamondTransSubState(time, true, FlxG.camera.zoom));
+    }
+    FlxTransitionableState.skipNextTransOut = false;
+    timePassedOnState = 0;
+  }
 
-			if(PlayState.SONG != null)
-			{
-				if (oldStep < curStep)
-					updateSection();
-				else
-					rollbackSection();
-			}
-		}
+  public function initPsychCamera():PsychCamera
+  {
+    var camera = new PsychCamera();
+    FlxG.cameras.reset(camera);
+    FlxG.cameras.setDefaultDrawTarget(camera, true);
+    _psychCameraInitialized = true;
+    return camera;
+  }
 
-		if(FlxG.save.data != null) FlxG.save.data.fullscreen = FlxG.fullscreen;
+  public static var timePassedOnState:Float = 0;
 
-		super.update(elapsed);
-	}
+  override function update(elapsed:Float)
+  {
+    var oldStep:Int = curStep;
+    timePassedOnState += elapsed;
 
-	var trackedBPMChanges:Int = 0;
-	/**
-	 * A handy function to calculate how many seconds it takes for the given steps to all be hit.
-	 * 
-	 * This function takes the future BPM into account.
-	 * If you feel this is not necessary, use `stepsToSecs_simple` instead.
-	 * @param targetStep The step value to calculate with.
-	 * @param isFixedStep If true, calculation will assume `targetStep` is not being calculated as in "after `targetStep` steps", but rather as in "time until `targetStep` is hit".
-	 * @return The amount of seconds as a float.
-	 */
-	inline public function stepsToSecs(targetStep:Int, isFixedStep:Bool = false):Float {
-		final playbackRate:Single = PlayState.instance != null ? PlayState.instance.playbackRate : 1;
-		function calc(stepVal:Single, crochetBPM:Int = -1) {
-			return ((crochetBPM == -1 ? Conductor.calculateCrochet(Conductor.bpm)/4 : Conductor.calculateCrochet(crochetBPM)/4) * (stepVal - curStep)) / 1000;
-		}
+    updateCurStep();
+    updateBeat();
 
-		final realStep:Single = isFixedStep ? targetStep : targetStep + curStep;
-		var secRet:Float = calc(realStep);
+    if (oldStep != curStep)
+    {
+      if (curStep >= 0) stepHit();
 
-		for(i in 0...Conductor.bpmChangeMap.length - trackedBPMChanges) {
-			var nextChange = Conductor.bpmChangeMap[trackedBPMChanges+i];
-			if(realStep < nextChange.stepTime) break;
+      if (PlayState.SONG != null)
+      {
+        if (oldStep < curStep) updateSection();
+        else
+          rollbackSection();
+      }
+    }
 
-			final diff = realStep - nextChange.stepTime;
-			if(i == 0) secRet -= calc(diff);
-			else secRet -= calc(diff, Std.int(Conductor.bpmChangeMap[(trackedBPMChanges+i) - 1].bpm)); //calc away bpm from before, not beginning bpm
+    if (FlxG.save.data != null) FlxG.save.data.fullscreen = FlxG.fullscreen;
 
-			secRet += calc(diff, Std.int(nextChange.bpm));
-		}
-		//trace(secRet);
-		return secRet / playbackRate;
-	}
+    super.update(elapsed);
+  }
 
-	inline public function beatsToSecs(targetBeat:Int, isFixedBeat:Bool = false):Float
-		return stepsToSecs(targetBeat * 4, isFixedBeat);
+  public static function switchState(nextState:FlxState = null, ?time:Float = 0.75)
+  {
+    if (nextState == null) nextState = FlxG.state;
+    if (nextState == FlxG.state)
+    {
+      resetState();
+      return;
+    }
 
-	/**
-	 * A handy function to calculate how many seconds it takes for the given steps to all be hit.
-	 * 
-	 * This function does not take the future BPM into account.
-	 * If you need to account for BPM, use `stepsToSecs` instead.
-	 * @param targetStep The step value to calculate with.
-	 * @param isFixedStep If true, calculation will assume `targetStep` is not being calculated as in "after `targetStep` steps", but rather as in "time until `targetStep` is hit".
-	 * @return The amount of seconds as a float.
-	 */
-	inline public function stepsToSecs_simple(targetStep:Int, isFixedStep:Bool = false):Float {
-		final playbackRate:Single = PlayState.instance != null ? PlayState.instance.playbackRate : 1;
+    if (FlxTransitionableState.skipNextTransIn) FlxG.switchState(nextState);
+    else
+      startTransition(nextState, time);
+    FlxTransitionableState.skipNextTransIn = false;
+  }
 
-		return ((Conductor.stepCrochet * (isFixedStep ? targetStep : curStep + targetStep)) / 1000) / playbackRate;
-	}
+  public static function resetState()
+  {
+    if (FlxTransitionableState.skipNextTransIn) FlxG.resetState();
+    else
+      startTransition();
+    FlxTransitionableState.skipNextTransIn = false;
+  }
 
-	private function updateSection():Void
-	{
-		if(stepsToDo < 1) stepsToDo = Math.round(getBeatsOnSection() * 4);
-		while(curStep >= stepsToDo)
-		{
-			curSection++;
-			var beats:Float = getBeatsOnSection();
-			stepsToDo += Math.round(beats * 4);
-			sectionHit();
-		}
-	}
+  // Custom made Trans in
+  public static function startTransition(nextState:FlxState = null, ?time:Float = 0.75)
+  {
+    if (nextState == null) nextState = FlxG.state;
 
-	private function rollbackSection():Void
-	{
-		if(curStep < 0) return;
+    FlxG.state.openSubState(new IndieDiamondTransSubState(time, false, FlxG.camera.zoom));
+    if (nextState == FlxG.state) IndieDiamondTransSubState.finishCallback = function() FlxG.resetState();
+    else
+      IndieDiamondTransSubState.finishCallback = function() FlxG.switchState(nextState);
+  }
 
-		var lastSection:Int = curSection;
-		curSection = 0;
-		stepsToDo = 0;
-		for (i in 0...PlayState.SONG.notes.length)
-		{
-			if (PlayState.SONG.notes[i] != null)
-			{
-				stepsToDo += Math.round(getBeatsOnSection() * 4);
-				if(stepsToDo > curStep) break;
-				
-				curSection++;
-			}
-		}
+  public static function getState():MusicBeatState
+  {
+    return cast(FlxG.state, MusicBeatState);
+  }
 
-		if(curSection > lastSection) sectionHit();
-	}
+  public function getNoteSkinPostfix()
+  {
+    var skin:String = '';
+    if (ClientPrefs.data.noteSkin != ClientPrefs.defaultData.noteSkin) skin = '-' + ClientPrefs.data.noteSkin.trim().toLowerCase().replace(' ', '_');
+    return skin;
+  }
 
-	private function updateBeat():Void
-	{
-		curBeat = Math.floor(curStep / 4);
-		curDecBeat = curDecStep/4;
-	}
+  var trackedBPMChanges:Int = 0;
 
-	private function updateCurStep():Void
-	{
-		var lastChange = Conductor.getBPMFromSeconds(Conductor.songPosition);
+  /**
+   * A handy function to calculate how many seconds it takes for the given steps to all be hit.
+   *
+   * This function takes the future BPM into account.
+   * If you feel this is not necessary, use `stepsToSecs_simple` instead.
+   * @param targetStep The step value to calculate with.
+   * @param isFixedStep If true, calculation will assume `targetStep` is not being calculated as in "after `targetStep` steps", but rather as in "time until `targetStep` is hit".
+   * @return The amount of seconds as a float.
+   */
+  inline public function stepsToSecs(targetStep:Int, isFixedStep:Bool = false):Float
+  {
+    final playbackRate:Single = PlayState.instance != null ? PlayState.instance.playbackRate : 1;
+    function calc(stepVal:Single, crochetBPM:Int = -1)
+    {
+      return ((crochetBPM == -1 ? Conductor.calculateCrochet(Conductor.bpm) / 4 : Conductor.calculateCrochet(crochetBPM) / 4) * (stepVal - curStep)) / 1000;
+    }
 
-		var shit = ((Conductor.songPosition - ClientPrefs.data.noteOffset) - lastChange.songTime) / lastChange.stepCrochet;
-		curDecStep = lastChange.stepTime + shit;
-		curStep = lastChange.stepTime + Math.floor(shit);
-	}
+    final realStep:Single = isFixedStep ? targetStep : targetStep + curStep;
+    var secRet:Float = calc(realStep);
 
-	public static function switchState(nextState:FlxState = null, ?time:Float = 0.75) {
-		if(nextState == null) nextState = FlxG.state;
-		if(nextState == FlxG.state)
-		{
-			resetState();
-			return;
-		}
+    for (i in 0...Conductor.bpmChangeMap.length - trackedBPMChanges)
+    {
+      var nextChange = Conductor.bpmChangeMap[trackedBPMChanges + i];
+      if (realStep < nextChange.stepTime) break;
 
-		if(FlxTransitionableState.skipNextTransIn) FlxG.switchState(nextState);
-		else startTransition(nextState, time);
-		FlxTransitionableState.skipNextTransIn = false;
-	}
+      final diff = realStep - nextChange.stepTime;
+      if (i == 0) secRet -= calc(diff);
+      else
+        secRet -= calc(diff, Std.int(Conductor.bpmChangeMap[(trackedBPMChanges + i) - 1].bpm)); // calc away bpm from before, not beginning bpm
 
-	public static function resetState() {
-		if(FlxTransitionableState.skipNextTransIn) FlxG.resetState();
-		else startTransition();
-		FlxTransitionableState.skipNextTransIn = false;
-	}
+      secRet += calc(diff, Std.int(nextChange.bpm));
+    }
+    // trace(secRet);
+    return secRet / playbackRate;
+  }
 
-	// Custom made Trans in
-	public static function startTransition(nextState:FlxState = null, ?time:Float = 0.75)
-	{
-		if(nextState == null)
-			nextState = FlxG.state;
+  inline public function beatsToSecs(targetBeat:Int, isFixedBeat:Bool = false):Float
+    return stepsToSecs(targetBeat * 4, isFixedBeat);
 
-		FlxG.state.openSubState(new IndieDiamondTransSubState(time, false, FlxG.camera.zoom));
-		if(nextState == FlxG.state) IndieDiamondTransSubState.finishCallback = function() FlxG.resetState();
-		else IndieDiamondTransSubState.finishCallback = function() FlxG.switchState(nextState);
-	}
+  /**
+   * A handy function to calculate how many seconds it takes for the given steps to all be hit.
+   *
+   * This function does not take the future BPM into account.
+   * If you need to account for BPM, use `stepsToSecs` instead.
+   * @param targetStep The step value to calculate with.
+   * @param isFixedStep If true, calculation will assume `targetStep` is not being calculated as in "after `targetStep` steps", but rather as in "time until `targetStep` is hit".
+   * @return The amount of seconds as a float.
+   */
+  inline public function stepsToSecs_simple(targetStep:Int, isFixedStep:Bool = false):Float
+  {
+    final playbackRate:Single = PlayState.instance != null ? PlayState.instance.playbackRate : 1;
 
-	public static function getState():MusicBeatState {
-		return cast (FlxG.state, MusicBeatState);
-	}
+    return ((Conductor.stepCrochet * (isFixedStep ? targetStep : curStep + targetStep)) / 1000) / playbackRate;
+  }
 
-	public function getNoteSkinPostfix()
-	{
-		var skin:String = '';
-		if(ClientPrefs.data.noteSkin != ClientPrefs.defaultData.noteSkin)
-			skin = '-' + ClientPrefs.data.noteSkin.trim().toLowerCase().replace(' ', '_');
-		return skin;
-	}
+  private function updateSection():Void
+  {
+    if (stepsToDo < 1) stepsToDo = Math.round(getBeatsOnSection() * 4);
+    while (curStep >= stepsToDo)
+    {
+      curSection++;
+      var beats:Float = getBeatsOnSection();
+      stepsToDo += Math.round(beats * 4);
+      sectionHit();
+    }
+  }
 
-	public function stepHit():Void
-	{
-		if (curStep % 4 == 0) beatHit();
-	}
+  private function rollbackSection():Void
+  {
+    if (curStep < 0) return;
 
-	public function beatHit():Void {}
+    var lastSection:Int = curSection;
+    curSection = 0;
+    stepsToDo = 0;
+    for (i in 0...PlayState.SONG.notes.length)
+    {
+      if (PlayState.SONG.notes[i] != null)
+      {
+        stepsToDo += Math.round(getBeatsOnSection() * 4);
+        if (stepsToDo > curStep) break;
 
-	public function sectionHit():Void {}
+        curSection++;
+      }
+    }
 
-	function getBeatsOnSection()
-	{
-		var val:Null<Float> = 4;
-		if(PlayState.SONG != null && PlayState.SONG.notes[curSection] != null) val = PlayState.SONG.notes[curSection].sectionBeats;
-		return val == null ? 4 : val;
-	}
+    if (curSection > lastSection) sectionHit();
+  }
+
+  private function updateBeat():Void
+  {
+    curBeat = Math.floor(curStep / 4);
+    curDecBeat = curDecStep / 4;
+  }
+
+  private function updateCurStep():Void
+  {
+    var lastChange = Conductor.getBPMFromSeconds(Conductor.songPosition);
+
+    var shit = ((Conductor.songPosition - ClientPrefs.data.noteOffset) - lastChange.songTime) / lastChange.stepCrochet;
+    curDecStep = lastChange.stepTime + shit;
+    curStep = Math.floor(lastChange.stepTime) + Math.floor(shit);
+  }
+
+  public function stepHit():Void
+  {
+    if (curStep % 4 == 0) beatHit();
+  }
+
+  public function beatHit():Void {}
+
+  public function sectionHit():Void {}
+
+  public function getBeatsOnSection()
+  {
+    var val:Null<Float> = 4;
+    if (PlayState.SONG != null && PlayState.SONG.notes[curSection] != null) val = PlayState.SONG.notes[curSection].sectionBeats;
+    return val == null ? 4 : val;
+  }
+
+  public function refresh()
+  {
+    sort(utils.SortUtil.byZIndex, flixel.util.FlxSort.ASCENDING);
+  }
 }

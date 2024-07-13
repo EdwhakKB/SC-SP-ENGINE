@@ -2,123 +2,119 @@ package;
 
 import flixel.graphics.FlxGraphic;
 import flixel.FlxState;
-
 import states.TitleState;
 import states.FlashingState;
-
 import debug.FPSCounter;
-
 import openfl.Lib;
-
 import backend.Highscore;
 import backend.Debug;
-
 import lime.app.Application;
 
 class Init extends FlxState
 {
-	public static var mouseCursor:FlxSprite;
+  public static var mouseCursor:FlxSprite;
 
-	override function create()
-	{
-		FlxTransitionableState.skipNextTransOut = true;
-		Paths.clearStoredMemory();
+  override function create()
+  {
+    FlxTransitionableState.skipNextTransOut = true;
+    Paths.clearStoredMemory();
 
-		// Run this first so we can see logs.
-		Debug.onInitProgram();
+    // Run this first so we can see logs.
+    Debug.onInitProgram();
 
-		Main.game.framerate = Application.current.window.displayMode.refreshRate;
-		Application.current.window.setIcon(lime.utils.Assets.getImage('assets/art/iconOG.png'));
+    Main.game.framerate = Application.current.window.displayMode.refreshRate;
+    Application.current.window.setIcon(lime.utils.Assets.getImage('assets/art/iconOG.png'));
 
-		#if !mobile
-		if (Main.fpsVar == null)
-		{
-			Main.fpsVar = new FPSCounter(10, 3, 0xFFFFFF);
-			Lib.current.stage.addChild(Main.fpsVar);
-		}
-		#end
+    #if !mobile
+    if (Main.fpsVar == null)
+    {
+      Main.fpsVar = new FPSCounter(10, 3, 0xFFFFFF);
+      Lib.current.stage.addChild(Main.fpsVar);
+    }
+    #end
 
-		#if linux
-		var icon = lime.graphics.Image.fromFile("icon.png");
-		Lib.current.stage.window.setIcon(icon);
-		#end
+    #if linux
+    var icon = lime.graphics.Image.fromFile("icon.png");
+    Lib.current.stage.window.setIcon(icon);
+    #end
 
-		FlxG.autoPause = false;
+    FlxG.autoPause = false;
 
-		FlxGraphic.defaultPersist = true;
+    // Setup window events (like callbacks for onWindowClose)
+    // and fullscreen keybind setup - Not Used
+    utils.WindowUtil.initWindowEvents();
+    // Disable the thing on Windows where it tries to send a bug report to Microsoft because why do they care?
+    utils.WindowUtil.disableCrashHandler();
 
-		#if LUA_ALLOWED
-		Mods.pushGlobalMods();
-		#end
-		Mods.loadTopMod();
+    FlxGraphic.defaultPersist = true;
 
-		FlxG.save.bind('funkin', CoolUtil.getSavePath());
+    #if LUA_ALLOWED
+    Mods.pushGlobalMods();
+    #end
+    Mods.loadTopMod();
 
-		ClientPrefs.loadPrefs();
-		ClientPrefs.keybindSaveLoad();
-		Language.reloadPhrases();
-		backend.ColorBlindness.setFilter();
+    FlxG.save.bind('funkin', CoolUtil.getSavePath());
 
-		FlxG.fixedTimestep = false;
-		FlxG.game.focusLostFramerate = 60;
-		FlxG.keys.preventDefaultKeys = [TAB];
+    ClientPrefs.loadPrefs();
+    ClientPrefs.keybindSaveLoad();
+    Language.reloadPhrases();
+    backend.ColorBlindness.setFilter();
 
-		FlxG.updateFramerate = FlxG.drawFramerate = ClientPrefs.data.framerate;
+    FlxG.fixedTimestep = false;
+    FlxG.game.focusLostFramerate = 60;
+    FlxG.keys.preventDefaultKeys = [TAB];
 
-		switch (FlxG.random.int(0, 1))
-		{
-			case 0:
-				mouseCursor = new FlxSprite().loadGraphic(Paths.getSharedPath('images/Default/cursor'));
-			case 1:
-				mouseCursor = new FlxSprite().loadGraphic(Paths.getSharedPath('images/Default/noteCursor'));
-		} 
-		FlxG.mouse.load(mouseCursor.pixels);
-		FlxG.mouse.enabled = true;
-		FlxG.mouse.visible = true;
+    FlxG.updateFramerate = FlxG.drawFramerate = ClientPrefs.data.framerate;
 
-		#if !mobile
-		if (Main.fpsVar != null)
-		{
-			Main.fpsVar.visible = ClientPrefs.data.showFPS;
-		}
-		#end
+    FlxG.mouse.enabled = true;
+    FlxG.mouse.visible = true;
 
-		#if LUA_ALLOWED llua.Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(psychlua.CallbackHandler.call)); #end
-		Controls.instance = new Controls();
-		ClientPrefs.loadDefaultKeys();
-		#if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
-		Highscore.load();
+    #if !mobile
+    if (Main.fpsVar != null)
+    {
+      Main.fpsVar.visible = ClientPrefs.data.showFPS;
+    }
+    #end
 
-		if (FlxG.save.data.weekCompleted != null) states.StoryMenuState.weekCompleted = FlxG.save.data.weekCompleted;
+    #if LUA_ALLOWED llua.Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(psychlua.CallbackHandler.call)); #end
+    Controls.instance = new Controls();
+    ClientPrefs.loadDefaultKeys();
+    #if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
+    Highscore.load();
 
-		#if DISCORD_ALLOWED
-		DiscordClient.prepare();
-		#end
+    if (FlxG.save.data.weekCompleted != null) states.StoryMenuState.weekCompleted = FlxG.save.data.weekCompleted;
 
-		#if cpp
-		cpp.NativeGc.enable(true);
-		cpp.NativeGc.run(true);
-		#end
+    #if DISCORD_ALLOWED
+    DiscordClient.prepare();
+    #end
 
-		// Finish up loading debug tools.
-		Debug.onGameStart();
+    #if cpp
+    cpp.NativeGc.enable(true);
+    cpp.NativeGc.run(true);
+    #end
 
-		if (Main.checkGJKeysAndId())
-		{
-			GameJoltAPI.connect();
-			GameJoltAPI.authDaUser(ClientPrefs.data.gjUser, ClientPrefs.data.gjToken, true);
-		}
+    // Finish up loading debug tools.
+    Debug.onGameStart();
 
-		if (FlxG.save.data != null && FlxG.save.data.fullscreen) FlxG.fullscreen = FlxG.save.data.fullscreen;
+    if (Main.checkGJKeysAndId())
+    {
+      GameJoltAPI.connect();
+      GameJoltAPI.authDaUser(ClientPrefs.data.gjUser, ClientPrefs.data.gjToken, true);
+    }
 
-		if(FlxG.save.data.flashing == null && !FlashingState.leftState) {
-			FlxTransitionableState.skipNextTransIn = true;
-			FlxTransitionableState.skipNextTransOut = true;
-			MusicBeatState.switchState(new FlashingState());
-		} else {
-			FlxG.switchState(Type.createInstance(Main.game.initialState, []));
-		}
+    if (FlxG.save.data != null && FlxG.save.data.fullscreen) FlxG.fullscreen = FlxG.save.data.fullscreen;
 
-		if (ClientPrefs.data.gjUser.toLowerCase() == 'glowsoony') FlxG.scaleMode = new flixel.system.scaleModes.FillScaleMode();
-	}
+    if (FlxG.save.data.flashing == null && !FlashingState.leftState)
+    {
+      FlxTransitionableState.skipNextTransIn = true;
+      FlxTransitionableState.skipNextTransOut = true;
+      MusicBeatState.switchState(new FlashingState());
+    }
+    else
+    {
+      FlxG.switchState(Type.createInstance(Main.game.initialState, []));
+    }
+
+    if (ClientPrefs.data.gjUser.toLowerCase() == 'glowsoony') FlxG.scaleMode = new flixel.system.scaleModes.FillScaleMode();
+  }
 }

@@ -103,7 +103,7 @@
 	end
 
 --Default character
-	local characterPos = { 
+	local characterPos = {
 		'defaultBoyfriendX', "Float", "770", "Default boyfriend X pos", --Grabs game.BF_X;
 		'defaultBoyfriendY', "Float", "450", "Default boyfriend Y pos", --Grabs game.BF_Y;
 		'defaultOpponentX', "Float", "100", "Default opponent X pos", --Grabs game.DAD_X;
@@ -116,10 +116,10 @@
 
 --Character shit
 	local characterShit = {
-		'boyfriendName', "String", "boyfriend", "PlayState's SONG Player 1", --Grabs PlayState.SONG.player1;
-		'dadName', "String", "dad", "PlayState's SONG Player 2", --Grabs PlayState.SONG.player2;
-		'gfName', "String", "gf", "PlayState's SONG gfVersion", --Grabs PlayState.SONG.gfVersion;
-		'momName', "String", "mom", "PlayState's SONG Player 4", --Grabs PlayState.SONG.player4;
+		'boyfriendName', "String", "boyfriend", "PlayState's SONG Player 1", --Grabs PlayState.SONG.characters.player;
+		'dadName', "String", "dad", "PlayState's SONG Player 2", --Grabs PlayState.SONG.characters.opponent;
+		'gfName', "String", "gf", "PlayState's SONG gfVersion", --Grabs PlayState.SONG.characters.girlfriend;
+		'momName', "String", "mom", "PlayState's SONG Player 4", --Grabs PlayState.SONG.characters.secondOpponent;
 	}
 
 -- Other settings

@@ -1,393 +1,337 @@
 package objects;
 
 import shaders.RGBPalette;
-
+import shaders.RGBPixelShader.RGBPixelShaderReference;
 import flixel.system.FlxAssets.FlxShader;
+import openfl.Assets;
 
-typedef NoteSplashConfig = {
-	anim:String,
-	minFps:Int,
-	maxFps:Int,
-	offsetCorrection:Bool,
-	offsets:Array<Array<Float>>
+typedef NoteSplashConfig =
+{
+  anim:String,
+  minFps:Int,
+  maxFps:Int,
+  offsetCorrection:Bool,
+  offsets:Array<Array<Float>>
 }
 
 class NoteSplash extends FunkinSCSprite
 {
-	public var rgbShader:PixelSplashShaderRef;
-	private var idleAnim:String;
-	private var _textureLoaded:String = null;
+  public var rgbShader:RGBPixelShaderReference;
 
-	public static var defaultNoteSplash(default, never):String = 'noteSplashes/noteSplashes';
-	public static var configs:Map<String, NoteSplashConfig> = new Map<String, NoteSplashConfig>();
-	private var _configLoaded:String = null;
-	private var string1NoteSkin:String = null;
-	private var string2NoteSkin:String = null;
+  private var idleAnim:String;
+  private var _textureLoaded:String = null;
 
-	public static var containedPixelTexture:Bool = false;
+  public static var defaultNoteSplash(default, never):String = 'noteSplashes/noteSplashes';
+  public static var configs:Map<String, NoteSplashConfig> = new Map<String, NoteSplashConfig>();
 
-	public var opponentSplashes:Bool = false;
+  private var _configLoaded:String = null;
+  private var string1NoteSkin:String = null;
+  private var string2NoteSkin:String = null;
 
-	public var styleChoice:String = '';
+  public static var containedPixelTexture:Bool = false;
 
-	public function new(x:Float = 0, y:Float = 0, ?opponentSplashes:Bool = false) {
-		super(x, y);
+  public var opponentSplashes:Bool = false;
 
-		this.opponentSplashes = opponentSplashes;
+  public var styleChoice:String = '';
 
-		var skin:String = null;
-		if (!opponentSplashes)
-		{
-			if (PlayState.instance != null){
-				if (ClientPrefs.getGameplaySetting('opponent') && !ClientPrefs.data.middleScroll) styleChoice = PlayState.instance.dadStrumStyle;
-				else styleChoice = PlayState.instance.bfStrumStyle;
-				
-				string1NoteSkin = "noteSplashes-"+ styleChoice;
-				string2NoteSkin = "notes/noteSplashes-"+ styleChoice;
-			}
+  public function new(x:Float = 0, y:Float = 0, ?opponentSplashes:Bool = false)
+  {
+    super(x, y);
 
-			if (FileSystem.exists(Paths.modsImages(string1NoteSkin)) || FileSystem.exists(Paths.getSharedPath('images/$string1NoteSkin.png')))
-				skin = "noteSplashes-" + styleChoice;
-			else if (FileSystem.exists(Paths.modsImages('notes/$string2NoteSkin')) || FileSystem.exists(Paths.getSharedPath('images/notes/$string2NoteSkin.png')))
-				skin = "notes/noteSplashes-"+ styleChoice;
-			else{
-				if (PlayState.SONG != null)
-				{
-					if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) skin = PlayState.SONG.splashSkin;
-					else skin = PlayState.SONG.disableSplashRGB ? 'noteSplashes' : defaultNoteSplash + getSplashSkinPostfix();
-				}
-			}
-		}
-		else
-		{
-			if (PlayState.instance != null){
-				if (ClientPrefs.getGameplaySetting('opponent') && !ClientPrefs.data.middleScroll) styleChoice = PlayState.instance.bfStrumStyle;
-				else styleChoice = PlayState.instance.dadStrumStyle;
+    this.opponentSplashes = opponentSplashes;
 
-				string1NoteSkin = "noteSplashes-"+ styleChoice;
-				string2NoteSkin = "notes/noteSplashes-"+ styleChoice;
-			}
-			if (FileSystem.exists(Paths.modsImages(string1NoteSkin)) || FileSystem.exists(Paths.getSharedPath('images/$string1NoteSkin.png')))
-				skin = "noteSplashes-" + styleChoice;
-			else if (FileSystem.exists(Paths.modsImages('notes/$string2NoteSkin')) || FileSystem.exists(Paths.getSharedPath('images/notes/$string2NoteSkin.png')))
-				skin = "notes/noteSplashes-"+ styleChoice;
-			else{
-				if (PlayState.SONG != null)
-				{
-					if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) skin = PlayState.SONG.splashSkin;
-					else skin = PlayState.SONG.disableSplashRGB ? 'noteSplashes' : defaultNoteSplash + getSplashSkinPostfix();
-				}
-			}
-		}
+    var skin:String = null;
+    if (!opponentSplashes)
+    {
+      if (PlayState.instance != null)
+      {
+        if (ClientPrefs.getGameplaySetting('opponent') && !ClientPrefs.data.middleScroll) styleChoice = PlayState.instance.dadStrumStyle;
+        else
+          styleChoice = PlayState.instance.bfStrumStyle;
 
-		if (_textureLoaded.contains('pixel') || skin.contains('pixel'))
-			containedPixelTexture = true;
-		
-		rgbShader = new PixelSplashShaderRef();
-		shader = rgbShader.shader;
-		precacheConfig(skin);
-		_configLoaded = skin;
-		scrollFactor.set();
-		setupNoteSplash(x, y, 0);
-	}
+        string1NoteSkin = "noteSplashes-" + styleChoice;
+        string2NoteSkin = "notes/noteSplashes-" + styleChoice;
+      }
 
-	override function destroy()
-	{
-		configs.clear();
-		super.destroy();
-	}
+      var firstPath:Bool = #if MODS_ALLOWED FileSystem.exists(Paths.getPath('images/$string1NoteSkin.png')) || #end Assets.exists(Paths.getPath('images/$string1NoteSkin.png'));
+      var secondPath:Bool = #if MODS_ALLOWED FileSystem.exists(Paths.getPath('images/$string2NoteSkin.png')) || #end Assets.exists(Paths.getPath('images/$string2NoteSkin.png'));
 
-	var maxAnims:Int = 2;
-	public static var neededOffsetCorrection:Bool = false;
-	public function setupNoteSplash(x:Float, y:Float, direction:Int = 0, ?note:Note = null, ?opponentSplashes:Bool = false) {
-		setPosition(x - Note.swagWidth * 0.95, y - Note.swagWidth);
-		aliveTime = 0;
+      if (firstPath) skin = "noteSplashes-" + styleChoice;
+      else if (secondPath) skin = "notes/noteSplashes-" + styleChoice;
+      else
+      {
+        if (PlayState.SONG != null)
+        {
+          if (PlayState.SONG.options.splashSkin != null
+            && PlayState.SONG.options.splashSkin.length > 0) skin = PlayState.SONG.options.splashSkin;
+          else
+            skin = PlayState.SONG.options.disableSplashRGB ? 'noteSplashes' : defaultNoteSplash + getSplashSkinPostfix();
+        }
+      }
+    }
+    else
+    {
+      if (PlayState.instance != null)
+      {
+        if (ClientPrefs.getGameplaySetting('opponent') && !ClientPrefs.data.middleScroll) styleChoice = PlayState.instance.bfStrumStyle;
+        else
+          styleChoice = PlayState.instance.dadStrumStyle;
 
-		var texture:String = null;
-		if (!opponentSplashes)
-		{
-			if (PlayState.instance != null){
-				if (ClientPrefs.getGameplaySetting('opponent') && !ClientPrefs.data.middleScroll) styleChoice = PlayState.instance.dadStrumStyle;
-				else styleChoice = PlayState.instance.bfStrumStyle;
+        string1NoteSkin = "noteSplashes-" + styleChoice;
+        string2NoteSkin = "notes/noteSplashes-" + styleChoice;
+      }
+      var firstPath:Bool = #if MODS_ALLOWED FileSystem.exists(Paths.getPath('images/$string1NoteSkin.png')) || #end Assets.exists(Paths.getPath('images/$string1NoteSkin.png'));
+      var secondPath:Bool = #if MODS_ALLOWED FileSystem.exists(Paths.getPath('images/$string2NoteSkin.png')) || #end Assets.exists(Paths.getPath('images/$string2NoteSkin.png'));
+      if (firstPath) skin = "noteSplashes-" + styleChoice;
+      else if (secondPath) skin = "notes/noteSplashes-" + styleChoice;
+      else
+      {
+        if (PlayState.SONG != null)
+        {
+          if (PlayState.SONG.options.splashSkin != null
+            && PlayState.SONG.options.splashSkin.length > 0) skin = PlayState.SONG.options.splashSkin;
+          else
+            skin = PlayState.SONG.options.disableSplashRGB ? 'noteSplashes' : defaultNoteSplash + getSplashSkinPostfix();
+        }
+      }
+    }
 
-				string1NoteSkin = "noteSplashes-" + styleChoice;
-				string2NoteSkin = "notes/noteSplashes-" + styleChoice;
-			}
-			if (FileSystem.exists(Paths.modsImages(string1NoteSkin)) || FileSystem.exists(Paths.getSharedPath('images/$string1NoteSkin.png')))
-				texture = "noteSplashes-" + styleChoice;
-			else if (FileSystem.exists(Paths.modsImages('notes/$string2NoteSkin')) || FileSystem.exists(Paths.getSharedPath('images/notes/$string2NoteSkin.png')))
-				texture = "notes/noteSplashes-" + styleChoice;
-			else
-			{
-				if(note != null && note.noteSplashData.texture != null) texture = note.noteSplashData.texture;
-				else if (PlayState.SONG != null)
-				{
-					if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) texture = PlayState.SONG.splashSkin;
-					else texture = PlayState.SONG.disableSplashRGB ? 'noteSplashes' : defaultNoteSplash + getSplashSkinPostfix();
-				}
-			}
-		}
-		else
-		{
-			if (PlayState.instance != null){
-				if (ClientPrefs.getGameplaySetting('opponent') && !ClientPrefs.data.middleScroll) styleChoice = PlayState.instance.bfStrumStyle;
-				else styleChoice = PlayState.instance.dadStrumStyle;
+    if (_textureLoaded.contains('pixel') || skin.contains('pixel')) containedPixelTexture = true;
 
-				string1NoteSkin = "noteSplashes-" + styleChoice;
-				string2NoteSkin = "notes/noteSplashes-" + styleChoice;
-			}
-			if (FileSystem.exists(Paths.modsImages(string1NoteSkin)) || FileSystem.exists(Paths.getSharedPath('images/$string1NoteSkin.png')))
-				texture = "noteSplashes-" + styleChoice;
-			else if (FileSystem.exists(Paths.modsImages('notes/$string2NoteSkin')) || FileSystem.exists(Paths.getSharedPath('images/notes/$string2NoteSkin.png')))
-				texture = "notes/noteSplashes-" + styleChoice;
-			else
-			{
-				if(note != null && note.noteSplashData.texture != null) texture = note.noteSplashData.texture;
-				else if (PlayState.SONG != null)
-				{
-					if(PlayState.SONG.splashSkin != null && PlayState.SONG.splashSkin.length > 0) texture = PlayState.SONG.splashSkin;
-					else texture = PlayState.SONG.disableSplashRGB ? 'noteSplashes' : defaultNoteSplash + getSplashSkinPostfix();
-				}
-			}
-		}
+    rgbShader = new RGBPixelShaderReference();
+    shader = rgbShader.shader;
+    precacheConfig(skin);
+    _configLoaded = skin;
+    scrollFactor.set();
+    setupNoteSplash(x, y, 0);
+  }
 
-		if (_textureLoaded.contains('pixel') || texture.contains('pixel'))
-			containedPixelTexture = true;
-		
-		var config:NoteSplashConfig = null;
-		if(_textureLoaded != texture) config = loadAnims(texture);
-		else config = precacheConfig(_configLoaded);
+  override function destroy()
+  {
+    configs.clear();
+    super.destroy();
+  }
 
-		var tempShader:RGBPalette = null;
-		if((note == null || note.noteSplashData.useRGBShader) && (PlayState.SONG == null || !PlayState.SONG.disableSplashRGB))
-		{
-			// If Splash RGB is enabled:
-			if(note != null && !note.noteSplashData.useGlobalShader)
-			{
-				if(note.noteSplashData.r != -1) note.rgbShader.r = note.noteSplashData.r;
-				if(note.noteSplashData.g != -1) note.rgbShader.g = note.noteSplashData.g;
-				if(note.noteSplashData.b != -1) note.rgbShader.b = note.noteSplashData.b;
-				tempShader = note.rgbShader.parent;
-			}
-			else tempShader = Note.globalRgbShaders[direction];
-		}
-	
-		if (!ClientPrefs.data.splashAlphaAsStrumAlpha) alpha = ClientPrefs.data.splashAlpha;
-		if(note != null) alpha = note.noteSplashData.a;
-		rgbShader.containsPixel = (containedPixelTexture || PlayState.isPixelStage);
-		rgbShader.copyValues(tempShader);
+  var maxAnims:Int = 2;
 
-		if(note != null) antialiasing = note.noteSplashData.antialiasing;
-		if(texture.contains('pixel') || _textureLoaded.contains('pixel') || !ClientPrefs.data.antialiasing) antialiasing = false;
+  public static var neededOffsetCorrection:Bool = false;
 
-		_textureLoaded = texture;
-		offset.set(10, 10);
+  public function setupNoteSplash(x:Float, y:Float, direction:Int = 0, ?note:Note = null, ?opponentSplashes:Bool = false)
+  {
+    setPosition(x - Note.swagWidth * 0.95, y - Note.swagWidth);
+    aliveTime = 0;
 
-		var animNum:Int = FlxG.random.int(1, maxAnims);
-		animation.play('note' + direction + '-' + animNum, true);
-		
-		var minFps:Int = 22;
-		var maxFps:Int = 26;
-		if(config != null)
-		{
-			var animID:Int = direction + ((animNum - 1) * Note.colArray.length);
-			var offs:Array<Float> = null;
-			if (config.offsets.length > 0)
-			{
-				offs = config.offsets[FlxMath.wrap(animID, 0, config.offsets.length-1)];
-				offset.x += offs[0];
-				offset.y += offs[1];
-			}
-			minFps = config.minFps;
-			maxFps = config.maxFps;
-			neededOffsetCorrection = config.offsetCorrection;
-		}
+    var texture:String = null;
+    if (!opponentSplashes)
+    {
+      if (PlayState.instance != null)
+      {
+        if (ClientPrefs.getGameplaySetting('opponent') && !ClientPrefs.data.middleScroll) styleChoice = PlayState.instance.dadStrumStyle;
+        else
+          styleChoice = PlayState.instance.bfStrumStyle;
 
-		if (neededOffsetCorrection)
-		{
-			offset.x += -58;
-			offset.y += -55;
-		}
+        string1NoteSkin = "noteSplashes-" + styleChoice;
+        string2NoteSkin = "notes/noteSplashes-" + styleChoice;
+      }
+      var firstPath:Bool = #if MODS_ALLOWED FileSystem.exists(Paths.getPath('images/$string1NoteSkin.png')) || #end Assets.exists(Paths.getPath('images/$string1NoteSkin.png'));
+      var secondPath:Bool = #if MODS_ALLOWED FileSystem.exists(Paths.getPath('images/$string2NoteSkin.png')) || #end Assets.exists(Paths.getPath('images/$string2NoteSkin.png'));
+      if (firstPath) texture = "noteSplashes-" + styleChoice;
+      else if (secondPath) texture = "notes/noteSplashes-" + styleChoice;
+      else
+      {
+        if (note != null && note.noteSplashData.texture != null) texture = note.noteSplashData.texture;
+        else if (PlayState.SONG != null)
+        {
+          if (PlayState.SONG.options.splashSkin != null
+            && PlayState.SONG.options.splashSkin.length > 0) texture = PlayState.SONG.options.splashSkin;
+          else
+            texture = PlayState.SONG.options.disableSplashRGB ? 'noteSplashes' : defaultNoteSplash + getSplashSkinPostfix();
+        }
+      }
+    }
+    else
+    {
+      if (PlayState.instance != null)
+      {
+        if (ClientPrefs.getGameplaySetting('opponent') && !ClientPrefs.data.middleScroll) styleChoice = PlayState.instance.bfStrumStyle;
+        else
+          styleChoice = PlayState.instance.dadStrumStyle;
 
-		if(animation.curAnim != null)
-			animation.curAnim.frameRate = FlxG.random.int(minFps, maxFps);
-	}
+        string1NoteSkin = "noteSplashes-" + styleChoice;
+        string2NoteSkin = "notes/noteSplashes-" + styleChoice;
+      }
+      var firstPath:Bool = #if MODS_ALLOWED FileSystem.exists(Paths.getPath('images/$string1NoteSkin.png')) || #end Assets.exists(Paths.getPath('images/$string1NoteSkin.png'));
+      var secondPath:Bool = #if MODS_ALLOWED FileSystem.exists(Paths.getPath('images/$string2NoteSkin.png')) || #end Assets.exists(Paths.getPath('images/$string2NoteSkin.png'));
+      if (firstPath) texture = "noteSplashes-" + styleChoice;
+      else if (secondPath) texture = "notes/noteSplashes-" + styleChoice;
+      else
+      {
+        if (note != null && note.noteSplashData.texture != null) texture = note.noteSplashData.texture;
+        else if (PlayState.SONG != null)
+        {
+          if (PlayState.SONG.options.splashSkin != null
+            && PlayState.SONG.options.splashSkin.length > 0) texture = PlayState.SONG.options.splashSkin;
+          else
+            texture = PlayState.SONG.options.disableSplashRGB ? 'noteSplashes' : defaultNoteSplash + getSplashSkinPostfix();
+        }
+      }
+    }
 
-	public static function getSplashSkinPostfix()
-	{
-		var skin:String = '';
-		if(ClientPrefs.data.splashSkin != ClientPrefs.defaultData.splashSkin)
-			skin = '-' + ClientPrefs.data.splashSkin.trim().toLowerCase().replace(' ', '_');
-		return skin;
-	}
+    if (_textureLoaded.contains('pixel') || texture.contains('pixel')) containedPixelTexture = true;
 
-	function loadAnims(skin:String, ?animName:String = null):NoteSplashConfig {
-		maxAnims = 0;
-		frames = Paths.getSparrowAtlas(skin);
-		var config:NoteSplashConfig = null;
-		if(frames == null)
-		{
-			skin = defaultNoteSplash + getSplashSkinPostfix();
-			frames = Paths.getSparrowAtlas(skin);
-			if(frames == null) //if you really need this, you really fucked something up
-			{
-				skin = defaultNoteSplash;
-				frames = Paths.getSparrowAtlas(skin);
-			}
-		}
-		config = precacheConfig(skin);
-		_configLoaded = skin;
+    var config:NoteSplashConfig = null;
+    if (_textureLoaded != texture) config = loadAnims(texture);
+    else
+      config = precacheConfig(_configLoaded);
 
-		if(animName == null)
-			animName = config != null ? config.anim : 'note splash';
-		
-		while(true) {
-			var animID:Int = maxAnims + 1;
-			for (i in 0...Note.colArray.length) {
-				if (!addAnimAndCheck('note$i-$animID', '$animName ${Note.colArray[i]} $animID', 24, false)) {
-					return config;
-				}
-			}
-			maxAnims++;
-		}
-	}
+    var tempShader:RGBPalette = null;
+    if ((note == null || note.noteSplashData.useRGBShader) && (PlayState.SONG == null || !PlayState.SONG.options.disableSplashRGB))
+    {
+      // If Splash RGB is enabled:
+      if (note != null && !note.noteSplashData.useGlobalShader)
+      {
+        if (note.noteSplashData.r != -1) note.rgbShader.r = note.noteSplashData.r;
+        if (note.noteSplashData.g != -1) note.rgbShader.g = note.noteSplashData.g;
+        if (note.noteSplashData.b != -1) note.rgbShader.b = note.noteSplashData.b;
+        tempShader = note.rgbShader.parent;
+      }
+      else
+        tempShader = Note.globalRgbShaders[direction];
+    }
 
-	public static function precacheConfig(skin:String)
-	{
-		if(configs.exists(skin)) return configs.get(skin);
+    if (!ClientPrefs.data.splashAlphaAsStrumAlpha) alpha = ClientPrefs.data.splashAlpha;
+    if (note != null) alpha = note.noteSplashData.a;
+    rgbShader.containsPixel = (containedPixelTexture || PlayState.isPixelStage);
+    rgbShader.copyValues(tempShader);
 
-		var path:String = Paths.getPath('images/$skin.txt', TEXT);
-		var configFile:Array<String> = CoolUtil.coolTextFile(path);
-		if(configFile.length < 1) return null;
-		
-		var firstArgs:Array<String> = configFile[1].split(' ');
-		var offs:Array<Array<Float>> = [];
-		for (i in 2...configFile.length)
-		{
-			var animOffs:Array<String> = configFile[i].split(' ');
-			offs.push([Std.parseFloat(animOffs[0]), Std.parseFloat(animOffs[1])]);
-		}
+    if (note != null) antialiasing = note.noteSplashData.antialiasing;
+    if (texture.contains('pixel') || _textureLoaded.contains('pixel') || !ClientPrefs.data.antialiasing) antialiasing = false;
 
-		var configString:String = firstArgs[2];
-		var configBool:Bool = configString.contains('true') ? true : false;
+    _textureLoaded = texture;
+    offset.set(10, 10);
 
-		var config:NoteSplashConfig = {
-			anim: configFile[0],
-			minFps: Std.parseInt(firstArgs[0]),
-			maxFps: Std.parseInt(firstArgs[1]),
-			offsetCorrection: configBool,
-			offsets: offs
-		};
-		configs.set(skin, config);
-		return config;
-	}
+    var animNum:Int = FlxG.random.int(1, maxAnims);
+    animation.play('note' + direction + '-' + animNum, true);
 
-	function addAnimAndCheck(name:String, anim:String, ?framerate:Int = 24, ?loop:Bool = false)
-	{
-		var animFrames = [];
-		@:privateAccess
-		animation.findByPrefix(animFrames, anim); // adds valid frames to animFrames
+    var minFps:Int = 22;
+    var maxFps:Int = 26;
+    if (config != null)
+    {
+      var animID:Int = direction + ((animNum - 1) * Note.colArray.length);
+      var offs:Array<Float> = null;
+      if (config.offsets.length > 0)
+      {
+        offs = config.offsets[FlxMath.wrap(animID, 0, config.offsets.length - 1)];
+        offset.x += offs[0];
+        offset.y += offs[1];
+      }
+      minFps = config.minFps;
+      maxFps = config.maxFps;
+      neededOffsetCorrection = config.offsetCorrection;
+    }
 
-		if(animFrames.length < 1) return false;
+    if (neededOffsetCorrection)
+    {
+      offset.x += -58;
+      offset.y += -55;
+    }
 
-		animation.addByPrefix(name, anim, framerate, loop);
-		return true;
-	}
+    if (animation.curAnim != null) animation.curAnim.frameRate = FlxG.random.int(minFps, maxFps);
+  }
 
-	private var aliveTime:Float = 0;
-	static var buggedKillTime:Float = 0.5; //automatically kills note splashes if they break to prevent it from flooding your HUD
-	override function update(elapsed:Float) {
-		aliveTime += elapsed;
-		if((animation.curAnim != null && animation.curAnim.finished) ||
-			(animation.curAnim == null && aliveTime >= buggedKillTime)) kill();
+  public static function getSplashSkinPostfix()
+  {
+    var skin:String = '';
+    if (ClientPrefs.data.splashSkin != ClientPrefs.defaultData.splashSkin) skin = '-' + ClientPrefs.data.splashSkin.trim().toLowerCase().replace(' ', '_');
+    return skin;
+  }
 
-		super.update(elapsed);
-	}
-}
+  function loadAnims(skin:String, ?animName:String = null):NoteSplashConfig
+  {
+    maxAnims = 0;
+    frames = Paths.getSparrowAtlas(skin);
+    var config:NoteSplashConfig = null;
+    if (frames == null)
+    {
+      skin = defaultNoteSplash + getSplashSkinPostfix();
+      frames = Paths.getSparrowAtlas(skin);
+      if (frames == null) // if you really need this, you really fucked something up
+      {
+        skin = defaultNoteSplash;
+        frames = Paths.getSparrowAtlas(skin);
+      }
+    }
+    config = precacheConfig(skin);
+    _configLoaded = skin;
 
-class PixelSplashShaderRef {
-	public var shader:PixelSplashShader = new PixelSplashShader();
-	public var containsPixel:Bool = false;
+    if (animName == null) animName = config != null ? config.anim : 'note splash';
 
-	public function copyValues(tempShader:RGBPalette)
-	{
-		var enabled:Bool = false;
-		if(tempShader != null)
-			enabled = true;
+    while (true)
+    {
+      var animID:Int = maxAnims + 1;
+      for (i in 0...Note.colArray.length)
+      {
+        if (!addAnimAndCheck('note$i-$animID', '$animName ${Note.colArray[i]} $animID', 24, false))
+        {
+          return config;
+        }
+      }
+      maxAnims++;
+    }
+  }
 
-		//Even though the shader is not RGB make it pixelate the splashes!
-		if(enabled)
-		{
-			for (i in 0...3){
-				shader.r.value[i] = tempShader.shader.r.value[i];
-				shader.g.value[i] = tempShader.shader.g.value[i];
-				shader.b.value[i] = tempShader.shader.b.value[i];
-			}
-			shader.mult.value[0] = tempShader.shader.mult.value[0];
-		}
-		else shader.mult.value[0] = 0.0;
+  public static function precacheConfig(skin:String)
+  {
+    if (configs.exists(skin)) return configs.get(skin);
 
-		var pixel:Float = 1;
-		if(containsPixel) pixel = PlayState.daPixelZoom;
-		shader.uBlocksize.value = [pixel, pixel];
-	}
+    var path:String = Paths.getPath('images/$skin.txt', TEXT);
+    var configFile:Array<String> = CoolUtil.coolTextFile(path);
+    if (configFile.length < 1) return null;
 
-	public function new()
-	{
-		shader.r.value = [0, 0, 0];
-		shader.g.value = [0, 0, 0];
-		shader.b.value = [0, 0, 0];
-		shader.mult.value = [1];
+    var firstArgs:Array<String> = configFile[1].split(' ');
+    var offs:Array<Array<Float>> = [];
+    for (i in 2...configFile.length)
+    {
+      var animOffs:Array<String> = configFile[i].split(' ');
+      offs.push([Std.parseFloat(animOffs[0]), Std.parseFloat(animOffs[1])]);
+    }
 
-		var pixel:Float = 1;
-		if(containsPixel) pixel = PlayState.daPixelZoom;
-		shader.uBlocksize.value = [pixel, pixel];
-	}
-}
+    var configString:String = firstArgs[2];
+    var configBool:Bool = configString.contains('true') ? true : false;
 
-class PixelSplashShader extends FlxShader
-{
-	@:glFragmentHeader('
-		#pragma header
-		
-		uniform vec3 r;
-		uniform vec3 g;
-		uniform vec3 b;
-		uniform float mult;
-		uniform vec2 uBlocksize;
+    var config:NoteSplashConfig =
+      {
+        anim: configFile[0],
+        minFps: Std.parseInt(firstArgs[0]),
+        maxFps: Std.parseInt(firstArgs[1]),
+        offsetCorrection: configBool,
+        offsets: offs
+      };
+    configs.set(skin, config);
+    return config;
+  }
 
-		vec4 flixel_texture2DCustom(sampler2D bitmap, vec2 coord) {
-			vec2 blocks = openfl_TextureSize / uBlocksize;
-			vec4 color = flixel_texture2D(bitmap, floor(coord * blocks) / blocks);
-			if (!hasTransform) {
-				return color;
-			}
+  function addAnimAndCheck(name:String, anim:String, ?framerate:Int = 24, ?loop:Bool = false)
+  {
+    var animFrames = [];
+    @:privateAccess
+    animation.findByPrefix(animFrames, anim); // adds valid frames to animFrames
 
-			if(color.a == 0.0 || mult == 0.0) {
-				return color * openfl_Alphav;
-			}
+    if (animFrames.length < 1) return false;
 
-			vec4 newColor = color;
-			newColor.rgb = min(color.r * r + color.g * g + color.b * b, vec3(1.0));
-			newColor.a = color.a;
-			
-			color = mix(color, newColor, mult);
-			
-			if(color.a > 0.0) {
-				return vec4(color.rgb, color.a);
-			}
-			return vec4(0.0, 0.0, 0.0, 0.0);
-		}')
+    animation.addByPrefix(name, anim, framerate, loop);
+    return true;
+  }
 
-	@:glFragmentSource('
-		#pragma header
+  private var aliveTime:Float = 0;
 
-		void main() {
-			gl_FragColor = flixel_texture2DCustom(bitmap, openfl_TextureCoordv);
-		}')
+  static var buggedKillTime:Float = 0.5; // automatically kills note splashes if they break to prevent it from flooding your HUD
 
-	public function new()
-	{
-		super();
-	}
+  override function update(elapsed:Float)
+  {
+    aliveTime += elapsed;
+    if ((animation.curAnim != null && animation.curAnim.finished) || (animation.curAnim == null && aliveTime >= buggedKillTime)) kill();
+
+    super.update(elapsed);
+  }
 }

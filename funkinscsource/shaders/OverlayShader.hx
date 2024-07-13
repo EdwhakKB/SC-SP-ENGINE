@@ -4,7 +4,7 @@ import flixel.system.FlxAssets.FlxShader;
 
 class OverlayShader extends FlxShader
 {
-	@:glFragmentSource('
+  @:glFragmentSource('
 		#pragma header
 		uniform vec4 uBlendColor;
 
@@ -26,8 +26,8 @@ class OverlayShader extends FlxShader
 			vec4 base = texture2D(bitmap, openfl_TextureCoordv);
 			gl_FragColor = blendLighten(base, uBlendColor, uBlendColor.a);
 		}')
-	public function new()
-	{
-		super();
-	}
+  public function new()
+  {
+    super();
+  }
 }

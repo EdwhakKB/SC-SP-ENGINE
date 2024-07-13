@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<project>
+<project xmlns="http://lime.openfl.org/project/1.0.4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/xsd/project-1.0.4.xsd">
 	<!-- _________________________ Application Settings _________________________ -->
 
-	<app title="Friday Night Funkin': SC ENGINE Edition" file="SCE" packageName="com.SCTeam.SCEE" package="com.SCTeam.SCE" main="Main" version="0.2.8" company="SCTeam" />
+	<app title="Friday Night Funkin': SC ENGINE Edition" file="SCE" packageName="com.SCTeam.SCEE" package="com.SCTeam.SCE" main="Main" version="0.4" company="SCTeam" />
 
 	<!--Switch Export with Unique ApplicationID and Icon-->
 	<set name="APP_ID" value="0x0100f6c013bbc000" />
@@ -24,7 +25,7 @@
 	<!-- ____________________________ Window Settings ___________________________ -->
 
 	<!--These window settings apply to all targets-->
-	<window width="1280" height="720" fps="" background="#000000" hardware="true" vsync="false" />
+	<window width="1280" height="720" fps="60" background="#000000" hardware="true" vsync="false" />
 
 	<!--HTML5-specific-->
 	<window if="html5" resizable="true" />
@@ -44,9 +45,11 @@
 	<set name="BUILD_DIR" value="export/release" unless="debug" />
 	<set name="BUILD_DIR" value="export/release-32bits" if="32bits" unless="32bits debug"/>
 	<set name="BUILD_DIR" value="export/32bit" if="32bits" />
+	<set name="BUILD_DIR" value="export/release-telemetry" if="telemetry" />
+	<set name="BUILD_DIR" value="export/debug-telemetry" if="debug telemetry" />
 	<set name="NO_PRECOMPILED_HEADERS" value="1"/>
 
-	<classpath name="funkinscsource" />
+	<source path="funkinscsource" />
 
 	<!-- PSYCH && SCE CUSTOMIZATION -->
 
@@ -77,11 +80,8 @@
 	<!-- Defines whether the if discord is allowed. -->
 	<define name="DISCORD_ALLOWED" />
 
-	<!-- Define whether translations are allowed or not.-->
+		<!-- Define whether translations are allowed or not.-->
 	<define name="TRANSLATIONS_ALLOWED" />
-
-	<!-- Allow Base game files!-->
-	<define name="BASE_GAME_FILES" /> <!-- DELETE THIS TO REMOVE MOST BASE GAME FILES AND REDUCE FILE SIZE -->
 
 	<!-- Defines whether if videos are allowed. -->
 	<define name="VIDEOS_ALLOWED" if="windows || linux || android" unless="32bits"/>
@@ -104,15 +104,17 @@
 	<!-- Defines whether there is a loadingscreen or not-->
 	<define name="SHOW_LOADING_SCREEN" />
 
-	<!-- Assets -->
-	<assets path="assets/fonts" />
-	<assets path="assets/art" />
+	<!--Defines whether base game files are included-->
+	<define name="BASE_GAME_FILES"/> <!-- DELETE THIS TO REMOVE MOST BASE GAME FILES AND REDUCE FILE SIZE -->
 
-	<assets path="assets/images" />
+	<!-- Assets -->
+	<assets path="assets/art" />
 	<assets path="assets/images" />
 
 	<assets path="assets/shared"        exclude="*.ogg" if="web"/>
 	<assets path="assets/shared"        exclude="*.mp3" unless="web"/>
+	<assets path="assets/embed"         exclude="*.ogg" if="web" embed="true"/>
+	<assets path="assets/embed"         exclude="*.mp3" unless="web" embed="true"/>
 	<assets path="assets/videos"        if="VIDEOS_ALLOWED"/>
 	<assets path="assets/songs"         exclude="*.ogg" if="web"/>
 	<assets path="assets/songs"         exclude="*.mp3" unless="web"/>
@@ -128,20 +130,20 @@
 		<assets path="assets/base_game" rename="assets" exclude="*.ogg" if="web"/>
 		<assets path="assets/base_game" rename="assets" exclude="*.mp3"  unless="web"/>
 	</section>
-	
+
 	<section if="MODS_ALLOWED">
 		<assets path='example_mods' rename='mods' embed='false' type='template'/>
 	</section>
 	<assets path='art/readme.txt' rename='do NOT readme.txt' />
-	<!-- <template path='mods' /> -->
-	
+
 	<!-- assets path="CHANGELOG.md" rename='changelog.txt' -->
 
-	<!-- NOTE FOR FUTURE SELF SINCE FONTS ARE ALWAYS FUCKY 
+	<!-- NOTE FOR FUTURE SELF SINCE FONTS ARE ALWAYS FUCKY
 		TO FIX ONE OF THEM, I CONVERTED IT TO OTF. DUNNO IF YOU NEED TO
 		THEN UHHH I USED THE NAME OF THE FONT WITH SETFORMAT() ON THE TEXT!!!
 		NOT USING A DIRECT THING TO THE ASSET!!!
 	-->
+
 
 	<!-- _______________________________ Defines (Most) And Custom_________________________ -->
 	<!-- Comment this out to prevent unused classes from being compiled.
@@ -172,7 +174,7 @@
 	<haxedef name="FLX_NO_MOUSE" if="mobile" />
 	<haxedef name="FLX_NO_KEYBOARD" if="mobile" />
 	<haxedef name="FLX_NO_TOUCH" if="desktop" />
-	
+
 	<!--<haxedef name="FLX_NO_GAMEPAD" />-->
 
 	<!--Disable the Flixel core sound tray-->
@@ -186,7 +188,7 @@
 
 	<!--Allow working memory greater than 1 Gig-->
 	<!--<haxedef name="HXCPP_GC_BIG_BLOCKS" />-->
-	
+
 	<!--Disable the Flixel core debugger. Automatically gets set whenever you compile in release mode!-->
 	<haxedef name="FLX_NO_DEBUG" unless="debug" />
 
@@ -209,33 +211,37 @@
 	<haxedef name="DISCORD_DISABLE_IO_THREAD" if="DISCORD_DISABLE_IO_THREAD" />
 	<haxedef name="NO_PRECOMPILED_HEADERS" if="linux" />
 
-	<haxelib name="flixel" /> 
-	<haxelib name="flixel-ui"/>
+	<haxelib name="flixel" />
 	<haxelib name="flixel-addons" />
-
-	<haxelib name='tjson' />
+	<haxelib name='tjson'/>
 
 	<!--In case you want to use the addons package-->
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
 	<haxelib name="SScript" if="HSCRIPT_ALLOWED"/>
 
-	<!-- GameJolt Stuff -->
-	<haxelib name="hxgamejolt-api" />
+	<!--Avoid memory leaks with for loops in HScript-->
+	<haxedef name="loop_unroll_max_cost" value="25" />
 
-	<!--In case you want to use the ui package-->
-	<haxelib name="faxe" if='switch'/>
-
-	<!-- Undo this for old system of videos-->
-	<!-- <haxelib name="hxCodec" if="VIDEOS_ALLOWED"/> -->
 	<haxelib name="hxvlc" if="VIDEOS_ALLOWED"/>
 	<haxelib name="format"/>
-		
+
 	<!--if you don't need FlxAnimate for exporting or for a mod just null it-->
 	<haxelib name="flxanimate"/>
 	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>
 
-  
-  	<!--Incase you want parallaxlt-->
+	<haxelib name="hxgamejolt-api"/>
+
+	<!--In case you want to use the ui package-->
+	<haxelib name="faxe" if='switch'/>
+
+	<!-- Enables a terminal log prompt on debug builds -->
+	<haxelib name="hxcpp-debug-server" if="debug"/>
+	<haxedef name="HXC_LIBVLC_LOGGING" if="VIDEOS_ALLOWED debug" />
+
+	<haxelib name="hxtelemetry" if="telemetry"/>
+	<haxedef name="HXCPP_TELEMETRY"  if="telemetry"/>
+
+  <!--Incase you want parallaxlt-->
 	<!-- <haxelib name="parallaxlt" /> -->
 
 	<haxelib name="fnf-modcharting-tools"/>
@@ -248,10 +254,10 @@
 
 	<haxelib name="haxeui-flixel" />
 	<haxelib name="haxeui-core" />
-	
+
 	<!--Avoid memory leaks with for loops in SScript's HScript-->
 	<haxedef name="loop_unroll_max_cost" value="25" />
-	
+
 	<!-- Enables a terminal log prompt on debug builds -->
 	<haxelib name="hxcpp-debug-server" if="debug"/>
 	<haxedef name="HXC_LIBVLC_LOGGING" if="VIDEOS_ALLOWED debug" />
@@ -259,12 +265,40 @@
 	<define name="haxeui_allow_drag_any_component" value="true"/>
 	<define name="haxeui_flixel_no_custom_cursors" value="true"/>
 
+	<!-- I don't remember what this is for. -->
+	<haxedef name="haxeui_no_mouse_reset" />
+	<!-- Clicking outside a dialog should deselect the current focused component. -->
+	<haxedef name="haxeui_focus_out_on_click" />
+	<!-- Required to use haxe.ui.backend.flixel.UIState with build macros. -->
+	<haxedef name="haxeui_dont_impose_base_class" />
+
+	<haxelib name="thx.core"/>
+	<haxelib name="thx.semver"/>
+	<haxelib name="json2object"/>
+	<haxelib name="FlxPartialSound"/>
+
+	<!--Disable source traces for release builds-->
+	<haxeflag name="-D no-traces"/>
 
 	<!-- <error value="Targets besides desktop are not supported" unless="desktop" />-->
 
 	<!-- _________________________________ Custom _______________________________ -->
 
 	<!--Place custom nodes like icons here (higher priority to override the HaxeFlixel icon)-->
+
+	<!-- Ensure all UI components are available at runtime. -->
+	<haxeflag name="--macro" value="include('haxe.ui.backend.flixel.components')" />
+	<haxeflag name="--macro" value="include('haxe.ui.containers.dialogs')" />
+	<haxeflag name="--macro" value="include('haxe.ui.containers.menus')" />
+	<haxeflag name="--macro" value="include('haxe.ui.containers.properties')" />
+	<haxeflag name="--macro" value="include('haxe.ui.core')" />
+	<haxeflag name="--macro" value="include('haxe.ui.components')" />
+	<haxeflag name="--macro" value="include('haxe.ui.containers')" />
+	<!--
+		Ensure additional class packages are available at runtime (some only really used by scripts).
+		Ignore packages we can't include.
+	-->
+	<haxeflag name="--macro" value="include('flixel', true, [ 'flixel.addons.editors.spine.*', 'flixel.addons.nape.*', 'flixel.system.macros.*' ])" />
 
 	<section if="COMPILE_ALL_CLASSES">
 		<haxeflag name="-dce" value="no" />
@@ -278,11 +312,32 @@
 	<haxedef name="message.reporting" value="pretty" />
 
 	<!--Used for Izzy Engine's crash handler-->
-	<haxedef name="HXCPP_STACK_TRACE" if="CRASH_HANDLER"/>  <!--if you want stack traces--> 
+	<haxedef name="HXCPP_STACK_TRACE" if="CRASH_HANDLER"/>  <!--if you want stack traces-->
 	<haxedef name="HXCPP_CHECK_POINTER" if="CRASH_HANDLER" />
 	<haxedef name="HXCPP_STACK_LINE" if="CRASH_HANDLER" />
 
 	<haxedef name="hscriptPos" /> <!-- for logging -->
+
+	<!-- Enable this on platforms which do not support dropping files onto the window. -->
+	<haxedef name="FILE_DROP_UNSUPPORTED" if="mac" />
+	<section unless="FILE_DROP_UNSUPPORTED">
+		<haxedef name="FILE_DROP_SUPPORTED" />
+	</section>
+
+	<section>
+		<!--
+			This flag enables the popup/crashlog error handler.
+			However, it also messes with breakpoints on some platforms.
+		-->
+		<haxedef name="openfl-enable-handle-error" />
+	</section>
+
+	<haxedef name="CAN_OPEN_LINKS" unless="switch" />
+	<haxedef name="CAN_CHEAT" if="switch debug" />
+
+	<!-- Enable this on platforms which do not support the edsior views. -->
+	<haxedef name="CHART_EDITOR_UNSUPPORTED" if="web" />
+	<haxedef name="CHART_EDITOR_SUPPORTED" unless="web"/>
 
 	<assets path="SCE-CrashDialog.exe" type="template" if="windows release" />
 </project>

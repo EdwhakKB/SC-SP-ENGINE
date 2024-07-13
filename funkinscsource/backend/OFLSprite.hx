@@ -9,16 +9,16 @@ import flixel.util.FlxColor;
  */
 class OFLSprite extends FlxSprite
 {
-	public var flSprite:Sprite;
+  public var flSprite:Sprite;
 
-	public function new(x, y, width:Int, height:Int, Sprite:Sprite)
-	{
-		super(x, y);
+  public function new(x, y, width:Int, height:Int, Sprite:Sprite)
+  {
+    super(x, y);
 
-		flSprite = Sprite;
+    flSprite = Sprite;
 
-		makeGraphic(width, height, FlxColor.TRANSPARENT);
+    makeGraphic(width, height, FlxColor.TRANSPARENT);
 
-		pixels.draw(flSprite);
-	}
+    pixels.draw(flSprite);
+  }
 }
