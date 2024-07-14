@@ -891,28 +891,159 @@ class LuaUtils
   }
 
   // trying to do some auto stuff so i don't have to set manual x and y values
+  // trying to do some auto stuff so i don't have to set manual x and y values
   public static function changeBFAuto(id:String, ?flipped:Bool = false)
   {
     if (!ClientPrefs.data.characters) return;
-    PlayState.instance?.boyfriend?.tools?.swapCharacter(PlayState.instance?.boyfriend, 'player', id, flipped);
+    var animationName:String = "no way anyone have an anim name this big";
+    var animationFrame:Int = 0;
+    if (PlayState.instance.boyfriend.playAnimationBeforeSwitch)
+    {
+      animationName = PlayState.instance.boyfriend.animation.curAnim.name;
+      animationFrame = PlayState.instance.boyfriend.animation.curAnim.curFrame;
+    }
+
+    PlayState.instance.boyfriend.resetAnimationVars();
+
+    PlayState.instance.removeObject(PlayState.instance.boyfriend);
+    PlayState.instance.destroyObject(PlayState.instance.boyfriend);
+    PlayState.instance.boyfriend = new Character(0, 0, id, !flipped);
+    PlayState.instance.boyfriend.flipMode = flipped;
+
+    var charOffset = new CharacterOffsets(id, !flipped);
+    var charX:Float = charOffset.daOffsetArray[0];
+    var charY:Float = charOffset.daOffsetArray[1] - (!flipped ? 0 : 350);
+
+    charX = PlayState.instance.boyfriend.positionArray[0];
+    charY = PlayState.instance.boyfriend.positionArray[1] - 350;
+
+    PlayState.instance.boyfriend.x = PlayState.instance.Stage.bfXOffset + charX + PlayState.instance.BF_X;
+    PlayState.instance.boyfriend.y = PlayState.instance.Stage.bfYOffset + charY + PlayState.instance.BF_Y;
+
+    PlayState.instance.addObject(PlayState.instance.boyfriend);
+
+    PlayState.instance.iconP1.changeIcon(PlayState.instance.boyfriend.healthIcon);
+
+    PlayState.instance.reloadHealthBarColors();
+
+    if (PlayState.instance.boyfriend.playAnimationBeforeSwitch)
+    {
+      if (PlayState.instance.boyfriend.animOffsets.exists(animationName)) PlayState.instance.boyfriend.playAnim(animationName, true, false, animationFrame);
+    }
+
+    PlayState.instance.startCharacterScripts(PlayState.instance.boyfriend.curCharacter);
   }
 
   public static function changeDadAuto(id:String, ?flipped:Bool = false)
   {
     if (!ClientPrefs.data.characters) return;
-    PlayState.instance?.dad?.tools?.swapCharacter(PlayState.instance?.dad, 'opponent', id, flipped);
+    var animationName:String = "no way anyone have an anim name this big";
+    var animationFrame:Int = 0;
+    if (PlayState.instance.dad.playAnimationBeforeSwitch)
+    {
+      animationName = PlayState.instance.dad.animation.curAnim.name;
+      animationFrame = PlayState.instance.dad.animation.curAnim.curFrame;
+    }
+
+    PlayState.instance.dad.resetAnimationVars();
+
+    PlayState.instance.removeObject(PlayState.instance.dad);
+    PlayState.instance.destroyObject(PlayState.instance.dad);
+    PlayState.instance.dad = new Character(0, 0, id, flipped);
+    PlayState.instance.dad.flipMode = flipped;
+
+    var charOffset = new CharacterOffsets(id, flipped);
+    var charX:Float = charOffset.daOffsetArray[0];
+    var charY:Float = charOffset.daOffsetArray[1] + (flipped ? 350 : 0);
+
+    charX = PlayState.instance.dad.positionArray[0];
+    charY = PlayState.instance.dad.positionArray[1];
+
+    PlayState.instance.dad.x = PlayState.instance.Stage.dadXOffset + charX + PlayState.instance.DAD_X;
+    PlayState.instance.dad.y = PlayState.instance.Stage.dadYOffset + charY + PlayState.instance.DAD_Y;
+    PlayState.instance.addObject(PlayState.instance.dad);
+
+    PlayState.instance.iconP2.changeIcon(PlayState.instance.dad.healthIcon);
+
+    PlayState.instance.reloadHealthBarColors();
+
+    if (PlayState.instance.dad.playAnimationBeforeSwitch)
+    {
+      if (PlayState.instance.dad.animOffsets.exists(animationName)) PlayState.instance.dad.playAnim(animationName, true, false, animationFrame);
+    }
+
+    PlayState.instance.startCharacterScripts(PlayState.instance.dad.curCharacter);
   }
 
   public static function changeGFAuto(id:String, ?flipped:Bool = false)
   {
     if (!ClientPrefs.data.characters) return;
-    PlayState.instance?.gf?.tools?.swapCharacter(PlayState.instance?.gf, 'girlfriend', id, flipped);
+    var animationName:String = "no way anyone have an anim name this big";
+    var animationFrame:Int = 0;
+    if (PlayState.instance.gf.playAnimationBeforeSwitch)
+    {
+      animationName = PlayState.instance.gf.animation.curAnim.name;
+      animationFrame = PlayState.instance.gf.animation.curAnim.curFrame;
+    }
+
+    PlayState.instance.gf.resetAnimationVars();
+
+    PlayState.instance.removeObject(PlayState.instance.gf);
+    PlayState.instance.destroyObject(PlayState.instance.gf);
+    PlayState.instance.gf = new Character(0, 0, id, flipped);
+    PlayState.instance.gf.flipMode = flipped;
+
+    var charX:Float = PlayState.instance.gf.positionArray[0];
+    var charY:Float = PlayState.instance.gf.positionArray[1];
+
+    PlayState.instance.gf.x = PlayState.instance.Stage.gfXOffset + charX + PlayState.instance.GF_X;
+    PlayState.instance.gf.y = PlayState.instance.Stage.gfYOffset + charY + PlayState.instance.GF_Y;
+    PlayState.instance.gf.scrollFactor.set(0.95, 0.95);
+    PlayState.instance.addObject(PlayState.instance.gf);
+
+    if (PlayState.instance.gf.playAnimationBeforeSwitch)
+    {
+      if (PlayState.instance.gf.animOffsets.exists(animationName)) PlayState.instance.gf.playAnim(animationName, true, false, animationFrame);
+    }
+
+    PlayState.instance.startCharacterScripts(PlayState.instance.gf.curCharacter);
   }
 
   public static function changeMomAuto(id:String, ?flipped:Bool = false)
   {
     if (!ClientPrefs.data.characters) return;
-    PlayState.instance?.mom?.tools?.swapCharacter(PlayState.instance?.mom, 'mom', id, flipped);
+    var animationName:String = "no way anyone have an anim name this big";
+    var animationFrame:Int = 0;
+    if (PlayState.instance.mom.playAnimationBeforeSwitch)
+    {
+      animationName = PlayState.instance.mom.animation.curAnim.name;
+      animationFrame = PlayState.instance.mom.animation.curAnim.curFrame;
+    }
+
+    PlayState.instance.mom.resetAnimationVars();
+
+    PlayState.instance.removeObject(PlayState.instance.mom);
+    PlayState.instance.destroyObject(PlayState.instance.mom);
+    PlayState.instance.mom = new Character(0, 0, id, flipped);
+    PlayState.instance.mom.flipMode = flipped;
+
+    var charOffset = new CharacterOffsets(id, flipped);
+    var charX:Float = charOffset.daOffsetArray[0];
+    var charY:Float = charOffset.daOffsetArray[1] + (flipped ? 350 : 0);
+
+    charX = PlayState.instance.mom.positionArray[0];
+    charY = PlayState.instance.mom.positionArray[1];
+
+    PlayState.instance.mom.x = PlayState.instance.Stage.momXOffset + charX + PlayState.instance.MOM_X;
+    PlayState.instance.mom.y = PlayState.instance.Stage.momYOffset + charY + PlayState.instance.MOM_Y;
+    PlayState.instance.addObject(PlayState.instance.mom);
+
+    if (PlayState.instance.mom.playAnimationBeforeSwitch)
+    {
+      if (PlayState.instance.mom.animOffsets.exists(animationName)) PlayState.instance.mom.playAnim(animationName, true, false, animationFrame);
+    }
+
+    PlayState.instance.startCharacterScripts(PlayState.instance.mom.curCharacter);
   }
 
   #if LUA_ALLOWED

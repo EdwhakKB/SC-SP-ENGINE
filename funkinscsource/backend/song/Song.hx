@@ -81,8 +81,6 @@ class Song
         if (note[3] != null && !Std.isOfType(note[3], String)) note[3] = Note.defaultNoteTypes[note[3]]; // compatibility with Week 7 and 0.1-0.3 psych charts
       }
     }
-
-    processForSCESongData(songJson);
   }
 
   public static var chartPath:String;
@@ -144,11 +142,7 @@ class Song
       }
     }
 
-    Debug.logInfo('passed to parsing');
-
     processForSCESongData(songJson);
-
-    Debug.logInfo('passed sfter parsing');
     return songJson;
   }
 

@@ -1,3 +1,6 @@
+package states.editors;
+
+class EditorPlayState extends MusicBeatSubState {}
 // package states.editors;
 // import backend.Song;
 // import backend.Section;

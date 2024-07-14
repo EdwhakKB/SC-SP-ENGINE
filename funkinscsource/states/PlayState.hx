@@ -5653,11 +5653,21 @@ class PlayState extends MusicBeatState
     }
     callOnScripts('onKeyRelease', [key]);
 
-    // Thanks drkfon376
-    if (playerHoldCovers != null
-      && !playerHoldCovers.members[key].isAnimationNull()
-      && !playerHoldCovers.members[key].getAnimationName()
-      .endsWith('p')) playerHoldCovers.despawnOnMiss(strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong, key);
+    if (opponentMode)
+    {
+      // Thanks drkfon376
+      if (playerHoldCovers != null
+        && !playerHoldCovers.members[key].isAnimationNull()
+        && !playerHoldCovers.members[key].getAnimationName()
+        .endsWith('p')) playerHoldCovers.despawnOnMiss(strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong, key);
+    }
+    else
+    {
+        if (opponentHoldCovers != null
+      && !opponentHoldCovers.members[key].isAnimationNull()
+      && !opponentHoldCovers.members[key].getAnimationName()
+      .endsWith('p')) opponentHoldCovers.despawnOnMiss(strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong, key);
+    }
   }
 
   public static function getKeyFromEvent(arr:Array<String>, key:FlxKey):Int
@@ -5832,13 +5842,27 @@ class PlayState extends MusicBeatState
 
   function noteMissCommon(direction:Int, note:Note = null)
   {
-    if (note != null)
+    if (opponentMode)
     {
-      playerHoldCovers.despawnOnMiss(strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong, direction, note);
+      if (note != null)
+      {
+        playerHoldCovers.despawnOnMiss(strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong, direction, note);
+      }
+      else
+      {
+        playerHoldCovers.despawnOnMiss(strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong, direction);
+      }
     }
     else
     {
-      playerHoldCovers.despawnOnMiss(strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong, direction);
+      if (note != null)
+      {
+        opponentHoldCovers.despawnOnMiss(strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong, direction, note);
+      }
+      else
+      {
+        opponentHoldCovers.despawnOnMiss(strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong, direction);
+      }
     }
     // score and data
     var char:Character = opponentMode ? dad : boyfriend;
@@ -6116,7 +6140,8 @@ class PlayState extends MusicBeatState
       }
     }
 
-    opponentHoldCovers.spawnOnNoteHit(note, strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong);
+    opponentMode ? playerHoldCovers.spawnOnNoteHit(note, strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong) : opponentHoldCovers.spawnOnNoteHit(note, strumLineNotes != null
+      && strumLineNotes.members.length > 0 && !startingSong);
 
     if (!opponentMode)
     {
@@ -6369,7 +6394,8 @@ class PlayState extends MusicBeatState
     if (guitarHeroSustains && note.isSustainNote) gainHealth = false;
     if (gainHealth) health += note.hitHealth * healthGain;
 
-    playerHoldCovers.spawnOnNoteHit(note, strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong);
+    !opponentMode ? playerHoldCovers.spawnOnNoteHit(note, strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong) :
+    opponentHoldCovers.spawnOnNoteHit(note, strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong);
 
     if (!opponentMode)
     {
