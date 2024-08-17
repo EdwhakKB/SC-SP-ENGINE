@@ -2664,7 +2664,7 @@ class PlayState extends MusicBeatState
           // CLEAR ANY POSSIBLE GHOST NOTES
           for (evilNote in unspawnNotes)
           {
-            var matches:Bool = noteColumn == evilNote.noteData && gottaHitNote == evilNote.mustPress;
+            var matches:Bool = (noteColumn == evilNote.noteData && gottaHitNote == evilNote.mustPress && evilNote.noteType == noteType);
             if (matches && Math.abs(spawnTime - evilNote.strumTime) == 0.0)
             {
               evilNote.destroy();
@@ -4681,7 +4681,7 @@ class PlayState extends MusicBeatState
 
         if (char != null) char.resetAnimationVars();
 
-      case 'Change stage':
+      case 'Change Stage':
         changeStage(eventParams[0]);
 
       case 'Add Cinematic Bars':
@@ -5706,8 +5706,8 @@ class PlayState extends MusicBeatState
 
     // obtain notes that the player can hit
     var plrInputNotes:Array<Note> = notes.members.filter(function(n:Note):Bool {
-      var canHit:Bool = !strumsBlocked[n.noteData] && n.canBeHit && n.mustPress && !n.tooLate && !n.wasGoodHit && !n.blockHit;
-      return n != null && canHit && !n.isSustainNote && n.noteData == key;
+      var canHit:Bool = n != null && !strumsBlocked[n.noteData] && n.canBeHit && n.mustPress && !n.tooLate && !n.wasGoodHit && !n.blockHit;
+      return canHit && !n.isSustainNote && n.noteData == key;
     });
     plrInputNotes.sort(sortHitNotes);
 
