@@ -8,10 +8,10 @@ import lime.app.Application;
 
 class WarnFreeplay extends states.MusicBeatState
 {
+  public static var leftState:Bool = false;
+
   var warnText:FlxText;
   var txtSine:Float = 0;
-
-  public static var leftState:Bool = false;
 
   override function create()
   {

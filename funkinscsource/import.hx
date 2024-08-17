@@ -31,8 +31,8 @@ import backend.ui.*;
 // Objects
 import objects.Alphabet;
 import objects.BGSprite;
-import objects.Stage;
 import objects.FunkinSCSprite;
+import objects.stagecontent.*;
 // States
 import states.PlayState;
 import states.LoadingState;
@@ -65,13 +65,10 @@ import flixel.addons.effects.FlxSkewedSprite as FlxSkewed;
 // FlxAnimate
 #if flxanimate
 import flxanimate.*;
-#else
-import animateatlas.AtlasFrameMaker;
+import flxanimate.PsychFlxAnimate as FlxAnimate;
 #end
 // Modcharting Tools
 #if SCEModchartingTools
-import fnf_modcharting_tools.modcharting.*;
-#else
 import modcharting.*;
 #end
 // Gamejolt

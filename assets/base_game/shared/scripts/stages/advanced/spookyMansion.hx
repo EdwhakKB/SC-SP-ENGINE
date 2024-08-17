@@ -57,17 +57,17 @@ function lightningStrikeShit():Void
   lightningStrikeBeat = curBeat;
   lightningOffset = FlxG.random.int(8, 24);
 
-  if (game.boyfriend.animOffsets.exists('scared'))
+  if (game.boyfriend.hasAnimation('scared'))
   {
     game.boyfriend.playAnim('scared', true);
   }
 
-  if (game.dad.animOffsets.exists('scared'))
+  if (game.dad.hasAnimation('scared'))
   {
     game.dad.playAnim('scared', true);
   }
 
-  if (game.gf != null && game.gf.animOffsets.exists('scared'))
+  if (game.gf != null && game.gf.hasAnimation('scared'))
   {
     game.gf.playAnim('scared', true);
   }

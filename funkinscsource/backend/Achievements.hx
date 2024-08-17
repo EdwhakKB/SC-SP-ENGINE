@@ -279,8 +279,8 @@ class Achievements
       }
       catch (e:Dynamic)
       {
-        var errorTitle = 'Mod name: ' + Mods.currentModDirectory != null ? Mods.currentModDirectory : "None";
-        var errorMsg = 'Error loading achievements.json: $e';
+        var errorTitle:String = 'Mod name: ' + Mods.currentModDirectory != null ? Mods.currentModDirectory : "None";
+        var errorMsg:String = 'Error loading achievements.json: $e';
         #if windows
         Debug.displayAlert(errorMsg, errorTitle);
         #end

@@ -33,7 +33,7 @@ class NoteOffsetState extends MusicBeatState
   var controllerPointer:FlxSprite;
   var _lastControllerMode:Bool = false;
 
-  var Stage:Stage = null;
+  var stage:Stage = null;
 
   override public function create()
   {
@@ -59,12 +59,12 @@ class NoteOffsetState extends MusicBeatState
 
     // Stage
     Paths.setCurrentLevel(stageDirectory);
-    Stage = new Stage('mainStage');
+    stage = new Stage('mainStage');
 
-    Stage.setupStageProperties("", false);
+    stage.setupStageProperties("", false);
 
-    Stage.loadStage(boyfriend, null, null, gf);
-    add(Stage);
+    for (i in stage.toAdd)
+      add(i);
 
     // Characters
     gf = new Character(400, 130, 'gf');

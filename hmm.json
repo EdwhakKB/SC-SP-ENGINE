@@ -38,7 +38,7 @@
     {
       "name": "SScript",
       "type": "haxelib",
-      "version": "8.1.6"
+      "version": "17.1.618"
     },
     {
       "name": "markdown",
@@ -87,7 +87,7 @@
       "name": "flxanimate",
       "type": "git",
       "dir": null,
-      "ref": "dev",
+      "ref": "768740a56b26aa0c072720e0d1236b94afe68e3e",
       "url": "https://github.com/ShadowMario/flxanimate"
     },
     {
@@ -102,7 +102,7 @@
       "type": "git",
       "dir": null,
       "ref": "custom-classes",
-      "url": "https://github.com/FNF-CNE-Devs/hscript-improved"
+      "url": "https://github.com/glowsoony/hscript-improved"
     },
     {
       "name": "haxeui-core",
@@ -140,17 +140,17 @@
       "url": "https://github.com/FunkinCrew/thx.semver"
     },
     {
-      "name": "funk.vis",
+      "name": "funkin.vis",
       "type": "git",
       "dir": null,
-      "ref": "38261833590773cb1de34ac5d11e0825696fc340",
+      "ref": "d5361037efa3a02c4ab20b5bd14ca11e7d00f519",
       "url": "https://github.com/FunkinCrew/funkVis"
     },
     {
       "name": "grig.audio",
       "type": "git",
       "dir": "src",
-      "ref": "57f5d47f2533fd0c3dcd025a86cb86c0dfa0b6d2",
+      "ref": "cbf91e2180fd2e374924fe74844086aab7891666",
       "url": "https://gitlab.com/haxe-grig/grig.audio.git"
     },
     {

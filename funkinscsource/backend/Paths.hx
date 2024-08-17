@@ -242,6 +242,15 @@ class Paths
     return parts[0];
   }
 
+  public static function exists(file:String, ?type:AssetType = TEXT, ?parentFolder:String, ?modsAllowed:Bool = true):Bool
+  {
+    #if MODS_ALLOWED
+    return FileSystem.exists(getPath(file, type, parentFolder, modsAllowed));
+    #else
+    return Assets.exists(getPath(file, type, parentFolder, modsAllowed));
+    #end
+  }
+
   public static function getPath(file:String, ?type:AssetType = TEXT, ?parentfolder:String, ?modsAllowed:Bool = true):String
   {
     #if MODS_ALLOWED
@@ -849,11 +858,10 @@ class Paths
 
   inline static public function formatToSongPath(path:String)
   {
-    var invalidChars = ~/[~&\\;:<>#]/;
-    var hideChars = ~/[.,'"%?!]/;
+    final invalidChars = ~/[~&;:<>#\s]/g;
+    final hideChars = ~/[.,'"%?!]/g;
 
-    var path = invalidChars.split(path.replace(' ', '-')).join("-");
-    return hideChars.split(path).join("").toLowerCase();
+    return hideChars.replace(invalidChars.replace(path, '-'), '').trim().toLowerCase();
   }
 
   public static var currentTrackedSounds:Map<String, Sound> = [];
@@ -872,7 +880,6 @@ class Paths
     else if (beepOnNull)
     {
       Debug.logError('SOUND NOT FOUND: $key, PATH: $path');
-      FlxG.log.error('SOUND NOT FOUND: $key, PATH: $path');
       return FlxAssets.getSound('flixel/sounds/beep');
     }
     }
@@ -938,7 +945,7 @@ class Paths
   #end
 
   #if flxanimate
-  public static function loadAnimateAtlas(spr:flxanimate.FlxAnimate, folderOrImg:Dynamic, spriteJson:Dynamic = null, animationJson:Dynamic = null)
+  public static function loadAnimateAtlas(spr:FlxAnimate, folderOrImg:Dynamic, spriteJson:Dynamic = null, animationJson:Dynamic = null)
   {
     var changedAnimJson = false;
     var changedAtlasJson = false;

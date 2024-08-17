@@ -137,8 +137,7 @@ class StageData
     var stage:String = '';
     if (SONG.stage != null) stage = SONG.stage;
     else if (Song.loadedSongName != null) stage = vanillaSongStage(Paths.formatToSongPath(Song.loadedSongName));
-    else
-      stage = 'mainStage';
+    else stage = 'mainStage';
 
     var stageFile:StageFile = getStageFile(stage);
     forceNextDirectory = (stageFile != null) ? stageFile.directory : ''; // preventing crashes

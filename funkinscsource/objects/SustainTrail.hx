@@ -28,7 +28,7 @@ class SustainTrail extends FlxSprite
   public var fullSustainLength:Float = 0;
   public var parentStrumline:Strumline;
 
-  public var cover:HoldCover = null;
+  public var cover:HoldCoverSprite = null;
 
   /**
    * Set to `true` if the user hit the note and is currently holding the sustain.

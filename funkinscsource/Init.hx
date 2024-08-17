@@ -22,20 +22,14 @@ class Init extends FlxState
     // Run this first so we can see logs.
     Debug.onInitProgram();
 
-    Main.game.framerate = Application.current.window.displayMode.refreshRate;
     Application.current.window.setIcon(lime.utils.Assets.getImage('assets/art/iconOG.png'));
 
     #if !mobile
-    if (Main.fpsVar == null)
-    {
-      Main.fpsVar = new FPSCounter(10, 3, 0xFFFFFF);
-      Lib.current.stage.addChild(Main.fpsVar);
-    }
+    if (Main.fpsVar == null) Lib.current.stage.addChild(Main.fpsVar = new FPSCounter(10, 3, 0xFFFFFF));
     #end
 
     #if linux
-    var icon = lime.graphics.Image.fromFile("icon.png");
-    Lib.current.stage.window.setIcon(icon);
+    Lib.current.stage.window.setIcon(lime.graphics.Image.fromFile("icon.png"));
     #end
 
     FlxG.autoPause = false;
@@ -76,7 +70,7 @@ class Init extends FlxState
     }
     #end
 
-    #if LUA_ALLOWED llua.Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(psychlua.CallbackHandler.call)); #end
+    #if LUA_ALLOWED llua.Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(psychlua.LuaCallbackHandler.call)); #end
     Controls.instance = new Controls();
     ClientPrefs.loadDefaultKeys();
     #if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
@@ -102,6 +96,8 @@ class Init extends FlxState
       GameJoltAPI.authDaUser(ClientPrefs.data.gjUser, ClientPrefs.data.gjToken, true);
     }
 
+    if (ClientPrefs.data.gjUser.toLowerCase() == 'glowsoony') FlxG.scaleMode = new flixel.system.scaleModes.FillScaleMode();
+
     if (FlxG.save.data != null && FlxG.save.data.fullscreen) FlxG.fullscreen = FlxG.save.data.fullscreen;
 
     if (FlxG.save.data.flashing == null && !FlashingState.leftState)
@@ -112,9 +108,7 @@ class Init extends FlxState
     }
     else
     {
-      FlxG.switchState(Type.createInstance(Main.game.initialState, []));
+      FlxG.switchState(Type.createInstance(TitleState, []));
     }
-
-    if (ClientPrefs.data.gjUser.toLowerCase() == 'glowsoony') FlxG.scaleMode = new flixel.system.scaleModes.FillScaleMode();
   }
 }

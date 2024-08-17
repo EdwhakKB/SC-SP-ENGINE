@@ -29,8 +29,6 @@ class MenuItem extends FlxSprite
   override function update(elapsed:Float)
   {
     super.update(elapsed);
-    y = FlxMath.lerp((targetY * 120) + 480, y, Math.exp(-elapsed * 10.2));
-
     if (isFlashing)
     {
       _flashingElapsed += elapsed;

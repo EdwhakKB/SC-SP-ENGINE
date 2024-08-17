@@ -21,8 +21,8 @@ enum MainMenuColumn
 
 class MainMenuState extends MusicBeatState
 {
-  public static final psychEngineVersion:String = '1.0a'; // This is also used for Discord RPC
-  public static var SCEVersion:String = '1.5.2'; // This is also used for Discord RPC
+  public static final psychEngineVersion:String = '1.0-prerelease'; // This is also used for Discord RPC
+  public static var SCEVersion:String = '1.5.25'; // This is also used for Discord RPC
   public static var curSelected:Int = 0;
   public static var curColumn:MainMenuColumn = CENTER;
 
@@ -216,8 +216,12 @@ class MainMenuState extends MusicBeatState
         changeItem(controls.UI_UP_P ? -1 : 1);
       }
 
-      if (allowMouse && FlxG.mouse.deltaScreenX != 0 && FlxG.mouse.deltaScreenY != 0) // more accurate than FlxG.mouse.justMoved
+      var allowMouse:Bool = allowMouse;
+      if (allowMouse
+        && ((FlxG.mouse.deltaViewX != 0 && FlxG.mouse.deltaViewY != 0)
+          || FlxG.mouse.justPressed)) // FlxG.mouse.deltaViewX/Y checks is more accurate than FlxG.mouse.justMoved
       {
+        allowMouse = false;
         FlxG.mouse.visible = true;
         timeNotMoving = 0;
 
@@ -234,6 +238,7 @@ class MainMenuState extends MusicBeatState
 
         if (leftItem != null && FlxG.mouse.overlaps(leftItem))
         {
+          allowMouse = true;
           if (selectedItem != leftItem)
           {
             curColumn = LEFT;
@@ -242,6 +247,7 @@ class MainMenuState extends MusicBeatState
         }
         else if (rightItem != null && FlxG.mouse.overlaps(rightItem))
         {
+          allowMouse = true;
           if (selectedItem != rightItem)
           {
             curColumn = RIGHT;
@@ -257,17 +263,18 @@ class MainMenuState extends MusicBeatState
             var memb:FlxSprite = menuItems.members[i];
             if (FlxG.mouse.overlaps(memb))
             {
-              var distance:Float = Math.sqrt(Math.pow(memb.getGraphicMidpoint().x - FlxG.mouse.screenX, 2)
-                + Math.pow(memb.getGraphicMidpoint().y - FlxG.mouse.screenY, 2));
+              var distance:Float = Math.sqrt(Math.pow(memb.getGraphicMidpoint().x - FlxG.mouse.viewX, 2)
+                + Math.pow(memb.getGraphicMidpoint().y - FlxG.mouse.viewY, 2));
               if (dist < 0 || distance < dist)
               {
                 dist = distance;
                 distItem = i;
+                allowMouse = true;
               }
             }
           }
 
-          if (distItem != -1 && curSelected != distItem)
+          if (distItem != -1 && selectedItem != menuItems.members[distItem])
           {
             curColumn = CENTER;
             curSelected = distItem;
@@ -278,7 +285,7 @@ class MainMenuState extends MusicBeatState
       else
       {
         timeNotMoving += elapsed;
-        if (timeNotMoving > 1) FlxG.mouse.visible = false;
+        if (timeNotMoving > 2) FlxG.mouse.visible = false;
       }
 
       switch (curColumn)

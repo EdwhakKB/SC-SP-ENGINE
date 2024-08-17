@@ -71,13 +71,6 @@ class GameplaySettingsSubState extends BaseOptionsMenu
     option.changeValue = 0.1;
     addOption(option);
 
-    var option:Option = new Option('Audio Visual Offset', 'Changes the audio\'s visual offset.', 'audioVisualOffset', INT);
-    option.scrollSpeed = 5;
-    option.minValue = -Math.pow(10, 4);
-    option.maxValue = Math.pow(10, 4);
-    option.changeValue = 0.1;
-    addOption(option);
-
     var option:Option = new Option('Hitsound in what way', 'if checked, note and keys do a hitsound when pressed!, else just when notes are hit!',
       'hitsoundType', STRING, ['None', 'Keys', 'Notes']);
     addOption(option);

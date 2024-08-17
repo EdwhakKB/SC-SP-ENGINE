@@ -84,10 +84,8 @@ class Main extends Sprite
     input.Cursor.registerHaxeUICursors();
     haxe.ui.tooltips.ToolTipManager.defaultDelay = 200;
 
-    addChild(new FlxGame(game.width, game.height, Init, game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
-
-    gjToastManager = new GJToastManager();
-    addChild(gjToastManager);
+    addChild(new FlxGame(1280, 720, Init, 60, 60, true, false));
+    addChild(gjToastManager = new GJToastManager());
 
     gameContainer = this;
 
@@ -162,9 +160,17 @@ class Main extends Sprite
       if (FlxG.cameras != null)
       {
         for (cam in FlxG.cameras.list)
-          if (cam != null && cam.filters != null) resetSpriteCache(cam.flashSprite);
+        {
+          if (cam != null && cam.filters != null)
+          {
+            resetSpriteCache(cam.flashSprite);
+          }
+        }
       }
     });
+    #if VIDEOS_ALLOWED
+    hxvlc.util.Handle.init(#if (hxvlc >= "1.8.0") ['--no-lua'] #end);
+    #end
   }
 
   static function resetSpriteCache(sprite:Sprite):Void

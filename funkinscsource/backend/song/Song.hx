@@ -114,17 +114,18 @@ class Song
     #end
     rawData = Assets.getText(_lastPath);
 
-    Debug.logInfo('is rawData null? ${rawData == null}');
-    Debug.logInfo('is newly processed rawData null? ${parseJSON(rawData, jsonInput) == null}');
-
     return rawData != null ? parseJSON(rawData, jsonInput) : null;
   }
 
   public static function parseJSON(rawData:String, ?nameForError:String = null, ?convertTo:String = 'psych_v1'):SwagSong
   {
-    var songJson:SwagSong = cast Json.parse(rawData).song;
+    var songJson:SwagSong = cast Json.parse(rawData);
+    if (Reflect.hasField(songJson, 'song'))
+    {
+      var subSong:SwagSong = Reflect.field(songJson, 'song');
+      if (subSong != null && Type.typeof(subSong) == TObject) songJson = subSong;
+    }
 
-    Debug.logInfo('is song json null? ${songJson == null}');
     if (convertTo != null && convertTo.length > 0)
     {
       var fmt:String = songJson.format;
@@ -142,41 +143,143 @@ class Song
       }
     }
 
-    processForSCESongData(songJson);
+    processSongDataToSCEData(songJson);
     return songJson;
   }
 
-  public static function processForSCESongData(songJson:Dynamic)
+  /**
+   * Use when loading an unknown song json or when song json is newly created in the chart editor. (new json without data / null json).
+   * @param songJson
+   */
+  public static function defaultIfNotFound(songJson:Dynamic)
+  {
+    if (songJson.options == null)
+    {
+      songJson.options =
+        {
+          disableNoteRGB: false,
+          disableNoteQuantRGB: false,
+          disableStrumRGB: false,
+          disableSplashRGB: false,
+          disableHoldCoverRGB: false,
+          disableHoldCover: false,
+          disableCaching: false,
+          notITG: false,
+          usesHUD: false,
+          oldBarSystem: false,
+          rightScroll: false,
+          middleScroll: false,
+          blockOpponentMode: false,
+          arrowSkin: "",
+          splashSkin: "",
+          holdCoverSkin: "",
+          opponentNoteStyle: "",
+          playerNoteStyle: "",
+          vocalsPrefix: "",
+          vocalsSuffix: "",
+          instrumentalPrefix: "",
+          instrumentalSuffix: ""
+        }
+    }
+    if (songJson.gameOverData == null)
+    {
+      songJson.gameOverData =
+        {
+          gameOverChar: "bf-dead",
+          gameOverSound: "fnf_loss_sfx",
+          gameOverLoop: "gameOver",
+          gameOverEnd: "gameOverEnd"
+        }
+    }
+    if (songJson.characters == null)
+    {
+      songJson.characters =
+        {
+          player: "bf",
+          girlfriend: "dad",
+          opponent: "gf",
+          secondOpponent: "",
+        }
+    }
+  }
+
+  /**
+   * Use to transform old data into new data from psych to SCE format to be able to load the Json when not null!
+   * @param songJson
+   */
+  public static function processSongDataToSCEData(songJson:Dynamic)
   {
     try
     {
+      /*
+        Original Event Format
+          event = [
+            strumTime,
+            [
+              event,
+              param1,
+              param2
+            ]
+          ]
+        Compared to SCE
+          event = [
+            strumTime,
+            [
+              events,
+              [
+                value1
+                value2
+                value3
+                value4
+                value5
+                value6
+                value7
+                value8
+                value9
+                value10
+                value11
+                value12
+                value13
+                value14
+              ]
+            ]
+          ]
+       */
+      if (songJson.events != null)
+      {
+        // Old Format
+        var oldEvents:Array<Dynamic> = songJson.events;
+
+        // New Format
+        var newEvents:Array<Dynamic> = [];
+
+        // Formatting Events
+        for (event in oldEvents)
+        {
+          for (i in 0...event[1].length)
+          {
+            // Comp for old event loading
+            var params:Array<String> = [];
+            if (Std.isOfType(event[1][i][1], Array)) params = event[1][i][1];
+            else if (Std.isOfType(event[1][i][1], String))
+            {
+              for (j in 1...14)
+              {
+                params.push(event[1][i][j]);
+              }
+            }
+
+            newEvents.push([event[0], [[event[1][i][0], params]]]);
+          }
+        }
+
+        // Old is now New.
+        songJson.events = newEvents;
+      }
+
       if (songJson.options == null)
       {
-        songJson.options =
-          {
-            disableNoteRGB: false,
-            disableNoteQuantRGB: false,
-            disableStrumRGB: false,
-            disableSplashRGB: false,
-            disableHoldCoverRGB: false,
-            disableHoldCover: false,
-            disableCaching: false,
-            notITG: false,
-            usesHUD: false,
-            oldBarSystem: false,
-            rightScroll: false,
-            middleScroll: false,
-            blockOpponentMode: false,
-            arrowSkin: "",
-            splashSkin: "",
-            holdCoverSkin: "",
-            opponentNoteStyle: "",
-            playerNoteStyle: "",
-            vocalsPrefix: "",
-            vocalsSuffix: "",
-            instrumentalPrefix: "",
-            instrumentalSuffix: ""
-          }
+        songJson.options = {}
       }
 
       var options:Array<String> = [
@@ -208,57 +311,101 @@ class Song
         'instrumentalSuffix'
       ];
 
+      var defaultOptionValues:Map<String, Dynamic> = [
+        'disableNoteRGB' => false,
+        'disableNoteQuantRGB' => false,
+        'disableStrumRGB' => false,
+        'disableSplashRGB' => false,
+        'disableHoldCoverRGB' => false,
+
+        'disableHoldCover' => false,
+        'disableCaching' => false,
+        'notITG' => false,
+        'usesHUD' => true,
+        'oldBarSystem' => true,
+        'rightScroll' => false,
+        'middleScroll' => false,
+        'blockOpponentMode' => false,
+
+        'arrowSkin' => "",
+        'splashSkin' => "",
+        'holdCoverSkin' => "",
+        'opponentNoteSyle' => "",
+        'playerNoteStyle' => "",
+
+        'vocalsPrefix' => "",
+        'vocalsSuffix' => "",
+        'instrumentalPrefix' => "",
+        'instrumentalSuffix' => ""
+      ];
+
       for (field in options)
       {
-        if (Reflect.getProperty(songJson, field) != null)
+        if (Reflect.hasField(songJson, field))
         {
-          Reflect.setProperty(songJson.options, field, Reflect.getProperty(songJson, field));
-          if (Reflect.hasField(songJson, field)) Reflect.deleteField(songJson, field);
+          if (!Reflect.hasField(songJson.options, field)) Reflect.setProperty(songJson.options, field, Reflect.getProperty(songJson, field));
+          Reflect.deleteField(songJson, field);
+        }
+        else
+        {
+          if (!Reflect.hasField(songJson.options, field)) Reflect.setProperty(songJson.options, field, defaultOptionValues.get(field));
         }
       }
 
       if (songJson.gameOverData == null)
       {
-        songJson.gameOverData =
-          {
-            gameOverChar: "bf-dead",
-            gameOverSound: "fnf_loss_sfx",
-            gameOverLoop: "gameOver",
-            gameOverEnd: "gameOverEnd"
-          }
+        songJson.gameOverData = {}
       }
 
       var gameOverData:Array<String> = ['gameOverChar', 'gameOverSound', 'gameOverLoop', 'gameOverEnd'];
 
+      var defaultGameOverValues:Map<String, String> = [
+        'gameOverChar' => "bf-dead",
+        'gameOverSound' => "fnf_loss_sfx",
+        'gameOverLoop' => "gameOver",
+        'gameOverEnd' => 'gameOverEnd'
+      ];
+
       for (field in gameOverData)
       {
-        if (Reflect.getProperty(songJson, field) != null)
+        if (Reflect.hasField(songJson, field))
         {
-          Reflect.setProperty(songJson.gameOverData, field, Reflect.getProperty(songJson, field));
-          if (Reflect.hasField(songJson, field)) Reflect.deleteField(songJson, field);
+          if (!Reflect.hasField(songJson.options, field)) Reflect.setProperty(songJson.gameOverData, field, Reflect.getProperty(songJson, field));
+          Reflect.deleteField(songJson, field);
+        }
+        else
+        {
+          if (Reflect.hasField(songJson, field)) Reflect.setProperty(songJson.gameOverData, field, defaultGameOverValues.get(field));
         }
       }
 
       if (songJson.characters == null)
       {
-        songJson.characters =
-          {
-            player: "bf",
-            girlfriend: "dad",
-            opponent: "gf",
-            secondOpponent: "",
-          }
+        songJson.characters = {}
       }
 
       var characters:Array<String> = ['player', 'opponent', 'girlfriend', 'secondOpponent'];
       var originalChar:Array<String> = ['player1', 'player2', 'gfVersion', 'player4'];
 
+      var defaultCharacters:Map<String, String> = [
+        'player' => "bf",
+        'opponent' => "dad",
+        'girlfriend' => "gf",
+        'secondOpponent' => ""
+      ];
+
       for (field in 0...characters.length)
       {
-        if (Reflect.getProperty(songJson, originalChar[field]) != null)
+        if (Reflect.hasField(songJson, originalChar[field]))
         {
-          Reflect.setProperty(songJson.characters, characters[field], Reflect.getProperty(songJson, originalChar[field]));
-          if (Reflect.hasField(songJson, originalChar[field])) Reflect.deleteField(songJson, originalChar[field]);
+          if (!Reflect.hasField(songJson.characters,
+            characters[field])) Reflect.setProperty(songJson.characters, characters[field], Reflect.getProperty(songJson, originalChar[field]));
+          Reflect.deleteField(songJson, originalChar[field]);
+        }
+        else
+        {
+          if (!Reflect.hasField(songJson.characters,
+            characters[field])) Reflect.setProperty(songJson.characters, characters[field], defaultCharacters.get(characters[field]));
         }
       }
 
@@ -273,21 +420,10 @@ class Song
         + Note.getNoteSkinPostfix();
       if (songJson.song != null && songJson.songId == null) songJson.songId = songJson.song;
       else if (songJson.songId != null && songJson.song == null) songJson.song = songJson.songId;
-
-      // var thisLog:String = '
-      // is options null ? ${songJson.options == null},
-      // is gameoverdata null ? ${songJson.gameOverData == null},
-      // is characterdata null ? ${songJson.characters == null},
-      // is songId null ? ${songJson.songId}, is song null ? ${songJson.song},
-      // is blockOpponentMode null ? ${songJson.options.blockOpponentMode},
-      // is holdCoverSkin null ? ${songJson.options.holdCoverSkin}
-      // ';
-
-      // Debug.logInfo(thisLog);
     }
     catch (e:haxe.Exception)
     {
-      Debug.logInfo('FAILED TO LOAD PASRING SCE DATA ${e.message + e.stack}');
+      Debug.logInfo('FAILED TO LOAD CONVERSION JSON DATA FOR SCE ${e.message + e.stack}');
     }
   }
 }

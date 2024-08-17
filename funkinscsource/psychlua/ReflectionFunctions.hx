@@ -30,6 +30,7 @@ class ReflectionFunctions
       catch (e)
       {
         Debug.displayAlert("Unknown 'Get' Variable: " + variable, "Variable Not Found");
+        return false;
       }
       return false;
     });
@@ -39,21 +40,22 @@ class ReflectionFunctions
         var split:Array<String> = variable.split('.');
         if (Stage.instance.swagBacks.exists(split[0]))
         {
-          return Stage.instance.setPropertyObject(variable, value);
+          Stage.instance.setPropertyObject(variable, value)
+          return value;
         }
         if (split.length > 1)
         {
-          if (Std.isOfType(LuaUtils.getObjectDirectly(split[0]), Character)
-            && split[split.length - 1] == 'color') LuaUtils.setVarInArray(LuaUtils.getPropertyLoop(split), 'doMissThing', "false");
-          return LuaUtils.setVarInArray(LuaUtils.getPropertyLoop(split, true, allowMaps), split[split.length - 1], value, allowMaps);
+          LuaUtils.setVarInArray(LuaUtils.getPropertyLoop(split, true, allowMaps), split[split.length - 1], value, allowMaps);
+          return value;
         }
-        return LuaUtils.setVarInArray(LuaUtils.getTargetInstance(), variable, value, allowMaps);
+        LuaUtils.setVarInArray(LuaUtils.getTargetInstance(), variable, value, allowMaps);
+        return value;
       }
       catch (e)
       {
         Debug.displayAlert("Unknown 'Set' Variable: " + variable, "Variable Not Found");
       }
-      return;
+      return value;
     });
     funk.set("getPropertyFromClass", function(classVar:String, variable:String, ?allowMaps:Bool = false) {
       classVar = checkForOldClassVars(classVar);
@@ -109,6 +111,9 @@ class ReflectionFunctions
       if (Std.isOfType(realObject, FlxTypedGroup))
       {
         var result:Dynamic = LuaUtils.getGroupStuff(realObject.members[index], variable, allowMaps);
+
+        if (PlayState.instance.stage.swagGroup.exists(obj)) result = PlayState.instance.stage.swagGroup.get(obj);
+
         return result;
       }
 
@@ -133,6 +138,7 @@ class ReflectionFunctions
 
       if (Std.isOfType(realObject, FlxTypedGroup))
       {
+        if (PlayState.instance.stage.swagGroup.exists(obj)) realObject = PlayState.instance.stage.swagGroup.get(obj);
         LuaUtils.setGroupStuff(realObject.members[index], variable, value, allowMaps);
         return value;
       }
@@ -153,6 +159,7 @@ class ReflectionFunctions
       var groupOrArray:Dynamic = Reflect.getProperty(LuaUtils.getTargetInstance(), obj);
       if (Std.isOfType(groupOrArray, FlxTypedGroup))
       {
+        if (PlayState.instance.stage.swagGroup.exists(obj)) groupOrArray = PlayState.instance.stage.swagGroup.get(obj);
         var member = groupOrArray.members[index];
         if (!dontDestroy) member.kill();
         groupOrArray.remove(member, true);

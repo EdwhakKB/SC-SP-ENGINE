@@ -59,6 +59,8 @@ class HealthIcon extends FunkinSCSprite
 
   public var characterId:String = "";
 
+  public var stopBop:Bool = false;
+
   private var animName:String = 'normal';
   private var changedComplete:Bool = true;
 
@@ -69,9 +71,10 @@ class HealthIcon extends FunkinSCSprite
     this.isSizedState = isSizedState;
     changeIcon(char, allowGPU);
     scrollFactor.set();
+    stopBop = (FlxG.state is states.editors.ChartingState);
   }
 
-  public function changeIcon(char:String, ?allowGPU:Bool = true)
+  public dynamic function changeIcon(char:String, ?allowGPU:Bool = true)
   {
     changedComplete = false;
     var name:String = 'icons/';
@@ -121,7 +124,7 @@ class HealthIcon extends FunkinSCSprite
     this.char = char;
   }
 
-  public function loadGraphicIcon(icon:String, gpuAllowed:Bool)
+  public dynamic function loadGraphicIcon(icon:String, gpuAllowed:Bool)
   {
     frames = null;
     if (animatedIcon) animatedIcon = false;
@@ -220,7 +223,7 @@ class HealthIcon extends FunkinSCSprite
     antialiasing = (ClientPrefs.data.antialiasing && !char.endsWith('-pixel'));
   }
 
-  public function loadIconFile(json:Dynamic, path:String, graphicIcon:String)
+  public dynamic function loadIconFile(json:Dynamic, path:String, graphicIcon:String)
   {
     if (json.image != null) path = 'images/' + json.image + '.json';
 
@@ -282,8 +285,8 @@ class HealthIcon extends FunkinSCSprite
       }
     }
 
-    if (animOffsets.exists('losing')) hasLosingAnimated = true;
-    if (animOffsets.exists('winning')) hasWinningAnimated = true;
+    if (hasAnimation('losing')) hasLosingAnimated = true;
+    if (hasAnimation('winning')) hasWinningAnimated = true;
 
     json.startingAnim != null ? playAnim(json.startingAnim) : playAnim('normal', true);
   }
@@ -318,6 +321,8 @@ class HealthIcon extends FunkinSCSprite
   {
     super.update(elapsed);
     if (sprTracker != null) setPosition(sprTracker.x + sprTracker.width + 12 + offsetX, sprTracker.y - 30 + offsetY);
+
+    if (stopBop) return;
 
     if (!iconStoppedBop)
     {
@@ -378,6 +383,9 @@ class HealthIcon extends FunkinSCSprite
   override public function beatHit(curBeat:Int)
   {
     super.beatHit(curBeat);
+
+    if (stopBop) return;
+
     if (!overrideBeatBop)
     {
       if (curBeat % iconBopSpeed == 0)

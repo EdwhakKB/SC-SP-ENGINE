@@ -6,8 +6,6 @@ import objects.HealthIcon;
 import objects.Character;
 import Type.ValueType;
 import openfl.display.BlendMode;
-import shaders.FunkinSourcedShaders.ShaderEffectNew as ShaderEffectNew;
-import shaders.FunkinSourcedShaders;
 import substates.GameOverSubstate;
 #if LUA_ALLOWED
 import psychlua.FunkinLua;
@@ -26,6 +24,17 @@ typedef LuaTweenOptions =
   onComplete:Null<String>,
   loopDelay:Float,
   ease:EaseFunction
+}
+
+enum abstract AffixType(String) from String to String
+{
+  var NONE = 'None';
+  var SUFFIXED = 'Suffixed';
+  var PREFIXED = 'Prefixed';
+  var CIRCUMFIXED = 'Circumfixed';
+  var FORMATTED_SUFFIX = 'Formatted Suffix';
+  var FORMATTED_PREFIX = 'Formatted Prefix';
+  var FORMATTED_CIRCUMFIX = 'Formatted Circumfix';
 }
 
 class LuaUtils
@@ -63,9 +72,9 @@ class LuaUtils
         var retVal:Dynamic = MusicBeatState.getVariables().get(splitProps[0]);
         if (retVal != null) target = retVal;
       }
-      else if (PlayState.instance.Stage.swagBacks.exists(splitProps[0]))
+      else if (PlayState.instance.stage.swagBacks.exists(splitProps[0]))
       {
-        var retVal:Dynamic = PlayState.instance.Stage.swagBacks.get(splitProps[0]);
+        var retVal:Dynamic = PlayState.instance.stage.swagBacks.get(splitProps[0]);
         if (retVal != null) target = retVal;
       }
       else if (Stage.instance.swagBacks.exists(splitProps[0]))
@@ -98,9 +107,9 @@ class LuaUtils
       MusicBeatState.getVariables().set(variable, value);
       return value;
     }
-    if (PlayState.instance.Stage.swagBacks.exists(variable))
+    if (PlayState.instance.stage.swagBacks.exists(variable))
     {
-      PlayState.instance.Stage.swagBacks.set(variable, value);
+      PlayState.instance.stage.swagBacks.set(variable, value);
       return true;
     }
     else if (Stage.instance.swagBacks.exists(variable))
@@ -123,9 +132,9 @@ class LuaUtils
         var retVal:Dynamic = MusicBeatState.getVariables().get(splitProps[0]);
         if (retVal != null) target = retVal;
       }
-      else if (PlayState.instance.Stage.swagBacks.exists(splitProps[0]))
+      else if (PlayState.instance.stage.swagBacks.exists(splitProps[0]))
       {
-        var retVal:Dynamic = PlayState.instance.Stage.swagBacks.get(splitProps[0]);
+        var retVal:Dynamic = PlayState.instance.stage.swagBacks.get(splitProps[0]);
         if (retVal != null) target = retVal;
       }
       else if (Stage.instance.swagBacks.exists(splitProps[0]))
@@ -154,9 +163,9 @@ class LuaUtils
       var retVal:Dynamic = MusicBeatState.getVariables().get(variable);
       if (retVal != null) return retVal;
     }
-    if (PlayState.instance.Stage.swagBacks.exists(variable))
+    if (PlayState.instance.stage.swagBacks.exists(variable))
     {
-      var retVal:Dynamic = PlayState.instance.Stage.swagBacks.get(variable);
+      var retVal:Dynamic = PlayState.instance.stage.swagBacks.get(variable);
       if (retVal != null) return retVal;
     }
     if (Stage.instance.swagBacks.exists(variable))
@@ -313,7 +322,7 @@ class LuaUtils
         var obj:Dynamic = null;
 
         if (Stage.instance.swagBacks.exists(objectName)) obj = Stage.instance.swagBacks.get(objectName);
-        else if (PlayState.instance.Stage.swagBacks.exists(objectName)) obj = PlayState.instance.Stage.swagBacks.get(objectName);
+        else if (PlayState.instance.stage.swagBacks.exists(objectName)) obj = PlayState.instance.stage.swagBacks.get(objectName);
         else if (MusicBeatState.getVariables().exists(objectName))
         {
           obj = MusicBeatState.getVariables().get(objectName);
@@ -351,23 +360,23 @@ class LuaUtils
 
   public static inline function getLowestCharacterPlacement():Character
   {
-    var group:Character = PlayState.instance.gf;
-    var pos:Int = PlayState.instance.members.indexOf(group);
+    var char:Character = PlayState.instance.gf;
+    var pos:Int = PlayState.instance.members.indexOf(char);
 
     var newPos:Int = PlayState.instance.members.indexOf(PlayState.instance.boyfriend);
     if (newPos < pos)
     {
-      group = PlayState.instance.boyfriend;
+      char = PlayState.instance.boyfriend;
       pos = newPos;
     }
 
     newPos = PlayState.instance.members.indexOf(PlayState.instance.dad);
     if (newPos < pos)
     {
-      group = PlayState.instance.dad;
+      char = PlayState.instance.dad;
       pos = newPos;
     }
-    return group;
+    return char;
   }
 
   public static function addAnimByIndices(obj:String, name:String, prefix:String, indices:Any = null, framerate:Int = 24, loop:Bool = false)
@@ -498,8 +507,43 @@ class LuaUtils
     }
   }
 
+  public static function formatVariableOption(tag:String, option:AffixType = NONE, ?suffix:String = null, ?prefix:String = null):String
+  {
+    final originalTag:String = tag;
+    var externalSuffix:String = suffix == null ? '' : suffix;
+    var externalPrefix:String = prefix == null ? '' : prefix;
+    switch (option)
+    {
+      case NONE:
+        final finalTag:String = originalTag;
+        return finalTag;
+      case SUFFIXED, FORMATTED_SUFFIX:
+        final finalTag:String = option == FORMATTED_SUFFIX ? formatVariable(suffix + originalTag) : suffix + originalTag;
+        return finalTag;
+      case PREFIXED, FORMATTED_PREFIX:
+        final finalTag:String = option == FORMATTED_PREFIX ? formatVariable(originalTag + prefix) : originalTag + prefix;
+        return finalTag;
+      case CIRCUMFIXED, FORMATTED_CIRCUMFIX:
+        final finalTag:String = option == FORMATTED_CIRCUMFIX ? formatVariable(suffix + originalTag + prefix) : suffix + originalTag + prefix;
+        return finalTag;
+      default:
+        return "";
+    }
+    return null;
+  }
+
   public static function formatVariable(tag:String)
     return tag.trim().replace(' ', '_').replace('.', '');
+
+  public static function checkVariable(tag:String, check:String)
+  {
+    if (!tag.startsWith(check))
+    {
+      tag = formatVariable(tag + check);
+      return tag;
+    }
+    return formatVariable(tag);
+  }
 
   public static function tweenPrepare(tag:String, vars:String)
   {
@@ -761,9 +805,9 @@ class LuaUtils
     return camera.cam;
   }
 
-  public static function makeLuaCharacter(tag:String, character:String, isPlayer:Bool = false, flipped:Bool = false)
+  public static function makeLuaCharacter(tag:String, character:String, isPlayer:Bool = false, flipped:Bool = false, ?change:Bool = false)
   {
-    tag = LuaUtils.formatVariable('extraCharacter_$tag');
+    tag = LuaUtils.checkVariable(tag, 'extraCharacter_');
 
     var animationName:String = "no way anyone have an anim name this big";
     var animationFrame:Int = 0;
@@ -783,20 +827,27 @@ class LuaUtils
       }
     }
 
-    destroyObject(tag);
     var leSprite:Character = new Character(0, 0, character, isPlayer);
     leSprite.flipMode = flipped;
     leSprite.isCustomCharacter = true;
-    MusicBeatState.getVariables().set(tag, leSprite); // yes
+    if (!change) MusicBeatState.getVariables().set(tag, leSprite); // yes
     var shit:Character = MusicBeatState.getVariables().get(tag);
+    if (change)
+    {
+      shit.isCustomCharacter = true;
+      shit.changeCharacter(character, isPlayer);
+    }
     if (ClientPrefs.data.characters)
     {
-      getTargetInstance().add(shit);
-
-      if (position >= 0) // this should keep them in the same spot if they switch
+      if (!change)
       {
-        getTargetInstance().remove(shit, true);
-        getTargetInstance().insert(position, shit);
+        getTargetInstance().add(shit);
+
+        if (position >= 0) // this should keep them in the same spot if they switch
+        {
+          getTargetInstance().remove(shit, true);
+          getTargetInstance().insert(position, shit);
+        }
       }
     }
 
@@ -804,15 +855,15 @@ class LuaUtils
     var charX:Float = charOffset.daOffsetArray[0];
     var charY:Float = charOffset.daOffsetArray[1] + (flipped ? 350 : 0);
 
-    if (flipped) shit.flipMode = true;
+    shit.flipMode = flipped;
 
     if (!isPlayer)
     {
       var charX:Float = shit.positionArray[0];
       var charY:Float = shit.positionArray[1];
 
-      shit.x = PlayState.instance.Stage.dadXOffset + charX + PlayState.instance.DAD_X;
-      shit.y = PlayState.instance.Stage.dadYOffset + charY + PlayState.instance.DAD_Y;
+      shit.x = PlayState.instance.stage.dadXOffset + charX + PlayState.instance.DAD_X;
+      shit.y = PlayState.instance.stage.dadYOffset + charY + PlayState.instance.DAD_Y;
     }
     else
     {
@@ -823,15 +874,15 @@ class LuaUtils
       charX = shit.positionArray[0];
       charY = shit.positionArray[1] - 350;
 
-      shit.x = PlayState.instance.Stage.bfXOffset + charX + PlayState.instance.BF_X;
-      shit.y = PlayState.instance.Stage.bfYOffset + charY + PlayState.instance.BF_Y;
+      shit.x = PlayState.instance.stage.bfXOffset + charX + PlayState.instance.BF_X;
+      shit.y = PlayState.instance.stage.bfYOffset + charY + PlayState.instance.BF_Y;
     }
 
     if (ClientPrefs.data.characters)
     {
       if (shit.playAnimationBeforeSwitch)
       {
-        if (shit.animOffsets.exists(animationName)) shit.playAnim(animationName, true, false, animationFrame);
+        if (shit.hasAnimation(animationName)) shit.playAnim(animationName, true, false, animationFrame);
       }
 
       PlayState.instance.startCharacterScripts(shit.curCharacter);
@@ -891,10 +942,10 @@ class LuaUtils
   }
 
   // trying to do some auto stuff so i don't have to set manual x and y values
-  // trying to do some auto stuff so i don't have to set manual x and y values
   public static function changeBFAuto(id:String, ?flipped:Bool = false)
   {
     if (!ClientPrefs.data.characters) return;
+    if (PlayState.instance.boyfriend == null) return;
     var animationName:String = "no way anyone have an anim name this big";
     var animationFrame:Int = 0;
     if (PlayState.instance.boyfriend.playAnimationBeforeSwitch)
@@ -905,9 +956,8 @@ class LuaUtils
 
     PlayState.instance.boyfriend.resetAnimationVars();
 
-    PlayState.instance.removeObject(PlayState.instance.boyfriend);
-    PlayState.instance.destroyObject(PlayState.instance.boyfriend);
-    PlayState.instance.boyfriend = new Character(0, 0, id, !flipped);
+    PlayState.instance.boyfriend.setPosition(0, 0);
+    PlayState.instance.boyfriend.changeCharacter(id, !flipped);
     PlayState.instance.boyfriend.flipMode = flipped;
 
     var charOffset = new CharacterOffsets(id, !flipped);
@@ -917,26 +967,30 @@ class LuaUtils
     charX = PlayState.instance.boyfriend.positionArray[0];
     charY = PlayState.instance.boyfriend.positionArray[1] - 350;
 
-    PlayState.instance.boyfriend.x = PlayState.instance.Stage.bfXOffset + charX + PlayState.instance.BF_X;
-    PlayState.instance.boyfriend.y = PlayState.instance.Stage.bfYOffset + charY + PlayState.instance.BF_Y;
-
-    PlayState.instance.addObject(PlayState.instance.boyfriend);
+    PlayState.instance.boyfriend.setPosition(PlayState.instance.stage.bfXOffset
+      + charX
+      + PlayState.instance.BF_X,
+      PlayState.instance.stage.bfYOffset
+      + charY
+      + PlayState.instance.BF_Y);
 
     PlayState.instance.iconP1.changeIcon(PlayState.instance.boyfriend.healthIcon);
 
-    PlayState.instance.reloadHealthBarColors();
+    PlayState.instance.reloadColors();
 
     if (PlayState.instance.boyfriend.playAnimationBeforeSwitch)
     {
-      if (PlayState.instance.boyfriend.animOffsets.exists(animationName)) PlayState.instance.boyfriend.playAnim(animationName, true, false, animationFrame);
+      if (PlayState.instance.boyfriend.hasAnimation(animationName)) PlayState.instance.boyfriend.playAnim(animationName, true, false, animationFrame);
     }
 
+    PlayState.instance.setOnScripts('boyfriendName', PlayState.instance.boyfriend.curCharacter);
     PlayState.instance.startCharacterScripts(PlayState.instance.boyfriend.curCharacter);
   }
 
   public static function changeDadAuto(id:String, ?flipped:Bool = false)
   {
     if (!ClientPrefs.data.characters) return;
+    if (PlayState.instance.dad == null) return;
     var animationName:String = "no way anyone have an anim name this big";
     var animationFrame:Int = 0;
     if (PlayState.instance.dad.playAnimationBeforeSwitch)
@@ -945,11 +999,8 @@ class LuaUtils
       animationFrame = PlayState.instance.dad.animation.curAnim.curFrame;
     }
 
-    PlayState.instance.dad.resetAnimationVars();
-
-    PlayState.instance.removeObject(PlayState.instance.dad);
-    PlayState.instance.destroyObject(PlayState.instance.dad);
-    PlayState.instance.dad = new Character(0, 0, id, flipped);
+    PlayState.instance.dad.setPosition(0, 0);
+    PlayState.instance.dad.changeCharacter(id, flipped);
     PlayState.instance.dad.flipMode = flipped;
 
     var charOffset = new CharacterOffsets(id, flipped);
@@ -959,25 +1010,30 @@ class LuaUtils
     charX = PlayState.instance.dad.positionArray[0];
     charY = PlayState.instance.dad.positionArray[1];
 
-    PlayState.instance.dad.x = PlayState.instance.Stage.dadXOffset + charX + PlayState.instance.DAD_X;
-    PlayState.instance.dad.y = PlayState.instance.Stage.dadYOffset + charY + PlayState.instance.DAD_Y;
-    PlayState.instance.addObject(PlayState.instance.dad);
+    PlayState.instance.dad.setPosition(PlayState.instance.stage.dadXOffset
+      + charX
+      + PlayState.instance.DAD_X,
+      PlayState.instance.stage.dadYOffset
+      + charY
+      + PlayState.instance.DAD_Y);
 
     PlayState.instance.iconP2.changeIcon(PlayState.instance.dad.healthIcon);
 
-    PlayState.instance.reloadHealthBarColors();
+    PlayState.instance.reloadColors();
 
     if (PlayState.instance.dad.playAnimationBeforeSwitch)
     {
-      if (PlayState.instance.dad.animOffsets.exists(animationName)) PlayState.instance.dad.playAnim(animationName, true, false, animationFrame);
+      if (PlayState.instance.dad.hasAnimation(animationName)) PlayState.instance.dad.playAnim(animationName, true, false, animationFrame);
     }
 
+    PlayState.instance.setOnScripts('dadName', PlayState.instance.dad.curCharacter);
     PlayState.instance.startCharacterScripts(PlayState.instance.dad.curCharacter);
   }
 
   public static function changeGFAuto(id:String, ?flipped:Bool = false)
   {
     if (!ClientPrefs.data.characters) return;
+    if (PlayState.instance.gf == null) return;
     var animationName:String = "no way anyone have an anim name this big";
     var animationFrame:Int = 0;
     if (PlayState.instance.gf.playAnimationBeforeSwitch)
@@ -986,32 +1042,34 @@ class LuaUtils
       animationFrame = PlayState.instance.gf.animation.curAnim.curFrame;
     }
 
-    PlayState.instance.gf.resetAnimationVars();
-
-    PlayState.instance.removeObject(PlayState.instance.gf);
-    PlayState.instance.destroyObject(PlayState.instance.gf);
-    PlayState.instance.gf = new Character(0, 0, id, flipped);
+    PlayState.instance.gf.setPosition(0, 0);
+    PlayState.instance.gf.changeCharacter(id, flipped);
     PlayState.instance.gf.flipMode = flipped;
 
     var charX:Float = PlayState.instance.gf.positionArray[0];
     var charY:Float = PlayState.instance.gf.positionArray[1];
 
-    PlayState.instance.gf.x = PlayState.instance.Stage.gfXOffset + charX + PlayState.instance.GF_X;
-    PlayState.instance.gf.y = PlayState.instance.Stage.gfYOffset + charY + PlayState.instance.GF_Y;
+    PlayState.instance.gf.setPosition(PlayState.instance.stage.gfXOffset
+      + charX
+      + PlayState.instance.GF_X,
+      PlayState.instance.stage.gfYOffset
+      + charY
+      + PlayState.instance.GF_Y);
     PlayState.instance.gf.scrollFactor.set(0.95, 0.95);
-    PlayState.instance.addObject(PlayState.instance.gf);
 
     if (PlayState.instance.gf.playAnimationBeforeSwitch)
     {
-      if (PlayState.instance.gf.animOffsets.exists(animationName)) PlayState.instance.gf.playAnim(animationName, true, false, animationFrame);
+      if (PlayState.instance.gf.hasAnimation(animationName)) PlayState.instance.gf.playAnim(animationName, true, false, animationFrame);
     }
 
+    PlayState.instance.setOnScripts('gfName', PlayState.instance.gf.curCharacter);
     PlayState.instance.startCharacterScripts(PlayState.instance.gf.curCharacter);
   }
 
   public static function changeMomAuto(id:String, ?flipped:Bool = false)
   {
     if (!ClientPrefs.data.characters) return;
+    if (PlayState.instance.mom == null) return;
     var animationName:String = "no way anyone have an anim name this big";
     var animationFrame:Int = 0;
     if (PlayState.instance.mom.playAnimationBeforeSwitch)
@@ -1020,11 +1078,8 @@ class LuaUtils
       animationFrame = PlayState.instance.mom.animation.curAnim.curFrame;
     }
 
-    PlayState.instance.mom.resetAnimationVars();
-
-    PlayState.instance.removeObject(PlayState.instance.mom);
-    PlayState.instance.destroyObject(PlayState.instance.mom);
-    PlayState.instance.mom = new Character(0, 0, id, flipped);
+    PlayState.instance.mom.setPosition(0, 0);
+    PlayState.instance.mom.changeCharacter(id, flipped);
     PlayState.instance.mom.flipMode = flipped;
 
     var charOffset = new CharacterOffsets(id, flipped);
@@ -1034,15 +1089,19 @@ class LuaUtils
     charX = PlayState.instance.mom.positionArray[0];
     charY = PlayState.instance.mom.positionArray[1];
 
-    PlayState.instance.mom.x = PlayState.instance.Stage.momXOffset + charX + PlayState.instance.MOM_X;
-    PlayState.instance.mom.y = PlayState.instance.Stage.momYOffset + charY + PlayState.instance.MOM_Y;
-    PlayState.instance.addObject(PlayState.instance.mom);
+    PlayState.instance.mom.setPosition(PlayState.instance.stage.momXOffset
+      + charX
+      + PlayState.instance.MOM_X,
+      PlayState.instance.stage.momYOffset
+      + charY
+      + PlayState.instance.MOM_Y);
 
     if (PlayState.instance.mom.playAnimationBeforeSwitch)
     {
-      if (PlayState.instance.mom.animOffsets.exists(animationName)) PlayState.instance.mom.playAnim(animationName, true, false, animationFrame);
+      if (PlayState.instance.mom.hasAnimation(animationName)) PlayState.instance.mom.playAnim(animationName, true, false, animationFrame);
     }
 
+    PlayState.instance.setOnScripts('momName', PlayState.instance.mom.curCharacter);
     PlayState.instance.startCharacterScripts(PlayState.instance.mom.curCharacter);
   }
 
@@ -1104,7 +1163,7 @@ class LuaUtils
     if (id.contains('stage-'))
     {
       var daID:String = id.split('-')[1];
-      return PlayState.instance.Stage.swagBacks[daID];
+      return PlayState.instance.stage.swagBacks[daID];
     }
 
     if (Reflect.getProperty(PlayState.instance, id) != null) return Reflect.getProperty(PlayState.instance, id);
@@ -1192,17 +1251,17 @@ class LuaUtils
     switch (char)
     {
       case 'boyfriend' | 'bf':
-        if (x != -10000) PlayState.instance.Stage.bfXOffset = x;
-        if (y != -10000) PlayState.instance.Stage.bfYOffset = y;
+        if (x != -10000) PlayState.instance.stage.bfXOffset = x;
+        if (y != -10000) PlayState.instance.stage.bfYOffset = y;
       case 'gf':
-        if (x != -10000) PlayState.instance.Stage.gfXOffset = x;
-        if (y != -10000) PlayState.instance.Stage.gfYOffset = y;
+        if (x != -10000) PlayState.instance.stage.gfXOffset = x;
+        if (y != -10000) PlayState.instance.stage.gfYOffset = y;
       case 'mom':
-        if (x != -10000) PlayState.instance.Stage.momXOffset = x;
-        if (y != -10000) PlayState.instance.Stage.momYOffset = y;
+        if (x != -10000) PlayState.instance.stage.momXOffset = x;
+        if (y != -10000) PlayState.instance.stage.momYOffset = y;
       default:
-        if (x != -10000) PlayState.instance.Stage.dadXOffset = x;
-        if (y != -10000) PlayState.instance.Stage.dadYOffset = y;
+        if (x != -10000) PlayState.instance.stage.dadXOffset = x;
+        if (y != -10000) PlayState.instance.stage.dadYOffset = y;
     }
   }
 
@@ -1217,8 +1276,6 @@ class LuaUtils
         PlayState.instance.resyncVocals();
       case 'cacheImage':
         Paths.cacheBitmap(val1, val2, val3, val4);
-      case 'spawnStartingNoteSplash':
-        PlayState.instance.precacheNoteSplashes(val1);
     }
   }
 }

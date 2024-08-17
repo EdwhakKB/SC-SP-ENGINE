@@ -99,17 +99,17 @@ class CreditsState extends MusicBeatState
       ],
       [
         "Kamizeta",
-        "face",
+        "kamizeta",
         "Creator of Pessy, Psych Engine's mascot.",
         "https://twitter.com/LittleCewwy",
-        "A1A1A1"
+        "D21C11"
       ],
       [
         "MaxNeton",
-        "face",
+        "maxneton",
         "Loading Screen Easter Egg Artist/Animator.",
         "https://twitter.com/MaxNeton",
-        "A1A1A1"
+        "3C2E4E"
       ],
       [
         "Keoiki",
@@ -140,10 +140,10 @@ class CreditsState extends MusicBeatState
         "A1A1A1"
       ],
       [
-        "Tahir",
+        "Tahir Toprak Karabekiroglu",
         "tahir",
         "Implementing & Maintaining SScript and Other PRs",
-        "https://twitter.com/tahirk618",
+        "https://twitter.com/TahirKarabekir",
         "A04397"
       ],
       [
@@ -169,10 +169,10 @@ class CreditsState extends MusicBeatState
       ],
       [
         "CheemsAndFriends",
-        "face",
+        "cheems",
         "Creator of FlxAnimate",
         "https://twitter.com/CheemsnFriendos",
-        "A1A1A1"
+        "E1E1E1"
       ],
       [""],
       ["Funkin' Crew"],
@@ -240,14 +240,12 @@ class CreditsState extends MusicBeatState
     ];
 
     for (i in defaultList)
-    {
       creditsStuff.push(i);
-    }
 
-    for (i in 0...creditsStuff.length)
+    for (i => credit in creditsStuff)
     {
       var isSelectable:Bool = !unselectableCheck(i);
-      var optionText:Alphabet = new Alphabet(FlxG.width / 2, 300, creditsStuff[i][0], !isSelectable);
+      var optionText:Alphabet = new Alphabet(FlxG.width / 2, 300, credit[0], !isSelectable);
       optionText.isMenuItem = true;
       optionText.targetY = i;
       optionText.changeX = false;
@@ -256,15 +254,12 @@ class CreditsState extends MusicBeatState
 
       if (isSelectable)
       {
-        if (creditsStuff[i][5] != null)
-        {
-          Mods.currentModDirectory = creditsStuff[i][5];
-        }
+        if (credit[5] != null) Mods.currentModDirectory = credit[5];
 
         var str:String = 'credits/missing_icon';
-        if (creditsStuff[i][1] != null && creditsStuff[i][1].length > 0)
+        if (credit[1] != null && credit[1].length > 0)
         {
-          var fileName = 'credits/' + creditsStuff[i][1];
+          var fileName = 'credits/' + credit[1];
           if (Paths.fileExists('images/$fileName.png', IMAGE)) str = fileName;
           else if (Paths.fileExists('images/$fileName-pixel.png', IMAGE)) str = fileName + '-pixel';
         }
@@ -451,12 +446,15 @@ class CreditsState extends MusicBeatState
   #if MODS_ALLOWED
   function pushModCreditsToList(folder:String)
   {
-    var creditsFile:String = null;
-    if (folder != null && folder.trim().length > 0) creditsFile = Paths.mods(folder + '/data/credits.txt');
-    else
-      creditsFile = Paths.mods('data/credits.txt');
+    var creditsFile:String = Paths.mods(folder + '/data/credits.txt');
 
-    if (FileSystem.exists(creditsFile))
+    #if TRANSLATIONS_ALLOWED
+    // trace('/data/credits-${ClientPrefs.data.language}.txt');
+    var translatedCredits:String = Paths.mods(folder + '/data/credits-${ClientPrefs.data.language}.txt');
+    #end
+
+    if (#if TRANSLATIONS_ALLOWED (FileSystem.exists(translatedCredits) && (creditsFile = translatedCredits) == translatedCredits)
+      || #end FileSystem.exists(creditsFile))
     {
       var firstarray:Array<String> = File.getContent(creditsFile).split('\n');
       for (i in firstarray)

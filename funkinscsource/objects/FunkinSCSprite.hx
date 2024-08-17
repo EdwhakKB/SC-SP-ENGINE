@@ -6,15 +6,16 @@ import flixel.math.FlxAngle;
 import math.VectorHelpers;
 import math.Vector3;
 import flixel.graphics.frames.FlxFrame.FlxFrameType;
+import flixel.graphics.frames.FlxAtlasFrames;
 import openfl.Vector;
 import openfl.geom.ColorTransform;
 import openfl.display.Shader;
 import flixel.system.FlxAssets.FlxShader;
 
 // Code from CNE (CodenameEngine)
-class FunkinSCSprite extends FlxSkewed implements backend.interfaces.IOffsetSetter
+class FunkinSCSprite extends FlxSkewed
 {
-  public var extra:Map<String, Dynamic> = new Map<String, Dynamic>();
+  public var extraSpriteData:Map<String, Dynamic> = new Map<String, Dynamic>();
 
   public var zoomFactor:Float = 1;
   public var initialZoom:Float = 1;
@@ -22,19 +23,10 @@ class FunkinSCSprite extends FlxSkewed implements backend.interfaces.IOffsetSett
   public var debugMode:Bool = false;
   public var failedLoadingAutoAtlas:Bool = false;
 
+  #if flxanimate
   public var atlasPath:String;
   public var secondAtlasPath:String;
-
-  public var yaw:Float = 0;
-  public var pitch:Float = 0;
-  @:isVar
-  public var roll(get, set):Float = 0;
-
-  function get_roll()
-    return angle;
-
-  function set_roll(val:Float)
-    return angle = val;
+  #end
 
   public function new(?X:Float = 0, ?Y:Float = 0, ?SimpleGraphic:FlxGraphicAsset)
   {
@@ -54,7 +46,7 @@ class FunkinSCSprite extends FlxSkewed implements backend.interfaces.IOffsetSett
     @:privateAccess {
       spr.setPosition(source.x, source.y);
       spr.frames = source.frames;
-      if (source.atlas != null && source.atlasPath != null) spr.loadSprite(source.atlasPath, source.secondAtlasPath);
+      #if flxanimate if (source.atlas != null && source.atlasPath != null) spr.loadSprite(source.atlasPath, source.secondAtlasPath); #end
       spr.animation.copyFrom(source.animation);
       spr.visible = source.visible;
       spr.alpha = source.alpha;
@@ -72,10 +64,15 @@ class FunkinSCSprite extends FlxSkewed implements backend.interfaces.IOffsetSett
   override public function update(elapsed:Float)
   {
     super.update(elapsed);
-    #if flxanimate if (this.isAnimateAtlas) this.atlas.update(elapsed); #end
+    #if flxanimate
+    if (!(this is Character))
+    {
+      if (this.isAnimateAtlas) this.atlas.update(elapsed);
+    }
+    #end
   }
 
-  public function loadSprite(path:String, ?ap:String, ?newEndString:String = null, ?parentfolder:String = null)
+  public function loadSprite(path:String, ?imageFile:String, ?newEndString:String = null, ?parentfolder:String = null)
   {
     #if flxanimate
     var atlasToFind:String = Paths.getPath(haxe.io.Path.withoutExtension(path) + '/Animation.json', TEXT);
@@ -84,24 +81,40 @@ class FunkinSCSprite extends FlxSkewed implements backend.interfaces.IOffsetSett
 
     if (!isAnimateAtlas)
     {
-      this.frames = Paths.getFrames(path, true, parentfolder, newEndString);
+      // Use a way for using mult frames lol
+      var split:Array<String> = imageFile.split(',');
+      var charFrames:FlxAtlasFrames = Paths.getAtlas(split[0].trim());
+      if (split.length > 1)
+      {
+        var original:FlxAtlasFrames = charFrames;
+        charFrames = new FlxAtlasFrames(charFrames.parent);
+        charFrames.addAtlas(original, true);
+        for (i in 1...split.length)
+        {
+          var extraFrames:FlxAtlasFrames = Paths.getAtlas(split[i].trim());
+          if (extraFrames != null) charFrames.addAtlas(extraFrames, true);
+        }
+      }
+      else
+        this.frames = Paths.getFrames(path, true, parentfolder, newEndString);
     }
     #if flxanimate
     else
     {
       this.atlasPath = atlasToFind;
-      this.secondAtlasPath = ap;
+      this.secondAtlasPath = imageFile;
       this.isAnimateAtlas = true;
       this.atlas = new FlxAnimate(this.x, this.y);
       this.atlas.showPivot = false;
       try
       {
-        Paths.loadAnimateAtlas(this.atlas, ap);
+        Paths.loadAnimateAtlas(this.atlas, imageFile);
       }
-      catch (e:Dynamic)
+      catch (e:haxe.Exception)
       {
         this.failedLoadingAutoAtlas = true;
         Debug.logError('Could not load atlas ${path}: $e');
+        Debug.logInfo(e.stack);
       }
     }
     #end
@@ -199,11 +212,18 @@ class FunkinSCSprite extends FlxSkewed implements backend.interfaces.IOffsetSett
   {
     if (AnimName == null) return;
 
-    if (!this.isAnimateAtlas) this.animation.play(AnimName, Force, Reversed, Frame);
-    #if flxanimate
-    else
-      this.atlas.anim.play(AnimName, Force, Reversed, Frame);
-    #end
+    if (!(this is Character))
+    {
+      if (!this.isAnimateAtlas) this.animation.play(AnimName, Force, Reversed, Frame);
+      #if flxanimate
+      else
+      {
+        this.atlas.anim.play(AnimName, Force, Reversed, Frame);
+        this.atlas.update(0);
+      }
+      #end
+    }
+    _lastPlayedAnimation = AnimName;
 
     var daOffset = this.getAnimOffset(AnimName);
     this.offset.set(daOffset[0], daOffset[1]);
@@ -211,21 +231,21 @@ class FunkinSCSprite extends FlxSkewed implements backend.interfaces.IOffsetSett
 
   public function getAnimOffset(name:String)
   {
-    if (this.animOffsets.exists(name)) return this.animOffsets.get(name);
+    if (this.hasAnimation(name)) return this.animOffsets.get(name);
     return [0, 0];
   }
 
   inline public function isAnimationNull():Bool
+  {
     return
-      #if flxanimate !this.isAnimateAtlas ? (this.animation.curAnim == null) : (this.atlas.anim.curSymbol == null); #else (this.animation.curAnim == null); #end
+      #if flxanimate !this.isAnimateAtlas ? (animation.curAnim == null) : (atlas.anim.curInstance == null || atlas.anim.curSymbol == null) #else (animation.curAnim == null) #end;
+  }
+
+  var _lastPlayedAnimation:String;
 
   inline public function getAnimationName():String
   {
-    var name:String = '';
-    @:privateAccess
-    if (!this.isAnimationNull())
-      name = #if flxanimate !this.isAnimateAtlas ? this.animation.curAnim.name : this.atlas.anim.lastPlayedAnim; #else this.animation.curAnim.name; #end
-    return (name != null) ? name : '';
+    return _lastPlayedAnimation;
   }
 
   inline public function removeAnimation(name:String)
@@ -262,6 +282,11 @@ class FunkinSCSprite extends FlxSkewed implements backend.interfaces.IOffsetSett
     this.animOffsets[anim2] = old;
   }
 
+  public function hasAnimation(anim:String):Bool
+  {
+    return animOffsets.exists(anim);
+  }
+
   public var animPaused(get, set):Bool;
 
   private function get_animPaused():Bool
@@ -277,9 +302,9 @@ class FunkinSCSprite extends FlxSkewed implements backend.interfaces.IOffsetSett
     #if flxanimate
     else
     {
-      if (value) this.atlas.anim.pause();
+      if (value) this.atlas.pauseAnimation();
       else
-        this.atlas.anim.resume();
+        this.atlas.resumeAnimation();
     }
     #end
 
@@ -288,18 +313,22 @@ class FunkinSCSprite extends FlxSkewed implements backend.interfaces.IOffsetSett
 
   // Atlas support
   // special thanks ne_eo for the references, you're the goat!!
-  public var isAnimateAtlas:Bool = false;
+  @:allow(states.editors.CharacterEditorState)
+  public var isAnimateAtlas(default, null):Bool = false;
 
   #if flxanimate
   public var atlas:FlxAnimate;
 
   public override function draw()
   {
-    if (isAnimateAtlas)
+    if (!(this is Character))
     {
-      this.copyAtlasValues();
-      this.atlas.draw();
-      return;
+      if (this.atlas != null && this.atlas.anim.curInstance != null)
+      {
+        this.copyAtlasValues();
+        this.atlas.draw();
+        return;
+      }
     }
     super.draw();
   }
@@ -308,28 +337,26 @@ class FunkinSCSprite extends FlxSkewed implements backend.interfaces.IOffsetSett
   {
     @:privateAccess
     {
-      this.atlas.cameras = this.cameras;
-      this.atlas.scrollFactor = this.scrollFactor;
-      this.atlas.scale = this.scale;
-      this.atlas.offset = this.offset;
-      this.atlas.origin = this.origin;
-      this.atlas.x = this.x;
-      this.atlas.y = this.y;
-      this.atlas.angle = this.angle;
-      this.atlas.alpha = this.alpha;
-      this.atlas.visible = this.visible;
-      this.atlas.flipX = this.flipX;
-      this.atlas.flipY = this.flipY;
-      this.atlas.shader = this.shader;
-      this.atlas.antialiasing = this.antialiasing;
-      this.atlas.colorTransform = this.colorTransform;
-      this.atlas.color = this.color;
+      if (this.atlas != null)
+      {
+        this.atlas.cameras = this.cameras;
+        this.atlas.scrollFactor = this.scrollFactor;
+        this.atlas.scale = this.scale;
+        this.atlas.offset = this.offset;
+        this.atlas.origin = this.origin;
+        this.atlas.x = this.x;
+        this.atlas.y = this.y;
+        this.atlas.angle = this.angle;
+        this.atlas.alpha = this.alpha;
+        this.atlas.visible = this.visible;
+        this.atlas.flipX = this.flipX;
+        this.atlas.flipY = this.flipY;
+        this.atlas.shader = this.shader;
+        this.atlas.antialiasing = this.antialiasing;
+        this.atlas.colorTransform = this.colorTransform;
+        this.atlas.color = this.color;
+      }
     }
-  }
-
-  public function destroyAtlas()
-  {
-    if (this.atlas != null) this.atlas = flixel.util.FlxDestroyUtil.destroy(this.atlas);
   }
   #end
 
@@ -360,7 +387,7 @@ class FunkinSCSprite extends FlxSkewed implements backend.interfaces.IOffsetSett
     this.animOffsets.clear();
 
     #if flxanimate
-    this.destroyAtlas();
+    this.atlas = flixel.util.FlxDestroyUtil.destroy(this.atlas);
     #end
     super.destroy();
   }

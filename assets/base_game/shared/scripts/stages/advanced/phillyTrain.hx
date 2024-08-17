@@ -1,6 +1,6 @@
-import objects.stageobjects.PhillyGlowGradient;
-import objects.stageobjects.PhillyGlowParticle;
-import objects.stageobjects.PhillyTrain;
+import objects.stagecontent.stageobjects.PhillyGlowGradient;
+import objects.stagecontent.stageobjects.PhillyGlowParticle;
+import objects.stagecontent.stageobjects.PhillyTrain;
 
 // Philly Train
 var phillyWindow:BGSprite;

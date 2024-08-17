@@ -9,6 +9,8 @@ import flixel.util.FlxStringUtil;
 
 class PauseSubState extends MusicBeatSubState
 {
+  public static var songName:String = null;
+
   var grpMenuShit:FlxTypedGroup<Alphabet>;
 
   var menuItems:Array<String> = [];
@@ -26,8 +28,6 @@ class PauseSubState extends MusicBeatSubState
 
   var missingTextBG:FlxSprite;
   var missingText:FlxText;
-
-  public static var songName:String = null;
 
   var music:FlxSound = FlxG.sound.music;
 
@@ -493,8 +493,8 @@ class PauseSubState extends MusicBeatSubState
   function pauseCountDown()
   {
     if (game == null) return;
-    game.stageIntroSoundsSuffix = game.Stage.stageIntroSoundsSuffix != null ? game.Stage.stageIntroSoundsSuffix : '';
-    game.stageIntroSoundsPrefix = game.Stage.stageIntroSoundsPrefix != null ? game.Stage.stageIntroSoundsPrefix : '';
+    game.stageIntroSoundsSuffix = game.stage.stageIntroSoundsSuffix != null ? game.stage.stageIntroSoundsSuffix : '';
+    game.stageIntroSoundsPrefix = game.stage.stageIntroSoundsPrefix != null ? game.stage.stageIntroSoundsPrefix : '';
 
     var introAssets:Map<String, Array<String>> = new Map<String, Array<String>>();
     var introImagesArray:Array<String> = switch (PlayState.stageUI)
@@ -511,12 +511,12 @@ class PauseSubState extends MusicBeatSubState
           '${PlayState.stageUI}UI/go'
         ];
     }
-    if (game.Stage.stageIntroAssets != null) introAssets.set(PlayState.curStage, game.Stage.stageIntroAssets);
+    if (game.stage.stageIntroAssets != null) introAssets.set(PlayState.curStage, game.stage.stageIntroAssets);
     else
       introAssets.set(PlayState.stageUI, introImagesArray);
 
     var isPixelated:Bool = PlayState.isPixelStage;
-    var introAlts:Array<String> = (game.Stage.stageIntroAssets != null ? introAssets.get(PlayState.curStage) : introAssets.get(PlayState.stageUI));
+    var introAlts:Array<String> = (game.stage.stageIntroAssets != null ? introAssets.get(PlayState.curStage) : introAssets.get(PlayState.stageUI));
     var antialias:Bool = (ClientPrefs.data.antialiasing && !isPixelated);
     for (value in introAssets.keys())
     {
@@ -542,12 +542,12 @@ class PauseSubState extends MusicBeatSubState
     var introArrays1:Array<Float> = [];
     var introArrays2:Array<Float> = [];
     var introArrays3:Array<Float> = [];
-    if (game.Stage.stageIntroSpriteScales != null)
+    if (game.stage.stageIntroSpriteScales != null)
     {
-      introArrays0 = game.Stage.stageIntroSpriteScales[0];
-      introArrays1 = game.Stage.stageIntroSpriteScales[1];
-      introArrays2 = game.Stage.stageIntroSpriteScales[2];
-      introArrays3 = game.Stage.stageIntroSpriteScales[3];
+      introArrays0 = game.stage.stageIntroSpriteScales[0];
+      introArrays1 = game.stage.stageIntroSpriteScales[1];
+      introArrays2 = game.stage.stageIntroSpriteScales[2];
+      introArrays3 = game.stage.stageIntroSpriteScales[3];
     }
 
     switch (CDANumber)

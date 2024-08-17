@@ -112,10 +112,24 @@ class CoolUtil
   {
     var hideChars = ~/[\t\n\r]/;
     var color:String = hideChars.split(color).join('').trim();
-    if (color.startsWith('0x')) color = color.substring(color.length - 6);
+    var alpha:Float = 1;
+
+    if (color.startsWith('0x'))
+    {
+      // alpha stuff
+      if (color.length == 10)
+      {
+        var alphaHex:String = color.substr(2, 2);
+        alpha = Std.parseInt("0x" + alphaHex) / 255.0;
+      }
+
+      color = color.substring(color.length - 6);
+    }
 
     var colorNum:Null<FlxColor> = FlxColor.fromString(color);
     if (colorNum == null) colorNum = FlxColor.fromString('#$color');
+    colorNum.alphaFloat = alpha;
+
     return colorNum != null ? colorNum : FlxColor.WHITE;
   }
 
@@ -411,5 +425,31 @@ class CoolUtil
       return FlxColor.fromRGB(r, g, b, a);
     }
     return null;
+  }
+
+  /**
+   * A function to blend colors.
+   * @param bgColor main color.
+   * @param ovColor overlay color.
+   * @return Int
+   */
+  public static function blendColors(bgColor:Int, ovColor:Int):Int
+  {
+    var a_bg = (bgColor >> 24) & 0xFF;
+    var r_bg = (bgColor >> 16) & 0xFF;
+    var g_bg = (bgColor >> 8) & 0xFF;
+    var b_bg = bgColor & 0xFF;
+
+    var a_ov = (ovColor >> 24) & 0xFF;
+    var r_ov = (ovColor >> 16) & 0xFF;
+    var g_ov = (ovColor >> 8) & 0xFF;
+    var b_ov = ovColor & 0xFF;
+
+    var alpha = a_ov + (a_bg * (255 - a_ov) / 255);
+    var red = r_ov * (a_ov / 255) + r_bg * (1 - (a_ov / 255));
+    var green = g_ov * (a_ov / 255) + g_bg * (1 - (a_ov / 255));
+    var blue = b_ov * (a_ov / 255) + b_bg * (1 - (a_ov / 255));
+
+    return (Std.int(alpha) << 24) | (Std.int(red) << 16) | (Std.int(green) << 8) | Std.int(blue);
   }
 }

@@ -9,6 +9,7 @@ import lime.system.Clipboard;
 import objects.TypedAlphabet;
 import cutscenes.DialogueBoxPsych;
 import cutscenes.DialogueCharacter;
+import states.editors.content.Prompt;
 
 class DialogueCharacterEditorState extends MusicBeatState implements PsychUIEventHandler.PsychUIEvent
 {
@@ -709,7 +710,7 @@ class DialogueCharacterEditorState extends MusicBeatState implements PsychUIEven
           transitioning = true;
         }
         else
-          openSubState(new substates.ConfirmationPopupSubstate(function() transitioning = true));
+          openSubState(new ExitConfirmationPrompt(function() transitioning = true));
       }
 
       ghostLoop.setPosition(character.x, character.y);

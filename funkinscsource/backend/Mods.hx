@@ -13,8 +13,15 @@ class Mods
 {
   static public var currentModDirectory:String = '';
   public static final ignoreModFolders:Array<String> = [
-    'characters', 'custom_events', 'custom_notetypes', 'data', 'songs', 'music', 'sounds', 'shaders', 'videos', 'images', 'stages', 'weeks', 'fonts',
-    'scripts', 'achievements'
+    'custom_events',
+    'custom_notetypes',
+    'data',
+    'songs',
+    'music',
+    'sounds',
+    'videos',
+    'images',
+    'scripts'
   ];
 
   private static var globalMods:Array<String> = [];

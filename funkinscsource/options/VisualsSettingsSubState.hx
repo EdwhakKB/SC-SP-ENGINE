@@ -116,8 +116,8 @@ class VisualsSettingsSubState extends BaseOptionsMenu
     option.decimals = 1;
     addOption(option);
 
-    var option:Option = new Option('Pause Screen Song:', "What song do you prefer for the Pause Screen?", 'pauseMusic', STRING,
-      ['None', 'Breakfast', 'Tea Time']);
+    var option:Option = new Option('Pause Music:', "What song do you prefer for the Pause Screen?", 'pauseMusic', STRING,
+      ['None', 'Tea Time', 'Breakfast', 'Breakfast (Pico)']);
     addOption(option);
     option.onChange = onChangePauseMusic;
 

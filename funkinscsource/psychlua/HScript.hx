@@ -21,19 +21,16 @@ class HScript extends SScript
 
   public static function initHaxeModule(parent:FunkinLua)
   {
-    #if (SScript >= "3.0.0")
     if (parent.hscript == null)
     {
       var times:Float = Date.now().getTime();
       Debug.logInfo('initialized sscript interp successfully: ${parent.scriptName} (${Std.int(Date.now().getTime() - times)}ms)');
       parent.hscript = new HScript(parent);
     }
-    #end
   }
 
   public static function initHaxeModuleCode(parent:FunkinLua, code:String, ?varsToBring:Any = null)
   {
-    #if (SScript >= "3.0.0")
     var hs:HScript = try parent.hscript
     catch (e) null;
     if (hs == null)
@@ -43,18 +40,14 @@ class HScript extends SScript
     }
     else
     {
-      #if (SScript > "6.1.80")
+      hs.varsToBring = varsToBring;
       hs.doString(code);
-      #else
-      hs.doScript(code);
-      #end
       @:privateAccess
       if (hs.parsingException != null)
       {
         states.PlayState.instance.addTextToDebug('ERROR ON LOADING (${hs.origin}): ${hs.parsingException.message}', FlxColor.RED);
       }
     }
-    #end
   }
   #end
 
@@ -70,7 +63,6 @@ class HScript extends SScript
   {
     if (file == null) file = '';
 
-    this.varsToBring = varsToBring;
     this.isHxStage = isHxStage;
 
     super(file, false, false);
@@ -92,11 +84,14 @@ class HScript extends SScript
         this.modFolder = myFolder[1];
       #end
     }
+
+    this.varsToBring = varsToBring;
+
     preset();
     execute();
   }
 
-  var varsToBring:Any = null;
+  var varsToBring(default, set):Any = null;
 
   override function preset()
   {
@@ -146,7 +141,7 @@ class HScript extends SScript
     set('InputFormatter', backend.InputFormatter);
 
     set('PsychCamera', backend.PsychCamera);
-    set('Countdown', objects.Stage.Countdown);
+    set('Countdown', objects.stagecontent.Countdown);
     set('PlayState', states.PlayState);
     set('Paths', backend.Paths);
     set('Conductor', backend.Conductor);
@@ -168,9 +163,9 @@ class HScript extends SScript
     #if LUA_ALLOWED
     set('FunkinLua', psychlua.FunkinLua);
     #end
-    set('Stage', objects.Stage);
+    set('Stage', objects.stagecontent.Stage);
     #if flxanimate
-    set('FlxAnimate', flxanimate.FlxAnimate);
+    set('FlxAnimate', FlxAnimate);
     #end
     set('CustomFlxColor', psychlua.CustomFlxColor);
 
@@ -368,7 +363,7 @@ class HScript extends SScript
     set('this', this);
     set('game', FlxG.state);
     set('controls', Controls.instance);
-    set('stageManager', objects.Stage.instance);
+    set('stageManager', objects.stagecontent.Stage.instance);
     set('buildTarget', psychlua.LuaUtils.getBuildTarget());
     set('customSubstate', psychlua.CustomSubstate.instance);
     set('customSubstateName', psychlua.CustomSubstate.name);
@@ -440,9 +435,7 @@ class HScript extends SScript
       set('addBehindGF', states.PlayState.instance.addBehindGF);
       set('addBehindDad', states.PlayState.instance.addBehindDad);
       set('addBehindBF', states.PlayState.instance.addBehindBF);
-      #if (SScript >= "6.1.8")
       setSpecialObject(states.PlayState.instance, false, states.PlayState.instance.instancesExclude);
-      #end
     }
 
     set("playDadSing", true);
@@ -497,17 +490,6 @@ class HScript extends SScript
     });
 
     set('sys', #if sys true #else false #end);
-
-    if (varsToBring != null)
-    {
-      for (key in Reflect.fields(varsToBring))
-      {
-        key = key.trim();
-        var value = Reflect.field(varsToBring, key);
-        set(key, Reflect.field(varsToBring, key));
-      }
-      varsToBring = null;
-    }
   }
 
   // I hate the CALLS CANT THEY BE STATIC FOR ONCE!?
@@ -587,8 +569,7 @@ class HScript extends SScript
       if (!callValue.succeeded)
       {
         var e = callValue.exceptions[0];
-        if (e != null) FunkinLua.luaTrace('ERROR (${funk.hscript.origin}: ${callValue.calledFunction}) - ' + e.message.substr(0, e.message.indexOf('\n')),
-          false, false, FlxColor.RED);
+        if (e != null) FunkinLua.luaTrace('ERROR (${funk.hscript.origin}: ${callValue.calledFunction}) - ' + e.details(), false, false, FlxColor.RED);
         return null;
       }
       else
@@ -627,7 +608,6 @@ class HScript extends SScript
   }
   #end
 
-  #if (SScript >= "3.0.3")
   override public function destroy()
   {
     origin = null;
@@ -635,12 +615,6 @@ class HScript extends SScript
 
     super.destroy();
   }
-  #else
-  public function destroy()
-  {
-    active = false;
-  }
-  #end
 
   #if SCEModchartingTools
   public inline function initMod(mod:modcharting.Modifier)
@@ -648,5 +622,27 @@ class HScript extends SScript
     call("initMod", [mod]);
   }
   #end
+
+  function set_varsToBring(values:Any)
+  {
+    if (varsToBring != null)
+    {
+      for (key in Reflect.fields(varsToBring))
+      {
+        unset(key.trim());
+      }
+    }
+
+    if (values != null)
+    {
+      for (key in Reflect.fields(values))
+      {
+        key = key.trim();
+        set(key, Reflect.field(values, key));
+      }
+    }
+
+    return varsToBring = values;
+  }
 }
 #end

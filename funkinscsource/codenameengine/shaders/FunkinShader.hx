@@ -1,24 +1,24 @@
 package codenameengine.shaders;
 
 import haxe.Exception;
+import flixel.system.FlxAssets.FlxShader;
 import flixel.graphics.tile.FlxGraphicsShader;
 import openfl.display3D.Program3D;
-import flixel.system.FlxAssets.FlxShader;
 import openfl.display.BitmapData;
 import openfl.display.ShaderParameter;
 import openfl.display.ShaderParameterType;
 import openfl.display.ShaderInput;
-import lime.utils.Float32Array;
 import openfl.display.ShaderParameter;
 import openfl.display.BitmapData;
 import openfl.display.ShaderInput;
-import hscript.IHScriptCustomBehaviour;
+import lime.utils.Float32Array;
+import _hscript.IHScriptCustomBehaviour;
 
 @:access(openfl.display3D.Context3D)
 @:access(openfl.display3D.Program3D)
 @:access(openfl.display.ShaderInput)
 @:access(openfl.display.ShaderParameter)
-class FunkinShader extends FlxShader implements hscript.IHScriptCustomBehaviour
+class FunkinShader extends FlxShader implements IHScriptCustomBehaviour
 {
   private static var __instanceFields = Type.getInstanceFields(FunkinShader);
 

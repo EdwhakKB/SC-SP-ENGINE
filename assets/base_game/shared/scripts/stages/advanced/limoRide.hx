@@ -1,4 +1,4 @@
-import objects.stageobjects.BackgroundDancer;
+import objects.stagecontent.stageobjects.BackgroundDancer;
 
 // Limo
 var fastCarCanDrive:Bool = true;

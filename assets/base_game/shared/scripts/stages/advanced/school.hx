@@ -1,7 +1,6 @@
 import sys.FileSystem;
 import openfl.utils.Assets as OpenFlAssets;
-import audio.FunkinSound;
-import objects.stageobjects.BackgroundGirls;
+import objects.stagecontent.stageobjects.BackgroundGirls;
 
 // School
 var bgSky:BGSprite;
@@ -12,8 +11,8 @@ var bgTrees:FlxSprite;
 var treeLeaves:BGSprite;
 var bgGirls:BackgroundGirls;
 var rosesRain:BGSprite;
-var rainSound:FunkinSound = null;
-var music:FunkinSound;
+var rainSound:FlxSound = null;
+var music:FlxSound;
 
 function onCreate()
 {
@@ -95,10 +94,11 @@ function onCreate()
   {
     if (songLowercase == 'senpai')
     {
-      music = FunkinSound.load(Paths.music('Lunchbox'), 0.0, true, true, true);
+      music = new FlxSound().loadEmbedded(Paths.music('Lunchbox'));
+      music.volume = 0;
       music.fadeIn(1, 0, 0.8);
     }
-    if (songLowercase == 'roses') FunkinSound.playOnce(Paths.sound('ANGRY'));
+    if (songLowercase == 'roses') FlxG.sound.play(Paths.sound('ANGRY'));
     initDoof();
     setStartCallback(schoolIntro);
 
@@ -113,7 +113,8 @@ function onCountdownTick(count, num)
 {
   if (count == Countdown.THREE)
   {
-    rainSound = FunkinSound.load(Paths.sound('rainSnd'), 0.0, true, true, true);
+    rainSound = new FlxSound().loadEmbedded(Paths.sound('rainSnd'));
+    rainSound.volume = 0;
     FlxG.sound.list.add(rainSound);
     rainSound.volume = 0;
     rainSound.looped = true;
@@ -123,8 +124,8 @@ function onCountdownTick(count, num)
   if (count == Countdown.START && songLowercase == 'roses')
   {
     rainSound.play();
-    rainSound.fadeIn(((Conductor.instance.stepLengthMs / 1000) * 4) / (game != null ? game.playbackRate : 1), 0, 0.7);
-    if (rosesRain != null) FlxTween.tween(rosesRain, {alpha: 1}, ((Conductor.instance.stepLengthMs / 1000) * 4) / (game != null ? game.playbackRate : 1));
+    rainSound.fadeIn(((Conductor.stepCrochet / 1000) * 4) / (game != null ? game.playbackRate : 1), 0, 0.7);
+    if (rosesRain != null) FlxTween.tween(rosesRain, {alpha: 1}, ((Conductor.stepCrochet / 1000) * 4) / (game != null ? game.playbackRate : 1));
   }
 }
 
@@ -186,8 +187,8 @@ function initDoof()
     if (music != null)
     {
       music.fadeOut(1, 0, function(e:FlxTween) {
-        FlxG.sound.music.stop();
-        FlxG.sound.music.destroy();
+        music.stop();
+        music.destroy();
       });
     }
     schoolStart();

@@ -2,7 +2,7 @@ package codenameengine.scripting;
 
 import lime.app.Application;
 import haxe.io.Path;
-import hscript.IHScriptCustomConstructor;
+import _hscript.IHScriptCustomConstructor;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import flixel.FlxBasic;
 
@@ -31,7 +31,9 @@ class Script extends FlxBasic implements IFlxDestroyable
       // OpenFL & Lime related stuff
       "Assets" => openfl.utils.Assets,
       "Application" => lime.app.Application,
+      "GraphicsShader" => openfl.display.GraphicsShader,
       "Main" => Main,
+      "ShaderFilter" => openfl.filters.ShaderFilter,
       "window" => lime.app.Application.current.window,
 
       // Flixel related stuff
@@ -54,60 +56,74 @@ class Script extends FlxBasic implements IFlxDestroyable
       "FlxPoint" => CoolUtil.getMacroAbstractClass("flixel.math.FlxPoint"),
       "FlxAxes" => CoolUtil.getMacroAbstractClass("flixel.util.FlxAxes"),
       "FlxColor" => CoolUtil.getMacroAbstractClass("flixel.util.FlxColor"),
-      "Mods" => backend.Mods,
-      "ModSettingsSubState" => options.ModSettingsSubState,
-      "PlayState" => states.PlayState,
-      "GameOverSubstate" => substates.GameOverSubstate,
-      "HealthIcon" => objects.HealthIcon,
-      "Note" => objects.Note,
-      "StrumArrow" => objects.StrumArrow,
-      "Character" => objects.Character,
-      "Boyfriend" => objects.Character, // for compatibility
-      "FreeplayState" => states.FreeplayState,
-      "MainMenuState" => states.MainMenuState,
-      "PauseSubState" => substates.PauseSubState,
-      "StoryMenuState" => states.StoryMenuState,
-      "TitleState" => states.TitleState,
-      "Options" => options.OptionsState,
-      "Paths" => backend.Paths,
-      "Conductor" => backend.Conductor,
-      "FunkinShader" => codenameengine.shaders.FunkinShader,
-      "CustomShader" => codenameengine.shaders.CustomShader,
-      #if flxanimate "FlxAnimate" => flxanimate.FlxAnimate, #end
-      "Alphabet" => objects.Alphabet,
 
-      "CoolUtil" => backend.CoolUtil,
-
-      "CustomFlxColor" => psychlua.CustomFlxColor,
-      "Stage" => objects.Stage,
-      "ClientPrefs" => backend.ClientPrefs,
+      // Flixel-addons related stuff
       #if (sys && !flash)
       "FlxRuntimeShader" => flixel.addons.display.FlxRuntimeShader,
       #end
-      "PsychCamera" => backend.PsychCamera,
-      "GraphicsShader" => openfl.display.GraphicsShader,
-      "Countdown" => objects.Stage.Countdown,
-      "ColorSwap" => shaders.ColorSwap,
+
+      // Engine related suff + Folder they are located in.
+      // Backend
       #if ACHIEVEMENTS_ALLOWED
       "Achievements" => backend.Achievements,
       #end
+      "Conductor" => backend.Conductor,
+      "ClientPrefs" => backend.ClientPrefs,
+      "CoolUtil" => backend.CoolUtil,
       #if DISCORD_ALLOWED
       "Discord" => backend.Discord.DiscordClient,
       #end
-      "ShaderFilter" => openfl.filters.ShaderFilter,
+      "Language" => backend.Language,
+      "Mods" => backend.Mods,
+      "Paths" => backend.Paths,
+      "PsychCamera" => backend.PsychCamera,
+      // CodenameEngine
+      // -->Shaders
+      "FunkinShader" => codenameengine.shaders.FunkinShader,
+      "CustomShader" => codenameengine.shaders.CustomShader,
+      // Cutscenes
+      "CutsceneHandler" => cutscenes.CutsceneHandler,
+      "DialogueBox" => cutscenes.DialogueBox,
+      "DialogueBoxPsych" => cutscenes.DialogueBoxPsych,
+      // Input
+      "Controls" => input.Controls,
+      // Objects
+      "Alphabet" => objects.Alphabet,
+      "AttachedSprite" => objects.AttachedSprite,
+      "AttachedText" => objects.AttachedText,
+      "Boyfriend" => objects.Character, // for compatibility
+      "BGSprite" => objects.BGSprite,
+      "Character" => objects.Character,
+      #if flxanimate "FlxAnimate" => FlxAnimate, #end
+      "FunkinSCSprite" => FunkinSCSprite,
+      "HealthIcon" => objects.HealthIcon,
+      "Note" => objects.Note,
+      "StrumArrow" => objects.StrumArrow,
+      // --> stagecontent
+      "Stage" => objects.stagecontent.Stage,
+      // Options
+      "Options" => options.OptionsState,
+      "ModSettingsSubState" => options.ModSettingsSubState,
+      // PsychLua
+      "CustomFlxColor" => psychlua.CustomFlxColor,
       #if LUA_ALLOWED
       "FunkinLua" => psychlua.FunkinLua,
       #end
-      "BGSprite" => objects.BGSprite,
-      "AttachedSprite" => objects.AttachedSprite,
-      "AttachedText" => objects.AttachedText,
-      "Controls" => input.Controls,
-      "FunkinSCSprite" => FunkinSCSprite,
-      "Language" => backend.Language,
-      "HenchmenKillState" => objects.Stage.HenchmenKillState,
-      "DialogueBox" => cutscenes.DialogueBox,
-      "DiaogueBoxPsych" => cutscenes.DialogueBoxPsych,
-      "CutsceneHandler" => cutscenes.CutsceneHandler
+      // Shaders
+      "ColorSwap" => shaders.ColorSwap,
+      // States
+      "FreeplayState" => states.FreeplayState,
+      "MainMenuState" => states.MainMenuState,
+      "PlayState" => states.PlayState,
+      "StoryMenuState" => states.StoryMenuState,
+      "TitleState" => states.TitleState,
+      // SubStates
+      "GameOverSubstate" => substates.GameOverSubstate,
+      "PauseSubState" => substates.PauseSubState,
+
+      // External Usages For Engine
+      "Countdown" => objects.stagecontent.Countdown,
+      "HenchmenKillState" => objects.stagecontent.HenchmenKillState
     ];
   }
 

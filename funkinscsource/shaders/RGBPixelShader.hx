@@ -8,14 +8,11 @@ class RGBPixelShaderReference
   public var shader:RGBPixelShader = new RGBPixelShader();
   public var containsPixel:Bool = false;
   public var pixelSize:Float = 1;
+  public var enabled(default, set):Bool = true;
 
   public function copyValues(tempShader:RGBPalette)
   {
-    var enabled:Bool = false;
-    if (tempShader != null) enabled = true;
-
-    // Even though the shader is not RGB make it pixelate the splashes!
-    if (enabled)
+    if (tempShader != null)
     {
       for (i in 0...3)
       {
@@ -26,21 +23,40 @@ class RGBPixelShaderReference
       shader.mult.value[0] = tempShader.shader.mult.value[0];
     }
     else
-      shader.mult.value[0] = 0.0;
+      enabled = false;
 
     if (containsPixel) pixelSize = 6;
     shader.uBlocksize.value = [pixelSize, pixelSize];
   }
 
-  public function new()
+  public function set_enabled(value:Bool)
+  {
+    enabled = value;
+		shader.mult.value = [value ? 1 : 0];
+		return value;
+	}
+
+  public function set_pixelAmount(value:Float)
+	{
+		pixelSize = value;
+		shader.uBlocksize.value = [value, value];
+		return value;
+	}
+
+  public function reset()
   {
     shader.r.value = [0, 0, 0];
     shader.g.value = [0, 0, 0];
     shader.b.value = [0, 0, 0];
-    shader.mult.value = [1];
+  }
 
-    if (containsPixel) pixelSize = 6;
-    shader.uBlocksize.value = [pixelSize, pixelSize];
+  public function new()
+  {
+    reset();
+    enabled = true;
+
+    if (containsPixel) pixelSize = PlayState.daPixelZoom;
+    else pixelSize = 1;
   }
 }
 

@@ -358,6 +358,7 @@ class ShaderFunctions
         {
           if (spr != null) spr.shader = Reflect.getProperty(shad, 'shader');
           if (actor != null) actor.shader = Reflect.getProperty(shad, 'shader');
+          Debug.logInfo("SHAD NOT NULL");
 
           if (actor == null && spr == null) Debug.logError('Actor and spr are both null!');
         }
@@ -399,7 +400,7 @@ class ShaderFunctions
             if (tag != null)
             {
               var originalTag:String = tag;
-              tag = LuaUtils.formatVariable('tween_$tag');
+              tag = LuaUtils.checkVariable(tag, 'tween_');
               variables.set(tag, FlxTween.num(startValue, value, time,
                 {
                   ease: ease,
@@ -508,7 +509,7 @@ class ShaderFunctions
             if (tag != null)
             {
               var originalTag:String = tag;
-              tag = LuaUtils.formatVariable('tween_$tag');
+              tag = LuaUtils.checkVariable(tag, 'tween_');
               var variables = MusicBeatState.getVariables();
               variables.set(tag, FlxTween.num(startValue, value, time,
                 {
@@ -547,7 +548,7 @@ class ShaderFunctions
           if (tag != null)
           {
             var originalTag:String = tag;
-            tag = LuaUtils.formatVariable('tween_$tag');
+            tag = LuaUtils.checkVariable(tag, 'tween_');
             var variables = MusicBeatState.getVariables();
             variables.set(tag, FlxTween.num(leObj.getFloat(floatName), newFloat, duration,
               {

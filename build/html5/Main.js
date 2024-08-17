@@ -2378,7 +2378,7 @@ haxe_ui_backend_ComponentImpl.prototype = $extend(haxe_ui_backend_ComponentBase.
 		if(Reflect.field(event,"wheelDelta") != null) {
 			delta = Reflect.field(event,"wheelDelta");
 		} else if(((event) instanceof WheelEvent)) {
-			delta = (js_Boot.__cast(event , WheelEvent)).deltaY;
+			delta = (js_Boot.__cast(event , WheelEvent)).viewY;
 		} else {
 			delta = -event.detail;
 		}
@@ -17484,14 +17484,14 @@ haxe_ui_containers_ScrollViewEvents.prototype = $extend(haxe_ui_events_Events.pr
 			var now = HxOverrides.now() / 1000;
 			var elapsed = (now - this._inertia.timestamp) * 1000;
 			var deltaX = Math.abs(this._inertia.screen.x - event.screenX);
-			var deltaY = Math.abs(this._inertia.screen.y - event.screenY);
+			var viewY = Math.abs(this._inertia.screen.y - event.screenY);
 			this._inertia.direction.x = this._inertia.screen.x - event.screenX < 0 ? 0 : 1;
 			var velocityX = deltaX / elapsed;
 			var v = 1000 * deltaX / (1 + elapsed);
 			velocityX = 0.8 * v + 0.2 * velocityX;
 			this._inertia.direction.y = this._inertia.screen.y - event.screenY < 0 ? 0 : 1;
-			var velocityY = deltaY / elapsed;
-			var v = 1000 * deltaY / (1 + elapsed);
+			var velocityY = viewY / elapsed;
+			var v = 1000 * viewY / (1 + elapsed);
 			velocityY = 0.8 * v + 0.2 * velocityY;
 			if(velocityX <= 75 && velocityY <= 75) {
 				this.dispatch(new haxe_ui_events_ScrollEvent(haxe_ui_events_ScrollEvent.STOP));
@@ -17567,14 +17567,14 @@ haxe_ui_containers_ScrollViewEvents.prototype = $extend(haxe_ui_events_Events.pr
 		}
 		var finishedY = false;
 		if(this._inertia.amplitude.y != 0) {
-			var deltaY = -this._inertia.amplitude.y * Math.exp(-elapsed / 325);
-			if(deltaY > 0.5 || deltaY < -0.5) {
+			var viewY = -this._inertia.amplitude.y * Math.exp(-elapsed / 325);
+			if(viewY > 0.5 || viewY < -0.5) {
 				var oldPos = this._scrollview.get_vscrollPos();
 				var newPos = 0;
 				if(this._inertia.direction.y == 0) {
-					newPos = this._inertia.target.y - deltaY;
+					newPos = this._inertia.target.y - viewY;
 				} else {
-					newPos = this._inertia.target.y + deltaY;
+					newPos = this._inertia.target.y + viewY;
 				}
 				if(newPos < 0) {
 					newPos = 0;

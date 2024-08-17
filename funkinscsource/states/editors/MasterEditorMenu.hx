@@ -15,7 +15,7 @@ class MasterEditorMenu extends MusicBeatState
     'Menu Character Editor',
     'Dialogue Editor',
     'Dialogue Portrait Editor',
-    'Note Splash Debug',
+    'Note Splash Editor',
   ];
   private var grpTexts:FlxTypedGroup<Alphabet>;
   private var directories:Array<String> = [null];
@@ -115,8 +115,8 @@ class MasterEditorMenu extends MusicBeatState
           LoadingState.loadAndSwitchState(new DialogueEditorState(), false);
         case 'Dialogue Portrait Editor':
           LoadingState.loadAndSwitchState(new DialogueCharacterEditorState(), false);
-        case 'Note Splash Debug':
-          MusicBeatState.switchState(new NoteSplashDebugState());
+        case 'Note Splash Editor':
+          MusicBeatState.switchState(new NoteSplashEditorState());
       }
     }
 

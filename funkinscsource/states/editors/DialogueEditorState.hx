@@ -8,6 +8,7 @@ import tjson.TJSON as Json;
 import objects.TypedAlphabet;
 import cutscenes.DialogueBoxPsych;
 import cutscenes.DialogueCharacter;
+import states.editors.content.Prompt;
 
 class DialogueEditorState extends MusicBeatState implements PsychUIEventHandler.PsychUIEvent
 {
@@ -365,7 +366,7 @@ class DialogueEditorState extends MusicBeatState implements PsychUIEventHandler.
           transitioning = true;
         }
         else
-          openSubState(new substates.ConfirmationPopupSubstate(function() transitioning = true));
+          openSubState(new ExitConfirmationPrompt(function() transitioning = true));
         return;
       }
       var negaMult:Array<Int> = [1, -1];

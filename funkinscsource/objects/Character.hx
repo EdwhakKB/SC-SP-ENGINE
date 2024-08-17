@@ -4,7 +4,8 @@ import flixel.util.FlxSort;
 import flixel.util.FlxDestroyUtil;
 import openfl.utils.Assets;
 import haxe.Json;
-import objects.stageobjects.TankmenBG;
+import objects.stagecontent.stageobjects.TankmenBG;
+import flixel.graphics.frames.FlxAtlasFrames;
 
 class Character extends FunkinSCSprite
 {
@@ -244,12 +245,12 @@ class Character extends FunkinSCSprite
   /**
    * how frequently bf and dad would play their idle animation(1 - every beat, 2 - every 2 beats and so on).
    */
-  public var idleBeat:Int = 2;
+  public var idleBeat:Int = 1;
 
   /**
    * Current color. (A different way, not the true color of the sprite unless taken into affect!)
    */
-  public var curColor:FlxColor;
+  public var curColor:FlxColor = 0xFFFFFFFF;
 
   /**
    * When the character has no miss animations but you want it to seem like they do.
@@ -283,11 +284,6 @@ class Character extends FunkinSCSprite
   public var playAnimationBeforeSwitch:Bool = false;
 
   /**
-   * Idle beat to when characters dance on whatever beat set, default is 1.
-   */
-  public var defaultIdleBeat:Int = 1;
-
-  /**
    * Whether the player is an active character (char) or not.
    */
   public var characterType(default, set):CharacterType = OTHER;
@@ -307,7 +303,17 @@ class Character extends FunkinSCSprite
    */
   public var characterId:String = "";
 
-  override public function new(x:Float, y:Float, ?character:String = 'bf', ?isPlayer:Bool = false)
+  /**
+   * Missing Character Stuff
+   */
+  public var missingCharacter:Bool = false;
+
+  /**
+   * Missing Character Stuff
+   */
+  public var missingText:FlxText;
+
+  public function new(x:Float, y:Float, ?character:String = 'bf', ?isPlayer:Bool = false)
   {
     super(x, y);
     changeCharacter(character, isPlayer);
@@ -323,7 +329,7 @@ class Character extends FunkinSCSprite
     }
   }
 
-  public function resetCharacterAttributes(?character:String = "bf", ?isPlayer:Bool = false)
+  public dynamic function resetCharacterAttributes(?character:String = "bf", ?isPlayer:Bool = false)
   {
     animPlayerOffsets = new Map<String, Array<Float>>();
     animInterrupt = new Map<String, Bool>();
@@ -348,7 +354,7 @@ class Character extends FunkinSCSprite
     resetAnimationVars();
   }
 
-  public function changeCharacter(character:String, ?isPlayer:Bool = false)
+  public dynamic function changeCharacter(character:String, ?isPlayer:Bool = false)
   {
     resetCharacterAttributes(character, isPlayer);
 
@@ -358,25 +364,18 @@ class Character extends FunkinSCSprite
     var characterPath:String = 'data/characters/$curCharacter.json';
     var path:String = Paths.getPath(characterPath, TEXT);
 
-    #if MODS_ALLOWED
-    if (!FileSystem.exists(path))
-    #else
-    if (!Assets.exists(path))
-    #end
+    if (#if MODS_ALLOWED !FileSystem.exists(path) && #end!Assets.exists(path))
     {
-      path = Paths.getSharedPath('data/characters/' + DEFAULT_CHARACTER + '.json');
-      // If a character couldn't be found, change him to BF just to prevent a crash
-      color = FlxColor.BLACK;
-      alpha = 0.6;
+      path = Paths.getSharedPath('data/characters/' + DEFAULT_CHARACTER +
+        '.json'); // If a character couldn't be found, change him to BF just to prevent a crash
+      missingCharacter = true;
+      missingText = new FlxText(0, 0, 300, 'ERROR:\n$character.json', 16);
+      missingText.alignment = CENTER;
     }
 
     try
     {
-      #if MODS_ALLOWED
-      loadCharacterFile(Json.parse(File.getContent(path)));
-      #else
-      loadCharacterFile(Json.parse(Assets.getText(path)));
-      #end
+      loadCharacterFile(Json.parse(#if MODS_ALLOWED File.getContent(path) #else Assets.getText(path) #end));
     }
     catch (e:Dynamic)
     {
@@ -395,26 +394,18 @@ class Character extends FunkinSCSprite
     originalFlipX = flipX;
 
     skipDance = false;
-    hasMissAnimations = animOffsets.exists('singLEFTmiss') || animOffsets.exists('singDOWNmiss') || animOffsets.exists('singUPmiss')
-      || animOffsets.exists('singRIGHTmiss');
+    hasMissAnimations = hasAnimation('singLEFTmiss') || hasAnimation('singDOWNmiss') || hasAnimation('singUPmiss') || hasAnimation('singRIGHTmiss');
     isDancing = (animation.getByName('danceLeft') != null && animation.getByName('danceRight') != null);
     doMissThing = (animation.getByName('singUPmiss') == null); // if for some reason you only have an up miss, why?
 
     dance();
 
-    if (isPlayer)
-    {
-      // Doesn't flip for BF, since his are already in the right place???
-      if (!curCharacter.startsWith('bf') && !isPsychPlayer) flipAnims(true);
-    }
-    else
-    {
-      // Flip for just bf
-      if (curCharacter.startsWith('bf') || isPsychPlayer) flipAnims(true);
-    }
+    var flips:Bool = isPlayer ? (!curCharacter.startsWith('bf') && !isPsychPlayer) : (curCharacter.startsWith('bf') || isPsychPlayer); // Doesn't flip for BF, since his are already in the right place??? --When Player!
+    // Flip for just bf --When Not Player!
+    if (flips) flipAnims(true);
   }
 
-  public function loadCharacterFile(json:Dynamic)
+  public dynamic function loadCharacterFile(json:Dynamic)
   {
     scale.set(1, 1);
     updateHitbox();
@@ -450,7 +441,7 @@ class Character extends FunkinSCSprite
     }
 
     // positioning
-    positionArray = (isPlayer && json.playerposition != null ? json.playerposition : json.position);
+    positionArray = ((!debugMode && isPlayer && json.playerposition != null) ? json.playerposition : json.position);
     (json.playerposition != null ? playerPositionArray = json.playerposition : playerPositionArray = json.position);
     (isPlayer
       && json.player_camera_position != null ? cameraPosition = json.player_camera_position : cameraPosition = json.camera_position);
@@ -476,11 +467,11 @@ class Character extends FunkinSCSprite
     iconColorFormatted = '0x' + colorPreCut.substring(2);
 
     // I HATE YOU SO MUCH! -- code by me, glowsoony
-    if (iconColorFormatted.contains('0xFF') || iconColorFormatted.contains('#') || iconColorFormatted.contains('0x'))
-    {
-      var newIconColorFormat:String = iconColorFormatted.replace('#', '').replace('0xFF', '').replace('0x', '');
-      iconColorFormatted = '#' + newIconColorFormat;
-    }
+    var newIconColorFormat:String = iconColorFormatted;
+    if (iconColorFormatted.contains('0xFF') && iconColorFormatted.length == 10) newIconColorFormat = newIconColorFormat.replace('0xFF', '');
+    if (iconColorFormatted.contains('0x') && iconColorFormatted.length == 8) newIconColorFormat = newIconColorFormat.replace('0x', '');
+    if (iconColorFormatted.contains('#') && iconColorFormatted.length == 7) newIconColorFormat = newIconColorFormat.replace('#', '');
+    iconColorFormatted = '#' + newIconColorFormat;
 
     // antialiasing
     noAntialiasing = (json.no_antialiasing == true);
@@ -489,9 +480,9 @@ class Character extends FunkinSCSprite
     // animations
     animationsArray = json.animations;
     if (isPlayer && json.playerAnimations != null) animationsArray = json.playerAnimations;
-    defaultIdleBeat = json.defaultBeat;
 
-    if (!Math.isNaN(defaultIdleBeat) && defaultIdleBeat != 0) idleBeat = defaultIdleBeat;
+    var defaultBeat:Int = Std.int(json.defaultBeat);
+    idleBeat = (!Math.isNaN(defaultBeat) && defaultBeat != 0) ? defaultBeat : 1;
 
     if (animationsArray != null && animationsArray.length > 0)
     {
@@ -524,7 +515,7 @@ class Character extends FunkinSCSprite
         var playerOffsets:Array<Int> = anim.playerOffsets;
         var swagOffsets:Array<Int> = offsets;
 
-        if (isPlayer && playerOffsets != null && playerOffsets.length > 1) swagOffsets = playerOffsets;
+        if (!debugMode && isPlayer && playerOffsets != null && playerOffsets.length > 1) swagOffsets = playerOffsets;
         if (swagOffsets != null && swagOffsets.length > 1) addOffset(anim.anim, swagOffsets[0], swagOffsets[1]);
         if (playerOffsets != null && playerOffsets.length > 1) addPlayerOffset(anim.anim, playerOffsets[0], playerOffsets[1]);
         animInterrupt[anim.anim] = anim.interrupt == null ? true : anim.interrupt;
@@ -542,7 +533,7 @@ class Character extends FunkinSCSprite
     if (isAnimateAtlas) copyAtlasValues();
     #end
 
-    json.startingAnim != null ? playAnim(json.startingAnim) : (animOffsets.exists('danceRight') ? playAnim('danceRight') : playAnim('idle'));
+    json.startingAnim != null ? playAnim(json.startingAnim) : (hasAnimation('danceRight') ? playAnim('danceRight') : playAnim('idle'));
   }
 
   override function update(elapsed:Float)
@@ -551,7 +542,8 @@ class Character extends FunkinSCSprite
     #if flxanimate if (isAnimateAtlas) atlas.update(elapsed); #end
 
     if (debugMode
-      || (!isAnimateAtlas && animation.curAnim == null) #if flxanimate || (isAnimateAtlas && atlas.anim.curSymbol == null) #end)
+      || (!isAnimateAtlas && animation.curAnim == null) #if flxanimate
+      || (isAnimateAtlas && (atlas.anim.curInstance == null || atlas.anim.curSymbol == null)) #end)
     {
       super.update(elapsed);
       return;
@@ -632,7 +624,7 @@ class Character extends FunkinSCSprite
       else
       {
         var name:String = getAnimationName();
-        if (isAnimationFinished() && animOffsets.exists('$name-loop')) playAnim('$name-loop');
+        if (isAnimationFinished() && hasAnimation('$name-loop')) playAnim('$name-loop');
       }
     }
 
@@ -646,7 +638,7 @@ class Character extends FunkinSCSprite
   /**
    * FOR GF DANCING SHIT
    */
-  public function dance(forced:Bool = false, altAnim:Bool = false)
+  public dynamic function dance(forced:Bool = false, altAnim:Bool = false)
   {
     if (!ClientPrefs.data.characters) return;
     if (debugMode || stoppedDancing || skipDance || specialAnim || nonanimated || stopIdle) return;
@@ -681,6 +673,37 @@ class Character extends FunkinSCSprite
 
   var missed:Bool = false;
 
+  public var doAffectForAnimationName:Bool = true;
+
+  public dynamic function doAffectForName(name:String)
+  {
+    if (name.endsWith('alt') && animation.getByName(name) == null) name = name.split('-')[0];
+    if (name == 'laugh' && animation.getByName(name) == null) name = 'singUP';
+    if (name.endsWith('miss') && animation.getByName(name) == null)
+    {
+      name = name.substr(0, name.length - 4);
+      if (doMissThing) missed = true;
+    }
+
+    if (animation.getByName(name) == null) // if it's STILL null, just play idle, and if you REALLY messed up, it'll look in the xml for a valid anim
+    {
+      if (isDancing && animation.getByName('danceRight') != null) name = 'danceRight';
+      else if (animation.getByName('idle') != null) name = 'idle';
+    }
+  }
+
+  public var doAfterAffectForAnimationName:Bool = true;
+
+  public dynamic function doAfterAffectForName(name:String)
+  {
+    if (curCharacter.startsWith('gf-') || curCharacter == 'gf')
+    {
+      if (name == 'singLEFT') danced = true;
+      else if (name == 'singRIGHT') danced = false;
+      if (name == 'singUP' || name == 'singDOWN') danced = !danced;
+    }
+  }
+
   override public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
   {
     super.playAnim(AnimName, Force, Reversed, Frame);
@@ -692,31 +715,27 @@ class Character extends FunkinSCSprite
 
     if (nonanimated || charNotPlaying) return;
 
-    if (AnimName.endsWith('alt') && animation.getByName(AnimName) == null) AnimName = AnimName.split('-')[0];
-
-    if (AnimName == 'laugh' && animation.getByName(AnimName) == null) AnimName = 'singUP';
-
-    if (AnimName.endsWith('miss') && animation.getByName(AnimName) == null)
-    {
-      AnimName = AnimName.substr(0, AnimName.length - 4);
-      if (doMissThing) missed = true;
-    }
-
-    if (animation.getByName(AnimName) == null) // if it's STILL null, just play idle, and if you REALLY messed up, it'll look in the xml for a valid anim
-    {
-      if (isDancing && animation.getByName('danceRight') != null) AnimName = 'danceRight';
-      else if (animation.getByName('idle') != null) AnimName = 'idle';
-    }
+    if (doAffectForAnimationName) doAffectForName(AnimName);
 
     if (!isAnimateAtlas) animation.play(AnimName, Force, Reversed, Frame);
     #if flxanimate
     else
+    {
       atlas.anim.play(AnimName, Force, Reversed, Frame);
+    }
     #end
 
     // To do full color transformations just do "doMissThing = false;"
-    if (missed) color = 0xCFAFFF;
-    else if (color != curColor && doMissThing) color = curColor;
+    if (missed)
+    {
+      var realCurColor = curColor;
+      color = CoolUtil.blendColors(curColor, FlxColor.fromInt(0xFFCFAFFF));
+      curColor = realCurColor;
+    }
+    else if (color != curColor && doMissThing)
+    {
+      color = curColor;
+    }
 
     var daOffset = animOffsets.get(AnimName);
 
@@ -724,28 +743,24 @@ class Character extends FunkinSCSprite
 
     if (debugMode)
     {
-      if (animOffsets.exists(AnimName) && !isPlayer || animPlayerOffsets.exists(AnimName) && isPlayer) offset.set(daOffset[0] * daZoom, daOffset[1] * daZoom);
+      if ((hasAnimation(AnimName) && !isPlayer)
+        || (animPlayerOffsets.exists(AnimName) && isPlayer)) offset.set(daOffset[0] * daZoom, daOffset[1] * daZoom);
     }
     else
     {
-      if (animOffsets.exists(AnimName)) offset.set(daOffset[0] * daZoom, daOffset[1] * daZoom);
+      if (hasAnimation(AnimName)) offset.set(daOffset[0] * daZoom, daOffset[1] * daZoom);
     }
 
-    if (curCharacter.startsWith('gf-') || curCharacter == 'gf')
-    {
-      if (AnimName == 'singLEFT') danced = true;
-      else if (AnimName == 'singRIGHT') danced = false;
-      if (AnimName == 'singUP' || AnimName == 'singDOWN') danced = !danced;
-    }
+    if (doAfterAffectForAnimationName) doAfterAffectForName(AnimName);
   }
 
-  public function allowDance():Bool
+  public dynamic function allowDance():Bool
     return !this.isAnimationNull() && !this.getAnimationName().startsWith("sing") && !this.specialAnim && !this.stunned;
 
-  public function isDancingType():Bool
+  public dynamic function isDancingType():Bool
     return this.isDancing;
 
-  public function allowHoldTimer():Bool
+  public dynamic function allowHoldTimer():Bool
   {
     return !this.isAnimationNull()
       && this.holdTimer > Conductor.stepCrochet * this.singDuration * (0.001 #if FLX_PITCH / FlxG.sound.music.pitch #end)
@@ -753,13 +768,13 @@ class Character extends FunkinSCSprite
       && !this.getAnimationName().endsWith('miss');
   }
 
-  public function danceConditions(conditionsMeet:Bool, ?forcedToIdle:Null<Bool> = null)
+  public dynamic function danceConditions(conditionsMeet:Bool, ?forcedToIdle:Null<Bool> = null)
   {
     var forced:Bool = (forcedToIdle != null ? forcedToIdle : false);
     if (conditionsMeet) this.dance(forced);
   }
 
-  public function danceChar(char:String, ?altBool:Bool, ?forcedToIdle:Bool, ?singArg:Bool)
+  public dynamic function danceChar(char:String, ?altBool:Bool, ?forcedToIdle:Bool, ?singArg:Bool)
   {
     switch (char)
     {
@@ -770,7 +785,7 @@ class Character extends FunkinSCSprite
     }
   }
 
-  public function beatDance(isGF:Bool, beat:Int, speed:Int):Bool
+  public dynamic function beatDance(isGF:Bool, beat:Int, speed:Int):Bool
   {
     return ((((beat % speed == 0) && !this.isDancingType()) || ((beat % speed != 0) && this.isDancingType()))
       && !isGF)
@@ -805,7 +820,7 @@ class Character extends FunkinSCSprite
     this.animation.addByPrefix(name, anim, 24, false);
   }
 
-  public function setZoom(?toChange:Float = 1):Void
+  public dynamic function setZoom(?toChange:Float = 1):Void
   {
     this.daZoom = toChange;
 
@@ -817,7 +832,7 @@ class Character extends FunkinSCSprite
     this.scale.set(daValue, daValue);
   }
 
-  public function resetAnimationVars()
+  public dynamic function resetAnimationVars()
   {
     for (i in [
       'flipMode', 'stopIdle', 'skipDance', 'nonanimated', 'specialAnim', 'doMissThing', 'stunned', 'stoppedDancing', 'stoppedUpdatingCharacter',
@@ -832,24 +847,27 @@ class Character extends FunkinSCSprite
   {
     var animSuf:Array<String> = ["", "miss", "-alt", "-alt2", "-loop"];
 
-    for (i in 0...animSuf.length)
+    // rewrote it -blantados
+    for (anim in animationsArray)
     {
-      if (left_right)
+      if (anim.anim.contains("singRIGHT") && left_right)
       {
-        if (this.animation.getByName('singRIGHT' + animSuf[i]) != null && this.animation.getByName('singLEFT' + animSuf[i]) != null)
+        var animSplit:Array<String> = anim.anim.split('singRIGHT');
+        if (animation.getByName('singRIGHT' + animSplit[1]) != null && animation.getByName('singLEFT' + animSplit[1]) != null)
         {
-          var oldRight = animation.getByName('singRIGHT' + animSuf[i]).frames;
-          this.animation.getByName('singRIGHT' + animSuf[i]).frames = this.animation.getByName('singLEFT' + animSuf[i]).frames;
-          this.animation.getByName('singLEFT' + animSuf[i]).frames = oldRight;
+          var oldRight = animation.getByName('singRIGHT' + animSplit[1]).frames;
+          animation.getByName('singRIGHT' + animSplit[1]).frames = animation.getByName('singLEFT' + animSplit[1]).frames;
+          animation.getByName('singLEFT' + animSplit[1]).frames = oldRight;
         }
       }
-      else
+      else if (anim.anim.contains("singUP") && !left_right)
       {
-        if (this.animation.getByName('singUP' + animSuf[i]) != null && this.animation.getByName('singDOWN' + animSuf[i]) != null)
+        var animSplit:Array<String> = anim.anim.split('singUP');
+        if (animation.getByName('singUP' + animSplit[1]) != null && animation.getByName('singDOWN' + animSplit[1]) != null)
         {
-          var oldRight = animation.getByName('singUP' + animSuf[i]).frames;
-          this.animation.getByName('singUP' + animSuf[i]).frames = this.animation.getByName('singDOWN' + animSuf[i]).frames;
-          this.animation.getByName('singDOWN' + animSuf[i]).frames = oldRight;
+          var oldUp = animation.getByName('singUP' + animSplit[1]).frames;
+          animation.getByName('singUP' + animSplit[1]).frames = animation.getByName('singDOWN' + animSplit[1]).frames;
+          animation.getByName('singDOWN' + animSplit[1]).frames = oldUp;
         }
       }
     }
@@ -871,6 +889,42 @@ class Character extends FunkinSCSprite
     }
   }
 
+  public override function draw()
+  {
+    var lastAlpha:Float = alpha;
+    var lastColor:FlxColor = color;
+    if (missingCharacter)
+    {
+      alpha *= 0.6;
+      color = FlxColor.BLACK;
+    }
+    #if flxanimate
+    if (isAnimateAtlas)
+    {
+      copyAtlasValues();
+      atlas.draw();
+      alpha = lastAlpha;
+      color = lastColor;
+      if (missingCharacter && visible)
+      {
+        missingText.x = getMidpoint().x - 150;
+        missingText.y = getMidpoint().y - 10;
+        missingText.draw();
+      }
+      return;
+    }
+    #end
+    super.draw();
+    if (missingCharacter && visible)
+    {
+      alpha = lastAlpha;
+      color = lastColor;
+      missingText.x = getMidpoint().x - 150;
+      missingText.y = getMidpoint().y - 10;
+      missingText.draw();
+    }
+  }
+
   override public function destroy()
   {
     this.animOffsets.clear();
@@ -881,23 +935,63 @@ class Character extends FunkinSCSprite
     this.animationNotes.resize(0);
 
     #if flxanimate
-    this.destroyAtlas();
+    this.atlas = flixel.util.FlxDestroyUtil.destroy(this.atlas);
     #end
     super.destroy();
+  }
+
+  override function set_color(Color:FlxColor):Int
+  {
+    curColor = Color;
+    return super.set_color(Color);
   }
 }
 
 typedef CharacterFile =
 {
+  /**
+   * Special name for character.
+   */
   var ?name:String;
+
+  /**
+   * Image path of the character image.
+   */
   var image:String;
+
+  /**
+   * Begining animation when characters loads.
+   */
   var ?startingAnim:String;
 
+  /**
+   * If in editor, character is player.
+   */
   var ?_editor_isPlayer:Null<Bool>;
+
+  /**
+   * Main position added on to the default in game.
+   */
   var ?position:Array<Float>;
+
+  /**
+   * In case of needing a position for when character is PLAYER.
+   */
   var ?playerposition:Array<Float>; // bcuz dammit some of em don't exactly flip right
+
+  /**
+   * Main camera positioning.
+   */
   var ?camera_position:Array<Float>;
+
+  /**
+   * In case of needing a camera_position when character is PLAYER.
+   */
   var ?player_camera_position:Array<Float>;
+
+  /**
+   * How long animations last.
+   */
   var ?sing_duration:Float;
 
   /**
@@ -905,8 +999,19 @@ typedef CharacterFile =
    */
   var ?healthbar_colors:Array<Int>;
 
+  /**
+   * Health icon used in game.
+   */
   var healthicon:String;
+
+  /**
+   * Main character animations.
+   */
   var animations:Array<AnimArray>;
+
+  /**
+   * In case the player has animations that are different when they are PLAYER.
+   */
   var ?playerAnimations:Array<AnimArray>; // bcuz player to opponent and opponent to player
 
   /**
@@ -915,11 +1020,16 @@ typedef CharacterFile =
    */
   var ?flip_x:Bool;
 
+  /**
+   * Let's characters used a custom deadChar based on character.
+   * @default ""
+   * **Note: bf => "bf-dead" =>, bf-pixel => "bf-dead-pixel", bf-holding-gf => "bf-holding-gf-dead"**
+   */
   var ?deadChar:String;
 
   /**
    * The scale of this character.
-   * Pixel characters typically use 6, scale.set(six, six).
+   * Pixel characters typically use 6, scale.set(6, 6).
    * @default 1
    */
   var ?scale:Float;
@@ -970,8 +1080,8 @@ typedef CharacterFile =
   var ?vocals_file:String;
 
   /**
-   * Changes the rate character dancing.
-   * @default '2'
+   * Idle defualt beat
+   * @default 1
    */
   var ?defaultBeat:Int;
 }

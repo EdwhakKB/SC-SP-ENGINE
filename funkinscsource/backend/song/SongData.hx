@@ -432,14 +432,14 @@ typedef SwagSection =
   var sectionNotes:Array<Dynamic>;
   var sectionBeats:Float;
   var mustHitSection:Bool;
-  var player4Section:Bool;
-  var gfSection:Bool;
-  var bpm:Float;
-  var changeBPM:Bool;
-  var altAnim:Bool;
-  var playerAltAnim:Bool;
-  var CPUAltAnim:Bool;
-  var dType:Int;
+  @:optional var playerAltAnim:Bool;
+  @:optional var CPUAltAnim:Bool;
+  @:optional var player4Section:Bool;
+  @:optional var gfSection:Bool;
+  @:optional var altAnim:Bool;
+  @:optional var changeBPM:Bool;
+  @:optional var bpm:Float;
+  @:optional var dType:Int;
 }
 
 typedef SwagSong =
@@ -464,7 +464,7 @@ typedef SwagSong =
   var stage:String;
   var format:String;
 
-  var options:OptionsData;
-  var gameOverData:GameOverData;
-  var characters:CharacterData;
+  var ?options:OptionsData;
+  var ?gameOverData:GameOverData;
+  var ?characters:CharacterData;
 }

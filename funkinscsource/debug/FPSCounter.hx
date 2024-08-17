@@ -198,39 +198,33 @@ class DateSetup
     var hourCheck:String = '';
     var minCheck:String = Std.string(date.getMinutes());
     var secCheck:String = Std.string(date.getSeconds());
+    var suffix:String = (ClientPrefs.data.militaryTime ? '' : (date.getHours() > 11 ? 'PM' : 'AM'));
 
-    var hourCheckArray:Array<String> = [];
-    var suffix:String = '';
-    if (ClientPrefs.data.militaryTime) hourCheckArray = [
-      '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'
-    ];
-    else
-      hourCheckArray = [
+    var hourCheckArray:Array<Array<String>> = [
+      [
+        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'
+      ],
+      [
         '12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'
-      ];
+      ]
+    ];
+    hourCheck = hourCheckArray[ClientPrefs.data.militaryTime ? 0 : 1][date.getHours()] + ' $suffix';
 
-    if (!ClientPrefs.data.militaryTime)
-    {
-      if (date.getHours() > 11) suffix = 'PM';
-      else
-        suffix = 'AM';
-    }
-    hourCheck = hourCheckArray[date.getHours()] + ' $suffix';
+    var dayArray:Array<Array<String>> = [
+      ['7', '1', '2', '3', '4', '5', '6'],
+      ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+    ];
+    realDay = dayArray[ClientPrefs.data.dayAsInt ? 0 : 1][date.getDay()];
 
-    var dayArray:Array<String> = [];
-    if (ClientPrefs.data.dayAsInt) dayArray = ['7', '1', '2', '3', '4', '5', '6'];
-    else
-      dayArray = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    realDay = dayArray[date.getDay()];
-
-    var monthArray:Array<String> = [];
-    if (ClientPrefs.data.monthAsInt) monthArray = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
-    else
-      monthArray = [
+    var monthArray:Array<Array<String>> = [
+      ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
+      [
         'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'
-      ];
-    realMonth = monthArray[date.getMonth()];
+      ]
+    ];
+    realMonth = monthArray[ClientPrefs.data.monthAsInt ? 0 : 1][date.getMonth()];
 
-    return FPSCounter.stringTimeToReturn = '(Year: $realYear | Month: $realMonth | Day: $realDay | Hour: $hourCheck | Min: $minCheck | Sec: $secCheck)';
+    final finalTime = '(Year: $realYear | Month: $realMonth | Day: $realDay | Hour: $hourCheck | Min: $minCheck | Sec: $secCheck)';
+    FPSCounter.stringTimeToReturn = finalTime;
   }
 }

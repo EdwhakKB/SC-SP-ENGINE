@@ -1,7 +1,6 @@
 package options;
 
 import flixel.FlxSubState;
-import flash.text.TextField;
 import flixel.input.keyboard.FlxKey;
 import flixel.addons.display.FlxGridOverlay;
 import flixel.group.FlxGroup.FlxTypedGroup;
@@ -9,6 +8,7 @@ import flixel.graphics.FlxGraphic;
 import flixel.util.FlxSave;
 import haxe.Json;
 import lime.utils.Assets;
+import openfl.text.TextField;
 
 class NoteOptions extends MusicBeatState
 {

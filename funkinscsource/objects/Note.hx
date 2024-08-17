@@ -2,14 +2,27 @@ package objects;
 
 // If you want to make a custom note type, you should search for:
 // "function set_noteType"
+import flixel.graphics.FlxGraphic;
+import flixel.math.FlxAngle;
+import flixel.math.FlxMath;
+import flixel.math.FlxRect;
+import flixel.system.FlxAssets.FlxGraphicAsset;
+import flixel.system.FlxAssets.FlxShader;
+import flixel.graphics.tile.FlxDrawTrianglesItem;
 import backend.NoteTypesConfig;
 import backend.Rating;
 import shaders.RGBPalette;
 import shaders.RGBPalette.RGBShaderReference;
-import objects.StrumArrow;
-import flixel.math.FlxRect;
 import openfl.Assets;
 import utils.tools.ICloneable;
+#if SCEModchartingTools
+import modcharting.NotePositionData;
+import modcharting.SustainStrip;
+#end
+import openfl.display.TriangleCulling;
+import openfl.geom.Vector3D;
+import openfl.geom.ColorTransform;
+import lime.math.Vector2;
 
 using StringTools;
 
@@ -20,9 +33,6 @@ typedef NoteSplashData =
   useGlobalShader:Bool, // breaks r/g/b/a but makes it copy default colors for your custom note
   useRGBShader:Bool,
   antialiasing:Bool,
-  r:FlxColor,
-  g:FlxColor,
-  b:FlxColor,
   a:Float
 }
 
@@ -38,8 +48,19 @@ typedef EventNote =
  *
  * If you want to make a custom note type, you should search for: "function set_noteType"
 **/
-class Note extends FunkinSCSprite implements ICloneable<Note>
+class Note extends ModchartArrow implements ICloneable<Note>
 {
+  // Modcharting Stuff ---->
+  // Galxay stuff
+  private static var alphas:Map<String, Map<String, Map<Int, Array<Float>>>> = new Map();
+  private static var indexes:Map<String, Map<String, Map<Int, Array<Int>>>> = new Map();
+  private static var glist:Array<FlxGraphic> = [];
+
+  public var gpix:FlxGraphic = null;
+  public var oalp:Float = 1;
+  public var oanim:String = "";
+
+  // <----
   public static var globalRgbShaders:Array<RGBPalette> = [];
   public static var globalQuantRgbShaders:Array<RGBPalette> = [];
   public static var instance:Note = null;
@@ -57,8 +78,8 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
   ];
 
   #if SCEModchartingTools
-  public var mesh:modcharting.SustainStrip;
-  public var notePositionData:modcharting.NotePositionData;
+  public var mesh:SustainStrip;
+  public var notePositionData:NotePositionData = NotePositionData.get();
   #end
 
   // We can now edit the time they spawn, useful for Modifiers (MT and non-MT)
@@ -127,9 +148,6 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
       antialiasing: !PlayState.isPixelStage,
       useGlobalShader: false,
       useRGBShader: (PlayState.SONG != null) ? !(PlayState.SONG.options.disableSplashRGB == true) : true,
-      r: -1,
-      g: -1,
-      b: -1,
       a: ClientPrefs.data.splashAlpha
     };
   public var offsetX:Float = 0;
@@ -144,8 +162,8 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
   public var copyAlpha:Bool = true;
   public var copyVisible:Bool = false;
 
-  public var hitHealth:Float = 0.023;
-  public var missHealth:Float = 0.0475;
+  public var hitHealth:Float = 0.02;
+  public var missHealth:Float = 0.01;
   public var rating:RatingWindow;
   public var ratingToString:String = '';
 
@@ -158,7 +176,42 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
 
   public var hitsoundDisabled:Bool = false;
   public var hitsoundChartEditor:Bool = true;
-  public var hitsound:String = 'hitsound';
+
+  public var canBeMissed:Bool = false;
+
+  /**
+   * Forces the hitsound to be played even if the user's hitsound volume is set to 0
+  **/
+  public var hitsoundForce:Bool = false;
+
+  public var hitsoundVolume(get, default):Float = 1.0;
+
+  function get_hitsoundVolume():Float
+  {
+    if (ClientPrefs.data.hitsoundVolume > 0) return ClientPrefs.data.hitsoundVolume;
+    return hitsoundForce ? hitsoundVolume : 0.0;
+  }
+
+  public var hitsound(default, set):String = 'hitsound';
+
+  function set_hitsound(value:String):String
+  {
+    if (ClientPrefs.data.hitsoundType == 'Notes')
+    {
+      if (value == null || value == '')
+      {
+        if (ClientPrefs.data.hitsoundType == 'Notes' && ClientPrefs.data.hitSounds != "None") value = ClientPrefs.data.hitSounds;
+      }
+
+      if (value == null || value == '') value = 'hitsound';
+
+      hitsound = value;
+    }
+    else
+      hitsound = null;
+    return value;
+  }
+
   public var isHoldEnd:Bool = false;
 
   // Quant Stuff
@@ -188,7 +241,7 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
     return value;
   }
 
-  public function resizeByRatio(ratio:Float) // haha funny twitter shit
+  public dynamic function resizeByRatio(ratio:Float) // haha funny twitter shit
   {
     if (isSustainNote && animation.curAnim != null && !isHoldEnd)
     {
@@ -204,8 +257,11 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
     return value;
   }
 
-  public function defaultRGB()
+  public dynamic function defaultRGB()
   {
+    var noteData:Int = noteData;
+    if (noteData > 3) noteData = noteData % 4;
+
     var arr:Array<FlxColor> = ClientPrefs.data.arrowRGB[noteData];
     if (texture.contains('pixel') || noteSkin.contains('pixel') || containsPixelTexture) arr = ClientPrefs.data.arrowRGBPixel[noteData];
 
@@ -223,8 +279,9 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
     }
   }
 
-  public function defaultRGBQuant()
+  public dynamic function defaultRGBQuant()
   {
+    var noteData:Int = noteData;
     var arrQuantRGB:Array<FlxColor> = ClientPrefs.data.arrowRGBQuantize[noteData];
 
     if (arrQuantRGB != null && noteData > -1 && noteData <= arrQuantRGB.length)
@@ -245,7 +302,6 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
   {
     var skin:String = 'noteSplashes';
     if (PlayState.SONG != null && PlayState.SONG.options.splashSkin != "") skin = PlayState.SONG.options.splashSkin;
-    noteSplashData.texture = skin;
     quantizedNotes ? defaultRGBQuant() : defaultRGB();
 
     if (noteData > -1 && noteType != value)
@@ -267,9 +323,9 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
           rgbShader.b = 0xFF990022;
 
           // splash data and colors
-          noteSplashData.r = 0xFFFF0000;
-          noteSplashData.g = 0xFF101010;
-          noteSplashData.texture = 'noteSplashes/noteSplashes-electric';
+          // noteSplashData.r = 0xFFFF0000;
+          // noteSplashData.g = 0xFF101010;
+          noteSplashData.texture = 'noteSplashes-electric';
 
           // gameplay data
           lowPriority = true;
@@ -279,6 +335,7 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
           hitsoundChartEditor = false;
         case 'Alt Animation':
           animSuffix = '-alt';
+
         case 'No Animation':
           noAnimation = true;
           noMissAnimation = true;
@@ -408,7 +465,7 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
     x += offsetX;
   }
 
-  public function setupNote(mustPress:Bool, strumLine:Int, daSection:Int, noteType:String)
+  public dynamic function setupNote(mustPress:Bool, strumLine:Int, daSection:Int, noteType:String)
   {
     this.mustPress = mustPress;
     this.strumLine = strumLine;
@@ -421,8 +478,6 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
     if (globalRgbShaders[noteData] == null)
     {
       var newRGB:RGBPalette = new RGBPalette();
-      globalRgbShaders[noteData] = newRGB;
-
       var arr:Array<FlxColor> = !PlayState.isPixelStage ? ClientPrefs.data.arrowRGB[noteData] : ClientPrefs.data.arrowRGBPixel[noteData];
 
       if (arr != null && noteData > -1 && noteData <= arr.length)
@@ -437,6 +492,7 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
         newRGB.g = 0xFF00FF00;
         newRGB.b = 0xFF0000FF;
       }
+      globalRgbShaders[noteData] = newRGB;
     }
     return globalRgbShaders[noteData];
   }
@@ -446,8 +502,6 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
     if (globalQuantRgbShaders[noteData] == null)
     {
       var newRGB:RGBPalette = new RGBPalette();
-      globalQuantRgbShaders[noteData] = newRGB;
-
       var arr:Array<FlxColor> = ClientPrefs.data.arrowRGBQuantize[noteData];
 
       if (arr != null && noteData > -1 && noteData <= arr.length)
@@ -462,6 +516,7 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
         newRGB.g = 0xFF00FF00;
         newRGB.b = 0xFF0000FF;
       }
+      globalQuantRgbShaders[noteData] = newRGB;
     }
     return globalQuantRgbShaders[noteData];
   }
@@ -473,7 +528,7 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
   public var originalHeight:Float = 6;
   public var correctionOffset:Float = 0; // dont mess with this
 
-  public function reloadNote(noteStyle:String = '', postfix:String = '')
+  public dynamic function reloadNote(noteStyle:String = '', postfix:String = '')
   {
     if (noteStyle == null) noteStyle = '';
     if (postfix == null) postfix = '';
@@ -509,7 +564,8 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
     else
       skin = customSkin;
 
-    if (!skin.contains('noteSkins')) rgbShader.enabled = false;
+    if (!skin.contains('noteSkins') && rgbShader.enabled) rgbShader.enabled = false;
+    else if (skin.contains('noteSkins') && !rgbShader.enabled) rgbShader.enabled = true;
 
     loadNoteTexture(skin, skinPostfix, skinPixel);
 
@@ -553,93 +609,92 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
     if (noteSkin != skin && noteSkin != noteStyle) noteSkin = skin;
   }
 
-  public function loadNoteTexture(noteStyleType:String, skinPostfix:String, skinPixel:String)
+  public dynamic function loadNoteTexture(noteStyleType:String, skinPostfix:String, skinPixel:String)
   {
-    switch (noteStyleType)
+    var firstPathFound:Bool = #if MODS_ALLOWED FileSystem.exists(Paths.getPath('images/notes/$noteStyleType.png')) || #end Assets.exists(Paths.getPath('images/notes/$noteStyleType.png'));
+    var secondPathFound:Bool = #if MODS_ALLOWED FileSystem.exists(Paths.getPath('images/$noteStyleType.png')) || #end Assets.exists(Paths.getPath('images/$noteStyleType.png'));
+    switch (noteType)
     {
       default:
-        if (texture.contains('pixel') || noteStyleType.contains('pixel') || containsPixelTexture)
+        switch (noteStyleType)
         {
-          if (FileSystem.exists(Paths.modsImages('notes/' + noteStyleType))
-            || FileSystem.exists(Paths.getSharedPath('images/notes/' + noteStyleType))
-            || Assets.exists('notes/' + noteStyleType))
-          {
-            if (isSustainNote)
+          default:
+            if ((texture.contains('pixel') || noteStyleType.contains('pixel') || containsPixelTexture)
+              && !FileSystem.exists('$noteStyleType.xml'))
             {
-              var graphic = Paths.image(noteStyleType != "" ? 'notes/' + noteStyleType + 'ENDS' : ('pixelUI/' + skinPixel + 'ENDS' + skinPostfix),
-                notePathLib, !notITGNotes);
-              loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
-              originalHeight = graphic.height / 2;
+              if (firstPathFound)
+              {
+                if (isSustainNote)
+                {
+                  var graphic = Paths.image(noteStyleType != "" ? 'notes/' + noteStyleType + 'ENDS' : ('pixelUI/' + skinPixel + 'ENDS' + skinPostfix),
+                    notePathLib, !notITGNotes);
+                  loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
+                  originalHeight = graphic.height / 2;
+                }
+                else
+                {
+                  var graphic = Paths.image(noteStyleType != "" ? 'notes/' + noteStyleType : ('pixelUI/' + skinPixel + skinPostfix), notePathLib, !notITGNotes);
+                  loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
+                }
+
+                loadNoteAnims(true);
+              }
+              else if (secondPathFound)
+              {
+                if (isSustainNote)
+                {
+                  var graphic = Paths.image(noteStyleType != "" ? noteStyleType + 'ENDS' : ('pixelUI/' + skinPixel + 'ENDS' + skinPostfix), notePathLib,
+                    !notITGNotes);
+                  loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
+                  originalHeight = graphic.height / 2;
+                }
+                else
+                {
+                  var graphic = Paths.image(noteStyleType != "" ? noteStyleType : ('pixelUI/' + skinPixel + skinPostfix), notePathLib, !notITGNotes);
+                  loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
+                }
+
+                loadNoteAnims(true);
+              }
+              else
+              {
+                var noteSkinNonRGB:Bool = (PlayState.SONG != null && PlayState.SONG.options.disableNoteRGB);
+                if (isSustainNote)
+                {
+                  var graphic = Paths.image(noteSkinNonRGB ? 'pixelUI/NOTE_assetsENDS' : 'pixelUI/noteSkins/NOTE_assetsENDS' + getNoteSkinPostfix(),
+                    notePathLib, !notITGNotes);
+                  loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
+                  originalHeight = graphic.height / 2;
+                }
+                else
+                {
+                  var graphic = Paths.image(noteSkinNonRGB ? 'pixelUI/NOTE_assets' : 'pixelUI/noteSkins/NOTE_assets' + getNoteSkinPostfix(), notePathLib,
+                    !notITGNotes);
+                  loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
+                }
+
+                loadNoteAnims(true);
+              }
             }
             else
             {
-              var graphic = Paths.image(noteStyleType != "" ? 'notes/' + noteStyleType : ('pixelUI/' + skinPixel + skinPostfix), notePathLib, !notITGNotes);
-              loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
+              if (firstPathFound)
+              {
+                frames = Paths.getSparrowAtlas('notes/' + noteStyleType, notePathLib, !notITGNotes);
+                loadNoteAnims();
+              }
+              else if (secondPathFound)
+              {
+                frames = Paths.getSparrowAtlas(noteStyleType, notePathLib, !notITGNotes);
+                loadNoteAnims();
+              }
+              else
+              {
+                var noteSkinNonRGB:Bool = (PlayState.SONG != null && PlayState.SONG.options.disableNoteRGB);
+                frames = Paths.getSparrowAtlas(noteSkinNonRGB ? "NOTE_assets" : "noteSkins/NOTE_assets" + getNoteSkinPostfix(), notePathLib, !notITGNotes);
+                loadNoteAnims();
+              }
             }
-
-            loadNoteAnims(true);
-          }
-          else if (FileSystem.exists(Paths.modsImages(noteStyleType))
-            || FileSystem.exists(Paths.getSharedPath('images/' + noteStyleType))
-            || Assets.exists(noteStyleType))
-          {
-            if (isSustainNote)
-            {
-              var graphic = Paths.image(noteStyleType != "" ? noteStyleType + 'ENDS' : ('pixelUI/' + skinPixel + 'ENDS' + skinPostfix), notePathLib,
-                !notITGNotes);
-              loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
-              originalHeight = graphic.height / 2;
-            }
-            else
-            {
-              var graphic = Paths.image(noteStyleType != "" ? noteStyleType : ('pixelUI/' + skinPixel + skinPostfix), notePathLib, !notITGNotes);
-              loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
-            }
-
-            loadNoteAnims(true);
-          }
-          else
-          {
-            var noteSkinNonRGB:Bool = (PlayState.SONG != null && PlayState.SONG.options.disableNoteRGB);
-            if (isSustainNote)
-            {
-              var graphic = Paths.image(noteSkinNonRGB ? 'pixelUI/NOTE_assetsENDS' : 'pixelUI/noteSkins/NOTE_assetsENDS' + getNoteSkinPostfix(), notePathLib,
-                !notITGNotes);
-              loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
-              originalHeight = graphic.height / 2;
-            }
-            else
-            {
-              var graphic = Paths.image(noteSkinNonRGB ? 'pixelUI/NOTE_assets' : 'pixelUI/noteSkins/NOTE_assets' + getNoteSkinPostfix(), notePathLib,
-                !notITGNotes);
-              loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
-            }
-
-            loadNoteAnims(true);
-          }
-        }
-        else
-        {
-          if (FileSystem.exists(Paths.modsImages('notes/' + noteStyleType))
-            || FileSystem.exists(Paths.getSharedPath('images/notes/' + noteStyleType))
-            || Assets.exists('notes/' + noteStyleType))
-          {
-            frames = Paths.getSparrowAtlas('notes/' + noteStyleType, notePathLib, !notITGNotes);
-            loadNoteAnims();
-          }
-          else if (FileSystem.exists(Paths.modsImages(noteStyleType))
-            || FileSystem.exists(Paths.getSharedPath('shared/images/' + noteStyleType))
-            || Assets.exists(noteStyleType))
-          {
-            frames = Paths.getSparrowAtlas(noteStyleType, notePathLib, !notITGNotes);
-            loadNoteAnims();
-          }
-          else
-          {
-            var noteSkinNonRGB:Bool = (PlayState.SONG != null && PlayState.SONG.options.disableNoteRGB);
-            frames = Paths.getSparrowAtlas(noteSkinNonRGB ? "NOTE_assets" : "noteSkins/NOTE_assets" + getNoteSkinPostfix(), notePathLib, !notITGNotes);
-            loadNoteAnims();
-          }
         }
     }
   }
@@ -651,8 +706,9 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
     return skin;
   }
 
-  public function loadNoteAnims(?pixel:Bool = false)
+  public dynamic function loadNoteAnims(?pixel:Bool = false)
   {
+    if (colArray[noteData] == null) return;
     if (pixel)
     {
       isPixel = true;
@@ -708,10 +764,11 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
 
   override function update(elapsed:Float)
   {
-    containsPixelTexture = ((texture.contains('pixel') || noteSkin.contains('pixel')) && !containsPixelTexture);
     super.update(elapsed);
+    daOffsetX = offsetX; // adjust modchart notes offset
+    containsPixelTexture = ((texture.contains('pixel') || noteSkin.contains('pixel')) && !containsPixelTexture);
 
-    if (!this.isAnimationNull() && this.animation.curAnim.name.endsWith('end')) isHoldEnd = true;
+    if (!isAnimationNull() && getAnimationName().endsWith('end')) isHoldEnd = true;
 
     if (mustPress)
     {
@@ -736,14 +793,7 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
     }
   }
 
-  override public function destroy()
-  {
-    clipRect = flixel.util.FlxDestroyUtil.put(clipRect);
-    _lastValidChecked = '';
-    super.destroy();
-  }
-
-  public function followStrumArrow(myStrum:StrumArrow, fakeCrochet:Float)
+  public dynamic function followStrumArrow(myStrum:StrumArrow, fakeCrochet:Float, newFollowSpeed:Float = 1)
   {
     var strumX:Float = myStrum.x;
     var strumY:Float = myStrum.y;
@@ -752,7 +802,7 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
     var strumDirection:Float = myStrum.direction;
     var strumVisible:Bool = myStrum.visible;
 
-    distance = (0.45 * (Conductor.songPosition - strumTime) * noteScrollSpeed * multSpeed);
+    distance = (0.45 * (Conductor.songPosition - strumTime) * newFollowSpeed * multSpeed);
     if (!myStrum.downScroll) distance *= -1;
 
     if (copyAngle) angle = strumDirection - 90 + strumAngle + offsetAngle;
@@ -782,7 +832,7 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
     if (copyVisible) visible = strumVisible;
   }
 
-  public function clipToStrumArrow(myStrum:StrumArrow)
+  public dynamic function clipToStrumArrow(myStrum:StrumArrow)
   {
     var center:Float = myStrum.y + offsetY + swagWidth / 2;
     if (isSustainNote && (mustPress || !ignoreNote) && (!mustPress || (wasGoodHit || (prevNote.wasGoodHit && !canBeHit))))
@@ -809,6 +859,115 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
     }
   }
 
+  @:access(flixel.FlxCamera)
+  override public function draw():Void
+  {
+    if (notITGNotes && drawManual)
+    {
+      if (alpha < 0 || vertices == null || indices == null || uvtData == null || _point == null || offset == null)
+      {
+        return;
+      }
+
+      for (camera in cameras)
+      {
+        if (!camera.visible || !camera.exists) continue;
+        // if (!isOnScreen(camera)) continue; // TODO: Update this code to make it work properly.
+
+        // memory leak with drawTriangles :c
+
+        getScreenPosition(_point, camera) /*.subtractPoint(offset)*/;
+        var newGraphic:FlxGraphic = cast mapData();
+
+        /*var shader = this.shader != null ? this.shader : new FlxShader();
+          if (this.shader != shader) this.shader = shader;
+
+          shader.bitmap.input = graphic.bitmap;
+          shader.bitmap.filter = antialiasing ? LINEAR : NEAREST;
+
+          var transforms:Array<ColorTransform> = [];
+          var transfarm:ColorTransform = new ColorTransform();
+          transfarm.redMultiplier = colorTransform.redMultiplier;
+          transfarm.greenMultiplier = colorTransform.greenMultiplier;
+          transfarm.blueMultiplier = colorTransform.blueMultiplier;
+          transfarm.redOffset = colorTransform.redOffset;
+          transfarm.greenOffset = colorTransform.greenOffset;
+          transfarm.blueOffset = colorTransform.blueOffset;
+          transfarm.alphaOffset = colorTransform.alphaOffset;
+          transfarm.alphaMultiplier = colorTransform.alphaMultiplier * camera.alpha;
+
+          for (n in 0...vertices.length)
+            transforms.push(transfarm);
+
+          var drawItem = camera.startTrianglesBatch(newGraphic, antialiasing, true, blend, true, shader);
+
+          @:privateAccess
+          {
+            drawItem.addTrianglesColorArray(vertices, indices, uvtData, null, _point, camera._bounds, transforms);
+        }*/
+
+        camera.drawTriangles(newGraphic, vertices, indices, uvtData, null, _point, blend, true, antialiasing, colorTransform, shader);
+        // camera.drawTriangles(processedGraphic, vertices, indices, uvtData, null, _point, blend, true, antialiasing);
+        // trace("we do be drawin... something?\n verts: \n" + vertices);
+      }
+
+      // trace("we do be drawin tho");
+
+      #if FLX_DEBUG
+      if (FlxG.debugger.drawDebug) drawDebug();
+      #end
+    }
+    else
+    {
+      super.draw();
+    }
+  }
+
+  function mapData():FlxGraphic
+  {
+    if (gpix == null || alpha != oalp || !animation.curAnim.finished || oanim != animation.curAnim.name)
+    {
+      if (!alphas.exists(noteType))
+      {
+        alphas.set(noteType, new Map());
+        indexes.set(noteType, new Map());
+      }
+      if (!alphas.get(noteType).exists(animation.curAnim.name))
+      {
+        alphas.get(noteType).set(animation.curAnim.name, new Map());
+        indexes.get(noteType).set(animation.curAnim.name, new Map());
+      }
+      if (!alphas.get(noteType).get(animation.curAnim.name).exists(animation.curAnim.curFrame))
+      {
+        alphas.get(noteType).get(animation.curAnim.name).set(animation.curAnim.curFrame, []);
+        indexes.get(noteType).get(animation.curAnim.name).set(animation.curAnim.curFrame, []);
+      }
+      if (!alphas.get(noteType)
+        .get(animation.curAnim.name)
+        .get(animation.curAnim.curFrame)
+        .contains(alpha))
+      {
+        var pix:FlxGraphic = FlxGraphic.fromFrame(frame, true);
+        var nalp:Array<Float> = alphas.get(noteType).get(animation.curAnim.name).get(animation.curAnim.curFrame);
+        var nindex:Array<Int> = indexes.get(noteType).get(animation.curAnim.name).get(animation.curAnim.curFrame);
+        pix.bitmap.colorTransform(pix.bitmap.rect, colorTransform);
+        glist.push(pix);
+        nalp.push(alpha);
+        nindex.push(glist.length - 1);
+        alphas.get(noteType).get(animation.curAnim.name).set(animation.curAnim.curFrame, nalp);
+        indexes.get(noteType).get(animation.curAnim.name).set(animation.curAnim.curFrame, nindex);
+      }
+      var dex = alphas.get(noteType)
+        .get(animation.curAnim.name)
+        .get(animation.curAnim.curFrame)
+        .indexOf(alpha);
+      gpix = glist[indexes.get(noteType).get(animation.curAnim.name).get(animation.curAnim.curFrame)[dex]];
+      oalp = alpha;
+      oanim = animation.curAnim.name;
+    }
+    return gpix;
+  }
+
   @:noCompletion
   override function set_clipRect(rect:FlxRect):FlxRect
   {
@@ -822,5 +981,22 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
   override public function clone():Note
   {
     return new Note(this.strumTime, this.noteData, this.isSustainNote, this.noteSkin, this.prevNote);
+  }
+
+  override public function destroy()
+  {
+    clipRect = flixel.util.FlxDestroyUtil.put(clipRect);
+    _lastValidChecked = '';
+    vertices = null;
+    indices = null;
+    uvtData = null;
+    for (i in glist)
+      i.destroy();
+    alphas = new Map();
+    indexes = new Map();
+    glist = [];
+    hasSetupRender = false;
+    drawManual = false;
+    super.destroy();
   }
 }

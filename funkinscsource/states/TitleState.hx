@@ -14,9 +14,6 @@ import states.StoryMenuState;
 import states.OutdatedState;
 import states.MainMenuState;
 import backend.ColorBlindness;
-#if sys
-import debug.Arguments;
-#end
 
 @:structInit
 class TitleData
@@ -29,11 +26,13 @@ class TitleData
   public var gfy:Float = 40;
   public var backgroundSprite:String = '';
   public var bpm:Float = 102;
+  public var skipTime:Float = 0;
 }
 
 class TitleState extends MusicBeatState
 {
   public static var skippedIntro:Bool = false;
+  public static var updateVersion:String;
 
   var pressedEnter:Bool = false;
 
@@ -60,8 +59,6 @@ class TitleState extends MusicBeatState
   var textGroup:FlxSpriteGroup;
   var colourSwap:ColorSwap = null;
 
-  public static var updateVersion:String;
-
   var mustUpdate:Bool = false;
 
   var grayGrad:FlxSprite = null;
@@ -73,6 +70,8 @@ class TitleState extends MusicBeatState
 
   var particlesUP = new FlxTypedGroup<FlxEmitter>();
   var particlesDOWN = new FlxTypedGroup<FlxEmitter>();
+
+  var defaultTimeSkipped:Float = 9400;
 
   override public function create():Void
   {
@@ -107,25 +106,25 @@ class TitleState extends MusicBeatState
     checkInternetConnection();
     if (internetConnection) getBuildVer();
 
-    // FlxG.worldBounds.set(0, 0);
-
     Assets.cache.enabled = true;
-
     ClientPrefs.data.SCEWatermark = ClientPrefs.data.SCEWatermark;
 
-    final balls = Json.parse(Paths.getTextFromFile('images/gfDanceTitle.json'));
+    final file = Json.parse(Paths.getTextFromFile('images/gfDanceTitle.json'));
 
     titleJson =
       {
-        titlex: balls.titlex,
-        titley: balls.titley,
-        startx: balls.startx,
-        starty: balls.starty,
-        gfx: balls.gfx,
-        gfy: balls.gfy,
-        backgroundSprite: balls.backgroundSprite,
-        bpm: balls.bpm,
+        titlex: file.titlex,
+        titley: file.titley,
+        startx: file.startx,
+        starty: file.starty,
+        gfx: file.gfx,
+        gfy: file.gfy,
+        backgroundSprite: file.backgroundSprite,
+        bpm: file.bpm,
+        skipTime: file.skipTime
       }
+
+    if (titleJson.skipTime != 0) defaultTimeSkipped = titleJson.skipTime;
 
     Conductor.bpm = titleJson.bpm;
 
@@ -288,13 +287,6 @@ class TitleState extends MusicBeatState
 
     if (!skippedIntro)
     {
-      #if sys
-      if (debug.Arguments.parse(Sys.args()))
-      {
-        FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"), 0);
-        return;
-      }
-      #end
       add(ngSpr = new FlxSprite(0, FlxG.height * 0.52, Paths.image('newgrounds_logo')));
       ngSpr.visible = false;
       ngSpr.active = false;
@@ -310,8 +302,6 @@ class TitleState extends MusicBeatState
     }
     else
       skipIntro();
-
-    // if (ClientPrefs.data.clearFolderOnStart) Debug.clearLogsFolder();
 
     Paths.clearUnusedMemory();
   }
@@ -374,60 +364,6 @@ class TitleState extends MusicBeatState
     {
       if (controls.UI_LEFT) colourSwap.hue -= elapsed * 0.1;
       if (controls.UI_RIGHT) colourSwap.hue += elapsed * 0.1;
-    }
-  }
-
-  function startWeirdState():Void
-  {
-    if (skippedIntro)
-    {
-      if (!pressedEnter)
-      {
-        pressedEnter = true;
-
-        if (ClientPrefs.data.flashing) titleText.active = true;
-        titleText.animation.play('press');
-        titleText.color = FlxColor.WHITE;
-        titleText.alpha = 1;
-
-        FlxG.camera.flash(ClientPrefs.data.flashing ? FlxColor.WHITE : 0x4CFFFFFF, 1);
-        FlxG.sound.play(Paths.sound('confirmMenu'), 0.7);
-
-        new FlxTimer().start(1.5, function(okFlixel:FlxTimer) {
-          FlxTransitionableState.skipNextTransIn = false;
-
-          /*if (mustUpdate) MusicBeatState.switchState(new OutdatedState());
-            else */ MusicBeatState.switchState(new MainMenuState());
-        });
-      }
-    }
-    else
-      skipIntro();
-  }
-
-  function getBuildVer():Void
-  {
-    if (ClientPrefs.data.checkForUpdates && !skippedIntro)
-    {
-      Debug.logInfo('checking for update');
-      var http = new haxe.Http("https://raw.githubusercontent.com/EdwhakKB/SC-SP-ENGINE/main/gitVersion.txt");
-
-      http.onData = function(data:String) {
-        final updateVersion = data.split('\n')[0].trim();
-        var curVersion:String = MainMenuState.psychEngineVersion.trim();
-        Debug.logInfo('version online: ' + updateVersion + ', your version: ' + curVersion);
-        if (updateVersion != curVersion)
-        {
-          Debug.logWarn('versions arent matching!');
-          mustUpdate = true;
-        }
-      }
-
-      http.onError = function(error) {
-        Debug.logError('error: $error');
-      }
-
-      http.request();
     }
   }
 
@@ -498,6 +434,24 @@ class TitleState extends MusicBeatState
           skipIntro();
       }
     }
+  }
+
+  function skipIntro()
+  {
+    remove(ngSpr);
+    FlxG.camera.flash(FlxColor.WHITE, 2);
+    skippedIntro = true;
+
+    gf.alpha = 1;
+    logo.alpha = 1;
+    titleText.visible = true;
+
+    particlesUP.visible = true;
+    particlesDOWN.visible = true;
+
+    if (FlxG.sound.music != null) FlxG.sound.music.time = defaultTimeSkipped; // 9.4 seconds
+
+    deleteText();
   }
 
   function gradsUpdate(direction:String)
@@ -591,22 +545,58 @@ class TitleState extends MusicBeatState
     }
   }
 
-  function skipIntro()
+  function startWeirdState():Void
   {
-    remove(ngSpr);
-    FlxG.camera.flash(FlxColor.WHITE, 2);
-    skippedIntro = true;
+    if (skippedIntro)
+    {
+      if (!pressedEnter)
+      {
+        pressedEnter = true;
 
-    gf.alpha = 1;
-    logo.alpha = 1;
-    titleText.visible = true;
+        if (ClientPrefs.data.flashing) titleText.active = true;
+        titleText.animation.play('press');
+        titleText.color = FlxColor.WHITE;
+        titleText.alpha = 1;
 
-    particlesUP.visible = true;
-    particlesDOWN.visible = true;
+        FlxG.camera.flash(ClientPrefs.data.flashing ? FlxColor.WHITE : 0x4CFFFFFF, 1);
+        FlxG.sound.play(Paths.sound('confirmMenu'), 0.7);
 
-    if (FlxG.sound.music != null) FlxG.sound.music.time = 9400; // 9.4 seconds
+        new FlxTimer().start(1.5, function(okFlixel:FlxTimer) {
+          FlxTransitionableState.skipNextTransIn = false;
 
-    deleteText();
+          /*if (mustUpdate) MusicBeatState.switchState(new OutdatedState());
+            else */ MusicBeatState.switchState(new MainMenuState());
+        });
+      }
+    }
+    else
+      skipIntro();
+  }
+
+  function getBuildVer():Void
+  {
+    if (ClientPrefs.data.checkForUpdates && !skippedIntro)
+    {
+      Debug.logInfo('checking for update');
+      var http = new haxe.Http("https://raw.githubusercontent.com/EdwhakKB/SC-SP-ENGINE/main/gitVersion.txt");
+
+      http.onData = function(data:String) {
+        final updateVersion = data.split('\n')[0].trim();
+        var curVersion:String = MainMenuState.SCEVersion.trim();
+        Debug.logInfo('version online: ' + updateVersion + ', your version: ' + curVersion);
+        if (updateVersion != curVersion)
+        {
+          Debug.logWarn('versions arent matching!');
+          mustUpdate = true;
+        }
+      }
+
+      http.onError = function(error) {
+        Debug.logError('error: $error');
+      }
+
+      http.request();
+    }
   }
 
   function createText(textArray:Array<String>, ?offset:Float = 0, ?mainColorString:String = "#FFFFFF")

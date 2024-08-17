@@ -61,7 +61,7 @@ class LoadingState extends MusicBeatState
         return;
       }
       #if !SHOW_LOADING_SCREEN
-      Sys.sleep(0.01);
+      Sys.sleep(0.001);
       #end
     }
 
@@ -173,7 +173,7 @@ class LoadingState extends MusicBeatState
     {
       if (!checkLoaded())
       {
-        Sys.sleep(0.01);
+        Sys.sleep(0.001);
       }
       else
         break;
@@ -231,10 +231,11 @@ class LoadingState extends MusicBeatState
       //
 
       // LOAD NOTE SPLASH IMAGE
-      var noteSplash:String = NoteSplash.defaultNoteSplash;
+      var noteSplash:String = NoteSplash.DEFAULT_SKIN;
       if (song.options.splashSkin != null && song.options.splashSkin.length > 0) noteSplash = song.options.splashSkin;
       else
         noteSplash += NoteSplash.getSplashSkinPostfix();
+
       imagesToPrepare.push(noteSplash);
 
       try
@@ -279,23 +280,36 @@ class LoadingState extends MusicBeatState
       if (song.stage == null || song.stage.length < 1) song.stage = StageData.vanillaSongStage(folder);
 
       var stageData:StageFile = StageData.getStageFile(song.stage);
-      if (stageData != null && stageData.preload != null)
+      if (stageData != null)
       {
         var imgs:Array<String> = [];
         var snds:Array<String> = [];
         var mscs:Array<String> = [];
-        for (asset in Reflect.fields(stageData.preload))
+        if (stageData.preload != null)
         {
-          var filters:Int = Reflect.field(stageData.preload, asset);
-          var asset:String = asset.trim();
-
-          if (filters < 0 || StageData.validateVisibility(filters))
+          for (asset in Reflect.fields(stageData.preload))
           {
-            if (asset.startsWith('images/')) imgs.push(asset.substr('images/'.length));
-            else if (asset.startsWith('sounds/')) snds.push(asset.substr('sounds/'.length));
-            else if (asset.startsWith('music/')) mscs.push(asset.substr('music/'.length));
+            var filters:Int = Reflect.field(stageData.preload, asset);
+            var asset:String = asset.trim();
+            if (filters < 0 || StageData.validateVisibility(filters))
+            {
+              if (asset.startsWith('images/')) imgs.push(asset.substr('images/'.length));
+              else if (asset.startsWith('sounds/')) snds.push(asset.substr('sounds/'.length));
+              else if (asset.startsWith('music/')) mscs.push(asset.substr('music/'.length));
+            }
           }
         }
+
+        if (stageData.objects != null)
+        {
+          for (sprite in stageData.objects)
+          {
+            if (sprite.type == 'sprite' || sprite.type == 'animatedSprite') if ((sprite.filters < 0
+              || StageData.validateVisibility(sprite.filters))
+              && !imgs.contains(sprite.image)) imgs.push(sprite.image);
+          }
+        }
+
         prepare(imgs, snds, mscs);
       }
 
@@ -378,14 +392,22 @@ class LoadingState extends MusicBeatState
 
   static function clearInvalidFrom(arr:Array<String>, prefix:String, ext:String, type:AssetType, ?parentfolder:String = null)
   {
-    for (i in 0...arr.length)
+    for (folder in arr.copy())
     {
-      var folder:String = arr[i];
-      if (folder.trim().endsWith('/'))
+      var nam:String = folder.trim();
+      if (nam.endsWith('/'))
       {
-        for (subfolder in Mods.directoriesWithFile(Paths.getSharedPath(), '$prefix/$folder'))
+        for (subfolder in Mods.directoriesWithFile(Paths.getSharedPath(), '$prefix/$nam'))
+        {
           for (file in FileSystem.readDirectory(subfolder))
-            if (file.endsWith(ext)) arr.push(folder + file.substr(0, file.length - ext.length));
+          {
+            if (file.endsWith(ext))
+            {
+              var toAdd:String = nam + haxe.io.Path.withoutExtension(file);
+              if (!arr.contains(toAdd)) arr.push(toAdd);
+            }
+          }
+        }
       }
     }
 
@@ -430,50 +452,29 @@ class LoadingState extends MusicBeatState
           #if TRANSLATIONS_ALLOWED requestKey = Language.getFileTranslation(requestKey); #end
           if (requestKey.lastIndexOf('.') < 0) requestKey += '.png';
 
-          var bitmap:BitmapData;
-          var file:String = Paths.getPath(requestKey, IMAGE);
-          if (Paths.currentTrackedAssets.exists(file))
+          if (!Paths.currentTrackedAssets.exists(requestKey))
           {
-            mutex.release();
-            loaded++;
-            return;
+            var bitmap:BitmapData = null;
+            var file:String = Paths.getPath(requestKey, IMAGE);
+            if (#if sys FileSystem.exists(file) || #end OpenFlAssets.exists(file, IMAGE))
+            {
+              #if sys
+              bitmap = BitmapData.fromFile(file);
+              #else
+              bitmap = OpenFlAssets.getBitmapData(file);
+              #end
+              requestedBitmaps.set(file, bitmap);
+              originalBitmapKeys.set(file, requestKey);
+            }
+            else
+              Debug.logError('no such image $image exists');
           }
-          #if MODS_ALLOWED
-          else if (!FileSystem.exists(file))
-          {
-            Debug.logError('no such image $image exists');
-            mutex.release();
-            loaded++;
-            return;
-          }
-          else
-            bitmap = openfl.display.BitmapData.fromFile(file);
-          #else
-          else if (!OpenFlAssets.exists(file, IMAGE))
-          {
-            Debug.logError('no such image $image exists');
-            mutex.release();
-            loaded++;
-            return;
-          }
-          else
-            bitmap = OpenFlAssets.getBitmapData(file);
-          #end
-          mutex.release();
-
-          if (bitmap != null)
-          {
-            requestedBitmaps.set(file, bitmap);
-            originalBitmapKeys.set(file, requestKey);
-          }
-          else
-            Debug.logError('oh no the image is null NOOOO ($image)');
         }
-        catch (e:Dynamic)
+        catch (e:haxe.Exception)
         {
-          mutex.release();
           Debug.logError('ERROR! fail on preloading image $image');
         }
+        mutex.release();
         loaded++;
       });
   }
@@ -484,18 +485,15 @@ class LoadingState extends MusicBeatState
       mutex.acquire();
       try
       {
-        var ret:Dynamic = func();
-        mutex.release();
-
-        if (ret != null) Debug.logError('finished preloading $traceData');
+        if (func() != null) Debug.logError('finished preloading $traceData');
         else
           Debug.logError('ERROR! fail on preloading $traceData');
       }
       catch (e:Dynamic)
       {
-        mutex.release();
         Debug.logError('ERROR! fail on preloading $traceData');
       }
+      mutex.release();
       loaded++;
     });
   }
@@ -505,20 +503,52 @@ class LoadingState extends MusicBeatState
     try
     {
       var path:String = Paths.getPath('data/characters/$char.json', TEXT);
-      #if MODS_ALLOWED
-      var character:Dynamic = Json.parse(File.getContent(path));
-      #else
-      var character:Dynamic = Json.parse(Assets.getText(path));
+      var character:Dynamic = Json.parse(#if MODS_ALLOWED File.getContent(path) #else Assets.getText(path) #end);
+
+      var isAnimateAtlas:Bool = false;
+      var img:String = character.image;
+      img = img.trim();
+      #if flxanimate
+      var animToFind:String = Paths.getPath('images/$img/Animation.json', TEXT);
+      if (#if MODS_ALLOWED FileSystem.exists(animToFind) || #end Assets.exists(animToFind)) isAnimateAtlas = true;
       #end
 
-      imagesToPrepare.push(character.image);
-      if (prefixVocals != null && character.vocals_file != null)
+      if (!isAnimateAtlas)
+      {
+        var split:Array<String> = img.split(',');
+        for (file in split)
+        {
+          imagesToPrepare.push(file.trim());
+        }
+      }
+      #if flxanimate
+      else
+      {
+        for (i in 0...10)
+        {
+          var st:String = '$i';
+          if (i == 0) st = '';
+
+          if (Paths.fileExists('images/$img/spritemap$st.png', IMAGE))
+          {
+            // trace('found Sprite PNG');
+            imagesToPrepare.push('$img/spritemap$st');
+            break;
+          }
+        }
+      }
+      #end
+
+      if (prefixVocals != null && character.vocals_file != null && character.vocals_file.length > 0)
       {
         songsToPrepare.push(prefixVocals + "-" + character.vocals_file);
         if (char == player) dontPreloadDefaultVoices = true;
       }
     }
-    catch (e:Dynamic) {}
+    catch (e:haxe.Exception)
+    {
+      Debug.logError(e.details());
+    }
   }
   /*public static function cacheStage(stage:String)
     {

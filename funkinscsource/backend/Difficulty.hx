@@ -10,16 +10,12 @@ class Difficulty
   {
     if (num == null) num = PlayState.storyDifficulty;
 
-    var fileSuffix:String = list[num].toLowerCase();
-    if (Paths.formatToSongPath(fileSuffix) != Paths.formatToSongPath(defaultDifficulty).toLowerCase())
-    {
-      fileSuffix = '-' + fileSuffix;
-    }
+    var filePostfix:String = list[num];
+    if (filePostfix != null
+      && Paths.formatToSongPath(filePostfix) != Paths.formatToSongPath(defaultDifficulty)) filePostfix = '-' + filePostfix;
     else
-    {
-      fileSuffix = '';
-    }
-    return Paths.formatToSongPath(fileSuffix);
+      filePostfix = '';
+    return Paths.formatToSongPath(filePostfix);
   }
 
   inline public static function loadFromWeek(week:WeekData = null)
@@ -64,6 +60,7 @@ class Difficulty
   inline public static function getString(?num:Null<Int> = null, ?canTranslate:Bool = true):String
   {
     var diffName:String = list[num == null ? PlayState.storyDifficulty : num];
+    if (diffName == null) diffName = defaultDifficulty;
     return canTranslate ? Language.getPhrase('difficulty_$diffName', diffName) : diffName;
   }
 

@@ -10,6 +10,9 @@ import objects.HealthIcon;
 import psychlua.LuaUtils;
 import shaders.ColorSwap;
 
+/**
+ * Class made form code borrowed from BETADCIU Engine and modified, https://github.com/Blantados/BETADCIU-Engine-Source (not all code, some are custom).
+ */
 class SupportBETAFunctions
 {
   // some kade / psych stuff from blantados, thanks ! (Added for lua, some of kade)
@@ -35,31 +38,31 @@ class SupportBETAFunctions
     });
 
     funk.set("setActorAccelerationX", function(x:Int, id:String, ?bg:Bool = false) {
-      if (bg) PlayState.instance.Stage.swagBacks[id].acceleration.x = x;
+      if (bg) PlayState.instance.stage.swagBacks[id].acceleration.x = x;
       else
         LuaUtils.getActorByName(id).acceleration.x = x;
     });
 
     funk.set("setActorDragX", function(x:Int, id:String, ?bg:Bool = false) {
-      if (bg) PlayState.instance.Stage.swagBacks[id].drag.x = x;
+      if (bg) PlayState.instance.stage.swagBacks[id].drag.x = x;
       else
         LuaUtils.getActorByName(id).drag.x = x;
     });
 
     funk.set("setActorVelocityX", function(x:Int, id:String, ?bg:Bool = false) {
-      if (bg) PlayState.instance.Stage.swagBacks[id].velocity.x = x;
+      if (bg) PlayState.instance.stage.swagBacks[id].velocity.x = x;
       else
         LuaUtils.getActorByName(id).velocity.x = x;
     });
 
     funk.set("setActorAlpha", function(alpha:Float, id:String, ?bg:Bool = false) {
-      if (bg) PlayState.instance.Stage.swagBacks[id].alpha = alpha;
+      if (bg) PlayState.instance.stage.swagBacks[id].alpha = alpha;
       else
         LuaUtils.getActorByName(id).alpha = alpha;
     });
 
     funk.set("setActorVisibility", function(visible:Bool, id:String, ?bg:Bool = false) {
-      if (bg) PlayState.instance.Stage.swagBacks[id].visible = visible;
+      if (bg) PlayState.instance.stage.swagBacks[id].visible = visible;
       else
         LuaUtils.getActorByName(id).visible = visible;
     });
@@ -69,25 +72,25 @@ class SupportBETAFunctions
     });
 
     funk.set("setActorAccelerationY", function(y:Int, id:String, ?bg:Bool = false) {
-      if (bg) PlayState.instance.Stage.swagBacks[id].acceleration.y = y;
+      if (bg) PlayState.instance.stage.swagBacks[id].acceleration.y = y;
       else
         LuaUtils.getActorByName(id).acceleration.y = y;
     });
 
     funk.set("setActorDragY", function(y:Int, id:String, ?bg:Bool = false) {
-      if (bg) PlayState.instance.Stage.swagBacks[id].drag.y = y;
+      if (bg) PlayState.instance.stage.swagBacks[id].drag.y = y;
       else
         LuaUtils.getActorByName(id).drag.y = y;
     });
 
     funk.set("setActorVelocityY", function(y:Int, id:String, ?bg:Bool = false) {
-      if (bg) PlayState.instance.Stage.swagBacks[id].velocity.y = y;
+      if (bg) PlayState.instance.stage.swagBacks[id].velocity.y = y;
       else
         LuaUtils.getActorByName(id).velocity.y = y;
     });
 
     funk.set("setActorAngle", function(angle:Int, id:String, ?bg:Bool = false) {
-      if (bg) PlayState.instance.Stage.swagBacks[id].angle = angle;
+      if (bg) PlayState.instance.stage.swagBacks[id].angle = angle;
       else
         LuaUtils.getActorByName(id).angle = angle;
     });
@@ -161,7 +164,7 @@ class SupportBETAFunctions
     });
 
     funk.set("getActorX", function(id:String, ?bg:Bool = false) {
-      if (bg) return PlayState.instance.Stage.swagBacks[id].x;
+      if (bg) return PlayState.instance.stage.swagBacks[id].x;
       else
         return LuaUtils.getActorByName(id).x;
     });
@@ -171,7 +174,7 @@ class SupportBETAFunctions
     });
 
     funk.set("getActorY", function(id:String, ?bg:Bool = false) {
-      if (bg) return PlayState.instance.Stage.swagBacks[id].y;
+      if (bg) return PlayState.instance.stage.swagBacks[id].y;
       else
         return LuaUtils.getActorByName(id).y;
     });
@@ -196,7 +199,7 @@ class SupportBETAFunctions
     });
 
     funk.set("characterZoom", function(id:String, zoomAmount:Float) {
-      id = LuaUtils.formatVariable('extraCharacter_$id');
+      id = LuaUtils.checkVariable(id, 'extraCharacter_');
       if (MusicBeatState.getVariables().exists(id) && ClientPrefs.data.characters)
       {
         var spr:Character = MusicBeatState.getVariables().get(id);
@@ -210,14 +213,10 @@ class SupportBETAFunctions
       var itemExam:Dynamic = LuaUtils.tweenPrepare(tag, vars);
       if (itemExam != null)
       {
-        if (Std.isOfType(itemExam, Character))
-        {
-          Reflect.setProperty(itemExam, 'doMissThing', 'false');
-        }
         if (tag != null)
         {
           var originalTag:String = tag;
-          tag = LuaUtils.formatVariable('tween_$tag');
+          tag = LuaUtils.checkVariable(tag, 'tween_');
           var variables = MusicBeatState.getVariables();
           variables.set(tag, FlxTween.color(itemExam, duration, initColor, finalColor,
             {
@@ -240,14 +239,10 @@ class SupportBETAFunctions
       var itemExam:Dynamic = LuaUtils.tweenPrepare(tag, vars);
       if (itemExam != null)
       {
-        if (Std.isOfType(itemExam, Character))
-        {
-          Reflect.setProperty(itemExam, 'doMissThing', 'false');
-        }
         if (tag != null)
         {
           var originalTag:String = tag;
-          tag = LuaUtils.formatVariable('tween_$tag');
+          tag = LuaUtils.checkVariable(tag, 'tween_');
           var variables = MusicBeatState.getVariables();
           variables.set(tag, FlxTween.color(itemExam, duration, initColor, finalColor,
             {
@@ -687,7 +682,7 @@ class SupportBETAFunctions
     });
 
     funk.set("tweenFadeInBG", function(id:String, toAlpha:Float, time:Float, onComplete:String) {
-      FlxTween.tween(PlayState.instance.Stage.swagBacks[id], {alpha: toAlpha}, time,
+      FlxTween.tween(PlayState.instance.stage.swagBacks[id], {alpha: toAlpha}, time,
         {
           ease: FlxEase.circIn,
           onComplete: function(flxTween:FlxTween) {
@@ -713,7 +708,7 @@ class SupportBETAFunctions
     });
 
     funk.set("tweenFadeOutBG", function(id:String, toAlpha:Float, time:Float, onComplete:String) {
-      FlxTween.tween(PlayState.instance.Stage.swagBacks[id], {alpha: toAlpha}, time,
+      FlxTween.tween(PlayState.instance.stage.swagBacks[id], {alpha: toAlpha}, time,
         {
           ease: FlxEase.circOut,
           onComplete: function(flxTween:FlxTween) {
@@ -840,7 +835,7 @@ class SupportBETAFunctions
       PlayState.instance.forceChangeOnTarget = true;
       PlayState.instance.cameraTargeted = '';
 
-      var camPosition:FlxObject = new FlxObject(0, 0, 1, 1);
+      var camPosition:FlxObject = new FlxObject();
       camPosition.setPosition(x, y);
       FlxG.camera.focusOn(camPosition.getPosition());
     });
@@ -974,7 +969,7 @@ class SupportBETAFunctions
     funk.set("destroyObject", function(id:String, ?bg:Bool = false) {
       if (bg)
       {
-        PlayState.instance.Stage.remove(PlayState.instance.Stage.swagBacks[id]);
+        PlayState.instance.stage.swagBacks[id].destroy();
       }
       else
       {
@@ -1040,7 +1035,7 @@ class SupportBETAFunctions
     });
 
     funk.set("removeLuaIcon", function(tag:String, ?destroy:Bool = false) {
-      tag = LuaUtils.formatVariable('extraIcon_$tag');
+      tag = LuaUtils.checkVariable(tag, 'extraIcon_');
       var variables = MusicBeatState.getVariables();
       var obj:HealthIcon = variables.get(tag);
       if (obj == null || obj.destroy == null) return;
@@ -1165,20 +1160,20 @@ class SupportBETAFunctions
     });
 
     funk.set("getScared", function(id:String) {
-      PlayState.instance.Stage.swagBacks[id].swapDanceType();
+      PlayState.instance.stage.swagBacks[id].swapDanceType();
     });
 
     funk.set("getStageOffsets", function(char:String, value:String) {
       switch (char)
       {
         case 'boyfriend' | 'bf':
-          return (value == 'y' ? PlayState.instance.Stage.bfYOffset : PlayState.instance.Stage.bfXOffset);
+          return (value == 'y' ? PlayState.instance.stage.bfYOffset : PlayState.instance.stage.bfXOffset);
         case 'gf':
-          return (value == 'y' ? PlayState.instance.Stage.gfYOffset : PlayState.instance.Stage.gfXOffset);
+          return (value == 'y' ? PlayState.instance.stage.gfYOffset : PlayState.instance.stage.gfXOffset);
         case 'mom':
-          return (value == 'y' ? PlayState.instance.Stage.momYOffset : PlayState.instance.Stage.momXOffset);
+          return (value == 'y' ? PlayState.instance.stage.momYOffset : PlayState.instance.stage.momXOffset);
         default:
-          return (value == 'y' ? PlayState.instance.Stage.dadYOffset : PlayState.instance.Stage.dadXOffset);
+          return (value == 'y' ? PlayState.instance.stage.dadYOffset : PlayState.instance.stage.dadXOffset);
       }
     });
 
@@ -1303,7 +1298,7 @@ class SupportBETAFunctions
     });
 
     funk.set("changeAddedIcon", function(tag:String, character:String) {
-      tag = LuaUtils.formatVariable('extraIcon_$tag');
+      tag = LuaUtils.checkVariable(tag, 'extraIcon_');
       var shit:HealthIcon = MusicBeatState.getVariables().get(tag);
       shit.changeIcon(character);
     });
@@ -1314,23 +1309,24 @@ class SupportBETAFunctions
     });
 
     funk.set("changeLuaIcon", function(tag:String, character:String) {
-      tag = LuaUtils.formatVariable('extraIcon_$tag');
+      tag = LuaUtils.checkVariable(tag, 'extraIcon_');
       var shit:HealthIcon = MusicBeatState.getVariables().get(tag);
       shit.changeIcon(character);
     });
 
     funk.set("makeLuaCharacter", function(tag:String, character:String, isPlayer:Bool = false, flipped:Bool = false) {
-      LuaUtils.makeLuaCharacter(tag, character, isPlayer, flipped);
+      LuaUtils.makeLuaCharacter(tag, character, isPlayer, flipped, false);
     });
 
     funk.set("changeLuaCharacter", function(tag:String, character:String) {
-      tag = LuaUtils.formatVariable('extraCharacter_$tag');
+      var originalTag:String = tag;
+      tag = LuaUtils.checkVariable(tag, 'extraCharacter_');
       var shit:Character = MusicBeatState.getVariables().get(tag);
-      LuaUtils.makeLuaCharacter(tag, character, shit.isPlayer, shit.flipMode);
+      LuaUtils.makeLuaCharacter(originalTag, character, shit.isPlayer, shit.flipMode, true);
     });
 
     funk.set("stopIdle", function(id:String, stopped:Bool) {
-      id = LuaUtils.formatVariable('extraCharacter_$id');
+      id = LuaUtils.checkVariable(id, 'extraCharacter_');
       if (ClientPrefs.data.characters)
       {
         if (MusicBeatState.getVariables().exists(id))
@@ -1343,7 +1339,7 @@ class SupportBETAFunctions
     });
 
     funk.set("characterDance", function(character:String) {
-      character = LuaUtils.formatVariable('extraCharacter_$character');
+      character = LuaUtils.checkVariable(character, 'extraCharacter_');
       if (ClientPrefs.data.characters)
       {
         if (MusicBeatState.getVariables().exists(character))
@@ -1382,11 +1378,36 @@ class SupportBETAFunctions
     funk.set("changeMomAuto", LuaUtils.changeMomAuto);
 
     funk.set("changeStageOffsets", LuaUtils.changeStageOffsets);
+
+    // Custom external non-BETADCIU Function in this class but oh well
+    funk.set("changeCharacterWithin", function(char:String, id:String, ?isPlayer:Bool = false, ?flipped:Bool = false) {
+      switch (char)
+      {
+        case 'boyfriend' | 'bf':
+          LuaUtils.changeBFAuto(id, flipped);
+        case 'girlfriend' | 'gf':
+          LuaUtils.changeGFAuto(id, flipped);
+        case 'dad':
+          LuaUtils.changeDadAuto(id, flipped);
+        case 'mom':
+          LuaUtils.changeMomAuto(id, flipped);
+        default:
+          LuaUtils.makeLuaCharacter(char, id, isPlayer, flipped);
+      }
+    });
+
+    funk.set("cameraSnap", function(camera:String, x:Float, y:Float) {
+      PlayState.instance.isCameraOnForcedPos = true;
+
+      var camPosition:FlxObject = new FlxObject();
+      camPosition.setPosition(x, y);
+      LuaUtils.cameraFromString(camera).focusOn(camPosition.getPosition());
+    });
   }
 
   static public function makeNewIcon(tag:String, character:String, player:Bool = false)
   {
-    tag = LuaUtils.formatVariable('extraIcon_$tag');
+    tag = LuaUtils.checkVariable(tag, 'extraIcon_');
     LuaUtils.destroyObject(tag);
     var leSprite:HealthIcon = new HealthIcon(character, player);
     MusicBeatState.getVariables().set(tag, leSprite); // yes

@@ -165,7 +165,6 @@ class FreeplayState extends MusicBeatState
       songText.snapToPosition();
 
       Mods.currentModDirectory = songs[i].folder;
-      Debug.logInfo('current directory${Mods.currentModDirectory} songs');
       var icon:HealthIcon = new HealthIcon(songs[i].songCharacter);
       icon.sprTracker = songText;
 
@@ -576,15 +575,29 @@ class FreeplayState extends MusicBeatState
             grpSongs.forEach(function(e:Alphabet) {
               if (e.text == songs[curSelected].songName)
               {
-                if (player != null) player.fadingOut = true;
-                FlxFlicker.flicker(e);
-                for (i in [bg, scoreBG, scoreText, helpText, opponentText, diffText, comboText])
-                  FlxTween.tween(i, {alpha: 0}, llll / 1000);
-                if (inst != null) inst.fadeOut(llll / 1000, 0);
-                if (vocals != null) vocals.fadeOut(llll / 1000, 0);
-                if (opponentVocals != null) opponentVocals.fadeOut(llll / 1000, 0);
-                if (FlxG.sound.music != null) FlxG.sound.music.fadeOut(llll / 1000, 0);
-                FlxG.camera.fade(FlxColor.BLACK, llll / 1000, false, acceptedSong, true);
+                try
+                {
+                  var songLowercase:String = Paths.formatToSongPath(songs[curSelected].songName);
+                  var poop:String = Highscore.formatSong(songLowercase, curDifficulty);
+                  Song.loadFromJson(poop, songLowercase);
+                  PlayState.isStoryMode = false;
+                  PlayState.storyDifficulty = curDifficulty;
+                  Debug.logInfo(poop);
+                  if (PlayState.SONG != null) tryLeaving(e, llll);
+                }
+                catch (e:haxe.Exception)
+                {
+                  Debug.logError('ERROR! ${e.message}');
+
+                  var errorStr:String = e.message;
+                  if (errorStr.contains('There is no TEXT asset with an ID of')) errorStr = 'Missing file: '
+                    + errorStr.substring(errorStr.indexOf(Paths.formatToSongPath(songs[curSelected].songName)), errorStr.length - 1); // Missing chart
+                  missingText.text = 'ERROR WHILE LOADING CHART:\n$errorStr';
+                  missingText.screenCenter(Y);
+                  missingText.visible = true;
+                  missingTextBG.visible = true;
+                  FlxG.sound.play(Paths.sound('cancelMenu'));
+                }
               }
             });
             break;
@@ -598,10 +611,9 @@ class FreeplayState extends MusicBeatState
       {
         Debug.logError('ERROR! ${e.message}');
 
-        var errorStr:String = e.toString();
         var errorStr:String = e.message;
-        if (errorStr.startsWith('[lime.utils.Assets] ERROR:')) errorStr = 'Missing file: '
-          + errorStr.substring(errorStr.indexOf(Paths.formatToSongPath(songs[curSelected].songName).toLowerCase()), errorStr.length - 1); // Missing chart
+        if (errorStr.contains('There is no TEXT asset with an ID of')) errorStr = 'Missing file: '
+          + errorStr.substring(errorStr.indexOf(Paths.formatToSongPath(songs[curSelected].songName)), errorStr.length - 1); // Missing chart
         else
           errorStr += '\n\n' + e.stack;
 
@@ -621,6 +633,20 @@ class FreeplayState extends MusicBeatState
     #if HSCRIPT_ALLOWED
     freeplayScript.call('onUpdatePost', [elapsed]);
     #end
+  }
+
+  function tryLeaving(e:Alphabet, llll:Float = 0)
+  {
+    if (player != null) player.fadingOut = true;
+    FlxFlicker.flicker(e);
+    for (i in [bg, scoreBG, scoreText, helpText, opponentText, diffText, comboText])
+      FlxTween.tween(i, {alpha: 0}, llll / 1000);
+    if (inst != null) inst.fadeOut(llll / 1000, 0);
+    if (vocals != null) vocals.fadeOut(llll / 1000, 0);
+    if (opponentVocals != null) opponentVocals.fadeOut(llll / 1000, 0);
+    if (FlxG.sound.music != null) FlxG.sound.music.fadeOut(llll / 1000, 0);
+
+    FlxG.camera.fade(FlxColor.BLACK, llll / 1000, false, moveToSong, true);
   }
 
   var alreadyPlayingSong:Bool = false;
@@ -657,7 +683,6 @@ class FreeplayState extends MusicBeatState
           }
 
           Mods.currentModDirectory = songs[curSelected].folder;
-          Debug.logInfo('current directory${Mods.currentModDirectory} song play');
 
           var poop:String = Highscore.formatSong(songs[curSelected].songName.toLowerCase(), curDifficulty);
           Song.loadFromJson(poop, songs[curSelected].songName.toLowerCase());
@@ -821,7 +846,7 @@ class FreeplayState extends MusicBeatState
     return null;
   }
 
-  public function acceptedSong()
+  public function moveToSong()
   {
     if (inst != null) inst = null;
     if (vocals != null) vocals = null;
@@ -829,31 +854,7 @@ class FreeplayState extends MusicBeatState
     Conductor.songPosition = 0;
     player.playingMusic = false;
     persistentUpdate = false;
-    var songLowercase:String = Paths.formatToSongPath(songs[curSelected].songName);
     curInstPlayingtxt = instPlayingtxt = '';
-
-    var poop:String = Highscore.formatSong(songLowercase, curDifficulty);
-    try
-    {
-      Song.loadFromJson(poop, songLowercase);
-      PlayState.isStoryMode = false;
-      PlayState.storyDifficulty = curDifficulty;
-      Debug.logInfo(poop);
-    }
-    catch (e:Dynamic)
-    {
-      Debug.logError('ERROR! $e');
-
-      var errorStr:String = e.toString();
-      if (errorStr.startsWith('[lime.utils.Assets] ERROR:')) errorStr = 'Missing file: '
-        + errorStr.substring(errorStr.indexOf(Paths.formatToSongPath(songs[curSelected].songName)), errorStr.length - 1); // Missing chart
-      missingText.text = 'ERROR WHILE LOADING CHART:\n$errorStr';
-      missingText.screenCenter(Y);
-      missingText.visible = true;
-      missingTextBG.visible = true;
-      FlxG.sound.play(Paths.sound('cancelMenu'));
-      return;
-    }
 
     Debug.logInfo('CURRENT WEEK: ' + WeekData.getWeekFileName());
 
@@ -927,7 +928,6 @@ class FreeplayState extends MusicBeatState
     }
 
     Mods.currentModDirectory = songs[curSelected].folder;
-    Debug.logInfo('current directory${Mods.currentModDirectory} song change');
     PlayState.storyWeek = songs[curSelected].week;
     Difficulty.loadFromWeek();
     bg.loadGraphic(Paths.image('menuDesat'));
@@ -976,11 +976,10 @@ class FreeplayState extends MusicBeatState
 
       if (accepted)
       {
-        var llll = FlxG.sound.play(Paths.sound('confirmMenu'), 0).length;
-
-        if (item.text != songs[curSelected].songName) FlxTween.tween(item, {x: -6000}, llll / 1000);
+        var musicLength:Float = (inst != null ? inst.length : FlxG.sound.play(Paths.sound('confirmMenu')).length);
+        if (item.text != songs[curSelected].songName) FlxTween.tween(item, {x: -6000 * (musicLength * 0.02)}, musicLength / 1000);
         else
-          FlxTween.tween(item, {x: item.x + 20}, llll / 1000);
+          FlxTween.tween(item, {x: item.x + 20}, musicLength / 1000);
       }
       else
         item.x = ((item.targetY - lerpSelected) * item.distancePerItem.x) + item.startPosition.x;

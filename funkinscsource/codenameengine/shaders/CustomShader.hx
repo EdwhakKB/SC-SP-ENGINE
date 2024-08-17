@@ -1,6 +1,5 @@
 package codenameengine.shaders;
 
-import haxe.Exception;
 import openfl.Assets;
 
 /**
@@ -23,15 +22,26 @@ class CustomShader extends FunkinShader
    */
   public function new(name:String, glslVersion:String = "120")
   {
-    var fragShaderPath = #if MODS_ALLOWED Paths.modsShaderFragment(name) #else Paths.shaderFragment(name) #end;
-    var vertShaderPath = #if MODS_ALLOWED Paths.modsShaderVertex(name) #else Paths.shaderVertex(name) #end;
-    var fragCode = #if MODS_ALLOWED FileSystem.exists(fragShaderPath) ? File.getContent(fragShaderPath) : null #else Assets.exists(fragShaderPath) ? Assets.getText(fragShaderPath) : null #end;
-    var vertCode = #if MODS_ALLOWED FileSystem.exists(vertShaderPath) ? File.getContent(vertShaderPath) : null #else Assets.exists(vertShaderPath) ? Assets.getText(vertShaderPath) : null #end;
+    var fragShaderPath:String = Paths.shaderFragment(name);
+    var vertShaderPath:String = Paths.shaderVertex(name);
+    var fragCode:String = getCode(fragShaderPath);
+    var vertCode:String = getCode(vertShaderPath);
 
     path = fragShaderPath + vertShaderPath;
 
+    var fragCodeFound:Bool = (fragCode != null);
+    var vertCodeFound:Bool = (vertCode != null);
+
     if (fragCode == null && vertCode == null) Debug.logWarn('Shader "$name" couldn\'t be found.');
+    else
+      Debug.logInfo('frag code found $fragCodeFound, vert code found $vertCodeFound');
 
     super(fragCode, vertCode, glslVersion);
+  }
+
+  public function getCode(path:String):String
+  {
+    var code:String = #if MODS_ALLOWED FileSystem.exists(path) ? File.getContent(path) : null #else Assets.exists(path) ? Assets.getText(path) : null #end;
+    return code;
   }
 }

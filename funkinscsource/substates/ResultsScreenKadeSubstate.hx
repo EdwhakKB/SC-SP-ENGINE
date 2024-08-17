@@ -7,6 +7,8 @@ import objects.*;
 
 class ResultsScreenKadeSubstate extends substates.MusicBeatSubState
 {
+  public static var instance:ResultsScreenKadeSubstate = null;
+
   public var background:FlxSprite;
   public var text:FlxText;
 
@@ -26,11 +28,9 @@ class ResultsScreenKadeSubstate extends substates.MusicBeatSubState
 
   public var superMegaConditionShit:Bool;
 
-  public static var instance:ResultsScreenKadeSubstate = null;
-
-  private var game:PlayState = PlayState.instance;
-
   var camFollow:flixel.FlxObject;
+
+  var game:PlayState = PlayState.instance;
 
   public function new(follow:flixel.FlxObject)
   {

@@ -1,4 +1,4 @@
-import objects.stageobjects.MallCrowd;
+import objects.stagecontent.stageobjects.MallCrowd;
 
 function onCreate()
 {
