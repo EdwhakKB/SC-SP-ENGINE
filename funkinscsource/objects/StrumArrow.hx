@@ -120,8 +120,8 @@ class StrumArrow extends ModchartArrow
 
     var skin:String = null;
     if (PlayState.SONG != null
-      && PlayState.SONG.options.arrowSkin != null
-      && PlayState.SONG.options.arrowSkin.length > 1) skin = PlayState.SONG.options.arrowSkin;
+      && PlayState.SONG.options.strumSkin != null
+      && PlayState.SONG.options.strumSkin.length > 1) skin = PlayState.SONG.options.strumSkin;
     else
       skin = Note.defaultNoteSkin;
 

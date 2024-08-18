@@ -564,8 +564,11 @@ class Note extends ModchartArrow implements ICloneable<Note>
     else
       skin = customSkin;
 
-    if (!skin.contains('noteSkins') && rgbShader.enabled) rgbShader.enabled = false;
-    else if (skin.contains('noteSkins') && !rgbShader.enabled) rgbShader.enabled = true;
+    if (!inEditor)
+    {
+      if (!skin.contains('noteSkins') && rgbShader.enabled) rgbShader.enabled = false;
+      else if (skin.contains('noteSkins') && !rgbShader.enabled) rgbShader.enabled = true;
+    }
 
     loadNoteTexture(skin, skinPostfix, skinPixel);
 

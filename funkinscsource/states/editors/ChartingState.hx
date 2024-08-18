@@ -379,7 +379,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
     infoBox.getTab('Information').menu.add(infoText);
     add(infoBox);
 
-    mainBox = new PsychUIBox(mainBoxPosition.x, mainBoxPosition.y, 300, 280, ['Charting', 'Data', 'Note', 'Section', 'Song']);
+    mainBox = new PsychUIBox(mainBoxPosition.x, mainBoxPosition.y, 330, 280, ['Charting', 'Data', 'Note', 'Section', 'Song', 'Gameplay Options']);
     mainBox.selectedName = 'Song';
     mainBox.scrollFactor.set();
     mainBox.cameras = [camUI];
@@ -439,6 +439,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
     addNoteTab();
     addSectionTab();
     addSongTab();
+    addGameplayOptionsTab();
 
     ////// for event box
     addEventsTab();
@@ -640,7 +641,43 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
     stageDropDown.selectedLabel = PlayState.SONG.stage;
     StageData.loadDirectory(PlayState.SONG);
 
+    // NOTE TAB
+    noRGBCheckBox.checked = PlayState.SONG.options.disableNoteRGB;
+    noRGBQuantCheckBox.checked = PlayState.SONG.options.disableNoteQuantRGB;
+    noStrumRGBCheckBox.checked = PlayState.SONG.options.disableStrumRGB;
+    noSplashRGBCheckBox.checked = PlayState.SONG.options.disableSplashRGB;
+    noHoldCoverRGBCheckBox.checked = PlayState.SONG.options.disableHoldCoversRGB;
+
+    opponentNoteStyleInputText.text = PlayState.SONG.options.opponentNoteStyle;
+    playerNoteStyleInputText.text = PlayState.SONG.options.playerNoteStyle;
+    opponentStrumStyleInputText.text = PlayState.SONG.options.opponentStrumStyle;
+    playerStrumStyleInputText.text = PlayState.SONG.options.playerStrumStyle;
+
     // DATA TAB
+    gameOverCharDropDown.selectedLabel = PlayState.SONG.gameOverData.gameOverChar;
+    gameOverSndInputText.text = PlayState.SONG.gameOverData.gameOverSound;
+    gameOverLoopInputText.text = PlayState.SONG.gameOverData.gameOverLoop;
+    gameOverRetryInputText.text = PlayState.SONG.gameOverData.gameOverEnd;
+
+    holdCoverSkinInputText.text = PlayState.SONG.options.holdCoverSkin;
+    noteTextureInputText.text = PlayState.SONG.options.arrowSkin;
+    strumTextureInputText.text = PlayState.SONG.options.strumSkin;
+    noteSplashesInputText.text = PlayState.SONG.options.splashSkin;
+
+    // GAMEPLAY OPTIONS TAB
+    disableCachingCheckBox.checked = PlayState.SONG.options.disableCaching;
+    notITGModchartCheckBox.checked = PlayState.SONG.options.notITG;
+    usesHUDCheckBox.checked = PlayState.SONG.options.usesHUD;
+    oldBarSystemCheckBox.checked = PlayState.SONG.options.oldBarSystem;
+    forceRightScrollCheckBox.checked = PlayState.SONG.options.rightScroll;
+    forceMiddleScrollCheckBox.checked = PlayState.SONG.options.middleScroll;
+    blockOpponentModeCheckBox.checked = PlayState.SONG.options.blockOpponentMode;
+
+    vocalsPrefixInputText.text = PlayState.SONG.options.vocalsPrefix;
+    vocalsSuffixInputText.text = PlayState.SONG.options.vocalsSuffix;
+
+    instrumentalPrefixInputText.text = PlayState.SONG.options.instrumentalPrefix;
+    instrumentalSuffixInputText.text = PlayState.SONG.options.instrumentalSuffix;
   }
 
   var noteSelectionSine:Float = 0;
@@ -2421,7 +2458,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
   var gameOverSndInputText:PsychUIInputText;
   var gameOverLoopInputText:PsychUIInputText;
   var gameOverRetryInputText:PsychUIInputText;
-  var noRGBCheckBox:PsychUICheckBox;
+
+  var holdCoverSkinInputText:PsychUIInputText;
+  var strumTextureInputText:PsychUIInputText;
   var noteTextureInputText:PsychUIInputText;
   var noteSplashesInputText:PsychUIInputText;
 
@@ -2455,9 +2494,6 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
       if (cur.trim().length < 1) Reflect.deleteField(PlayState.SONG.gameOverData, 'gameOverEnd');
     }
 
-    objY += 35;
-    noRGBCheckBox = new PsychUICheckBox(objX, objY, 'Disable Note RGB', 100, updateNotesRGB);
-
     objY += 40;
     noteTextureInputText = new PsychUIInputText(objX, objY, 120, '');
     noteTextureInputText.unfocus = function() {
@@ -2468,19 +2504,13 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
       if (changed)
       {
-        var textureLoad:String = 'images/${noteTextureInputText.text}.png';
+        var textureLoad:String = !noteTextureInputText.text.contains('images') ? 'images/${noteTextureInputText.text}.png' : '${noteTextureInputText.text}.png';
         if (Paths.fileExists(textureLoad, IMAGE) || noteTextureInputText.text.trim() == '')
         {
           for (note in notes)
           {
             if (note == null) continue;
-            note.reloadNote(note.texture);
-
-            if (note.width > note.height) note.setGraphicSize(GRID_SIZE);
-            else
-              note.setGraphicSize(0, GRID_SIZE);
-
-            note.updateHitbox();
+            note.reloadToNewTexture(note, note.texture);
           }
           if (noteTextureInputText.text.trim().length > 0) showOutput('Reloaded notes to: "$textureLoad"');
           else
@@ -2497,6 +2527,35 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
       if (cur.trim().length < 1) PlayState.SONG.options.splashSkin = null;
     }
 
+    holdCoverSkinInputText = new PsychUIInputText(objX, objY + 40, 120, '', 8);
+    holdCoverSkinInputText.onChange = function(old:String, cur:String) PlayState.SONG.options.holdCoverSkin = cur;
+
+    strumTextureInputText = new PsychUIInputText(holdCoverSkinInputText.x + 150, holdCoverSkinInputText.y, 120, '');
+    strumTextureInputText.unfocus = function() {
+      var changed:Bool = false;
+      if (PlayState.SONG.options.strumSkin != noteTextureInputText.text) changed = true;
+      PlayState.SONG.options.strumSkin = noteTextureInputText.text.trim();
+      if (PlayState.SONG.options.strumSkin.trim().length < 1) PlayState.SONG.options.strumSkin = null;
+
+      if (changed)
+      {
+        var textureLoad:String = !strumTextureInputText.text.contains('images') ? 'images/${strumTextureInputText.text}.png' : '${strumTextureInputText.text}.png';
+        if (Paths.fileExists(textureLoad, IMAGE) || strumTextureInputText.text.trim() == '')
+        {
+          for (note in strumLineNotes)
+          {
+            if (note == null) continue;
+            note.reloadNote(note.texture);
+          }
+          if (strumTextureInputText.text.trim().length > 0) showOutput('Reloaded strums to: "$textureLoad"');
+          else
+            showOutput('Reloaded strums to default texture');
+        }
+        else
+          showOutput('ERROR: "$textureLoad" not found.', true);
+      }
+    };
+
     tab_group.add(new FlxText(gameOverCharDropDown.x, gameOverCharDropDown.y - 15, 120, 'Game Over Character:'));
     tab_group.add(new FlxText(gameOverSndInputText.x, gameOverSndInputText.y - 15, 180, 'Game Over Death Sound (sounds/):'));
     tab_group.add(new FlxText(gameOverLoopInputText.x, gameOverLoopInputText.y - 15, 180, 'Game Over Loop Music (music/):'));
@@ -2504,12 +2563,15 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
     tab_group.add(gameOverSndInputText);
     tab_group.add(gameOverLoopInputText);
     tab_group.add(gameOverRetryInputText);
-    tab_group.add(noRGBCheckBox);
 
     tab_group.add(new FlxText(noteTextureInputText.x, noteTextureInputText.y - 15, 100, 'Note Texture:'));
     tab_group.add(new FlxText(noteSplashesInputText.x, noteSplashesInputText.y - 15, 120, 'Note Splashes Texture:'));
+    tab_group.add(new FlxText(holdCoverSkinInputText.x, holdCoverSkinInputText.y - 15, 125, 'Hold Covers Texture:'));
+    tab_group.add(new FlxText(strumTextureInputText.x, strumTextureInputText.y - 15, 125, 'Strum Note Texture:'));
     tab_group.add(noteTextureInputText);
     tab_group.add(noteSplashesInputText);
+    tab_group.add(holdCoverSkinInputText);
+    tab_group.add(strumTextureInputText);
 
     tab_group.add(gameOverCharDropDown); // lowest priority to display properly
   }
@@ -2735,6 +2797,18 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
   var noteTypeDropDown:PsychUIDropDownMenu;
   var noteTypes:Array<String>;
 
+  var noRGBCheckBox:PsychUICheckBox;
+  var noRGBQuantCheckBox:PsychUICheckBox;
+  var noStrumRGBCheckBox:PsychUICheckBox;
+  var noSplashRGBCheckBox:PsychUICheckBox;
+  var noHoldCoverRGBCheckBox:PsychUICheckBox;
+
+  var opponentNoteStyleInputText:PsychUIInputText;
+  var playerNoteStyleInputText:PsychUIInputText;
+
+  var opponentStrumStyleInputText:PsychUIInputText;
+  var playerStrumStyleInputText:PsychUIInputText;
+
   function addNoteTab()
   {
     var tab_group = mainBox.getTab('Note').menu;
@@ -2803,12 +2877,51 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
       softReloadNotes();
     }, 150);
 
+    noRGBCheckBox = new PsychUICheckBox(objX + 190, objY - 85, 'Disable Note RGB', 80, updateNotesRGB);
+    noRGBQuantCheckBox = new PsychUICheckBox(noRGBCheckBox.x, noRGBCheckBox.y + 25, 'Disable Note Quant RGB', 80,
+      function() PlayState.SONG.options.disableNoteQuantRGB = noRGBQuantCheckBox.checked);
+    noStrumRGBCheckBox = new PsychUICheckBox(noRGBCheckBox.x, noRGBCheckBox.y + 45, 'Disable Strum RGB', 80, updateStrumsRGB);
+    noSplashRGBCheckBox = new PsychUICheckBox(noRGBCheckBox.x, noRGBCheckBox.y + 65, 'Disable Splash RGB', 80, updateSplashesRGB);
+    noHoldCoverRGBCheckBox = new PsychUICheckBox(noRGBCheckBox.x, noRGBCheckBox.y + 85, 'Disable Hold Covers RGB', 80,
+      function() PlayState.SONG.options.disableHoldCoversRGB = noHoldCoverRGBCheckBox.checked);
+
+    objY += 60;
+    opponentNoteStyleInputText = new PsychUIInputText(objX, objY, 100, '', 8);
+    opponentNoteStyleInputText.onChange = function(old:String, cur:String) PlayState.SONG.options.opponentNoteStyle = cur;
+
+    playerNoteStyleInputText = new PsychUIInputText(objX + 150, objY, 100, '', 8);
+    playerNoteStyleInputText.onChange = function(old:String, cur:String) PlayState.SONG.options.playerNoteStyle = cur;
+
+    objY += 60;
+    opponentStrumStyleInputText = new PsychUIInputText(objX, objY, 100, '', 8);
+    opponentStrumStyleInputText.onChange = function(old:String, cur:String) PlayState.SONG.options.opponentSturmStyle = cur;
+
+    playerStrumStyleInputText = new PsychUIInputText(objX + 150, objY, 100, '', 8);
+    playerSturmStyleInputText.onChange = function(old:String, cur:String) PlayState.SONG.options.playerStrumStyle = cur;
+
+    tab_group.add(new FlxText(opponentNoteStyleInputText.x, opponentNoteStyleInputText.y - 15, 120, 'Opponent Note Style:'));
+    tab_group.add(new FlxText(playerNoteStyleInputText.x, playerNoteStyleInputText.y - 15, 100, 'Player Note Style:'));
+
+    tab_group.add(new FlxText(opponentStrumStyleInputText.x, opponentStrumStyleInputText.y - 15, 120, 'Opponent Strum Style:'));
+    tab_group.add(new FlxText(playerStrumStyleInputText.x, playerStrumStyleInputText.y - 15, 100, 'Player Strum Style:'));
+
+    tab_group.add(opponentNoteStyleInputText);
+    tab_group.add(playerNoteStyleInputText);
+    tab_group.add(opponentStrumStyleInputText);
+    tab_group.add(playerStrumStyleInputText);
+
     tab_group.add(new FlxText(susLengthStepper.x, susLengthStepper.y - 15, 80, 'Sustain length:'));
     tab_group.add(new FlxText(strumTimeStepper.x, strumTimeStepper.y - 15, 100, 'Note Hit time (ms):'));
     tab_group.add(new FlxText(noteTypeDropDown.x, noteTypeDropDown.y - 15, 80, 'Note Type:'));
     tab_group.add(susLengthStepper);
     tab_group.add(strumTimeStepper);
     tab_group.add(noteTypeDropDown);
+
+    tab_group.add(noRGBCheckBox);
+    tab_group.add(noRGBQuantCheckBox);
+    tab_group.add(noStrumRGBCheckBox);
+    tab_group.add(noSplashRGBCheckBox);
+    tab_group.add(noHoldCoverRGBCheckBox);
   }
 
   var mustHitCheckBox:PsychUICheckBox;
@@ -2950,7 +3063,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
       }
     };
 
-    dTypeSecStepper = new PsychUINumericStepper(objX + 120, objY, 1, 0, 0, 1000, 0);
+    dTypeSecStepper = new PsychUINumericStepper(objX + 90, objY, 1, 0, 0, 1000, 0);
     dTypeSecStepper.onValueChange = function() {
       var sec = getCurChartSection();
       if (sec != null)
@@ -3006,9 +3119,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
       copiedEvents = lastCopiedEvents;
     });
     copyLastSecButton.resize(80, 26);
-    copyLastSecStepper = new PsychUINumericStepper(objX + 110, objY + 2, 1, 1, -999, 999, 0);
+    copyLastSecStepper = new PsychUINumericStepper(objX + 90, objY + 2, 1, 1, -999, 999, 0);
 
-    beatsPerSecStepper = new PsychUINumericStepper(copyLastSecStepper.x + 50, objY, 1, 4, 1, 7, 2);
+    beatsPerSecStepper = new PsychUINumericStepper(copyLastSecStepper.x + 70, objY + 2, 1, 4, 1, 7, 2);
     beatsPerSecStepper.onValueChange = function() {
       var sec = getCurChartSection();
       if (sec != null)
@@ -3094,8 +3207,9 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
     tab_group.add(playerAltAnimSectionCheckBox);
     tab_group.add(cpuAltAnimSectionCheckBox);
 
-    tab_group.add(new FlxText(beatsPerSecStepper.x, beatsPerSecStepper.y - 15, 100, 'Beats per Section:'));
-    tab_group.add(new FlxText(dTypeSecStepper.x, dTypeSecStepper.y - 15, 100, 'D Type per Section:'));
+    tab_group.add(new FlxText(copyLastSecStepper.x, copyLastSecStepper.y - 15, 100, 'Copy Last Section:'));
+    tab_group.add(new FlxText(beatsPerSecStepper.x, beatsPerSecStepper.y - 15, 100, 'Beats Per Section:'));
+    tab_group.add(new FlxText(dTypeSecStepper.x, dTypeSecStepper.y - 15, 100, 'D Type Per Section:'));
     tab_group.add(changeBpmCheckBox);
     tab_group.add(changeBpmStepper);
     tab_group.add(beatsPerSecStepper);
@@ -3149,10 +3263,12 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
     {
       var exts:Array<String> = ['.txt'];
       #if LUA_ALLOWED exts.push('.lua'); #end
-      #if HSCRIPT_ALLOWED exts.push('.hx');
+      #if HSCRIPT_ALLOWED
+      exts.push('.hx');
       exts.push('.hsc');
       exts.push('.hscript');
-      exts.push('.hxs'); #end
+      exts.push('.hxs');
+      #end
       noteTypes = loadFileList('custom_notetypes/', exts);
       for (id => noteType in Note.defaultNoteTypes)
         if (!noteTypes.contains(noteType)) noteTypes.insert(id, noteType);
@@ -3350,6 +3466,79 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
     tab_group.add(girlfriendDropDown);
     tab_group.add(opponentDropDown);
     tab_group.add(playerDropDown);
+  }
+
+  var disableCachingCheckBox:PsychUICheckBox;
+  var notITGModchartCheckBox:PsychUICheckBox;
+  var usesHUDCheckBox:PsychUICheckBox;
+  var oldBarSystemCheckBox:PsychUICheckBox;
+  var forceRightScrollCheckBox:PsychUICheckBox;
+  var forceMiddleScrollCheckBox:PsychUICheckBox;
+  var blockOpponentModeCheckBox:PsychUICheckBox;
+
+  var vocalsPrefixInputText:PsychUIInputText;
+  var vocalsSuffixInputText:PsychUIInputText;
+  var instrumentalPrefixInputText:PsychUIInputText;
+  var instrumentalSuffixInputText:PsychUIInputText;
+
+  function addGameplayOptionsTab()
+  {
+    var tab_group = mainBox.getTab('Gameplay Options').menu;
+    var objX = 10;
+    var objY = 10;
+
+    disableCachingCheckBox = new PsychUICheckBox(objX, objY, 'Disable PlayState Caching', 60,
+      function() PlayState.SONG.options.disableCaching = disableCachingCheckBox.checked);
+    notITGModchartCheckBox = new PsychUICheckBox(disableCachingCheckBox.x + 70, objY, 'NotITG Modchart', 60,
+      function() PlayState.SONG.options.notITG = notITGModchartCheckBox.checked);
+    usesHUDCheckBox = new PsychUICheckBox(notITGModchartCheckBox.x + 90, objY, 'Notes In HUD Camera', 60,
+      function() PlayState.SONG.options.usesHUD = usesHUDCheckBox.checked);
+
+    // 40 Y Split
+    objY += 40;
+    oldBarSystemCheckBox = new PsychUICheckBox(objX, objY, 'Uses Old Bars', 60, function() PlayState.SONG.options.oldBarSystem = oldBarSystemCheckBox.checked);
+    forceRightScrollCheckBox = new PsychUICheckBox(oldBarSystemCheckBox.x + 70, objY, 'Force RightScroll', 60,
+      function() PlayState.SONG.options.rightScroll = forceRightScrollCheckBox.checked);
+    forceMiddleScrollCheckBox = new PsychUICheckBox(forceRightScrollCheckBox.x + 90, objY, 'Force MiddleScroll', 70,
+      function() PlayState.SONG.options.middleScroll = forceMiddleScrollCheckBox.checked);
+
+    // Obj 40 Y Split
+    objY += 40;
+    blockOpponentModeCheckBox = new PsychUICheckBox(objX, objY, 'Block Opponent Mode', 60,
+      function() PlayState.SONG.options.blockOpponentMode = blockOpponentModeCheckBox.checked);
+
+    // 80 Y Split
+    objY += 80;
+    vocalsPrefixInputText = new PsychUIInputText(objX, objY, 100, '', 8);
+    vocalsPrefixInputText.onChange = function(old:String, cur:String) PlayState.SONG.options.vocalsPrefix = cur;
+
+    vocalsSuffixInputText = new PsychUIInputText(objX + 120, objY, 100, '', 8);
+    vocalsSuffixInputText.onChange = function(old:String, cur:String) PlayState.SONG.options.vocalsSuffix = cur;
+
+    // 130 Y Split
+    objY += 50;
+    instrumentalSuffixInputText = new PsychUIInputText(objX, objY, 100, '', 8);
+    instrumentalSuffixInputText.onChange = function(old:String, cur:String) PlayState.SONG.options.instrumentalSuffix = cur;
+
+    instrumentalPrefixInputText = new PsychUIInputText(objX + 120, objY, 100, '', 8);
+    instrumentalPrefixInputText.onChange = function(old:String, cur:String) PlayState.SONG.options.instrumentalPrefix = cur;
+
+    tab_group.add(disableCachingCheckBox);
+    tab_group.add(notITGModchartCheckBox);
+    tab_group.add(blockOpponentModeCheckBox);
+    tab_group.add(usesHUDCheckBox);
+    tab_group.add(oldBarSystemCheckBox);
+    tab_group.add(forceRightScrollCheckBox);
+    tab_group.add(forceMiddleScrollCheckBox);
+
+    tab_group.add(new FlxText(vocalsPrefixInputText.x, vocalsPrefixInputText.y - 15, 100, "Vocals Prefix:"));
+    tab_group.add(new FlxText(vocalsSuffixInputText.x, vocalsSuffixInputText.y - 15, 100, "Vocals Suffix:"));
+    tab_group.add(new FlxText(instrumentalPrefixInputText.x, instrumentalPrefixInputText.y - 15, 130, "Instrumental Prefix:"));
+    tab_group.add(new FlxText(instrumentalSuffixInputText.x, instrumentalSuffixInputText.y - 15, 130, "Instrumental Suffix:"));
+    tab_group.add(vocalsPrefixInputText);
+    tab_group.add(vocalsSuffixInputText);
+    tab_group.add(instrumentalPrefixInputText);
+    tab_group.add(instrumentalSuffixInputText);
   }
 
   function addFileTab()
@@ -4488,7 +4677,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
     {
       if (note == null) continue;
 
-      note.rgbShader.enabled = !noRGBCheckBox.checked;
+      note.setShaderEnabled(note, !noRGBCheckBox.checked);
       if (note.rgbShader.enabled)
       {
         var data = backend.NoteTypesConfig.loadNoteTypeData(note.noteType);
@@ -4497,7 +4686,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
         for (line in data)
         {
           var prop:String = line.property.join('.');
-          if (prop == 'rgbShader.enabled') note.rgbShader.enabled = line.value;
+          if (prop == 'rgbShader.enabled') note.setShaderEnabled(note, line.value);
         }
       }
     }
@@ -4505,9 +4694,13 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
   function updateStrumsRGB()
   {
-    /*for (note in strumLineNotes)
-      note.rgbShader.enabled = !noRGBCheckBoxStrum.checked; */
+    PlayState.SONG.options.disableStrumRGB = noStrumRGBCheckBox.checked;
+    for (note in strumLineNotes)
+      note.rgbShader.enabled = !noStrumRGBCheckBox.checked;
   }
+
+  function updateSplashesRGB()
+    PlayState.SONG.options.disableSplashRGB = noSplashRGBCheckBox.checked;
 
   function updateGridVisibility()
   {

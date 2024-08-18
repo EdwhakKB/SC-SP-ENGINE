@@ -189,9 +189,7 @@ class VSlice
       time += sectionTime;
 
       var sec:SwagSection = emptySection();
-      sec.mustHitSection = sectionMustHits[
-        baseSections.length >= sectionMustHits.length ? sectionMustHits.length - 1 : baseSections.length
-      ];
+      sec.mustHitSection = sectionMustHits[baseSections.length >= sectionMustHits.length ? sectionMustHits.length - 1 : baseSections.length];
       if (lastBpm != bpm)
       {
         sec.changeBPM = true;
@@ -252,8 +250,8 @@ class VSlice
               disableNoteQuantRGB: false,
               disableStrumRGB: false,
               disableSplashRGB: false,
-              disableHoldCoverRGB: false,
-              disableHoldCover: false,
+              disableHoldCoversRGB: false,
+              disableHoldCovers: false,
               disableCaching: false,
               notITG: false,
               usesHUD: false,
@@ -262,10 +260,13 @@ class VSlice
               middleScroll: false,
               blockOpponentMode: false,
               arrowSkin: "",
+              strumSkin: "",
               splashSkin: "",
               holdCoverSkin: "",
               opponentNoteStyle: "",
+              opponentStrumStyle: "",
               playerNoteStyle: "",
+              playerStrumStyle: "",
               vocalsPrefix: "",
               vocalsSuffix: "",
               instrumentalPrefix: "",

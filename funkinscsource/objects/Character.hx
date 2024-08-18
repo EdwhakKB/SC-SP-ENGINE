@@ -115,6 +115,11 @@ class Character extends FunkinSCSprite
   public var noteSkin:String;
 
   /**
+   * Custom sturm skin the overrides while playing unless its null.
+   */
+  public var strumSkin:String;
+
+  /**
    * A zoom the modifies the scale of the character.
    */
   public var daZoom:Float = 1;
@@ -236,6 +241,11 @@ class Character extends FunkinSCSprite
    * Note skin style of the character (really a backup for finding the original null).
    */
   public var noteSkinStyleOfCharacter:String = 'noteSkins/NOTE_assets';
+
+  /**
+   * Sturm skin style of the character (really a backup for finding the original null).
+   */
+  public var strumSkinStyleOfCharacter:String = 'noteSkins/NOTE_assets';
 
   /**
    * change if bf and dad would idle to the beat of the song.
@@ -422,9 +432,16 @@ class Character extends FunkinSCSprite
     scale.set(1, 1);
     updateHitbox();
 
-    if (PlayState.SONG != null) noteSkin = (json.noteSkin != null ? json.noteSkin : PlayState.SONG.options.arrowSkin);
+    if (PlayState.SONG != null)
+    {
+      noteSkin = (json.noteSkin != null ? json.noteSkin : PlayState.SONG.options.arrowSkin);
+      strumSkin = (json.strumSkin != null ? json.strumSkin : PlayState.SONG.options.strumSkin);
+    }
     else
+    {
       noteSkin = (json.noteSkin != null ? json.noteSkin : noteSkinStyleOfCharacter);
+      strumSkin = (json.strumSkin != null ? json.strumSkin : strumSkinStyleOfCharacter);
+    }
 
     if (json.isPlayerChar) isPsychPlayer = json.isPlayerChar;
 
@@ -1068,10 +1085,16 @@ typedef CharacterFile =
   var ?replacesGF:Bool;
 
   /**
-   * Whether the character overrides the noteSkin in playstate.hx or note.hx or strumarrow.hx;
+   * Whether the character overrides the noteSkin in playstate.hx or note.hx;
    * @default "noteSkins/NOTE_assets"
    */
   var ?noteSkin:String;
+
+  /**
+   * Whether the character overrides the strumSkin in playstate.hx or strumarrow.hx;
+   * @default "noteSkins/NOTE_assets"
+   */
+  var ?strumSkin:String;
 
   /**
    * Whether the character has a vocals file for the game to change to.

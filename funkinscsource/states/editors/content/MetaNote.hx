@@ -138,10 +138,46 @@ class MetaNote extends Note
     }
   }
 
+  public function reloadToNewTexture(note:MetaNote, texture:String)
+  {
+    note.reloadNote(texture);
+    if (note.width > note.height) note.setGraphicSize(ChartingState.GRID_SIZE);
+    else
+      note.setGraphicSize(0, ChartingState.GRID_SIZE);
+
+    note.updateHitbox();
+
+    if (note.sustainLength > 0)
+    {
+      if (note.endSprite != null)
+      {
+        note.endSprite.reloadNote(texture);
+        note.endSprite.setGraphicSize(ChartingState.GRID_SIZE * 0.5, ChartingState.GRID_SIZE * 0.5);
+        note.endSprite.updateHitbox();
+      }
+      if (note.sustainSprite != null)
+      {
+        note.sustainSprite.reloadNote(texture);
+        note.sustainSprite.setGraphicSize(ChartingState.GRID_SIZE * 0.5, note.sustainLength);
+        note.sustainSprite.updateHitbox();
+      }
+    }
+  }
+
+  public function setShaderEnabled(note:MetaNote, enabled:Bool)
+  {
+    note.rgbShader.enabled = enabled;
+    if (note.sustainLength > 0)
+    {
+      if (note.endSprite != null) note.endSprite.rgbShader.enabled = enabled;
+      if (note.sustainSprite != null) note.sustainSprite.rgbShader.enabled = enabled;
+    }
+  }
+
   public function grabNoteY(end:Note, sus:Note):Float
   {
-    var diff:Float = (sus.y + sus.height) + 4;
-    if (end.y > diff) diff = (sus.y + (sus.height - end.y) + 4);
+    var diff:Float = (sus.y + sus.height) - 5;
+    if (end.y > diff) diff = (sus.y + (sus.height - end.y) - 5);
     return diff;
   }
 

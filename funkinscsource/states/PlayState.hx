@@ -715,6 +715,7 @@ class PlayState extends MusicBeatState
     dad = new Character(DAD_X, DAD_Y, SONG.characters.opponent);
     startCharacterPos(dad, true);
     dad.noteSkinStyleOfCharacter = SONG.options.opponentNoteStyle;
+    dad.strumSkinStyleOfCharacter = SONG.options.opponentStrumStyle;
 
     mom = new Character(MOM_X, MOM_X, SONG.characters.secondOpponent);
     startCharacterPos(mom, true);
@@ -730,6 +731,7 @@ class PlayState extends MusicBeatState
     boyfriend = new Character(BF_X, BF_Y, SONG.characters.player, true);
     startCharacterPos(boyfriend, false, true);
     boyfriend.noteSkinStyleOfCharacter = SONG.options.playerNoteStyle;
+    boyfriend.strumSkinStyleOfCharacter = SONG.options.playerStrumStyle;
 
     Debug.logInfo('current stage, $curStage');
 
@@ -904,7 +906,7 @@ class PlayState extends MusicBeatState
 
     arrowLanes.cameras = #if SCEModchartingTools arrowPaths.cameras = #end [usesHUD ? camHUD : camNoteStuff];
 
-    var enabledHolds:Bool = (!(SONG.options.disableHoldCover || SONG.options.notITG) && ClientPrefs.data.holdCoverPlay);
+    var enabledHolds:Bool = (!(SONG.options.disableHoldCovers || SONG.options.notITG) && ClientPrefs.data.holdCoverPlay);
     opponentHoldCovers = new HoldCoverGroup(enabledHolds, false);
     opponentHoldCovers.isReady = (strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong && !inCutscene && !inCinematic && generatedMusic);
     playerHoldCovers = new HoldCoverGroup(enabledHolds, true);
@@ -2035,17 +2037,16 @@ class PlayState extends MusicBeatState
         }
       }
 
-      var arrowSetupStuffDAD:String = dad.noteSkin;
-      var arrowSetupStuffBF:String = boyfriend.noteSkin;
-      var songArrowSkins:Bool = true;
+      var arrowSetupStuffDAD:String = dad.strumSkin;
+      var arrowSetupStuffBF:String = boyfriend.strumSkin;
+      var songArrowSkins:Bool = !(SONG.options.strumSkin == null || SONG.options.strumSkin == '' || SONG.options.strumSkin == "");
 
-      if (SONG.options.arrowSkin == null || SONG.options.arrowSkin == '' || SONG.options.arrowSkin == "") songArrowSkins = false;
       if (arrowSetupStuffBF == null || arrowSetupStuffBF == '' || arrowSetupStuffBF == "")
-        arrowSetupStuffBF = (!songArrowSkins ? (isPixelStage ? 'pixel' : 'normal') : SONG.options.arrowSkin);
+        arrowSetupStuffBF = (!songArrowSkins ? (isPixelStage ? 'pixel' : 'normal') : SONG.options.strumSkin);
       else
         arrowSetupStuffBF = boyfriend.noteSkin;
       if (arrowSetupStuffDAD == null || arrowSetupStuffDAD == '' || arrowSetupStuffDAD == "")
-        arrowSetupStuffDAD = (!songArrowSkins ? (isPixelStage ? 'pixel' : 'normal') : SONG.options.arrowSkin);
+        arrowSetupStuffDAD = (!songArrowSkins ? (isPixelStage ? 'pixel' : 'normal') : SONG.options.strumSkin);
       else
         arrowSetupStuffDAD = dad.noteSkin;
 
@@ -2489,9 +2490,15 @@ class PlayState extends MusicBeatState
   public var opponentSectionNoteStyle:String = "";
   public var playerSectionNoteStyle:String = "";
 
+  public var opponentSectionStrumStyle:String = "";
+  public var playerSectionStrumStyle:String = "";
+
   // note shit
   public var noteSkinDad:String;
   public var noteSkinBF:String;
+
+  public var strumSkinDad:String;
+  public var strumSkinBF:String;
 
   public var daSection:Int = 0;
   public var totalColumns:Int = 4;
@@ -2500,6 +2507,9 @@ class PlayState extends MusicBeatState
   {
     opponentSectionNoteStyle = "";
     playerSectionNoteStyle = "";
+
+    opponentSectionStrumStyle = "";
+    playerSectionStrumStyle = "";
 
     var songData = SONG;
 
@@ -2627,6 +2637,7 @@ class PlayState extends MusicBeatState
           if (daSection == Std.parseInt(data[0]))
           {
             (data[2] == 'dad' ? opponentSectionNoteStyle = data[1] : playerSectionNoteStyle = data[1]);
+            (data[3] == 'dad' ? opponentSectionStrumStyle = data[4] : playerSectionStrumStyle = data[4]);
           }
         }
       }
@@ -2634,6 +2645,9 @@ class PlayState extends MusicBeatState
       {
         noteSkinDad = dad.noteSkin;
         noteSkinBF = boyfriend.noteSkin;
+
+        strumSkinDad = dad.strumSkin;
+        strumSkinBF = boyfriend.strumSkin;
 
         final songNotes:Array<Dynamic> = section.sectionNotes[i];
         var spawnTime:Float = songNotes[0];
@@ -2775,6 +2789,9 @@ class PlayState extends MusicBeatState
 
     opponentSectionNoteStyle = "";
     playerSectionNoteStyle = "";
+
+    opponentSectionSturmStyle = "";
+    playerSectionSturmStyle = "";
 
     callOnScripts('onSongGenerated', []);
   }

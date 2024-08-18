@@ -161,8 +161,8 @@ class Song
           disableNoteQuantRGB: false,
           disableStrumRGB: false,
           disableSplashRGB: false,
-          disableHoldCoverRGB: false,
-          disableHoldCover: false,
+          disableHoldCoversRGB: false,
+          disableHoldCovers: false,
           disableCaching: false,
           notITG: false,
           usesHUD: false,
@@ -171,10 +171,13 @@ class Song
           middleScroll: false,
           blockOpponentMode: false,
           arrowSkin: "",
+          strumSkin: "",
           splashSkin: "",
           holdCoverSkin: "",
           opponentNoteStyle: "",
+          opponentStrumStyle: "",
           playerNoteStyle: "",
+          playerStrumStyle: "",
           vocalsPrefix: "",
           vocalsSuffix: "",
           instrumentalPrefix: "",
@@ -288,9 +291,9 @@ class Song
         'disableNoteQuantRGB',
         'disableStrumRGB',
         'disableSplashRGB',
-        'disableHoldCoverRGB',
+        'disableHoldCoversRGB',
         // Bools
-        'disableHoldCover',
+        'disableHoldCovers',
         'disableCaching',
         'notITG',
         'usesHUD',
@@ -300,10 +303,13 @@ class Song
         'blockOpponentMode',
         // Strings
         'arrowSkin',
+        'strumSkin',
         'splashSkin',
         'holdCoverSkin',
         'opponentNoteStyle',
+        'opponentStrumStyle',
         'playerNoteStyle',
+        'playerStrumStyle',
         // Music Strings
         'vocalsPrefix',
         'vocalsSuffix',
@@ -316,9 +322,9 @@ class Song
         'disableNoteQuantRGB' => false,
         'disableStrumRGB' => false,
         'disableSplashRGB' => false,
-        'disableHoldCoverRGB' => false,
+        'disableHoldCoversRGB' => false,
 
-        'disableHoldCover' => false,
+        'disableHoldCovers' => false,
         'disableCaching' => false,
         'notITG' => false,
         'usesHUD' => true,
@@ -328,10 +334,13 @@ class Song
         'blockOpponentMode' => false,
 
         'arrowSkin' => "",
+        'strumSkin' => "",
         'splashSkin' => "",
         'holdCoverSkin' => "",
         'opponentNoteSyle' => "",
+        'opponentStrumStyle' => "",
         'playerNoteStyle' => "",
+        'playerStrumStyle' => "",
 
         'vocalsPrefix' => "",
         'vocalsSuffix' => "",
@@ -418,6 +427,11 @@ class Song
       if (songJson.options.arrowSkin == '' || songJson.options.arrowSkin == "" || songJson.options.arrowSkin == null)
         songJson.options.arrowSkin = "noteSkins/NOTE_assets"
         + Note.getNoteSkinPostfix();
+
+      if (songJson.options.strumSkin == '' || songJson.options.strumSkin == "" || songJson.options.strumSkin == null)
+        songJson.options.strumSkin = "noteSkins/NOTE_assets"
+        + Note.getNoteSkinPostfix();
+
       if (songJson.song != null && songJson.songId == null) songJson.songId = songJson.song;
       else if (songJson.songId != null && songJson.song == null) songJson.song = songJson.songId;
     }

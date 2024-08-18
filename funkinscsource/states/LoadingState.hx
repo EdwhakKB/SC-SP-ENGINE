@@ -227,7 +227,7 @@ class LoadingState extends MusicBeatState
 
       var customSkin:String = noteSkin + Note.getNoteSkinPostfix();
       if (Paths.fileExists('images/$customSkin.png', IMAGE)) noteSkin = customSkin;
-      if (!song.options.notITG) imagesToPrepare.push(noteSkin);
+      if (!song.options.notITG && noteSkin != "") imagesToPrepare.push(noteSkin);
       //
 
       // LOAD NOTE SPLASH IMAGE
@@ -235,8 +235,20 @@ class LoadingState extends MusicBeatState
       if (song.options.splashSkin != null && song.options.splashSkin.length > 0) noteSplash = song.options.splashSkin;
       else
         noteSplash += NoteSplash.getSplashSkinPostfix();
+      if (!song.options.notITG && noteSplash != "") imagesToPrepare.push(noteSplash);
+      //
 
-      imagesToPrepare.push(noteSplash);
+      // LOAD HOLD COVER IMAGE
+      var holdCoverSkin:String = "holdCovers";
+      if (song.options.holdCoverSkin != null && song.options.holdCoverSkin.length > 1) noteSkin = song.options.holdCoverSkin;
+      if (!song.options.notITG && holdCoverSkin != "") imagesToPrepare.push(noteSkin);
+      //
+
+      // LOAD STRUM NOTE IMAGE
+      var strumSkin:String = "";
+      if (song.options.strumSkin != null && song.options.strumSkin.length > 1) strumSkin = song.options.strumSkin;
+      if (!song.options.notITG && strumSkin != "") imagesToPrepare.push(noteSkin);
+      //
 
       try
       {

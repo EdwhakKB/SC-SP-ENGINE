@@ -36,14 +36,14 @@ typedef OptionsData =
    */
   @:optional
   @:default(false)
-  var disableHoldCoverRGB:Bool;
+  var disableHoldCoversRGB:Bool;
 
   /**
    * Disables the HoldCovers
    */
   @:optional
   @:default(false)
-  var disableHoldCover:Bool;
+  var disableHoldCovers:Bool;
 
   /**
    * disabled character and stage caching while in song (stuck in creat until done). (stages are not included yet!)
@@ -97,11 +97,18 @@ typedef OptionsData =
   var blockOpponentMode:Bool;
 
   /**
-   * The arrow skin used for the notes and strums.
+   * The arrow skin used for the notes.
    */
   @:optional
   @:default("")
   var arrowSkin:String;
+
+  /**
+   * The strum skin used for the strums.
+   */
+  @:optional
+  @:default("")
+  var strumSkin:String;
 
   /**
    * The splash skin used for the note splashes.
@@ -125,11 +132,25 @@ typedef OptionsData =
   var opponentNoteStyle:String;
 
   /**
+   * The opponent's strumStyle.
+   */
+  @:optional
+  @:default("")
+  var opponentStrumStyle:String;
+
+  /**
    * The players noteStyle.
    */
   @:optional
   @:default("")
   var playerNoteStyle:String;
+
+  /**
+   * The players strumStyle.
+   */
+  @:optional
+  @:default("")
+  var playerStrumStyle:String;
 
   /**
    * The vocals prefix.
@@ -196,14 +217,14 @@ class SongOptionsData
    */
   @:optional
   @:default(false)
-  public var disableHoldCoverRGB:Bool = false;
+  public var disableHoldCoverRGBs:Bool = false;
 
   /**
    * Disables the HoldCovers
    */
   @:optional
   @:default(false)
-  public var disableHoldCover:Bool = false;
+  public var disableHoldCovers:Bool = false;
 
   /**
    * disabled character and stage caching while in song (stuck in creat until done). (stages are not included yet!)
@@ -257,11 +278,18 @@ class SongOptionsData
   public var blockOpponentMode:Bool = false;
 
   /**
-   * The arrow skin used for the notes and strums.
+   * The arrow skin used for the notes.
    */
   @:optional
   @:default("")
   public var arrowSkin:String = "";
+
+  /**
+   * The arrow skin used for the strums.
+   */
+  @:optional
+  @:default("")
+  public var strumSkin:String = "";
 
   /**
    * The splash skin used for the note splashes.
@@ -285,11 +313,25 @@ class SongOptionsData
   public var opponentNoteStyle:String = "";
 
   /**
+   * The opponent's strumStyle.
+   */
+  @:optional
+  @:default("")
+  public var opponentStrumStyle:String = "";
+
+  /**
    * The players noteStyle.
    */
   @:optional
   @:default("")
   public var playerNoteStyle:String = "";
+
+  /**
+   * The players strumStyle.
+   */
+  @:optional
+  @:default("")
+  public var playerStrumStyle:String = "";
 
   /**
    * The vocals prefix.

@@ -76,7 +76,7 @@ class HoldCoverSprite extends FunkinSCSprite
       {
         if (foundFirstPath)
         {
-          var holdCoverSkinNonRGB:Bool = PlayState.SONG.options.disableHoldCoverRGB;
+          var holdCoverSkinNonRGB:Bool = PlayState.SONG.options.disableHoldCoversRGB;
           this.frames = Paths.getSparrowAtlas(holdCoverSkinNonRGB ? 'HoldNoteEffect/$holdCoverSkin$hcolor' : 'HoldNoteEffect/RGB/$holdCoverSkin$hcolor');
           if (!holdCoverSkinNonRGB) this.initShader(i);
         }
@@ -112,7 +112,7 @@ class HoldCoverSprite extends FunkinSCSprite
     this.antialiasing = ClientPrefs.data.antialiasing;
     if (skin.contains('pixel') || !ClientPrefs.data.antialiasing) this.antialiasing = false;
     var tempShader:RGBPalette = null;
-    if ((note == null || this.coverData.useRGBShader) && (PlayState.SONG == null || !PlayState.SONG.options.disableHoldCoverRGB))
+    if ((note == null || this.coverData.useRGBShader) && (PlayState.SONG == null || !PlayState.SONG.options.disableHoldCoversRGB))
     {
       // If Splash RGB is enabled:
       if (note != null)

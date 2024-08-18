@@ -390,6 +390,8 @@ class MainMenuState extends MusicBeatState
                 {
                   PlayState.SONG.options.arrowSkin = null;
                   PlayState.SONG.options.splashSkin = null;
+                  PlayState.SONG.options.strumSkin = null;
+                  PlayState.SONG.options.holdCoverSkin = null;
                   PlayState.stageUI = 'normal';
                 }
             }
