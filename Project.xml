@@ -251,25 +251,12 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<define name="SCEModchartingTools" if="fnf-modcharting-tools"/>
 	<define name="HScriptImproved" if="hscript-improved"/>
 
-	<haxelib name="haxeui-flixel" />
-	<haxelib name="haxeui-core" />
-
 	<!--Avoid memory leaks with for loops in SScript's HScript-->
 	<haxedef name="loop_unroll_max_cost" value="25" />
 
 	<!-- Enables a terminal log prompt on debug builds -->
 	<haxelib name="hxcpp-debug-server" if="debug"/>
 	<haxedef name="HXC_LIBVLC_LOGGING" if="VIDEOS_ALLOWED debug" />
-
-	<define name="haxeui_allow_drag_any_component" value="true"/>
-	<define name="haxeui_flixel_no_custom_cursors" value="true"/>
-
-	<!-- I don't remember what this is for. -->
-	<haxedef name="haxeui_no_mouse_reset" />
-	<!-- Clicking outside a dialog should deselect the current focused component. -->
-	<haxedef name="haxeui_focus_out_on_click" />
-	<!-- Required to use haxe.ui.backend.flixel.UIState with build macros. -->
-	<haxedef name="haxeui_dont_impose_base_class" />
 
 	<haxelib name="thx.core"/>
 	<haxelib name="thx.semver"/>
@@ -284,15 +271,6 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<!-- _________________________________ Custom _______________________________ -->
 
 	<!--Place custom nodes like icons here (higher priority to override the HaxeFlixel icon)-->
-
-	<!-- Ensure all UI components are available at runtime. -->
-	<haxeflag name="--macro" value="include('haxe.ui.backend.flixel.components')" />
-	<haxeflag name="--macro" value="include('haxe.ui.containers.dialogs')" />
-	<haxeflag name="--macro" value="include('haxe.ui.containers.menus')" />
-	<haxeflag name="--macro" value="include('haxe.ui.containers.properties')" />
-	<haxeflag name="--macro" value="include('haxe.ui.core')" />
-	<haxeflag name="--macro" value="include('haxe.ui.components')" />
-	<haxeflag name="--macro" value="include('haxe.ui.containers')" />
 	<!--
 		Ensure additional class packages are available at runtime (some only really used by scripts).
 		Ignore packages we can't include.
@@ -335,10 +313,6 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 
 	<haxedef name="CAN_OPEN_LINKS" unless="switch" />
 	<haxedef name="CAN_CHEAT" if="switch debug" />
-
-	<!-- Enable this on platforms which do not support the edsior views. -->
-	<haxedef name="CHART_EDITOR_UNSUPPORTED" if="web" />
-	<haxedef name="CHART_EDITOR_SUPPORTED" unless="web"/>
 
 	<assets path="SCE-CrashDialog.exe" type="template" if="windows release" />
 </project>

@@ -12,9 +12,6 @@ haxelib install SScript 17.1.618
 haxelib install hscript
 haxelib install hxgamejolt-api
 haxelib install markdown
-haxelib install format
-haxelib git haxeui-flixel https://github.com/haxeui/haxeui-flixel/tree/63a906a6148958dbfde8c7b48d90b0693767fd95
-haxelib git haxeui-core https://github.com/haxeui/haxeui-core/tree/0212d8fdfcafeb5f0d5a41e1ddba8ff21d0e183b
 haxelib git flixel https://github.com/glowsoony/flixel/tree/Main-SCE
 haxelib git flixel-addons https://github.com/glowsoony/flixel-addons/tree/dev
 haxelib git FlxPartialSound https://github.com/FunkinCrew/FlxPartialSound/tree/f986332ba5ab02abd386ce662578baf04904604a

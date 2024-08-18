@@ -1,6 +1,5 @@
 package;
 
-import backend.ColorBlindness;
 import flixel.input.keyboard.FlxKey;
 import flixel.system.scaleModes.*;
 import flixel.graphics.FlxGraphic;
@@ -16,7 +15,6 @@ import openfl.events.Event;
 import openfl.display.StageScaleMode;
 import openfl.filters.ShaderFilter;
 import openfl.display.StageQuality;
-import debug.FPSCounter;
 import lime.app.Application;
 // crash handler stuff
 #if CRASH_HANDLER
@@ -24,10 +22,11 @@ import haxe.CallStack;
 import haxe.io.Path;
 #end
 // Other Things
+import backend.ColorBlindness;
+import debug.FPSCounter;
 import gamejolt.GameJoltGroup.GJToastManager;
 import gamejolt.*;
 import states.TitleState;
-import haxe.ui.Toolkit;
 
 class Main extends Sprite
 {
@@ -76,14 +75,6 @@ class Main extends Sprite
 
   private function setupGame():Void
   {
-    Toolkit.init();
-    Toolkit.theme = "dark";
-    Toolkit.autoScale = false;
-
-    haxe.ui.focus.FocusManager.instance.autoFocus = false;
-    input.Cursor.registerHaxeUICursors();
-    haxe.ui.tooltips.ToolTipManager.defaultDelay = 200;
-
     addChild(new FlxGame(1280, 720, Init, 60, 60, true, false));
     addChild(gjToastManager = new GJToastManager());
 
