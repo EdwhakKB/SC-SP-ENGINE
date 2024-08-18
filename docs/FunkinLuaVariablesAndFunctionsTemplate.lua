@@ -331,10 +331,6 @@ makeLuaSprite(tag, image, x, y)
 
 makeAnimatedLuaSprite(tag, image, x, y, spriteType)
 
---makeParallaxSprite(tag, image, x, y)  if you have parallax use it! (Versions 4.11.0 flixel && flixel > "5.2.0")
-
---flxateParallaxSprite(obj, anchorX, anchorY, scrollOneX, scrollOneY, scrollTwoX, scrollTwoY, direct) if you have parallax use it! (Versions 4.11.0 flixel && flixel > "5.2.0")
-
 makeLuaSkewedSprite(tag, image, x, y, skewX, skewY)
 
 makeGraphic(obj, width, height, color)
@@ -357,8 +353,6 @@ setScrollFactor(obj, scrollX, scrollY)
 
 addLuaSprite(tag, place)
 
---addParallaxSprite(tag, front)  if you have parallax use it! (Versions 4.11.0 flixel && flixel > "5.2.0")
-
 addSkewedSprite(tag, front)
 
 addBackdrop(tag, front)
@@ -373,15 +367,11 @@ updateHitBoxFromGroup(group, index)
 
 removeLuaSprite(tag, destroy)
 
---removeParallaxSprite(tag, destroy)  if you have parallax use it! (Versions 4.11.0 flixel && flixel > "5.2.0")
-
 removeSkewedSprite(tag, destroy)
 
 removeBackdrop(tag, destroy)
 
 luaSpriteExists(tag)
-
---luaParallaxExists(tag)  if you have parallax use it! (Versions 4.11.0 flixel && flixel > "5.2.0")
 
 luaSkewedExists(tag)
 

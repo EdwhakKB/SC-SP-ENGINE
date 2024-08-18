@@ -243,9 +243,6 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<haxelib name="hxtelemetry" if="telemetry"/>
 	<haxedef name="HXCPP_TELEMETRY"  if="telemetry"/>
 
-  <!--Incase you want parallaxlt-->
-	<!-- <haxelib name="parallaxlt" /> -->
-
 	<haxelib name="fnf-modcharting-tools"/>
 	<haxelib name="hscript-improved" />
 	<haxelib name="markdown"/>

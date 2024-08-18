@@ -6,9 +6,6 @@ import flixel.FlxObject;
 import flixel.util.FlxAxes;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.addons.display.FlxBackdrop;
-#if ((flixel == "5.3.1" || flixel >= "4.11.0" && flixel <= "5.0.0") && parallaxlt)
-import flixel_5_3_1.ParallaxSprite; // flixel 5 render pipeline
-#end
 import backend.WeekData;
 import backend.Highscore;
 import openfl.utils.Assets;

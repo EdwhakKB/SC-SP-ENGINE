@@ -9,7 +9,6 @@ haxelib install flixel
 haxelib install tjson
 haxelib install flixel-tools
 haxelib install SScript 17.1.618
-haxelib install parallaxlt
 haxelib install hscript
 haxelib install hxgamejolt-api
 haxelib install markdown

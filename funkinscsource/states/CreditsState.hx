@@ -221,13 +221,6 @@ class CreditsState extends MusicBeatState
         'C7B1AB'
       ],
       [
-        'Itz-Miles',
-        'miles',
-        "Code for parallaxLT!",
-        'https://github.com/Itz-Miles',
-        'CC875E'
-      ],
-      [
         'Haone',
         '',
         "Extra Function code for Chart editor.",

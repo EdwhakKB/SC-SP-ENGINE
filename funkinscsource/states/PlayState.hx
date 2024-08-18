@@ -24,9 +24,6 @@ import flixel.input.keyboard.FlxKey;
 import flixel.addons.effects.FlxTrail;
 import flixel.addons.display.FlxRuntimeShader;
 import flixel.addons.display.FlxBackdrop;
-#if ((flixel == "5.3.1" || flixel >= "4.11.0" && flixel <= "5.0.0") && parallaxlt)
-import flixel_5_3_1.ParallaxSprite;
-#end
 import lime.app.Application;
 import lime.utils.Assets;
 import openfl.utils.Assets as OpenFlAssets;

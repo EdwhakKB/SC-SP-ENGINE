@@ -91,8 +91,8 @@ class CustomSubstate extends MusicBeatSubState
     PlayState.instance.callOnScripts('onCustomSubstateDestroy', [name]);
     name = 'unnamed';
 
-    PlayState.instance.setOnHscript('customSubstate', null);
-    PlayState.instance.setOnHscript('customSubstateName', name);
+    PlayState.instance.setOnHScript('customSubstate', null);
+    PlayState.instance.setOnHScript('customSubstateName', name);
     PlayState.instance.setOnHSI('customSubstate', null);
     PlayState.instance.setOnHSI('customSubstateName', name);
     super.destroy();
