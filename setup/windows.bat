@@ -19,7 +19,7 @@ haxelib git FlxPartialSound https://github.com/FunkinCrew/FlxPartialSound/tree/f
 haxelib git fnf-modcharting-tools https://github.com/glowsoony/FNF-Modcharting-Tools main-old
 haxelib git linc_luajit https://github.com/superpowers04/linc_luajit
 haxelib git hscript-improved https://github.com/glowsoony/hscript-improved/tree/custom-classes
-haxelib git flxanimate https://github.com/ShadowMario/flxanimate/tree/768740a56b26aa0c072720e0d1236b94afe68e3e
+haxelib git flxanimate https://github.com/Dot-Stuff/flxanimate/tree/768740a56b26aa0c072720e0d1236b94afe68e3e
 haxelib git hxdiscord_rpc https://github.com/FNF-CNE-Devs/hxdiscord_rpc/tree/main
 haxelib git grig.audio https://gitlab.com/haxe-grig/grig.audio.git cbf91e2180fd2e374924fe74844086aab7891666
 haxelib git funkin.vis https://github.com/FunkinCrew/funkVis d5361037efa3a02c4ab20b5bd14ca11e7d00f519
