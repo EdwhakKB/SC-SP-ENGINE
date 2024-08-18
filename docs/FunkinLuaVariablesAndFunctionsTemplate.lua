@@ -66,7 +66,7 @@
 		'rating', "Float", "0", "Total Rating",
 		'ratingName', "String", "", "Rating's Name's",
 		'version', "String", "psychEngineVersion", "Psych Engine's Version", --Grabs MainMenuState.psychEngineVersion.trim();
-		'SCEversion', "String", "SCEEngineVersion", "SCE's Engine Version", --Grabs MainMenuState.SCEVersion.trim();
+		'SCEversion', "String", "SCEEngineVersion", "SC Engine's Version", --Grabs MainMenuState.SCEVersion.trim();
 
 		'inGameOver', "Boolean", "false", "is in gameOver",
 		'mustHitSection', "Boolean", "false", "is musthitsection",

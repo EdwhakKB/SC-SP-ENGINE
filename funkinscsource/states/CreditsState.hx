@@ -41,7 +41,7 @@ class CreditsState extends MusicBeatState
 
     var defaultList:Array<Array<String>> = [
       // Name - Icon name - Description - Link - BG Color
-      ['SCE Engine Team'],
+      ['Sick Coders Engine\'s Team'],
       [
         'Edwhak_Killbot',
         'edwhak',

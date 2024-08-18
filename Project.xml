@@ -3,7 +3,7 @@
 xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/xsd/project-1.0.4.xsd">
 	<!-- _________________________ Application Settings _________________________ -->
 
-	<app title="Friday Night Funkin': SC ENGINE Edition" file="SCE" packageName="com.SCTeam.SCEE" package="com.SCTeam.SCE" main="Main" version="1.5.25" company="SCTeam" />
+	<app title="Friday Night Funkin': Sick Coders Engine" file="SCE" packageName="com.SCTeam.SCEE" package="com.SCTeam.SCE" main="Main" version="1.5.25" company="SCTeam" />
 
 	<!--Switch Export with Unique ApplicationID and Icon-->
 	<set name="APP_ID" value="0x0100f6c013bbc000" />

@@ -1,4 +1,4 @@
-## SCE Edition
+## Sick Coders Engine
 * This engine brings features the may apply to modified game play!, other results screens!, betadciu things support!, more stuff is added to the engine for it to be modified however *you* intend to use this engine!*
 * SCE brings NotITG modchart support along with many other features!
 * Parallax Stuff by Itz-Miles [THANK YOU SO MUCH!](https://github.com/ShadowMario/FNF-PsychEngine/pull/13397)
