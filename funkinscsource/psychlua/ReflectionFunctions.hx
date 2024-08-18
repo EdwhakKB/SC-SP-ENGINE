@@ -40,7 +40,7 @@ class ReflectionFunctions
         var split:Array<String> = variable.split('.');
         if (Stage.instance.swagBacks.exists(split[0]))
         {
-          Stage.instance.setPropertyObject(variable, value)
+          Stage.instance.setPropertyObject(variable, value);
           return value;
         }
         if (split.length > 1)
