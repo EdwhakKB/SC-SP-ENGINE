@@ -2530,11 +2530,11 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
     holdCoverSkinInputText = new PsychUIInputText(objX, objY + 40, 120, '', 8);
     holdCoverSkinInputText.onChange = function(old:String, cur:String) PlayState.SONG.options.holdCoverSkin = cur;
 
-    strumTextureInputText = new PsychUIInputText(holdCoverSkinInputText.x + 150, holdCoverSkinInputText.y, 120, '');
+    strumTextureInputText = new PsychUIInputText(holdCoverSkinInputText.x + 140, holdCoverSkinInputText.y, 120, '');
     strumTextureInputText.unfocus = function() {
       var changed:Bool = false;
-      if (PlayState.SONG.options.strumSkin != noteTextureInputText.text) changed = true;
-      PlayState.SONG.options.strumSkin = noteTextureInputText.text.trim();
+      if (PlayState.SONG.options.strumSkin != strumTextureInputText.text) changed = true;
+      PlayState.SONG.options.strumSkin = strumTextureInputText.text.trim();
       if (PlayState.SONG.options.strumSkin.trim().length < 1) PlayState.SONG.options.strumSkin = null;
 
       if (changed)
@@ -2546,6 +2546,13 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
           {
             if (note == null) continue;
             note.reloadNote(note.texture);
+            if (note.width > note.height) note.setGraphicSize(GRID_SIZE);
+            else
+              note.setGraphicSize(0, GRID_SIZE);
+
+            note.updateHitbox();
+            // note.x += GRID_SIZE / 2 - note.width / 2;
+            // note.y += GRID_SIZE / 2 - note.height / 2;
           }
           if (strumTextureInputText.text.trim().length > 0) showOutput('Reloaded strums to: "$textureLoad"');
           else
@@ -2892,12 +2899,12 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
     playerNoteStyleInputText = new PsychUIInputText(objX + 150, objY, 100, '', 8);
     playerNoteStyleInputText.onChange = function(old:String, cur:String) PlayState.SONG.options.playerNoteStyle = cur;
 
-    objY += 60;
+    objY += 40;
     opponentStrumStyleInputText = new PsychUIInputText(objX, objY, 100, '', 8);
-    opponentStrumStyleInputText.onChange = function(old:String, cur:String) PlayState.SONG.options.opponentSturmStyle = cur;
+    opponentStrumStyleInputText.onChange = function(old:String, cur:String) PlayState.SONG.options.opponentStrumStyle = cur;
 
     playerStrumStyleInputText = new PsychUIInputText(objX + 150, objY, 100, '', 8);
-    playerSturmStyleInputText.onChange = function(old:String, cur:String) PlayState.SONG.options.playerStrumStyle = cur;
+    playerStrumStyleInputText.onChange = function(old:String, cur:String) PlayState.SONG.options.playerStrumStyle = cur;
 
     tab_group.add(new FlxText(opponentNoteStyleInputText.x, opponentNoteStyleInputText.y - 15, 120, 'Opponent Note Style:'));
     tab_group.add(new FlxText(playerNoteStyleInputText.x, playerNoteStyleInputText.y - 15, 100, 'Player Note Style:'));

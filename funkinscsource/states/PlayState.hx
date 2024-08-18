@@ -621,11 +621,8 @@ class PlayState extends MusicBeatState
     OMANDNOTMSANDNOTITG = (opponentMode && SONG.options.notITG && ClientPrefs.data.middleScroll);
     CoolUtil.opponentModeActive = opponentMode;
 
-    if (notITGMod && SONG.options.notITG)
-    {
-      Note.notITGNotes = true;
-      StrumArrow.notITGStrums = true;
-    }
+    Note.notITGNotes = (notITGMod && SONG.options.notITG);
+    StrumArrow.notITGStrums = (notITGMod && SONG.options.notITG);
 
     // var gameCam:FlxCamera = FlxG.camera;
     camGame = initPsychCamera();
@@ -2790,8 +2787,8 @@ class PlayState extends MusicBeatState
     opponentSectionNoteStyle = "";
     playerSectionNoteStyle = "";
 
-    opponentSectionSturmStyle = "";
-    playerSectionSturmStyle = "";
+    opponentSectionStrumStyle = "";
+    playerSectionStrumStyle = "";
 
     callOnScripts('onSongGenerated', []);
   }
