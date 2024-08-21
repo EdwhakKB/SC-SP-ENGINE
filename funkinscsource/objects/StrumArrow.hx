@@ -281,7 +281,7 @@ class StrumArrow extends ModchartArrow
       animation.add('blue', [5]);
       animation.add('purple', [4]);
 
-      if (inEditor) setGraphicSize(Std.int(width * PlayState.daPixelZoom));
+      if (!inEditor) setGraphicSize(Std.int(width * PlayState.daPixelZoom));
       antialiasing = false;
 
       animation.add('static', [0 + noteData]);
@@ -293,7 +293,7 @@ class StrumArrow extends ModchartArrow
     {
       isPixel = false;
       antialiasing = ClientPrefs.data.antialiasing;
-      if (inEditor) setGraphicSize(Std.int(width * 0.7));
+      if (!inEditor) setGraphicSize(Std.int(width * 0.7));
 
       animation.addByPrefix(colorAnims[noteData], 'arrow' + notesAnim[noteData]);
 
