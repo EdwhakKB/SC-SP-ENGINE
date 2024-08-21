@@ -107,6 +107,9 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<!--Defines whether base game files are included-->
 	<define name="BASE_GAME_FILES"/> <!-- DELETE THIS TO REMOVE MOST BASE GAME FILES AND REDUCE FILE SIZE -->
 
+	<!--Defines whether to use debug with IRIS-->
+	<define name="IRIS_DEBUG"/>
+
 	<!-- Assets -->
 	<assets path="assets/art" />
 	<assets path="assets/images" />
@@ -219,7 +222,7 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 
 	<!--In case you want to use the addons package-->
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
-	<haxelib name="SScript" if="HSCRIPT_ALLOWED" version="19.0.618"/>
+	<haxelib name="hscript-iris" if="HSCRIPT_ALLOWED" version="1.0.2"/>
 
 	<!--Avoid memory leaks with for loops in HScript-->
 	<haxedef name="loop_unroll_max_cost" value="25" />
@@ -250,9 +253,6 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<!-- Defines the SCE's version of modcharting Tools. -->
 	<define name="SCEModchartingTools" if="fnf-modcharting-tools"/>
 	<define name="HScriptImproved" if="hscript-improved"/>
-
-	<!--Avoid memory leaks with for loops in SScript's HScript-->
-	<haxedef name="loop_unroll_max_cost" value="25" />
 
 	<!-- Enables a terminal log prompt on debug builds -->
 	<haxelib name="hxcpp-debug-server" if="debug"/>

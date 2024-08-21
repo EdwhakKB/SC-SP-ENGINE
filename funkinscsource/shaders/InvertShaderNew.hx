@@ -1,6 +1,6 @@
 package shaders;
 
-class InvertShaderNew extends FlxFixedShader
+class InvertShaderNew extends FlxShader
 {
   @:glFragmentSource('
 	#pragma header

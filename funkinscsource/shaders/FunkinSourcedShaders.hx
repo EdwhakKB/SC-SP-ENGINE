@@ -3,17 +3,16 @@ package shaders;
 // STOLEN FROM HAXEFLIXEL DEMO LOL
 // Am I even allowed to use this?
 // Blantados code! Thanks!!
-import flixel.system.FlxAssets.FlxShader;
 import flixel.graphics.tile.FlxGraphicsShader;
 import flixel.math.FlxAngle;
 #if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
 #end
+import openfl.display.GraphicsShader;
 import openfl.display.Shader;
 import openfl.utils.Assets;
 import openfl.Lib;
 import haxe.Json;
-import openfl.display.GraphicsShader;
 import codenameengine.shaders.FunkinShader;
 
 class ShaderEffectNew
@@ -33,7 +32,7 @@ class ShaderEffectNew
   public function destroy() {}
 }
 
-// Effects A-Z WITH SHADERS
+// Effects A-Z WITH SHADERS -glow
 class BarrelBlurEffect extends ShaderEffectNew
 {
   public var shader(default, null):BarrelBlurShader = new BarrelBlurShader();
@@ -72,9 +71,9 @@ class BarrelBlurEffect extends ShaderEffectNew
   }
 }
 
-class BarrelBlurShader extends FlxFixedShader
+class BarrelBlurShader extends FlxShader
 {
-  @:glFragmentSource('#pragmaheader uniform float barrel;
+  @:glFragmentSource('#pragma header uniform float barrel;
 uniform float zoom;
 uniform bool doChroma;
 uniform float angle;
@@ -232,9 +231,9 @@ class BetterBlurEffect extends ShaderEffectNew
   }
 }
 
-class BetterBlurShader extends FlxFixedShader
+class BetterBlurShader extends FlxShader
 {
-  @:glFragmentSource('#pragmaheader // https://www.shadertoy.com/view/Xltfzj
+  @:glFragmentSource('#pragma header // https://www.shadertoy.com/view/Xltfzj
 // https://xorshaders.weebly.com/tutorials/blur-shaders-5-part-2
 uniform float strength;
 uniform float loops;
@@ -300,9 +299,9 @@ class BloomBetterEffect extends ShaderEffectNew
   }
 }
 
-class BloomBetterShader extends FlxFixedShader
+class BloomBetterShader extends FlxShader
 {
-  @:glFragmentSource('#pragmaheader uniform float effect;
+  @:glFragmentSource('#pragma header uniform float effect;
 uniform float strength;
 uniform float contrast;
 uniform float brightness;
@@ -364,9 +363,9 @@ class BlurEffect extends ShaderEffectNew
   }
 }
 
-class BlurShader extends FlxFixedShader
+class BlurShader extends FlxShader
 {
-  @:glFragmentSource('#pragmaheader uniform float strength;
+  @:glFragmentSource('#pragma header uniform float strength;
 uniform float strengthY;
 // uniform bool vertical;
 void main()
@@ -414,9 +413,9 @@ class ChromAbEffect extends ShaderEffectNew
   }
 }
 
-class ChromAbShader extends FlxFixedShader
+class ChromAbShader extends FlxShader
 {
-  @:glFragmentSource('#pragmaheader uniform float strength;
+  @:glFragmentSource('#pragma header uniform float strength;
 void main()
 {
   vec2
@@ -451,9 +450,9 @@ class ChromAbBlueSwapEffect extends ShaderEffectNew
   }
 }
 
-class ChromAbBlueSwapShader extends FlxFixedShader
+class ChromAbBlueSwapShader extends FlxShader
 {
-  @:glFragmentSource('#pragmaheader uniform float strength;
+  @:glFragmentSource('#pragma header uniform float strength;
 void main()
 {
   vec2
@@ -523,9 +522,9 @@ class ChromaticAberrationEffect extends ShaderEffectNew
   }
 }
 
-class ChromaticAberrationShader extends FlxFixedShader
+class ChromaticAberrationShader extends FlxShader
 {
-  @:glFragmentSource('#pragmaheader uniform float rOffset;
+  @:glFragmentSource('#pragma header uniform float rOffset;
 uniform float gOffset;
 uniform float bOffset;
 void main()
@@ -674,10 +673,10 @@ class ColorFillEffect extends ShaderEffectNew
   }
 }
 
-class ColorFillShader extends FlxFixedShader
+class ColorFillShader extends FlxShader
 {
   @:glFragmentSource('
-  #pragmaheader
+  #pragma header
   uniform float red;
 uniform float green;
 uniform float blue;
@@ -723,9 +722,9 @@ class ColorOverrideEffect extends ShaderEffectNew
   }
 }
 
-class ColorOverrideShader extends FlxFixedShader
+class ColorOverrideShader extends FlxShader
 {
-  @:glFragmentSource('#pragmaheader uniform float red;
+  @:glFragmentSource('#pragma header uniform float red;
 uniform float green;
 uniform float blue;
 void main()
@@ -950,7 +949,7 @@ class DesaturationRGBEffect extends ShaderEffectNew
   }
 }
 
-class DesaturationRGBShader extends FlxGraphicsShader
+class DesaturationRGBShader extends FlxShader
 {
   @:glFragmentSource('
     #pragma header
@@ -2277,9 +2276,9 @@ class GreyscaleEffectNew extends ShaderEffectNew
   }
 }
 
-class GreyscaleShaderNew extends FlxFixedShader
+class GreyscaleShaderNew extends FlxShader
 {
-  @:glFragmentSource('#pragmaheader uniform float strength;
+  @:glFragmentSource('#pragma header uniform float strength;
 void main()
 {
   vec2
@@ -2318,9 +2317,9 @@ class HeatEffect extends ShaderEffectNew
   }
 }
 
-class HeatShader extends FlxFixedShader
+class HeatShader extends FlxShader
 {
-  @:glFragmentSource('#pragmaheader uniform float strength;
+  @:glFragmentSource('#pragma header uniform float strength;
 uniform float iTime;
 float rand(vec2 n)
 {
@@ -2549,9 +2548,9 @@ class MirrorRepeatEffect extends ShaderEffectNew
 }
 
 // moved to a seperate shader because not all modcharts need the barrel shit and probably runs slightly better on weaker pcs
-class MirrorRepeatShader extends FlxFixedShader
+class MirrorRepeatShader extends FlxShader
 {
-  @:glFragmentSource('#pragmaheader // written by TheZoroForce240
+  @:glFragmentSource('#pragma header // written by TheZoroForce240
 uniform float zoom;
 uniform float angle;
 uniform float iTime;
@@ -2657,9 +2656,9 @@ class MosaicEffect extends ShaderEffectNew
   }
 }
 
-class MosaicShader extends FlxFixedShader
+class MosaicShader extends FlxShader
 {
-  @:glFragmentSource('#pragmaheader uniform float strength;
+  @:glFragmentSource('#pragma header uniform float strength;
 void main()
 {
   if (strength == 0.0)
@@ -2697,9 +2696,9 @@ class PaletteEffect extends ShaderEffectNew
   }
 }
 
-class PaletteShader extends FlxFixedShader
+class PaletteShader extends FlxShader
 {
-  @:glFragmentSource('#pragmaheader uniform float strength;
+  @:glFragmentSource('#pragma header uniform float strength;
 uniform float paletteSize;
 float palette(float val, float size)
 {
@@ -2752,9 +2751,9 @@ class PerlinSmokeEffect extends ShaderEffectNew
   }
 }
 
-class PerlinSmokeShader extends FlxFixedShader
+class PerlinSmokeShader extends FlxShader
 {
-  @:glFragmentSource('#pragmaheader uniform float iTime;
+  @:glFragmentSource('#pragma header uniform float iTime;
 uniform float waveStrength;
 uniform float smokeStrength;
 // https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83
@@ -3164,9 +3163,9 @@ class RainEffect extends ShaderEffectNew
   }
 }
 
-class RainShader extends FlxFixedShader
+class RainShader extends FlxShader
 {
-  @:glFragmentSource('#pragmaheader uniform float iTime;
+  @:glFragmentSource('#pragma header uniform float iTime;
 vec2 rand(vec2 c)
 {
   mat2
@@ -3285,9 +3284,9 @@ class RayMarchEffect extends ShaderEffectNew
 }
 
 // shader from here: https://www.shadertoy.com/view/WtGXDD
-class RayMarchShader extends FlxFixedShader
+class RayMarchShader extends FlxShader
 {
-  @:glFragmentSource('#pragmaheader // "RayMarching starting point"
+  @:glFragmentSource('#pragma header // "RayMarching starting point"
 // by Martijn Steinrucken aka The Art of Code/BigWings - 2020
 // The MIT License
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -3477,7 +3476,7 @@ class RedAberration extends ShaderEffectNew
   }
 }
 
-class RedAberrationShader extends FlxGraphicsShader
+class RedAberrationShader extends FlxShader
 {
   @:glFragmentSource('
     #pragma header
@@ -3680,9 +3679,9 @@ class ScanlineEffectNew extends ShaderEffectNew
   }
 }
 
-class ScanlineShaderNew extends FlxFixedShader
+class ScanlineShaderNew extends FlxShader
 {
-  @:glFragmentSource('#pragmaheader uniform float strength;
+  @:glFragmentSource('#pragma header uniform float strength;
 uniform float pixelsBetweenEachLine;
 uniform bool smoothVar;
 float m(float a, float b) // was having an issue with mod so i did this to try and fix it
@@ -3744,9 +3743,9 @@ class SobelEffect extends ShaderEffectNew
   }
 }
 
-class SobelShader extends FlxFixedShader
+class SobelShader extends FlxShader
 {
-  @:glFragmentSource('#pragmaheader uniform float strength;
+  @:glFragmentSource('#pragma header uniform float strength;
 uniform float intensity;
 void main()
 {
@@ -4133,9 +4132,9 @@ class ThreeDEffect extends ShaderEffectNew
 // coding is like hitting on women, you never start with the number
 //               -naether
 
-class ThreeDShader extends FlxFixedShader
+class ThreeDShader extends FlxShader
 {
-  @:glFragmentSource('#pragmaheader // fixed by edwhak
+  @:glFragmentSource('#pragma header // fixed by edwhak
 // i just defined and fixed some PI math and fragColor fixed for notes
 #definePI 3.14159265 uniform float xrot = 0.0;
 uniform float yrot = 0.0;
@@ -4407,9 +4406,9 @@ class VCRDistortionEffect extends ShaderEffectNew
   }
 }
 
-class VCRDistortionShader extends FlxFixedShader // https://www.shadertoy.com/view/ldjGzV and https://www.shadertoy.com/view/Ms23DR and https://www.shadertoy.com/view/MsXGD4 and https://www.shadertoy.com/view/Xtccz4
+class VCRDistortionShader extends FlxShader // https://www.shadertoy.com/view/ldjGzV and https://www.shadertoy.com/view/Ms23DR and https://www.shadertoy.com/view/MsXGD4 and https://www.shadertoy.com/view/Xtccz4
 {
-  @:glFragmentSource('#pragmaheader uniform float iTime;
+  @:glFragmentSource('#pragma header uniform float iTime;
 uniform bool vignetteOn;
 uniform bool perspectiveOn;
 uniform bool distortionOn;
@@ -4546,9 +4545,9 @@ class VCRDistortionEffect2 extends ShaderEffectNew // the one used for tails dol
   }
 }
 
-class VCRDistortionShader2 extends FlxFixedShader // https://www.shadertoy.com/view/ldjGzV and https://www.shadertoy.com/view/Ms23DR and https://www.shadertoy.com/view/MsXGD4 and https://www.shadertoy.com/view/Xtccz4
+class VCRDistortionShader2 extends FlxShader // https://www.shadertoy.com/view/ldjGzV and https://www.shadertoy.com/view/Ms23DR and https://www.shadertoy.com/view/MsXGD4 and https://www.shadertoy.com/view/Xtccz4
 {
-  @:glFragmentSource('#pragmaheader uniform float iTime;
+  @:glFragmentSource('#pragma header uniform float iTime;
 uniform bool vignetteOn;
 uniform bool perspectiveOn;
 uniform bool distortionOn;
@@ -5230,9 +5229,9 @@ class VignetteEffect extends ShaderEffectNew
   }
 }
 
-class VignetteShader extends FlxFixedShader
+class VignetteShader extends FlxShader
 {
-  @:glFragmentSource('#pragmaheader uniform float strength;
+  @:glFragmentSource('#pragma header uniform float strength;
 uniform float size;
 uniform float red;
 uniform float green;
@@ -5561,9 +5560,9 @@ class WaveBurstEffect extends ShaderEffectNew
   }
 }
 
-class WaveBurstShader extends FlxFixedShader
+class WaveBurstShader extends FlxShader
 {
-  @:glFragmentSource('#pragmaheader uniform float strength;
+  @:glFragmentSource('#pragma header uniform float strength;
 float nrand(vec2 n)
 {
   return fract(sin(dot(n.xy, vec2(12.9898, 78.233))) * 43758.5453);
@@ -5608,9 +5607,9 @@ class WaterEffect extends ShaderEffectNew
   }
 }
 
-class WaterShader extends FlxFixedShader
+class WaterShader extends FlxShader
 {
-  @:glFragmentSource('#pragmaheader uniform float iTime;
+  @:glFragmentSource('#pragma header uniform float iTime;
 uniform float strength;
 vec2 mirror(vec2 uv)
 {
@@ -5682,7 +5681,7 @@ class WaveCircleEffect extends ShaderEffectNew
   }
 }
 
-class WaveCircleShader extends FlxFixedShader
+class WaveCircleShader extends FlxShader
 {
   @:glFragmentSource('
     #pragma header

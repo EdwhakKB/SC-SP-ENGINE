@@ -1,6 +1,6 @@
 package shaders;
 
-class BloomShaderNew extends FlxFixedShader // Taken from BBPanzu anime mod hueh
+class BloomShaderNew extends FlxShader // Taken from BBPanzu anime mod hueh
 {
   @:glFragmentSource('
 	#pragma header

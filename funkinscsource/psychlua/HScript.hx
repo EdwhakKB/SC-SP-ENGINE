@@ -7,13 +7,19 @@ import psychlua.LuaUtils;
 import psychlua.FunkinLua;
 #end
 #if HSCRIPT_ALLOWED
-import tea.SScript;
-#end
+import crowplexus.iris.Iris;
 
-#if HSCRIPT_ALLOWED
-class HScript extends SScript
+typedef IrisCall =
+{
+  var methodName:String;
+  var methodReturn:Dynamic;
+  var methodVal:Dynamic;
+};
+
+class HScript extends Iris
 {
   public var isHxStage:Bool = false;
+  public var filePath:String;
   public var modFolder:String;
 
   #if LUA_ALLOWED
@@ -24,7 +30,7 @@ class HScript extends SScript
     if (parent.hscript == null)
     {
       var times:Float = Date.now().getTime();
-      Debug.logInfo('initialized sscript interp successfully: ${parent.scriptName} (${Std.int(Date.now().getTime() - times)}ms)');
+      Debug.logInfo('initialized Hscript interp successfully: ${parent.scriptName} (${Std.int(Date.now().getTime() - times)}ms)');
       parent.hscript = new HScript(parent);
     }
   }
@@ -41,11 +47,14 @@ class HScript extends SScript
     else
     {
       hs.varsToBring = varsToBring;
-      hs.doString(code);
-      @:privateAccess
-      if (hs.parsingException != null)
+      try
       {
-        states.PlayState.instance.addTextToDebug('ERROR ON LOADING (${hs.origin}): ${hs.parsingException.message}', FlxColor.RED);
+        hs.scriptStr = code;
+        hs.execute();
+      }
+      catch (e:Dynamic)
+      {
+        FunkinLua.luaTrace('ERROR (${hs.origin}) - $e', false, false, FlxColor.RED);
       }
     }
   }
@@ -65,7 +74,7 @@ class HScript extends SScript
 
     this.isHxStage = isHxStage;
 
-    super(file, false, false);
+    super(null, {name: "hscript-iris", autoRun: false, preset: false});
     #if LUA_ALLOWED
     parentLua = parent;
     if (parent != null)
@@ -74,21 +83,32 @@ class HScript extends SScript
       this.modFolder = parent.modFolder;
     }
     #end
-    if (scriptFile != null && scriptFile.length > 0)
+    filePath = file;
+    if (filePath != null && filePath.length > 0)
     {
-      this.origin = scriptFile;
+      this.origin = filePath;
       #if MODS_ALLOWED
-      var myFolder:Array<String> = scriptFile.split('/');
+      var myFolder:Array<String> = filePath.split('/');
       if (myFolder[0] + '/' == Paths.mods()
         && (Mods.currentModDirectory == myFolder[1] || Mods.getGlobalMods().contains(myFolder[1]))) // is inside mods folder
         this.modFolder = myFolder[1];
       #end
     }
 
-    this.varsToBring = varsToBring;
+    var scriptThing:String = file;
+    if (parent == null && file != null)
+    {
+      var f:String = file.replace('\\', '/');
+      if (f.contains('/') && !f.contains('\n'))
+      {
+        scriptThing = File.getContent(f);
+      }
+    }
+    this.scriptStr = scriptThing;
 
     preset();
     execute();
+    this.varsToBring = varsToBring;
   }
 
   var varsToBring(default, set):Any = null;
@@ -131,7 +151,6 @@ class HScript extends SScript
     set('File', sys.io.File);
     set('FlxTrail', flixel.addons.effects.FlxTrail);
     set('FlxShader', flixel.system.FlxAssets.FlxShader);
-    set('FlxFixedShader', shaders.FlxFixedShader);
     set('FlxBar', flixel.ui.FlxBar);
     set('FlxBackdrop', flixel.addons.display.FlxBackdrop);
     set('StageSizeScaleMode', flixel.system.scaleModes.StageSizeScaleMode);
@@ -435,7 +454,6 @@ class HScript extends SScript
       set('addBehindGF', states.PlayState.instance.addBehindGF);
       set('addBehindDad', states.PlayState.instance.addBehindDad);
       set('addBehindBF', states.PlayState.instance.addBehindBF);
-      setSpecialObject(states.PlayState.instance, false, states.PlayState.instance.instancesExclude);
     }
 
     set("playDadSing", true);
@@ -493,45 +511,35 @@ class HScript extends SScript
   }
 
   // I hate the CALLS CANT THEY BE STATIC FOR ONCE!?
-  public function executeCode(?funcToRun:String = null, ?funcArgs:Array<Dynamic> = null)
+  public function executeCode(?funcToRun:String = null, ?funcArgs:Array<Dynamic> = null):IrisCall
   {
     if (funcToRun == null) return null;
 
     if (!exists(funcToRun))
     {
       #if LUA_ALLOWED
-      FunkinLua.luaTrace(origin + ' - No HScript function named: $funcToRun', false, false, FlxColor.RED);
+      FunkinLua.luaTrace(origin + ' - No function named: $funcToRun', false, false, FlxColor.RED);
       #else
-      states.PlayState.instance.addTextToDebug(origin + ' - No HScript function named: $funcToRun', FlxColor.RED);
+      states.PlayState.instance.addTextToDebug(origin + ' - No function named: $funcToRun', FlxColor.RED);
       #end
       return null;
     }
 
-    final callValue = call(funcToRun, funcArgs);
-    if (!callValue.succeeded)
+    try
     {
-      final e = callValue.exceptions[0];
-      if (e != null)
-      {
-        var msg:String = e.toString();
-        #if LUA_ALLOWED
-        if (parentLua != null)
-        {
-          FunkinLua.luaTrace('$origin: ${parentLua.lastCalledFunction} - $msg', false, false, FlxColor.RED);
-          return null;
-        }
-        #end
-        states.PlayState.instance.addTextToDebug('$origin - $msg', FlxColor.RED);
-      }
-      return null;
+      final callValue:IrisCall = call(funcToRun, funcArgs);
+      return callValue.methodVal;
     }
-    return callValue;
+    catch (e:Dynamic)
+    {
+      Debug.logInfo('ERROR ${funcToRun}: $e');
+    }
+    return null;
   }
 
-  // I hate the CALLS CANT THEY BE STATIC FOR ONCE!?
-  public function executeFunction(funcToRun:String = null, funcArgs:Array<Dynamic>)
+  public function executeFunction(funcToRun:String = null, funcArgs:Array<Dynamic>):IrisCall
   {
-    if (funcToRun == null) return null;
+    if (funcToRun == null || !exists(funcToRun)) return null;
     return call(funcToRun, funcArgs);
   }
 
@@ -539,23 +547,21 @@ class HScript extends SScript
   public static function implement(funk:FunkinLua)
   {
     funk.addLocalCallback("runHaxeCode",
-      function(codeToRun:String, ?varsToBring:Any = null, ?funcToRun:String = null, ?funcArgs:Array<Dynamic> = null):Dynamic {
-        #if SScript
+      function(codeToRun:String, ?varsToBring:Any = null, ?funcToRun:String = null, ?funcArgs:Array<Dynamic> = null):IrisCall {
+        #if HSCRIPT_ALLOWED
         initHaxeModuleCode(funk, codeToRun, varsToBring);
-        final retVal = funk.hscript.executeCode(funcToRun, funcArgs);
-        if (retVal != null)
+        try
         {
-          if (retVal.succeeded) return (retVal.returnValue == null
-            || LuaUtils.isOfTypes(retVal.returnValue, [Bool, Int, Float, String, Array])) ? retVal.returnValue : null;
-
-          final e = retVal.exceptions[0];
-          final calledFunc:String = if (funk.hscript.origin == funk.lastCalledFunction) funcToRun else funk.lastCalledFunction;
-          if (e != null) FunkinLua.luaTrace(funk.hscript.origin + ":" + calledFunc + " - " + e, false, false, FlxColor.RED);
-          return null;
+          final retVal:IrisCall = funk.hscript.executeCode(funcToRun, funcArgs);
+          if (retVal != null)
+          {
+            return (retVal.methodVal == null
+              || LuaUtils.isOfTypes(retVal.methodVal, [Bool, Int, Float, String, Array])) ? retVal.methodVal : null;
+          }
         }
-        else if (funk.hscript.returnValue != null)
+        catch (e:Dynamic)
         {
-          return funk.hscript.returnValue;
+          FunkinLua.luaTrace('ERROR (${funk.hscript.origin}: $funcToRun) - $e', false, false, FlxColor.RED);
         }
         #else
         FunkinLua.luaTrace("runHaxeCode: HScript isn't supported on this platform!", false, false, FlxColor.RED);
@@ -564,21 +570,27 @@ class HScript extends SScript
       });
 
     funk.addLocalCallback("runHaxeFunction", function(funcToRun:String, ?funcArgs:Array<Dynamic> = null) {
-      #if SScript
-      var callValue = funk.hscript.executeFunction(funcToRun, funcArgs);
-      if (!callValue.succeeded)
+      #if HSCRIPT_ALLOWED
+      try
       {
-        var e = callValue.exceptions[0];
-        if (e != null) FunkinLua.luaTrace('ERROR (${funk.hscript.origin}: ${callValue.calledFunction}) - ' + e.details(), false, false, FlxColor.RED);
-        return null;
+        final retVal:IrisCall = funk.hscript.executeFunction(funcToRun, funcArgs);
+        if (retVal != null)
+        {
+          return (retVal.methodVal == null
+            || LuaUtils.isOfTypes(retVal.methodVal, [Bool, Int, Float, String, Array])) ? retVal.methodVal : null;
+        }
       }
-      else
-        return callValue.returnValue;
+      catch (e:Dynamic)
+      {
+        FunkinLua.luaTrace('ERROR (${funk.hscript.origin}: $funcToRun) - $e', false, false, FlxColor.RED);
+      }
+      return null;
       #else
       FunkinLua.luaTrace("runHaxeFunction: HScript isn't supported on this platform!", false, false, FlxColor.RED);
+      return null;
       #end
     });
-    // This function is unnecessary because import already exists in SScript as a native feature
+    // This function is unnecessary because import already exists in HScript as a native feature
     funk.addLocalCallback("addHaxeLibrary", function(libName:String, ?libPackage:String = '') {
       var str:String = '';
       if (libPackage.length > 0) str = libPackage + '.';
@@ -587,9 +599,7 @@ class HScript extends SScript
       var c:Dynamic = Type.resolveClass(str + libName);
       if (c == null) c = Type.resolveEnum(str + libName);
 
-      #if SScript
-      if (c != null) SScript.globalVariables[libName] = c;
-
+      #if HScript
       if (funk.hscript != null)
       {
         try
@@ -608,6 +618,17 @@ class HScript extends SScript
   }
   #end
 
+  override public function set(name:String, value:Dynamic, allowOverride:Bool = false):Void
+  {
+    // should always override by default
+    super.set(name, value, true);
+  }
+
+  /*override function irisPrint(v):Void
+    {
+      FunkinLua.luaTrace('ERROR (${this.origin}:${interp.posInfos().lineNumber}): ${v}');
+      Debug.logInfo('[${ruleSet.name}:${interp.posInfos().lineNumber}]: ${v}\n');
+  }*/
   override public function destroy()
   {
     origin = null;
@@ -625,13 +646,8 @@ class HScript extends SScript
 
   function set_varsToBring(values:Any)
   {
-    if (varsToBring != null)
-    {
-      for (key in Reflect.fields(varsToBring))
-      {
-        unset(key.trim());
-      }
-    }
+    if (varsToBring != null) for (key in Reflect.fields(varsToBring))
+      if (exists(key.trim())) interp.variables.remove(key.trim());
 
     if (values != null)
     {

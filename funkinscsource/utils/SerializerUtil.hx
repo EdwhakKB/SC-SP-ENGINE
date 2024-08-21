@@ -4,13 +4,6 @@ import haxe.Json;
 import haxe.io.Bytes;
 import thx.semver.Version;
 
-typedef ScoreInput =
-{
-  var d:Int; // Key pressed
-  var l:Int; // Duration
-  var t:Int; // Start timestamp
-}
-
 /**
  * Functions dedicated to serializing and deserializing data.
  * NOTE: Use `json2object` wherever possible, it's way more efficient.

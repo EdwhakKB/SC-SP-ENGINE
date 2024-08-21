@@ -22,7 +22,6 @@ import haxe.CallStack;
 import haxe.io.Path;
 #end
 // Other Things
-import backend.ColorBlindness;
 import debug.FPSCounter;
 import gamejolt.GameJoltGroup.GJToastManager;
 import gamejolt.*;
@@ -32,8 +31,6 @@ class Main extends Sprite
 {
   public static var focused:Bool = true;
   public static var fpsVar:FPSCounter;
-
-  public static var colorFilter:ColorBlindness;
 
   public static var appName:String = ''; // Application name.
 

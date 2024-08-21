@@ -10,7 +10,7 @@ import backend.Mods;
  */
 class GlobalScript
 {
-  public static var scripts:ScriptPack;
+  public static var codeNameScripts:ScriptPack;
 
   public static function init()
   {
@@ -39,10 +39,11 @@ class GlobalScript
       call("postUpdate", [FlxG.elapsed]);
       if (FlxG.keys.justPressed.F5)
       {
-        if (scripts.scripts.length > 0)
+        if (codeNameScripts != null && codeNameScripts.scripts.length > 0)
         {
           Debug.logInfo('Reloading global script...');
-          scripts.reload();
+          for (script in codeNameScripts.scripts)
+            if (script != null && script.active) script.reload();
           Debug.logInfo('Global script successfully reloaded.');
         }
         else
@@ -74,7 +75,13 @@ class GlobalScript
 
   public static function call(name:String, ?args:Array<Dynamic>)
   {
-    if (scripts != null) scripts.call(name, args);
+    if (codeNameScripts != null && codeNameScripts.scripts.length > 0)
+    {
+      for (script in codeNameScripts.scripts)
+      {
+        if (script != null && script.active) script.call(name, args);
+      }
+    }
   }
 }
 #end

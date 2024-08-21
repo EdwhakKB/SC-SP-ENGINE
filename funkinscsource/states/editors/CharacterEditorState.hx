@@ -1007,6 +1007,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
   var holdingFrameTime:Float = 0;
   var holdingFrameElapsed:Float = 0;
   var undoOffsets:Array<Float> = null;
+  var cameraPosition:Array<Float> = [0, 0];
 
   override function update(elapsed:Float)
   {
@@ -1035,6 +1036,18 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
     if (FlxG.keys.pressed.L) FlxG.camera.scroll.x += elapsed * 500 * shiftMult * ctrlMult;
     if (FlxG.keys.pressed.I) FlxG.camera.scroll.y -= elapsed * 500 * shiftMult * ctrlMult;
 
+    var mouse = FlxG.mouse.getScreenPosition();
+    if (FlxG.mouse.justPressed && !FlxG.mouse.overlaps(UI_characterbox))
+    {
+      cameraPosition[0] = FlxG.camera.scroll.x + mouse.x;
+      cameraPosition[1] = FlxG.camera.scroll.y + mouse.y;
+    }
+    else if (FlxG.mouse.pressed && !FlxG.mouse.overlaps(UI_characterbox))
+    {
+      FlxG.camera.scroll.x = cameraPosition[0] - mouse.x;
+      FlxG.camera.scroll.y = cameraPosition[1] - mouse.y;
+    }
+
     var lastZoom = FlxG.camera.zoom;
     if (FlxG.keys.justPressed.R && !FlxG.keys.pressed.CONTROL) FlxG.camera.zoom = 1;
     else if (FlxG.keys.pressed.E && FlxG.camera.zoom < 3)
@@ -1051,10 +1064,10 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
     if (lastZoom != FlxG.camera.zoom) cameraZoomText.text = 'Zoom: ' + FlxMath.roundDecimal(FlxG.camera.zoom, 2) + 'x';
 
     /*if (FlxG.keys.justPressed.TAB)
-      {
-        changedOffsetType = !changedOffsetType;
-        reloadAnimList();
-    }*/
+        {
+          changedOffsetType = !changedOffsetType;
+          reloadAnimList();
+      }*/
 
     // CHARACTER CONTROLS
     var changedAnim:Bool = false;
@@ -1276,7 +1289,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 
   inline function updatePointerPos(?snap:Bool = true)
   {
-    if(character == null || cameraFollowPointer == null) return;
+    if (character == null || cameraFollowPointer == null) return;
     var offX:Float = 0;
     var offY:Float = 0;
     if (!character.isPlayer)
@@ -1338,10 +1351,10 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
       text.fieldWidth = 400;
       text.fieldHeight = 20;
       /*if (changedOffsetType)
-          if (character.animPlayerOffsets != null)
-            text.text = 'Player Offset: ' + anim.anim + ": " + anim.playerOffsets;
-          else text.text = anim.anim + ": " + anim.offsets;
-        else text.text = anim.anim + ": " + anim.offsets; */
+            if (character.animPlayerOffsets != null)
+              text.text = 'Player Offset: ' + anim.anim + ": " + anim.playerOffsets;
+            else text.text = anim.anim + ": " + anim.offsets;
+          else text.text = anim.anim + ": " + anim.offsets; */
       text.text = anim.anim + ": " + (anim.playerOffsets != null ? anim.playerOffsets : anim.offsets);
       text.setFormat(null, 16, FlxColor.WHITE, LEFT, OUTLINE_FAST, FlxColor.BLACK);
       text.scrollFactor.set();
@@ -1476,8 +1489,8 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
   }
 
   /**
-   * Called when the save file dialog is cancelled.
-   */
+     * Called when the save file dialog is cancelled.
+     */
   function onSaveCancel(_):Void
   {
     if (_file == null) return;
@@ -1488,8 +1501,8 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
   }
 
   /**
-   * Called if there is an error while saving the gameplay recording.
-   */
+     * Called if there is an error while saving the gameplay recording.
+     */
   function onSaveError(_):Void
   {
     if (_file == null) return;

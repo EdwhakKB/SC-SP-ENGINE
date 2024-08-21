@@ -1,4 +1,4 @@
-Here we add state scripts scripts, for lua and SScript (HScript for Psych)
+Here we add state scripts scripts, for lua and HScript for Psych
 If you wanna be more advanced with state scripts use the advanced folder (only accepts HScript from CodeNameEngine)
 No lua allowed in that folder.
 

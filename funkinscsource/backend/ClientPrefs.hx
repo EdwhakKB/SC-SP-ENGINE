@@ -194,8 +194,6 @@ import states.TitleState;
 
   public var pauseCountDown:Bool = false;
 
-  public var colorFilter:String = "NONE";
-
   public var vanillaStrumAnimations:Bool = false;
   public var holdCoverPlay:Bool = true;
 }

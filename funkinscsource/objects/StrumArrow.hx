@@ -91,7 +91,9 @@ class StrumArrow extends ModchartArrow
     return value;
   }
 
-  public function new(x:Float, y:Float, leData:Int, player:Int, ?style:String, ?quantizedNotes:Bool)
+  public var inEditor:Bool = false;
+
+  public function new(x:Float, y:Float, leData:Int, player:Int, ?style:String, ?quantizedNotes:Bool, ?inEditor:Bool)
   {
     direction = 90;
     rgbShader = new RGBShaderReference(this, !quantizedNotes ? Note.initializeGlobalRGBShader(leData) : Note.initializeGlobalQuantRGBShader(leData));
@@ -116,6 +118,7 @@ class StrumArrow extends ModchartArrow
     this.noteData = leData;
     this.daStyle = style;
     this.quantizedNotes = quantizedNotes;
+    this.inEditor = inEditor;
     super(x, y);
 
     var skin:String = null;
@@ -278,7 +281,7 @@ class StrumArrow extends ModchartArrow
       animation.add('blue', [5]);
       animation.add('purple', [4]);
 
-      setGraphicSize(Std.int(width * PlayState.daPixelZoom));
+      if (inEditor) setGraphicSize(Std.int(width * PlayState.daPixelZoom));
       antialiasing = false;
 
       animation.add('static', [0 + noteData]);
@@ -290,7 +293,7 @@ class StrumArrow extends ModchartArrow
     {
       isPixel = false;
       antialiasing = ClientPrefs.data.antialiasing;
-      setGraphicSize(Std.int(width * 0.7));
+      if (inEditor) setGraphicSize(Std.int(width * 0.7));
 
       animation.addByPrefix(colorAnims[noteData], 'arrow' + notesAnim[noteData]);
 

@@ -36,9 +36,9 @@
       "version": null
     },
     {
-      "name": "SScript",
+      "name": "hscript-iris",
       "type": "haxelib",
-      "version": "19.0.618"
+      "version": "1.0.2"
     },
     {
       "name": "markdown",

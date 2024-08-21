@@ -898,7 +898,9 @@ class FreeplayState extends MusicBeatState
         ease: FlxEase.quadInOut
       });
 
+    #if HSCRIPT_ALLOWED
     freeplayScript.call('onChangeDiffPost', [change]);
+    #end
   }
 
   function changeSelection(change:Int = 0, playSound:Bool = true)

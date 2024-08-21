@@ -68,7 +68,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
     ],
     [
       'Hey!',
-      "Plays the \"Hey!\" animation from Bopeebo,\nValue 1: BF = Only Boyfriend, GF = Only Girlfriend,\nSomething else = Both.\nValue 2: Custom animation duration,\nleave it blank for 0.6s"
+      "Plays the \"Hey!\" animation from Bopeebo,\nValue 1: BF / 0 = Only Boyfriend, GF / 1 = Only Girlfriend,\nDAD / 2 = Only Opponent\nMOM / 3 = Only SecondOpponent\n4 = All\nValue 2: Custom animation duration,\nleave it blank for 0.6s"
     ],
     [
       'Set GF Speed',
@@ -91,7 +91,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
     ],
     [
       'Camera Follow Pos',
-      "Value 1: X\nValue 2: Y\n\nThe camera won't change the follow point\nafter using this, for getting it back\nto normal, leave both values blank."
+      "Value 1: X\nValue 2: Y\n\nThe camera won't change the follow point\nafter using this, for getting it back\nto normal, leave both values blank.\nValue 3: Camera zoom."
     ],
     [
       'Alt Idle Animation',
@@ -103,16 +103,38 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
     ],
     [
       'Change Character',
-      "Value 1: Character to change (Dad, BF, GF)\nValue 2: New character's name"
+      "Value 1: Character to change (BF / 0, GF / 2, Dad / 1, Mom / 3, Other Name / Other Num = (Custom Character))\nValue 2: New character's name"
     ],
     [
       'Change Scroll Speed',
-      "Value 1: Scroll Speed Multiplier (1 is default)\nValue 2: Time it takes to change fully in seconds."
+      "Value 1: Scroll Speed Multiplier (1 is default)\nValue 2: Time it takes to change fully in seconds.\nValue 3: Ease"
     ],
     ['Set Property', "Value 1: Variable name\nValue 2: New value"],
     [
       'Play Sound',
       "Value 1: Sound file name\nValue 2: Volume (Default: 1), ranges from 0 to 1"
+    ],
+    [
+      'Reset Extra Arguments',
+      "Value 1: (Dad / 0, BF / 1, GF / 2, Mom / 4, Other Name), Resets Some Default Arguments If Changed."
+    ],
+    ['Change Stage', "Value 1: Stage Name, Changes Stage to specified stage."],
+    [
+      'Add Cinematic Bars',
+      "Value 1: Speed of the bars apperance\nValue 2: Thickness of bars"
+    ],
+    ['Remove Cinematic Bars', "Value 1: Time taken for bars to disappear"],
+    [
+      'Change Camera Props',
+      "Value 1: X, Y, Zoom (Split by ',' so, 100, 100, 1)\nValue 2: If it tweens the values (true or false)\nValue 3: Eases for values, X, Y, Zoom Tweens Ex. (Linear, Sine, ExpoIn) \nValue 4: Time for eases to happen (0.2, 0.3, 1.2)"
+    ],
+    [
+      "Default Camera Flash",
+      "Value 1: Color Ex. FFFFFF\nValue 2: Time for flash to last\nValue 3: Camera Ex. camGame\nValue 4: Alpha of flash (how visible the flashSprite is)"
+    ],
+    [
+      "Default Set Cam Zoom",
+      "Value 1: Zoom For Camera\nValue 2: Time it may take (optional, leave blank for instant affect)"
     ]
   ];
 
@@ -303,7 +325,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
     for (i in 0...Std.int(GRID_PLAYERS * GRID_COLUMNS_PER_PLAYER))
     {
-      var note:StrumArrow = new StrumArrow(startX + (GRID_SIZE * i), startY, i % GRID_COLUMNS_PER_PLAYER, 0);
+      var note:StrumArrow = new StrumArrow(startX + (GRID_SIZE * i), startY, i % GRID_COLUMNS_PER_PLAYER, 0, PlayState.SONG?.options?.strumSkin, false, true);
       note.scrollFactor.set();
       note.playAnim('static');
       note.alpha = 0.4;
@@ -313,6 +335,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
         note.setGraphicSize(0, GRID_SIZE);
 
       note.updateHitbox();
+
       note.x += GRID_SIZE / 2 - note.width / 2;
       note.y += GRID_SIZE / 2 - note.height / 2;
       strumLineNotes.add(note);
@@ -517,6 +540,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
       "Shift + Click - Select/Unselect Note(s)",
       "Right Click - Selection Box",
       "",
+      "R - Reset Section",
       "Z/X - Zoom in/out",
       "Left/Right - Change Snap",
       #if FLX_PITCH
@@ -929,6 +953,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
               Conductor.songPosition = FlxG.sound.music.time = cachedSectionTimes[curSec] + 0.000001;
             }
           }
+        }
+        else if (FlxG.keys.justPressed.R)
+        {
+          Conductor.songPosition = FlxG.sound.music.time = cachedSectionTimes[curSec] + (curSec > 0 ? 0.000001 : 0);
         }
         else if (FlxG.keys.pressed.W != FlxG.keys.pressed.S || FlxG.mouse.wheel != 0)
         {
@@ -2510,7 +2538,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
           for (note in notes)
           {
             if (note == null) continue;
-            note.reloadToNewTexture(note, note.texture);
+            note.reloadToNewTexture(note.texture);
           }
           if (noteTextureInputText.text.trim().length > 0) showOutput('Reloaded notes to: "$textureLoad"');
           else
@@ -4678,13 +4706,13 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
   function updateNotesRGB()
   {
-    PlayState.SONG.options.disableNoteRGB = noRGBCheckBox.checked;
+    PlayState.SONG.options.disableNoteRGB = noRGBCheckBox.checked ? true : false;
 
     for (note in notes)
     {
       if (note == null) continue;
 
-      note.setShaderEnabled(note, !noRGBCheckBox.checked);
+      note.setShaderEnabled(noRGBCheckBox.checked ? false : true);
       if (note.rgbShader.enabled)
       {
         var data = backend.NoteTypesConfig.loadNoteTypeData(note.noteType);
@@ -4693,7 +4721,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
         for (line in data)
         {
           var prop:String = line.property.join('.');
-          if (prop == 'rgbShader.enabled') note.setShaderEnabled(note, line.value);
+          if (prop == 'rgbShader.enabled') note.setShaderEnabled(line.value);
         }
       }
     }
@@ -4701,13 +4729,13 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
   function updateStrumsRGB()
   {
-    PlayState.SONG.options.disableStrumRGB = noStrumRGBCheckBox.checked;
+    PlayState.SONG.options.disableStrumRGB = noStrumRGBCheckBox.checked ? true : false;
     for (note in strumLineNotes)
-      note.rgbShader.enabled = !noStrumRGBCheckBox.checked;
+      note.rgbShader.enabled = noStrumRGBCheckBox.checked ? true : false;
   }
 
   function updateSplashesRGB()
-    PlayState.SONG.options.disableSplashRGB = noSplashRGBCheckBox.checked;
+    PlayState.SONG.options.disableSplashRGB = noSplashRGBCheckBox.checked ? true : false;
 
   function updateGridVisibility()
   {

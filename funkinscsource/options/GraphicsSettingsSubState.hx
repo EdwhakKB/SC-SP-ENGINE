@@ -45,11 +45,6 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
       'shaders', BOOL);
     addOption(option);
 
-    var option:Option = new Option('Color Filter: ', 'Choose your color blindness filter of your choice.', 'colorFilter', STRING,
-      ['NONE', "DEUTERANOPIA", "PROTANOPIA", "TRITANOPIA"]);
-    option.onChange = onChangeColorFilter;
-    addOption(option);
-
     var option:Option = new Option('GPU Caching', // Name
       "If checked, allows the GPU to be used for caching textures, decreasing RAM usage.\nDon't turn this on if you have a shitty Graphics Card.", // Description
       'cacheOnGPU', BOOL);
@@ -69,11 +64,6 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
 
     super();
     insert(1, boyfriend);
-  }
-
-  function onChangeColorFilter()
-  {
-    backend.ColorBlindness.setFilter();
   }
 
   function onChangeAntiAliasing()

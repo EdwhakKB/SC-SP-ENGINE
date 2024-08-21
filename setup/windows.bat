@@ -8,7 +8,7 @@ haxelib install openfl
 haxelib install flixel
 haxelib install tjson
 haxelib install flixel-tools
-haxelib install SScript 19.0.618
+haxelib install hscript-iris 1.0.2
 haxelib install hscript
 haxelib install hxgamejolt-api
 haxelib install markdown

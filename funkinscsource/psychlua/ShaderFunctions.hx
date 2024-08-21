@@ -342,15 +342,15 @@ class ShaderFunctions
       funk.set("setActorShader", function(actorStr:String, shaderName:String) {
         var shad = FunkinLua.lua_Shaders.get(shaderName);
         var actor = LuaUtils.getActorByName(actorStr);
-        var spr:FlxSprite = MusicBeatState.getVariables().get(actorStr);
+        var spr:FlxSprite = cast(MusicBeatState.getVariables().get(actorStr), FlxSprite);
 
         if (spr == null)
         {
           var split:Array<String> = actorStr.split('.');
-          spr = LuaUtils.getObjectDirectly(split[0]);
+          spr = cast(LuaUtils.getObjectDirectly(split[0]), FlxSprite);
           if (split.length > 1)
           {
-            spr = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
+            spr = cast(LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]), FlxSprite);
           }
         }
 

@@ -138,39 +138,39 @@ class MetaNote extends Note
     }
   }
 
-  public function reloadToNewTexture(note:MetaNote, texture:String)
+  public function reloadToNewTexture(texture:String)
   {
-    note.reloadNote(texture);
-    if (note.width > note.height) note.setGraphicSize(ChartingState.GRID_SIZE);
+    reloadNote(texture);
+    if (width > height) setGraphicSize(ChartingState.GRID_SIZE);
     else
-      note.setGraphicSize(0, ChartingState.GRID_SIZE);
+      setGraphicSize(0, ChartingState.GRID_SIZE);
 
-    note.updateHitbox();
+    updateHitbox();
 
-    if (note.sustainLength > 0)
+    if (sustainLength > 0)
     {
-      if (note.endSprite != null)
+      if (endSprite != null)
       {
-        note.endSprite.reloadNote(texture);
-        note.endSprite.setGraphicSize(ChartingState.GRID_SIZE * 0.5, ChartingState.GRID_SIZE * 0.5);
-        note.endSprite.updateHitbox();
+        endSprite.reloadNote(texture);
+        endSprite.setGraphicSize(ChartingState.GRID_SIZE * 0.5, ChartingState.GRID_SIZE * 0.5);
+        endSprite.updateHitbox();
       }
-      if (note.sustainSprite != null)
+      if (sustainSprite != null)
       {
-        note.sustainSprite.reloadNote(texture);
-        note.sustainSprite.setGraphicSize(ChartingState.GRID_SIZE * 0.5, note.sustainLength);
-        note.sustainSprite.updateHitbox();
+        sustainSprite.reloadNote(texture);
+        sustainSprite.setGraphicSize(ChartingState.GRID_SIZE * 0.5, sustainLength);
+        sustainSprite.updateHitbox();
       }
     }
   }
 
-  public function setShaderEnabled(note:MetaNote, enabled:Bool)
+  public function setShaderEnabled(isEnabled:Bool)
   {
-    note.rgbShader.enabled = enabled;
-    if (note.sustainLength > 0)
+    rgbShader.enabled = isEnabled;
+    if (sustainLength > 0)
     {
-      if (note.endSprite != null) note.endSprite.rgbShader.enabled = enabled;
-      if (note.sustainSprite != null) note.sustainSprite.rgbShader.enabled = enabled;
+      if (endSprite != null) endSprite.rgbShader.enabled = isEnabled;
+      if (sustainSprite != null) sustainSprite.rgbShader.enabled = isEnabled;
     }
   }
 

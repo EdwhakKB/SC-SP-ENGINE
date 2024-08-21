@@ -1,6 +1,6 @@
 package shaders;
 
-class WarpShader extends FlxFixedShader // modified from https://www.shadertoy.com/view/wlScRz
+class WarpShader extends FlxShader // modified from https://www.shadertoy.com/view/wlScRz
 {
   @:glFragmentSource('
 	#pragma header

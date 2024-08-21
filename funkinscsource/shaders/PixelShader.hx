@@ -1,6 +1,6 @@
 package shaders;
 
-class PixelShader extends FlxFixedShader // https://www.shadertoy.com/view/4l2fDz
+class PixelShader extends FlxShader // https://www.shadertoy.com/view/4l2fDz
 {
   public var upFloat:Float = 0.0;
 

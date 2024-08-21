@@ -380,6 +380,7 @@ class Note extends ModchartArrow implements ICloneable<Note>
     this.isSustainNote = sustainNote;
     this.noteSkin = noteSkin;
     this.moves = false;
+    this.inEditor = inEditor;
 
     x += (ClientPrefs.data.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X) + 50;
     // MAKE SURE ITS DEFINITELY OFF SCREEN?
@@ -572,41 +573,43 @@ class Note extends ModchartArrow implements ICloneable<Note>
 
     loadNoteTexture(skin, skinPostfix, skinPixel);
 
-    var becomePixelNote:Bool = isPixel;
-
-    if (isSustainNote)
+    if (!inEditor)
     {
-      scale.y = lastScaleY;
+      var becomePixelNote:Bool = isPixel;
 
-      if (changedSkin)
+      if (isSustainNote)
       {
-        if (wasPixelNote && !becomePixelNote) // fixes the scaling
+        scale.y = lastScaleY;
+
+        if (changedSkin)
         {
-          if (PlayState.SONG != null && !PlayState.SONG.options.notITG)
+          if (wasPixelNote && !becomePixelNote) // fixes the scaling
           {
-            scale.y /= PlayState.daPixelZoom;
-            scale.y *= 0.7;
+            if (PlayState.SONG != null && !PlayState.SONG.options.notITG)
+            {
+              scale.y /= PlayState.daPixelZoom;
+              scale.y *= 0.7;
+            }
+
+            offsetX += 3;
           }
 
-          offsetX += 3;
-        }
-
-        if (becomePixelNote && !wasPixelNote) // fixes the scaling
-        {
-          if (PlayState.SONG != null && !PlayState.SONG.options.notITG)
+          if (becomePixelNote && !wasPixelNote) // fixes the scaling
           {
-            if (getNoteSkinPostfix().contains('future')) scale.y /= 1.26;
-            else
-              scale.y /= 0.7;
-            scale.y *= PlayState.daPixelZoom;
-          }
+            if (PlayState.SONG != null && !PlayState.SONG.options.notITG)
+            {
+              if (getNoteSkinPostfix().contains('future')) scale.y /= 1.26;
+              else
+                scale.y /= 0.7;
+              scale.y *= PlayState.daPixelZoom;
+            }
 
-          offsetX -= 3;
+            offsetX -= 3;
+          }
         }
       }
+      updateHitbox();
     }
-
-    updateHitbox();
 
     if (animName != null) animation.play(animName, true);
     if (noteSkin != skin && noteSkin != noteStyle) noteSkin = skin;
@@ -715,7 +718,7 @@ class Note extends ModchartArrow implements ICloneable<Note>
     if (pixel)
     {
       isPixel = true;
-      setGraphicSize(Std.int(width * PlayState.daPixelZoom));
+      if (!inEditor) setGraphicSize(Std.int(width * PlayState.daPixelZoom));
       if (isSustainNote)
       {
         animation.add(colArray[noteData] + 'holdend', [noteData + 4], 24, true);
@@ -725,7 +728,7 @@ class Note extends ModchartArrow implements ICloneable<Note>
         animation.add(colArray[noteData] + 'Scroll', [noteData + 4], 24, true);
       antialiasing = false;
 
-      if (isSustainNote)
+      if (!inEditor && isSustainNote)
       {
         offsetX += _lastNoteOffX;
         _lastNoteOffX = (width - 7) * (PlayState.daPixelZoom / 2);
@@ -744,13 +747,16 @@ class Note extends ModchartArrow implements ICloneable<Note>
       else
         animation.addByPrefix(colArray[noteData] + 'Scroll', colArray[noteData] + '0');
 
-      setGraphicSize(Std.int(width * 0.7));
-      updateHitbox();
-
-      if (!isSustainNote)
+      if (!inEditor)
       {
-        centerOffsets();
-        centerOrigin();
+        setGraphicSize(Std.int(width * 0.7));
+        updateHitbox();
+
+        if (!isSustainNote)
+        {
+          centerOffsets();
+          centerOrigin();
+        }
       }
     }
   }

@@ -52,7 +52,6 @@ class Init extends FlxState
     ClientPrefs.loadPrefs();
     ClientPrefs.keybindSaveLoad();
     Language.reloadPhrases();
-    backend.ColorBlindness.setFilter();
 
     FlxG.fixedTimestep = false;
     FlxG.game.focusLostFramerate = 60;

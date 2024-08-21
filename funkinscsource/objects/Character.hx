@@ -323,6 +323,16 @@ class Character extends FunkinSCSprite
    */
   public var missingText:FlxText;
 
+  /**
+   * How frequent gf dances (used for other character's when useGFSpeed is active!)
+   */
+  public var gfSpeed:Int = 2;
+
+  /**
+   * If character uses GF Speed to dance (normally for LEFT AND RIGHT DANCES!)
+   */
+  public var useGFSpeed:Bool = false;
+
   public function new(x:Float, y:Float, ?character:String = 'bf', ?isPlayer:Bool = false)
   {
     super(x, y);
@@ -802,11 +812,13 @@ class Character extends FunkinSCSprite
     }
   }
 
-  public dynamic function beatDance(isGF:Bool, beat:Int, speed:Int):Bool
+  public dynamic function beatDance(beat:Int):Bool
   {
+    var isGF:Bool = curCharacter.startsWith('gf');
+    var speed:Int = useGFSpeed ? gfSpeed : idleBeat;
     return ((((beat % speed == 0) && !this.isDancingType()) || ((beat % speed != 0) && this.isDancingType()))
       && !isGF)
-      || (isGF && (((beat % speed == 0) && (this.isDancingType() || !this.isDancingType()))));
+      || (isGF && (beat % speed == 0));
   }
 
   public function loadMappedAnims(?defaultJson:String = 'picospeaker', ?tankManNotes:Bool):Void

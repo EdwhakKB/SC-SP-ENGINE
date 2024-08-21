@@ -17,7 +17,7 @@ class HoldCoverGroup extends FlxTypedSpriteGroup<HoldCoverSprite>
 
   public dynamic function addHolds(i:Int)
   {
-    var colors:Array<String> = ["Purple", "Blue", "Green", "Red", "Purple", "Blue", "Green", "Red"];
+    var colors:Array<String> = ["Purple", "Blue", "Green", "Red"];
     var hcolor:String = colors[i];
     var hold:HoldCoverSprite = new HoldCoverSprite();
     hold.initFrames(i, hcolor);

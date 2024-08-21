@@ -1242,7 +1242,7 @@ class FunkinLua
 
       set("getMidpointX", function(variable:String) {
         var split:Array<String> = variable.split('.');
-        var obj:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
+        var obj:FlxObject = LuaUtils.getObjectDirectly(split[0]);
         if (split.length > 1)
         {
           obj = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
@@ -1253,7 +1253,7 @@ class FunkinLua
       });
       set("getMidpointY", function(variable:String) {
         var split:Array<String> = variable.split('.');
-        var obj:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
+        var obj:FlxObject = LuaUtils.getObjectDirectly(split[0]);
         if (split.length > 1)
         {
           obj = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
@@ -1286,7 +1286,7 @@ class FunkinLua
       });
       set("getScreenPositionX", function(variable:String, ?camera:String = 'game') {
         var split:Array<String> = variable.split('.');
-        var obj:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
+        var obj:FlxObject = LuaUtils.getObjectDirectly(split[0]);
         var cam:FlxCamera = LuaUtils.cameraFromString(camera);
         if (split.length > 1)
         {
@@ -1298,7 +1298,7 @@ class FunkinLua
       });
       set("getScreenPositionY", function(variable:String, ?camera:String = 'game') {
         var split:Array<String> = variable.split('.');
-        var obj:FlxSprite = LuaUtils.getObjectDirectly(split[0]);
+        var obj:FlxObject = LuaUtils.getObjectDirectly(split[0]);
         var cam:FlxCamera = LuaUtils.cameraFromString(camera);
         if (split.length > 1)
         {
@@ -1849,7 +1849,7 @@ class FunkinLua
         return false;
       });
       set("screenCenter", function(obj:String, pos:String = 'xy') {
-        var spr:FlxSprite = LuaUtils.getObjectDirectly(obj);
+        var spr:FlxObject = LuaUtils.getObjectDirectly(obj);
 
         if (spr == null)
         {
@@ -2555,7 +2555,7 @@ class FunkinLua
   public function addLocalCallback(name:String, myFunction:Dynamic)
   {
     callbacks.set(name, myFunction);
-    Lua_helper.add_callback(lua, name, null); // just so that it gets called
+    set(name, null); // just so that it gets called
   }
 
   #if (MODS_ALLOWED && !flash && sys)

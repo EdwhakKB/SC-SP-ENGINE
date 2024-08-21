@@ -19,8 +19,8 @@ import psychlua.HScript;
 #if (HSCRIPT_ALLOWED && HScriptImproved)
 import codenameengine.scripting.Script as HScriptCode;
 #end
-#if SScript
-import tea.SScript;
+#if HSCRIPT_ALLOWED
+import crowplexus.iris.Iris;
 #end
 
 class Stage extends BaseStage
@@ -56,11 +56,10 @@ class Stage extends BaseStage
 
   #if HSCRIPT_ALLOWED
   public var hscriptArray:Array<psychlua.HScript> = [];
-  public var instancesExclude:Array<String> = [];
   #end
 
   #if (HSCRIPT_ALLOWED && HScriptImproved)
-  public var scripts:codenameengine.scripting.ScriptPack;
+  public var codeNameScripts:codenameengine.scripting.ScriptPack;
   #end
 
   public var preloading:Bool = false;
@@ -79,7 +78,7 @@ class Stage extends BaseStage
     instance = this;
 
     #if (HSCRIPT_ALLOWED && HScriptImproved)
-    if (scripts == null) (scripts = new codenameengine.scripting.ScriptPack('Stage')).setParent(this);
+    if (codeNameScripts == null) (codeNameScripts = new codenameengine.scripting.ScriptPack('Stage')).setParent(this);
     #end
   }
 
@@ -462,7 +461,7 @@ class Stage extends BaseStage
 
       if (FileSystem.exists(scriptToLoad))
       {
-        if (SScript.global.exists(scriptToLoad)) return false;
+        if (Iris.instances.exists(scriptToLoad)) return false;
 
         initHScript(scriptToLoad);
         return true;
@@ -473,54 +472,21 @@ class Stage extends BaseStage
 
   public function initHScript(file:String)
   {
+    var newScript:HScript = null;
     try
     {
       var times:Float = Date.now().getTime();
-      var newScript:HScript = new HScript(null, file, null, true);
-      if (newScript.parsingException != null)
-      {
-        var e = newScript.parsingException.message;
-        if (!e.contains(newScript.origin)) e = '${newScript.origin}: $e';
-        HScript.hscriptTrace('ERROR ON LOADING - $e', FlxColor.RED);
-        newScript.destroy();
-        return;
-      }
-
+      newScript = new HScript(null, file, true, true);
+      newScript.call('onCreate');
       hscriptArray.push(newScript);
-      if (newScript.exists('onCreate'))
-      {
-        var callValue = newScript.call('onCreate');
-        if (!callValue.succeeded)
-        {
-          for (e in callValue.exceptions)
-          {
-            if (e != null)
-            {
-              var len:Int = e.message.indexOf('\n') + 1;
-              if (len <= 0) len = e.message.length;
-              HScript.hscriptTrace('ERROR ($file: onCreate) - ${e.message.substr(0, len)}', FlxColor.RED);
-            }
-          }
-          newScript.destroy();
-          hscriptArray.remove(newScript);
-          return;
-        }
-      }
-
-      Debug.logInfo('initialized sscript interp successfully: $file (${Std.int(Date.now().getTime() - times)}ms)');
+      Debug.logInfo('initialized Hscript interp successfully: $file (${Std.int(Date.now().getTime() - times)}ms)');
     }
-    catch (e)
+    catch (e:Dynamic)
     {
-      var newScript:HScript = cast(SScript.global.get(file), HScript);
-      var len:Int = e.message.indexOf('\n') + 1;
-      if (len <= 0) len = e.message.length;
-      HScript.hscriptTrace('ERROR ($file) - ' + e.message.substr(0, len), FlxColor.RED);
+      var newScript:HScript = cast(Iris.instances.get(file), HScript);
+      HScript.hscriptTrace('ERROR ON LOADING ($file) - $e', FlxColor.RED);
 
-      if (newScript != null)
-      {
-        newScript.destroy();
-        hscriptArray.remove(newScript);
-      }
+      if (newScript != null) newScript.destroy();
     }
   }
 
@@ -539,6 +505,8 @@ class Stage extends BaseStage
 
       if (FileSystem.exists(scriptToLoad))
       {
+        for (script in codeNameScripts.scripts)
+          if (script.fileName == scriptToLoad) return false;
         initHSIScript(scriptToLoad);
         return true;
       }
@@ -627,41 +595,30 @@ class Stage extends BaseStage
 
     var len:Int = hscriptArray.length;
     if (len < 1) return returnVal;
-    for (i in 0...len)
+    for (script in hscriptArray)
     {
-      var script:HScript = hscriptArray[i];
+      @:privateAccess
       if (script == null || !script.exists(funcToCall) || exclusions.contains(script.origin)) continue;
 
-      var myValue:Dynamic = null;
       try
       {
         var callValue = script.call(funcToCall, args);
-        if (!callValue.succeeded)
-        {
-          var e = callValue.exceptions[0];
-          if (e != null)
-          {
-            var len:Int = e.message.indexOf('\n') + 1;
-            if (len <= 0) len = e.message.length;
-            PlayState.instance.addTextToDebug('ERROR (${script.origin}: ${callValue.calledFunction}) - ' + e.message.substr(0, len), FlxColor.RED);
-          }
-        }
-        else
-        {
-          myValue = callValue.returnValue;
-          // compiler fuckup fix
-          final stopHscript = myValue == LuaUtils.Function_StopHScript;
-          final stopAll = myValue == LuaUtils.Function_StopAll;
-          if ((stopHscript || stopAll) && !excludeValues.contains(myValue) && !ignoreStops)
-          {
-            returnVal = myValue;
-            break;
-          }
+        var myValue:Dynamic = callValue.methodVal;
 
-          if (myValue != null && !excludeValues.contains(myValue)) returnVal = myValue;
+        // compiler fuckup fix
+        final stopHscript = myValue == LuaUtils.Function_StopHScript;
+        final stopAll = myValue == LuaUtils.Function_StopAll;
+        if ((stopHscript || stopAll) && !excludeValues.contains(myValue) && !ignoreStops)
+        {
+          returnVal = myValue;
+          break;
         }
+        if (myValue != null && !excludeValues.contains(myValue)) returnVal = myValue;
       }
-      catch (e:Dynamic) {}
+      catch (e:Dynamic)
+      {
+        HScript.hscriptTrace('ERROR (${script.origin}: $funcToCall) - $e', FlxColor.RED);
+      }
     }
     #end
 
@@ -678,17 +635,21 @@ class Stage extends BaseStage
     if (exclusions == null) exclusions = [];
     if (excludeValues == null) excludeValues = [LuaUtils.Function_Continue];
 
-    var len:Int = scripts.scripts.length;
+    var len:Int = codeNameScripts.scripts.length;
     if (len < 1) return returnVal;
 
-    var myValue = scripts.call(funcToCall, args);
-    if ((myValue == LuaUtils.Function_StopLua || myValue == LuaUtils.Function_StopAll) && !excludeValues.contains(myValue) && !ignoreStops)
+    for (script in codeNameScripts.scripts)
     {
-      returnVal = myValue;
-      return returnVal;
+      var myValue:Dynamic = script.active ? script.call(funcToCall, args) : null;
+      final stopHscript = myValue == LuaUtils.Function_StopHScript;
+      final stopAll = myValue == LuaUtils.Function_StopAll;
+      if ((stopHscript || stopAll) && !excludeValues.contains(myValue) && !ignoreStops)
+      {
+        returnVal = myValue;
+        break;
+      }
+      if (myValue != null && !excludeValues.contains(myValue)) returnVal = myValue;
     }
-
-    if (myValue != null && !excludeValues.contains(myValue)) returnVal = myValue;
     #end
 
     return returnVal;
@@ -723,8 +684,6 @@ class Stage extends BaseStage
     {
       if (exclusions.contains(script.origin)) continue;
 
-      if (!instancesExclude.contains(variable)) instancesExclude.push(variable);
-
       script.set(variable, arg);
     }
     #end
@@ -734,11 +693,9 @@ class Stage extends BaseStage
   {
     #if (HSCRIPT_ALLOWED && HScriptImproved)
     if (exclusions == null) exclusions = [];
-    for (script in scripts.scripts)
+    for (script in codeNameScripts.scripts)
     {
       if (exclusions.contains(script.fileName)) continue;
-
-      if (!instancesExclude.contains(variable)) instancesExclude.push(variable);
 
       script.set(variable, arg);
     }
@@ -783,7 +740,7 @@ class Stage extends BaseStage
   {
     #if (HSCRIPT_ALLOWED && HScriptImproved)
     if (exclusions == null) exclusions = [];
-    for (script in scripts.scripts)
+    for (script in codeNameScripts.scripts)
     {
       if (exclusions.contains(script.fileName)) continue;
 
@@ -834,7 +791,7 @@ class Stage extends BaseStage
   public function searchHSIVar(variable:String, arg:String, result:Bool)
   {
     #if (HSCRIPT_ALLOWED && HScriptImproved)
-    for (script in scripts.scripts)
+    for (script in codeNameScripts.scripts)
     {
       if (LuaUtils.convert(script.get(variable), arg) == result)
       {
@@ -1075,7 +1032,7 @@ class Stage extends BaseStage
         var script = HScriptCode.create(file);
         if (!(script is codenameengine.scripting.DummyScript))
         {
-          scripts.add(script);
+          codeNameScripts.add(script);
 
           // Set the things first
           script.set("game", PlayState?.instance);
@@ -1123,13 +1080,13 @@ class Stage extends BaseStage
     hscriptArray = null;
 
     #if HScriptImproved
-    for (script in scripts.scripts)
+    for (script in codeNameScripts.scripts)
       if (script != null)
       {
         script.call('onDestroy');
         script.destroy();
       }
-    scripts.scripts = null;
+    codeNameScripts.scripts = null;
     #end
     #end
 

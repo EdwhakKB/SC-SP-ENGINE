@@ -239,15 +239,29 @@ class LoadingState extends MusicBeatState
       //
 
       // LOAD HOLD COVER IMAGE
-      var holdCoverSkin:String = "holdCovers";
+      var holdCoverSkin:String = "";
       if (song.options.holdCoverSkin != null && song.options.holdCoverSkin.length > 1) noteSkin = song.options.holdCoverSkin;
-      if (!song.options.notITG && holdCoverSkin != "") imagesToPrepare.push(noteSkin);
+      else
+        holdCoverSkin = "holdCover";
+
+      var addOn:String = "";
+      if (!holdCoverSkin.startsWith("HoldNoteEffect/")) addOn = "HoldNoteEffect/";
+      if (!song.options.disableHoldCovers && !song.options.notITG && holdCoverSkin.length > 0)
+      {
+        if (song.options.disableHoldCoversRGB) imagesToPrepare.push(addOn + holdCoverSkin);
+        else
+        {
+          var colors:Array<String> = ["Purple", "Blue", "Green", "Purple"];
+          for (i in 0...4)
+            imagesToPrepare.push(addOn + holdCoverSkin + colors[i]);
+        }
+      }
       //
 
       // LOAD STRUM NOTE IMAGE
       var strumSkin:String = "";
       if (song.options.strumSkin != null && song.options.strumSkin.length > 1) strumSkin = song.options.strumSkin;
-      if (!song.options.notITG && strumSkin != "") imagesToPrepare.push(noteSkin);
+      if (!song.options.notITG && strumSkin != "") imagesToPrepare.push(strumSkin);
       //
 
       try
