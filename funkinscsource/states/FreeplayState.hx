@@ -1,5 +1,12 @@
 package states;
 
+import flixel.addons.display.FlxBackdrop;
+import flixel.addons.display.FlxGridOverlay;
+import flixel.effects.FlxFlicker;
+import flixel.math.FlxMath;
+import flixel.util.FlxStringUtil;
+import flixel.ui.FlxBar;
+import haxe.Json;
 import backend.WeekData;
 import backend.Highscore;
 import openfl.utils.Assets as OpenFlAssets;
@@ -8,13 +15,7 @@ import objects.MusicPlayer;
 import objects.CoolText;
 import substates.GameplayChangersSubstate;
 import substates.ResetScoreSubState;
-import flixel.addons.display.FlxBackdrop;
-import flixel.addons.display.FlxGridOverlay;
-import flixel.effects.FlxFlicker;
-import flixel.math.FlxMath;
-import flixel.util.FlxStringUtil;
-import flixel.ui.FlxBar;
-import haxe.Json;
+import utils.SoundUtil;
 
 class FreeplayState extends MusicBeatState
 {
@@ -695,15 +696,19 @@ class FreeplayState extends MusicBeatState
           {
             try
             {
-              var playerVocals:String = getFromCharacter(PlayState.SONG.characters.player).vocals_file;
-              var loadedVocals = Paths.voices((PlayState.SONG.options.vocalsPrefix != null ? PlayState.SONG.options.vocalsPrefix : ''), songPath,
-                (PlayState.SONG.options.vocalsSuffix != null ? PlayState.SONG.options.vocalsSuffix : ''),
-                (playerVocals != null && playerVocals.length > 0) ? playerVocals : 'Player');
-              if (loadedVocals == null) loadedVocals = Paths.voices((PlayState.SONG.options.vocalsPrefix != null ? PlayState.SONG.options.vocalsPrefix : ''),
-                songPath, (PlayState.SONG.options.vocalsSuffix != null ? PlayState.SONG.options.vocalsSuffix : ''));
-              var externalVocals = Paths.voices((PlayState.SONG.options.vocalsPrefix != null ? PlayState.SONG.options.vocalsPrefix : ''), songPath,
-                (PlayState.SONG.options.vocalsSuffix != null ? PlayState.SONG.options.vocalsSuffix : ''), PlayState.SONG.characters.opponent);
-              if (loadedVocals == null && externalVocals != null) loadedVocals = externalVocals;
+              final currentPrefix:String = (PlayState.SONG.options.vocalsPrefix != null ? PlayState.SONG.options.vocalsPrefix : '');
+              final currentSuffix:String = (PlayState.SONG.options.vocalsSuffix != null ? PlayState.SONG.options.vocalsSuffix : '');
+              final vocalPl:String = getFromCharacter(PlayState.SONG.characters.player).vocals_file;
+              final vocalSuffix:String = (vocalPl != null && vocalPl.length > 0) ? vocalPl : 'Player';
+              var loadedVocals = SoundUtil.findVocal(
+                {
+                  song: songPath,
+                  prefix: currentPrefix,
+                  suffix: currentSuffix,
+                  externVocal: vocalSuffix,
+                  character: PlayState.SONG.characters.player,
+                  difficulty: Difficulty.getString(curDifficulty)
+                });
 
               if (loadedVocals != null && loadedVocals.length > 0)
               {
@@ -726,13 +731,19 @@ class FreeplayState extends MusicBeatState
 
             try
             {
-              var oppVocals:String = getFromCharacter(PlayState.SONG.characters.opponent).vocals_file;
-              var loadedVocals = Paths.voices((PlayState.SONG.options.vocalsPrefix != null ? PlayState.SONG.options.vocalsPrefix : ''), songPath,
-                (PlayState.SONG.options.vocalsSuffix != null ? PlayState.SONG.options.vocalsSuffix : ''),
-                (oppVocals != null && oppVocals.length > 0) ? oppVocals : 'Opponent');
-              var externalVocals = Paths.voices((PlayState.SONG.options.vocalsPrefix != null ? PlayState.SONG.options.vocalsPrefix : ''), songPath,
-                (PlayState.SONG.options.vocalsSuffix != null ? PlayState.SONG.options.vocalsSuffix : ''), PlayState.SONG.characters.opponent);
-              if (loadedVocals == null && externalVocals != null) loadedVocals = externalVocals;
+              final currentPrefix:String = (PlayState.SONG.options.vocalsPrefix != null ? PlayState.SONG.options.vocalsPrefix : '');
+              final currentSuffix:String = (PlayState.SONG.options.vocalsSuffix != null ? PlayState.SONG.options.vocalsSuffix : '');
+              final vocalOp:String = getFromCharacter(PlayState.SONG.characters.opponent).vocals_file;
+              final vocalSuffix:String = (vocalOp != null && vocalOp.length > 0) ? vocalOp : 'Opponent';
+              var loadedVocals = SoundUtil.findVocal(
+                {
+                  song: songPath,
+                  prefix: currentPrefix,
+                  suffix: currentSuffix,
+                  externVocal: vocalSuffix,
+                  character: PlayState.SONG.characters.opponent,
+                  difficulty: Difficulty.getString(curDifficulty)
+                });
               if (loadedVocals != null && loadedVocals.length > 0)
               {
                 opponentVocals = new FlxSound().loadEmbedded(loadedVocals);

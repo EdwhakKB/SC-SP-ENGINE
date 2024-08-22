@@ -326,7 +326,7 @@ class Character extends FunkinSCSprite
   /**
    * How frequent gf dances (used for other character's when useGFSpeed is active!)
    */
-  public var gfSpeed:Int = 2;
+  public var gfSpeed:Int = 1;
 
   /**
    * If character uses GF Speed to dance (normally for LEFT AND RIGHT DANCES!)

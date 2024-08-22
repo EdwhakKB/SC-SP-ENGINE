@@ -1,5 +1,5 @@
 // adapted from https://raw.githubusercontent.com/HaxeFlixel/flixel/master/flixel/group/FlxSpriteGroup.hx
-package objects;
+package group;
 
 import openfl.display.BitmapData;
 import openfl.display.BlendMode;
@@ -12,14 +12,14 @@ import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxSort;
 import flixel.group.*;
 
-typedef SkewSpriteGroup = TypedSkewedSpriteGroup<FlxSkewed>;
+typedef FlxSkewSpriteGroup = FlxTypedSkewedSpriteGroup<FlxSkewed>;
 
 /**
  * `FlxSpriteGroup` is a special `FlxSprite` that can be treated like
  * a single sprite even if it's made up of several member sprites.
  * It shares the `FlxTypedGroup` API, but it doesn't inherit from it.
  */
-class TypedSkewedSpriteGroup<T:FlxSkewed> extends FlxSprite
+class FlxTypedSkewedSpriteGroup<T:FlxSkewed> extends FlxSprite
 {
   /**
    * The actual group which holds all sprites.
@@ -121,9 +121,9 @@ class TypedSkewedSpriteGroup<T:FlxSkewed> extends FlxSprite
    *
    * @return  copy of this sprite group
    */
-  override public function clone():TypedSkewedSpriteGroup<T>
+  override public function clone():FlxTypedSkewedSpriteGroup<T>
   {
-    var newGroup = new TypedSkewedSpriteGroup<T>(x, y, maxSize);
+    var newGroup = new FlxTypedSkewedSpriteGroup<T>(x, y, maxSize);
     for (sprite in group.members)
     {
       if (sprite != null)

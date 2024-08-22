@@ -55,6 +55,7 @@ import psychlua.HScript;
 import codenameengine.scripting.Script as HScriptCode;
 #end
 import shaders.FNFShader;
+import utils.SoundUtil;
 #if HSCRIPT_ALLOWED
 import crowplexus.iris.Iris;
 #end
@@ -1251,26 +1252,10 @@ class PlayState extends MusicBeatState
 
     if (ClientPrefs.data.characters)
     {
-      if (dad != null)
-      {
-        dad.changeCharacter(SONG.characters.opponent, dad.isPlayer);
-        dad.dance();
-      }
-      if (boyfriend != null)
-      {
-        boyfriend.changeCharacter(SONG.characters.player, boyfriend.isPlayer);
-        boyfriend.dance();
-      }
-      if (gf != null)
-      {
-        gf.changeCharacter(SONG.characters.girlfriend, gf.isPlayer);
-        gf.dance();
-      }
-      if (mom != null)
-      {
-        mom.changeCharacter(SONG.characters.secondOpponent, mom.isPlayer);
-        mom.dance();
-      }
+      if (dad != null) dad.changeCharacter(SONG.characters.opponent, dad.isPlayer);
+      if (boyfriend != null) boyfriend.changeCharacter(SONG.characters.player, boyfriend.isPlayer);
+      if (gf != null) gf.changeCharacter(SONG.characters.girlfriend, gf.isPlayer);
+      if (mom != null) mom.changeCharacter(SONG.characters.secondOpponent, mom.isPlayer);
     }
 
     if (inCutscene) cancelAppearArrows();
@@ -2546,22 +2531,31 @@ class PlayState extends MusicBeatState
     {
       if (songData.needsVoices)
       {
-        var normalVocals = Paths.voices((songData.options.vocalsPrefix != null ? songData.options.vocalsPrefix : ''), songData.songId,
-          (songData.options.vocalsSuffix != null ? songData.options.vocalsSuffix : ''));
-        var externalPlayerVocals = Paths.voices((songData.options.vocalsPrefix != null ? songData.options.vocalsPrefix : ''), songData.songId,
-          (songData.options.vocalsSuffix != null ? songData.options.vocalsSuffix : ''), boyfriend.curCharacter);
-        var playerVocals = Paths.voices((songData.options.vocalsPrefix != null ? songData.options.vocalsPrefix : ''), songData.songId,
-          (songData.options.vocalsSuffix != null ? songData.options.vocalsSuffix : ''),
-          (boyfriend.vocalsFile == null || boyfriend.vocalsFile.length < 1) ? 'Player' : boyfriend.vocalsFile);
-        if (playerVocals == null && externalPlayerVocals != null) playerVocals = externalPlayerVocals;
+        final currentPrefix:String = (songData.options.vocalsPrefix != null ? songData.options.vocalsPrefix : '');
+        final currentSuffix:String = (songData.options.vocalsSuffix != null ? songData.options.vocalsSuffix : '');
+        final vocalPl:String = (boyfriend.vocalsFile == null || boyfriend.vocalsFile.length < 1) ? 'Player' : boyfriend.vocalsFile;
+        final normalVocals = Paths.voices(currentPrefix, songData.songId, currentSuffix);
+        var playerVocals = SoundUtil.findVocal(
+          {
+            song: songData.songId,
+            prefix: currentPrefix,
+            suffix: currentSuffix,
+            externVocal: vocalPl,
+            character: boyfriend.curCharacter,
+            difficulty: Difficulty.getString()
+          });
         vocals.loadEmbedded(playerVocals != null ? playerVocals : normalVocals);
 
-        var oppVocals = Paths.voices((songData.options.vocalsPrefix != null ? songData.options.vocalsPrefix : ''), songData.songId,
-          (songData.options.vocalsSuffix != null ? songData.options.vocalsSuffix : ''),
-          (dad.vocalsFile == null || dad.vocalsFile.length < 1) ? 'Opponent' : dad.vocalsFile);
-        var externalOppVocals = Paths.voices((songData.options.vocalsPrefix != null ? songData.options.vocalsPrefix : ''), songData.songId,
-          (songData.options.vocalsSuffix != null ? songData.options.vocalsSuffix : ''), dad.curCharacter);
-        if (oppVocals == null && externalOppVocals != null) oppVocals = externalOppVocals;
+        final vocalOp:String = (dad.vocalsFile == null || dad.vocalsFile.length < 1) ? 'Opponent' : dad.vocalsFile;
+        var oppVocals = SoundUtil.findVocal(
+          {
+            song: songData.songId,
+            prefix: currentPrefix,
+            suffix: currentSuffix,
+            externVocal: vocalOp,
+            character: dad.curCharacter,
+            difficulty: Difficulty.getString()
+          });
         if (oppVocals != null)
         {
           opponentVocals.loadEmbedded(oppVocals);
@@ -3847,10 +3841,13 @@ class PlayState extends MusicBeatState
     {
       if (!forceChangeOnTarget)
       {
-        if (!SONG.notes[curSection].mustHitSection) cameraTargeted = 'dad';
-        if (SONG.notes[curSection].mustHitSection) cameraTargeted = 'bf';
-        if (SONG.notes[curSection].gfSection) cameraTargeted = 'gf';
-        if (SONG.notes[curSection].player4Section) cameraTargeted = 'mom';
+        if (SONG.notes[curSection] != null)
+        {
+          if (!SONG.notes[curSection].mustHitSection) cameraTargeted = 'dad';
+          if (SONG.notes[curSection].mustHitSection) cameraTargeted = 'bf';
+          if (SONG.notes[curSection].gfSection) cameraTargeted = 'gf';
+          if (SONG.notes[curSection].player4Section) cameraTargeted = 'mom';
+        }
       }
 
       switch (cameraTargeted)
@@ -4037,10 +4034,18 @@ class PlayState extends MusicBeatState
       {
         if (newSong != null)
         {
-          var oppVocals = Paths.voices((prefix != null ? prefix : ''), newSong, (suffix != null ? suffix : ''),
-            (dad.vocalsFile == null || dad.vocalsFile.length < 1) ? 'Opponent' : dad.vocalsFile);
-          var externalOppVocals = Paths.voices((prefix != null ? prefix : ''), newSong, (suffix != null ? suffix : ''), dad.curCharacter);
-          if (oppVocals == null && externalOppVocals != null) oppVocals = externalOppVocals;
+          final vocalOpp:String = (dad.vocalsFile == null || dad.vocalsFile.length < 1) ? 'Opponent' : dad.vocalsFile;
+          final currentPrefix:String = prefix != null ? prefix : '';
+          final currentSuffix:String = suffix != null ? suffix : '';
+          final oppVocals = SoundUtil.findVocal(
+            {
+              song: songData.song,
+              prefix: currentPrefix,
+              suffix: currentSuffix,
+              externVocal: vocalOpp,
+              character: dad.curCharacter,
+              difficulty: Difficulty.getString()
+            });
           if (oppVocals != null)
           {
             opponentVocals.loadEmbedded(oppVocals);
@@ -4049,12 +4054,19 @@ class PlayState extends MusicBeatState
         }
         else
         {
-          var oppVocals = Paths.voices((songData.options.vocalsPrefix != null ? songData.options.vocalsPrefix : ''), songData.song,
-            (songData.options.vocalsSuffix != null ? songData.options.vocalsSuffix : ''),
-            (dad.vocalsFile == null || dad.vocalsFile.length < 1) ? 'Opponent' : dad.vocalsFile);
-          var externalOppVocals = Paths.voices((songData.options.vocalsPrefix != null ? songData.options.vocalsPrefix : ''), songData.song,
-            (songData.options.vocalsSuffix != null ? songData.options.vocalsSuffix : ''), dad.curCharacter);
-          if (oppVocals == null && externalOppVocals != null) oppVocals = externalOppVocals;
+          final vocalOpp:String = (dad.vocalsFile == null || dad.vocalsFile.length < 1) ? 'Opponent' : dad.vocalsFile;
+          final currentPrefix:String = songData.options.vocalsPrefix != null ? songData.options.vocalsPrefix : '';
+          final currentSuffix:String = songData.options.vocalsSuffix != null ? songData.options.vocalsSuffix : '';
+          final oppVocals = SoundUtil.findVocal(
+            {
+              song: songData.song,
+              prefix: currentPrefix,
+              suffix: currentSuffix,
+              externVocal: vocalOpp,
+              character: dad.curCharacter,
+              difficulty: Difficulty.getString()
+            });
+
           if (oppVocals != null)
           {
             opponentVocals.loadEmbedded(oppVocals);
@@ -4079,23 +4091,36 @@ class PlayState extends MusicBeatState
       {
         if (newSong != null)
         {
-          var normalVocals = Paths.voices((prefix != null ? prefix : ''), newSong, (suffix != null ? suffix : ''));
-          var externalPlayerVocals = Paths.voices((prefix != null ? prefix : ''), newSong, (suffix != null ? suffix : ''), boyfriend.curCharacter);
-          var playerVocals = Paths.voices((prefix != null ? prefix : ''), newSong, (suffix != null ? suffix : ''),
-            (boyfriend.vocalsFile == null || boyfriend.vocalsFile.length < 1) ? 'Player' : boyfriend.vocalsFile);
-          if (playerVocals == null && externalPlayerVocals != null) playerVocals = externalPlayerVocals;
+          final vocalPl:String = (boyfriend.vocalsFile == null || boyfriend.vocalsFile.length < 1) ? 'Player' : boyfriend.vocalsFile;
+          final currentPrefix:String = prefix != null ? prefix : '';
+          final currentSuffix:String = suffix != null ? suffix : '';
+          final normalVocals = Paths.voices(currentPrefix, newSong, currentSuffix);
+          var playerVocals = SoundUtil.findVocal(
+            {
+              song: songData.song,
+              prefix: currentPrefix,
+              suffix: currentSuffix,
+              externVocal: vocalPl,
+              character: boyfriend.curCharacter,
+              difficulty: Difficulty.getString()
+            });
           vocals.loadEmbedded(playerVocals != null ? playerVocals : normalVocals);
         }
         else
         {
-          var normalVocals = Paths.voices((songData.options.vocalsPrefix != null ? songData.options.vocalsPrefix : ''), songData.song,
-            (songData.options.vocalsSuffix != null ? songData.options.vocalsSuffix : ''));
-          var externalPlayerVocals = Paths.voices((songData.options.vocalsPrefix != null ? songData.options.vocalsPrefix : ''), songData.song,
-            (songData.options.vocalsSuffix != null ? songData.options.vocalsSuffix : ''), boyfriend.curCharacter);
-          var playerVocals = Paths.voices((songData.options.vocalsPrefix != null ? songData.options.vocalsPrefix : ''), songData.song,
-            (songData.options.vocalsSuffix != null ? songData.options.vocalsSuffix : ''),
-            (boyfriend.vocalsFile == null || boyfriend.vocalsFile.length < 1) ? 'Player' : boyfriend.vocalsFile);
-          if (playerVocals == null && externalPlayerVocals != null) playerVocals = externalPlayerVocals;
+          final vocalPl:String = (boyfriend.vocalsFile == null || boyfriend.vocalsFile.length < 1) ? 'Player' : boyfriend.vocalsFile;
+          final currentPrefix:String = songData.options.vocalsPrefix != null ? songData.options.vocalsPrefix : '';
+          final currentSuffix:String = songData.options.vocalsSuffix != null ? songData.options.vocalsSuffix : '';
+          final normalVocals = Paths.voices(currentPrefix, songData.song, currentSuffix);
+          var playerVocals = SoundUtil.findVocal(
+            {
+              song: songData.song,
+              prefix: currentPrefix,
+              suffix: currentSuffix,
+              externVocal: vocalPl,
+              character: boyfriend.curCharacter,
+              difficulty: Difficulty.getString()
+            });
           vocals.loadEmbedded(playerVocals != null ? playerVocals : normalVocals);
         }
       }

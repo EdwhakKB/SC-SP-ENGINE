@@ -27,6 +27,7 @@ import states.editors.content.MetaNote;
 import states.editors.content.VSlice;
 import states.editors.content.Prompt;
 import states.editors.content.*;
+import utils.SoundUtil;
 
 using DateTools;
 
@@ -1880,20 +1881,35 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
     {
       try
       {
-        var normalVocals:Sound = Paths.voices((PlayState.SONG.options.vocalsPrefix != null ? PlayState.SONG.options.vocalsPrefix : ''), PlayState.SONG.songId,
-          (PlayState.SONG.options.vocalsSuffix != null ? PlayState.SONG.options.vocalsSuffix : ''));
-        var playerVocals:Sound = Paths.voices((PlayState.SONG.options.vocalsPrefix != null ? PlayState.SONG.options.vocalsPrefix : ''), PlayState.SONG.songId,
-          (PlayState.SONG.options.vocalsSuffix != null ? PlayState.SONG.options.vocalsSuffix : ''),
-          (characterData.vocalsP1 == null || characterData.vocalsP1.length < 1) ? 'Player' : characterData.vocalsP1);
+        final currentPrefix:String = (PlayState.SONG.options.vocalsPrefix != null ? PlayState.SONG.options.vocalsPrefix : '');
+        final currentSuffix:String = (PlayState.SONG.options.vocalsSuffix != null ? PlayState.SONG.options.vocalsSuffix : '');
+        final vocalPl:String = (characterData.vocalsP1 == null || characterData.vocalsP1.length < 1) ? 'Player' : characterData.vocalsP1;
+        final normalVocals:Sound = Paths.voices(currentPrefix, PlayState.SONG.songId, currentSuffix);
+        var playerVocals:Sound = SoundUtil.findVocal(
+          {
+            song: PlayState.SONG.songId,
+            prefix: currentPrefix,
+            suffix: currentSuffix,
+            externVocal: vocalPl,
+            character: characterData.vocalsP1,
+            difficulty: Difficulty.getString()
+          });
         vocals.loadEmbedded(playerVocals != null ? playerVocals : normalVocals);
         vocals.volume = 0;
         vocals.play();
         vocals.pause();
         vocals.time = time;
 
-        var oppVocals:Sound = Paths.voices((PlayState.SONG.options.vocalsPrefix != null ? PlayState.SONG.options.vocalsPrefix : ''), PlayState.SONG.songId,
-          (PlayState.SONG.options.vocalsSuffix != null ? PlayState.SONG.options.vocalsSuffix : ''),
-          (characterData.vocalsP2 == null || characterData.vocalsP2.length < 1) ? 'Opponent' : characterData.vocalsP2);
+        final vocalOp:String = (characterData.vocalsP2 == null || characterData.vocalsP2.length < 1) ? 'Opponent' : characterData.vocalsP2;
+        var oppVocals:Sound = SoundUtil.findVocal(
+          {
+            song: PlayState.SONG.songId,
+            prefix: currentPrefix,
+            suffix: currentSuffix,
+            externVocal: vocalOp,
+            character: characterData.vocalsP2,
+            difficulty: Difficulty.getString()
+          });
         if (oppVocals != null && oppVocals.length > 0)
         {
           opponentVocals.loadEmbedded(oppVocals);

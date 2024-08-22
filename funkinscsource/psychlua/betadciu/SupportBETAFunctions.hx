@@ -1322,7 +1322,7 @@ class SupportBETAFunctions
       var originalTag:String = tag;
       tag = LuaUtils.checkVariable(tag, 'extraCharacter_');
       var shit:Character = MusicBeatState.getVariables().get(tag);
-      LuaUtils.makeLuaCharacter(originalTag, character, shit.isPlayer, shit.flipMode, true);
+      if (shit != null) LuaUtils.makeLuaCharacter(originalTag, character, shit.isPlayer, shit.flipMode, true);
     });
 
     funk.set("stopIdle", function(id:String, stopped:Bool) {
