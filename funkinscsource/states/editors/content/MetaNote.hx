@@ -13,6 +13,7 @@ class MetaNote extends Note
   public var sustainSprite:Note;
   public var endSprite:Note;
   public var chartY:Float = 0;
+  public var editorVisualSusLength:Float = 0;
 
   public function new(time:Float, data:Int, songData:Array<Dynamic>)
   {
@@ -53,17 +54,17 @@ class MetaNote extends Note
     _lastZoom = zoom;
     v = Math.round(v / (stepCrochet / 2)) * (stepCrochet / 2);
     songData[2] = sustainLength = Math.max(Math.min(v, stepCrochet * 128), 0);
+    editorVisualSusLength = Math.max(0, (v * ChartingState.GRID_SIZE / stepCrochet * zoom) + ChartingState.GRID_SIZE / 2);
 
-    if (sustainLength > 0)
+    if (editorVisualSusLength > 0)
     {
-      var length:Float = Math.max(0, (v * ChartingState.GRID_SIZE / stepCrochet * zoom) + ChartingState.GRID_SIZE / 2);
       if (sustainSprite == null)
       {
         sustainSprite = new Note(this.strumTime, this.noteData, true, this.noteSkin, null, null, 1.0, null, true);
         sustainSprite.animation.play(Note.colArray[this.noteData % Note.colArray.length] + 'hold');
         sustainSprite.scrollFactor.x = 0;
       }
-      sustainSprite.setGraphicSize(ChartingState.GRID_SIZE * 0.5, length);
+      sustainSprite.setGraphicSize(ChartingState.GRID_SIZE * 0.5, editorVisualSusLength);
       sustainSprite.updateHitbox();
       if (endSprite == null)
       {
@@ -147,7 +148,7 @@ class MetaNote extends Note
 
     updateHitbox();
 
-    if (sustainLength > 0)
+    if (editorVisualSusLength > 0)
     {
       if (endSprite != null)
       {
@@ -158,7 +159,7 @@ class MetaNote extends Note
       if (sustainSprite != null)
       {
         sustainSprite.reloadNote(texture);
-        sustainSprite.setGraphicSize(ChartingState.GRID_SIZE * 0.5, sustainLength);
+        sustainSprite.setGraphicSize(ChartingState.GRID_SIZE * 0.5, editorVisualSusLength);
         sustainSprite.updateHitbox();
       }
     }
@@ -167,7 +168,7 @@ class MetaNote extends Note
   public function setShaderEnabled(isEnabled:Bool)
   {
     rgbShader.enabled = isEnabled;
-    if (sustainLength > 0)
+    if (editorVisualSusLength > 0)
     {
       if (endSprite != null) endSprite.rgbShader.enabled = isEnabled;
       if (sustainSprite != null) sustainSprite.rgbShader.enabled = isEnabled;

@@ -3,7 +3,7 @@ package utils;
 import openfl.media.Sound;
 
 /**
- * Props for vocal checking because yes!
+ * Props for vocal checking because I need variables from the place grabing the props to use here.
  */
 typedef VocalPropsCheck =
 {
@@ -57,11 +57,12 @@ class SoundUtil
     var finalSound:Sound = null;
     finalSound = Paths.voices(prefix, song, suffix, vocal);
 
-    while (finalSound == null)
+    while (finalSound == null && pathAmount != findingArguments.length)
     {
       finalSound = Paths.voices(prefix, song, suffix, findingArguments[pathAmount]);
       pathAmount++;
     }
+
     return finalSound;
   }
 

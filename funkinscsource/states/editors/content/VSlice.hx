@@ -324,7 +324,7 @@ class VSlice
               fields.push(Std.string(event.v));
           }
         }
-        while (fields.length < 2)
+        while (fields.length < 14)
           fields.push('');
 
         fields.insert(0, event.e);
