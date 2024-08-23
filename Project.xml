@@ -311,6 +311,9 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 		<haxedef name="openfl-enable-handle-error" />
 	</section>
 
+	<!-- Fix compiling issues -->
+	<setenv name="HAXEPATH" value="./"/>
+
 	<haxedef name="CAN_OPEN_LINKS" unless="switch" />
 	<haxedef name="CAN_CHEAT" if="switch debug" />
 
