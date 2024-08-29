@@ -66,7 +66,7 @@
 		'rating', "Float", "0", "Total Rating",
 		'ratingName', "String", "", "Rating's Name's",
 		'version', "String", "psychEngineVersion", "Psych Engine's Version", --Grabs MainMenuState.psychEngineVersion.trim();
-		'SCEversion', "String", "SCEEngineVersion", "SCE's Engine Version", --Grabs MainMenuState.SCEVersion.trim();
+		'SCEversion', "String", "SCEEngineVersion", "SC Engine's Version", --Grabs MainMenuState.SCEVersion.trim();
 
 		'inGameOver', "Boolean", "false", "is in gameOver",
 		'mustHitSection', "Boolean", "false", "is musthitsection",
@@ -103,7 +103,7 @@
 	end
 
 --Default character
-	local characterPos = { 
+	local characterPos = {
 		'defaultBoyfriendX', "Float", "770", "Default boyfriend X pos", --Grabs game.BF_X;
 		'defaultBoyfriendY', "Float", "450", "Default boyfriend Y pos", --Grabs game.BF_Y;
 		'defaultOpponentX', "Float", "100", "Default opponent X pos", --Grabs game.DAD_X;
@@ -116,10 +116,10 @@
 
 --Character shit
 	local characterShit = {
-		'boyfriendName', "String", "boyfriend", "PlayState's SONG Player 1", --Grabs PlayState.SONG.player1;
-		'dadName', "String", "dad", "PlayState's SONG Player 2", --Grabs PlayState.SONG.player2;
-		'gfName', "String", "gf", "PlayState's SONG gfVersion", --Grabs PlayState.SONG.gfVersion;
-		'momName', "String", "mom", "PlayState's SONG Player 4", --Grabs PlayState.SONG.player4;
+		'boyfriendName', "String", "boyfriend", "PlayState's SONG Player 1", --Grabs PlayState.SONG.characters.player;
+		'dadName', "String", "dad", "PlayState's SONG Player 2", --Grabs PlayState.SONG.characters.opponent;
+		'gfName', "String", "gf", "PlayState's SONG gfVersion", --Grabs PlayState.SONG.characters.girlfriend;
+		'momName', "String", "mom", "PlayState's SONG Player 4", --Grabs PlayState.SONG.characters.secondOpponent;
 	}
 
 -- Other settings
@@ -273,7 +273,7 @@ precacheMusic(name)
 
 precacheSound(name)
 
-triggerEvent(name, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14)
+triggerEventLegacy(name, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14)
 
 startCountdown()
 
@@ -331,10 +331,6 @@ makeLuaSprite(tag, image, x, y)
 
 makeAnimatedLuaSprite(tag, image, x, y, spriteType)
 
---makeParallaxSprite(tag, image, x, y)  if you have parallax use it! (Versions 4.11.0 flixel && flixel > "5.2.0")
-
---flxateParallaxSprite(obj, anchorX, anchorY, scrollOneX, scrollOneY, scrollTwoX, scrollTwoY, direct) if you have parallax use it! (Versions 4.11.0 flixel && flixel > "5.2.0")
-
 makeLuaSkewedSprite(tag, image, x, y, skewX, skewY)
 
 makeGraphic(obj, width, height, color)
@@ -357,8 +353,6 @@ setScrollFactor(obj, scrollX, scrollY)
 
 addLuaSprite(tag, place)
 
---addParallaxSprite(tag, front)  if you have parallax use it! (Versions 4.11.0 flixel && flixel > "5.2.0")
-
 addSkewedSprite(tag, front)
 
 addBackdrop(tag, front)
@@ -373,15 +367,11 @@ updateHitBoxFromGroup(group, index)
 
 removeLuaSprite(tag, destroy)
 
---removeParallaxSprite(tag, destroy)  if you have parallax use it! (Versions 4.11.0 flixel && flixel > "5.2.0")
-
 removeSkewedSprite(tag, destroy)
 
 removeBackdrop(tag, destroy)
 
 luaSpriteExists(tag)
-
---luaParallaxExists(tag)  if you have parallax use it! (Versions 4.11.0 flixel && flixel > "5.2.0")
 
 luaSkewedExists(tag)
 
@@ -401,7 +391,7 @@ objectOverlap(obj1, obj2)
 
 getPixelColor(obj, x, y)
 
-startDialouge(dialougeFile, music)
+startDialogue(dialogueFile, music)
 
 startVideo(videoFile, videoType)
 
@@ -484,6 +474,12 @@ stopIdle(id, bool)
 characterDance(character)
 
 initBackgroundOverlayVideo(vidPath, videoType, layInFront)
+
+startCharScripts(name)
+
+setGeneralItem(item, value, instance) --Instance is if it uses the instance or the global item (PlayState.instance or PlayState)
+
+getGeneralItem(item, instance) --Instance is if it uses the instance or the global item (PlayState.instance or PlayState)
 
 --SupportBeta Functions (BETADCIU, EXTRA FUNCTIONS FOR SCE)--
 setActorX(x, id)
@@ -741,39 +737,3 @@ changeNotes2(style, character, postfix)
 changeIndividualNotes(style, i, postfix)
 
 playStrumAnim(isDad, id, time)
-
-setActorWaveCircleShader(id, speed, frequency, amplitude)
-
-setActorNoShader(id)
-
-initShaderFromSource(name, classString)
-
-setActorShader(actorStr, shaderName)
-
-setShaderProperty(shaderName, prop, value)
-
-getShaderProperty(shaderName, prop)
-
-tweenShaderProperty(shaderName, prop, value, time, easeStr)
-
-setCameraShader(camStr, shaderName)
-
-removeCameraShader(camStr, shaderName)
-
-createCustomShader(id, file, glslVersion)
-
-setActorCustomShader(id, actor)
-
-setActorNoCustomShader(actor)
-
-setCameraCustomShader(id, camera)
-
-pushShaderToCamera(id, camera)
-
-setCameraNoCustomShader(shader)
-
-getCustomShaderProperty(id, property)
-
-setCustomShaderProperty(id, property, value)
-
-tweenCustomShaderProperty(shaderName, prop, value, time, easeStr)

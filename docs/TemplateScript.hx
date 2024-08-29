@@ -56,7 +56,7 @@ function onCountdownStarted()
 	// called AFTER countdown started, if you want to stop it from starting, refer to the previous function (onStartCountdown)
 }
 
-function onCountdownTick(tick:Countdown, counter:Int)
+function onCountdownTick(counter:Int, tick:Countdown)
 {
 	switch(tick)
 	{
@@ -157,15 +157,6 @@ function opponentNoteHit(note:Note)
 	// Works the same as goodNoteHit, but for Opponent's notes being hit
 }
 
-function goodNoteHitPost(note:Note)
-{
-	// Function called when you hit a note (***after*** note hit calculations)
-}
-function opponentNoteHitPost(note:Note)
-{
-	// Works the same as goodNoteHitPost, but for Opponent's notes being hit
-}
-
 function noteMissPress(direction:Int)
 {
 	// Called after the note press miss calculations
@@ -202,20 +193,51 @@ function onMoveCamera(focus:String)
 
 
 // Event notes hooks
-function onEvent(name:String, value1:String, value2:String, strumTime:Float)
+function onEvent(name:String, eventParams:Array<String>, strumTime:Float)
 {
 	// event note triggered
 	// triggerEvent() does not call this function!!
 
-	// print('Event triggered: ', name, value1, value2, strumTime);
+	// print('Event triggered: ', name, eventParams, strumTime);
 }
 
-function onEventPushed(name:String, value1:String, value2:String, strumTime:Float)
+function onEventPushed(name:String, eventParams:Array<String>, strumTime:Float)
 {
 	// Called for every event note, recommended to precache assets
 }
 
 function eventEarlyTrigger(name:String)
+{
+	/*
+	Here's a port of the Kill Henchmen early trigger:
+
+	if (name == 'Kill Henchmen')
+		return 280;
+
+	This makes the "Kill Henchmen" event be triggered 280 miliseconds earlier so that the kill sound is perfectly timed with the song
+	*/
+
+	// write your shit under this line, the new return value will override the ones hardcoded on the engine
+}
+
+// Event notes hooks legacy
+// AFTER strumTime use ?value3:String, to 14 (?value14:String) in the function to make it work!
+function onEventLegacy(name:String, value1:String, value2:String, strumTime:Float, etc)
+{
+	// event note triggered
+	// triggerEvent() does not call this function!!
+
+	// print('Event triggered: ', name, eventParams, strumTime);
+}
+
+// AFTER strumTime use ?value3:String, to 14 (?value14:String) in the function to make it work!
+function onEventPushedLegacy(name:String, value1:String, value2:String, strumTime:Float, etc)
+{
+	// Called for every event note, recommended to precache assets
+}
+
+// BEFORE strumTime use value1:String, to 14 (value14:String) in the function to make it work! ()
+function eventEarlyTriggerLegacy(name:String, etc, strumTime:Float)
 {
 	/*
 	Here's a port of the Kill Henchmen early trigger:

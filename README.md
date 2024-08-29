@@ -1,7 +1,6 @@
-## SCE Edition
+## Sick Coders Engine
 * This engine brings features the may apply to modified game play!, other results screens!, betadciu things support!, more stuff is added to the engine for it to be modified however *you* intend to use this engine!*
 * SCE brings NotITG modchart support along with many other features!
-* Parallax Stuff by Itz-Miles [THANK YOU SO MUCH!](https://github.com/ShadowMario/FNF-PsychEngine/pull/13397)
 * This engine is made with **Psych Engine**!
 
 ## Other SCE Usage Stuff
@@ -60,7 +59,6 @@ same goes for *Lua Scripts*, comment out or delete the line with `LUA_ALLOWED`, 
 ## Credits:
 * Shadow Mario - Programmer
 * RiverOaken - Artist
-* Yoshubs - Assistant Programmer
 
 ## SCE Credits:
 * Glowsoony - Programmer
@@ -69,7 +67,7 @@ same goes for *Lua Scripts*, comment out or delete the line with `LUA_ALLOWED`, 
 
 ### Special Thanks
 * bbpanzu - Ex-Programmer
-* Yoshubs - New Input System
+* crowplexus - New Input System
 * SqirraRNG - Crash Handler and Base code for Chart Editor's Waveform
 * KadeDev - Fixed some cool stuff on Chart Editor and other PRs
 * iFlicky - Composer of Psync and Tea Time, also made the Dialogue Sounds
@@ -124,7 +122,7 @@ _____________________________________
   * Alt Animation: Forces an alt animation to play, useful for songs like Ugh/Stress
   * Hey: Forces a "Hey" animation instead of the base Sing animation, if Boyfriend hits this note, Girlfriend will do a "Hey!" too.
   * You can use gf and mom notes to make the second opponent or gf play animations!
-* You can now use up to 14 values for each event! 
+* You can now use up to 14 values for each event!
 
 ## Multiple editors to assist you in making your own Mod
 ![Screenshot_3](https://user-images.githubusercontent.com/44785097/144629914-1fe55999-2f18-4cc1-bc70-afe616d74ae5.png)

@@ -1,15 +1,13 @@
 package shaders;
 
-import flixel.graphics.tile.FlxGraphicsShader;
-
-class IndieDiamondTransShader extends FlxGraphicsShader
+class IndieDiamondTransShader extends FlxShader
 {
-    @:glFragmentSource("
+  @:glFragmentSource("
     #pragma header
 
     // Ranges from 0 to 1 over the course of the transition.
     // We use this to actually animate the shader.
-    
+
     uniform float progress;
     uniform bool reverse;
 
@@ -21,10 +19,10 @@ class IndieDiamondTransShader extends FlxGraphicsShader
         float yFraction = fract(gl_FragCoord.y / diamondPixelSize);
         float xDistance = abs(xFraction - 0.5);
         float yDistance = abs(yFraction - 0.5);
-        
+
         float target = xDistance + yDistance + openfl_TextureCoordv.y;
         float actualProgress = progress * 2.0;
-        
+
         if (reverse) {
             if (target < actualProgress) discard;
         }
@@ -35,13 +33,12 @@ class IndieDiamondTransShader extends FlxGraphicsShader
         gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
     }
     ")
+  public function new()
+  {
+    super();
 
-    public function new()
-    {
-        super();
-
-        progress.value = [0.0];
-        reverse.value = [false];
-        diamondPixelSize.value = [30.0];
-    }
+    progress.value = [0.0];
+    reverse.value = [false];
+    diamondPixelSize.value = [30.0];
+  }
 }

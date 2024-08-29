@@ -1,47 +1,51 @@
 package shaders;
 
-import flixel.system.FlxAssets.FlxShader;
+class ColorSwap
+{
+  public var shader(default, null):ColorSwapShader = new ColorSwapShader();
+  public var hue(default, set):Float = 0;
+  public var saturation(default, set):Float = 0;
+  public var brightness(default, set):Float = 0;
+  public var awesomeOutline(default, set):Bool = false;
 
-class ColorSwap {
-	public var shader(default, null):ColorSwapShader = new ColorSwapShader();
-	public var hue(default, set):Float = 0;
-	public var saturation(default, set):Float = 0;
-	public var brightness(default, set):Float = 0;
-	public var awesomeOutline(default, set):Bool = false;
+  private function set_hue(value:Float)
+  {
+    hue = value;
+    shader.uTime.value[0] = hue;
+    return hue;
+  }
 
-	private function set_hue(value:Float) {
-		hue = value;
-		shader.uTime.value[0] = hue;
-		return hue;
-	}
+  private function set_saturation(value:Float)
+  {
+    saturation = value;
+    shader.uTime.value[1] = saturation;
+    return saturation;
+  }
 
-	private function set_saturation(value:Float) {
-		saturation = value;
-		shader.uTime.value[1] = saturation;
-		return saturation;
-	}
+  private function set_brightness(value:Float)
+  {
+    brightness = value;
+    shader.uTime.value[2] = brightness;
+    return brightness;
+  }
 
-	private function set_brightness(value:Float) {
-		brightness = value;
-		shader.uTime.value[2] = brightness;
-		return brightness;
-	}
+  private function set_awesomeOutline(value:Bool)
+  {
+    awesomeOutline = value;
+    shader.awesomeOutline.value = [awesomeOutline];
+    return awesomeOutline;
+  }
 
-	private function set_awesomeOutline(value:Bool) {
-		awesomeOutline = value;
-		shader.awesomeOutline.value = [awesomeOutline];
-		return awesomeOutline;
-	}
-
-	public function new()
-	{
-		shader.uTime.value = [0, 0, 0];
-		shader.awesomeOutline.value = [false];
-	}
+  public function new()
+  {
+    shader.uTime.value = [0, 0, 0];
+    shader.awesomeOutline.value = [false];
+  }
 }
 
-class ColorSwapShader extends FlxShader {
-	@:glFragmentSource('
+class ColorSwapShader extends FlxShader
+{
+  @:glFragmentSource('
 		varying float openfl_Alphav;
 		varying vec4 openfl_ColorMultiplierv;
 		varying vec4 openfl_ColorOffsetv;
@@ -130,7 +134,7 @@ class ColorSwapShader extends FlxShader {
 			swagColor[0] = swagColor[0] + uTime[0];
 			swagColor[1] = swagColor[1] + uTime[1];
 			swagColor[2] = swagColor[2] * (1.0 + uTime[2]);
-			
+
 			if(swagColor[1] < 0.0)
 			{
 				swagColor[1] = 0.0;
@@ -150,7 +154,7 @@ class ColorSwapShader extends FlxShader {
 				if (color.a <= 0.5) {
 					float w = size.x / openfl_TextureSize.x;
 					float h = size.y / openfl_TextureSize.y;
-					
+
 					if (flixel_texture2D(bitmap, vec2(openfl_TextureCoordv.x + w, openfl_TextureCoordv.y)).a != 0.
 					|| flixel_texture2D(bitmap, vec2(openfl_TextureCoordv.x - w, openfl_TextureCoordv.y)).a != 0.
 					|| flixel_texture2D(bitmap, vec2(openfl_TextureCoordv.x, openfl_TextureCoordv.y + h)).a != 0.
@@ -160,7 +164,7 @@ class ColorSwapShader extends FlxShader {
 			}
 			gl_FragColor = color;
 
-			/* 
+			/*
 			if (color.a > 0.5)
 				gl_FragColor = color;
 			else
@@ -175,7 +179,7 @@ class ColorSwapShader extends FlxShader {
 					gl_FragColor = color;
 			} */
 		}')
-	@:glVertexSource('
+  @:glVertexSource('
 		attribute float openfl_Alpha;
 		attribute vec4 openfl_ColorMultiplier;
 		attribute vec4 openfl_ColorOffset;
@@ -195,7 +199,7 @@ class ColorSwapShader extends FlxShader {
 		attribute vec4 colorMultiplier;
 		attribute vec4 colorOffset;
 		uniform bool hasColorTransform;
-		
+
 		void main(void)
 		{
 			openfl_Alphav = openfl_Alpha;
@@ -215,9 +219,8 @@ class ColorSwapShader extends FlxShader {
 				openfl_ColorMultiplierv = colorMultiplier;
 			}
 		}')
-
-	public function new()
-	{
-		super();
-	}
+  public function new()
+  {
+    super();
+  }
 }

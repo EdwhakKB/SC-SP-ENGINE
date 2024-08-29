@@ -23,13 +23,12 @@ import cpp.UInt64;
 #include <sys/sysctl.h>
 ')
 #end
-
 #end
 class GetRAMSys
 {
-	#if cpp
-	#if linux
-	@:functionCode('
+  #if cpp
+  #if linux
+  @:functionCode('
 		FILE *meminfo = fopen("/proc/meminfo", "r");
 
     	if(meminfo == NULL)
@@ -49,14 +48,14 @@ class GetRAMSys
     	fclose(meminfo);
     	return -1;
 	')
-	#elseif windows
-	@:functionCode('
+  #elseif windows
+  @:functionCode('
 		unsigned long long allocatedRAM = 0;
 		GetPhysicallyInstalledSystemMemory(&allocatedRAM);
 		return (allocatedRAM / 1024);
 	')
-	#elseif macos
-	@:functionCode('
+  #elseif macos
+  @:functionCode('
 	int mib [] = { CTL_HW, HW_MEMSIZE };
 	int64_t value = 0;
 	size_t length = sizeof(value);
@@ -66,10 +65,10 @@ class GetRAMSys
 
 	return value / 1024 / 1024;
 	')
-	#end
-	public static function obtainRAM():UInt64
-	{
-		return 0;
-	}
-	#end
+  #end
+  public static function obtainRAM():UInt64
+  {
+    return 0;
+  }
+  #end
 }

@@ -2,398 +2,375 @@ package objects;
 
 import flixel.group.FlxGroup;
 import flixel.ui.FlxBar;
-import flixel.util.FlxStringUtil;
-
 import states.FreeplayState;
+import flixel.util.FlxStringUtil;
 
 /**
  * Music player used for Freeplay
  */
 @:access(states.FreeplayState)
-class MusicPlayer extends FlxGroup 
+class MusicPlayer extends FlxGroup
 {
-	public var instance:FreeplayState;
+  public var instance:FreeplayState;
+  public var controls:Controls;
 
-	public var playing(get, never):Bool;
-	public var paused(get, never):Bool;
+  public var playing(get, never):Bool;
 
-	public var playingMusic:Bool = false;
-	public var curTime:Float;
+  public var playingMusic:Bool = false;
+  public var curTime:Float;
 
-	var songBG:FlxSprite;
-	var songTxt:FlxText;
-	var timeTxt:FlxText;
-	var progressBar:FlxBar;
-	var playbackBG:FlxSprite;
-	var playbackSymbols:Array<FlxText> = [];
-	var playbackTxt:FlxText;
+  var songBG:FlxSprite;
+  var songTxt:FlxText;
+  var timeTxt:FlxText;
+  var progressBar:FlxBar;
+  var playbackBG:FlxSprite;
+  var playbackSymbols:Array<FlxText> = [];
+  var playbackTxt:FlxText;
 
-	public var wasPlaying:Bool;
+  public var wasPlaying:Bool;
 
-	public var holdPitchTime:Float = 0;
-	public var playbackRate(default, set):Float = 1;
+  public var holdPitchTime:Float = 0;
+  public var playbackRate(default, set):Float = 1;
 
-	public function new(instance:FreeplayState)
-	{
-		super();
+  public var fadingOut:Bool;
 
-		this.instance = instance;
+  public var background:FlxSprite;
 
-		var xPos:Float = FlxG.width * 0.7;
+  public function new(instance:FreeplayState)
+  {
+    super();
 
-		songBG = new FlxSprite(xPos - 6, 0).makeGraphic(1, 100, 0xFF000000);
-		songBG.alpha = 0.6;
-		add(songBG);
+    this.instance = instance;
+    this.controls = instance.controls;
 
-		playbackBG = new FlxSprite(xPos - 6, 0).makeGraphic(1, 100, 0xFF000000);
-		playbackBG.alpha = 0.6;
-		add(playbackBG);
+    var xPos:Float = FlxG.width * 0.7;
 
-		songTxt = new FlxText(FlxG.width * 0.7, 5, 0, "", 32);
-		songTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, RIGHT);
-		add(songTxt);
+    songBG = new FlxSprite(xPos - 6, 0).makeGraphic(1, 100, 0xFF000000);
+    songBG.alpha = 0.6;
+    add(songBG);
 
-		timeTxt = new FlxText(xPos, songTxt.y + 60, 0, "", 32);
-		timeTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, RIGHT);
-		add(timeTxt);
+    playbackBG = new FlxSprite(xPos - 6, 0).makeGraphic(1, 100, 0xFF000000);
+    playbackBG.alpha = 0.6;
+    add(playbackBG);
 
-		for (i in 0...2)
-		{
-			var text:FlxText = new FlxText();
-			text.setFormat(Paths.font('vcr.ttf'), 32, FlxColor.WHITE, CENTER);
-			text.text = '^';
-			if (i == 1)
-				text.flipY = true;
-			text.visible = false;
-			playbackSymbols.push(text);
-			add(text);
-		}
+    songTxt = new FlxText(FlxG.width * 0.7, 5, 0, "", 32);
+    songTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, RIGHT);
+    add(songTxt);
 
-		progressBar = new FlxBar(timeTxt.x, timeTxt.y + timeTxt.height, LEFT_TO_RIGHT, Std.int(timeTxt.width), 8, null, "", 0, Math.POSITIVE_INFINITY);
-		progressBar.createFilledBar(FlxColor.WHITE, FlxColor.BLACK);
-		add(progressBar);
+    timeTxt = new FlxText(xPos, songTxt.y + 60, 0, "", 32);
+    timeTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, RIGHT);
+    add(timeTxt);
 
-		playbackTxt = new FlxText(FlxG.width * 0.6, 20, 0, "", 32);
-		playbackTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE);
-		add(playbackTxt);
+    for (i in 0...2)
+    {
+      var text:FlxText = new FlxText();
+      text.setFormat(Paths.font('vcr.ttf'), 32, FlxColor.WHITE, CENTER);
+      text.text = '^';
+      if (i == 1) text.flipY = true;
+      text.visible = false;
+      playbackSymbols.push(text);
+      add(text);
+    }
 
-		switchPlayMusic();
-	}
+    progressBar = new FlxBar(timeTxt.x, timeTxt.y + timeTxt.height, LEFT_TO_RIGHT, Std.int(timeTxt.width), 8, null, "", 0, Math.POSITIVE_INFINITY);
+    progressBar.createFilledBar(FlxColor.WHITE, FlxColor.BLACK);
+    add(progressBar);
 
-	override function update(elapsed:Float)
-	{
-		super.update(elapsed);
+    playbackTxt = new FlxText(FlxG.width * 0.6, 20, 0, "", 32);
+    playbackTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE);
+    add(playbackTxt);
 
-		if (!playingMusic)
-		{
-			Conductor.songPosition = -5000 / Conductor.songPosition;
-			return;
-		}
+    backgroundLol = new FlxSprite(0, 0).makeGraphic(Std.int(FlxG.width), Std.int(FlxG.height), 0xFF000000);
+    backgroundLol.alpha = 0;
+    add(backgroundLol);
 
-        Conductor.songPosition = FreeplayState.inst.time;
+    switchPlayMusic();
+  }
 
-		if (paused && !wasPlaying)
-			songTxt.text = 'PLAYING: ' + instance.songs[FreeplayState.curSelected].songName + ' (PAUSED)';
-		else
-			songTxt.text = 'PLAYING: ' + instance.songs[FreeplayState.curSelected].songName;
+  override function update(elapsed:Float)
+  {
+    super.update(elapsed);
 
-		positionSong();
+    if (!playingMusic)
+    {
+      Conductor.songPosition = -5000 / Conductor.songPosition;
+      return;
+    }
 
-		if (instance.controls.UI_LEFT_P)
-		{
-			if (playing)
-				wasPlaying = true;
+    Conductor.songPosition = FreeplayState.inst.time;
 
-			pauseOrResume();
+    var songName:String = instance.songs[FreeplayState.curSelected].songName;
+    if (playing && !wasPlaying) songTxt.text = Language.getPhrase('musicplayer_playing', 'PLAYING: {1}', [songName]);
+    else
+      songTxt.text = Language.getPhrase('musicplayer_paused', 'PLAYING: {1} (PAUSED)', [songName]);
 
-			curTime = FreeplayState.inst.time - 1000;
-			instance.holdTime = 0;
+    // if(FlxG.keys.justPressed.K) Debug.logInfo('Time: ${FreeplayState.vocals.time}, Playing: ${FreeplayState.vocals.playing}');
 
-			if (curTime < 0)
-				curTime = 0;
+    if (controls.UI_LEFT_P)
+    {
+      if (playing) wasPlaying = true;
 
-			FreeplayState.inst.time = curTime;
-			if (FreeplayState.vocals != null)
-				FreeplayState.vocals.time = curTime;
-			if (FreeplayState.opponentVocals != null)
-				FreeplayState.opponentVocals.time = curTime;
-		}
-		if (instance.controls.UI_RIGHT_P)
-		{
-			if (playing)
-				wasPlaying = true;
+      pauseOrResume();
 
-			pauseOrResume();
+      curTime = FreeplayState.inst.time - 1000;
+      instance.holdTime = 0;
 
-			curTime = FreeplayState.inst.time + 1000;
-			instance.holdTime = 0;
+      if (curTime < 0) curTime = 0;
 
-			if (curTime > FreeplayState.inst.length)
-				curTime = FreeplayState.inst.length;
+      FreeplayState.inst.time = curTime;
+      setVocalsTime(curTime);
+    }
+    if (controls.UI_RIGHT_P)
+    {
+      if (playing) wasPlaying = true;
 
-			FreeplayState.inst.time = curTime;
-			if (FreeplayState.vocals != null)
-				FreeplayState.vocals.time = curTime;
-			if (FreeplayState.opponentVocals != null)
-				FreeplayState.opponentVocals.time = curTime;
-		}
-	
-		updateTimeTxt();
+      pauseOrResume();
 
-		if(instance.controls.UI_LEFT || instance.controls.UI_RIGHT)
-		{
-			instance.holdTime += elapsed;
-			if(instance.holdTime > 0.5)
-			{
-				curTime += 40000 * elapsed * (instance.controls.UI_LEFT ? -1 : 1);
-			}
+      curTime = FreeplayState.inst.time + 1000;
+      instance.holdTime = 0;
 
-			var difference:Float = Math.abs(curTime - FreeplayState.inst.time);
-			if(curTime + difference > FreeplayState.inst.length) curTime = FreeplayState.inst.length;
-			else if(curTime - difference < 0) curTime = 0;
+      if (curTime > FreeplayState.inst.length) curTime = FreeplayState.inst.length;
 
-			FreeplayState.inst.time = curTime;
-			if (FreeplayState.vocals != null)
-				FreeplayState.vocals.time = curTime;
-			if (FreeplayState.opponentVocals != null)
-				FreeplayState.opponentVocals.time = curTime;
-			updateTimeTxt();
-		}
+      FreeplayState.inst.time = curTime;
+      setVocalsTime(curTime);
+    }
 
-		if(instance.controls.UI_LEFT_R || instance.controls.UI_RIGHT_R)
-		{
-			FreeplayState.inst.time = curTime;
-			if (FreeplayState.vocals != null)
-				FreeplayState.vocals.time = curTime;
-			if (FreeplayState.opponentVocals != null)
-				FreeplayState.opponentVocals.time = curTime;
+    if (controls.UI_LEFT || controls.UI_RIGHT)
+    {
+      instance.holdTime += elapsed;
+      if (instance.holdTime > 0.5)
+      {
+        curTime += 40000 * elapsed * (controls.UI_LEFT ? -1 : 1);
+      }
 
-			if (wasPlaying)
-			{
-				pauseOrResume(true);
-				wasPlaying = false;
-			}
+      var difference:Float = Math.abs(curTime - FreeplayState.inst.time);
+      if (curTime + difference > FreeplayState.inst.length) curTime = FreeplayState.inst.length;
+      else if (curTime - difference < 0) curTime = 0;
 
-			updateTimeTxt();
-		}
-		if (instance.controls.UI_UP_P)
-		{
-			holdPitchTime = 0;
-			playbackRate += 0.05;
-			setPlaybackRate();
-		}
-		else if (instance.controls.UI_DOWN_P)
-		{
-			holdPitchTime = 0;
-			playbackRate -= 0.05;
-			setPlaybackRate();
-		}
-		if (instance.controls.UI_DOWN || instance.controls.UI_UP)
-		{
-			holdPitchTime += elapsed;
-			if (holdPitchTime > 0.6)
-			{
-				playbackRate += 0.05 * (instance.controls.UI_UP ? 1 : -1);
-				setPlaybackRate();
-			}
-		}
-		if (FreeplayState.vocals != null && FreeplayState.inst.time > 5)
-		{
-			var difference:Float = Math.abs(FreeplayState.inst.time - FreeplayState.vocals.time);
-			if (difference >= 5 && !paused)
-			{
-				pauseOrResume();
-				FreeplayState.vocals.time = FreeplayState.inst.time;
-				pauseOrResume(true);
-			}
-		}
-		if (FreeplayState.opponentVocals != null && FreeplayState.inst.time > 5)
-		{
-			var difference:Float = Math.abs(FreeplayState.inst.time - FreeplayState.opponentVocals.time);
-			if (difference >= 5 && !paused)
-			{
-				pauseOrResume();
-				FreeplayState.opponentVocals.time = FreeplayState.inst.time;
-				pauseOrResume(true);
-			}
-		}
-		updatePlaybackTxt();
-	
-		if (instance.controls.RESET)
-		{
-			playbackRate = 1;
-			setPlaybackRate();
+      FreeplayState.inst.time = curTime;
+      setVocalsTime(curTime);
+    }
 
-			FreeplayState.inst.time = 0;
-			if (FreeplayState.vocals != null)
-				FreeplayState.vocals.time = 0;
-			if (FreeplayState.opponentVocals != null)
-				FreeplayState.opponentVocals.time = 0;
+    if (controls.UI_LEFT_R || controls.UI_RIGHT_R)
+    {
+      FreeplayState.inst.time = curTime;
+      setVocalsTime(curTime);
 
-			updateTimeTxt();
-		}
-	}
+      if (wasPlaying)
+      {
+        pauseOrResume(true);
+        wasPlaying = false;
+      }
+    }
+    if (controls.UI_UP_P)
+    {
+      holdPitchTime = 0;
+      playbackRate += 0.05;
+      setPlaybackRate();
+    }
+    else if (controls.UI_DOWN_P)
+    {
+      holdPitchTime = 0;
+      playbackRate -= 0.05;
+      setPlaybackRate();
+    }
+    if (controls.UI_DOWN || controls.UI_UP)
+    {
+      holdPitchTime += elapsed;
+      if (holdPitchTime > 0.6)
+      {
+        playbackRate += 0.05 * (controls.UI_UP ? 1 : -1);
+        setPlaybackRate();
+      }
+    }
 
-	public function pauseOrResume(resume:Bool = false) 
-	{
-		if (resume)
-		{
-			FreeplayState.inst.resume();
+    if (controls.RESET)
+    {
+      playbackRate = 1;
+      setPlaybackRate();
 
-			if (FreeplayState.vocals != null)
-				FreeplayState.vocals.resume();
+      FreeplayState.inst.time = 0;
+      setVocalsTime(0);
 
-			if (FreeplayState.opponentVocals != null)
-				FreeplayState.opponentVocals.resume();
-		}
-		else 
-		{
-			FreeplayState.inst.pause();
+      updateTimeTxt();
+    }
 
-			if (FreeplayState.vocals != null)
-				FreeplayState.vocals.pause();
+    if (playing && !fadingOut)
+    {
+      if (FreeplayState.inst != null) FreeplayState.inst.volume = 0.8;
+      if (FreeplayState.vocals != null) FreeplayState.vocals.volume = (FreeplayState.vocals.length > FreeplayState.inst.time) ? 0.8 : 0;
+      if (FreeplayState.opponentVocals != null) FreeplayState.opponentVocals.volume = (FreeplayState.opponentVocals.length > FreeplayState.inst.time) ? 0.8 : 0;
 
-			if (FreeplayState.opponentVocals != null)
-				FreeplayState.opponentVocals.pause();
-		}
-		positionSong();
-	}
+      if ((FreeplayState.vocals != null
+        && FreeplayState.vocals.length > FreeplayState.inst.time
+        && Math.abs(FreeplayState.inst.time - FreeplayState.vocals.time) >= 25)
+        || (FreeplayState.opponentVocals != null
+          && FreeplayState.opponentVocals.length > FreeplayState.inst.time
+          && Math.abs(FreeplayState.inst.time - FreeplayState.opponentVocals.time) >= 25))
+      {
+        pauseOrResume();
+        setVocalsTime(FreeplayState.inst.time);
+        pauseOrResume(true);
+      }
+    }
 
-	public function switchPlayMusic()
-	{
-		active = visible = playingMusic;
+    positionSong();
+    updateTimeTxt();
+    updatePlaybackTxt();
+  }
 
-		instance.scoreBG.visible = instance.diffText.visible = 
-        instance.scoreText.visible = instance.helpText.visible = 
-        instance.comboText.visible = instance.opponentText.visible = !playingMusic; //Hide Freeplay texts and boxes if playingMusic is true
+  function setVocalsTime(time:Float)
+  {
+    if (FreeplayState.vocals != null && FreeplayState.vocals.length > time) FreeplayState.vocals.time = time;
+    if (FreeplayState.opponentVocals != null && FreeplayState.opponentVocals.length > time) FreeplayState.opponentVocals.time = time;
+  }
 
-		songTxt.visible = timeTxt.visible = songBG.visible = playbackTxt.visible = playbackBG.visible = progressBar.visible = playingMusic; //Show Music Player texts and boxes if playingMusic is true
+  public function pauseOrResume(resume:Bool = false)
+  {
+    if (resume)
+    {
+      if (!FreeplayState.inst.playing) FreeplayState.inst.resume();
 
-		for (i in playbackSymbols)
-			i.visible = playingMusic;
-		
-		holdPitchTime = 0;
-		instance.holdTime = 0;
-		playbackRate = 1;
-		updatePlaybackTxt();
+      if (FreeplayState.vocals != null
+        && FreeplayState.vocals.length > FreeplayState.inst.time
+        && !FreeplayState.vocals.playing) FreeplayState.vocals.resume();
+      if (FreeplayState.opponentVocals != null
+        && FreeplayState.opponentVocals.length > FreeplayState.inst.time
+        && !FreeplayState.opponentVocals.playing) FreeplayState.opponentVocals.resume();
+    }
+    else
+    {
+      FreeplayState.inst.pause();
 
-		if (playingMusic)
-		{
-			instance.downText.text = "Press SPACE to Pause / Press ESCAPE to Exit / Press R to Reset the Song";
-            instance.downText.x = -210;
-			positionSong();
-			
-			progressBar.setRange(0, FreeplayState.inst.length);
-			progressBar.setParent(FreeplayState.inst, "time");
-			progressBar.numDivisions = 1600;
+      if (FreeplayState.vocals != null) FreeplayState.vocals.pause();
 
-			updateTimeTxt();
-		}
-		else
-		{
-			progressBar.setRange(0, Math.POSITIVE_INFINITY);
-			progressBar.setParent(null, "");
-			progressBar.numDivisions = 0;
+      if (FreeplayState.opponentVocals != null) FreeplayState.opponentVocals.pause();
+    }
+  }
 
-            instance.downText.text = instance.leText;
-			instance.downText.x = -600;
-		}
-		progressBar.updateBar();
-	}
+  public function switchPlayMusic()
+  {
+    active = visible = playingMusic;
 
-	function updatePlaybackTxt()
-	{
-		var text = "";
-		if (playbackRate is Int)
-			text = playbackRate + '.00';
-		else
-		{
-			var playbackRate = Std.string(playbackRate);
-			if (playbackRate.split('.')[1].length < 2) // Playback rates for like 1.1, 1.2 etc
-				playbackRate += '0';
+    instance.scoreBG.visible = instance.diffText.visible = instance.scoreText.visible = instance.helpText.visible = instance.comboText.visible = instance.opponentText.visible = !playingMusic; // Hide Freeplay texts and boxes if playingMusic is true
 
-			text = playbackRate;
-		}
-		playbackTxt.text = text + 'x';
-	}
+    songTxt.visible = timeTxt.visible = songBG.visible = playbackTxt.visible = playbackBG.visible = progressBar.visible = playingMusic; // Show Music Player texts and boxes if playingMusic is true
 
-	function positionSong() 
-	{
-		var length:Int = instance.songs[FreeplayState.curSelected].songName.length;
-		var shortName:Bool = length < 5; // Fix for song names like Ugh, Guns
-		songTxt.x = FlxG.width - songTxt.width - 6;
-		if (shortName)
-			songTxt.x -= 10 * length - length;
-		songBG.scale.x = FlxG.width - songTxt.x + 12;
-		if (shortName) 
-			songBG.scale.x += 6 * length;
-		songBG.x = FlxG.width - (songBG.scale.x / 2);
-		timeTxt.x = Std.int(songBG.x + (songBG.width / 2));
-		timeTxt.x -= timeTxt.width / 2;
-		if (shortName)
-			timeTxt.x -= length - 5;
+    for (i in playbackSymbols)
+      i.visible = playingMusic;
 
-		playbackBG.scale.x = playbackTxt.width + 30;
-		playbackBG.x = songBG.x - (songBG.scale.x / 2);
-		playbackBG.x -= playbackBG.scale.x;
+    holdPitchTime = 0;
+    instance.holdTime = 0;
+    playbackRate = 1;
+    updatePlaybackTxt();
 
-		playbackTxt.x = playbackBG.x - playbackTxt.width / 2;
-		playbackTxt.y = playbackTxt.height;
+    if (playingMusic)
+    {
+      instance.downText.text = Language.getPhrase('musicplayer_tip', "Press SPACE to Pause / Press ESCAPE to Exit / Press R to Reset the Song");
+      instance.downText.x = -210;
+      positionSong();
 
-		progressBar.setGraphicSize(Std.int(songTxt.width), 5);
-		progressBar.y = songTxt.y + songTxt.height + 10;
-		progressBar.x = songTxt.x + songTxt.width / 2 - 15;
-		if (shortName)
-		{
-			progressBar.scale.x += length / 2;
-			progressBar.x -= length - 10;
-		}
+      progressBar.setRange(0, FreeplayState.inst.length);
+      progressBar.setParent(FreeplayState.inst, "time");
+      progressBar.numDivisions = 1600;
 
-		for (i in 0...2)
-		{
-			var text = playbackSymbols[i];
-			text.x = playbackTxt.x + playbackTxt.width / 2 - 10;
-			text.y = playbackTxt.y;
+      updateTimeTxt();
+      backgroundLol.alpha = .5;
+    }
+    else
+    {
+      progressBar.setRange(0, Math.POSITIVE_INFINITY);
+      progressBar.setParent(null, "");
+      progressBar.numDivisions = 0;
 
-			if (i == 0)
-				text.y -= playbackTxt.height;
-			else
-				text.y += playbackTxt.height;
-		}
-	}
+      instance.downText.text = instance.leText;
+      instance.downText.x = -600;
+      backgroundLol.alpha = 0;
+    }
+    progressBar.updateBar();
+  }
 
-	function updateTimeTxt()
-	{
-		var text = FlxStringUtil.formatTime(FlxMath.roundDecimal(Conductor.songPosition / 1000 / playbackRate, 2), false) + ' / ' + FlxStringUtil.formatTime(FlxMath.roundDecimal(FreeplayState.inst.length / 1000 / playbackRate, 2), false);
-		timeTxt.text = '< ' + text + ' >';
-	}
+  function updatePlaybackTxt()
+  {
+    var text = "";
+    if (playbackRate is Int) text = playbackRate + '.00';
+    else
+    {
+      var playbackRate = Std.string(playbackRate);
+      if (playbackRate.split('.')[1].length < 2) // Playback rates for like 1.1, 1.2 etc
+        playbackRate += '0';
 
-	function setPlaybackRate() 
-	{
-		FreeplayState.inst.pitch = playbackRate;
-		if (FreeplayState.vocals != null)
-			FreeplayState.vocals.pitch = playbackRate;
-		if (FreeplayState.opponentVocals != null)
-			FreeplayState.opponentVocals.pitch = playbackRate;
-	}
+      text = playbackRate;
+    }
+    playbackTxt.text = text + 'x';
+  }
 
-	function get_playing():Bool 
-	{
-		return FreeplayState.inst.playing;
-	}
+  function positionSong()
+  {
+    var length:Int = instance.songs[FreeplayState.curSelected].songName.length;
+    var shortName:Bool = length < 5; // Fix for song names like Ugh, Guns
+    songTxt.x = FlxG.width - songTxt.width - 6;
+    if (shortName) songTxt.x -= 10 * length - length;
+    songBG.scale.x = FlxG.width - songTxt.x + 12;
+    if (shortName) songBG.scale.x += 6 * length;
+    songBG.x = FlxG.width - (songBG.scale.x / 2);
+    timeTxt.x = Std.int(songBG.x + (songBG.width / 2));
+    timeTxt.x -= timeTxt.width / 2;
+    if (shortName) timeTxt.x -= length - 5;
 
-	function get_paused():Bool 
-	{
-		@:privateAccess return FreeplayState.inst._paused;
-	}
+    playbackBG.scale.x = playbackTxt.width + 30;
+    playbackBG.x = songBG.x - (songBG.scale.x / 2);
+    playbackBG.x -= playbackBG.scale.x;
 
-	function set_playbackRate(value:Float):Float 
-	{
-		var value = FlxMath.roundDecimal(value, 2);
-		if (value > 3)
-			value = 3;
-		else if (value <= 0.25)
-			value = 0.25;
-		return playbackRate = value;
-	}
+    playbackTxt.x = playbackBG.x - playbackTxt.width / 2;
+    playbackTxt.y = playbackTxt.height;
+
+    progressBar.setGraphicSize(Std.int(songTxt.width), 5);
+    progressBar.y = songTxt.y + songTxt.height + 10;
+    progressBar.x = songTxt.x + songTxt.width / 2 - 15;
+    if (shortName)
+    {
+      progressBar.scale.x += length / 2;
+      progressBar.x -= length - 10;
+    }
+
+    for (i in 0...2)
+    {
+      var text = playbackSymbols[i];
+      text.x = playbackTxt.x + playbackTxt.width / 2 - 10;
+      text.y = playbackTxt.y;
+
+      if (i == 0) text.y -= playbackTxt.height;
+      else
+        text.y += playbackTxt.height;
+    }
+  }
+
+  function updateTimeTxt()
+  {
+    var text = FlxStringUtil.formatTime(FlxMath.roundDecimal(Conductor.songPosition / 1000 / playbackRate, 2), false)
+      + ' / '
+      + FlxStringUtil.formatTime(FlxMath.roundDecimal(FreeplayState.inst.length / 1000 / playbackRate, 2), false);
+    timeTxt.text = '< ' + text + ' >';
+  }
+
+  function setPlaybackRate()
+  {
+    FreeplayState.inst.pitch = playbackRate;
+    if (FreeplayState.vocals != null) FreeplayState.vocals.pitch = playbackRate;
+    if (FreeplayState.opponentVocals != null) FreeplayState.opponentVocals.pitch = playbackRate;
+  }
+
+  function get_playing():Bool
+  {
+    return FreeplayState.inst.playing;
+  }
+
+  function set_playbackRate(value:Float):Float
+  {
+    var value = FlxMath.roundDecimal(value, 2);
+    if (value > 3) value = 3;
+    else if (value <= 0.25) value = 0.25;
+    return playbackRate = value;
+  }
 }

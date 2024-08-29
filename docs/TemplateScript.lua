@@ -168,14 +168,14 @@ end
 
 -- There are 14 values for each not 2 anymore!
 -- Event notes hooks
-function onEvent(name, value1, value2)
+function onEvent(name, eventParams, strumTime)
 	-- event note triggered
-	-- triggerEvent() does not call this function!!
+	-- triggerEvent() calls this function!!
 
-	-- print('Event triggered: ', name, value1, value2);
+	-- print('Event triggered: ', name, eventParams);
 end
 
-function eventEarlyTrigger(name)
+function eventEarlyTrigger(name, eventParams, strumTime)
 	--[[
 	Here's a port of the Kill Henchmen early trigger but on Lua instead of Haxe:
 
@@ -188,7 +188,34 @@ function eventEarlyTrigger(name)
 	-- write your shit under this line, the new return value will override the ones hardcoded on the engine
 end
 
-function onEventPushed(name)
+function onEventPushed(name, eventParams, strumTime)
+	-- Works like a preloader for events such for "Change Character"
+end
+
+--Added the values 1-14 like (name, value1, value2, etc..)
+function onEventLegacy(name, etc.., strumTime)
+	-- event note triggered
+	-- triggerEventLegacy() calls this function!!
+
+	-- print('Event triggered: ', name, eventParams);
+end
+
+--Added the values 1-14 like (name, value1, value2, etc..)
+function eventEarlyTriggerLegacy(name, etc..., strumTime)
+	--[[
+	Here's a port of the Kill Henchmen early trigger but on Lua instead of Haxe:
+
+	if name == 'Kill Henchmen'
+		return 280;
+
+	This makes the "Kill Henchmen" event be triggered 280 miliseconds earlier so that the kill sound is perfectly timed with the song
+	]]--
+
+	-- write your shit under this line, the new return value will override the ones hardcoded on the engine
+end
+
+--Added the values 1-14 like (name, value1, value2, etc..)
+function onEventPushedLegacy(name, etc..., strumTime)
 	-- Works like a preloader for events such for "Change Character"
 end
 
@@ -204,7 +231,7 @@ function onTimerCompleted(tag, loops, loopsLeft)
 end
 
 --SCE extra Doc functions or Functions not mentioned originally
-function onStrumNote(membersIndex, playerNumber, ID)
+function onSpawnNote(membersIndex, playerNumber, ID)
 	--membersIndex of the strums
 	--plyaerNumber of what strum number "playerNumber ? 0 : 1" -- haxe form
 	--ID number ID of strum as in noteData
