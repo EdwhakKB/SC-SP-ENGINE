@@ -290,7 +290,7 @@ class ReflectionFunctions
     switch (classVar)
     {
       case "StrumNote", "StrumArrow":
-        classVar = "objects.StrumArrow";
+        classVar = "objects.note.StrumArrow";
       case "ClientPrefs":
         classVar = "backend.ClientPrefs";
       case "Conductor":

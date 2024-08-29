@@ -1,7 +1,7 @@
 package options;
 
-import objects.Note;
-import objects.StrumArrow;
+import objects.note.Note;
+import objects.note.StrumArrow;
 import objects.Alphabet;
 
 class VisualsSettingsSubState extends BaseOptionsMenu

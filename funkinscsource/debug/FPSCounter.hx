@@ -189,18 +189,18 @@ class MemoryUtil
 
 class DateSetup
 {
-  public static function initDate()
+  public static function initDate():String
   {
-    var date = Date.now();
-    var realYear:String = Std.string(date.getFullYear());
+    final date = Date.now();
+    final realYear:String = Std.string(date.getFullYear());
     var realMonth:String = '';
     var realDay:String = '';
     var hourCheck:String = '';
-    var minCheck:String = Std.string(date.getMinutes());
-    var secCheck:String = Std.string(date.getSeconds());
-    var suffix:String = (ClientPrefs.data.militaryTime ? '' : (date.getHours() > 11 ? 'PM' : 'AM'));
+    final minCheck:String = Std.string(date.getMinutes());
+    final secCheck:String = Std.string(date.getSeconds());
+    final suffix:String = (ClientPrefs.data.militaryTime ? '' : (date.getHours() > 11 ? 'PM' : 'AM'));
 
-    var hourCheckArray:Array<Array<String>> = [
+    final hourCheckArray:Array<Array<String>> = [
       [
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'
       ],
@@ -210,13 +210,13 @@ class DateSetup
     ];
     hourCheck = hourCheckArray[ClientPrefs.data.militaryTime ? 0 : 1][date.getHours()] + ' $suffix';
 
-    var dayArray:Array<Array<String>> = [
+    final dayArray:Array<Array<String>> = [
       ['7', '1', '2', '3', '4', '5', '6'],
       ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
     ];
     realDay = dayArray[ClientPrefs.data.dayAsInt ? 0 : 1][date.getDay()];
 
-    var monthArray:Array<Array<String>> = [
+    final monthArray:Array<Array<String>> = [
       ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
       [
         'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'
@@ -225,6 +225,6 @@ class DateSetup
     realMonth = monthArray[ClientPrefs.data.monthAsInt ? 0 : 1][date.getMonth()];
 
     final finalTime = '(Year: $realYear | Month: $realMonth | Day: $realDay | Hour: $hourCheck | Min: $minCheck | Sec: $secCheck)';
-    FPSCounter.stringTimeToReturn = finalTime;
+    return FPSCounter.stringTimeToReturn = finalTime;
   }
 }

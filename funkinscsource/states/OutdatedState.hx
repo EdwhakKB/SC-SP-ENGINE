@@ -23,7 +23,7 @@ class OutdatedState extends MusicBeatState
 			Press ESCAPE to proceed anyway.\n
 			\n
 			Thank you for using the Engine!", 32);
-    warnText.setFormat("VCR OSD Mono", 32, FlxColor.WHITE, CENTER);
+    warnText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER);
     warnText.screenCenter(Y);
     add(warnText);
   }

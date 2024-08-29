@@ -8,12 +8,14 @@ import haxe.PosInfos;
 import flixel.util.FlxStringUtil;
 
 /**
+ * Credit to boloVevo for this is his class from his custom kadeEngine!
+ *
  * Hey you, developer!
  * This class contains lots of utility functions for logging and debugging.
  * The goal is to integrate development more heavily with the HaxeFlixel debugger.
  * Use these methods to the fullest to produce mods efficiently!
- *
  * @see https://haxeflixel.com/documentation/debugger/
+ * @see https://github.com/BoloVEVO/Kade-Engine/tree/develop
  */
 class Debug
 {

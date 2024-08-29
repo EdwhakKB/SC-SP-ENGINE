@@ -28,6 +28,17 @@ class Init extends FlxState
     if (Main.fpsVar == null) Lib.current.stage.addChild(Main.fpsVar = new FPSCounter(10, 3, 0xFFFFFF));
     #end
 
+    #if !MODS_ALLOWED
+    final path:String = 'mods';
+    if (sys.FileSystem.exists(path) && sys.FileSystem.isDirectory(path))
+    {
+      var entries = sys.FileSystem.readDirectory(path);
+      for (entry in entries)
+        sys.FileSystem.deleteFile(path + '/' + entry);
+      FileSystem.deleteDirectory(path);
+    }
+    #end
+
     #if linux
     Lib.current.stage.window.setIcon(lime.graphics.Image.fromFile("icon.png"));
     #end

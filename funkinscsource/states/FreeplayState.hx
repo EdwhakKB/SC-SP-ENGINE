@@ -94,7 +94,10 @@ class FreeplayState extends MusicBeatState
       FlxTransitionableState.skipNextTransIn = true;
       persistentUpdate = false;
       MusicBeatState.switchState(new states.ErrorState("NO WEEKS ADDED FOR FREEPLAY\n\nPress ACCEPT to go to the Week Editor Menu.\nPress BACK to return to Main Menu.",
-        function() MusicBeatState.switchState(new states.editors.WeekEditorState()), function() MusicBeatState.switchState(new states.MainMenuState())));
+        function() MusicBeatState.switchState(new states.editors.WeekEditorState()), function() {
+          FlxG.sound.play(Paths.sound('cancelMenu'));
+          MusicBeatState.switchState(new states.MainMenuState());
+      }));
       return;
     }
 
@@ -321,7 +324,11 @@ class FreeplayState extends MusicBeatState
 
   override function update(elapsed:Float)
   {
-    if (WeekData.weeksList.length < 1) return;
+    if (WeekData.weeksList.length < 1)
+    {
+      super.update(elapsed);
+      return;
+    }
 
     #if HSCRIPT_ALLOWED
     freeplayScript.call('onUpdate', [elapsed]);
@@ -694,13 +701,14 @@ class FreeplayState extends MusicBeatState
 
           if (PlayState.SONG.needsVoices)
           {
+            final currentPrefix:String = (PlayState.SONG.options.vocalsPrefix != null ? PlayState.SONG.options.vocalsPrefix : '');
+            final currentSuffix:String = (PlayState.SONG.options.vocalsSuffix != null ? PlayState.SONG.options.vocalsSuffix : '');
             try
             {
-              final currentPrefix:String = (PlayState.SONG.options.vocalsPrefix != null ? PlayState.SONG.options.vocalsPrefix : '');
-              final currentSuffix:String = (PlayState.SONG.options.vocalsSuffix != null ? PlayState.SONG.options.vocalsSuffix : '');
               final vocalPl:String = getFromCharacter(PlayState.SONG.characters.player).vocals_file;
               final vocalSuffix:String = (vocalPl != null && vocalPl.length > 0) ? vocalPl : 'Player';
-              var loadedVocals = SoundUtil.findVocal(
+              final normalVocals = Paths.voices(currentPrefix, songPath, currentSuffix);
+              var loadedPlayerVocals = SoundUtil.findVocal(
                 {
                   song: songPath,
                   prefix: currentPrefix,
@@ -709,10 +717,11 @@ class FreeplayState extends MusicBeatState
                   character: PlayState.SONG.characters.player,
                   difficulty: Difficulty.getString(curDifficulty)
                 });
+              if (loadedPlayerVocals == null && normalVocals != null) loadedPlayerVocals = normalVocals;
 
-              if (loadedVocals != null && loadedVocals.length > 0)
+              if (loadedPlayerVocals != null && loadedPlayerVocals.length > 0)
               {
-                vocals = new FlxSound().loadEmbedded(loadedVocals);
+                vocals = new FlxSound().loadEmbedded(loadedPlayerVocals);
                 vocals.volume = 0;
                 add(vocals);
               }
@@ -731,8 +740,6 @@ class FreeplayState extends MusicBeatState
 
             try
             {
-              final currentPrefix:String = (PlayState.SONG.options.vocalsPrefix != null ? PlayState.SONG.options.vocalsPrefix : '');
-              final currentSuffix:String = (PlayState.SONG.options.vocalsSuffix != null ? PlayState.SONG.options.vocalsSuffix : '');
               final vocalOp:String = getFromCharacter(PlayState.SONG.characters.opponent).vocals_file;
               final vocalSuffix:String = (vocalOp != null && vocalOp.length > 0) ? vocalOp : 'Opponent';
               var loadedVocals = SoundUtil.findVocal(
@@ -989,8 +996,8 @@ class FreeplayState extends MusicBeatState
 
       if (accepted)
       {
-        var musicLength:Float = (inst != null ? inst.length : FlxG.sound.play(Paths.sound('confirmMenu')).length);
-        if (item.text != songs[curSelected].songName) FlxTween.tween(item, {x: -6000 * (musicLength * 0.02)}, musicLength / 1000);
+        var musicLength:Float = FlxG.sound.play(Paths.sound('confirmMenu')).length;
+        if (item.text != songs[curSelected].songName) FlxTween.tween(item, {x: -6000}, musicLength / 1000);
         else
           FlxTween.tween(item, {x: item.x + 20}, musicLength / 1000);
       }

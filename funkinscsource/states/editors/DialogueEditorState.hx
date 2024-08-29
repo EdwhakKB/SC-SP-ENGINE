@@ -359,6 +359,7 @@ class DialogueEditorState extends MusicBeatState implements PsychUIEventHandler.
       }
       if (FlxG.keys.justPressed.ESCAPE)
       {
+        ClientPrefs.toggleVolumeKeys(true);
         if (!unsavedProgress)
         {
           MusicBeatState.switchState(new states.editors.MasterEditorMenu());

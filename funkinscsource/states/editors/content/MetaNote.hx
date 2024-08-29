@@ -1,6 +1,6 @@
 package states.editors.content;
 
-import objects.Note;
+import objects.note.Note;
 import shaders.RGBPalette;
 import flixel.util.FlxDestroyUtil;
 
@@ -26,6 +26,7 @@ class MetaNote extends Note
   {
     this.songData[1] = v;
     this.noteData = v % ChartingState.GRID_COLUMNS_PER_PLAYER;
+    this.mustPress = v <= 3;
 
     loadNoteAnims(containsPixelTexture);
 

@@ -234,12 +234,6 @@ class PauseSubState extends MusicBeatSubState
 
     super.update(elapsed);
 
-    if (controls.BACK)
-    {
-      close();
-      return;
-    }
-
     updateSkipTextStuff();
 
     if (controls.UI_UP_P && !inCountDown)
@@ -286,12 +280,6 @@ class PauseSubState extends MusicBeatSubState
     if ((controls.ACCEPT && (cantUnpause <= 0 || !controls.controllerMode)) && !inCountDown)
     {
       // Finally
-      if (!stoppedUpdatingMusic)
-      {
-        stoppedUpdatingMusic = true;
-        destroyMusic();
-      }
-
       if (menuItems == difficultyChoices)
       {
         var songLowercase:String = Paths.formatToSongPath(PlayState.SONG.songId);
@@ -338,6 +326,7 @@ class PauseSubState extends MusicBeatSubState
         switch (daSelected)
         {
           case 'Note Options':
+            game.canResync = false;
             OptionsState.onPlayState = true;
             FlxTransitionableState.skipNextTransOut = true;
             FlxTransitionableState.skipNextTransIn = true;
@@ -353,11 +342,13 @@ class PauseSubState extends MusicBeatSubState
           case 'Misc':
             openSubState(new options.MiscSettingsSubState());
           case 'Adjust Delay and Combo':
+            game.canResync = false;
             OptionsState.onPlayState = true;
             MusicBeatState.switchState(new options.NoteOffsetState());
           case 'Language':
             openSubState(new options.LanguageSubState());
           default:
+            game.canResync = true;
             ClientPrefs.saveSettings();
             ClientPrefs.loadPrefs();
             ClientPrefs.keybindSaveLoad();
@@ -367,7 +358,21 @@ class PauseSubState extends MusicBeatSubState
         }
         return;
       }
+
+      if (!stoppedUpdatingMusic)
+      {
+        stoppedUpdatingMusic = true;
+        destroyMusic();
+      }
       menuOptions(daSelected);
+    }
+
+    if (controls.BACK)
+    {
+      game.paused = false;
+      game.canResync = true;
+      close();
+      return;
     }
   }
 
@@ -435,7 +440,6 @@ class PauseSubState extends MusicBeatSubState
         game.botplayTxt.alpha = 1;
         game.botplaySine = 0;
       case 'Options':
-        PlayState.instance.canResync = false;
         menuItems = optionChoices;
         deleteSkipTimeText();
         regenMenu();
@@ -456,7 +460,7 @@ class PauseSubState extends MusicBeatSubState
         else
           MusicBeatState.switchState(new FreeplayState());
 
-        PlayState.instance.canResync = false;
+        game.canResync = false;
         FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
         PlayState.changedDifficulty = false;
         PlayState.chartingMode = false;
@@ -590,7 +594,7 @@ class PauseSubState extends MusicBeatSubState
           spr.destroy();
         }
       });
-    FlxG.sound.play(Paths.sound(soundName), 0.6);
+    if (!game.stage.disabledIntroSounds) FlxG.sound.play(Paths.sound(soundName), 0.6);
     return spr;
   }
 

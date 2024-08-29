@@ -72,11 +72,11 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
     FlxG.camera.follow(null, LOCKON, 0);
 
     loadJsonAssetDirectory();
-    gf = new Character(0, 0, stageJson._editorMeta != null ? stageJson._editorMeta.gf : 'gf');
+    gf = new Character(0, 0, stageJson._editorMeta != null ? stageJson._editorMeta.gf : 'gf', 'GF');
     gf.visible = !(stageJson.hide_girlfriend);
     gf.scrollFactor.set(0.95, 0.95);
-    dad = new Character(0, 0, stageJson._editorMeta != null ? stageJson._editorMeta.dad : 'dad');
-    boyfriend = new Character(0, 0, stageJson._editorMeta != null ? stageJson._editorMeta.boyfriend : 'bf', true);
+    dad = new Character(0, 0, stageJson._editorMeta != null ? stageJson._editorMeta.dad : 'dad', 'DAD');
+    boyfriend = new Character(0, 0, stageJson._editorMeta != null ? stageJson._editorMeta.boyfriend : 'bf', true, 'BF');
 
     for (i in 0...4)
     {

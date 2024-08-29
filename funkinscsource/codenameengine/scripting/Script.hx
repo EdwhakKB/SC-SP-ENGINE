@@ -97,10 +97,10 @@ class Script extends FlxBasic implements IFlxDestroyable
       #if flxanimate "FlxAnimate" => FlxAnimate, #end
       "FunkinSCSprite" => FunkinSCSprite,
       "HealthIcon" => objects.HealthIcon,
-      "Note" => objects.Note,
-      "StrumArrow" => objects.StrumArrow,
+      "Note" => objects.note.Note,
+      "StrumArrow" => objects.note.StrumArrow,
       // --> stagecontent
-      "Stage" => objects.stagecontent.Stage,
+      "Stage" => backend.stage.Stage,
       // Options
       "Options" => options.OptionsState,
       "ModSettingsSubState" => options.ModSettingsSubState,
@@ -122,8 +122,8 @@ class Script extends FlxBasic implements IFlxDestroyable
       "PauseSubState" => substates.PauseSubState,
 
       // External Usages For Engine
-      "Countdown" => objects.stagecontent.Countdown,
-      "HenchmenKillState" => objects.stagecontent.HenchmenKillState
+      "Countdown" => backend.Countdown,
+      "HenchmenKillState" => backend.stage.HenchmenKillState
     ];
   }
 
@@ -351,8 +351,8 @@ class Script extends FlxBasic implements IFlxDestroyable
     });
 
     #if LUA_ALLOWED
-    set('doLua', function(code:String = null, stageLua:Bool = false, preloading:Bool = false, scriptName:String = 'unknown') {
-      if (code != null) new psychlua.FunkinLua(code, stageLua, preloading, scriptName);
+    set('doLua', function(code:String = null, instance:String = "PLAYSTATE", preloading:Bool = false, scriptName:String = 'unknown') {
+      if (code != null) new psychlua.FunkinLua(code, instance, preloading, scriptName);
     });
     #end
 

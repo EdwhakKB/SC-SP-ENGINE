@@ -26,13 +26,16 @@ import backend.StageData;
 import backend.WeekData;
 import backend.song.Song;
 import backend.song.SongData;
+import backend.stage.*;
 // Psych-UI
 import backend.ui.*;
 // Objects
 import objects.Alphabet;
 import objects.BGSprite;
 import objects.FunkinSCSprite;
-import objects.stagecontent.*;
+import objects.note.*;
+import objects.note.constant.*;
+import objects.stage.*;
 // States
 import states.PlayState;
 import states.LoadingState;

@@ -305,7 +305,7 @@ class VSlice
               for (field in Reflect.fields(event.v))
               {
                 fields.push(Std.string(Reflect.field(event.v, field)));
-                if (fields.length == 2) break;
+                if (fields.length == 14) break;
               }
             case TClass(String):
               fields.push(event.v);

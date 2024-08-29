@@ -5,7 +5,7 @@ import flixel.graphics.frames.FlxFrame;
 import flixel.FlxBasic;
 import flixel.util.FlxSort;
 #end
-import objects.Note;
+import objects.note.Note;
 
 /**
  * Utility functions related to sorting.

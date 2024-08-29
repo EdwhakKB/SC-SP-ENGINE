@@ -1,5 +1,5 @@
-import objects.stagecontent.stageobjects.TankmanSpriteGroup;
-import objects.stagecontent.stageobjects.BackgroundTank;
+import objects.stage.TankmanSpriteGroup;
+import objects.stage.BackgroundTank;
 
 // tankman
 var tankWatchtower:BGSprite;

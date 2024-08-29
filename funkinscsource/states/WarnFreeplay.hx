@@ -25,7 +25,7 @@ class WarnFreeplay extends states.MusicBeatState
     warnText = new FlxText(0, 0, FlxG.width, "Hey!\n
 			This Engine has some settings you may need to change before playing!\n
 			\nWhich may be due to how some songs are!", 32);
-    warnText.setFormat("VCR OSD Mono", 32, FlxColor.WHITE, CENTER);
+    warnText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER);
     warnText.screenCenter(Y);
     add(warnText);
   }

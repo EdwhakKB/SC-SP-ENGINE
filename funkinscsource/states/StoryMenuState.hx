@@ -56,17 +56,21 @@ class StoryMenuState extends MusicBeatState
       FlxTransitionableState.skipNextTransIn = true;
       persistentUpdate = false;
       MusicBeatState.switchState(new states.ErrorState("NO WEEKS ADDED FOR STORY MODE\n\nPress ACCEPT to go to the Week Editor Menu.\nPress BACK to return to Main Menu.",
-        function() MusicBeatState.switchState(new states.editors.WeekEditorState()), function() MusicBeatState.switchState(new states.MainMenuState())));
+        function() MusicBeatState.switchState(new states.editors.WeekEditorState()), function() {
+          FlxG.sound.play(Paths.sound('cancelMenu'));
+          movedBack = true;
+          MusicBeatState.switchState(new states.MainMenuState());
+      }));
       return;
     }
 
     if (curWeek >= WeekData.weeksList.length) curWeek = 0;
 
     scoreText = new FlxText(10, 10, 0, Language.getPhrase('week_score', 'WEEK SCORE: {1}', [lerpScore]), 36);
-    scoreText.setFormat("VCR OSD Mono", 32);
+    scoreText.setFormat(Paths.font("vcr.ttf"), 32);
 
     txtWeekTitle = new FlxText(FlxG.width * 0.7, 10, 0, "", 32);
-    txtWeekTitle.setFormat("VCR OSD Mono", 32, FlxColor.WHITE, RIGHT);
+    txtWeekTitle.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, RIGHT);
     txtWeekTitle.alpha = 0.7;
 
     var ui_tex = Paths.getSparrowAtlas('campaign_menu_UI_assets');
@@ -197,14 +201,8 @@ class StoryMenuState extends MusicBeatState
 
   override function update(elapsed:Float)
   {
-    if (grpWeekText.length < 1)
+    if (WeekData.weeksList.length < 1)
     {
-      if (controls.BACK && !movedBack && !selectedWeek)
-      {
-        FlxG.sound.play(Paths.sound('cancelMenu'));
-        movedBack = true;
-        MusicBeatState.switchState(new MainMenuState());
-      }
       super.update(elapsed);
       return;
     }
@@ -360,6 +358,7 @@ class StoryMenuState extends MusicBeatState
         PlayState.isStoryMode = false;
         PlayState.storyPlaylist = [];
         PlayState.storyDifficulty = 0;
+        FlxG.sound.play(Paths.sound('cancelMenu'));
         Debug.logError('ERROR! $e');
         return;
       }

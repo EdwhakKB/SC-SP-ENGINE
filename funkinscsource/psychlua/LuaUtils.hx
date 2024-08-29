@@ -431,10 +431,11 @@ class LuaUtils
     return false;
   }
 
-  public static function changeSpriteClass(tag:Dynamic):FlxSprite
-  {
-    return tag;
-  }
+  public static function changeSpriteClass(sprite:Dynamic):FlxSprite
+    return sprite;
+
+  public static function changeSkewedSpriteClass(sprite:Dynamic):FlxSkewed
+    return sprite;
 
   public static function loadFrames(spr:FlxSprite, image:String, spriteType:String)
   {
@@ -480,7 +481,7 @@ class LuaUtils
 
   public static function cancelTween(tag:String)
   {
-    if (!tag.startsWith('tween_')) tag = 'tween_' + LuaUtils.formatVariable(tag);
+    tag = checkVariable(tag, 'tween_');
     var variables = MusicBeatState.getVariables();
     var twn:FlxTween = variables.get(tag);
     if (twn != null)
@@ -493,7 +494,7 @@ class LuaUtils
 
   public static function cancelTimer(tag:String)
   {
-    if (!tag.startsWith('timer_')) tag = 'timer_' + LuaUtils.formatVariable(tag);
+    tag = checkVariable(tag, 'timer_');
     var variables = MusicBeatState.getVariables();
     var tmr:FlxTimer = variables.get(tag);
     if (tmr != null)
@@ -818,7 +819,7 @@ class LuaUtils
     return camera.cam;
   }
 
-  public static function makeLuaCharacter(tag:String, character:String, isPlayer:Bool = false, flipped:Bool = false, ?change:Bool = false)
+  public static function makeLuaCharacter(tag:String, character:String, isPlayer:Bool = false, flipped:Bool = false, characterType:String = 'OTHER')
   {
     tag = LuaUtils.checkVariable(tag, 'extraCharacter_');
 
@@ -828,9 +829,9 @@ class LuaUtils
 
     if (ClientPrefs.data.characters)
     {
-      if (MusicBeatState.getVariables().get(tag) != null)
+      if (MusicBeatState.getVariables().get(tag) != null && MusicBeatState.getVariables().exists(tag))
       {
-        var daChar:Character = MusicBeatState.getVariables().get(tag);
+        var daChar:Character = cast(MusicBeatState.getVariables().get(tag), Character);
         if (daChar.playAnimationBeforeSwitch)
         {
           animationName = daChar.animation.curAnim.name;
@@ -840,27 +841,19 @@ class LuaUtils
       }
     }
 
-    var leSprite:Character = new Character(0, 0, character, isPlayer);
+    var leSprite:Character = new Character(0, 0, character, isPlayer, characterType);
     leSprite.flipMode = flipped;
     leSprite.isCustomCharacter = true;
-    if (!change) MusicBeatState.getVariables().set(tag, leSprite); // yes
-    var shit:Character = MusicBeatState.getVariables().get(tag);
-    if (change)
-    {
-      shit.isCustomCharacter = true;
-      shit.changeCharacter(character, isPlayer);
-    }
+    MusicBeatState.getVariables().set(tag, leSprite); // yes
+    var shit:Character = cast(MusicBeatState.getVariables().get(tag), Character);
     if (ClientPrefs.data.characters)
     {
-      if (!change)
-      {
-        getTargetInstance().add(shit);
+      getTargetInstance().add(shit);
 
-        if (position >= 0) // this should keep them in the same spot if they switch
-        {
-          getTargetInstance().remove(shit, true);
-          getTargetInstance().insert(position, shit);
-        }
+      if (position >= 0) // this should keep them in the same spot if they switch
+      {
+        getTargetInstance().remove(shit, true);
+        getTargetInstance().insert(position, shit);
       }
     }
 
@@ -868,24 +861,76 @@ class LuaUtils
     var charX:Float = charOffset.daOffsetArray[0];
     var charY:Float = charOffset.daOffsetArray[1] + (flipped ? 350 : 0);
 
-    shit.flipMode = flipped;
-
     if (!isPlayer)
     {
-      var charX:Float = shit.positionArray[0];
-      var charY:Float = shit.positionArray[1];
+      if (flipped) shit.flipMode = true;
+
+      if (shit.hardCodedCharacter)
+      {
+        if (flipped)
+        {
+          if (charX == 0 && charOffset.daOffsetArray[1] == 0 && !charOffset.hasOffsets)
+          {
+            var charOffset2 = new CharacterOffsets(character, false);
+            charX = charOffset2.daOffsetArray[0];
+            charY = charOffset2.daOffsetArray[1];
+          }
+        }
+        else
+        {
+          if (charX == 0 && charY == 0 && !charOffset.hasOffsets)
+          {
+            var charOffset2 = new CharacterOffsets(character, true);
+            charX = charOffset2.daOffsetArray[0];
+            charY = charOffset2.daOffsetArray[1] + 350;
+          }
+        }
+      }
+
+      if (!shit.hardCodedCharacter)
+      {
+        charX = shit.positionArray[0];
+        charY = shit.positionArray[1];
+      }
 
       shit.x = PlayState.instance.stage.dadXOffset + charX + PlayState.instance.DAD_X;
       shit.y = PlayState.instance.stage.dadYOffset + charY + PlayState.instance.DAD_Y;
     }
     else
     {
+      if (flipped) shit.flipMode = true;
+
       var charOffset = new CharacterOffsets(character, !flipped);
       var charX:Float = charOffset.daOffsetArray[0];
       var charY:Float = charOffset.daOffsetArray[1] - (!flipped ? 0 : 350);
 
-      charX = shit.positionArray[0];
-      charY = shit.positionArray[1] - 350;
+      if (shit.hardCodedCharacter)
+      {
+        if (flipped)
+        {
+          if (charX == 0 && charOffset.daOffsetArray[1] == 0)
+          {
+            var charOffset2 = new CharacterOffsets(character, true);
+            charX = charOffset2.daOffsetArray[0];
+            charY = charOffset2.daOffsetArray[1];
+          }
+        }
+        else
+        {
+          if (charX == 0 && charY == 0 && !shit.curCharacter.startsWith('bf'))
+          {
+            var charOffset2 = new CharacterOffsets(character, false);
+            charX = charOffset2.daOffsetArray[0];
+            charY = charOffset2.daOffsetArray[1] - 350;
+          }
+        }
+      }
+
+      if (!shit.hardCodedCharacter)
+      {
+        charX = shit.positionArray[0];
+        charY = shit.positionArray[1] - 350;
+      }
 
       shit.x = PlayState.instance.stage.bfXOffset + charX + PlayState.instance.BF_X;
       shit.y = PlayState.instance.stage.bfYOffset + charY + PlayState.instance.BF_Y;
@@ -969,16 +1014,42 @@ class LuaUtils
 
     PlayState.instance.boyfriend.resetAnimationVars();
 
-    PlayState.instance.boyfriend.setPosition(0, 0);
-    PlayState.instance.boyfriend.changeCharacter(id, !flipped);
+    PlayState.instance.removeObject(PlayState.instance.boyfriend);
+    PlayState.instance.destroyObject(PlayState.instance.boyfriend);
+    PlayState.instance.boyfriend = new Character(0, 0, id, !flipped, 'BF');
     PlayState.instance.boyfriend.flipMode = flipped;
 
     var charOffset = new CharacterOffsets(id, !flipped);
     var charX:Float = charOffset.daOffsetArray[0];
     var charY:Float = charOffset.daOffsetArray[1] - (!flipped ? 0 : 350);
 
-    charX = PlayState.instance.boyfriend.positionArray[0];
-    charY = PlayState.instance.boyfriend.positionArray[1] - 350;
+    if (PlayState.instance.boyfriend.hardCodedCharacter)
+    {
+      if (flipped)
+      {
+        if (charX == 0 && charOffset.daOffsetArray[1] == 0)
+        {
+          var charOffset2 = new CharacterOffsets(id, true);
+          charX = charOffset2.daOffsetArray[0];
+          charY = charOffset2.daOffsetArray[1];
+        }
+      }
+      else
+      {
+        if (charX == 0 && charY == 0 && !PlayState.instance.boyfriend.curCharacter.startsWith('bf'))
+        {
+          var charOffset2 = new CharacterOffsets(id, false);
+          charX = charOffset2.daOffsetArray[0];
+          charY = charOffset2.daOffsetArray[1] - 350;
+        }
+      }
+    }
+
+    if (PlayState.instance.boyfriend.hardCodedCharacter)
+    {
+      charX = PlayState.instance.boyfriend.positionArray[0];
+      charY = PlayState.instance.boyfriend.positionArray[1] - 350;
+    }
 
     PlayState.instance.boyfriend.setPosition(PlayState.instance.stage.bfXOffset
       + charX
@@ -986,6 +1057,8 @@ class LuaUtils
       PlayState.instance.stage.bfYOffset
       + charY
       + PlayState.instance.BF_Y);
+
+    PlayState.instance.addObject(PlayState.instance.boyfriend);
 
     PlayState.instance.iconP1.changeIcon(PlayState.instance.boyfriend.healthIcon);
 
@@ -1012,16 +1085,42 @@ class LuaUtils
       animationFrame = PlayState.instance.dad.animation.curAnim.curFrame;
     }
 
-    PlayState.instance.dad.setPosition(0, 0);
-    PlayState.instance.dad.changeCharacter(id, flipped);
+    PlayState.instance.removeObject(PlayState.instance.dad);
+    PlayState.instance.destroyObject(PlayState.instance.dad);
+    PlayState.instance.dad = new Character(0, 0, id, flipped, 'DAD');
     PlayState.instance.dad.flipMode = flipped;
 
     var charOffset = new CharacterOffsets(id, flipped);
     var charX:Float = charOffset.daOffsetArray[0];
     var charY:Float = charOffset.daOffsetArray[1] + (flipped ? 350 : 0);
 
-    charX = PlayState.instance.dad.positionArray[0];
-    charY = PlayState.instance.dad.positionArray[1];
+    if (PlayState.instance.dad.hardCodedCharacter)
+    {
+      if (flipped)
+      {
+        if (charX == 0 && charOffset.daOffsetArray[1] == 0 && !charOffset.hasOffsets)
+        {
+          var charOffset2 = new CharacterOffsets(id, false);
+          charX = charOffset2.daOffsetArray[0];
+          charY = charOffset2.daOffsetArray[1];
+        }
+      }
+      else
+      {
+        if (charX == 0 && charY == 0 && !charOffset.hasOffsets)
+        {
+          var charOffset2 = new CharacterOffsets(id, true);
+          charX = charOffset2.daOffsetArray[0];
+          charY = charOffset2.daOffsetArray[1] + 350;
+        }
+      }
+    }
+
+    if (!PlayState.instance.dad.hardCodedCharacter)
+    {
+      charX = PlayState.instance.dad.positionArray[0];
+      charY = PlayState.instance.dad.positionArray[1];
+    }
 
     PlayState.instance.dad.setPosition(PlayState.instance.stage.dadXOffset
       + charX
@@ -1029,6 +1128,8 @@ class LuaUtils
       PlayState.instance.stage.dadYOffset
       + charY
       + PlayState.instance.DAD_Y);
+
+    PlayState.instance.addObject(PlayState.instance.dad);
 
     PlayState.instance.iconP2.changeIcon(PlayState.instance.dad.healthIcon);
 
@@ -1055,8 +1156,9 @@ class LuaUtils
       animationFrame = PlayState.instance.gf.animation.curAnim.curFrame;
     }
 
-    PlayState.instance.gf.setPosition(0, 0);
-    PlayState.instance.gf.changeCharacter(id, flipped);
+    PlayState.instance.removeObject(PlayState.instance.gf);
+    PlayState.instance.destroyObject(PlayState.instance.gf);
+    PlayState.instance.gf = new Character(0, 0, id, flipped, 'GF');
     PlayState.instance.gf.flipMode = flipped;
 
     var charX:Float = PlayState.instance.gf.positionArray[0];
@@ -1069,6 +1171,7 @@ class LuaUtils
       + charY
       + PlayState.instance.GF_Y);
     PlayState.instance.gf.scrollFactor.set(0.95, 0.95);
+    PlayState.instance.addObject(PlayState.instance.gf);
 
     if (PlayState.instance.gf.playAnimationBeforeSwitch)
     {
@@ -1091,8 +1194,9 @@ class LuaUtils
       animationFrame = PlayState.instance.mom.animation.curAnim.curFrame;
     }
 
-    PlayState.instance.mom.setPosition(0, 0);
-    PlayState.instance.mom.changeCharacter(id, flipped);
+    PlayState.instance.removeObject(PlayState.instance.mom);
+    PlayState.instance.destroyObject(PlayState.instance.mom);
+    PlayState.instance.mom = new Character(0, 0, id, flipped, 'DAD');
     PlayState.instance.mom.flipMode = flipped;
 
     var charOffset = new CharacterOffsets(id, flipped);
@@ -1108,6 +1212,8 @@ class LuaUtils
       PlayState.instance.stage.momYOffset
       + charY
       + PlayState.instance.MOM_Y);
+
+    PlayState.instance.addObject(PlayState.instance.mom);
 
     if (PlayState.instance.mom.playAnimationBeforeSwitch)
     {

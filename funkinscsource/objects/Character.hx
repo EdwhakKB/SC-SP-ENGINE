@@ -4,7 +4,7 @@ import flixel.util.FlxSort;
 import flixel.util.FlxDestroyUtil;
 import openfl.utils.Assets;
 import haxe.Json;
-import objects.stagecontent.stageobjects.TankmenBG;
+import objects.stage.TankmenBG;
 import flixel.graphics.frames.FlxAtlasFrames;
 
 class Character extends FunkinSCSprite
@@ -273,9 +273,14 @@ class Character extends FunkinSCSprite
   public var charNotPlaying:Bool = false;
 
   /**
-   * Check if the character is maybe external or like custom or lua character.
+   * Check if the character is custom but not loaded originaly from source.
    */
   public var isCustomCharacter:Bool = false;
+
+  /**
+   * Check if the character is not external or like custom or lua character.
+   */
+  public var hardCodedCharacter:Bool = false;
 
   /**
    * To check if in editor the charatcer is player.
@@ -300,7 +305,7 @@ class Character extends FunkinSCSprite
 
   function set_characterType(value:CharacterType):CharacterType
   {
-    return this.characterType = value;
+    return characterType = value;
   }
 
   /**
@@ -333,23 +338,25 @@ class Character extends FunkinSCSprite
    */
   public var useGFSpeed:Bool = false;
 
-  public function new(x:Float, y:Float, ?character:String = 'bf', ?isPlayer:Bool = false)
+  public function new(x:Float, y:Float, ?character:String = 'bf', ?isPlayer:Bool = false, ?characterType:CharacterType = OTHER)
   {
     super(x, y);
-    changeCharacter(character, isPlayer);
 
     switch (curCharacter)
     {
       // case 'your character name in case you want to hardcode them instead':
       case 'pico-speaker':
+        changeCharacter(character, isPlayer);
         skipDance = true;
         stopIdle = true;
         loadMappedAnims();
         playAnim("shoot1");
+      default:
+        changeCharacter(character, isPlayer);
     }
   }
 
-  public dynamic function resetCharacterAttributes(?character:String = "bf", ?isPlayer:Bool = false)
+  public dynamic function resetCharacterAttributes(?character:String = "bf", ?isPlayer:Bool = false, ?characterType:CharacterType = OTHER)
   {
     animPlayerOffsets = new Map<String, Array<Float>>();
     animInterrupt = new Map<String, Bool>();
@@ -359,6 +366,7 @@ class Character extends FunkinSCSprite
     healthIcon = character;
     curCharacter = character;
     this.isPlayer = isPlayer;
+    this.characterType = characterType;
 
     idleSuffix = "";
 
@@ -374,9 +382,9 @@ class Character extends FunkinSCSprite
     resetAnimationVars();
   }
 
-  public dynamic function changeCharacter(character:String, ?isPlayer:Bool = false)
+  public dynamic function changeCharacter(character:String, ?isPlayer:Bool = false, ?characterType:CharacterType = OTHER)
   {
-    resetCharacterAttributes(character, isPlayer);
+    resetCharacterAttributes(character, isPlayer, characterType);
 
     isPsychPlayer = false;
     // Finally a easier way to try-catch characters!
@@ -442,16 +450,10 @@ class Character extends FunkinSCSprite
     scale.set(1, 1);
     updateHitbox();
 
-    if (PlayState.SONG != null)
-    {
-      noteSkin = (json.noteSkin != null ? json.noteSkin : PlayState.SONG.options.arrowSkin);
-      strumSkin = (json.strumSkin != null ? json.strumSkin : PlayState.SONG.options.strumSkin);
-    }
-    else
-    {
-      noteSkin = (json.noteSkin != null ? json.noteSkin : noteSkinStyleOfCharacter);
-      strumSkin = (json.strumSkin != null ? json.strumSkin : strumSkinStyleOfCharacter);
-    }
+    var defaultIfNotFoundArrowSkin:String = PlayState.SONG != null ? PlayState.SONG.options.arrowSkin : noteSkinStyleOfCharacter;
+    var defaultIfNotFoundStrumSkin:String = PlayState.SONG != null ? PlayState.SONG.options.strumSkin : strumSkinStyleOfCharacter;
+    noteSkin = (json.noteSkin != null ? json.noteSkin : defaultIfNotFoundArrowSkin);
+    strumSkin = (json.strumSkin != null ? json.strumSkin : defaultIfNotFoundStrumSkin);
 
     if (json.isPlayerChar) isPsychPlayer = json.isPlayerChar;
 
@@ -486,6 +488,7 @@ class Character extends FunkinSCSprite
     deadChar = (deadChar != null ? json.deadChar : '');
     healthColorArray = (json.healthbar_colors != null && json.healthbar_colors.length > 2) ? json.healthbar_colors : [161, 161, 161];
     vocalsFile = (json.vocals_file != null ? json.vocals_file : '');
+    if (json.characterType != null) characterType = json.characterType;
 
     colorPreString = FlxColor.fromRGB(healthColorArray[0], healthColorArray[1], healthColorArray[2]);
     colorPreCut = colorPreString.toHexString();
@@ -771,34 +774,34 @@ class Character extends FunkinSCSprite
     if (debugMode)
     {
       if ((hasAnimation(AnimName) && !isPlayer)
-        || (animPlayerOffsets.exists(AnimName) && isPlayer)) offset.set(daOffset[0] * daZoom, daOffset[1] * daZoom);
+        || (animPlayerOffsets.exists(AnimName) && isPlayer)) offset.set(daOffset[0] * scale.x * daZoom, daOffset[1] * scale.y * daZoom);
     }
     else
     {
-      if (hasAnimation(AnimName)) offset.set(daOffset[0] * daZoom, daOffset[1] * daZoom);
+      if (hasAnimation(AnimName)) offset.set(daOffset[0] * scale.x * daZoom, daOffset[1] * scale.y * daZoom);
     }
 
     if (doAfterAffectForAnimationName) doAfterAffectForName(AnimName);
   }
 
   public dynamic function allowDance():Bool
-    return !this.isAnimationNull() && !this.getAnimationName().startsWith("sing") && !this.specialAnim && !this.stunned;
+    return !isAnimationNull() && !getAnimationName().startsWith("sing") && !specialAnim && !stunned;
 
   public dynamic function isDancingType():Bool
-    return this.isDancing;
+    return isDancing;
 
   public dynamic function allowHoldTimer():Bool
   {
-    return !this.isAnimationNull()
-      && this.holdTimer > Conductor.stepCrochet * this.singDuration * (0.001 #if FLX_PITCH / FlxG.sound.music.pitch #end)
-      && this.getAnimationName().startsWith('sing')
-      && !this.getAnimationName().endsWith('miss');
+    return !isAnimationNull()
+      && holdTimer > Conductor.stepCrochet * singDuration * (0.001 #if FLX_PITCH / FlxG.sound.music.pitch #end)
+      && getAnimationName().startsWith('sing')
+      && !getAnimationName().endsWith('miss');
   }
 
   public dynamic function danceConditions(conditionsMeet:Bool, ?forcedToIdle:Null<Bool> = null)
   {
     var forced:Bool = (forcedToIdle != null ? forcedToIdle : false);
-    if (conditionsMeet) this.dance(forced);
+    if (conditionsMeet) dance(forced);
   }
 
   public dynamic function danceChar(char:String, ?altBool:Bool, ?forcedToIdle:Bool, ?singArg:Bool)
@@ -806,17 +809,17 @@ class Character extends FunkinSCSprite
     switch (char)
     {
       case 'dad', 'bf', 'mom':
-        if (this.allowDance() && singArg) this.dance(forcedToIdle, altBool);
+        if (allowDance() && singArg) dance(forcedToIdle, altBool);
       default:
-        if (this.allowDance()) this.dance();
+        if (allowDance()) dance();
     }
   }
 
   public dynamic function beatDance(beat:Int):Bool
   {
-    var isGF:Bool = curCharacter.startsWith('gf');
+    var isGF:Bool = characterType == GF;
     var speed:Int = useGFSpeed ? gfSpeed : idleBeat;
-    return ((((beat % speed == 0) && !this.isDancingType()) || ((beat % speed != 0) && this.isDancingType()))
+    return ((((beat % speed == 0) && !isDancingType()) || ((beat % speed != 0) && isDancingType()))
       && !isGF)
       || (isGF && (beat % speed == 0));
   }
@@ -828,8 +831,8 @@ class Character extends FunkinSCSprite
         var noteData:Array<SwagSection> = Song.loadFromJson(defaultJson, Paths.formatToSongPath(PlayState.SONG.songId)).notes;
         for (section in noteData)
           for (songNotes in section.sectionNotes)
-            this.animationNotes.push(songNotes);
-        this.animationNotes.sort(sortAnims);
+            animationNotes.push(songNotes);
+        animationNotes.sort(sortAnims);
       }
       catch (e:Dynamic) {} */
   }
@@ -841,24 +844,24 @@ class Character extends FunkinSCSprite
 
   public function addPlayerOffset(name:String, x:Float = 0, y:Float = 0)
   {
-    this.animPlayerOffsets[name] = [x, y];
+    animPlayerOffsets[name] = [x, y];
   }
 
   public function quickAnimAdd(name:String, anim:String)
   {
-    this.animation.addByPrefix(name, anim, 24, false);
+    animation.addByPrefix(name, anim, 24, false);
   }
 
   public dynamic function setZoom(?toChange:Float = 1):Void
   {
-    this.daZoom = toChange;
+    daZoom = toChange;
 
     var daMulti:Float = 1;
     daMulti *= 1;
-    daMulti = this.jsonScale;
+    daMulti = jsonScale;
 
     var daValue:Float = toChange * daMulti;
-    this.scale.set(daValue, daValue);
+    scale.set(daValue, daValue);
   }
 
   public dynamic function resetAnimationVars()
@@ -906,15 +909,15 @@ class Character extends FunkinSCSprite
   {
     if (!forVis)
     {
-      this.setGraphicSize(Std.int(width * 0.75));
-      this.updateHitbox();
-      this.dance();
-      this.animation.finishCallback = function(name:String) dance();
-      this.visible = false;
+      setGraphicSize(Std.int(width * 0.75));
+      updateHitbox();
+      dance();
+      animation.finishCallback = function(name:String) dance();
+      visible = false;
     }
     else
     {
-      this.visible = vis;
+      visible = vis;
     }
   }
 
@@ -956,15 +959,15 @@ class Character extends FunkinSCSprite
 
   override public function destroy()
   {
-    this.animOffsets.clear();
-    this.animInterrupt.clear();
-    this.animNext.clear();
-    this.animDanced.clear();
+    animOffsets.clear();
+    animInterrupt.clear();
+    animNext.clear();
+    animDanced.clear();
 
-    this.animationNotes.resize(0);
+    animationNotes.resize(0);
 
     #if flxanimate
-    this.atlas = flixel.util.FlxDestroyUtil.destroy(this.atlas);
+    atlas = flixel.util.FlxDestroyUtil.destroy(atlas);
     #end
     super.destroy();
   }
@@ -1119,6 +1122,12 @@ typedef CharacterFile =
    * @default 1
    */
   var ?defaultBeat:Int;
+
+  /**
+   * What type of character is it? DAD, BF, GF, OTHER
+   * @default OTHER
+   */
+  var ?characterType:String;
 }
 
 typedef AnimArray =
@@ -1167,7 +1176,7 @@ typedef AnimArray =
  * The type of a given character sprite. Defines its default behaviors.
  * Useful for feature references in this engine. -glowsoony
  */
-enum CharacterType
+enum abstract CharacterType(String) to String from String
 {
   /**
    * The BF character has the following behaviors.
@@ -1176,7 +1185,7 @@ enum CharacterType
    * - If there is a `singDIR-end` animation, the `singDIR` animation will play once before looping the `singDIR-end` animation until BF is done singing.
    * - If the player misses or hits a ghost note, plays the appropriate `singDIR-miss` animation until BF is done singing.
    */
-  BF;
+  var BF = 'BF';
 
   /**
    * The DAD character has the following behaviors.
@@ -1186,7 +1195,7 @@ enum CharacterType
    * - When the CPU misses a note (NOTE: This only happens via script, not by default),
    *     plays the appropriate `singDIR-miss` animation until DAD is done singing.
    */
-  DAD;
+  var DAD = 'DAD';
 
   /**
    * The GF character has the following behaviors.
@@ -1199,11 +1208,11 @@ enum CharacterType
    *   - Multiple drop animations can be provided for different thresholds (i.e. dropping larger combos).
    *   - No drop animation will play if one isn't applicable (i.e. if the combo count is too low).
    */
-  GF;
+  var GF = 'GF';
 
   /**
    * The OTHER character will only perform the `danceLeft`/`danceRight` or `idle` animation by default, depending on what's available.
    * Additional behaviors can be performed via scripts.
    */
-  OTHER;
+  var OTHER = 'OTHER';
 }

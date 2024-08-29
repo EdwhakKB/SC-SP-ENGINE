@@ -1,5 +1,5 @@
 import openfl.display.BlendMode;
-import objects.stagecontent.stageobjects.DadBattleFog;
+import objects.stage.DadBattleFog;
 
 // StageWeek1
 var dadbattleBlack:BGSprite;

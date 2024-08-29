@@ -61,7 +61,10 @@ class Main extends Sprite
 
   private function setupGame():Void
   {
-    addChild(new FlxGame(1280, 720, Init, 60, 60, true, false));
+    var game:FlxGame = new FlxGame(1280, 720, Init, 60, 60, true, false);
+    @:privateAccess
+    game._customSoundTray = backend.soundtray.FunkinSoundTray;
+    addChild(game);
     addChild(gjToastManager = new GJToastManager());
 
     gameContainer = this;

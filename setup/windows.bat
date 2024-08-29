@@ -4,19 +4,19 @@ cd ..
 @echo on
 echo Installing dependencies.
 haxelib install lime
-haxelib git openfl https://github.com/FunkinCrew/openfl feature/shader-improvements
-haxelib git flixel https://github.com/glowsoony/flixel/tree/Main-SCE
-haxelib git flixel-addons https://github.com/glowsoony/flixel-addons/tree/dev
-haxelib install tjson
 haxelib install flixel-tools
-haxelib install hscript-iris 1.0.2
 haxelib install hscript
-haxelib git hscript-improved https://github.com/glowsoony/hscript-improved/tree/custom-classes
+haxelib install hscript-iris 1.0.2
+haxelib install tjson
 haxelib install hxgamejolt-api
 haxelib install markdown
 haxelib install format
+haxelib git openfl https://github.com/FunkinCrew/openfl feature/shader-improvements
+haxelib git flixel https://github.com/glowsoony/flixel/tree/Main-SCE
+haxelib git flixel-addons https://github.com/glowsoony/flixel-addons/tree/dev
+haxelib git hscript-improved https://github.com/glowsoony/hscript-improved/tree/custom-classes
 haxelib git linc_luajit https://github.com/superpowers04/linc_luajit
-haxelib git flxanimate https://github.com/Dot-Stuff/flxanimate/tree/768740a56b26aa0c072720e0d1236b94afe68e3e
+haxelib git flxanimate https://github.com/Dot-Stuff/flxanimate 05a3e4d1c9b31ae5fc3f394bb5c9c3c477d7e506
 haxelib git FlxPartialSound https://github.com/FunkinCrew/FlxPartialSound/tree/f986332ba5ab02abd386ce662578baf04904604a
 haxelib git fnf-modcharting-tools https://github.com/glowsoony/FNF-Modcharting-Tools main-old
 haxelib git hxdiscord_rpc https://github.com/FNF-CNE-Devs/hxdiscord_rpc/tree/main

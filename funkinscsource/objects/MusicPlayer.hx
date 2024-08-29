@@ -34,6 +34,8 @@ class MusicPlayer extends FlxGroup
 
   public var fadingOut:Bool;
 
+  public var background:FlxSprite;
+
   public function new(instance:FreeplayState)
   {
     super();
@@ -77,6 +79,10 @@ class MusicPlayer extends FlxGroup
     playbackTxt = new FlxText(FlxG.width * 0.6, 20, 0, "", 32);
     playbackTxt.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE);
     add(playbackTxt);
+
+    backgroundLol = new FlxSprite(0, 0).makeGraphic(Std.int(FlxG.width), Std.int(FlxG.height), 0xFF000000);
+    backgroundLol.alpha = 0;
+    add(backgroundLol);
 
     switchPlayMusic();
   }
@@ -269,6 +275,7 @@ class MusicPlayer extends FlxGroup
       progressBar.numDivisions = 1600;
 
       updateTimeTxt();
+      backgroundLol.alpha = .5;
     }
     else
     {
@@ -278,6 +285,7 @@ class MusicPlayer extends FlxGroup
 
       instance.downText.text = instance.leText;
       instance.downText.x = -600;
+      backgroundLol.alpha = 0;
     }
     progressBar.updateBar();
   }

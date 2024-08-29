@@ -2,7 +2,7 @@ package backend.song;
 
 import tjson.TJSON as Json;
 import lime.utils.Assets;
-import objects.Note;
+import objects.note.Note;
 
 using backend.song.SongData;
 

@@ -15,7 +15,7 @@ import openfl.Lib;
 import haxe.Json;
 import codenameengine.shaders.FunkinShader;
 
-class ShaderEffectNew
+class ShaderBase
 {
   public var id:String = null;
   public var tweens:Array<FlxTween> = [];
@@ -33,7 +33,7 @@ class ShaderEffectNew
 }
 
 // Effects A-Z WITH SHADERS -glow
-class BarrelBlurEffect extends ShaderEffectNew
+class BarrelBlurEffect extends ShaderBase
 {
   public var shader(default, null):BarrelBlurShader = new BarrelBlurShader();
   public var barrel:Float = 2.0;
@@ -208,7 +208,7 @@ void main()
   }
 }
 
-class BetterBlurEffect extends ShaderEffectNew
+class BetterBlurEffect extends ShaderBase
 {
   public var shader(default, null):BetterBlurShader = new BetterBlurShader();
   public var loops:Float = 16.0;
@@ -272,7 +272,7 @@ void main()
   }
 }
 
-class BloomBetterEffect extends ShaderEffectNew
+class BloomBetterEffect extends ShaderBase
 {
   public var shader:BloomBetterShader = new BloomBetterShader();
   public var effect:Float = 5;
@@ -341,7 +341,7 @@ void main()
   }
 }
 
-class BlurEffect extends ShaderEffectNew
+class BlurEffect extends ShaderBase
 {
   public var shader(default, null):BlurShader = new BlurShader();
   public var strength:Float = 0.0;
@@ -397,7 +397,7 @@ void main()
   }
 }
 
-class ChromAbEffect extends ShaderEffectNew
+class ChromAbEffect extends ShaderBase
 {
   public var shader(default, null):ChromAbShader = new ChromAbShader();
   public var strength:Float = 0.0;
@@ -434,7 +434,7 @@ void main()
   }
 }
 
-class ChromAbBlueSwapEffect extends ShaderEffectNew
+class ChromAbBlueSwapEffect extends ShaderBase
 {
   public var shader(default, null):ChromAbBlueSwapShader = new ChromAbBlueSwapShader();
   public var strength:Float = 0.0;
@@ -471,7 +471,7 @@ void main()
   }
 }
 
-class ChromaticAberrationEffect extends ShaderEffectNew
+class ChromaticAberrationEffect extends ShaderBase
 {
   public var shader:ChromaticAberrationShader;
 
@@ -551,7 +551,7 @@ void main()
 }
 
 // More changed shaders added!
-class ChromaticPincushEffect extends ShaderEffectNew // No Vars Used!
+class ChromaticPincushEffect extends ShaderBase // No Vars Used!
 {
   public var shader:ChromaticPincushShader = new ChromaticPincushShader();
 }
@@ -588,7 +588,7 @@ class ChromaticPincushShader extends FlxShader
   }
 }
 
-class ChromaticRadialBlurEffect extends ShaderEffectNew
+class ChromaticRadialBlurEffect extends ShaderBase
 {
   public var shader:ChromaticRadialBlurShader = new ChromaticRadialBlurShader();
 }
@@ -646,7 +646,7 @@ class ChromaticRadialBlurShader extends FlxShader
   }
 }
 
-class ColorFillEffect extends ShaderEffectNew
+class ColorFillEffect extends ShaderBase
 {
   public var shader(default, null):ColorFillShader = new ColorFillShader();
   public var red:Float = 0.0;
@@ -698,7 +698,7 @@ void main()
   }
 }
 
-class ColorOverrideEffect extends ShaderEffectNew
+class ColorOverrideEffect extends ShaderBase
 {
   public var shader(default, null):ColorOverrideShader = new ColorOverrideShader();
   public var red:Float = 0.0;
@@ -748,7 +748,7 @@ void main()
 /**
  * Cool Shader by ShadowMario that changes RGB based on HSV.
  */
-class ColorSwapEffect extends ShaderEffectNew
+class ColorSwapEffect extends ShaderBase
 {
   public var shader(default, null):ColorSwap.ColorSwapShader = new ColorSwap.ColorSwapShader();
   public var hue(default, set):Float = 0;
@@ -791,7 +791,7 @@ class ColorSwapEffect extends ShaderEffectNew
   }
 }
 
-class ColorWhiteFrameEffect extends ShaderEffectNew
+class ColorWhiteFrameEffect extends ShaderBase
 {
   public var shader:ColorWhiteFrameShader = new ColorWhiteFrameShader();
 
@@ -845,7 +845,7 @@ class ColorWhiteFrameShader extends FlxShader
   }
 }
 
-class DesaturateEffect extends ShaderEffectNew
+class DesaturateEffect extends ShaderBase
 {
   public var shader:DesaturateShader = new DesaturateShader();
 
@@ -895,7 +895,7 @@ class DesaturateShader extends FlxShader
   }
 }
 
-class DesaturationRGBEffect extends ShaderEffectNew
+class DesaturationRGBEffect extends ShaderBase
 {
   public var shader:DesaturationRGBShader = new DesaturationRGBShader();
 
@@ -970,7 +970,7 @@ class DesaturationRGBShader extends FlxShader
   }
 }
 
-class DropShadow extends ShaderEffectNew
+class DropShadow extends ShaderBase
 {
   public var shader:DropShadowShader = new DropShadowShader();
 
@@ -1091,7 +1091,7 @@ class DropShadowShader extends FlxShader
   }
 }
 
-class FlipEffect extends ShaderEffectNew
+class FlipEffect extends ShaderBase
 {
   public var shader:FlipShader = new FlipShader();
   public var flip(default, set):Float = 0.0;
@@ -1136,7 +1136,7 @@ class FlipShader extends FlxShader
   }
 }
 
-class GameBoyEffect extends ShaderEffectNew
+class GameBoyEffect extends ShaderBase
 {
   public var shader:GameBoyShader = new GameBoyShader();
   public var intensity(default, set):Float = 0.0;
@@ -1305,7 +1305,7 @@ class GameBoyShader extends GraphicsShader
   }
 }
 
-class GlitchedEffect extends ShaderEffectNew
+class GlitchedEffect extends ShaderBase
 {
   public var shader:GlitchedShader = new GlitchedShader();
   public var time(default, set):Float = 0.0;
@@ -1629,7 +1629,7 @@ class GlitchedShader extends GraphicsShader
   }
 }
 
-class GlitchNewEffect extends ShaderEffectNew
+class GlitchNewEffect extends ShaderBase
 {
   public var shader:GlitchNewShader = new GlitchNewShader();
 
@@ -1951,7 +1951,7 @@ class GlitchNewShader extends FlxShader // https://www.shadertoy.com/view/XtyXzW
   }
 }
 
-class GlitchyChromaticEffect extends ShaderEffectNew
+class GlitchyChromaticEffect extends ShaderBase
 {
   public var shader:GlitchyChromaticShader = new GlitchyChromaticShader();
   public var glitch(default, set):Float = 0;
@@ -2091,7 +2091,7 @@ class GlitchyChromaticShader extends FlxShader
   }
 }
 
-class GocpEffect extends ShaderEffectNew
+class GocpEffect extends ShaderBase
 {
   public var shader:GocpShader = new GocpShader();
   public var iTime:Float = 0;
@@ -2234,7 +2234,7 @@ class GocpShader extends FlxShader
   }
 }
 
-class GreyscaleEffect extends ShaderEffectNew // Has No Values To Add, Change, Take
+class GreyscaleEffect extends ShaderBase // Has No Values To Add, Change, Take
 {
   public var shader:GreyscaleShader = new GreyscaleShader();
 
@@ -2260,7 +2260,7 @@ class GreyscaleShader extends FlxShader
   }
 }
 
-class GreyscaleEffectNew extends ShaderEffectNew
+class GreyscaleEffectNew extends ShaderBase
 {
   public var shader(default, null):GreyscaleShaderNew = new GreyscaleShaderNew();
   public var strength:Float = 0.0;
@@ -2296,7 +2296,7 @@ void main()
   }
 }
 
-class HeatEffect extends ShaderEffectNew
+class HeatEffect extends ShaderBase
 {
   public var shader(default, null):HeatShader = new HeatShader();
   public var strength:Float = 1.0;
@@ -2357,7 +2357,7 @@ void main()
   }
 }
 
-class HeatWaveEffect extends ShaderEffectNew
+class HeatWaveEffect extends ShaderBase
 {
   public var shader:HeatWaveShader = new HeatWaveShader();
   public var iTime:Float = 0;
@@ -2424,7 +2424,7 @@ class HeatWaveShader extends FlxShader
   }
 }
 
-class IndividualGlitchesEffect extends ShaderEffectNew
+class IndividualGlitchesEffect extends ShaderBase
 {
   public var shader:IndividualGlitchesShader = new IndividualGlitchesShader();
 
@@ -2487,7 +2487,7 @@ class IndividualGlitchesShader extends FlxShader
   }
 }
 
-class InvertEffect extends ShaderEffectNew
+class InvertEffect extends ShaderBase
 {
   public var shader:InvertShader = new InvertShader();
 }
@@ -2515,7 +2515,7 @@ class InvertShader extends FlxShader
   }
 }
 
-class MirrorRepeatEffect extends ShaderEffectNew
+class MirrorRepeatEffect extends ShaderBase
 {
   public var shader(default, null):MirrorRepeatShader = new MirrorRepeatShader();
   public var zoom:Float = 5.0;
@@ -2600,7 +2600,7 @@ void main()
   }
 }
 
-class MonitorEffect extends ShaderEffectNew
+class MonitorEffect extends ShaderBase
 {
   public var shader:MonitorShader = new MonitorShader();
 }
@@ -2640,7 +2640,7 @@ class MonitorShader extends FlxShader
   }
 }
 
-class MosaicEffect extends ShaderEffectNew
+class MosaicEffect extends ShaderBase
 {
   public var shader(default, null):MosaicShader = new MosaicShader();
   public var strength:Float = 0.0;
@@ -2677,7 +2677,58 @@ void main()
   }
 }
 
-class PaletteEffect extends ShaderEffectNew
+class MultiSplitEffect extends ShaderBase
+{
+  public var shader:MultiSplitShader = new MultiSplitShader();
+
+  public var mult(default, set):Float = 0;
+
+  public function new()
+  {
+    shader.multi.value = [mult];
+  }
+
+  override public function update(elapsed:Float)
+  {
+    shader.multi.value = [mult];
+  }
+
+  public function set_mult(isplit:Float):Float
+  {
+    mult = isplit;
+    shader.multi.value = [mult];
+    return isplit;
+  }
+}
+
+class MultiSplitShader extends FlxShader
+{
+  @:glFragmentSource("
+  #pragma header
+
+  uniform float multi;
+
+  void main()
+  {
+    vec2 uv = openfl_TextureCoordv*openfl_TextureSize/openfl_TextureSize.xy;
+        uv.x *= multi;
+        uv.y *= multi;
+          uv = fract(uv);
+    vec3 duplicate = vec3(mod(floor(uv.x) + floor(uv.y),1.0));
+    vec3 color1 = vec3(flixel_texture2D(bitmap,uv));
+    vec3 color;
+          color = color1 * (1.0 - duplicate);
+
+    gl_FragColor = vec4(color,flixel_texture2D(bitmap, uv).a);
+  }
+  ")
+  public function new()
+  {
+    super();
+  }
+}
+
+class PaletteEffect extends ShaderBase
 {
   public var shader(default, null):PaletteShader = new PaletteShader();
   public var strength:Float = 0.0;
@@ -2726,7 +2777,7 @@ void main()
   }
 }
 
-class PerlinSmokeEffect extends ShaderEffectNew
+class PerlinSmokeEffect extends ShaderBase
 {
   public var shader(default, null):PerlinSmokeShader = new PerlinSmokeShader();
   public var waveStrength:Float = 0; // for screen wave (only for ruckus)
@@ -2913,7 +2964,7 @@ void main()
 }
 
 // Quick plane raymarcher thingy by 4mbr0s3 2 (partially)
-class PlaneRaymarcher extends ShaderEffectNew
+class PlaneRaymarcher extends ShaderBase
 {
   public var shader(default, null):PlaneRaymarcherShader = new PlaneRaymarcherShader();
 
@@ -3145,7 +3196,7 @@ class PlaneRaymarcherShader extends FlxShader
 
 // https://www.shadertoy.com/view/MlfBWr
 // le shader
-class RainEffect extends ShaderEffectNew
+class RainEffect extends ShaderBase
 {
   public var shader(default, null):RainShader = new RainShader();
 
@@ -3247,7 +3298,7 @@ void main()
   }
 }
 
-class RayMarchEffect extends ShaderEffectNew
+class RayMarchEffect extends ShaderBase
 {
   public var shader:RayMarchShader = new RayMarchShader();
   public var x:Float = 0;
@@ -3432,7 +3483,7 @@ void main() // this shader is pain
   }
 }
 
-class RedAberration extends ShaderEffectNew
+class RedAberration extends ShaderBase
 {
   public var shader:RedAberrationShader = new RedAberrationShader();
 
@@ -3530,7 +3581,7 @@ class RedAberrationShader extends FlxShader
   }
 }
 
-class RGBPinEffect extends ShaderEffectNew
+class RGBPinEffect extends ShaderBase
 {
   public var shader:RGBPinShader = new RGBPinShader();
 
@@ -3594,7 +3645,7 @@ class RGBPinShader extends FlxShader
   }
 }
 
-class RgbThreeEffect extends ShaderEffectNew
+class RgbThreeEffect extends ShaderBase
 {
   public var shader:RgbThreeEffectShader = new RgbThreeEffectShader();
 
@@ -3657,7 +3708,7 @@ class RgbThreeEffectShader extends FlxShader
   }
 }
 
-class ScanlineEffectNew extends ShaderEffectNew
+class ScanlineEffectNew extends ShaderBase
 {
   public var shader(default, null):ScanlineShaderNew = new ScanlineShaderNew();
   public var strength:Float = 0.0;
@@ -3724,7 +3775,7 @@ void main()
   }
 }
 
-class SobelEffect extends ShaderEffectNew
+class SobelEffect extends ShaderBase
 {
   public var shader(default, null):SobelShader = new SobelShader();
   public var strength:Float = 1.0;
@@ -3793,7 +3844,7 @@ void main()
   }
 }
 
-class SquishyEffect extends ShaderEffectNew
+class SquishyEffect extends ShaderBase
 {
   public var shader:SquishyShader = new SquishyShader();
 
@@ -4075,7 +4126,7 @@ class SquishyShader extends FlxShader
   }
 }
 
-class ThreeDEffect extends ShaderEffectNew
+class ThreeDEffect extends ShaderBase
 {
   public var shader:ThreeDShader = new ThreeDShader();
 
@@ -4220,7 +4271,7 @@ void main()
   }
 }
 
-class TypeVCREffect extends ShaderEffectNew
+class TypeVCREffect extends ShaderBase
 {
   public var shader:TypeVCRShader = new TypeVCRShader();
 
@@ -4308,7 +4359,7 @@ class TypeVCRShader extends FlxShader
   }
 }
 
-class VCRDistortionEffect extends ShaderEffectNew
+class VCRDistortionEffect extends ShaderBase
 {
   public var shader:VCRDistortionShader = new VCRDistortionShader();
 
@@ -4530,7 +4581,7 @@ void main()
   }
 }
 
-class VCRDistortionEffect2 extends ShaderEffectNew // the one used for tails doll /// No Things Used!
+class VCRDistortionEffect2 extends ShaderBase // the one used for tails doll /// No Things Used!
 {
   public var shader:VCRDistortionShader2 = new VCRDistortionShader2();
 
@@ -4669,7 +4720,7 @@ void main()
   }
 }
 
-class VcrEffect extends ShaderEffectNew
+class VcrEffect extends ShaderBase
 {
   public var shader:VcrShader = new VcrShader();
 
@@ -4805,7 +4856,7 @@ class VcrShader extends FlxShader
   }
 }
 
-class VcrNoGlitchEffect extends ShaderEffectNew
+class VcrNoGlitchEffect extends ShaderBase
 {
   public var shader:VcrNoGlitchShader = new VcrNoGlitchShader();
 
@@ -4941,7 +4992,7 @@ class VcrNoGlitchShader extends FlxShader
   }
 }
 
-class VcrWithGlitch extends ShaderEffectNew
+class VcrWithGlitch extends ShaderBase
 {
   public var shader:VcrWithGlitchShader = new VcrWithGlitchShader();
 
@@ -5077,7 +5128,7 @@ class VcrWithGlitchShader extends FlxShader
   }
 }
 
-class VHSEffect extends ShaderEffectNew
+class VHSEffect extends ShaderBase
 {
   public var shader:VHSShader = new VHSShader();
 
@@ -5201,7 +5252,7 @@ class VHSShader extends FlxShader
   }
 }
 
-class VignetteEffect extends ShaderEffectNew
+class VignetteEffect extends ShaderBase
 {
   public var shader(default, null):VignetteShader = new VignetteShader();
   public var strength:Float = 1.0;
@@ -5265,7 +5316,7 @@ void main()
   }
 }
 
-class VignetteGlitchEffect extends ShaderEffectNew
+class VignetteGlitchEffect extends ShaderBase
 {
   public var shader:VignetteGlitchShader = new VignetteGlitchShader();
 
@@ -5544,7 +5595,7 @@ class VignetteGlitchShader extends GraphicsShader
   }
 }
 
-class WaveBurstEffect extends ShaderEffectNew
+class WaveBurstEffect extends ShaderBase
 {
   public var shader(default, null):WaveBurstShader = new WaveBurstShader();
   public var strength:Float = 0.0;
@@ -5586,7 +5637,7 @@ void main()
   }
 }
 
-class WaterEffect extends ShaderEffectNew
+class WaterEffect extends ShaderBase
 {
   public var shader(default, null):WaterShader = new WaterShader();
   public var strength:Float = 10.0;
@@ -5639,7 +5690,7 @@ void main()
   }
 }
 
-class WaveCircleEffect extends ShaderEffectNew
+class WaveCircleEffect extends ShaderBase
 {
   public var shader(default, null):WaveCircleShader = new WaveCircleShader();
 

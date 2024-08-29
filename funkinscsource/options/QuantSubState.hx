@@ -7,8 +7,8 @@ import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepadInputID;
 import flixel.util.FlxGradient;
 import lime.system.Clipboard;
-import objects.StrumArrow;
-import objects.Note;
+import objects.note.StrumArrow;
+import objects.note.Note;
 import shaders.RGBPalette;
 import shaders.RGBPalette.RGBShaderReference;
 

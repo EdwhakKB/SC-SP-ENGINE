@@ -496,7 +496,7 @@ class ShaderFunctions
         funnyCustomShader.hset(property, value);
       });
 
-      // Custom shader made by me (glowsoony)
+      // Custom shader tween made by me (glowsoony)
       funk.set("tweenCustomShaderProperty",
         function(tag:String, shaderName:String, prop:String, value:Dynamic, time:Float, easeStr:String = "linear", startVal:Null<Float> = null) {
           var shad:CustomShader = FunkinLua.lua_Custom_Shaders.get(shaderName);

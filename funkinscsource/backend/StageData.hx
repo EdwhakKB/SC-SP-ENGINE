@@ -38,9 +38,9 @@ typedef StageFile =
   var ?introSoundsSuffix:String;
 
   /**
-   * A Movement created by intensity of X, Y
+   * Disables Intro Sounds
    */
-  var ?cameraXYMovement:Array<Float>;
+  var ?disableIntroSounds:Bool;
 
   /**
    * Offsets for the ratings.
@@ -66,6 +66,11 @@ typedef StageFile =
    * Stage Meta For The Editor.
    */
   var ?_editorMeta:Dynamic;
+
+  /**
+   * Extra Stage Data Fields.
+   */
+  var ?_extraData:Dynamic;
 
   /**
    * Stage Id.
@@ -115,7 +120,7 @@ class StageData
       introSoundsPrefix: "",
       introSoundsSuffix: "",
 
-      cameraXYMovement: [50, 60],
+      disableIntroSounds: false,
 
       ratingOffsets: [[0, 0], [0, 0]],
 
@@ -126,6 +131,15 @@ class StageData
           gf: "gf",
           dad: "dad",
           boyfriend: "bf"
+        },
+      _extraData:
+        {
+          cameraMovement:
+            {
+              player: [50, 60],
+              opponent: [50, 60],
+              girlfriend: [50, 60]
+            }
         }
     };
   }
@@ -137,7 +151,8 @@ class StageData
     var stage:String = '';
     if (SONG.stage != null) stage = SONG.stage;
     else if (Song.loadedSongName != null) stage = vanillaSongStage(Paths.formatToSongPath(Song.loadedSongName));
-    else stage = 'mainStage';
+    else
+      stage = 'mainStage';
 
     var stageFile:StageFile = getStageFile(stage);
     forceNextDirectory = (stageFile != null) ? stageFile.directory : ''; // preventing crashes

@@ -52,7 +52,7 @@ class DeprecatedFunctions
           character = LuaUtils.checkVariable(character, 'extraCharacter_');
           if (MusicBeatState.getVariables().exists(character) && ClientPrefs.data.characters)
           {
-            var spr:Character = MusicBeatState.getVariables().get(character);
+            var spr:Character = cast(MusicBeatState.getVariables().get(character), Character);
 
             if (spr.hasAnimation(anim)) spr.playAnim(anim, forced);
           }

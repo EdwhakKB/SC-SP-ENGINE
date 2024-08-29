@@ -11,9 +11,9 @@ import backend.Highscore;
 import openfl.utils.Assets;
 import openfl.filters.BitmapFilter;
 import cutscenes.DialogueBoxPsych;
-import objects.StrumArrow;
-import objects.Note;
-import objects.NoteSplash;
+import objects.note.StrumArrow;
+import objects.note.Note;
+import objects.note.NoteSplash;
 import objects.Character;
 import objects.HealthIcon;
 import states.MainMenuState;
@@ -38,6 +38,17 @@ typedef LuaCamera =
   var shaderNames:Array<String>;
 }
 
+/**
+ * Where the files are looked from (As in place). Used for Lua.
+ */
+enum abstract FileInstance(String) to String from String
+{
+  var STAGE = 'STAGE';
+  var PLAYSTATE = 'PLAYSTATE';
+  var MODCHARTEDITOR = 'MODCHARTEDITOR';
+  var CUSTOM = 'CUSTOM';
+}
+
 class FunkinLua
 {
   public static var Function_Stop:Dynamic = "##PSYCHLUA_FUNCTIONSTOP";
@@ -55,7 +66,14 @@ class FunkinLua
 
   public var preloading:Bool = false;
 
-  public var isStageLua:Bool = false;
+  public var typeInstance:FileInstance = PLAYSTATE;
+
+  public var isStageLua(get, never):Bool;
+
+  public function get_isStageLua():Bool
+  {
+    return typeInstance == STAGE;
+  }
 
   public var notScriptName:String = '';
 
@@ -72,10 +90,10 @@ class FunkinLua
   public static var customFunctions:Map<String, Dynamic> = new Map<String, Dynamic>();
 
   public static var lua_Cameras:Map<String, LuaCamera> = [];
-  public static var lua_Shaders:Map<String, shaders.FunkinSourcedShaders.ShaderEffectNew> = [];
+  public static var lua_Shaders:Map<String, shaders.FunkinSourcedShaders.ShaderBase> = [];
   public static var lua_Custom_Shaders:Map<String, codenameengine.shaders.CustomShader> = [];
 
-  public function new(scriptName:String, ?isStageLua:Bool = false, ?preloading:Bool = false, ?notScriptName:String = null)
+  public function new(scriptName:String, ?instance:FileInstance = PLAYSTATE, ?preloading:Bool = false, ?notScriptName:String = null)
   {
     var times:Float = Date.now().getTime();
     var game:PlayState = PlayState.instance;
@@ -96,6 +114,7 @@ class FunkinLua
 
     // LuaL.dostring(lua, CLENSE);
 
+    this.typeInstance = instance;
     this.preloading = preloading;
     this.scriptName = scriptName.trim();
     this.notScriptName = notScriptName.trim();
@@ -675,7 +694,7 @@ class FunkinLua
               return;
             }
 
-          new FunkinLua(foundScript);
+          new FunkinLua(foundScript, typeInstance);
           return;
         }
         luaTrace("addLuaScript: Script doesn't exist!", false, false, FlxColor.RED);
@@ -910,6 +929,14 @@ class FunkinLua
       set("doTweenZoom", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
         oldTweenFunction(tag, vars, {zoom: value}, duration, ease, 'doTweenZoom');
       });
+
+      /**
+       * Function is mean't for only cameras since they have the variable rotation, but if any other then I allow using Dynamic!
+       */
+      set("doTweenRotation", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
+        oldTweenFunction(tag, vars, {rotation: value}, duration, ease, 'doTweenRotation');
+      });
+
       set("doTweenColor", function(tag:String, vars:String, targetColor:String, duration:Float, ease:String) {
         var itemExam:Dynamic = LuaUtils.tweenPrepare(tag, vars);
         if (itemExam != null)
@@ -2267,7 +2294,7 @@ class FunkinLua
       ExtraFunctions.implement(this);
       CustomSubstate.implement(this);
       ShaderFunctions.implement(this);
-      SpriteGroupFunctions.implement(this);
+      GroupFunctions.implement(this);
       DeprecatedFunctions.implement(this);
     }
 

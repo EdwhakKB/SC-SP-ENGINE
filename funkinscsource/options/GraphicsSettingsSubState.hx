@@ -12,7 +12,7 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
     title = Language.getPhrase('graphics_menu', 'Graphics Settings');
     rpcTitle = 'Graphics Settings Menu'; // for Discord Rich Presence
 
-    boyfriend = new Character(840, 170, 'bf', true);
+    boyfriend = new Character(840, 170, 'bf', true, 'BF');
     boyfriend.forOption(false, false);
 
     // I'd suggest using "Low Quality" as an example for making your own option since it is the simplest here

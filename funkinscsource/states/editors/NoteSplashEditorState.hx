@@ -1,8 +1,8 @@
 package states.editors;
 
-import objects.Note;
-import objects.NoteSplash;
-import objects.StrumArrow;
+import objects.note.Note;
+import objects.note.NoteSplash;
+import objects.note.StrumArrow;
 import flixel.FlxSprite;
 import flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup;
 import flixel.input.keyboard.FlxKey;
@@ -13,12 +13,11 @@ import openfl.net.FileFilter;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
 import openfl.net.FileReference;
-
 import haxe.Json;
 
 using StringTools;
 
-@:access(objects.NoteSplash)
+@:access(objects.note.NoteSplash)
 class NoteSplashEditorState extends MusicBeatState
 {
   var strums:FlxTypedSpriteGroup<StrumArrow> = new FlxTypedSpriteGroup();
@@ -339,6 +338,7 @@ class NoteSplashEditorState extends MusicBeatState
 
   var imageInputText:PsychUIInputText;
   var scaleNumericStepper:PsychUINumericStepper;
+
   function addProperitiesTab()
   {
     var ui = properUI.getTab("Properties").menu;
@@ -372,32 +372,30 @@ class NoteSplashEditorState extends MusicBeatState
     var allowRGBCheck:PsychUICheckBox = new PsychUICheckBox(20, 105, "", 1);
     function check()
     {
-      if (config != null)
-      config.allowRGB = allowRGBCheck.checked;
+      if (config != null) config.allowRGB = allowRGBCheck.checked;
     }
     allowRGBCheck.onClick = check;
     allowRGBCheck.checked = config != null && cast(config.allowRGB, Null<Bool>) != null ? config.allowRGB : false;
 
     var rgbText = new FlxText(allowRGBCheck.x + 20, 0);
     rgbText.text = "Allow RGB?";
-		rgbText.y = allowRGBCheck.y + 2.5;
-		ui.add(rgbText);
+    rgbText.y = allowRGBCheck.y + 2.5;
+    ui.add(rgbText);
 
     ui.add(allowRGBCheck);
 
     var allowPixelCheck:PsychUICheckBox = new PsychUICheckBox(allowRGBCheck.x + 110, allowRGBCheck.y, "", 1);
     function check()
     {
-      if (config != null)
-        config.allowPixel = allowPixelCheck.checked;
+      if (config != null) config.allowPixel = allowPixelCheck.checked;
     }
     allowPixelCheck.onClick = check;
     allowPixelCheck.checked = config != null && cast(config.allowPixel, Null<Bool>) != null ? config.allowPixel : false;
 
     var pixelText = new FlxText(allowPixelCheck.x + 20, 0);
     pixelText.text = "Allow Pixel?";
-		pixelText.y = allowPixelCheck.y + 2.5;
-		ui.add(pixelText);
+    pixelText.y = allowPixelCheck.y + 2.5;
+    ui.add(pixelText);
 
     ui.add(allowPixelCheck);
   }
@@ -512,9 +510,8 @@ class NoteSplashEditorState extends MusicBeatState
     //
   }
 
-
-	var holdingArrowsTime:Float = 0;
-	var holdingArrowsElapsed:Float = 0;
+  var holdingArrowsTime:Float = 0;
+  var holdingArrowsElapsed:Float = 0;
   var copiedOffset:Array<Float> = [0, 0];
 
   override function update(elapsed:Float)
@@ -563,54 +560,65 @@ class NoteSplashEditorState extends MusicBeatState
       var changedOffset = false;
       if (FlxG.keys.pressed.CONTROL && config.animations.get(curAnim) != null)
       {
-          if (FlxG.keys.justPressed.C)
-          {
-            copiedOffset = config.animations.get(curAnim).offsets.copy();
-          }
-          else if (FlxG.keys.justPressed.V)
-          {
-            var conf = config.animations.get(curAnim);
-            conf.offsets = copiedOffset.copy();
-            config.animations.set(curAnim, conf);
-            changedOffset = true;
-          }
-          else if(FlxG.keys.justPressed.R)
-          {
-            var conf = config.animations.get(curAnim);
-            conf.offsets = [0, 0];
-            config.animations.set(curAnim, conf);
-            changedOffset = true;
-          }
+        if (FlxG.keys.justPressed.C)
+        {
+          copiedOffset = config.animations.get(curAnim).offsets.copy();
+        }
+        else if (FlxG.keys.justPressed.V)
+        {
+          var conf = config.animations.get(curAnim);
+          conf.offsets = copiedOffset.copy();
+          config.animations.set(curAnim, conf);
+          changedOffset = true;
+        }
+        else if (FlxG.keys.justPressed.R)
+        {
+          var conf = config.animations.get(curAnim);
+          conf.offsets = [0, 0];
+          config.animations.set(curAnim, conf);
+          changedOffset = true;
+        }
       }
 
       var multiplier:Int = (FlxG.keys.pressed.SHIFT || FlxG.gamepads.anyPressed(LEFT_SHOULDER)) ? 10 : 1;
-      var moveKeysP = [FlxG.keys.justPressed.LEFT, FlxG.keys.justPressed.RIGHT, FlxG.keys.justPressed.UP, FlxG.keys.justPressed.DOWN];
-      if(moveKeysP.contains(true))
+      var moveKeysP = [
+        FlxG.keys.justPressed.LEFT,
+        FlxG.keys.justPressed.RIGHT,
+        FlxG.keys.justPressed.UP,
+        FlxG.keys.justPressed.DOWN
+      ];
+      if (moveKeysP.contains(true))
       {
         config.animations[curAnim].offsets[0] += ((moveKeysP[0] ? 1 : 0) - (moveKeysP[1] ? 1 : 0)) * multiplier;
         config.animations[curAnim].offsets[1] += ((moveKeysP[2] ? 1 : 0) - (moveKeysP[3] ? 1 : 0)) * multiplier;
         changedOffset = true;
       }
 
-      var moveKeys = [FlxG.keys.pressed.LEFT, FlxG.keys.pressed.RIGHT, FlxG.keys.pressed.UP, FlxG.keys.pressed.DOWN];
-      if(moveKeys.contains(true))
+      var moveKeys = [
+        FlxG.keys.pressed.LEFT,
+        FlxG.keys.pressed.RIGHT,
+        FlxG.keys.pressed.UP,
+        FlxG.keys.pressed.DOWN
+      ];
+      if (moveKeys.contains(true))
       {
         holdingArrowsTime += elapsed;
-        if(holdingArrowsTime > 0.6)
+        if (holdingArrowsTime > 0.6)
         {
           holdingArrowsElapsed += elapsed;
-          while(holdingArrowsElapsed > (1/60))
+          while (holdingArrowsElapsed > (1 / 60))
           {
             config.animations[curAnim].offsets[0] += ((moveKeys[0] ? 1 : 0) - (moveKeys[1] ? 1 : 0)) * multiplier;
             config.animations[curAnim].offsets[1] += ((moveKeys[2] ? 1 : 0) - (moveKeys[3] ? 1 : 0)) * multiplier;
-            holdingArrowsElapsed -= (1/60);
+            holdingArrowsElapsed -= (1 / 60);
             changedOffset = true;
           }
         }
       }
-      else holdingArrowsTime = 0;
+      else
+        holdingArrowsTime = 0;
 
-      if(changedOffset || FlxG.keys.justPressed.SPACE) splash();
+      if (changedOffset || FlxG.keys.justPressed.SPACE) splash();
     }
 
     if (!blockInput)
@@ -896,10 +904,7 @@ class NoteSplashEditorState extends MusicBeatState
   override function destroy()
   {
     super.destroy();
-
-    var FlxG = FlxG.sound;
-
-    FlxG.music.volume = 1;
+    FlxG.sound.music.volume = 1;
     ClientPrefs.toggleVolumeKeys(true);
   }
 
@@ -920,9 +925,9 @@ class NoteSplashEditorState extends MusicBeatState
     if (configs[1] != null && configs[1].trim() != "")
     {
       var newFps = configs[1].trim().split(" ");
-			fps = [Std.parseInt(newFps[0]), Std.parseInt(newFps[1])];
-			if (fps[0] == null) fps[0] = 22;
-			if (fps[1] == null) fps[1] = 26;
+      fps = [Std.parseInt(newFps[0]), Std.parseInt(newFps[1])];
+      if (fps[0] == null) fps[0] = 22;
+      if (fps[1] == null) fps[1] = 26;
     }
     var hasOneOffset = false;
     var offsets:Array<Array<Null<Float>>> = [[0, 0]];
@@ -936,10 +941,10 @@ class NoteSplashEditorState extends MusicBeatState
         if (offset != "")
         {
           var offset:Array<String> = offset.split(" ");
-					var x:Null<Float> = Std.parseFloat(offset[0]);
-					var y:Null<Float> = Std.parseFloat(offset[1]);
-					if (x == null) x = 0;
-					if (y == null) y = 0;
+          var x:Null<Float> = Std.parseFloat(offset[0]);
+          var y:Null<Float> = Std.parseFloat(offset[1]);
+          if (x == null) x = 0;
+          if (y == null) y = 0;
           offsets.push([x, y]);
         }
       }
@@ -954,10 +959,10 @@ class NoteSplashEditorState extends MusicBeatState
         if (offset != "")
         {
           var offset:Array<String> = offset.split(" ");
-					var x:Null<Float> = Std.parseFloat(offset[0]);
-					var y:Null<Float> = Std.parseFloat(offset[1]);
-					if (x == null) x = 0;
-					if (y == null) y = 0;
+          var x:Null<Float> = Std.parseFloat(offset[0]);
+          var y:Null<Float> = Std.parseFloat(offset[1]);
+          if (x == null) x = 0;
+          if (y == null) y = 0;
           offsets.push([x, y]);
         }
         i++;
@@ -969,7 +974,7 @@ class NoteSplashEditorState extends MusicBeatState
     {
       var offset = offsets[hasOneOffset ? 0 : i];
       if (i + 1 > configs.length && !hasOneOffset) break;
-     config = NoteSplash.addAnimationToConfig(config, 1, Note.colArray[i], '$animation ${Note.colArray[i]} 10', fps, offset, [], i);
+      config = NoteSplash.addAnimationToConfig(config, 1, Note.colArray[i], '$animation ${Note.colArray[i]} 10', fps, offset, [], i);
     }
     if (offsets.length > 4)
     {
@@ -977,7 +982,7 @@ class NoteSplashEditorState extends MusicBeatState
       {
         var offset = offsets[i + 4];
         if (i + 1 > offsets.length) break;
-config = NoteSplash.addAnimationToConfig(config, 1, Note.colArray[i] + "2", '$animation ${Note.colArray[i]} 20', fps, offset, [], i + 4);
+        config = NoteSplash.addAnimationToConfig(config, 1, Note.colArray[i] + "2", '$animation ${Note.colArray[i]} 20', fps, offset, [], i + 4);
       }
     }
 
@@ -995,33 +1000,35 @@ class NoteSplashEditorHelpSubState extends MusicBeatSubState
     bg.alpha = 0.6;
     add(bg);
 
-    var str:Array<String> = ["Click on a Strum or Press Space",
-		"to spawn a Splash",
-		"",
-		"Arrow Keys - Move Offset",
-		"Hold Shift - Move Offsets 10x faster",
-		"",
-		"",
-		"Ctrl + C - Copy Current Offset",
-		"Ctrl + V - Paste Copied Offset on Current Splash",
-		"Ctrl + R - Reset Current Offset"];
+    var str:Array<String> = [
+      "Click on a Strum or Press Space",
+      "to spawn a Splash",
+      "",
+      "Arrow Keys - Move Offset",
+      "Hold Shift - Move Offsets 10x faster",
+      "",
+      "",
+      "Ctrl + C - Copy Current Offset",
+      "Ctrl + V - Paste Copied Offset on Current Splash",
+      "Ctrl + R - Reset Current Offset"
+    ];
 
-		var helpTexts:FlxSpriteGroup = new FlxSpriteGroup();
-		for (i => txt in str)
-		{
-			if(txt.length < 1) continue;
+    var helpTexts:FlxSpriteGroup = new FlxSpriteGroup();
+    for (i => txt in str)
+    {
+      if (txt.length < 1) continue;
 
-			var helpText:FlxText = new FlxText(0, 0, 0, txt, 32);
-			helpText.setFormat(null, 32, FlxColor.WHITE, CENTER, OUTLINE_FAST, FlxColor.BLACK);
-			helpText.borderColor = FlxColor.BLACK;
-			helpText.scrollFactor.set();
-			helpText.borderSize = 1;
-			helpText.screenCenter();
-			add(helpText);
-			helpText.y += ((i - str.length/2) * 32) + 16;
-			helpTexts.add(helpText);
-		}
-		add(helpTexts);
+      var helpText:FlxText = new FlxText(0, 0, 0, txt, 32);
+      helpText.setFormat(null, 32, FlxColor.WHITE, CENTER, OUTLINE_FAST, FlxColor.BLACK);
+      helpText.borderColor = FlxColor.BLACK;
+      helpText.scrollFactor.set();
+      helpText.borderSize = 1;
+      helpText.screenCenter();
+      add(helpText);
+      helpText.y += ((i - str.length / 2) * 32) + 16;
+      helpTexts.add(helpText);
+    }
+    add(helpTexts);
 
     var noteDataText:FlxText = new FlxText();
     noteDataText.setFormat(null, 32, FlxColor.WHITE, RIGHT, OUTLINE_FAST, FlxColor.BLACK);

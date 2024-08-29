@@ -3,3 +3,4 @@
 * Update functions.
 * Make an explains in a doc.
 * Fix Any bugs that may appear without me noticing!
+* Remove FlxSkewedSpriteGroup and FlxSkewedContainer if flixel merges FlxSkewedSprite && FlxSprite!

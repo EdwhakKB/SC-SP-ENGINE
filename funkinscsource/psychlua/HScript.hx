@@ -160,7 +160,7 @@ class HScript extends Iris
     set('InputFormatter', backend.InputFormatter);
 
     set('PsychCamera', backend.PsychCamera);
-    set('Countdown', objects.stagecontent.Countdown);
+    set('Countdown', backend.Countdown);
     set('PlayState', states.PlayState);
     set('Paths', backend.Paths);
     set('Conductor', backend.Conductor);
@@ -174,15 +174,15 @@ class HScript extends Iris
     #end
     set('Character', objects.Character);
     set('Alphabet', objects.Alphabet);
-    set('Note', objects.Note);
-    set('NoteSplash', objects.NoteSplash);
-    set('StrumArrow', objects.StrumArrow);
+    set('Note', objects.note.Note);
+    set('NoteSplash', objects.note.NoteSplash);
+    set('StrumArrow', objects.note.StrumArrow);
     set('CustomSubstate', psychlua.CustomSubstate);
     set('ShaderFilter', openfl.filters.ShaderFilter);
     #if LUA_ALLOWED
     set('FunkinLua', psychlua.FunkinLua);
     #end
-    set('Stage', objects.stagecontent.Stage);
+    set('Stage', backend.stage.Stage);
     #if flxanimate
     set('FlxAnimate', FlxAnimate);
     #end
@@ -368,8 +368,8 @@ class HScript extends Iris
     });
 
     #if LUA_ALLOWED
-    set('doLua', function(code:String = null, stageLua:Bool = false, preloading:Bool = false, scriptName:String = 'unknown') {
-      if (code != null) new FunkinLua(code, stageLua, preloading, scriptName);
+    set('doLua', function(code:String = null, instance:String = 'PLAYSTATE', preloading:Bool = false, scriptName:String = 'unknown') {
+      if (code != null) new FunkinLua(code, instance, preloading, scriptName);
     });
     #end
     set('CustomShader', codenameengine.shaders.CustomShader);
@@ -382,7 +382,7 @@ class HScript extends Iris
     set('this', this);
     set('game', FlxG.state);
     set('controls', Controls.instance);
-    set('stageManager', objects.stagecontent.Stage.instance);
+    set('stageManager', backend.stage.Stage.instance);
     set('buildTarget', psychlua.LuaUtils.getBuildTarget());
     set('customSubstate', psychlua.CustomSubstate.instance);
     set('customSubstateName', psychlua.CustomSubstate.name);

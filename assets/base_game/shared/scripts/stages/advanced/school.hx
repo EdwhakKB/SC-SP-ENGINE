@@ -1,6 +1,6 @@
 import sys.FileSystem;
 import openfl.utils.Assets as OpenFlAssets;
-import objects.stagecontent.stageobjects.BackgroundGirls;
+import objects.stage.BackgroundGirls;
 
 // School
 var bgSky:BGSprite;

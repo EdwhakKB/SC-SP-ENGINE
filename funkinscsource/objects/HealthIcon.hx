@@ -6,8 +6,8 @@ import flixel.math.FlxMath;
 
 class HealthIcon extends FunkinSCSprite
 {
-  public var isPlayer:Bool = false;
   public var char:String = '';
+  public var isPlayer:Bool = false;
   public var iconOffset:Array<Float> = [0, 0];
 
   public var sprTracker:FlxSprite;
@@ -32,8 +32,6 @@ class HealthIcon extends FunkinSCSprite
 
   public var offsetX:Float = 0;
   public var offsetY:Float = 0;
-
-  public var isSizedState:Bool = false;
 
   public var losingAnimation:Bool = false;
   public var winningAnimation:Bool = false;
@@ -64,11 +62,10 @@ class HealthIcon extends FunkinSCSprite
   private var animName:String = 'normal';
   private var changedComplete:Bool = true;
 
-  public function new(char:String = 'face', isPlayer:Bool = false, isSizedState:Bool = false, ?allowGPU:Bool = true)
+  public function new(char:String = 'face', isPlayer:Bool = false, ?allowGPU:Bool = true)
   {
     super();
     this.isPlayer = isPlayer;
-    this.isSizedState = isSizedState;
     changeIcon(char, allowGPU);
     scrollFactor.set();
     stopBop = (FlxG.state is states.editors.ChartingState);
@@ -92,12 +89,6 @@ class HealthIcon extends FunkinSCSprite
     else
       name = name + 'icon-' + char;
 
-    if (animatedIcon && isSizedState)
-    {
-      setGraphicSize(Std.int(width * 0.7));
-      updateHitbox();
-    }
-
     var frameName:String = name;
     if (frameName.contains('.png')) frameName = frameName.substring(0, frameName.length - 4);
 
@@ -117,7 +108,7 @@ class HealthIcon extends FunkinSCSprite
     }
     catch (e:Dynamic)
     {
-      Debug.logError("Couldn't find sprite and xml, nor single sprite to load!, Error: " + e);
+      Debug.displayAlert("Error: " + e, "Couldn't find sprite and xml, nor single sprite to load!");
     }
 
     changedComplete = true;
@@ -238,25 +229,25 @@ class HealthIcon extends FunkinSCSprite
       return;
     }
 
-    if (!isSizedState)
+    scale.set(1, 1);
+    updateHitbox();
+
+    if (json.scale != 1)
     {
-      scale.set(1, 1);
+      scale.set(json.scale, json.scale);
       updateHitbox();
-
-      if (json.scale != 1)
-      {
-        scale.set(json.scale, json.scale);
-        updateHitbox();
-      }
-
-      if (json.graphicScale != 1)
-      {
-        setGraphicSize(Std.int(width * json.graphicScale));
-        updateHitbox();
-      }
     }
 
+    if (json.graphicScale != 1)
+    {
+      setGraphicSize(Std.int(width * json.graphicScale));
+      updateHitbox();
+    }
+
+    final speed:Int = json.bopSpeed;
+
     flipX = (json.flip_x != null ? json.flip_x : isPlayer);
+    iconBopSpeed = (!Math.isNaN(speed) && speed != 0) ? speed : 2;
 
     final noAntialiasing = (json.no_antialiasing == true);
     antialiasing = ClientPrefs.data.antialiasing ? !noAntialiasing && !char.endsWith('-pixel') : false;
@@ -417,11 +408,12 @@ typedef IconData =
 {
   var ?name:String;
   var image:String;
-  var ?startingAnim:String;
   var animations:Array<IconAnimations>;
+  var ?startingAnim:String;
   var ?scale:Float;
   var ?graphicScale:Float;
   var ?no_antialiasing:Bool;
+  var ?bopSpeed:Int;
 }
 
 typedef IconAnimations =

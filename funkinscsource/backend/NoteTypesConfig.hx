@@ -1,6 +1,6 @@
 package backend;
 
-import objects.Note;
+import objects.note.Note;
 
 typedef NoteTypeProperty =
 {

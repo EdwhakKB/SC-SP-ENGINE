@@ -114,7 +114,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
     add(healthBar);
     healthBar.cameras = [camHUD];
 
-    healthIcon = new HealthIcon(character.healthIcon, false, false, false);
+    healthIcon = new HealthIcon(character.healthIcon, false, false);
     healthIcon.y = FlxG.height - 150;
     add(healthIcon);
     healthIcon.cameras = [camHUD];
@@ -226,7 +226,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
     }
 
     var isPlayer = (reload ? character.isPlayer : !predictCharacterIsNotPlayer(_char));
-    character = new Character(0, 0, _char, isPlayer);
+    character = new Character(0, 0, _char, isPlayer, isPlayer ? 'BF' : 'DAD');
     if (!reload && character.editorIsPlayer != null && isPlayer != character.editorIsPlayer)
     {
       character.isPlayer = !character.isPlayer;
@@ -321,7 +321,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
           spr.scale.set(character.scale.x, character.scale.y);
           spr.updateHitbox();
 
-          spr.offset.set(character.offset.x, character.offset.y);
+          spr.offset.set(character.offset.x * spr.scale.x, spr.offset.y * spr.scale.y);
           spr.visible = true;
 
           var otherSpr:FlxSprite = #if flxanimate (spr == animateGhost) ? ghost : animateGhost #else ghost #end;
@@ -1244,15 +1244,24 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
     }
     else if (FlxG.keys.justPressed.ESCAPE)
     {
-      FlxG.mouse.visible = false;
       MusicBeatState.divideCameraZoom = false;
-      if (!unsavedProgress)
+      ClientPrefs.toggleVolumeKeys(true);
+      if (!_goToPlayState)
       {
-        MusicBeatState.switchState(new states.editors.MasterEditorMenu());
-        FlxG.sound.playMusic(Paths.music('freakyMenu'));
+        if (!unsavedProgress)
+        {
+          FlxG.mouse.visible = false;
+          MusicBeatState.switchState(new states.editors.MasterEditorMenu());
+          FlxG.sound.playMusic(Paths.music('freakyMenu'));
+        }
+        else
+          openSubState(new ExitConfirmationPrompt());
       }
       else
-        openSubState(new ExitConfirmationPrompt());
+      {
+        FlxG.mouse.visible = false;
+        MusicBeatState.switchState(new PlayState());
+      }
       MusicBeatState.divideCameraZoom = true;
       return;
     }
