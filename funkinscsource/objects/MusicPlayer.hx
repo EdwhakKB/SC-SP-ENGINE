@@ -34,7 +34,7 @@ class MusicPlayer extends FlxGroup
 
   public var fadingOut:Bool;
 
-  public var background:FlxSprite;
+  public var backgroundLol:FlxSprite;
 
   public function new(instance:FreeplayState)
   {
