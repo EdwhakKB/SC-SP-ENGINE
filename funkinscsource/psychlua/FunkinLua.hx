@@ -2250,8 +2250,9 @@ class FunkinLua
         catch (e)
         {
           Debug.displayAlert("Unknown Item: " + item, "Item Not Found");
-          return;
+          return null;
         }
+        return null;
       });
 
       set("setPlayStateVariable", function(item:String, value:Dynamic, instance:Bool = true) {
@@ -2267,6 +2268,7 @@ class FunkinLua
           Debug.displayAlert("Unknown Item: " + item, "Item Not Found");
           return false;
         }
+        return false;
       });
 
       addLocalCallback("close", function() {

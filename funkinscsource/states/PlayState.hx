@@ -774,6 +774,18 @@ class PlayState extends MusicBeatState
           if (file.toLowerCase().endsWith('.$extn')) initHSIScript(folder + file);
     #end
 
+    for (i in 0...startCharScripts.length)
+    {
+      startCharacterScripts(startCharScripts[i]);
+      startCharScripts.remove(startCharScripts[i]);
+    }
+
+    startCharacterScripts(gf.curCharacter);
+    startCharacterScripts(dad.curCharacter);
+    startCharacterScripts(mom.curCharacter);
+    startCharacterScripts(boyfriend.curCharacter);
+    #end
+
     if (ClientPrefs.data.characters)
     {
       boyfriend.scrollFactor.set(stage.bfScrollFactor[0], stage.bfScrollFactor[1]);
@@ -782,12 +794,6 @@ class PlayState extends MusicBeatState
     }
 
     if (boyfriend.deadChar != null) GameOverSubstate.characterName = boyfriend.deadChar;
-
-    for (i in 0...startCharScripts.length)
-    {
-      startCharacterScripts(startCharScripts[i]);
-      startCharScripts.remove(startCharScripts[i]);
-    }
 
     var camPos:FlxPoint = FlxPoint.get(girlfriendCameraOffset[0], girlfriendCameraOffset[1]);
     if (gf != null)
@@ -801,12 +807,6 @@ class PlayState extends MusicBeatState
       dad.setPosition(GF_X, GF_Y);
       if (gf != null) gf.visible = false;
     }
-
-    startCharacterScripts(gf.curCharacter);
-    startCharacterScripts(dad.curCharacter);
-    startCharacterScripts(mom.curCharacter);
-    startCharacterScripts(boyfriend.curCharacter);
-    #end
 
     setCameraOffsets();
 
@@ -903,7 +903,7 @@ class PlayState extends MusicBeatState
 
     arrowLanes.cameras = #if SCEModchartingTools arrowPaths.cameras = #end [usesHUD ? camHUD : camNoteStuff];
 
-    var enabledHolds:Bool = (!(SONG.options.disableHoldCovers || SONG.options.notITG) && ClientPrefs.data.holdCoverPlay);
+    var enabledHolds:Bool = ((!SONG.options.disableHoldCovers && !SONG.options.notITG) && ClientPrefs.data.holdCoverPlay);
     opponentHoldCovers = new HoldCoverGroup(enabledHolds, false);
     opponentHoldCovers.isReady = (strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong && !inCutscene && !inCinematic && generatedMusic);
     opponentHoldCovers.setParentStrums(opponentStrums);
