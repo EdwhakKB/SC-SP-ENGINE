@@ -930,13 +930,6 @@ class FunkinLua
         oldTweenFunction(tag, vars, {zoom: value}, duration, ease, 'doTweenZoom');
       });
 
-      /**
-       * Function is mean't for only cameras since they have the variable rotation, but if any other then I allow using Dynamic!
-       */
-      set("doTweenRotation", function(tag:String, vars:String, value:Dynamic, duration:Float, ease:String) {
-        oldTweenFunction(tag, vars, {rotation: value}, duration, ease, 'doTweenRotation');
-      });
-
       set("doTweenColor", function(tag:String, vars:String, targetColor:String, duration:Float, ease:String) {
         var itemExam:Dynamic = LuaUtils.tweenPrepare(tag, vars);
         if (itemExam != null)
