@@ -3,9 +3,10 @@ package psychlua;
 import objects.VideoSprite;
 import substates.GameOverSubstate;
 
+#if (VIDEOS_ALLOWED && hxvlc)
 class VideoFunctions
 {
-  //Code by DMMaster636
+  // Code by DMMaster636
   public static function implement(funk:FunkinLua)
   {
     funk.set("makeVideoSprite", function(tag:String, video:String, ext:String = 'mp4', ?x:Float = 0, ?y:Float = 0, ?loop:Dynamic = false) {
@@ -194,3 +195,4 @@ class VideoFunctions
     });
   }
 }
+#end
