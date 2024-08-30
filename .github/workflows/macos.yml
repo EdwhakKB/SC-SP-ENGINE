@@ -4,7 +4,7 @@ on:
   push:
 jobs:
   build:
-    name: Mas OS Build
+    name: Mac OS Build
     permissions: write-all
     runs-on: macos-13
     steps:
@@ -13,7 +13,7 @@ jobs:
       - name: Setting up Haxe
         uses: krdlab/setup-haxe@master
         with:
-          haxe-version: 4.3.4
+          haxe-version: 4.3.5
       - name: Restore existing build cache for faster compilation
         uses: actions/cache@v4.0.2
         with:
