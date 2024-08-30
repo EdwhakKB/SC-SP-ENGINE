@@ -7,8 +7,10 @@
     },
     {
       "name": "openfl",
-      "type": "haxelib",
-      "verion": null
+      "type": "git",
+      "dir": null,
+      "ref": "feature/shader-improvements",
+      "url": "https://github.com/FunkinCrew/openfl"
     },
     {
       "name": "flixel-tools",
