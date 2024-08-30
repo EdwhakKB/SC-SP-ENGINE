@@ -6,7 +6,7 @@ jobs:
   build:
     name: Linux Build
     permissions: write-all
-    runs-on: ubuntu-lastest
+    runs-on: ubuntu-latest
     steps:
       - name: hxvlc linux extra
         run: |
