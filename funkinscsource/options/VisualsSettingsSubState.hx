@@ -168,10 +168,8 @@ class VisualsSettingsSubState extends BaseOptionsMenu
       'Mainly all text in playstate will change color on character change and will start with dad\'s character color.', 'coloredText', BOOL);
     addOption(option);
 
-    var option:Option = new Option('Note Splashes', "If checked, on rating swag or sick will give a splash effect.", 'noteSplashes', BOOL);
-    addOption(option);
-
-    var option:Option = new Option('Note Splashes Opponent', "If checked, on a note being hit it will give a splash effect.", 'noteSplashesOP', BOOL);
+    var option:Option = new Option('Note Splashes Option', "Different options on how the splashes show.", 'splashOption', STRING,
+      ['Player', 'Opponent', 'Both']);
     addOption(option);
 
     var option:Option = new Option('Hold Cover Animation And Splash', "If checked, A Splash and Hold Note animation wil show.", 'holdCoverPlay', BOOL);

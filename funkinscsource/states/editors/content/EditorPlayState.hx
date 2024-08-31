@@ -464,7 +464,7 @@ class EditorPlayState extends MusicBeatSubState
     score = daRating.scoreBonus;
     daRating.count++;
 
-    note.canSplash = ((!note.noteSplashData.disabled && ClientPrefs.data.noteSplashes && daRating.doNoteSplash)
+    note.canSplash = ((!note.noteSplashData.disabled && ClientPrefs.splashOption('Player') && daRating.doNoteSplash)
       && !PlayState.SONG.options.notITG);
     if (note.canSplash) spawnNoteSplashOnNote(note);
 

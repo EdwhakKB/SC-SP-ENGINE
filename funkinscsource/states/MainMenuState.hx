@@ -22,7 +22,7 @@ enum MainMenuColumn
 class MainMenuState extends MusicBeatState
 {
   public static final psychEngineVersion:String = '1.0-prerelease'; // This is also used for Discord RPC
-  public static var SCEVersion:String = '1.5.25'; // This is also used for Discord RPC
+  public static var SCEVersion:String = '1.5.2'; // This is also used for Discord RPC
   public static var curSelected:Int = 0;
   public static var curColumn:MainMenuColumn = CENTER;
 

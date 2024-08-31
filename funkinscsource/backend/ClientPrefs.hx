@@ -178,8 +178,7 @@ import states.TitleState;
 
   public var coloredText:Bool = false;
 
-  public var noteSplashes:Bool = true;
-  public var noteSplashesOP:Bool = true;
+  public var splashOption:String = 'Both';
 
   public var characters:Bool = true;
   public var background:Bool = true;
@@ -399,5 +398,17 @@ class ClientPrefs
       keys[i] = randomKey;
     }
     return keys[0] == '---' ? keys[1] : keys[1] == '---' ? keys[0] : keys[0] + separator + keys[1];
+  }
+
+  public static function splashOption(type:String):Bool
+  {
+    switch (type)
+    {
+      case 'Player':
+        return (data.splashOption == 'Player' || data.splashOption == 'Both') ? true : false;
+      default:
+        return (data.splashOption == 'Opponent' || data.splashOption == 'Both') ? true : false;
+    }
+    return false;
   }
 }

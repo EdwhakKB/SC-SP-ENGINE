@@ -21,10 +21,10 @@ typedef HoldCoverData =
 
 enum abstract HoldCoverStep(String) to String from String
 {
-  var STOP = 'STOP';
-  var DONE = 'DONE';
-  var HOLDING = 'HOLDING';
-  var SPLASHING = 'SPLAHING';
+  var STOP = 'Stop';
+  var DONE = 'Done';
+  var HOLDING = 'Holding';
+  var SPLASHING = 'Splashing';
 }
 
 class HoldCoverSprite extends FunkinSCSprite
@@ -49,7 +49,6 @@ class HoldCoverSprite extends FunkinSCSprite
     }
   public var offsetX:Float = 0;
   public var offsetY:Float = 0;
-  public var parentStrum:StrumArrow = null;
 
   public dynamic function initShader(noteData:Int)
   {
@@ -134,10 +133,9 @@ class HoldCoverSprite extends FunkinSCSprite
     rgbShader.copyValues(tempShader);
   }
 
-  public dynamic function affectSplash(splashStep:HoldCoverStep = HOLDING, ?noteData:Int = -1, ?note:Note = null)
+  public dynamic function affectSplash(splashStep:HoldCoverStep, ?noteData:Int = -1, ?note:Note = null)
   {
     if (noteData == -1 && note == null) return;
-
     switch (splashStep)
     {
       // Stop
@@ -159,14 +157,5 @@ class HoldCoverSprite extends FunkinSCSprite
         boom = true;
         playAnim(Std.string(noteData) + 'p');
     }
-  }
-
-  override public function update(elapsed:Float):Void
-  {
-    if (parentStrum != null)
-    {
-      setPosition(parentStrum.x - 110 + offsetX, parentStrum.y - 100 + offsetY);
-    }
-    super.update(elapsed);
   }
 }

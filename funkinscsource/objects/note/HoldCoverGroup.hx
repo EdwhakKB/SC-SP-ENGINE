@@ -17,7 +17,7 @@ class HoldCoverGroup extends FlxTypedSpriteGroup<HoldCoverSprite>
 
   public dynamic function addHolds(i:Int)
   {
-    var colors:Array<String> = ["Purple", "Blue", "Green", "Red"];
+    var colors:Array<String> = ["Purple", "Blue", "Green", "Red", "Purple", "Blue", "Green", "Red"];
     var hcolor:String = colors[i];
     var hold:HoldCoverSprite = new HoldCoverSprite();
     hold.initFrames(i, hcolor);
@@ -28,24 +28,24 @@ class HoldCoverGroup extends FlxTypedSpriteGroup<HoldCoverSprite>
     hold.activatedSprite = enabled;
     hold.spriteId = '$hcolor-$i';
     hold.spriteIntID = i;
-    this.add(hold);
+    add(hold);
   }
 
   public dynamic function spawnOnNoteHit(note:Note):Void
   {
-    var noteData:Int = note.noteData;
+    var noteData:Int = note.noteData % 4;
     var isSus:Bool = note.isSustainNote;
     var isHoldEnd:Bool = note.isHoldEnd;
     if (enabled && isReady)
     {
       if (isSus)
       {
-        this.members[noteData].affectSplash(HOLDING, noteData, note);
+        members[noteData].affectSplash('Holding', noteData, note);
         if (isHoldEnd)
         {
-          if (isPlayer) this.members[noteData].affectSplash(SPLASHING, noteData);
+          if (isPlayer) members[noteData].affectSplash('Splashing', noteData);
           else
-            this.members[noteData].affectSplash(DONE, noteData);
+            members[noteData].affectSplash('Done', noteData);
         }
       }
     }
@@ -53,31 +53,53 @@ class HoldCoverGroup extends FlxTypedSpriteGroup<HoldCoverSprite>
 
   public dynamic function despawnOnMiss(direction:Int, ?note:Note = null):Void
   {
-    var noteData:Int = (note != null ? note.noteData : direction);
-    if (enabled && isReady) this.members[noteData].affectSplash(STOP, noteData, note);
-  }
-
-  public function setParentStrums(strumLine:Strumline)
-  {
-    for (i in 0...maxSize)
-      this.members[i].parentStrum = strumLine.members[i];
+    var noteData:Int = (note != null ? note.noteData % 4 : direction % 4);
+    if (enabled && isReady) members[noteData].affectSplash('Stop', noteData, note);
   }
 
   public dynamic function updateHold(elapsed:Float):Void
   {
     if (enabled && isReady)
     {
-      for (i in 0...this.members.length - 1)
+      for (i in 0...members.length)
       {
-        if (this.members[i].boom)
+        if (members[i].x != pos(i, "x") - 110)
         {
-          if (this.members[i].isAnimationFinished())
+          members[i].x = pos(i, "x") - 110;
+        }
+        if (members[i].y != pos(i, "y") - 100)
+        {
+          members[i].y = pos(i, "y") - 100;
+        }
+
+        if (members[i].boom)
+        {
+          if (members[i].isAnimationFinished())
           {
-            this.members[i].visible = false;
-            this.members[i].boom = false;
+            members[i].visible = false;
+            members[i].boom = false;
           }
         }
       }
     }
+  }
+
+  public dynamic function pos(note:Int, variable:String):Float
+  {
+    if (enabled && isReady)
+    {
+      if (PlayState.instance != null)
+      {
+        var game:PlayState = PlayState.instance;
+        if (game.strumLineNotes != null)
+        {
+          if (variable == "x") return game.strumLineNotes.members[isPlayer ? note + 4 : note].x;
+          else if (variable == "y") return game.strumLineNotes.members[isPlayer ? note + 4 : note].y;
+        }
+        return 0;
+      }
+      return 0;
+    }
+    return 0;
   }
 }

@@ -908,10 +908,8 @@ class PlayState extends MusicBeatState
     var enabledHolds:Bool = ((!SONG.options.disableHoldCovers && !SONG.options.notITG) && ClientPrefs.data.holdCoverPlay);
     opponentHoldCovers = new HoldCoverGroup(enabledHolds, false);
     opponentHoldCovers.isReady = (strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong && !inCutscene && !inCinematic && generatedMusic);
-    opponentHoldCovers.setParentStrums(opponentStrums);
     playerHoldCovers = new HoldCoverGroup(enabledHolds, true);
     playerHoldCovers.isReady = (strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong && !inCutscene && !inCinematic && generatedMusic);
-    playerHoldCovers.setParentStrums(playerStrums);
 
     if (isStoryMode)
     {
@@ -1930,8 +1928,6 @@ class PlayState extends MusicBeatState
   // CountDown Stuff
   public var stageIntroSoundsSuffix:String = '';
   public var stageIntroSoundsPrefix:String = '';
-
-  public var daChar:Character = null;
 
   function cacheCountdown()
   {
@@ -3061,6 +3057,7 @@ class PlayState extends MusicBeatState
 
     if (paused)
     {
+      canResync = true;
       FlxG.timeScale = playbackRate;
       #if (VIDEOS_ALLOWED && hxvlc)
       if (daVideoGroup != null)
@@ -3276,6 +3273,32 @@ class PlayState extends MusicBeatState
       return;
     }
 
+    if (paused)
+    {
+      callOnScripts('onUpdate', [elapsed]);
+      callOnScripts('update', [elapsed]);
+
+      super.update(elapsed);
+
+      callOnScripts('onUpdatePost', [elapsed]);
+      callOnScripts('updatePost', [elapsed]);
+      return;
+    }
+
+    for (holdCovers in [opponentHoldCovers, playerHoldCovers])
+    {
+      if (holdCovers != null)
+      {
+        if (!holdCovers.isReady) if (strumLineNotes != null && strumLineNotes.members.length > 0 && !startingSong && !inCutscene && !inCinematic
+          && generatedMusic) holdCovers.isReady = true;
+        else if (holdCovers.isReady) if (((strumLineNotes == null && strumLineNotes.members.length <= 0)
+          || startingSong
+          || inCutscene
+          || inCinematic)
+          && !generatedMusic) holdCovers.isReady = false;
+      }
+    }
+
     totalElapsed += elapsed;
 
     #if SCEModchartingTools
@@ -3293,7 +3316,7 @@ class PlayState extends MusicBeatState
       {
         if (value.startsWith('extraCharacter_'))
         {
-          daChar = cast(MusicBeatState.getVariables().get(value), Character);
+          var daChar:Character = cast(MusicBeatState.getVariables().get(value), Character);
           if (daChar != null)
           {
             if ((daChar.isPlayer && !daChar.flipMode || !daChar.isPlayer && daChar.flipMode))
@@ -5362,7 +5385,8 @@ class PlayState extends MusicBeatState
     score = daRating.scoreBonus;
     daRating.count++;
 
-    note.canSplash = ((!note.noteSplashData.disabled && ClientPrefs.data.noteSplashes && daRating.doNoteSplash) && !SONG.options.notITG);
+    note.canSplash = ((!note.noteSplashData.disabled && ClientPrefs.splashOption('Player') && daRating.doNoteSplash)
+      && !SONG.options.notITG);
     if (note.canSplash) spawnNoteSplashOnNote(note);
 
     if (playbackRate >= 1.05) score = getRatesScore(playbackRate, score);
@@ -5566,7 +5590,7 @@ class PlayState extends MusicBeatState
     var placement:Float = FlxG.width * 0.38;
     var rating:FlxSprite = new FlxSprite();
 
-    note.canSplash = ((!note.noteSplashData.disabled && ClientPrefs.data.noteSplashesOP) && !SONG.options.notITG);
+    note.canSplash = ((!note.noteSplashData.disabled && ClientPrefs.splashOption('Opponent')) && !SONG.options.notITG);
     if (note.canSplash) spawnNoteSplashOnNote(note);
 
     if (!showRating && !showComboNum && !showComboNum) return;
@@ -5960,8 +5984,7 @@ class PlayState extends MusicBeatState
         {
           if (value.startsWith('extraCharacter_'))
           {
-            daChar = cast(MusicBeatState.getVariables().get(value), Character);
-
+            var daChar:Character = cast(MusicBeatState.getVariables().get(value), Character);
             if (daChar != null)
             {
               var daCharConditions:Bool = daChar.allowHoldTimer();
@@ -6197,7 +6220,7 @@ class PlayState extends MusicBeatState
     else
       char = opponentMode ? boyfriend : dad;
 
-    note.canSplash = ((!note.noteSplashData.disabled && !note.isSustainNote && ClientPrefs.data.noteSplashesOP && !popupScoreForOp)
+    note.canSplash = ((!note.noteSplashData.disabled && !note.isSustainNote && ClientPrefs.splashOption('Opponent') && !popupScoreForOp)
       && !SONG.options.notITG);
     if (note.canSplash) spawnNoteSplashOnNote(note);
 
@@ -6582,7 +6605,8 @@ class PlayState extends MusicBeatState
         }
       }
       noteMiss(note);
-      note.canSplash = ((!note.noteSplashData.disabled && !note.isSustainNote && ClientPrefs.data.noteSplashes) && !SONG.options.notITG);
+      note.canSplash = ((!note.noteSplashData.disabled && !note.isSustainNote && ClientPrefs.splashOption('Player'))
+        && !SONG.options.notITG);
       if (note.canSplash) spawnNoteSplashOnNote(note);
     }
 
@@ -6887,7 +6911,7 @@ class PlayState extends MusicBeatState
       {
         if (characterValue.startsWith('extraCharacter_'))
         {
-          daChar = cast(MusicBeatState.getVariables().get(characterValue), Character);
+          var daChar:Character = cast(MusicBeatState.getVariables().get(characterValue), Character);
           if (daChar != null) daChar.gfSpeed = value;
         }
       }
@@ -6910,7 +6934,7 @@ class PlayState extends MusicBeatState
       {
         if (value.startsWith('extraCharacter_'))
         {
-          daChar = cast(MusicBeatState.getVariables().get(value), Character);
+          var daChar:Character = cast(MusicBeatState.getVariables().get(value), Character);
           if (daChar != null && daChar.beatDance(beat)) daChar.danceChar('custom_char');
         }
       }
