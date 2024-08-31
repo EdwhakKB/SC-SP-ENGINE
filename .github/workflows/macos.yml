@@ -27,7 +27,7 @@ jobs:
             cache-build-mac
       - name: Installing/Updating libraries
         run: |
-          haxe -cp /.setup -D analyzer-optimize -main Main --interp
+          haxe -cp setup -D analyzer-optimize -main Main --interp
       - name: Building the game
         run: |
           haxelib run lime build mac

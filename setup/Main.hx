@@ -1,4 +1,4 @@
-package setup;
+package;
 
 import haxe.Json;
 #if sys
