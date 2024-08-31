@@ -423,8 +423,8 @@ class Character extends FunkinSCSprite
 
     skipDance = false;
     hasMissAnimations = hasAnimation('singLEFTmiss') || hasAnimation('singDOWNmiss') || hasAnimation('singUPmiss') || hasAnimation('singRIGHTmiss');
-    isDancing = (animation.getByName('danceLeft') != null && animation.getByName('danceRight') != null);
-    doMissThing = (animation.getByName('singUPmiss') == null); // if for some reason you only have an up miss, why?
+    isDancing = hasAnimation('danceLeft') && hasAnimation('danceRight');
+    doMissThing = !hasAnimation('singUPmiss'); // if for some reason you only have an up miss, why?
 
     dance();
 
@@ -479,7 +479,6 @@ class Character extends FunkinSCSprite
     // data
     characterId = curCharacter;
     characterName = json.name != null ? json.name : curCharacter + '-Name';
-    isDancing = json.isDancing;
     replacesGF = json.replacesGF;
     healthIcon = json.healthicon;
     singDuration = json.sing_duration;
@@ -511,8 +510,11 @@ class Character extends FunkinSCSprite
     animationsArray = json.animations;
     if (isPlayer && json.playerAnimations != null) animationsArray = json.playerAnimations;
 
+    // Bound dancing varialbes
     var defaultBeat:Int = Std.int(json.defaultBeat);
     idleBeat = (!Math.isNaN(defaultBeat) && defaultBeat != 0) ? defaultBeat : 1;
+
+    if (json.useGFSpeed != null) useGFSpeed = json.useGFSpeed;
 
     if (animationsArray != null && animationsArray.length > 0)
     {
@@ -573,7 +575,8 @@ class Character extends FunkinSCSprite
 
     if (debugMode
       || (!isAnimateAtlas && animation.curAnim == null) #if flxanimate
-      || (isAnimateAtlas && (atlas.anim.curInstance == null || atlas.anim.curSymbol == null)) #end)
+      || (isAnimateAtlas && (atlas.anim.curInstance == null || atlas.anim.curSymbol == null)) #end
+      || stoppedUpdatingCharacter)
     {
       super.update(elapsed);
       return;
@@ -665,9 +668,6 @@ class Character extends FunkinSCSprite
   public var stoppedDancing:Bool = false;
   public var stoppedUpdatingCharacter:Bool = false;
 
-  /**
-   * FOR GF DANCING SHIT
-   */
   public dynamic function dance(forced:Bool = false, altAnim:Bool = false)
   {
     if (!ClientPrefs.data.characters) return;
@@ -682,15 +682,13 @@ class Character extends FunkinSCSprite
         if (isDancing)
         {
           danced = !danced;
-          if (altAnim
-            && animation.getByName('danceRight-alt') != null
-            && animation.getByName('danceLeft-alt') != null) animName = 'dance' + (danced ? 'Right' : 'Left') + '-alt';
+          if (altAnim && hasAnimation('danceRight-alt') && hasAnimation('danceLeft-alt')) animName = 'dance' + (danced ? 'Right' : 'Left') + '-alt';
           else
             animName = 'dance' + (danced ? 'Right' : 'Left') + idleSuffix;
         }
         else
         {
-          if (altAnim && (animation.getByName('idle-alt') != null || animation.getByName('idle-alt2') != null)) animName = 'idle-alt';
+          if (altAnim && (hasAnimation('idle-alt') || hasAnimation('idle-alt2'))) animName = 'idle-alt';
           else
             animName = 'idle' + idleSuffix;
         }
@@ -707,18 +705,18 @@ class Character extends FunkinSCSprite
 
   public dynamic function doAffectForName(name:String)
   {
-    if (name.endsWith('alt') && animation.getByName(name) == null) name = name.split('-')[0];
-    if (name == 'laugh' && animation.getByName(name) == null) name = 'singUP';
-    if (name.endsWith('miss') && animation.getByName(name) == null)
+    if (name.endsWith('alt') && !hasAnimation(name)) name = name.split('-')[0];
+    if (name == 'laugh' && !hasAnimation(name)) name = 'singUP';
+    if (name.endsWith('miss') && !hasAnimation(name))
     {
       name = name.substr(0, name.length - 4);
       if (doMissThing) missed = true;
     }
 
-    if (animation.getByName(name) == null) // if it's STILL null, just play idle, and if you REALLY messed up, it'll look in the xml for a valid anim
+    if (hasAnimation(name)) // if it's STILL null, just play idle, and if you REALLY messed up, it'll look in the xml for a valid anim
     {
-      if (isDancing && animation.getByName('danceRight') != null) name = 'danceRight';
-      else if (animation.getByName('idle') != null) name = 'idle';
+      if (isDancing && hasAnimation('danceRight')) name = 'danceRight';
+      else if (hasAnimation('idle')) name = 'idle';
     }
   }
 
@@ -798,17 +796,17 @@ class Character extends FunkinSCSprite
       && !getAnimationName().endsWith('miss');
   }
 
-  public dynamic function danceConditions(conditionsMeet:Bool, ?forcedToIdle:Null<Bool> = null)
+  public dynamic function danceConditions(conditionsMet:Bool, ?forcedToIdle:Null<Bool> = null)
   {
     var forced:Bool = (forcedToIdle != null ? forcedToIdle : false);
-    if (conditionsMeet) dance(forced);
+    if (conditionsMet) dance(forced);
   }
 
   public dynamic function danceChar(char:String, ?altBool:Bool, ?forcedToIdle:Bool, ?singArg:Bool)
   {
     switch (char)
     {
-      case 'dad', 'bf', 'mom':
+      case 'player', 'opponent':
         if (allowDance() && singArg) dance(forcedToIdle, altBool);
       default:
         if (allowDance()) dance();
@@ -817,11 +815,9 @@ class Character extends FunkinSCSprite
 
   public dynamic function beatDance(beat:Int):Bool
   {
-    var isGF:Bool = characterType == GF;
-    var speed:Int = useGFSpeed ? gfSpeed : idleBeat;
-    return ((((beat % speed == 0) && !isDancingType()) || ((beat % speed != 0) && isDancingType()))
-      && !isGF)
-      || (isGF && (beat % speed == 0));
+    return ((((beat % idleBeat == 0) && !isDancingType()) || ((beat % idleBeat != 0) && isDancingType()))
+      && !useGFSpeed)
+      || (useGFSpeed && (((beat % gfSpeed == 0) && (isDancingType() || !isDancingType()))));
   }
 
   public function loadMappedAnims(?defaultJson:String = 'picospeaker', ?tankManNotes:Bool):Void
@@ -1080,7 +1076,7 @@ typedef CharacterFile =
   var ?no_antialiasing:Bool;
 
   /**
-   * Whether this character uses a dancing idle instead of a regular idle.
+   * Whether this character uses a dancing idle instead of a regular idle. used for animation dealing with isDanced.
    * (ex. gf, spooky)
    * @default false
    */
@@ -1128,6 +1124,12 @@ typedef CharacterFile =
    * @default OTHER
    */
   var ?characterType:String;
+
+  /**
+   *
+   * @default false
+   */
+  var ?useGFSpeed:Bool;
 }
 
 typedef AnimArray =

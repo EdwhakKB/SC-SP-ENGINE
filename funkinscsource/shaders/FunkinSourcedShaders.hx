@@ -71,7 +71,7 @@ class BarrelBlurEffect extends ShaderBase
   }
 }
 
-class BarrelBlurShader extends FlxShader
+class BarrelBlurShader extends FlxFixedShader
 {
   @:glFragmentSource('#pragma header uniform float barrel;
 uniform float zoom;
@@ -129,7 +129,7 @@ vec4 render(vec2 uv)
 void main()
 {
   vec2
-  iResolution = vec2(1280, 720);
+  iResolution = vec2(1280.0, 720.0);
   // rotation bullshit
   vec2
   center = vec2(0.5, 0.5);
@@ -231,7 +231,7 @@ class BetterBlurEffect extends ShaderBase
   }
 }
 
-class BetterBlurShader extends FlxShader
+class BetterBlurShader extends FlxFixedShader
 {
   @:glFragmentSource('#pragma header // https://www.shadertoy.com/view/Xltfzj
 // https://xorshaders.weebly.com/tutorials/blur-shaders-5-part-2
@@ -299,7 +299,7 @@ class BloomBetterEffect extends ShaderBase
   }
 }
 
-class BloomBetterShader extends FlxShader
+class BloomBetterShader extends FlxFixedShader
 {
   @:glFragmentSource('#pragma header uniform float effect;
 uniform float strength;
@@ -363,7 +363,7 @@ class BlurEffect extends ShaderBase
   }
 }
 
-class BlurShader extends FlxShader
+class BlurShader extends FlxFixedShader
 {
   @:glFragmentSource('#pragma header uniform float strength;
 uniform float strengthY;
@@ -413,7 +413,7 @@ class ChromAbEffect extends ShaderBase
   }
 }
 
-class ChromAbShader extends FlxShader
+class ChromAbShader extends FlxFixedShader
 {
   @:glFragmentSource('#pragma header uniform float strength;
 void main()
@@ -450,7 +450,7 @@ class ChromAbBlueSwapEffect extends ShaderBase
   }
 }
 
-class ChromAbBlueSwapShader extends FlxShader
+class ChromAbBlueSwapShader extends FlxFixedShader
 {
   @:glFragmentSource('#pragma header uniform float strength;
 void main()
@@ -522,7 +522,7 @@ class ChromaticAberrationEffect extends ShaderBase
   }
 }
 
-class ChromaticAberrationShader extends FlxShader
+class ChromaticAberrationShader extends FlxFixedShader
 {
   @:glFragmentSource('#pragma header uniform float rOffset;
 uniform float gOffset;
@@ -625,7 +625,7 @@ class ChromaticRadialBlurShader extends FlxShader
                                    velocity * 2.0 * inverseSampleCount,
                                    velocity * 4.0 * inverseSampleCount);
 
-        vec4 accumulator = vec4(0);
+        vec4 accumulator = vec4(0.0);
         mat3x2 offsets = mat3x2(0);
 
         for (int i = 0; i < sampleCount; i++) {
@@ -673,7 +673,7 @@ class ColorFillEffect extends ShaderBase
   }
 }
 
-class ColorFillShader extends FlxShader
+class ColorFillShader extends FlxFixedShader
 {
   @:glFragmentSource('
   #pragma header
@@ -722,7 +722,7 @@ class ColorOverrideEffect extends ShaderBase
   }
 }
 
-class ColorOverrideShader extends FlxShader
+class ColorOverrideShader extends FlxFixedShader
 {
   @:glFragmentSource('#pragma header uniform float red;
 uniform float green;
@@ -954,10 +954,10 @@ class DesaturationRGBShader extends FlxShader
   @:glFragmentSource('
     #pragma header
 
-    uniform float desaturationAmount = 0.0;
-    uniform float distortionTime = 0.0;
-    uniform float amplitude = -0.1;
-    uniform float frequency = 8.0;
+    uniform float desaturationAmount;
+    uniform float distortionTime;
+    uniform float amplitude;
+    uniform float frequency;
 
     void main() {
         vec4 desatTexture = texture2D(bitmap, vec2(openfl_TextureCoordv.x + sin((openfl_TextureCoordv.y * frequency) + distortionTime) * amplitude, openfl_TextureCoordv.y));
@@ -1119,7 +1119,7 @@ class FlipShader extends FlxShader
   @:glFragmentSource('
     #pragma header
 
-    uniform float flip = -1.0;
+    uniform float flip;
 
     void main()
     {
@@ -1165,7 +1165,7 @@ class GameBoyShader extends GraphicsShader
     #pragma header
 
     float threshold = 0.125; // Threshold for dithering (0.0045 found to be optimal)
-    uniform float intensity = 0.0;
+    uniform float intensity;
     mat2 dither_2 = mat2(0.,1.,1.,0.);
 
     struct dither_tile {
@@ -1356,9 +1356,9 @@ class GlitchedShader extends GraphicsShader
       #pragma header
       #extension GL_ARB_gpu_shader5 : enable
 
-      uniform float time = 0.0;
-      uniform float prob = 0.0;
-      uniform float intensityChromatic = 0.0;
+      uniform float time;
+      uniform float prob;
+      uniform float intensityChromatic;
       const int sampleCount = 50;
 
       float _round(float n) {
@@ -1378,8 +1378,8 @@ class GlitchedShader extends GraphicsShader
           return col;
       }
 
-      #define PI 3.14159265359
-      #define PHI (1.618033988749895)
+      const float PI = 3.14159265359;
+      const float PHI = (1.618033988749895);
 
       // --------------------------------------------------------
       // Glitch core
@@ -1532,24 +1532,24 @@ class GlitchedShader extends GraphicsShader
           float apply;
 
           groupSize = vec2(.6) * scale;
-          subGrid = vec2(2);
-          blockSize = vec2(1);
+          subGrid = vec2(2.0);
+          blockSize = vec2(1.0);
 
           seed = glitchSeed(glitchCoord(p, groupSize), speed);
           apply = shouldApply(seed);
           swapBlocks(p, groupSize, subGrid, blockSize, seed.seed, apply);
 
           groupSize = vec2(.8) * scale;
-          subGrid = vec2(3);
-          blockSize = vec2(1);
+          subGrid = vec2(3.0);
+          blockSize = vec2(1.0);
 
           seed = glitchSeed(glitchCoord(p, groupSize), speed);
           apply = shouldApply(seed);
           swapBlocks(p, groupSize, subGrid, blockSize, seed.seed, apply);
 
           groupSize = vec2(.2) * scale;
-          subGrid = vec2(6);
-          blockSize = vec2(1);
+          subGrid = vec2(6.0);
+          blockSize = vec2(1.0);
 
           seed = glitchSeed(glitchCoord(p, groupSize), speed);
           float apply2 = shouldApply(seed);
@@ -1560,8 +1560,8 @@ class GlitchedShader extends GraphicsShader
           swapBlocks(p, groupSize, subGrid, blockSize, (seed.seed + 5.), apply * apply2);
 
           groupSize = vec2(1.2, .2) * scale;
-          subGrid = vec2(9,2);
-          blockSize = vec2(3,1);
+          subGrid = vec2(9.0,2.0);
+          blockSize = vec2(3.0,1.0);
 
           seed = glitchSeed(glitchCoord(p, groupSize), speed);
           apply = shouldApply(seed);
@@ -1583,7 +1583,7 @@ class GlitchedShader extends GraphicsShader
           GlitchSeed seed = glitchSeed(glitchCoord(p, groupSize), speed);
           seed.prob *= .3;
           if (shouldApply(seed) == 1.)
-              color = vec3(0, 0, 0);
+              color = vec3(0.0, 0.0, 0.0);
       }
 
       vec4 transverseChromatic(vec2 p) {
@@ -1699,8 +1699,8 @@ class GlitchNewShader extends FlxShader // https://www.shadertoy.com/view/XtyXzW
 		return col;
 	}
 
-	#define PI 3.14159265359
-	#define PHI (1.618033988749895)
+	const float PI = 3.14159265359;
+	const float PHI = (1.618033988749895);
 
 	// --------------------------------------------------------
 	// Glitch core
@@ -1710,7 +1710,7 @@ class GlitchNewShader extends FlxShader // https://www.shadertoy.com/view/XtyXzW
 		return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
 	}
 
-	const float glitchScale = .4;
+	const float glitchScale = 0.4;
 
 	vec2 glitchCoord(vec2 p, vec2 gridSize) {
 		vec2 coord = floor(p / gridSize) * gridSize;;
@@ -1853,24 +1853,24 @@ class GlitchNewShader extends FlxShader // https://www.shadertoy.com/view/XtyXzW
 		float apply;
 
 		groupSize = vec2(.6) * scale;
-		subGrid = vec2(2);
-		blockSize = vec2(1);
+		subGrid = vec2(2.0);
+		blockSize = vec2(1.0);
 
 		seed = glitchSeed(glitchCoord(p, groupSize), speed);
 		apply = shouldApply(seed);
 		swapBlocks(p, groupSize, subGrid, blockSize, seed.seed, apply);
 
 		groupSize = vec2(.8) * scale;
-		subGrid = vec2(3);
-		blockSize = vec2(1);
+		subGrid = vec2(3.0);
+		blockSize = vec2(1.0);
 
 		seed = glitchSeed(glitchCoord(p, groupSize), speed);
 		apply = shouldApply(seed);
 		swapBlocks(p, groupSize, subGrid, blockSize, seed.seed, apply);
 
 		groupSize = vec2(.2) * scale;
-		subGrid = vec2(6);
-		blockSize = vec2(1);
+		subGrid = vec2(6.0);
+		blockSize = vec2(1.0);
 
 		seed = glitchSeed(glitchCoord(p, groupSize), speed);
 		float apply2 = shouldApply(seed);
@@ -1881,8 +1881,8 @@ class GlitchNewShader extends FlxShader // https://www.shadertoy.com/view/XtyXzW
 		swapBlocks(p, groupSize, subGrid, blockSize, (seed.seed + 5.), apply * apply2);
 
 		groupSize = vec2(1.2, .2) * scale;
-		subGrid = vec2(9,2);
-		blockSize = vec2(3,1);
+		subGrid = vec2(9.0,2.0);
+		blockSize = vec2(3.0,1.0);
 
 		seed = glitchSeed(glitchCoord(p, groupSize), speed);
 		apply = shouldApply(seed);
@@ -1899,12 +1899,12 @@ class GlitchNewShader extends FlxShader // https://www.shadertoy.com/view/XtyXzW
 
 	void glitchColor(vec2 p, inout vec3 color) {
 		vec2 groupSize = vec2(.75,.125) * glitchScale;
-		vec2 subGrid = vec2(0,6);
+		vec2 subGrid = vec2(0.0,6.0);
 		float speed = 5.;
 		GlitchSeed seed = glitchSeed(glitchCoord(p, groupSize), speed);
 		seed.prob *= .3;
 		if (shouldApply(seed) == 1.)
-			color = vec3(0, 0, 0);
+			color = vec3(0.0, 0.0, 0.0);
 	}
 
 	vec4 transverseChromatic(vec2 p) {
@@ -1915,7 +1915,7 @@ class GlitchNewShader extends FlxShader // https://www.shadertoy.com/view/XtyXzW
 
 		mat3x2 increments = mat3x2(velocity * 1.0 * inverseSampleCount, velocity * 2.0 * inverseSampleCount, velocity * 4.0 * inverseSampleCount);
 
-		vec3 accumulator = vec3(0);
+		vec3 accumulator = vec3(0.0);
 		mat3x2 offsets = mat3x2(0);
 		for (int i = 0; i < sampleCount; i++) {
 			accumulator.r += texture(bitmap, destCoord + offsets[0]).r;
@@ -2183,8 +2183,8 @@ class GocpShader extends FlxShader
     #define fragColor gl_FragColor
     #define mainImage main
 
-    uniform float texAlpha = 0;
-    uniform float saturation = 0;
+    uniform float texAlpha;
+    uniform float saturation;
 
     uniform sampler2D iChannel1;
     uniform float iTime;
@@ -2199,10 +2199,10 @@ class GocpShader extends FlxShader
         return temp;
     }
 
-    uniform float threshold = 0.3;
-    uniform float rVal = 255.0;
-    uniform float gVal = 255.0;
-    uniform float bVal = 255.0;
+    uniform float threshold;
+    uniform float rVal;
+    uniform float gVal;
+    uniform float bVal;
 
     void mainImage()
     {
@@ -2276,7 +2276,7 @@ class GreyscaleEffectNew extends ShaderBase
   }
 }
 
-class GreyscaleShaderNew extends FlxShader
+class GreyscaleShaderNew extends FlxFixedShader
 {
   @:glFragmentSource('#pragma header uniform float strength;
 void main()
@@ -2317,7 +2317,7 @@ class HeatEffect extends ShaderBase
   }
 }
 
-class HeatShader extends FlxShader
+class HeatShader extends FlxFixedShader
 {
   @:glFragmentSource('#pragma header uniform float strength;
 uniform float iTime;
@@ -2453,7 +2453,7 @@ class IndividualGlitchesShader extends FlxShader
   @:glFragmentSource('
     #pragma header
 
-    uniform float binaryIntensity = 0.0;
+    uniform float binaryIntensity;
 
     void main() {
         vec2 uv = openfl_TextureCoordv.xy;
@@ -2548,7 +2548,7 @@ class MirrorRepeatEffect extends ShaderBase
 }
 
 // moved to a seperate shader because not all modcharts need the barrel shit and probably runs slightly better on weaker pcs
-class MirrorRepeatShader extends FlxShader
+class MirrorRepeatShader extends FlxFixedShader
 {
   @:glFragmentSource('#pragma header // written by TheZoroForce240
 uniform float zoom;
@@ -2656,7 +2656,7 @@ class MosaicEffect extends ShaderBase
   }
 }
 
-class MosaicShader extends FlxShader
+class MosaicShader extends FlxFixedShader
 {
   @:glFragmentSource('#pragma header uniform float strength;
 void main()
@@ -2747,7 +2747,7 @@ class PaletteEffect extends ShaderBase
   }
 }
 
-class PaletteShader extends FlxShader
+class PaletteShader extends FlxFixedShader
 {
   @:glFragmentSource('#pragma header uniform float strength;
 uniform float paletteSize;
@@ -2802,7 +2802,7 @@ class PerlinSmokeEffect extends ShaderBase
   }
 }
 
-class PerlinSmokeShader extends FlxShader
+class PerlinSmokeShader extends FlxFixedShader
 {
   @:glFragmentSource('#pragma header uniform float iTime;
 uniform float waveStrength;
@@ -2964,7 +2964,7 @@ void main()
 }
 
 // Quick plane raymarcher thingy by 4mbr0s3 2 (partially)
-class PlaneRaymarcher extends ShaderBase
+class PlaneRaymarcherEffect extends ShaderBase
 {
   public var shader(default, null):PlaneRaymarcherShader = new PlaneRaymarcherShader();
 
@@ -3084,110 +3084,111 @@ class PlaneRaymarcherShader extends FlxShader
 {
   // Drafted this in Shadertoy: https://www.shadertoy.com/view/fdlXzn
   @:glFragmentSource('
-        // "RayMarching starting point"
-		// by Martijn Steinrucken aka The Art of Code/BigWings - 2020
-		// The MIT License
-        // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-        // Original shader: https://www.shadertoy.com/view/WtGXDD
-        // You can use this shader as a template for ray marching shaders
+    // "RayMarching starting point"
+    // by Martijn Steinrucken aka The Art of Code/BigWings - 2020
+    // The MIT License
+    // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+    // Original shader: https://www.shadertoy.com/view/WtGXDD
+    // You can use this shader as a template for ray marching shaders
 
-        #define MAX_STEPS 100
-        #define MAX_DIST 100.
-        #define SURF_DIST .01
-        #define WIDTH 1.778
-        #define HEIGHT 1.
+    #pragma header
 
-        #pragma header
-        uniform float uTime;
-        uniform float pitch;
-        uniform float yaw;
-        uniform vec3 cameraOff;
-        uniform vec3 cameraLookAt;
+    const float MAX_STEPS = 100;
+    const float MAX_DIST = 100.0;
+    const float SURF_DIST = 0.01;
+    const float WIDTH = 1.778;
+    const float HEIGHT = 1.0;
 
-        mat2 Rot(float a) {
-            float s=sin(a), c=cos(a);
-            return mat2(c, -s, s, c);
-        }
+    uniform float uTime;
+    uniform float pitch;
+    uniform float yaw;
+    uniform vec3 cameraOff;
+    uniform vec3 cameraLookAt;
 
-        float BoxSDF( vec3 p, vec3 b )
-        {
-        vec3 q = abs(p) - b;
-        return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
-        }
+    mat2 Rot(float a) {
+        float s=sin(a), c=cos(a);
+        return mat2(c, -s, s, c);
+    }
 
-        float GetDist(vec3 p) {
-            vec4 s = vec4(0, 1, 6, 1);
+    float BoxSDF( vec3 p, vec3 b )
+    {
+      vec3 q = abs(p) - b;
+      return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
+    }
 
-            float playfieldDist = BoxSDF(p, vec3(WIDTH, HEIGHT, 0));
-            float d = playfieldDist; // Union
+    float GetDist(vec3 p) {
+      vec4 s = vec4(0, 1, 6, 1);
 
-            return d;
-        }
+      float playfieldDist = BoxSDF(p, vec3(WIDTH, HEIGHT, 0));
+      float d = playfieldDist; // Union
 
-        vec3 GetNormal(vec3 p) {
-            float d = GetDist(p);
-            vec2 e = vec2(.001, 0);
+      return d;
+    }
 
-            vec3 n = d - vec3(
-                GetDist(p-e.xyy),
-                GetDist(p-e.yxy),
-                GetDist(p-e.yyx));
+    vec3 GetNormal(vec3 p) {
+      float d = GetDist(p);
+      vec2 e = vec2(.001, 0);
 
-            return normalize(n);
-        }
+      vec3 n = d - vec3(
+        GetDist(p-e.xyy),
+        GetDist(p-e.yxy),
+        GetDist(p-e.yyx));
+
+      return normalize(n);
+    }
 
 
-        vec3 GetRayDir(vec2 uv, vec3 p, vec3 l, float z) {
-            vec3 f = normalize(l-p),
-                r = normalize(cross(vec3(0,1,0), f)),
-                u = cross(f,r),
-                c = f*z,
-                i = c + uv.x*r + uv.y*u,
-                d = normalize(i);
-            return d;
-        }
+    vec3 GetRayDir(vec2 uv, vec3 p, vec3 l, float z) {
+      vec3 f = normalize(l-p),
+        r = normalize(cross(vec3(0.0,1.0,0.0), f)),
+        u = cross(f,r),
+        c = f*z,
+        i = c + uv.x*r + uv.y*u,
+        d = normalize(i);
+      return d;
+    }
 
-        float RayMarch(vec3 ro, vec3 rd) {
-            float d0 = 0.; // Distance marched
-            for (int i = 0; i < MAX_STEPS; i++) {
-                vec3 p = ro + rd * d0;
-                float dS = GetDist(p); // Closest distance to surface
-                d0 += dS;
-                if (d0 > MAX_DIST || dS < SURF_DIST) {
-                    break;
-                }
+    float RayMarch(vec3 ro, vec3 rd) {
+        float d0 = 0.; // Distance marched
+        for (int i = 0; i < MAX_STEPS; i++) {
+            vec3 p = ro + rd * d0;
+            float dS = GetDist(p); // Closest distance to surface
+            d0 += dS;
+            if (d0 > MAX_DIST || dS < SURF_DIST) {
+                break;
             }
-            return d0;
+        }
+        return d0;
+    }
+
+    void main()
+    {
+        vec2 uv = openfl_TextureCoordv - vec2(0.5);
+        uv.x *= WIDTH / HEIGHT;
+        vec3 ro = vec3(0, 0, -2); // Ray origin
+        ro += cameraOff;
+        ro.yz *= Rot(pitch);
+        ro.xz *= Rot(yaw);
+        vec3 rd = GetRayDir(uv, ro, cameraLookAt, 1.);
+
+        float d = RayMarch(ro, rd);
+
+        vec4 col = vec4(0);
+
+        // Collision
+        if (d < MAX_DIST) {
+            vec3 p = ro + rd * d;
+            vec3 n = GetNormal(p);
+
+            float dif = dot(n, normalize(vec3(1,2,3)))*0.5+0.5;
+            col += dif * dif;
+
+            uv = vec2(p.x / WIDTH, p.y) * 0.5 + vec2(0.5);
+            col = texture2D(bitmap, uv);
         }
 
-        void main()
-        {
-            vec2 uv = openfl_TextureCoordv - vec2(0.5);
-            uv.x *= WIDTH / HEIGHT;
-            vec3 ro = vec3(0, 0, -2); // Ray origin
-            ro += cameraOff;
-            ro.yz *= Rot(pitch);
-            ro.xz *= Rot(yaw);
-            vec3 rd = GetRayDir(uv, ro, cameraLookAt, 1.);
-
-            float d = RayMarch(ro, rd);
-
-            vec4 col = vec4(0);
-
-            // Collision
-            if (d < MAX_DIST) {
-                vec3 p = ro + rd * d;
-                vec3 n = GetNormal(p);
-
-                float dif = dot(n, normalize(vec3(1,2,3)))*0.5+0.5;
-                col += dif * dif;
-
-                uv = vec2(p.x / WIDTH, p.y) * 0.5 + vec2(0.5);
-                col = texture2D(bitmap, uv);
-            }
-
-            gl_FragColor = col;
-        }')
+        gl_FragColor = col;
+    }')
   public function new()
   {
     super();
@@ -3214,7 +3215,7 @@ class RainEffect extends ShaderBase
   }
 }
 
-class RainShader extends FlxShader
+class RainShader extends FlxFixedShader
 {
   @:glFragmentSource('#pragma header uniform float iTime;
 vec2 rand(vec2 c)
@@ -3307,9 +3308,9 @@ class RayMarchEffect extends ShaderBase
   public var zoom:Float = -2;
 
   // Now you can customize these things for the shader! (NOW CAN CHANGE HOW MANY "windows" OR DISTANCE IS VISIBLE WHICH MAKES IT A BETTER SHADER)!
-  public var addedMAX_STEPS:Float = 0;
-  public var addedMAX_DIST:Float = 0;
-  public var addedSURF_DIST:Float = 0;
+  public var stepsLimit:Float = 0;
+  public var distLimit:Float = 0;
+  public var surfDistLimit:Float = 0;
 
   public function new()
   {
@@ -3317,9 +3318,9 @@ class RayMarchEffect extends ShaderBase
     shader.rotation.value = [0, 0, 0];
     shader.zoom.value = [zoom];
 
-    shader.addedMAX_STEPS.value = [addedMAX_STEPS];
-    shader.addedMAX_DIST.value = [addedMAX_DIST];
-    shader.addedSURF_DIST.value = [addedSURF_DIST];
+    shader.MAX_STEPS_LIMIT.value = [stepsLimit];
+    shader.MAX_DIST_LIMIT.value = [distLimit];
+    shader.SURF_DIST_LIMIT.value = [surfDistLimit];
   }
 
   override public function update(elapsed:Float)
@@ -3328,155 +3329,162 @@ class RayMarchEffect extends ShaderBase
     shader.rotation.value = [x * FlxAngle.TO_RAD, y * FlxAngle.TO_RAD, z * FlxAngle.TO_RAD];
     shader.zoom.value = [zoom];
 
-    shader.addedMAX_STEPS.value = [addedMAX_STEPS];
-    shader.addedMAX_DIST.value = [addedMAX_DIST];
-    shader.addedSURF_DIST.value = [addedSURF_DIST];
+    shader.MAX_STEPS_LIMIT.value = [stepsLimit];
+    shader.MAX_DIST_LIMIT.value = [distLimit];
+    shader.SURF_DIST_LIMIT.value = [surfDistLimit];
   }
 }
 
 // shader from here: https://www.shadertoy.com/view/WtGXDD
-class RayMarchShader extends FlxShader
+class RayMarchShader extends FlxFixedShader
 {
-  @:glFragmentSource('#pragma header // "RayMarching starting point"
-// by Martijn Steinrucken aka The Art of Code/BigWings - 2020
-// The MIT License
-// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-// Email: countfrolic@gmail.com
-// Twitter: @The_ArtOfCode
-// YouTube: youtube.com/TheArtOfCodeIsCool
-// Facebook: https://www.facebook.com/groups/theartofcode/
-//
-// You can use this shader as a template for ray marching shaders
-#defineMAX_STEPS 100#defineMAX_DIST 100.#defineSURF_DIST .001#defineS smoothstep#defineT iTime uniform vec3 rotation;
-uniform vec3 iResolution;
-uniform float zoom;
-uniform float addedMAX_STEPS = 0;
-uniform float addedMAX_DIST = 0;
-uniform float addedSURF_DIST = 0;
-// Rotation matrix around the X axis.
-mat3 rotateX(float theta)
-{
-  float
-  c = cos(theta);
-  float
-  s = sin(theta);
-  return mat3(vec3(1, 0, 0), vec3(0, c, -s), vec3(0, s, c));
-}
-// Rotation matrix around the Y axis.
-mat3 rotateY(float theta)
-{
-  float
-  c = cos(theta);
-  float
-  s = sin(theta);
-  return mat3(vec3(c, 0, s), vec3(0, 1, 0), vec3(-s, 0, c));
-}
-// Rotation matrix around the Z axis.
-mat3 rotateZ(float theta)
-{
-  float
-  c = cos(theta);
-  float
-  s = sin(theta);
-  return mat3(vec3(c, -s, 0), vec3(s, c, 0), vec3(0, 0, 1));
-}
-mat2 Rot(float a)
-{
-  float
-  s = sin(a),
-  c = cos(a);
-  return mat2(c, -s, s, c);
-}
-float sdBox(vec3 p, vec3 s)
-{
-  // p = p * rotateX(rotation.x) * rotateY(rotation.y) * rotateZ(rotation.z);
-  p = abs(p) - s;
-  return length(max(p, 0.)) + min(max(p.x, max(p.y, p.z)), 0.);
-}
-float plane(vec3 p, vec3 offset)
-{
-  float
-  d = p.z;
-  return d;
-}
-float GetDist(vec3 p)
-{
-  float
-  d = plane(p, vec3(0.0, 0.0, 0.0));
-  return d;
-}
-float RayMarch(vec3 ro, vec3 rd)
-{
-  float
-  dO = 0.;
-  for (int i = 0;
-  i < MAX_STEPS + addedMAX_STEPS;
-  i++
-)
+  @:glFragmentSource('
+  #pragma header
+
+  // "RayMarching starting point"
+  // by Martijn Steinrucken aka The Art of Code/BigWings - 2020
+  // The MIT License
+  // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  // Email: countfrolic@gmail.com
+  // Twitter: @The_ArtOfCode
+  // YouTube: youtube.com/TheArtOfCodeIsCool
+  // Facebook: https://www.facebook.com/groups/theartofcode/
+  //
+  // You can use this shader as a template for ray marching shaders
+
+  const float MAX_STEPS = 100;
+  const float MAX_DIST = 100.0;
+  const float SURF_DIST = 0.001;
+  uniform vec3 rotation;
+  uniform vec3 iResolution;
+  uniform float zoom;
+  uniform float MAX_STEPS_LIMIT;
+  uniform float MAX_DIST_LIMIT;
+  uniform float SURF_DIST_LIMIT;
+  // Rotation matrix around the X axis.
+  mat3 rotateX(float theta)
   {
-    vec3
-    p = ro + rd * dO;
     float
-    dS = GetDist(p);
-    dO += dS;
-    if (dO > MAX_DIST + addedMAX_DIST || abs(dS) < SURF_DIST + addedSURF_DIST) break;
+    c = cos(theta);
+    float
+    s = sin(theta);
+    return mat3(vec3(1.0, 0.0, 0.0), vec3(0.0, c, -s), vec3(0.0, s, c));
   }
-  return dO;
-}
-vec3 GetNormal(vec3 p)
-{
-  float
-  d = GetDist(p);
-  vec2
-  e = vec2(.001, 0.0);
-  vec3
-  n = d - vec3(GetDist(p - e.xyy), GetDist(p - e.yxy), GetDist(p - e.yyx));
-  return normalize(n);
-}
-vec3 GetRayDir(vec2 uv, vec3 p, vec3 l, float z)
-{
-  vec3
-  f = normalize(l - p),
-  r = normalize(cross(vec3(0.0, 1.0, 0.0), f)),
-  u = cross(f, r),
-  c = f * z,
-  i = c + uv.x * r + uv.y * u,
-  d = normalize(i);
-  return d;
-}
-vec2 repeat(vec2 uv)
-{
-  return vec2(abs(mod(uv.x, 1.0)), abs(mod(uv.y, 1.0)));
-}
-void main() // this shader is pain
-{
-  vec2
-  center = vec2(0.5, 0.5);
-  vec2
-  uv = openfl_TextureCoordv.xy - center;
-  uv.x = 0 - uv.x;
-  vec3
-  ro = vec3(0.0, 0.0, zoom);
-  ro = ro * rotateX(rotation.x) * rotateY(rotation.y) * rotateZ(rotation.z);
-  // ro.yz *= Rot(ShaderPointShit.y); //rotation shit
-  // ro.xz *= Rot(ShaderPointShit.x);
-  vec3
-  rd = GetRayDir(uv, ro, vec3(0.0, 0., 0.0), 1.0);
-  vec4
-  col = vec4(0.0);
-  float
-  d = RayMarch(ro, rd);
-  if (d < MAX_DIST + addedMAX_DIST)
+  // Rotation matrix around the Y axis.
+  mat3 rotateY(float theta)
+  {
+    float
+    c = cos(theta);
+    float
+    s = sin(theta);
+    return mat3(vec3(c, 0.0, s), vec3(0.0, 1.0, 0.0), vec3(-s, 0.0, c));
+  }
+  // Rotation matrix around the Z axis.
+  mat3 rotateZ(float theta)
+  {
+    float
+    c = cos(theta);
+    float
+    s = sin(theta);
+    return mat3(vec3(c, -s, 0.0), vec3(s, c, 0.0), vec3(0.0, 0.0, 1.0));
+  }
+  mat2 Rot(float a)
+  {
+    float
+    s = sin(a),
+    c = cos(a);
+    return mat2(c, -s, s, c);
+  }
+  float sdBox(vec3 p, vec3 s)
+  {
+    // p = p * rotateX(rotation.x) * rotateY(rotation.y) * rotateZ(rotation.z);
+    p = abs(p) - s;
+    return length(max(p, 0.)) + min(max(p.x, max(p.y, p.z)), 0.);
+  }
+  float plane(vec3 p, vec3 offset)
+  {
+    float
+    d = p.z;
+    return d;
+  }
+  float GetDist(vec3 p)
+  {
+    float
+    d = plane(p, vec3(0.0, 0.0, 0.0));
+    return d;
+  }
+  float RayMarch(vec3 ro, vec3 rd)
+  {
+    float
+    dO = 0.;
+    for (int i = 0;
+    i < MAX_STEPS + MAX_STEPS_LIMIT;
+    i++
+  )
+    {
+      vec3
+      p = ro + rd * dO;
+      float
+      dS = GetDist(p);
+      dO += dS;
+      if (dO > MAX_DIST + MAX_DIST_LIMIT || abs(dS) < SURF_DIST + SURF_DIST_LIMIT) break;
+    }
+    return dO;
+  }
+  vec3 GetNormal(vec3 p)
+  {
+    float
+    d = GetDist(p);
+    vec2
+    e = vec2(.001, 0.0);
+    vec3
+    n = d - vec3(GetDist(p - e.xyy), GetDist(p - e.yxy), GetDist(p - e.yyx));
+    return normalize(n);
+  }
+  vec3 GetRayDir(vec2 uv, vec3 p, vec3 l, float z)
   {
     vec3
-    p = ro + rd * d;
-    uv = vec2(p.x, p.y) * 0.5;
-    uv += center; // move coords from top left to center
-    col = flixel_texture2D(bitmap, repeat(uv)); // shadertoy to haxe bullshit i barely understand
+    f = normalize(l - p),
+    r = normalize(cross(vec3(0.0, 1.0, 0.0), f)),
+    u = cross(f, r),
+    c = f * z,
+    i = c + uv.x * r + uv.y * u,
+    d = normalize(i);
+    return d;
   }
-  gl_FragColor = col;
-}
-')
+  vec2 repeat(vec2 uv)
+  {
+    return vec2(abs(mod(uv.x, 1.0)), abs(mod(uv.y, 1.0)));
+  }
+  void main() // this shader is pain
+  {
+    vec2
+    center = vec2(0.5, 0.5);
+    vec2
+    uv = openfl_TextureCoordv.xy - center;
+    uv.x = 0 - uv.x;
+    vec3
+    ro = vec3(0.0, 0.0, zoom);
+    ro = ro * rotateX(rotation.x) * rotateY(rotation.y) * rotateZ(rotation.z);
+    // ro.yz *= Rot(ShaderPointShit.y); //rotation shit
+    // ro.xz *= Rot(ShaderPointShit.x);
+    vec3
+    rd = GetRayDir(uv, ro, vec3(0.0, 0., 0.0), 1.0);
+    vec4
+    col = vec4(0.0);
+    float
+    d = RayMarch(ro, rd);
+    if (d < MAX_DIST + MAX_DIST_LIMIT)
+    {
+      vec3
+      p = ro + rd * d;
+      uv = vec2(p.x, p.y) * 0.5;
+      uv += center; // move coords from top left to center
+      col = flixel_texture2D(bitmap, repeat(uv)); // shadertoy to haxe bullshit i barely understand
+    }
+    gl_FragColor = col;
+  }
+  ')
   public function new()
   {
     super();
@@ -3532,10 +3540,10 @@ class RedAberrationShader extends FlxShader
   @:glFragmentSource('
     #pragma header
 
-    #define PI 3.14159265
-    uniform float time = 0.0;
-    uniform float intensity = 0.0;
-    uniform float initial = 0.0;
+    const float PI = 3.14159265;
+    uniform float time;
+    uniform float intensity;
+    uniform float initial;
 
     float sat( float t ) {
         return clamp( t, 0.0, 1.0 );
@@ -3622,8 +3630,8 @@ class RGBPinShader extends FlxShader
   @:glFragmentSource('
     #pragma header
 
-    uniform float amount = 0.05;
-    uniform float distortionFactor = 0.05;
+    uniform float amount;
+    uniform float distortionFactor;
 
     vec2 uv = openfl_TextureCoordv.xy;
     vec2 center = vec2(0.5, 0.5);
@@ -3730,7 +3738,7 @@ class ScanlineEffectNew extends ShaderBase
   }
 }
 
-class ScanlineShaderNew extends FlxShader
+class ScanlineShaderNew extends FlxFixedShader
 {
   @:glFragmentSource('#pragma header uniform float strength;
 uniform float pixelsBetweenEachLine;
@@ -3794,7 +3802,7 @@ class SobelEffect extends ShaderBase
   }
 }
 
-class SobelShader extends FlxShader
+class SobelShader extends FlxFixedShader
 {
   @:glFragmentSource('#pragma header uniform float strength;
 uniform float intensity;
@@ -4002,7 +4010,7 @@ class SquishyShader extends FlxShader
     //glow from: https://www.shadertoy.com/view/XslGDr (unused but useful)
     vec3 samplef(vec2 tc, vec3 color)
     {
-        return pow(color, vec3(1, 1, 1));
+        return pow(color, vec3(1.0, 1.0, 1.0));
     }
 
     vec3 highlights(vec3 pixel, float thres)
@@ -4182,92 +4190,99 @@ class ThreeDEffect extends ShaderBase
 
 // coding is like hitting on women, you never start with the number
 //               -naether
+// Edited by Geokureli
+class ThreeDShader extends FlxFixedShader
+{
+  @:glFragmentSource('
+  #pragma header // added space
 
-class ThreeDShader extends FlxShader
-{
-  @:glFragmentSource('#pragma header // fixed by edwhak
-// i just defined and fixed some PI math and fragColor fixed for notes
-#definePI 3.14159265 uniform float xrot = 0.0;
-uniform float yrot = 0.0;
-uniform float zrot = 0.0;
-uniform float depth = 0.0;
-float plane( in vec3 norm, in vec3 po, in vec3 ro, in vec3 rd)
-{
-  float
-  de = dot(norm, rd);
-  de = sign(de) * max(abs(de), 0.001);
-  return dot(norm, po - ro) / de;
-}
-vec2 raytraceTexturedQuad( in vec3 rayOrigin, in vec3 rayDirection, in vec3 quadCenter, in vec3 quadRotation, in vec2 quadDimensions)
-{
-  // Rotations ------------------
-  float
-  a = sin(quadRotation.x);
-  float
-  b = cos(quadRotation.x);
-  float
-  c = sin(quadRotation.y);
-  float
-  d = cos(quadRotation.y);
-  float
-  e = sin(quadRotation.z);
-  float
-  f = cos(quadRotation.z);
-  float
-  ac = a * c;
-  float
-  bc = b * c;
-  mat3
-  RotationMatrix = mat3(d * f, d * e, -c, ac * f - b * e, ac * e + b * f, a * d, bc * f + a * e, bc * e - a * f, b * d);
-  //--------------------------------------
-  vec3
-  right = RotationMatrix * vec3(quadDimensions.x, 0.0, 0.0);
-  vec3
-  up = RotationMatrix * vec3(0, quadDimensions.y, 0);
-  vec3
-  normal = cross(right, up);
-  normal /= length(normal);
-  // Find the plane hit point in space
-  vec3
-  pos = (rayDirection * plane(normal, quadCenter, rayOrigin, rayDirection)) - quadCenter;
-  // Find the texture UV by projecting the hit point along the plane dirs
-  return vec2(dot(pos, right) / dot(right, right), dot(pos, up) / dot(up, up)) + 0.5;
-}
-void main()
-{
-  vec4
-  texColor = texture2D(bitmap, openfl_TextureCoordv);
-  // Screen UV goes from 0 - 1 along each axis
-  vec2
-  screenUV = openfl_TextureCoordv;
-  vec2
-  p = (2.0 * screenUV) - 1.0;
-  float
-  screenAspect = 1280 / 720;
-  p.x *= screenAspect;
-  // Normalized Ray Dir
-  vec3
-  dir = vec3(p.x, p.y, 1.0);
-  dir /= length(dir);
-  // Define the plane
-  vec3
-  planePosition = vec3(0.0, 0.0, depth + 0.5);
-  vec3
-  planeRotation = vec3(xrot, PI + yrot, zrot); // this the shit you needa change
-  vec2
-  planeDimension = vec2(-screenAspect, 1.0);
-  vec2
-  uv = raytraceTexturedQuad(vec3(0), dir, planePosition, planeRotation, planeDimension);
-  // If we hit the rectangle, sample the texture
-  if (abs(uv.x - 0.5) < 0.5 && abs(uv.y - 0.5) < 0.5)
+  const float PI = 3.14159265; // was "#definePI 3.14159265"  which is nonsense
+  uniform float xrot; // uniforms cant have default values, assign in the constructor
+  uniform float yrot; // uniforms cant have default values, assign in the constructor
+  uniform float zrot; // uniforms cant have default values, assign in the constructor
+  uniform float depth; // uniforms cant have default values, assign in the constructor
+  float plane( in vec3 norm, in vec3 po, in vec3 ro, in vec3 rd)
   {
-    gl_FragColor = vec4(flixel_texture2D(bitmap, uv));
+    float
+    de = dot(norm, rd);
+    de = sign(de) * max(abs(de), 0.001);
+    return dot(norm, po - ro) / de;
   }
-}
+  vec2 raytraceTexturedQuad( in vec3 rayOrigin, in vec3 rayDirection, in vec3 quadCenter, in vec3 quadRotation, in vec2 quadDimensions)
+  {
+    // Rotations ------------------
+    float
+    a = sin(quadRotation.x);
+    float
+    b = cos(quadRotation.x);
+    float
+    c = sin(quadRotation.y);
+    float
+    d = cos(quadRotation.y);
+    float
+    e = sin(quadRotation.z);
+    float
+    f = cos(quadRotation.z);
+    float
+    ac = a * c;
+    float
+    bc = b * c;
+    mat3
+    RotationMatrix = mat3(d * f, d * e, -c, ac * f - b * e, ac * e + b * f, a * d, bc * f + a * e, bc * e - a * f, b * d);
+    //--------------------------------------
+    vec3
+    right = RotationMatrix * vec3(quadDimensions.x, 0.0, 0.0);
+    vec3
+    up = RotationMatrix * vec3(0.0, quadDimensions.y, 0.0); // prev version had 0, which is treated as an int
+    vec3
+    normal = cross(right, up);
+    normal /= length(normal);
+    // Find the plane hit point in space
+    vec3
+    pos = (rayDirection * plane(normal, quadCenter, rayOrigin, rayDirection)) - quadCenter;
+    // Find the texture UV by projecting the hit point along the plane dirs
+    return vec2(dot(pos, right) / dot(right, right), dot(pos, up) / dot(up, up)) + 0.5;
+  }
+  void main()
+  {
+    vec4
+    texColor = texture2D(bitmap, openfl_TextureCoordv);
+    // Screen UV goes from 0 - 1 along each axis
+    vec2
+    screenUV = openfl_TextureCoordv;
+    vec2
+    p = (2.0 * screenUV) - 1.0;
+    float
+    screenAspect = 1280.0 / 720.0; // added .0
+    p.x *= screenAspect;
+    // Normalized Ray Dir
+    vec3
+    dir = vec3(p.x, p.y, 1.0);
+    dir /= length(dir);
+    // Define the plane
+    vec3
+    planePosition = vec3(0.0, 0.0, depth + 0.5);
+    vec3
+    planeRotation = vec3(xrot, PI + yrot, zrot); // this the shit you needa change
+    vec2
+    planeDimension = vec2(-screenAspect, 1.0);
+    vec2
+    uv = raytraceTexturedQuad(vec3(0), dir, planePosition, planeRotation, planeDimension);
+    // If we hit the rectangle, sample the texture
+    if (abs(uv.x - 0.5) < 0.5 && abs(uv.y - 0.5) < 0.5)
+    {
+      gl_FragColor = vec4(flixel_texture2D(bitmap, uv));
+    }
+  }
 ')
   public function new()
   {
     super();
+    // set drfault values of uniforms
+    yrot.value = [0.0];
+    zrot.value = [0.0];
+    xrot.value = [0.0];
+    depth.value = [0.0];
   }
 }
 
@@ -4457,7 +4472,7 @@ class VCRDistortionEffect extends ShaderBase
   }
 }
 
-class VCRDistortionShader extends FlxShader // https://www.shadertoy.com/view/ldjGzV and https://www.shadertoy.com/view/Ms23DR and https://www.shadertoy.com/view/MsXGD4 and https://www.shadertoy.com/view/Xtccz4
+class VCRDistortionShader extends FlxFixedShader // https://www.shadertoy.com/view/ldjGzV and https://www.shadertoy.com/view/Ms23DR and https://www.shadertoy.com/view/MsXGD4 and https://www.shadertoy.com/view/Xtccz4
 {
   @:glFragmentSource('#pragma header uniform float iTime;
 uniform bool vignetteOn;
@@ -4571,7 +4586,7 @@ void main()
   gl_FragColor = mix(video, vec4(noise(uv * 75.)), .05);
   if (curUV.x < 0 || curUV.x > 1 || curUV.y < 0 || curUV.y > 1)
   {
-    gl_FragColor = vec4(0, 0, 0, 0);
+    gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
   }
 }
 ')
@@ -4596,7 +4611,7 @@ class VCRDistortionEffect2 extends ShaderBase // the one used for tails doll ///
   }
 }
 
-class VCRDistortionShader2 extends FlxShader // https://www.shadertoy.com/view/ldjGzV and https://www.shadertoy.com/view/Ms23DR and https://www.shadertoy.com/view/MsXGD4 and https://www.shadertoy.com/view/Xtccz4
+class VCRDistortionShader2 extends FlxFixedShader // https://www.shadertoy.com/view/ldjGzV and https://www.shadertoy.com/view/Ms23DR and https://www.shadertoy.com/view/MsXGD4 and https://www.shadertoy.com/view/Xtccz4
 {
   @:glFragmentSource('#pragma header uniform float iTime;
 uniform bool vignetteOn;
@@ -4710,7 +4725,7 @@ void main()
   gl_FragColor = mix(video, vec4(noise(uv * 75.)), .05);
   if (curUV.x < 0. || curUV.x > 1. || curUV.y < 0. || curUV.y > 1.)
   {
-    gl_FragColor = vec4(0, 0, 0, 0);
+    gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
   }
 }
 ')
@@ -4845,7 +4860,7 @@ class VcrShader extends FlxShader
       gl_FragColor = mix(video,vec4(noise(uv * 300.)),.05);
 
       if(curUV.x<0 || curUV.x>1 || curUV.y<0 || curUV.y>1){
-        gl_FragColor = vec4(0,0,0,0);
+        gl_FragColor = vec4(0.0,0.0,0.0,0.0);
       }
 
     }
@@ -4981,7 +4996,7 @@ class VcrNoGlitchShader extends FlxShader
       gl_FragColor = mix(video,vec4(noise(uv * 75.)),.05);
 
       if(curUV.x<0 || curUV.x>1 || curUV.y<0 || curUV.y>1){
-        gl_FragColor = vec4(1,0,1,0);
+        gl_FragColor = vec4(1.0,0.0,1.0,0.0);
       }
 
     }
@@ -5117,9 +5132,8 @@ class VcrWithGlitchShader extends FlxShader
       gl_FragColor = mix(video,vec4(noise(uv * 75.)),.05);
 
       if(curUV.x<0 || curUV.x>1 || curUV.y<0 || curUV.y>1){
-        gl_FragColor = vec4(0,0,0,0);
+        gl_FragColor = vec4(0.0,0.0,0.0,0.0);
       }
-
     }
     ')
   public function new()
@@ -5166,7 +5180,7 @@ class VHSShader extends FlxShader
 
     #define time iTime
     #define resolution ( iResolution.xy )
-    #define PI 3.14159265
+    const float PI = 3.14159265;
 
     vec3 tex2D( sampler2D _tex, vec2 _p ){
       vec3 col = texture2D( _tex, _p ).xyz;
@@ -5280,7 +5294,7 @@ class VignetteEffect extends ShaderBase
   }
 }
 
-class VignetteShader extends FlxShader
+class VignetteShader extends FlxFixedShader
 {
   @:glFragmentSource('#pragma header uniform float strength;
 uniform float size;
@@ -5368,9 +5382,9 @@ class VignetteGlitchShader extends GraphicsShader
   #pragma header
   #extension GL_EXT_gpu_shader4 : enable
 
-  uniform float time = 0.0;
-  uniform float prob = 0.0;
-  uniform float vignetteIntensity = 0.75;
+  uniform float time;
+  uniform float prob;
+  uniform float vignetteIntensity;
 
   float _round(float n) {
       return floor(n + .5);
@@ -5389,8 +5403,8 @@ class VignetteGlitchShader extends GraphicsShader
       return col;
   }
 
-  #define PI 3.14159265359
-  #define PHI (1.618033988749895)
+  const float PI = 3.14159265359;
+  const float PHI = (1.618033988749895);
 
   // --------------------------------------------------------
   // Glitch core
@@ -5400,7 +5414,7 @@ class VignetteGlitchShader extends GraphicsShader
       return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
   }
 
-  const float glitchScale = .5;
+  const float glitchScale = 0.5;
 
   vec2 glitchCoord(vec2 p, vec2 gridSize) {
       vec2 coord = floor(p / gridSize) * gridSize;;
@@ -5529,24 +5543,24 @@ class VignetteGlitchShader extends GraphicsShader
       float apply;
 
       groupSize = vec2(.6) * scale;
-      subGrid = vec2(2);
-      blockSize = vec2(1);
+      subGrid = vec2(2.0);
+      blockSize = vec2(1.0);
 
       seed = glitchSeed(glitchCoord(p, groupSize), speed);
       apply = shouldApply(seed);
       swapBlocks(p, groupSize, subGrid, blockSize, seed.seed, apply);
 
       groupSize = vec2(.8) * scale;
-      subGrid = vec2(3);
-      blockSize = vec2(1);
+      subGrid = vec2(3.0);
+      blockSize = vec2(1.0);
 
       seed = glitchSeed(glitchCoord(p, groupSize), speed);
       apply = shouldApply(seed);
       swapBlocks(p, groupSize, subGrid, blockSize, seed.seed, apply);
 
       groupSize = vec2(.2) * scale;
-      subGrid = vec2(6);
-      blockSize = vec2(1);
+      subGrid = vec2(6.0);
+      blockSize = vec2(1.0);
 
       seed = glitchSeed(glitchCoord(p, groupSize), speed);
       float apply2 = shouldApply(seed);
@@ -5557,8 +5571,8 @@ class VignetteGlitchShader extends GraphicsShader
       swapBlocks(p, groupSize, subGrid, blockSize, (seed.seed + 5.), apply * apply2);
 
       groupSize = vec2(1.2, .2) * scale;
-      subGrid = vec2(9,2);
-      blockSize = vec2(3,1);
+      subGrid = vec2(9.0,2.0);
+      blockSize = vec2(3.0,1.0);
 
       seed = glitchSeed(glitchCoord(p, groupSize), speed);
       apply = shouldApply(seed);
@@ -5611,7 +5625,7 @@ class WaveBurstEffect extends ShaderBase
   }
 }
 
-class WaveBurstShader extends FlxShader
+class WaveBurstShader extends FlxFixedShader
 {
   @:glFragmentSource('#pragma header uniform float strength;
 float nrand(vec2 n)
@@ -5658,7 +5672,7 @@ class WaterEffect extends ShaderBase
   }
 }
 
-class WaterShader extends FlxShader
+class WaterShader extends FlxFixedShader
 {
   @:glFragmentSource('#pragma header uniform float iTime;
 uniform float strength;
@@ -5732,7 +5746,7 @@ class WaveCircleEffect extends ShaderBase
   }
 }
 
-class WaveCircleShader extends FlxShader
+class WaveCircleShader extends FlxFixedShader
 {
   @:glFragmentSource('
     #pragma header

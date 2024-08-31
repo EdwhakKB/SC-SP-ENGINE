@@ -149,7 +149,7 @@ class ColorSwapShader extends FlxShader
 			if (awesomeOutline)
 			{
 				 // Outline bullshit?
-				vec2 size = vec2(3, 3);
+				vec2 size = vec2(3.0, 3.0);
 
 				if (color.a <= 0.5) {
 					float w = size.x / openfl_TextureSize.x;

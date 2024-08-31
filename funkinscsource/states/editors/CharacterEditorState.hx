@@ -420,7 +420,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
           position: [0, 0],
           playerposition: [0, 0],
           deadChar: "bf-dead",
-          isDancing: false,
+          useGFSpeed: false,
           isPlayerChar: true,
           replacesGF: false,
           noteSkin: null,
