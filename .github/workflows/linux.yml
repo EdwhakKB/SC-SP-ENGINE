@@ -36,7 +36,7 @@ jobs:
             cache-build-linux
       - name: Installing/Updating libraries
         run: |
-          haxe -cp setup -D analyzer-optimize -main Main --interp
+          haxe -cp /.setup -D analyzer-optimize -main Main --interp
       - name: Building the game
         run: |
           haxelib run lime build linux

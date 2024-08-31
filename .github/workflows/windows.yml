@@ -27,7 +27,7 @@ jobs:
             cache-build-windows
       - name: Installing/Updating libraries
         run: |
-          haxe -cp setup -D analyzer-optimize -main Main --interp
+          haxe -cp /.setup -D analyzer-optimize -main Main --interp
         shell: cmd
       - name: Building the game
         run: |
