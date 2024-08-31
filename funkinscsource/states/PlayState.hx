@@ -481,6 +481,8 @@ class PlayState extends MusicBeatState
       return;
     }
 
+    gfSpeed = 1;
+
     // Set up stage stuff before any scripts, else no functioning playstate.
     if (SONG.stage == null || SONG.stage.length < 1) SONG.stage = StageData.vanillaSongStage(Paths.formatToSongPath(Song.loadedSongName));
     curStage = SONG.stage;
@@ -6898,10 +6900,10 @@ class PlayState extends MusicBeatState
     if (!ClientPrefs.data.characters) return;
     var cpuAlt:Bool = SONG.notes[curSection] != null ? SONG.notes[curSection].CPUAltAnim : false;
     var playerAlt:Bool = SONG.notes[curSection] != null ? SONG.notes[curSection].playerAltAnim : false;
-    if (boyfriend != null && boyfriend.beatDance(beat)) boyfriend.danceChar('bf', playerAlt, forcedToIdle, allowedToPlayAnimationsBF);
-    if (dad != null && dad.beatDance(beat)) dad.danceChar('dad', cpuAlt, forcedToIdle, allowedToPlayAnimationsDAD);
-    if (mom != null && mom.beatDance(beat)) mom.danceChar('mom', cpuAlt, forcedToIdle, allowedToPlayAnimationsMOM);
-    if (gf != null && gf.beatDance(beat)) gf.danceChar('gf');
+    if (boyfriend != null && boyfriend.beatDance(beat)) boyfriend.danceChar('player', playerAlt, forcedToIdle, allowedToPlayAnimationsBF);
+    if (dad != null && dad.beatDance(beat)) dad.danceChar('opponent', cpuAlt, forcedToIdle, allowedToPlayAnimationsDAD);
+    if (mom != null && mom.beatDance(beat)) mom.danceChar('opponent', cpuAlt, forcedToIdle, allowedToPlayAnimationsMOM);
+    if (gf != null && gf.beatDance(beat)) gf.danceChar('girlfriend');
     for (value in MusicBeatState.getVariables().keys())
     {
       if (MusicBeatState.getVariables().get(value) != null && MusicBeatState.getVariables().exists(value))
@@ -6909,7 +6911,7 @@ class PlayState extends MusicBeatState
         if (value.startsWith('extraCharacter_'))
         {
           daChar = cast(MusicBeatState.getVariables().get(value), Character);
-          if (daChar != null && daChar.beatDance(beat)) daChar.danceChar('custom');
+          if (daChar != null && daChar.beatDance(beat)) daChar.danceChar('custom_char');
         }
       }
     }

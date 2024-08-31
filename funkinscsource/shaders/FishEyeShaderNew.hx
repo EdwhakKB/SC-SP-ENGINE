@@ -8,7 +8,7 @@ typedef FishEyeNewJSON =
   var presets:Array<Array<Float>>;
 }
 
-class FishEyeShaderNew extends FlxShader // https://www.shadertoy.com/view/WsVSzV
+class FishEyeShaderNew extends FlxFixedShader // https://www.shadertoy.com/view/WsVSzV
 {
   @:glFragmentSource('#pragma header vec2 uv = openfl_TextureCoordv.xy;
 vec2 fragCoord = openfl_TextureCoordv * openfl_TextureSize;
