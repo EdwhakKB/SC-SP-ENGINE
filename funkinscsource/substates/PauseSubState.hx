@@ -337,7 +337,7 @@ class PauseSubState extends MusicBeatSubState
             FlxTransitionableState.skipNextTransOut = true;
             FlxTransitionableState.skipNextTransIn = true;
             MusicBeatState.switchState(new options.NoteOptions());
-            PlayState.instance.canResync = false;
+            game.canResync = false;
           case 'Controls':
             openSubState(new options.ControlsSubState());
           case 'Graphics':
@@ -351,7 +351,7 @@ class PauseSubState extends MusicBeatSubState
           case 'Adjust Delay and Combo':
             OptionsState.onPlayState = true;
             MusicBeatState.switchState(new options.NoteOffsetState());
-            PlayState.instance.canResync = false;
+            game.canResync = false;
           case 'Language':
             openSubState(new options.LanguageSubState());
           default:
@@ -458,7 +458,7 @@ class PauseSubState extends MusicBeatSubState
         else
           MusicBeatState.switchState(new FreeplayState());
 
-        PlayState.instance.canResync = false;
+        game.canResync = false;
         FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
         PlayState.changedDifficulty = false;
         PlayState.chartingMode = false;
@@ -610,17 +610,17 @@ class PauseSubState extends MusicBeatSubState
 
   public static function restartSong(noTrans:Bool = false)
   {
-    if (PlayState.instance != null)
+    if (game != null)
     {
-      PlayState.instance.paused = true; // For lua
-      if (PlayState.instance.vocals != null)
+      game.paused = true; // For lua
+      if (game.vocals != null)
       {
-        PlayState.instance.vocals.volume = 0;
+        game.vocals.volume = 0;
       }
 
-      if (PlayState.instance.splitVocals && PlayState.instance.opponentVocals != null)
+      if (game.splitVocals && game.opponentVocals != null)
       {
-        PlayState.instance.opponentVocals.volume = 0;
+        game.opponentVocals.volume = 0;
       }
     }
     if (FlxG.sound.music != null) FlxG.sound.music.volume = 0;
@@ -636,7 +636,7 @@ class PauseSubState extends MusicBeatSubState
   override function destroy()
   {
     if (pauseMusic != null) pauseMusic.destroy();
-    PlayState.instance.canResync = true;
+    game.canResync = true;
 
     super.destroy();
   }
