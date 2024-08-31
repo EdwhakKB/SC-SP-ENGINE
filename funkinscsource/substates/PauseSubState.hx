@@ -610,17 +610,17 @@ class PauseSubState extends MusicBeatSubState
 
   public static function restartSong(noTrans:Bool = false)
   {
-    if (game != null)
+    if (PlayState.instance != null)
     {
-      game.paused = true; // For lua
-      if (game.vocals != null)
+      PlayState.instance.paused = true; // For lua
+      if (PlayState.instance.vocals != null)
       {
-        game.vocals.volume = 0;
+        PlayState.instance.vocals.volume = 0;
       }
 
-      if (game.splitVocals && game.opponentVocals != null)
+      if (PlayState.instance.splitVocals && PlayState.instance.opponentVocals != null)
       {
-        game.opponentVocals.volume = 0;
+        PlayState.instance.opponentVocals.volume = 0;
       }
     }
     if (FlxG.sound.music != null) FlxG.sound.music.volume = 0;
