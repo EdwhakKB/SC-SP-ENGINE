@@ -7023,7 +7023,8 @@ class PlayState extends MusicBeatState
     #end
     #if HSCRIPT_ALLOWED
     startHScriptsNamed('custom_notetypes/scripts/' + type);
-    startSCHSNamed('custom_notetypes/script/sc/' + type) #if HScriptImproved startHSIScriptsNamed('custom_notetypes/scripts/advanced/' + type); #end
+    startSCHSNamed('custom_notetypes/script/sc/' + type);
+    #if HScriptImproved startHSIScriptsNamed('custom_notetypes/scripts/advanced/' + type); #end
     #end
   }
 
