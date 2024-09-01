@@ -7205,7 +7205,7 @@ class PlayState extends MusicBeatState
 
     var result:Dynamic = callOnHScript(funcToCall, args, ignoreStops, exclusions, excludeValues);
     if (result == null || excludeValues.contains(result)) result = callOnHSI(funcToCall, args, ignoreStops, exclusions, excludeValues);
-    if (result == null || excludeValues.contains(result)) result = callOnSCHS(funcToCall, args, ignoreStops, exclusions, excludeValues)
+    if (result == null || excludeValues.contains(result)) result = callOnSCHS(funcToCall, args, ignoreStops, exclusions, excludeValues);
     return result;
   }
 
