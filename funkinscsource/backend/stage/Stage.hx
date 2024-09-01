@@ -3,6 +3,7 @@ package backend.stage;
 import flixel.FlxBasic;
 import openfl.utils.Assets as OpenFlAssets;
 import openfl.Assets;
+import openfl.display.BlendMode;
 import objects.Character;
 import objects.note.Note.EventNote;
 import objects.note.Note;
@@ -15,6 +16,9 @@ import psychlua.*;
 #else
 import psychlua.LuaUtils;
 import psychlua.HScript;
+#end
+#if HSCRIPT_ALLOWED
+import scripting.*;
 #end
 #if (HSCRIPT_ALLOWED && HScriptImproved)
 import codenameengine.scripting.Script as HScriptCode;
@@ -56,6 +60,7 @@ class Stage extends backend.stage.base.BaseStage
 
   #if HSCRIPT_ALLOWED
   public var hscriptArray:Array<psychlua.HScript> = [];
+  public var scHSArray:Array<scripting.SCScript> = [];
   #end
 
   #if (HSCRIPT_ALLOWED && HScriptImproved)
@@ -82,6 +87,8 @@ class Stage extends backend.stage.base.BaseStage
     #end
   }
 
+  public var defaultStage:BaseStage = null;
+
   public function setupStageProperties(songName:String, ?stageChanged:Bool = false)
   {
     if (!ClientPrefs.data.background) return;
@@ -97,6 +104,40 @@ class Stage extends backend.stage.base.BaseStage
     {
       Debug.logWarn('Stage .json not found, using the default stage');
       curStage = 'mainStage'; // defaults to stage if we can't find the path
+    }
+
+    switch (curStage)
+    {
+      #if BASE_GAME_FILES
+      case 'mainStage':
+        defaultStage = new MainStage();
+      case 'spookyMansion':
+        defaultStage = new SpookyMansion();
+      case 'phillyTrain':
+        defaultStage = new PhillyTrain();
+      case 'phillyBlazin':
+        defaultStage = new PhillyBlazin();
+      case 'phillyStreets':
+        defaultStage = new PhillyStreets();
+      case 'limoRide':
+        defaultStage = new LimoRide();
+      case 'mallXMas':
+        defaultStage = new MallXMas();
+      case 'mallEvil':
+        defaultStage = new MallEvil();
+      case 'school':
+        defaultStage = new School();
+      case 'schoolEvil':
+        defaultStage = new SchoolEvil();
+      case 'tankmanBattlefield':
+        defaultStage = new TankmanBattlefield();
+      #end
+    }
+
+    if (defaultStage != null)
+    {
+      defaultStage.buildStage(this);
+      return;
     }
 
     isLuaStage = true;
@@ -300,6 +341,29 @@ class Stage extends backend.stage.base.BaseStage
     }
   }
 
+  public function onCreatePost()
+  {
+    if (defaultStage != null) defaultStage.createPost();
+  }
+
+  public function onOpenSubState(SubState:flixel.FlxSubState)
+  {
+    if (defaultStage != null) defaultStage.openSubState(SubState);
+  }
+
+  public function onCloseSubState():Void
+  {
+    if (defaultStage != null) defaultStage.closeSubState();
+  }
+
+  public function onUpdate(elapsed:Float):Void
+  {
+    if (defaultStage != null) defaultStage.update(elapsed);
+
+    callOnScripts('onStageUpdate', [elapsed]);
+    callOnScripts('stageUpdate', [elapsed]);
+  }
+
   public function onStepHit(curStep:Int):Void
   {
     final array = slowBacks[curStep];
@@ -332,6 +396,12 @@ class Stage extends backend.stage.base.BaseStage
       }
     }
 
+    if (defaultStage != null)
+    {
+      defaultStage.curStep = curStep;
+      defaultStage.stepHit();
+    }
+
     setOnScripts('curStageStep', curStep);
     callOnScripts('stageStepHit');
     callOnScripts('onStageStepHit');
@@ -355,6 +425,12 @@ class Stage extends backend.stage.base.BaseStage
       }
     }
 
+    if (defaultStage != null)
+    {
+      defaultStage.curBeat = curBeat;
+      defaultStage.beatHit();
+    }
+
     setOnScripts('curStageBeat', curBeat);
     callOnScripts('stageBeatHit');
     callOnScripts('onStageBeatHit');
@@ -362,12 +438,17 @@ class Stage extends backend.stage.base.BaseStage
 
   public function onSectionHit(curSection:Int):Void
   {
+    if (defaultStage != null)
+    {
+      defaultStage.curSection = curSeciton;
+      defaultStage.sectionHit();
+    }
     setOnScripts('curStageSection', curSection);
     callOnScripts('stageSectionHit');
     callOnScripts('onStageSectionHit');
   }
 
-  public function eventCalledStage(eventName:String, eventParams:Array<String>, strumTme:Float):Void
+  public function eventCalledStage(eventName:String, eventParams:Array<String>, strumTime:Float):Void
   {
     var flValues:Array<Null<Float>> = [];
     for (i in 0...eventParams.length - 1)
@@ -376,25 +457,51 @@ class Stage extends backend.stage.base.BaseStage
       else
         flValues.push(null);
     }
+
+    if (defaultStage != null) defaultStage.onEvent(eventName, eventParams, flValues, strumTime);
   }
 
-  public function countdownTickStage(count:Countdown, num:Int) {}
+  public function countdownTickStage(count:Countdown, num:Int)
+  {
+    if (defaultStage != null) defaultStage.countDownTick(count, num);
+  }
 
-  public function startSongStage() {}
+  public function startSongStage()
+  {
+    if (defaultStage != null) defaultStage.startSong();
+  }
 
-  public function eventPushedStage(event:EventNote) {}
+  public function eventPushedStage(event:EventNote)
+  {
+    if (defaultStage != null) defaultStage.onEventPushed(event);
+  }
 
   // Events
-  public function eventPushedUniqueStage(event:EventNote) {}
+  public function eventPushedUniqueStage(event:EventNote)
+  {
+    if (defaultStage != null) defaultStage.onEventPushedUnique(event);
+  }
 
   // Note Hit/Miss
-  public function goodNoteHitStage(note:Note) {}
+  public function goodNoteHitStage(note:Note)
+  {
+    if (defaultStage != null) defaultStage.goodNoteHit(note);
+  }
 
-  public function opponentNoteHitStage(note:Note) {}
+  public function opponentNoteHitStage(note:Note)
+  {
+    if (defaultStage != null) defaultStage.opponentNoteHit(note);
+  }
 
-  public function noteMissStage(note:Note) {}
+  public function noteMissStage(note:Note)
+  {
+    if (defaultStage != null) defaultStage.noteMiss(note);
+  }
 
-  public function noteMissPressStage(direction:Int) {}
+  public function noteMissPressStage(direction:Int)
+  {
+    if (defaultStage != null) defaultStage.noteMissPress(event);
+  }
 
   // start/end callback functions
   public function setStartCallbackStage(myfn:Void->Void)
@@ -432,6 +539,7 @@ class Stage extends backend.stage.base.BaseStage
     #end
     #if HSCRIPT_ALLOWED
     startHScriptsNamed('scripts/stages/' + stage);
+    startSCHSNamed('scripts/stages/sc/' + stage);
     #if HScriptImproved startHSIScriptsNamed('scripts/stages/advanced/' + stage); #end
     #end
   }
@@ -505,6 +613,54 @@ class Stage extends backend.stage.base.BaseStage
     }
   }
 
+  public function startSCHSNamed(scriptFile:String)
+  {
+    for (extn in CoolUtil.haxeExtensions)
+    {
+      var scriptFileHx:String = scriptFile + '.$extn';
+      #if MODS_ALLOWED
+      var scriptToLoad:String = Paths.modFolders(scriptFileHx);
+      if (!FileSystem.exists(scriptToLoad)) scriptToLoad = Paths.getSharedPath(scriptFileHx);
+      #else
+      var scriptToLoad:String = Paths.getSharedPath(scriptFileHx);
+      #end
+
+      if (FileSystem.exists(scriptToLoad))
+      {
+        for (script in scHSArray)
+          if (script.path == scriptToLoad) return false;
+
+        initSCHS(scriptToLoad);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public function initSCHS(file:String)
+  {
+    var newScript:SCScript = null;
+    try
+    {
+      var times:Float = Date.now().getTime();
+      newScript = new SCScript();
+      newScript.loadScript(file);
+      newScript.callFunc('onCreate');
+      scHSArray.push(newScript);
+      Debug.logInfo('initialized SCHScript interp successfully: $file (${Std.int(Date.now().getTime() - times)}ms)');
+    }
+    catch (e:Dynamic)
+    {
+      var script:SCScript = null;
+      for (scripts in scScriptsArray)
+        if (scripts.path == file) script = scripts;
+      var newScript:SCHScript = script;
+      addTextToDebug('ERROR ON LOADING ($file) - $e', FlxColor.RED);
+
+      if (newScript != null) newScript.destroy();
+    }
+  }
+
   #if HScriptImproved
   public function startHSIScriptsNamed(scriptFile:String)
   {
@@ -555,6 +711,7 @@ class Stage extends backend.stage.base.BaseStage
     var result:Dynamic = callOnLuas(funcToCall, args, ignoreStops, exclusions, excludeValues);
     if (result == null || excludeValues.contains(result)) result = callOnHScript(funcToCall, args, ignoreStops, exclusions, excludeValues);
     if (result == null || excludeValues.contains(result)) result = callOnHSI(funcToCall, args, ignoreStops, exclusions, excludeValues);
+    if (result == null || excludeValues.contains(result)) result = callOnSCHS(funcToCall, args, ignoreStops, exclusions, excludeValues);
     return result;
   }
 
@@ -670,12 +827,51 @@ class Stage extends backend.stage.base.BaseStage
     return returnVal;
   }
 
+  public function callOnSCHS(funcToCall:String, ?args:Array<Dynamic> = null, ?ignoreStops:Bool = false, exclusions:Array<String> = null,
+      excludeValues:Array<Dynamic> = null):Dynamic
+  {
+    var returnVal:Dynamic = LuaUtils.Function_Continue;
+
+    #if HSCRIPT_ALLOWED
+    if (exclusions == null) exclusions = new Array();
+    if (excludeValues == null) excludeValues = new Array();
+    excludeValues.push(LuaUtils.Function_Continue);
+
+    var len:Int = scHSArray.length;
+    if (len < 1) return returnVal;
+    for (script in scHSArray)
+    {
+      if (script == null || !script.existsVar(funcToCall) || exclusions.contains(script.path)) continue;
+
+      try
+      {
+        var callValue = script.callFunc(funcToCall, args);
+        var myValue:Dynamic = callValue.funcValue;
+
+        // compiler fuckup fix
+        final stopHscript = myValue == LuaUtils.Function_StopHScript;
+        final stopAll = myValue == LuaUtils.Function_StopAll;
+        if ((stopHscript || stopAll) && !excludeValues.contains(myValue) && !ignoreStops)
+        {
+          returnVal = myValue;
+          break;
+        }
+        if (myValue != null && !excludeValues.contains(myValue)) returnVal = myValue;
+      }
+      catch (e:Dynamic) {}
+    }
+    #end
+
+    return returnVal;
+  }
+
   public function setOnScripts(variable:String, arg:Dynamic, exclusions:Array<String> = null)
   {
     if (exclusions == null) exclusions = [];
     setOnLuas(variable, arg, exclusions);
     setOnHScript(variable, arg, exclusions);
     setOnHSI(variable, arg, exclusions);
+    setOnSCHS(variable, arg, exclusions);
   }
 
   public function setOnLuas(variable:String, arg:Dynamic, exclusions:Array<String> = null)
@@ -717,12 +913,26 @@ class Stage extends backend.stage.base.BaseStage
     #end
   }
 
+  public function setOnSCHS(variable:String, arg:Dynamic, exclusions:Array<String> = null)
+  {
+    #if HSCRIPT_ALLOWED
+    if (exclusions == null) exclusions = [];
+    for (script in scHSArray)
+    {
+      if (exclusions.contains(script.path)) continue;
+
+      script.setVar(variable, arg);
+    }
+    #end
+  }
+
   public function getOnScripts(variable:String, arg:String, exclusions:Array<String> = null)
   {
     if (exclusions == null) exclusions = [];
     getOnLuas(variable, arg, exclusions);
     getOnHScript(variable, exclusions);
     getOnHSI(variable, exclusions);
+    getOnSCHS(variable, exclusions);
   }
 
   public function getOnLuas(variable:String, arg:String, exclusions:Array<String> = null)
@@ -760,6 +970,19 @@ class Stage extends backend.stage.base.BaseStage
       if (exclusions.contains(script.fileName)) continue;
 
       script.get(variable);
+    }
+    #end
+  }
+
+  public function getOnSCHS(variable:String, exclusions:Array<String> = null)
+  {
+    #if HSCRIPT_ALLOWED
+    if (exclusions == null) exclusions = [];
+    for (script in scHSArray)
+    {
+      if (exclusions.contains(script.path)) continue;
+
+      script.getVar(variable);
     }
     #end
   }
@@ -1093,6 +1316,14 @@ class Stage extends backend.stage.base.BaseStage
         script.destroy();
       }
     hscriptArray = null;
+
+    for (script in scHSArray)
+      if (script != null)
+      {
+        script.callFunc('onDestroy');
+        script.destroy();
+      }
+    scHSArray = null;
 
     #if HScriptImproved
     for (script in codeNameScripts.scripts)

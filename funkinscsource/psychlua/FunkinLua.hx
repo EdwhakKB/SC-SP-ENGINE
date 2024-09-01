@@ -518,6 +518,11 @@ class FunkinLua
         if (ignoreSelf && !exclusions.contains(scriptName)) exclusions.push(scriptName);
         game.setOnHSI(varName, arg, exclusions);
       });
+      addLocalCallback("setOnSCHS", function(varName:String, arg:Dynamic, ?ignoreSelf:Bool = false, ?exclusions:Array<String> = null) {
+        if (exclusions == null) exclusions = [];
+        if (ignoreSelf && !exclusions.contains(scriptName)) exclusions.push(scriptName);
+        game.setOnSCHS(varName, arg, exclusions);
+      });
       addLocalCallback("setOnLuas", function(varName:String, arg:Dynamic, ?ignoreSelf:Bool = false, ?exclusions:Array<String> = null) {
         if (exclusions == null) exclusions = [];
         if (ignoreSelf && !exclusions.contains(scriptName)) exclusions.push(scriptName);
@@ -554,6 +559,14 @@ class FunkinLua
           if (excludeScripts == null) excludeScripts = [];
           if (ignoreSelf && !excludeScripts.contains(scriptName)) excludeScripts.push(scriptName);
           game.callOnHSI(funcName, args, ignoreStops, excludeScripts, excludeValues);
+          return true;
+        });
+      addLocalCallback("callOnSCHS",
+        function(funcName:String, ?args:Array<Dynamic> = null, ?ignoreStops = false, ?ignoreSelf:Bool = true, ?excludeScripts:Array<String> = null,
+            ?excludeValues:Array<Dynamic> = null) {
+          if (excludeScripts == null) excludeScripts = [];
+          if (ignoreSelf && !excludeScripts.contains(scriptName)) excludeScripts.push(scriptName);
+          game.callOnSCHS(funcName, args, ignoreStops, excludeScripts, excludeValues);
           return true;
         });
 

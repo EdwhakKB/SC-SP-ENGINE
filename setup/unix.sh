@@ -2,7 +2,7 @@
 # SETUP FOR MAC AND LINUX SYSTEMS!!!
 #
 # REMINDER THAT YOU NEED HAXE INSTALLED PRIOR TO USING THIS
-# https://haxe.org/download/version/4.3.4/
+# https://haxe.org/download/version/4.3.6/
 haxelib install lime
 haxelib git openfl https://github.com/FunkinCrew/openfl feature/shader-improvements
 haxelib git flixel https://github.com/glowsoony/flixel/tree/Main-SCE

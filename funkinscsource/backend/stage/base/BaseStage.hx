@@ -7,7 +7,10 @@ import flixel.group.FlxGroup;
 import objects.note.Note;
 import objects.Character;
 
-class BaseStage extends FlxBasic
+/**
+ * Made for objects added on to Stage.
+ */
+class StagePreset extends FlxBasic
 {
   private var game(get, never):Dynamic;
 
@@ -36,8 +39,10 @@ class BaseStage extends FlxBasic
   public var defaultCamZoom(get, set):Float;
   public var camFollow(get, never):FlxObject;
 
+  public var stage:Stage = null;
+
   // main callbacks
-  public function create() {}
+  public function buildStage(baseStage:Stage) {}
 
   public function createPost() {}
 
@@ -65,11 +70,11 @@ class BaseStage extends FlxBasic
   public function openSubState(SubState:FlxSubState) {}
 
   // Events
-  public function eventCalled(eventName:String, value1:String, value2:String, flValue1:Null<Float>, flValue2:Null<Float>, strumTime:Float) {}
+  public function onEvent(eventName:String, eventParams:Array<String>, flValues:Array<Null<Float>>, time:Float) {}
 
-  public function eventPushed(event:EventNote) {}
+  public function onEventPushed(event:EventNote) {}
 
-  public function eventPushedUnique(event:EventNote) {}
+  public function onEventPushedUnique(event:EventNote) {}
 
   // Note Hit/Miss
   public function goodNoteHit(note:Note) {}

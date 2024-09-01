@@ -33,6 +33,8 @@ class CustomSubstate extends MusicBeatSubState
     PlayState.instance.setOnHScript('customSubstateName', name);
     PlayState.instance.setOnHSI('customSubstate', instance);
     PlayState.instance.setOnHSI('customSubstateName', instance);
+    PlayState.instance.setOnSCHS('customSubstate', instance);
+    PlayState.instance.setOnSCHS('customSubstateName', instance);
   }
 
   public static function closeCustomSubstate()
@@ -66,6 +68,8 @@ class CustomSubstate extends MusicBeatSubState
   {
     instance = this;
     PlayState.instance.setOnHScript('customSubstate', instance);
+    PlayState.instance.setOnHSI('customSubstate', instance);
+    PlayState.instance.setOnSCHS('customSubstate', instance);
 
     PlayState.instance.callOnScripts('onCustomSubstateCreate', [name]);
     super.create();
@@ -76,6 +80,8 @@ class CustomSubstate extends MusicBeatSubState
   {
     CustomSubstate.name = name;
     PlayState.instance.setOnHScript('customSubstateName', name);
+    PlayState.instance.setOnHSI('customSubstateName', name);
+    PlayState.instance.setOnSCHS('customSubstateName', name);
     super();
     cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
   }
@@ -96,6 +102,8 @@ class CustomSubstate extends MusicBeatSubState
     PlayState.instance.setOnHScript('customSubstateName', name);
     PlayState.instance.setOnHSI('customSubstate', null);
     PlayState.instance.setOnHSI('customSubstateName', name);
+    PlayState.instance.setOnSCHS('customSubstate', null);
+    PlayState.instance.setOnSCHS('customSubstateName', name);
     super.destroy();
   }
 }
