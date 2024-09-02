@@ -3,7 +3,7 @@
 * SCE brings NotITG modchart support along with many other features!
 * This engine is made with **Psych Engine**!
 
-## Other SCE Usage Stuff
+## Extra Engine Features
 * BETADCIU Engine By Blantados [Stuff like character change and others are used from here!](https://github.com/Blantados/BETADCIU-Engine-Source/tree/main)
 * Kade stuff added from original stuff and my friend bolo! TYSM [Kade ResultsScreen and most stuff](https://github.com/BoloVEVO/Kade-Engine)
 * Newer versions of flixel fixes by system32unknown [FlxRuntimerShader, FlxAnimationController, Main](https://github.com/ShadowMario/FNF-PsychEngine/pull/13422)
@@ -19,15 +19,7 @@ open up a Command Prompt/PowerShell or Terminal, type `haxelib install hmm`
 
 after it finishes, simply type `haxelib run hmm install` in order to install all the needed libraries for *Psych Engine!*
 
-## HxCodec in Linux:
-
-some linux distros do not have certain libraries that we need to compile HxCodec on such distros, if you get this error:
-
-```cmd
-Link: ApplicationMain
-hxCodec/anyVersion/lib/vlc/lib/Linux/libvlc.so.5: file format not recognized; treating as linker script
-hxCodec/anyVersion/lib/vlc/lib/Linux/libvlc.so.5:0: syntax error collect2: error: ld returned 1 exit status
-```
+## HXVlc in Linux:
 
 Use the following commands:
 
@@ -41,10 +33,6 @@ sudo apt-get install libidn-dev
 ```
 
 It doesn't matter if you already have some of those libraries, just use the command and retry the compile command (``lime test linux``?)
-
-I recommend using HxCodec version ``3.0.2``
-
-This was a product of my tests trying to compile SCE in Pop!_OS, maybe in other linux distros there are other errors that I don't know -- Slushi
 
 ## Customization:
 
@@ -94,7 +82,7 @@ _____________________________________
   * New Dad Left sing sprite
   * Unused stage lights are now used
 ### Week 2:
-  * Both BF and Skid & Pump does "Hey!" animations
+  * Both BF and Skid & Pump does "Hey!" animations (Todo: Make bf use "cheer" from VSlice)
   * Thunders does a quick light flash and zooms the camera in slightly
   * Added a quick transition/cutscene to Monster
 ### Week 3:
@@ -109,8 +97,10 @@ _____________________________________
 ### Week 6:
   * On Thorns, the HUD is hidden during the cutscene
   * Also there's the Background girls being spooky during the "Hey!" parts of the Instrumental
-  * Added rain for roses, added some effects to thorns but left senpai alone
+  * ~~Added rain for roses, added some effects to thorns but left senpai alone~~ <- Todo
 ### Week 7:
+  * No extra features yet!
+### Weekend1:
   * No extra features yet!
 
 ## Cool new Chart Editor changes and countless bug fixes
@@ -131,7 +121,7 @@ _____________________________________
 
 ## Story mode menu rework:
 ![](https://i.imgur.com/UB2EKpV.png)
-* Added a different BG to every song (less Tutorial)
+* Added a different BG to every song (Other than Tutorial)
 * All menu characters are now in individual spritesheets, makes modding it easier.
 
 ## Credits menu
@@ -148,10 +138,10 @@ _____________________________________
 
 ## Other gameplay features:
 * When the enemy hits a note, their strum note also glows.
-* Lag doesn't impact the camera movement and player icon scaling anymore.
-* Some stuff based on Week 7's changes has been put in (Background colors on Freeplay, Note splashes)
-* You can reset your Score on Freeplay/Story Mode by pressing Reset button.
-* You can listen to a song or adjust Scroll Speed/Damage taken/etc. on Freeplay by pressing Space.
-* You can play on the opponent's side!
-* You can turn off the sustains!
-* You can do a show casing mode for gameplay, playing normaly, or even for videos!
+ * Lag doesn't impact the camera movement and player icon scaling anymore.
+  * Some stuff based on Week 7's changes has been put in (Background colors on Freeplay, Note splashes)
+   * You can reset your Score on Freeplay/Story Mode by pressing Reset button.
+    * You can listen to a song or adjust Scroll Speed/Damage taken/etc. on Freeplay by pressing Space.
+   * You can play on the opponent's side!
+  * You can turn off the sustains!
+ * You can do a show casing mode for gameplay, playing normaly, or even for videos!
