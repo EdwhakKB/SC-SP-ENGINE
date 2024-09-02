@@ -85,6 +85,7 @@ class Song
 
   public static var chartPath:String;
   public static var loadedSongName:String;
+  public static var formattedSongName:String;
 
   public static function loadFromJson(jsonInput:String, ?folder:String):SwagSong
   {
@@ -92,6 +93,7 @@ class Song
     PlayState.SONG = getChart(jsonInput, folder);
     loadedSongName = folder;
     chartPath = _lastPath.replace('/', '\\');
+    formattedSongName = Paths.formatToSongPath(PlayState.SONG.songId);
     Debug.logInfo(_lastPath);
     Debug.logInfo(chartPath);
     StageData.loadDirectory(PlayState.SONG);

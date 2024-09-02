@@ -17,7 +17,7 @@ class School extends BaseStage
 
   override public function buildStage(baseStage:Stage)
   {
-    var _song = PlayState.SONG;
+    var _song = PlayState.SONG.gameOverData;
     if (_song.gameOverSound == null || _song.gameOverSound.trim().length < 1) GameOverSubstate.deathSoundName = 'fnf_loss_sfx-pixel';
     if (_song.gameOverLoop == null || _song.gameOverLoop.trim().length < 1) GameOverSubstate.loopSoundName = 'gameOver-pixel';
     if (_song.gameOverEnd == null || _song.gameOverEnd.trim().length < 1) GameOverSubstate.endSoundName = 'gameOverEnd-pixel';
@@ -25,16 +25,16 @@ class School extends BaseStage
 
     var bgSky:BGSprite = new BGSprite('weeb/weebSky', 0, 0, 0.1, 0.1);
     bgSky.antialiasing = false;
-    bgStagestageSpriteHandler(bgSky, -1, 'weebSky');
+    baseStage.stageSpriteHandler(bgSky, -1, 'weebSky');
 
     var repositionShit = -200;
 
     var bgSchool:BGSprite = new BGSprite('weeb/weebSchool', repositionShit, 0, 0.6, 0.90);
-    bgStagestageSpriteHandler(bgSchool, -1, 'weebSchool');
+    baseStage.stageSpriteHandler(bgSchool, -1, 'weebSchool');
     bgSchool.antialiasing = false;
 
     var bgStreet:BGSprite = new BGSprite('weeb/weebStreet', repositionShit, 0, 0.95, 0.95);
-    bgStagestageSpriteHandler(bgStreet, -1, 'weebStreet');
+    baseStage.stageSpriteHandler(bgStreet, -1, 'weebStreet');
     bgStreet.antialiasing = false;
 
     var widShit = Std.int(bgSky.width * PlayState.daPixelZoom);
@@ -43,7 +43,7 @@ class School extends BaseStage
       var fgTrees:BGSprite = new BGSprite('weeb/weebTreesBack', repositionShit + 170, 130, 0.9, 0.9);
       fgTrees.setGraphicSize(Std.int(widShit * 0.8));
       fgTrees.updateHitbox();
-      bgStagestageSpriteHandler(fgTrees, -1, 'weebTreesBack');
+      baseStage.stageSpriteHandler(fgTrees, -1, 'weebTreesBack');
       fgTrees.antialiasing = false;
     }
 
@@ -52,7 +52,7 @@ class School extends BaseStage
     bgTrees.animation.add('treeLoop', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18], 12);
     bgTrees.animation.play('treeLoop');
     bgTrees.scrollFactor.set(0.85, 0.85);
-    bgStagestageSpriteHandler(bgTrees, -1, 'weebTrees');
+    baseStage.stageSpriteHandler(bgTrees, -1, 'weebTrees');
     bgTrees.antialiasing = false;
 
     if (!ClientPrefs.data.lowQuality)
@@ -60,7 +60,7 @@ class School extends BaseStage
       var treeLeaves:BGSprite = new BGSprite('weeb/petals', repositionShit, -40, 0.85, 0.85, ['PETALS ALL'], true);
       treeLeaves.setGraphicSize(widShit);
       treeLeaves.updateHitbox();
-      bgStagestageSpriteHandler(treeLeaves, -1, 'petals');
+      baseStage.stageSpriteHandler(treeLeaves, -1, 'petals');
       treeLeaves.antialiasing = false;
     }
 
@@ -76,9 +76,9 @@ class School extends BaseStage
 
     if (!ClientPrefs.data.lowQuality)
     {
-      bgGirls = new BackgroundGirls(-100, 190);
+      bgGirls = new BackgroundGirls(-100, 190, '');
       bgGirls.scrollFactor.set(0.9, 0.9);
-      bgStagestageSpriteHandler(bgGirls, -1, 'bgGirls');
+      baseStage.stageSpriteHandler(bgGirls, -1, 'bgGirls');
     }
     setDefaultGF('gf-pixel');
 
@@ -94,13 +94,13 @@ class School extends BaseStage
     {
       if (songName == 'roses') FlxG.sound.play(Paths.sound('ANGRY'));
       initDoof();
-      setStartCallback(schoolIntro);
+      baseStage.setStartCallbackStage(schoolIntro);
     }
   }
 
   override public function beatHit()
   {
-    if (bgGirls != null) bgGirls.dance();
+    if (bgGirls != null) bgGirls.beatHit(curBeat);
   }
 
   // For events

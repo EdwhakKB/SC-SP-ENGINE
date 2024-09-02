@@ -95,7 +95,7 @@ class CreditsState extends MusicBeatState
         "crowplexus",
         "Hscript Iris, Input System v3, and Other PRs",
         "https://twitter.com/crowplexus",
-        "A1A1A1"
+        "CFCFCF"
       ],
       [
         "Kamizeta",
@@ -137,7 +137,7 @@ class CreditsState extends MusicBeatState
         "majigsaw",
         ".MP4 Video Loader Library (hxvlc)",
         "https://twitter.com/MAJigsaw77",
-        "A1A1A1"
+        "5F5F5F"
       ],
       [
         "Tahir Toprak Karabekiroglu",

@@ -5,7 +5,6 @@ import flixel.FlxObject;
 import flixel.FlxSubState;
 import objects.Character;
 import states.StoryMenuState;
-import states.FreeplayState;
 
 class GameOverSubstate extends MusicBeatSubState
 {
@@ -65,7 +64,8 @@ class GameOverSubstate extends MusicBeatSubState
 
     if (boyfriend == null)
     {
-      boyfriend = new Character(PlayState.instance.boyfriend.getScreenPosition().x, PlayState.instance.boyfriend.getScreenPosition().y, characterName, true, 'BF');
+      boyfriend = new Character(PlayState.instance.boyfriend.getScreenPosition().x, PlayState.instance.boyfriend.getScreenPosition().y, characterName, true,
+        'BF');
       boyfriend.x += boyfriend.positionArray[0] - PlayState.instance.boyfriend.positionArray[0];
       boyfriend.y += boyfriend.positionArray[1] - PlayState.instance.boyfriend.positionArray[1];
     }
@@ -88,46 +88,46 @@ class GameOverSubstate extends MusicBeatSubState
     PlayState.instance.callOnScripts('onGameOverStart', []);
     FlxG.sound.music.loadEmbedded(Paths.music(loopSoundName), true);
 
-    /*if (characterName == 'pico-dead')
-      {
-        overlay = new FlxSprite(boyfriend.x + 205, boyfriend.y - 80);
-        overlay.frames = Paths.getSparrowAtlas('Pico_Death_Retry');
-        overlay.animation.addByPrefix('deathLoop', 'Retry Text Loop', 24, true);
-        overlay.animation.addByPrefix('deathConfirm', 'Retry Text Confirm', 24, false);
-        overlay.antialiasing = ClientPrefs.data.antialiasing;
-        overlayConfirmOffsets.set(250, 200);
-        overlay.visible = false;
-        add(overlay);
+    if (characterName == 'pico-dead')
+    {
+      overlay = new FlxSprite(boyfriend.x + 205, boyfriend.y - 80);
+      overlay.frames = Paths.getSparrowAtlas('Pico_Death_Retry');
+      overlay.animation.addByPrefix('deathLoop', 'Retry Text Loop', 24, true);
+      overlay.animation.addByPrefix('deathConfirm', 'Retry Text Confirm', 24, false);
+      overlay.antialiasing = ClientPrefs.data.antialiasing;
+      overlayConfirmOffsets.set(250, 200);
+      overlay.visible = false;
+      add(overlay);
 
-        boyfriend.animation.callback = function(name:String, frameNumber:Int, frameIndex:Int) {
-          switch (name)
-          {
-            case 'firstDeath':
-              if (frameNumber >= 36 - 1)
-              {
-                overlay.visible = true;
-                overlay.animation.play('deathLoop');
-                boyfriend.animation.callback = null;
-              }
-            default:
-              boyfriend.animation.callback = null;
-          }
-        }
-
-        if (PlayState.instance.gf != null && PlayState.instance.gf.curCharacter == 'nene')
+      boyfriend.animation.callback = function(name:String, frameNumber:Int, frameIndex:Int) {
+        switch (name)
         {
-          var neneKnife:FlxSprite = new FlxSprite(boyfriend.x - 450, boyfriend.y - 250);
-          neneKnife.frames = Paths.getSparrowAtlas('NeneKnifeToss');
-          neneKnife.animation.addByPrefix('anim', 'knife toss', 24, false);
-          neneKnife.antialiasing = ClientPrefs.data.antialiasing;
-          neneKnife.animation.finishCallback = function(_) {
-            remove(neneKnife);
-            neneKnife.destroy();
-          }
-          insert(0, neneKnife);
-          neneKnife.animation.play('anim', true);
+          case 'firstDeath':
+            if (frameNumber >= 36 - 1)
+            {
+              overlay.visible = true;
+              overlay.animation.play('deathLoop');
+              boyfriend.animation.callback = null;
+            }
+          default:
+            boyfriend.animation.callback = null;
         }
-    }*/
+      }
+
+      if (PlayState.instance.gf != null && PlayState.instance.gf.curCharacter == 'nene')
+      {
+        var neneKnife:FlxSprite = new FlxSprite(boyfriend.x - 450, boyfriend.y - 250);
+        neneKnife.frames = Paths.getSparrowAtlas('NeneKnifeToss');
+        neneKnife.animation.addByPrefix('anim', 'knife toss', 24, false);
+        neneKnife.antialiasing = ClientPrefs.data.antialiasing;
+        neneKnife.animation.finishCallback = function(_) {
+          remove(neneKnife);
+          neneKnife.destroy();
+        }
+        insert(0, neneKnife);
+        neneKnife.animation.play('anim', true);
+      }
+    }
 
     super.create();
   }
@@ -139,7 +139,7 @@ class GameOverSubstate extends MusicBeatSubState
     PlayState.instance.callOnScripts('onUpdate', [elapsed]);
 
     var justPlayedLoop:Bool = false;
-    if (!boyfriend.isAnimationNull() && boyfriend.getAnimationName() == 'firstDeath' && boyfriend.isAnimationFinished())
+    if (!boyfriend.isAnimationNull() && boyfriend.getLastAnimationPlayed() == 'firstDeath' && boyfriend.isAnimationFinished())
     {
       boyfriend.playAnim('deathLoop');
       if (overlay != null && overlay.animation.exists('deathLoop'))
@@ -169,7 +169,7 @@ class GameOverSubstate extends MusicBeatSubState
         Mods.loadTopMod();
         if (PlayState.isStoryMode) MusicBeatState.switchState(new StoryMenuState());
         else
-          MusicBeatState.switchState(new FreeplayState());
+          MusicBeatState.switchState(new states.freeplay.FreeplayState());
 
         FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
         PlayState.instance.callOnScripts('onGameOverConfirm', [false]);
@@ -227,14 +227,14 @@ class GameOverSubstate extends MusicBeatSubState
     if (!isEnding)
     {
       isEnding = true;
-      if (boyfriend.hasAnimation('deathConfirm')) boyfriend.playAnim('deathConfirm', true);
+      if (boyfriend.hasOffsetAnimation('deathConfirm')) boyfriend.playAnim('deathConfirm', true);
 
-      /*if (overlay != null && overlay.animation.exists('deathConfirm'))
-        {
-          overlay.visible = true;
-          overlay.animation.play('deathConfirm');
-          overlay.offset.set(overlayConfirmOffsets.x, overlayConfirmOffsets.y);
-      }*/
+      if (overlay != null && overlay.animation.exists('deathConfirm'))
+      {
+        overlay.visible = true;
+        overlay.animation.play('deathConfirm');
+        overlay.offset.set(overlayConfirmOffsets.x, overlayConfirmOffsets.y);
+      }
       FlxG.sound.music.stop();
       FlxG.sound.play(Paths.music(endSoundName));
       new FlxTimer().start(0.7, function(tmr:FlxTimer) {

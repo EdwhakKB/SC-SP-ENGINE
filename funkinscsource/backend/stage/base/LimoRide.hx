@@ -186,7 +186,7 @@ class LimoRide extends BaseStage
     if (!ClientPrefs.data.lowQuality)
     {
       grpLimoDancers.forEach(function(dancer:BackgroundDancer) {
-        dancer.dance();
+        dancer.beatHit(curBeat);
       });
     }
 

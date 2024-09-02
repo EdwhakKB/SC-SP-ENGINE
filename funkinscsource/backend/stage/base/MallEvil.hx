@@ -16,10 +16,10 @@ class MallEvil extends BaseStage
     baseStage.stageSpriteHandler(bg, -1, 'evilBG');
 
     var evilTree:BGSprite = new BGSprite('christmas/evilTree', 300, -300, 0.2, 0.2);
-    baseStage.stageSpriteHandle(evilTree, -1, 'evilTree');
+    baseStage.stageSpriteHandler(evilTree, -1, 'evilTree');
 
     var evilSnow:BGSprite = new BGSprite('christmas/evilSnow', -200, 700);
-    baseStage.stageSpriteHandle(evilSnow, -1, 'evilSnow');
+    baseStage.stageSpriteHandler(evilSnow, -1, 'evilSnow');
     setDefaultGF('gf-christmas');
 
     // Winter Horrorland cutscene

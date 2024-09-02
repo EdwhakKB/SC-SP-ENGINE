@@ -336,21 +336,25 @@ class Character extends FunkinSCSprite
   /**
    * If character uses GF Speed to dance (normally for LEFT AND RIGHT DANCES!)
    */
-  public var useGFSpeed:Bool = false;
+  public var useGFSpeed:Null<Bool> = false;
 
   public function new(x:Float, y:Float, ?character:String = 'bf', ?isPlayer:Bool = false, ?characterType:CharacterType = OTHER)
   {
     super(x, y);
 
-    switch (curCharacter)
+    switch (character)
     {
       // case 'your character name in case you want to hardcode them instead':
       case 'pico-speaker':
         changeCharacter(character, isPlayer);
         skipDance = true;
-        stopIdle = true;
-        loadMappedAnims();
+        stopIdle = false;
+        loadMappedAnims('picospeaker', true);
         playAnim("shoot1");
+      case 'pico-blazin', 'darnell-blazin':
+        changeCharacter(character, isPlayer);
+        stopIdle = false;
+				skipDance = true;
       default:
         changeCharacter(character, isPlayer);
     }
@@ -422,9 +426,9 @@ class Character extends FunkinSCSprite
     originalFlipX = flipX;
 
     skipDance = false;
-    hasMissAnimations = hasAnimation('singLEFTmiss') || hasAnimation('singDOWNmiss') || hasAnimation('singUPmiss') || hasAnimation('singRIGHTmiss');
-    isDancing = hasAnimation('danceLeft') && hasAnimation('danceRight');
-    doMissThing = !hasAnimation('singUPmiss'); // if for some reason you only have an up miss, why?
+    hasMissAnimations = hasOffsetAnimation('singLEFTmiss') || hasOffsetAnimation('singDOWNmiss') || hasOffsetAnimation('singUPmiss') || hasOffsetAnimation('singRIGHTmiss');
+    isDancing = hasOffsetAnimation('danceLeft') && hasOffsetAnimation('danceRight');
+    doMissThing = !hasOffsetAnimation('singUPmiss'); // if for some reason you only have an up miss, why?
 
     dance();
 
@@ -565,7 +569,7 @@ class Character extends FunkinSCSprite
     if (isAnimateAtlas) copyAtlasValues();
     #end
 
-    json.startingAnim != null ? playAnim(json.startingAnim) : (hasAnimation('danceRight') ? playAnim('danceRight') : playAnim('idle'));
+    json.startingAnim != null ? playAnim(json.startingAnim) : (hasOffsetAnimation('danceRight') ? playAnim('danceRight') : playAnim('idle'));
   }
 
   override function update(elapsed:Float)
@@ -588,7 +592,7 @@ class Character extends FunkinSCSprite
       heyTimer -= elapsed * rate;
       if (heyTimer <= 0)
       {
-        var anim:String = getAnimationName();
+        var anim:String = getLastAnimationPlayed();
         if (specialAnim && (anim == 'hey' || anim == 'cheer'))
         {
           specialAnim = false;
@@ -602,7 +606,7 @@ class Character extends FunkinSCSprite
       specialAnim = false;
       dance();
     }
-    else if (getAnimationName().endsWith('miss') && isAnimationFinished())
+    else if (getLastAnimationPlayed().endsWith('miss') && isAnimationFinished())
     {
       dance();
       finishAnimation();
@@ -620,12 +624,12 @@ class Character extends FunkinSCSprite
           playAnim('shoot' + noteData, true);
           animationNotes.shift();
         }
-        if (isAnimationFinished()) playAnim(getAnimationName(), false, false, animation.curAnim.frames.length - 3);
+        if (isAnimationFinished()) playAnim(getLastAnimationPlayed(), false, false, animation.curAnim.frames.length - 3);
     }
 
     if ((flipMode && isPlayer) || (!flipMode && !isPlayer))
     {
-      if (getAnimationName().startsWith('sing')) holdTimer += elapsed;
+      if (getLastAnimationPlayed().startsWith('sing')) holdTimer += elapsed;
 
       if (!CoolUtil.opponentModeActive || CoolUtil.opponentModeActive && isCustomCharacter)
       {
@@ -639,15 +643,15 @@ class Character extends FunkinSCSprite
 
     if (isPlayer && !isCustomCharacter && !flipMode)
     {
-      if (getAnimationName().startsWith('sing')) holdTimer += elapsed;
+      if (getLastAnimationPlayed().startsWith('sing')) holdTimer += elapsed;
       else
         holdTimer = 0;
     }
 
     if (!debugMode)
     {
-      var nextAnim = animNext.get(getAnimationName());
-      var forceDanced = animDanced.get(getAnimationName());
+      var nextAnim = animNext.get(getLastAnimationPlayed());
+      var forceDanced = animDanced.get(getLastAnimationPlayed());
 
       if (nextAnim != null && isAnimationFinished())
       {
@@ -656,8 +660,8 @@ class Character extends FunkinSCSprite
       }
       else
       {
-        var name:String = getAnimationName();
-        if (isAnimationFinished() && hasAnimation('$name-loop')) playAnim('$name-loop');
+        var name:String = getLastAnimationPlayed();
+        if (isAnimationFinished() && hasOffsetAnimation('$name-loop')) playAnim('$name-loop');
       }
     }
 
@@ -682,13 +686,13 @@ class Character extends FunkinSCSprite
         if (isDancing)
         {
           danced = !danced;
-          if (altAnim && hasAnimation('danceRight-alt') && hasAnimation('danceLeft-alt')) animName = 'dance' + (danced ? 'Right' : 'Left') + '-alt';
+          if (altAnim && hasOffsetAnimation('danceRight-alt') && hasOffsetAnimation('danceLeft-alt')) animName = 'dance${danced ? 'Right' : 'Left'}-alt';
           else
-            animName = 'dance' + (danced ? 'Right' : 'Left') + idleSuffix;
+            animName = 'dance${(danced ? 'Right' : 'Left') + idleSuffix}';
         }
         else
         {
-          if (altAnim && (hasAnimation('idle-alt') || hasAnimation('idle-alt2'))) animName = 'idle-alt';
+          if (altAnim && (hasOffsetAnimation('idle-alt') || hasOffsetAnimation('idle-alt2'))) animName = 'idle-alt';
           else
             animName = 'idle' + idleSuffix;
         }
@@ -705,18 +709,18 @@ class Character extends FunkinSCSprite
 
   public dynamic function doAffectForName(name:String)
   {
-    if (name.endsWith('alt') && !hasAnimation(name)) name = name.split('-')[0];
-    if (name == 'laugh' && !hasAnimation(name)) name = 'singUP';
-    if (name.endsWith('miss') && !hasAnimation(name))
+    if (name.endsWith('alt') && !hasOffsetAnimation(name)) name = name.split('-')[0];
+    if (name == 'laugh' && !hasOffsetAnimation(name)) name = 'singUP';
+    if (name.endsWith('miss') && !hasOffsetAnimation(name))
     {
       name = name.substr(0, name.length - 4);
       if (doMissThing) missed = true;
     }
 
-    if (hasAnimation(name)) // if it's STILL null, just play idle, and if you REALLY messed up, it'll look in the xml for a valid anim
+    if (hasOffsetAnimation(name)) // if it's STILL null, just play idle, and if you REALLY messed up, it'll look in the xml for a valid anim
     {
-      if (isDancing && hasAnimation('danceRight')) name = 'danceRight';
-      else if (hasAnimation('idle')) name = 'idle';
+      if (isDancing && hasOffsetAnimation('danceRight')) name = 'danceRight';
+      else if (hasOffsetAnimation('idle')) name = 'idle';
     }
   }
 
@@ -738,6 +742,8 @@ class Character extends FunkinSCSprite
 
     if (!ClientPrefs.data.characters) return;
 
+    _lastPlayedAnimation = AnimName;
+
     specialAnim = false;
     missed = false;
 
@@ -750,6 +756,7 @@ class Character extends FunkinSCSprite
     else
     {
       atlas.anim.play(AnimName, Force, Reversed, Frame);
+      atlas.update(0);
     }
     #end
 
@@ -771,19 +778,19 @@ class Character extends FunkinSCSprite
 
     if (debugMode)
     {
-      if ((hasAnimation(AnimName) && !isPlayer)
+      if ((hasOffsetAnimation(AnimName) && !isPlayer)
         || (animPlayerOffsets.exists(AnimName) && isPlayer)) offset.set(daOffset[0] * scale.x * daZoom, daOffset[1] * scale.y * daZoom);
     }
     else
     {
-      if (hasAnimation(AnimName)) offset.set(daOffset[0] * scale.x * daZoom, daOffset[1] * scale.y * daZoom);
+      if (hasOffsetAnimation(AnimName)) offset.set(daOffset[0] * scale.x * daZoom, daOffset[1] * scale.y * daZoom);
     }
 
     if (doAfterAffectForAnimationName) doAfterAffectForName(AnimName);
   }
 
   public dynamic function allowDance():Bool
-    return !isAnimationNull() && !getAnimationName().startsWith("sing") && !specialAnim && !stunned;
+    return !isAnimationNull() && !getLastAnimationPlayed().startsWith("sing") && !specialAnim && !stunned;
 
   public dynamic function isDancingType():Bool
     return isDancing;
@@ -792,8 +799,8 @@ class Character extends FunkinSCSprite
   {
     return !isAnimationNull()
       && holdTimer > Conductor.stepCrochet * singDuration * (0.001 #if FLX_PITCH / FlxG.sound.music.pitch #end)
-      && getAnimationName().startsWith('sing')
-      && !getAnimationName().endsWith('miss');
+      && getLastAnimationPlayed().startsWith('sing')
+      && !getLastAnimationPlayed().endsWith('miss');
   }
 
   public dynamic function danceConditions(conditionsMet:Bool, ?forcedToIdle:Null<Bool> = null)
@@ -815,22 +822,44 @@ class Character extends FunkinSCSprite
 
   public dynamic function beatDance(beat:Int):Bool
   {
-    return ((((beat % idleBeat == 0) && !isDancingType()) || ((beat % idleBeat != 0) && isDancingType()))
-      && !useGFSpeed)
-      || (useGFSpeed && (((beat % gfSpeed == 0) && (isDancingType() || !isDancingType()))));
+    var dancing:Bool = false;
+    if (!useGFSpeed)
+    {
+      if (beat % idleBeat == 0)
+      {
+        if (idleToBeat)
+          dancing = true;
+      }
+      else if (beat % idleBeat != 0)
+      {
+        if (isDancingType())
+          dancing = true;
+      }
+      return dancing;
+    }
+    else return (beat % gfSpeed == 0);
+    return false;
   }
 
-  public function loadMappedAnims(?defaultJson:String = 'picospeaker', ?tankManNotes:Bool):Void
+  public function loadMappedAnims(json:String = '', tankManNotes:Bool = false):Void
   {
-    /*try
+    try
+    {
+      var songData:SwagSong = Song.getChart(json, Song.formattedSongName);
+      if (songData != null)
       {
-        var noteData:Array<SwagSection> = Song.loadFromJson(defaultJson, Paths.formatToSongPath(PlayState.SONG.songId)).notes;
-        for (section in noteData)
+        for (section in songData.notes)
           for (songNotes in section.sectionNotes)
             animationNotes.push(songNotes);
-        animationNotes.sort(sortAnims);
       }
-      catch (e:Dynamic) {} */
+      if (tankManNotes) TankmenBG.animationNotes = animationNotes;
+      animationNotes.sort(sortAnims);
+      Debug.logInfo('note lengths ${animationNotes.length}');
+    }
+    catch (e:haxe.Exception)
+    {
+      Debug.logError(e.message);
+    }
   }
 
   public function sortAnims(Obj1:Array<Dynamic>, Obj2:Array<Dynamic>):Int

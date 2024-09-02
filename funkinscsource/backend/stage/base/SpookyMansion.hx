@@ -58,11 +58,11 @@ class SpookyMansion extends BaseStage
     lightningStrikeBeat = curBeat;
     lightningOffset = FlxG.random.int(8, 24);
 
-    if (boyfriend.hasAnimation('scared')) boyfriend.playAnim('scared', true);
+    if (boyfriend.hasOffsetAnimation('scared')) boyfriend.playAnim('scared', true);
 
-    if (dad.hasAnimation('scared')) dad.playAnim('scared', true);
+    if (dad.hasOffsetAnimation('scared')) dad.playAnim('scared', true);
 
-    if (gf != null && gf.hasAnimation('scared')) gf.playAnim('scared', true);
+    if (gf != null && gf.hasOffsetAnimation('scared')) gf.playAnim('scared', true);
 
     if (ClientPrefs.data.camZooms)
     {

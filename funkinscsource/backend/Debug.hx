@@ -293,18 +293,6 @@ class Debug
         logFileWriter.setLogLevel(logLevel);
       }
     });
-
-    /*// Console commands let you do WHATEVER you want.
-      addConsoleCommand("playSong", function(songName:String, ?difficulty:Int = 1)
-      {
-        Debug.logInfo('CONSOLE: Opening song $songName ($difficulty) in Free Play...');
-        FreeplayState.instance.loadSongInFreePlay(songName, difficulty, false);
-      });
-      addConsoleCommand("chartSong", function(songName:String, ?difficulty:Int = 1)
-      {
-        Debug.logInfo('CONSOLE: Opening song $songName ($difficulty) in Chart Editor...');
-        FreeplayState.instance.loadSongInFreePlay(songName, difficulty, true, true);
-    });*/
   }
 
   static function formatOutput(input:Dynamic, pos:haxe.PosInfos):Array<Dynamic>

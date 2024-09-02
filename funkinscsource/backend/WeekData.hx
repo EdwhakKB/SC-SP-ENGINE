@@ -85,16 +85,19 @@ class WeekData
     this.fileName = fileName;
   }
 
-  public static function reloadWeekFiles(isStoryMode:Null<Bool> = false)
+  public static function reloadWeekFiles(isStoryMode:Null<Bool> = false, modsAllowed:Bool = true)
   {
     weeksList = [];
     weeksLoaded.clear();
     #if MODS_ALLOWED
-    var directories:Array<String> = [Paths.mods(), Paths.getSharedPath()];
+    var directories:Array<String> = modsAllowed ? [Paths.mods(), Paths.getSharedPath()] : [Paths.getSharedPath()];
     var originalLength:Int = directories.length;
 
-    for (mod in Mods.parseList().enabled)
-      directories.push(Paths.mods(mod + '/'));
+    if (modsAllowed)
+    {
+      for (mod in Mods.parseList().enabled)
+        directories.push(Paths.mods(mod + '/'));
+    }
     #else
     var directories:Array<String> = [Paths.getSharedPath()];
     var originalLength:Int = directories.length;
@@ -114,7 +117,7 @@ class WeekData
             var weekFile:WeekData = new WeekData(week, sexList[i]);
 
             #if MODS_ALLOWED
-            if (j >= originalLength)
+            if (modsAllowed && j >= originalLength)
             {
               weekFile.folder = directories[j].substring(Paths.mods().length, directories[j].length - 1);
             }
@@ -131,36 +134,39 @@ class WeekData
       }
     }
 
-    #if MODS_ALLOWED
-    for (i in 0...directories.length)
+    if (modsAllowed)
     {
-      var directory:String = directories[i] + 'data/weeks/';
-      if (FileSystem.exists(directory))
+      #if MODS_ALLOWED
+      for (i in 0...directories.length)
       {
-        var listOfWeeks:Array<String> = CoolUtil.coolTextFile(directory + 'weekList.txt');
-        for (daWeek in listOfWeeks)
+        var directory:String = directories[i] + 'data/weeks/';
+        if (FileSystem.exists(directory))
         {
-          var path:String = directory + daWeek + '.json';
-          if (FileSystem.exists(path))
+          var listOfWeeks:Array<String> = CoolUtil.coolTextFile(directory + 'weekList.txt');
+          for (daWeek in listOfWeeks)
           {
-            addWeek(daWeek, path, directories[i], i, originalLength);
+            var path:String = directory + daWeek + '.json';
+            if (FileSystem.exists(path))
+            {
+              addWeek(daWeek, path, directories[i], i, originalLength, modsAllowed);
+            }
           }
-        }
 
-        for (file in FileSystem.readDirectory(directory))
-        {
-          var path = haxe.io.Path.join([directory, file]);
-          if (!FileSystem.isDirectory(path) && file.endsWith('.json'))
+          for (file in FileSystem.readDirectory(directory))
           {
-            addWeek(file.substr(0, file.length - 5), path, directories[i], i, originalLength);
+            var path = haxe.io.Path.join([directory, file]);
+            if (!FileSystem.isDirectory(path) && file.endsWith('.json'))
+            {
+              addWeek(file.substr(0, file.length - 5), path, directories[i], i, originalLength, modsAllowed);
+            }
           }
         }
       }
+      #end
     }
-    #end
   }
 
-  private static function addWeek(weekToCheck:String, path:String, directory:String, i:Int, originalLength:Int)
+  private static function addWeek(weekToCheck:String, path:String, directory:String, i:Int, originalLength:Int, modsAllowed:Bool = true)
   {
     if (!weeksLoaded.exists(weekToCheck))
     {
@@ -168,7 +174,7 @@ class WeekData
       if (week != null)
       {
         var weekFile:WeekData = new WeekData(week, weekToCheck);
-        if (i >= originalLength)
+        if (modsAllowed && i >= originalLength)
         {
           #if MODS_ALLOWED
           weekFile.folder = directory.substring(Paths.mods().length, directory.length - 1);

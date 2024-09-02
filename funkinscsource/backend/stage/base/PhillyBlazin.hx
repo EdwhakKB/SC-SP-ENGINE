@@ -4,8 +4,8 @@ package backend.stage.base;
 import openfl.filters.ShaderFilter;
 import flixel.addons.transition.FlxTransitionableState;
 import flixel.addons.display.FlxTiledSprite;
-import objects.stages.*;
-import objects.Note;
+import objects.stage.*;
+import objects.note.Note;
 import shaders.RainShader;
 import substates.GameOverSubstate;
 
@@ -74,7 +74,7 @@ class PhillyBlazin extends BaseStage
       baseStage.stageSpriteHandler(additionalLighten, -1, 'additionalLighten');
     }
 
-    abot = new ABotSpeaker(gf.x, gf.y + 550);
+    abot = new ABotSpeaker(0, 0);
     baseStage.stageSpriteHandler(abot, -1, 'abot');
 
     if (ClientPrefs.data.shaders) setupRainShader();
@@ -109,6 +109,7 @@ class PhillyBlazin extends BaseStage
 
   override function createPost()
   {
+    abot.setPosition(gf.x, gf.y + 350);
     FlxG.camera.focusOn(camFollow.getPosition());
     FlxG.camera.fade(FlxColor.BLACK, 1.5, true, null, true);
 
@@ -128,7 +129,7 @@ class PhillyBlazin extends BaseStage
       note.noAnimation = true;
       note.noMissAnimation = true;
     }
-    remove(dadGroup, true);
+    remove(dad, true);
     addBehindBF(dad);
   }
 

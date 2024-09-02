@@ -265,7 +265,7 @@ class ResultsScreenKadeSubstate extends substates.MusicBeatSubState
                 close();
                 if (PlayState.isStoryMode) MusicBeatState.switchState(new StoryMenuState());
                 else
-                  MusicBeatState.switchState(new FreeplayState());
+                  MusicBeatState.switchState(new states.freeplay.FreeplayState());
               }, true);
             }
           });

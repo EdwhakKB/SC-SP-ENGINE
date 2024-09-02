@@ -4,13 +4,15 @@ import flixel.FlxBasic;
 import openfl.utils.Assets as OpenFlAssets;
 import openfl.Assets;
 import openfl.display.BlendMode;
+import backend.stage.*;
+import backend.stage.base.*;
+import backend.StageData;
 import objects.Character;
 import objects.note.Note.EventNote;
 import objects.note.Note;
 import cutscenes.CutsceneHandler;
 import cutscenes.DialogueBox;
 import substates.GameOverSubstate;
-import backend.StageData;
 #if LUA_ALLOWED
 import psychlua.*;
 #else
@@ -87,7 +89,7 @@ class Stage extends backend.stage.base.BaseStage
     #end
   }
 
-  public var defaultStage:BaseStage = null;
+  public var defaultStage:backend.stage.base.BaseStage = null;
 
   public function setupStageProperties(songName:String, ?stageChanged:Bool = false)
   {
@@ -106,9 +108,9 @@ class Stage extends backend.stage.base.BaseStage
       curStage = 'mainStage'; // defaults to stage if we can't find the path
     }
 
+    #if BASE_GAME_FILES
     switch (curStage)
     {
-      #if BASE_GAME_FILES
       case 'mainStage':
         defaultStage = new MainStage();
       case 'spookyMansion':
@@ -131,8 +133,8 @@ class Stage extends backend.stage.base.BaseStage
         defaultStage = new SchoolEvil();
       case 'tankmanBattlefield':
         defaultStage = new TankmanBattlefield();
-      #end
     }
+    #end
 
     if (defaultStage != null)
     {
@@ -440,7 +442,7 @@ class Stage extends backend.stage.base.BaseStage
   {
     if (defaultStage != null)
     {
-      defaultStage.curSection = curSeciton;
+      defaultStage.curSection = curSection;
       defaultStage.sectionHit();
     }
     setOnScripts('curStageSection', curSection);
@@ -463,7 +465,7 @@ class Stage extends backend.stage.base.BaseStage
 
   public function countdownTickStage(count:Countdown, num:Int)
   {
-    if (defaultStage != null) defaultStage.countDownTick(count, num);
+    if (defaultStage != null) defaultStage.countdownTick(count, num);
   }
 
   public function startSongStage()
@@ -500,7 +502,7 @@ class Stage extends backend.stage.base.BaseStage
 
   public function noteMissPressStage(direction:Int)
   {
-    if (defaultStage != null) defaultStage.noteMissPress(event);
+    if (defaultStage != null) defaultStage.noteMissPress(direction);
   }
 
   // start/end callback functions
@@ -628,7 +630,7 @@ class Stage extends backend.stage.base.BaseStage
       if (FileSystem.exists(scriptToLoad))
       {
         for (script in scHSArray)
-          if (script.path == scriptToLoad) return false;
+          if (script.hsCode.path == scriptToLoad) return false;
 
         initSCHS(scriptToLoad);
         return true;
@@ -652,10 +654,10 @@ class Stage extends backend.stage.base.BaseStage
     catch (e:Dynamic)
     {
       var script:SCScript = null;
-      for (scripts in scScriptsArray)
-        if (scripts.path == file) script = scripts;
-      var newScript:SCHScript = script;
-      addTextToDebug('ERROR ON LOADING ($file) - $e', FlxColor.RED);
+      for (scripts in scHSArray)
+        if (scripts.hsCode.path == file) script = scripts;
+      var newScript:SCScript = script;
+      // addTextToDebug('ERROR ON LOADING ($file) - $e', FlxColor.RED);
 
       if (newScript != null) newScript.destroy();
     }
@@ -841,7 +843,7 @@ class Stage extends backend.stage.base.BaseStage
     if (len < 1) return returnVal;
     for (script in scHSArray)
     {
-      if (script == null || !script.existsVar(funcToCall) || exclusions.contains(script.path)) continue;
+      if (script == null || !script.existsVar(funcToCall) || exclusions.contains(script.hsCode.path)) continue;
 
       try
       {
@@ -919,7 +921,7 @@ class Stage extends backend.stage.base.BaseStage
     if (exclusions == null) exclusions = [];
     for (script in scHSArray)
     {
-      if (exclusions.contains(script.path)) continue;
+      if (exclusions.contains(script.hsCode.path)) continue;
 
       script.setVar(variable, arg);
     }
@@ -980,7 +982,7 @@ class Stage extends backend.stage.base.BaseStage
     if (exclusions == null) exclusions = [];
     for (script in scHSArray)
     {
-      if (exclusions.contains(script.path)) continue;
+      if (exclusions.contains(script.hsCode.path)) continue;
 
       script.getVar(variable);
     }

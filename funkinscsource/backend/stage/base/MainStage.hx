@@ -1,5 +1,7 @@
 package backend.stage.base;
 
+import openfl.display.BlendMode;
+
 class MainStage extends BaseStage
 {
   var dadbattleBlack:BGSprite;
@@ -35,7 +37,7 @@ class MainStage extends BaseStage
       var stageCurtains:BGSprite = new BGSprite('stagecurtains', -500, -300, 1.3, 1.3);
       stageCurtains.setGraphicSize(Std.int(stageCurtains.width * 0.9));
       stageCurtains.updateHitbox();
-      stageSpriteHandler(stageCurtains, -1, "stageCurtains");
+      baseStage.stageSpriteHandler(stageCurtains, -1, "stageCurtains");
     }
 
     dadbattleBlack = new BGSprite(null, -800, -400, 0, 0);
@@ -57,7 +59,7 @@ class MainStage extends BaseStage
 
   override public function onEvent(name:String, params:Array<String>, flValues:Array<Null<Float>>, time:Float)
   {
-    switch (eventName)
+    switch (name)
     {
       case "Dadbattle Spotlight":
         if (flValues[0] == null) flValues[0] = 0;

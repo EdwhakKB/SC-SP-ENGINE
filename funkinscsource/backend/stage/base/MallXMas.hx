@@ -36,7 +36,7 @@ class MallXMas extends BaseStage
     }
 
     var tree:BGSprite = new BGSprite('christmas/christmasTree', 370, -250, 0.40, 0.40);
-    baseStage.stageSpriteHandler(treem - 1, 'chritmasTree');
+    baseStage.stageSpriteHandler(tree, -1, 'chritmasTree');
 
     bottomBoppers = new MallCrowd(-300, 140);
     baseStage.stageSpriteHandler(bottomBoppers, -1, 'bottomBoppers');
@@ -71,7 +71,7 @@ class MallXMas extends BaseStage
             return;
         }
         bottomBoppers.animation.play('hey', true);
-        bottomBoppers.heyTimer = flValue2;
+        bottomBoppers.heyTimer = flValues[1];
     }
   }
 

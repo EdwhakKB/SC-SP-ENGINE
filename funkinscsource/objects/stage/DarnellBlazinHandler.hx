@@ -102,7 +102,7 @@ class DarnellBlazinHandler
   public function noteMiss(note:Note)
   {
     // SPECIAL CASE: Darnell prepared to uppercut last time and Pico missed! FINISH HIM!
-    if (dad.getAnimationName() == 'uppercutPrep')
+    if (dad.getLastAnimationPlayed() == 'uppercutPrep')
     {
       playUppercutAnim();
       return;
@@ -248,7 +248,7 @@ class DarnellBlazinHandler
 
   function playPissedConditionalAnim()
   {
-    if (dad.getAnimationName() == "cringe") playPissedAnim();
+    if (dad.getLastAnimationPlayed() == "cringe") playPissedAnim();
     else
       playIdleAnim();
   }

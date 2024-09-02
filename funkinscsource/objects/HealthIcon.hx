@@ -276,8 +276,8 @@ class HealthIcon extends FunkinSCSprite
       }
     }
 
-    if (hasAnimation('losing')) hasLosingAnimated = true;
-    if (hasAnimation('winning')) hasWinningAnimated = true;
+    if (hasOffsetAnimation('losing')) hasLosingAnimated = true;
+    if (hasOffsetAnimation('winning')) hasWinningAnimated = true;
 
     json.startingAnim != null ? playAnim(json.startingAnim) : playAnim('normal', true);
   }

@@ -542,7 +542,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
         if (animationInputText.text == anim.anim)
         {
           lastOffsets = anim.offsets;
-          if (character.hasAnimation(animationInputText.text))
+          if (character.hasOffsetAnimation(animationInputText.text))
           {
             if (!character.isAnimateAtlas) character.animation.remove(animationInputText.text);
             #if flxanimate
@@ -560,7 +560,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
         {
           if (anim.playerOffsets != null && anim.playerOffsets.length > 1) lastPlayerOffsets = anim.playerOffsets;
           else if (anim.offsets != null && anim.offsets.length > 1) lastPlayerOffsets = anim.offsets;
-          if (character.hasAnimation(animationInputText.text))
+          if (character.hasOffsetAnimation(animationInputText.text))
           {
             if (!character.isAnimateAtlas) character.animation.remove(animationInputText.text);
             #if flxanimate
@@ -592,8 +592,8 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
         if (animationInputText.text == anim.anim)
         {
           var resetAnim:Bool = false;
-          if (anim.anim == character.getAnimationName()) resetAnim = true;
-          if (character.hasAnimation(anim.anim))
+          if (anim.anim == character.getLastAnimationPlayed()) resetAnim = true;
+          if (character.hasOffsetAnimation(anim.anim))
           {
             if (!character.isAnimateAtlas) character.animation.remove(anim.anim);
             #if flxanimate
@@ -675,7 +675,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 
     imageInputText = new PsychUIInputText(15, 30, 200, character.imageFile, 8);
     var reloadImage:PsychUIButton = new PsychUIButton(imageInputText.x + 210, imageInputText.y - 3, "Reload Image", function() {
-      var lastAnim = character.getAnimationName();
+      var lastAnim = character.getLastAnimationPlayed();
       character.imageFile = imageInputText.text;
       reloadCharacterImage();
       if (!character.isAnimationNull())
@@ -911,7 +911,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 
   function reloadCharacterImage()
   {
-    var lastAnim:String = character.getAnimationName();
+    var lastAnim:String = character.getLastAnimationPlayed();
     var anims:Array<AnimArray> = character.animationsArray.copy();
 
     #if flxanimate
@@ -1191,7 +1191,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
       else
         holdingFrameTime = 0;
 
-      if (FlxG.keys.justPressed.SPACE) character.playAnim(character.getAnimationName(), true);
+      if (FlxG.keys.justPressed.SPACE) character.playAnim(character.getLastAnimationPlayed(), true);
 
       var frames:Int = -1;
       var length:Int = -1;
@@ -1437,7 +1437,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
     }
     #end
 
-    if (!character.hasAnimation(anim)) character.addOffset(anim, 0, 0);
+    if (!character.hasOffsetAnimation(anim)) character.addOffset(anim, 0, 0);
 
     if (!character.animPlayerOffsets.exists(anim)) character.addPlayerOffset(anim, 0, 0);
   }

@@ -6,8 +6,8 @@ import shaders.RainShader;
 import flixel.addons.display.FlxTiledSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
 import substates.GameOverSubstate;
-import states.stages.objects.*;
-import objects.Note;
+import objects.stage.*;
+import objects.note.Note;
 import cutscenes.CutsceneHandler;
 
 enum NeneState
@@ -131,7 +131,7 @@ class PhillyStreets extends BaseStage
       darkenable.push(picoFade);
     }
 
-    abot = new ABotSpeaker(gf.x, gf.y + 550);
+    abot = new ABotSpeaker(0, 0);
     updateABotEye(true);
     baseStage.stageSpriteHandler(abot, -1, 'abot');
 
@@ -162,13 +162,13 @@ class PhillyStreets extends BaseStage
           });
       }
     }
-    this.stage = baseStage;
   }
 
   var noteTypes:Array<String> = [];
 
   override function createPost()
   {
+    abot.setPosition(gf.x, gf.y + 350);
     var unspawnNotes:Array<Note> = cast game.unspawnNotes;
     for (note in unspawnNotes)
     {

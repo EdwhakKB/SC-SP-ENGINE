@@ -304,7 +304,7 @@ class PicoBlazinHandler
 
   function playTauntConditionalAnim()
   {
-    if (boyfriend.getAnimationName() == "fakeout") playTauntAnim();
+    if (boyfriend.getLastAnimationPlayed() == "fakeout") playTauntAnim();
     else
       playIdleAnim();
   }
@@ -322,12 +322,12 @@ class PicoBlazinHandler
 
   function isDarnellPreppingUppercut()
   {
-    return dad.getAnimationName() == 'uppercutPrep';
+    return dad.getLastAnimationPlayed() == 'uppercutPrep';
   }
 
   function isDarnellInUppercut()
   {
-    return dad.getAnimationName() == 'uppercut' || dad.getAnimationName() == 'uppercut-hold';
+    return dad.getLastAnimationPlayed() == 'uppercut' || dad.getLastAnimationPlayed() == 'uppercut-hold';
   }
 
   function wasNoteHitPoorly(rating:String)

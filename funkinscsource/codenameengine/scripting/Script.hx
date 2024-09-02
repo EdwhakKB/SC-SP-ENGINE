@@ -112,7 +112,7 @@ class Script extends FlxBasic implements IFlxDestroyable
       // Shaders
       "ColorSwap" => shaders.ColorSwap,
       // States
-      "FreeplayState" => states.FreeplayState,
+      "FreeplayState" => states.freeplay.FreeplayState,
       "MainMenuState" => states.MainMenuState,
       "PlayState" => states.PlayState,
       "StoryMenuState" => states.StoryMenuState,

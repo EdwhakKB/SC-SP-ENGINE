@@ -533,7 +533,7 @@ class LoadingState extends MusicBeatState
     Thread.create(() -> {
       try
       {
-        if (func() != null) Debug.logError('finished preloading $traceData');
+        if (func() != null) Debug.logInfo('finished preloading $traceData');
         else
           Debug.logError('ERROR! fail on preloading $traceData');
       }

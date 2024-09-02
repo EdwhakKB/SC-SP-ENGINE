@@ -4,12 +4,12 @@ package backend.stage.base;
 import sobjects.stages.*;
 import objects.Character;
 
-class Philly extends BaseStage
+class PhillyTrain extends BaseStage
 {
   var phillyLightsColors:Array<FlxColor>;
   var phillyWindow:BGSprite;
   var phillyStreet:BGSprite;
-  var phillyTrain:PhillyTrain;
+  var phillyTrain:PhillyTrainSprite;
   var curLight:Int = -1;
 
   // For Philly Glow events
@@ -50,7 +50,7 @@ class Philly extends BaseStage
       baseStage.stageSpriteHandler(streetBehind, -1, 'behindTrain');
     }
 
-    phillyTrain = new PhillyTrain(2000, 360);
+    phillyTrain = new PhillyTrainSprite(2000, 360);
     baseStage.stageSpriteHandler(phillyTrain, -1, 'train');
 
     phillyStreet = new BGSprite('philly/street', -40, 50);

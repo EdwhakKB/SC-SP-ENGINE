@@ -156,7 +156,7 @@ class StrumArrow extends ModchartArrow
 
   var confirmHoldTimer:Float = -1;
 
-  static final CONFIRM_HOLD_TIME:Float = 0.15;
+  static final CONFIRM_HOLD_TIME:Float = 0.1;
 
   public dynamic function reloadNote(style:String)
   {
@@ -380,11 +380,11 @@ class StrumArrow extends ModchartArrow
   public dynamic function holdConfirm():Void
   {
     if (!ClientPrefs.data.vanillaStrumAnimations) return;
-    if (getAnimationName() == "confirm-hold")
+    if (getLastAnimationPlayed() == "confirm-hold")
     {
       return;
     }
-    else if (getAnimationName() == "confirm")
+    else if (getLastAnimationPlayed() == "confirm")
     {
       if (isAnimationFinished())
       {
@@ -401,6 +401,8 @@ class StrumArrow extends ModchartArrow
   override public function playAnim(anim:String, force:Bool = false, reverse:Bool = false, frame:Int = 0)
   {
     super.playAnim(anim, force, reverse, frame);
+
+    _lastPlayedAnimation = anim;
 
     if ((anim.toLowerCase() == 'confirm' || anim.toLowerCase() == 'confirm-hold') && force)
     {

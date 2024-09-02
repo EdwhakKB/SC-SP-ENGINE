@@ -3197,9 +3197,9 @@ class PlaneRaymarcherShader extends FlxShader
 
 // https://www.shadertoy.com/view/MlfBWr
 // le shader
-class RainEffect extends ShaderBase
+class RainFallEffect extends ShaderBase
 {
-  public var shader(default, null):RainShader = new RainShader();
+  public var shader(default, null):RainFallShader = new RainFallShader();
 
   var iTime:Float = 0.0;
 
@@ -3215,7 +3215,7 @@ class RainEffect extends ShaderBase
   }
 }
 
-class RainShader extends FlxFixedShader
+class RainFallShader extends FlxFixedShader
 {
   @:glFragmentSource('#pragma header uniform float iTime;
 vec2 rand(vec2 c)

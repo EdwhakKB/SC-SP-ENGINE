@@ -3,7 +3,6 @@ package states.editors;
 import backend.WeekData;
 import objects.Character;
 import states.MainMenuState;
-import states.FreeplayState;
 
 class MasterEditorMenu extends MusicBeatState
 {

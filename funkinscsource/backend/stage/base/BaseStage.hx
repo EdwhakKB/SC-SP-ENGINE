@@ -10,7 +10,7 @@ import objects.Character;
 /**
  * Made for objects added on to Stage.
  */
-class StagePreset extends FlxBasic
+class BaseStage extends FlxBasic
 {
   private var game(get, never):Dynamic;
 
@@ -160,7 +160,7 @@ class StagePreset extends FlxBasic
     return game.paused;
 
   inline private function get_songName()
-    return game.songName;
+    return Song.formattedSongName;
 
   inline private function get_isStoryMode()
     return PlayState.isStoryMode;

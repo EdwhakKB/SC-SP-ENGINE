@@ -716,10 +716,14 @@ class Paths
       return Paths.getJsonAtlasAlt(hasNoEx);
     }
 
-    var graph:FlxGraphic = FlxG.bitmap.add(hasNoEx, Unique, Key);
-    if (graph == null)
+    var graph:FlxGraphic = null;
+    try
     {
-      Debug.logError('SOMETHING IS WRONG WITH THE GRAPHIC!');
+      graph = FlxG.bitmap.add(hasNoEx, Unique, Key);
+    }
+    catch (e:haxe.Exception)
+    {
+      Debug.logInfo(e.message);
       return null;
     }
     return graph.imageFrame;
@@ -1007,12 +1011,4 @@ class Paths
     spr.loadAtlasEx(folderOrImg, spriteJson, animationJson);
   }
   #end
-}
-
-enum abstract PathsFunction(String)
-{
-  var MUSIC;
-  var INST;
-  var VOICES;
-  var SOUND;
 }

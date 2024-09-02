@@ -940,7 +940,7 @@ class LuaUtils
     {
       if (shit.playAnimationBeforeSwitch)
       {
-        if (shit.hasAnimation(animationName)) shit.playAnim(animationName, true, false, animationFrame);
+        if (shit.hasOffsetAnimation(animationName)) shit.playAnim(animationName, true, false, animationFrame);
       }
 
       PlayState.instance.startCharacterScripts(shit.curCharacter);
@@ -1066,7 +1066,7 @@ class LuaUtils
 
     if (PlayState.instance.boyfriend.playAnimationBeforeSwitch)
     {
-      if (PlayState.instance.boyfriend.hasAnimation(animationName)) PlayState.instance.boyfriend.playAnim(animationName, true, false, animationFrame);
+      if (PlayState.instance.boyfriend.hasOffsetAnimation(animationName)) PlayState.instance.boyfriend.playAnim(animationName, true, false, animationFrame);
     }
 
     PlayState.instance.setOnScripts('boyfriendName', PlayState.instance.boyfriend.curCharacter);
@@ -1137,7 +1137,7 @@ class LuaUtils
 
     if (PlayState.instance.dad.playAnimationBeforeSwitch)
     {
-      if (PlayState.instance.dad.hasAnimation(animationName)) PlayState.instance.dad.playAnim(animationName, true, false, animationFrame);
+      if (PlayState.instance.dad.hasOffsetAnimation(animationName)) PlayState.instance.dad.playAnim(animationName, true, false, animationFrame);
     }
 
     PlayState.instance.setOnScripts('dadName', PlayState.instance.dad.curCharacter);
@@ -1175,7 +1175,7 @@ class LuaUtils
 
     if (PlayState.instance.gf.playAnimationBeforeSwitch)
     {
-      if (PlayState.instance.gf.hasAnimation(animationName)) PlayState.instance.gf.playAnim(animationName, true, false, animationFrame);
+      if (PlayState.instance.gf.hasOffsetAnimation(animationName)) PlayState.instance.gf.playAnim(animationName, true, false, animationFrame);
     }
 
     PlayState.instance.setOnScripts('gfName', PlayState.instance.gf.curCharacter);
@@ -1217,7 +1217,7 @@ class LuaUtils
 
     if (PlayState.instance.mom.playAnimationBeforeSwitch)
     {
-      if (PlayState.instance.mom.hasAnimation(animationName)) PlayState.instance.mom.playAnim(animationName, true, false, animationFrame);
+      if (PlayState.instance.mom.hasOffsetAnimation(animationName)) PlayState.instance.mom.playAnim(animationName, true, false, animationFrame);
     }
 
     PlayState.instance.setOnScripts('momName', PlayState.instance.mom.curCharacter);

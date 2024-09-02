@@ -16,11 +16,11 @@ typedef StageFile =
   var ?opponent2:Array<Dynamic>;
   var hide_girlfriend:Bool;
 
-  var camera_boyfriend:Array<Float>;
-  var camera_opponent:Array<Float>;
+  var ?camera_boyfriend:Array<Float>;
+  var ?camera_opponent:Array<Float>;
   var ?camera_opponent2:Array<Float>;
-  var camera_girlfriend:Array<Float>;
-  var camera_speed:Null<Float>;
+  var ?camera_girlfriend:Array<Float>;
+  var ?camera_speed:Null<Float>;
 
   var ?ratingSkin:Array<String>;
   var ?countDownAssets:Array<String>;
@@ -172,26 +172,30 @@ class StageData
     return dummy();
   }
 
-  public static function vanillaSongStage(songName):String
+  public static function vanillaSongStage(songName:String):String
   {
     switch (songName)
     {
-      case 'spookeez' | 'south' | 'monster':
+      case 'spookeez', 'south', 'monster':
         return 'spookyMansion';
-      case 'pico' | 'blammed' | 'philly' | 'philly-nice':
+      case 'pico', 'blammed', 'philly', 'philly-nice':
         return 'phillyTrain';
-      case 'milf' | 'satin-panties' | 'high':
+      case 'milf', 'satin-panties', 'high':
         return 'limoRide';
-      case 'cocoa' | 'eggnog':
-        return 'mallXmas';
+      case 'cocoa', 'eggnog':
+        return 'mallXMas';
       case 'winter-horrorland':
         return 'mallEvil';
-      case 'senpai' | 'roses':
+      case 'senpai', 'roses':
         return 'school';
       case 'thorns':
         return 'schoolEvil';
-      case 'ugh' | 'guns' | 'stress':
+      case 'ugh', 'guns', 'stress':
         return 'tankmanBattlefield';
+      case 'darnell', 'lit-up', '2hot':
+        return 'phillyStreets';
+      case 'blazin':
+        return 'phillyBlazin';
     }
     return 'mainStage';
   }

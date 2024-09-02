@@ -83,20 +83,21 @@ class FunkinSCSprite extends FlxSkewed
     {
       // Use a way for using mult frames lol
       var split:Array<String> = imageFile.split(',');
-      var charFrames:FlxAtlasFrames = Paths.getAtlas(split[0].trim());
+      var finalFrames:FlxAtlasFrames = Paths.getAtlas(split[0].trim());
       if (split.length > 1)
       {
-        var original:FlxAtlasFrames = charFrames;
-        charFrames = new FlxAtlasFrames(charFrames.parent);
-        charFrames.addAtlas(original, true);
+        var original:FlxAtlasFrames = finalFrames;
+        finalFrames = new FlxAtlasFrames(finalFrames.parent);
+        finalFrames.addAtlas(original, true);
         for (i in 1...split.length)
         {
           var extraFrames:FlxAtlasFrames = Paths.getAtlas(split[i].trim());
-          if (extraFrames != null) charFrames.addAtlas(extraFrames, true);
+          if (extraFrames != null) finalFrames.addAtlas(extraFrames, true);
         }
       }
-      else
-        this.frames = Paths.getFrames(path, true, parentfolder, newEndString);
+      this.frames = finalFrames;
+
+      if (frames == null) this.frames = Paths.getFrames(path, true, parentfolder, newEndString);
     }
     #if flxanimate
     else
@@ -210,29 +211,30 @@ class FunkinSCSprite extends FlxSkewed
 
   public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
   {
-    if (AnimName == null) return;
-
-    if (!(this is Character))
+    if (AnimName != null)
     {
-      if (!this.isAnimateAtlas) this.animation.play(AnimName, Force, Reversed, Frame);
-      #if flxanimate
-      else
+      if (!(this is Character))
       {
-        this.atlas.anim.play(AnimName, Force, Reversed, Frame);
-        this.atlas.update(0);
+        if (!this.isAnimateAtlas) this.animation.play(AnimName, Force, Reversed, Frame);
+        #if flxanimate
+        else
+        {
+          this.atlas.anim.play(AnimName, Force, Reversed, Frame);
+          this.atlas.update(0);
+        }
+        #end
       }
-      #end
-    }
-    _lastPlayedAnimation = AnimName;
+      _lastPlayedAnimation = AnimName;
 
-    var daOffset = this.getAnimOffset(AnimName);
-    this.offset.set(daOffset[0], daOffset[1]);
+      var daOffset = this.getAnimOffset(AnimName);
+      if (daOffset != null && daOffset.length > 1) this.offset.set(daOffset[0], daOffset[1]);
+    }
   }
 
-  public function getAnimOffset(name:String)
+  public function getAnimOffset(name:String):Array<Float>
   {
-    if (this.hasAnimation(name)) return this.animOffsets.get(name);
-    return [0, 0];
+    if (this.hasOffsetAnimation(name)) return this.animOffsets.get(name);
+    return null;
   }
 
   inline public function isAnimationNull():Bool
@@ -243,9 +245,17 @@ class FunkinSCSprite extends FlxSkewed
 
   var _lastPlayedAnimation:String;
 
-  inline public function getAnimationName():String
+  inline public function getLastAnimationPlayed():String
   {
     return _lastPlayedAnimation;
+  }
+
+  inline public function getAnimationName():String
+  {
+    var name:String = '';
+    @:privateAccess
+    if (!isAnimationNull()) name = #if flxanimate !this.isAnimateAtlas ? animation.curAnim.name : getLastAnimationPlayed(); #else animation.curAnim.name; #end
+    return (name != null) ? name : '';
   }
 
   inline public function removeAnimation(name:String)
@@ -282,9 +292,16 @@ class FunkinSCSprite extends FlxSkewed
     this.animOffsets[anim2] = old;
   }
 
-  public function hasAnimation(anim:String):Bool
+  public function hasOffsetAnimation(anim:String):Bool
   {
     return animOffsets.exists(anim);
+  }
+
+  public function hasAnimation(anim:String)
+  {
+    @:privateAccess
+    return #if flxanimate this.isAnimateAtlas ? (atlas.anim.animsMap.exists(anim)
+      || atlas.anim.symbolDictionary.exists(anim)) : animation.exists(anim) #else animation.exists(anim) #end;
   }
 
   public var animPaused(get, set):Bool;

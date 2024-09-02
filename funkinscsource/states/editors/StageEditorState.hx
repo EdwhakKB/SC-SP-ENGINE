@@ -2094,7 +2094,7 @@ class StageEditorAnimationSubstate extends MusicBeatSubState
           var resetAnim:Bool = false;
           if (targetSprite.animation.curAnim != null && anim.anim == targetSprite.animation.curAnim.name) resetAnim = true;
 
-          if (targetSprite.hasAnimation(anim.anim)) targetSprite.animOffsets.remove(anim.anim);
+          if (targetSprite.hasOffsetAnimation(anim.anim)) targetSprite.animOffsets.remove(anim.anim);
 
           target.animations.remove(anim);
           targetSprite.animation.remove(anim.anim);
@@ -2196,7 +2196,7 @@ class StageEditorAnimationSubstate extends MusicBeatSubState
   {
     var spr:ModchartSprite = cast(target.sprite, ModchartSprite);
     spr.playAnim(name, force);
-    if (!spr.hasAnimation(name)) spr.updateHitbox();
+    if (!spr.hasOffsetAnimation(name)) spr.updateHitbox();
   }
 
   final minZoom = 0.25;

@@ -1,6 +1,6 @@
 package objects.stage;
 
-class PhillyTrain extends BGSprite
+class PhillyTrainSprite extends BGSprite
 {
   public var sound:FlxSound;
 

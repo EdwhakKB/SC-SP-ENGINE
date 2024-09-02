@@ -39,14 +39,15 @@ class DeprecatedFunctions
       switch (character.toLowerCase())
       {
         case 'dad':
-          if (PlayState.instance.dad.hasAnimation(anim) && ClientPrefs.data.characters) PlayState.instance.dad.playAnim(anim, forced);
+          if (PlayState.instance.dad.hasOffsetAnimation(anim)
+            && ClientPrefs.data.characters) PlayState.instance.dad.playAnim(anim, forced);
         case 'gf' | 'girlfriend':
           if (PlayState.instance.gf != null
-            && PlayState.instance.gf.hasAnimation(anim)
+            && PlayState.instance.gf.hasOffsetAnimation(anim)
             && ClientPrefs.data.characters) PlayState.instance.gf.playAnim(anim, forced);
         case 'mom':
           if (PlayState.instance.mom != null
-            && PlayState.instance.mom.hasAnimation(anim)
+            && PlayState.instance.mom.hasOffsetAnimation(anim)
             && ClientPrefs.data.characters) PlayState.instance.mom.playAnim(anim, forced);
         default:
           character = LuaUtils.checkVariable(character, 'extraCharacter_');
@@ -54,9 +55,9 @@ class DeprecatedFunctions
           {
             var spr:Character = cast(MusicBeatState.getVariables().get(character), Character);
 
-            if (spr.hasAnimation(anim)) spr.playAnim(anim, forced);
+            if (spr.hasOffsetAnimation(anim)) spr.playAnim(anim, forced);
           }
-          else if (PlayState.instance.boyfriend.hasAnimation(anim)
+          else if (PlayState.instance.boyfriend.hasOffsetAnimation(anim)
             && ClientPrefs.data.characters) PlayState.instance.boyfriend.playAnim(anim, forced);
       }
     });

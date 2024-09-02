@@ -18,7 +18,6 @@ import objects.Character;
 import objects.HealthIcon;
 import states.MainMenuState;
 import states.StoryMenuState;
-import states.FreeplayState;
 import substates.PauseSubState;
 import substates.GameOverSubstate;
 import psychlua.LuaUtils;
@@ -1156,7 +1155,7 @@ class FunkinLua
 
         if (PlayState.isStoryMode) MusicBeatState.switchState(new StoryMenuState());
         else
-          MusicBeatState.switchState(new FreeplayState());
+          MusicBeatState.switchState(new states.freeplay.FreeplayState());
 
         #if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
 
@@ -1499,7 +1498,7 @@ class FunkinLua
               var luaObj:ModchartSprite = obj;
 
               var daOffset = luaObj.animOffsets.get(name);
-              if (luaObj.hasAnimation(name))
+              if (luaObj.hasOffsetAnimation(name))
               {
                 luaObj.offset.set(daOffset[0], daOffset[1]);
               }

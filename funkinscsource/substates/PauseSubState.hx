@@ -3,7 +3,6 @@ package substates;
 import backend.WeekData;
 import backend.Highscore;
 import states.StoryMenuState;
-import states.FreeplayState;
 import options.OptionsState;
 import flixel.util.FlxStringUtil;
 
@@ -456,7 +455,7 @@ class PauseSubState extends MusicBeatSubState
 
         if (PlayState.isStoryMode) MusicBeatState.switchState(new StoryMenuState());
         else
-          MusicBeatState.switchState(new FreeplayState());
+          MusicBeatState.switchState(new states.freeplay.FreeplayState());
 
         game.canResync = false;
         FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));

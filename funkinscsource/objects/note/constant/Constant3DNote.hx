@@ -197,7 +197,12 @@ class Constant3DNote extends ModchartArrow implements ICloneable<Constant3DNote>
     return value;
   }
 
-  public var isHoldEnd:Bool = false;
+  public var isHoldEnd(get, never):Bool;
+
+  function get_isHoldEnd():Bool
+  {
+    return (!isAnimationNull() && getAnimationName().endsWith('end'));
+  }
 
   // Quant Stuff
   public var quantColorsOnNotes:Bool = true;
@@ -761,8 +766,6 @@ class Constant3DNote extends ModchartArrow implements ICloneable<Constant3DNote>
     super.update(elapsed);
     daOffsetX = offsetX; // adjust modchart notes offset
     containsPixelTexture = ((texture.contains('pixel') || noteSkin.contains('pixel')) && !containsPixelTexture);
-
-    if (!isAnimationNull() && getAnimationName().endsWith('end')) isHoldEnd = true;
 
     if (mustPress)
     {
