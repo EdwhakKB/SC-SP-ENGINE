@@ -778,7 +778,7 @@ class Stage extends backend.stage.base.BaseStage
       try
       {
         var callValue = script.call(funcToCall, args);
-        var myValue:Dynamic = callValue.methodVal;
+        var myValue:Dynamic = callValue.signature;
 
         // compiler fuckup fix
         if ((myValue == LuaUtils.Function_StopHScript || myValue == LuaUtils.Function_StopAll)

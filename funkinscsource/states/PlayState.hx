@@ -2699,7 +2699,7 @@ class PlayState extends MusicBeatState
           {
             #if LUA_ALLOWED
             case 'lua':
-             addScript(Paths.getPath(script.folder + script.name), LUA);
+              addScript(Paths.getPath(script.folder + script.name), LUA);
             #end
             #if HSCRIPT_ALLOWED
             case 'psych-hx', 'psych-hxs', 'psych-hsc', 'psych-hscript':
@@ -7615,7 +7615,7 @@ class PlayState extends MusicBeatState
       try
       {
         var callValue = script.call(funcToCall, args);
-        var myValue:Dynamic = callValue.methodVal;
+        var myValue:Dynamic = callValue.signature;
 
         // compiler fuckup fix
         if ((myValue == LuaUtils.Function_StopHScript || myValue == LuaUtils.Function_StopAll)

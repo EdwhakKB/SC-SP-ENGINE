@@ -9,13 +9,6 @@ import psychlua.FunkinLua;
 #if HSCRIPT_ALLOWED
 import crowplexus.iris.Iris;
 
-typedef IrisCall =
-{
-  var methodName:String;
-  var methodReturn:Dynamic;
-  var methodVal:Dynamic;
-};
-
 class HScript extends Iris
 {
   public var isHxStage:Bool = false;
@@ -49,7 +42,7 @@ class HScript extends Iris
       hs.varsToBring = varsToBring;
       try
       {
-        hs.scriptStr = code;
+        hs.scriptCode = code;
         hs.execute();
       }
       catch (e:Dynamic)
@@ -74,7 +67,7 @@ class HScript extends Iris
 
     this.isHxStage = isHxStage;
 
-    super(null, {name: "hscript-iris", autoRun: false, preset: false});
+    super(null, {name: "hscript-iris", autoRun: false, autoPreset: false});
     #if LUA_ALLOWED
     parentLua = parent;
     if (parent != null)
@@ -104,7 +97,7 @@ class HScript extends Iris
         scriptThing = File.getContent(f);
       }
     }
-    this.scriptStr = scriptThing;
+    this.scriptCode = scriptThing;
 
     preset();
     execute();
@@ -528,7 +521,7 @@ class HScript extends Iris
     try
     {
       final callValue:IrisCall = call(funcToRun, funcArgs);
-      return callValue.methodVal;
+      return callValue.signature;
     }
     catch (e:Dynamic)
     {
@@ -555,8 +548,8 @@ class HScript extends Iris
           final retVal:IrisCall = funk.hscript.executeCode(funcToRun, funcArgs);
           if (retVal != null)
           {
-            return (retVal.methodVal == null
-              || LuaUtils.isOfTypes(retVal.methodVal, [Bool, Int, Float, String, Array])) ? retVal.methodVal : null;
+            return (retVal.signature == null
+              || LuaUtils.isOfTypes(retVal.signature, [Bool, Int, Float, String, Array])) ? retVal.signature : null;
           }
         }
         catch (e:Dynamic)
@@ -576,8 +569,8 @@ class HScript extends Iris
         final retVal:IrisCall = funk.hscript.executeFunction(funcToRun, funcArgs);
         if (retVal != null)
         {
-          return (retVal.methodVal == null
-            || LuaUtils.isOfTypes(retVal.methodVal, [Bool, Int, Float, String, Array])) ? retVal.methodVal : null;
+          return (retVal.signature == null
+            || LuaUtils.isOfTypes(retVal.signature, [Bool, Int, Float, String, Array])) ? retVal.signature : null;
         }
       }
       catch (e:Dynamic)
