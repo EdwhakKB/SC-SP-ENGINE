@@ -2,6 +2,7 @@ package psychlua;
 
 #if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
+import flixel.addons.system.macros.FlxRuntimeShaderMacro;
 #end
 import openfl.filters.ShaderFilter;
 import codenameengine.shaders.CustomShader;
@@ -580,7 +581,8 @@ class ShaderFunctions
       if (value != null)
       {
         @:privateAccess
-        value = value.replace("#pragma header", FlxRuntimeShader.BASE_FRAGMENT_HEADER).replace("#pragma body", FlxRuntimeShader.BASE_FRAGMENT_BODY);
+        value = value.replace("#pragma header", FlxRuntimeShaderMacro.retrieveMetadata('glFragmentHeader'))
+          .replace("#pragma body", FlxRuntimeShaderMacro.retrieveMetadata('glFragmentHeader'));
       }
       return value;
     }
