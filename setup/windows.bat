@@ -6,7 +6,7 @@ echo Installing dependencies.
 haxelib install lime
 haxelib install flixel-tools
 haxelib install hscript
-haxelib install hscript-iris 1.0.2
+haxelib install hscript-iris
 haxelib install tjson
 haxelib install hxgamejolt-api
 haxelib install markdown

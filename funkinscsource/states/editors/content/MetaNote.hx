@@ -26,7 +26,7 @@ class MetaNote extends Note
   {
     this.songData[1] = v;
     this.noteData = v % ChartingState.GRID_COLUMNS_PER_PLAYER;
-    this.mustPress = v <= 3;
+    this.mustPress = (v < ChartingState.GRID_COLUMNS_PER_PLAYER);
 
     loadNoteAnims(containsPixelTexture);
 
@@ -186,6 +186,7 @@ class MetaNote extends Note
   override function destroy()
   {
     sustainSprite = FlxDestroyUtil.destroy(sustainSprite);
+    endSprite = FlxDestroyUtil.destroy(endSprite);
     super.destroy();
   }
 }
@@ -193,6 +194,7 @@ class MetaNote extends Note
 class EventMetaNote extends MetaNote
 {
   public var eventText:FlxText;
+  public var eventDescription:String = "";
 
   public function new(time:Float, eventData:Dynamic)
   {

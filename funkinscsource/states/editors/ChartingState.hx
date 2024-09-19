@@ -69,7 +69,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
     ],
     [
       'Hey!',
-      "Plays the \"Hey!\" animation from Bopeebo,\nValue 1: BF / 0 = Only Boyfriend, GF / 1 = Only Girlfriend,\nDAD / 2 = Only Opponent\nMOM / 3 = Only SecondOpponent\n4 = All\nValue 2: Custom animation duration,\nleave it blank for 0.6s"
+      "Plays the \"Hey!\" animation from Bopeebo,\nValue 1: BF / 0 = Only Boyfriend, GF / 1 = Only Girlfriend,\nDAD / 2 = Only Opponent\nMOM / 3 = Only SecondOpponent\n4 = All\nValue 2: Custom animation duration,\nleave it blank for 0.6s\nValue 3: In case the character has another animation other then hey! or cheer!, custom animation here"
     ],
     [
       'Set GF Speed',
@@ -91,20 +91,24 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
       "Plays an animation on a Character,\nonce the animation is completed,\nthe animation changes to Idle\n\nValue 1: Animation to play.\nValue 2: Character (Dad, BF, GF)"
     ],
     [
-      'Camera Follow Pos',
-      "Value 1: X\nValue 2: Y\n\nThe camera won't change the follow point\nafter using this, for getting it back\nto normal, leave both values blank.\nValue 3: Camera zoom."
-    ],
-    [
       'Alt Idle Animation',
       "Sets a specified postfix after the idle animation name.\nYou can use this to trigger 'idle-alt' if you set\nValue 2 to -alt\n\nValue 1: Character to set (Dad, BF or GF)\nValue 2: New postfix (Leave it blank to disable)"
     ],
     [
-      'Screen Shake',
-      "Value 1: Camera shake\nValue 2: HUD shake\n\nEvery value works as the following example: \"1, 0.05\".\nThe first number (1) is the duration.\nThe second number (0.05) is the intensity."
+      'Reset Extra Arguments',
+      "Value 1: (Dad / 0, BF / 1, GF / 2, Mom / 4, Other Name), Resets Some Default Arguments If Changed."
     ],
     [
-      'Change Character',
-      "Value 1: Character to change (BF / 0, GF / 2, Dad / 1, Mom / 3, Other Name / Other Num = (Custom Character))\nValue 2: New character's name"
+      'Camera Follow Pos',
+      "Value 1: X\nValue 2: Y\n\nThe camera won't change the follow point\nafter using this, for getting it back\nto normal, leave both values blank.\nValue 3: Camera zoom."
+    ],
+    [
+      'Change Camera Props',
+      "Value 1: X, Y, Zoom (Split by ',' so, 100, 100, 1)\nValue 2: If it tweens the values (true or false)\nValue 3: Eases for values, X, Y, Zoom Tweens Ex. (Linear, Sine, ExpoIn) \nValue 4: Time for eases to happen (0.2, 0.3, 1.2)\nValue 5: 'disable' or leave blank to disable"
+    ],
+    [
+      'Screen Shake',
+      "Value 1: Camera shake\nValue 2: HUD shake\n\nEvery value works as the following example: \"1, 0.05\".\nThe first number (1) is the duration.\nThe second number (0.05) is the intensity."
     ],
     [
       'Change Scroll Speed',
@@ -116,8 +120,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
       "Value 1: Sound file name\nValue 2: Volume (Default: 1), ranges from 0 to 1"
     ],
     [
-      'Reset Extra Arguments',
-      "Value 1: (Dad / 0, BF / 1, GF / 2, Mom / 4, Other Name), Resets Some Default Arguments If Changed."
+      'Change Character',
+      "Value 1: Character to change (BF / 0, GF / 2, Dad / 1, Mom / 3, Other Name / Other Num = (Custom Character))\nValue 2: New character's name"
     ],
     ['Change Stage', "Value 1: Stage Name, Changes Stage to specified stage."],
     [
@@ -126,16 +130,24 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
     ],
     ['Remove Cinematic Bars', "Value 1: Time taken for bars to disappear"],
     [
-      'Change Camera Props',
-      "Value 1: X, Y, Zoom (Split by ',' so, 100, 100, 1)\nValue 2: If it tweens the values (true or false)\nValue 3: Eases for values, X, Y, Zoom Tweens Ex. (Linear, Sine, ExpoIn) \nValue 4: Time for eases to happen (0.2, 0.3, 1.2)"
-    ],
-    [
       "Default Camera Flash",
       "Value 1: Color Ex. FFFFFF\nValue 2: Time for flash to last\nValue 3: Camera Ex. camGame\nValue 4: Alpha of flash (how visible the flashSprite is)"
     ],
     [
-      "Default Set Cam Zoom",
+      "Default Set Camera Zoom",
       "Value 1: Zoom For Camera\nValue 2: Time it may take (optional, leave blank for instant affect)"
+    ],
+    [
+      "Default Set Camera Bop",
+      "Value 1: if not null, changes the bop multiplier (intensity of camera zoom bop)\nValue 2: if not null, changes the rate multiplier (rate of camera zoom bop)\nValue 3: if not null, changes bop or intensity variable to step, beat, or sec/section"
+    ],
+    [
+      "Set Camera Target",
+      "Value 1: the target the camera targets\nValue 2: if force the change on target? (true or false)"
+    ],
+    [
+      "Set Camera Bop Type",
+      "Value 1: if not null, changes bop intensity\nValue 2: if not null, changes bop rate multipler\nValue 3: if not null, bopping on step, beat, or section variables change"
     ]
   ];
 
@@ -1345,7 +1357,10 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
         {
           var closeNotes:Array<MetaNote> = curRenderedNotes.members.filter(function(note:MetaNote) {
             var chartY:Float = FlxG.mouse.y - note.chartY;
-            return ((note.isEvent && noteData < 0) || note.songData[1] == noteData) && chartY >= 0 && chartY < GRID_SIZE;
+            return ((note.isEvent && noteData < 0)
+              || (!note.isEvent && note.songData[1] == noteData))
+              && chartY >= 0
+              && chartY < GRID_SIZE;
           });
           closeNotes.sort(function(a:MetaNote, b:MetaNote) return Math.abs(a.strumTime - FlxG.mouse.y) < Math.abs(b.strumTime - FlxG.mouse.y) ? 1 : -1);
 
@@ -1614,12 +1629,19 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
     var pushedNotes:Array<MetaNote> = [];
     var pushedEvents:Array<EventMetaNote> = [];
     movingNotes.forEachAlive(function(note:MetaNote) {
-      notes.push(note);
-      if (!note.isEvent) pushedNotes.push(note);
+      if (!note.isEvent)
+      {
+        notes.push(note);
+        pushedNotes.push(note);
+      }
       else
+      {
+        events.push(cast(note, EventMetaNote));
         pushedEvents.push(cast(note, EventMetaNote));
+      }
     });
     notes.sort(PlayState.sortByTime);
+    events.sort(PlayState.sortByTime);
     movingNotes.clear();
     isMovingNotes = false;
     softReloadNotes();
@@ -1872,9 +1894,19 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
     try
     {
-      FlxG.sound.playMusic(Paths.inst((PlayState.SONG.options.instrumentalPrefix != null ? PlayState.SONG.options.instrumentalPrefix : ''),
-        PlayState.SONG.songId, (PlayState.SONG.options.instrumentalSuffix != null ? PlayState.SONG.options.instrumentalSuffix : '')),
-        0);
+      final currentPrefix:String = (PlayState.SONG.options.instrumentalPrefix != null ? PlayState.SONG.options.instrumentalPrefix : '');
+      final currentSuffix:String = (PlayState.SONG.options.vocalsSuffix != null ? PlayState.SONG.options.instrumentalSuffix : '');
+      final instSound = SoundUtil.findVocalOrInst((PlayState.SONG._extraData != null
+        && PlayState.SONG._extraData._instSettings != null) ? PlayState.SONG._extraData._instSettings :
+          {
+            song: PlayState.SONG.songId,
+            prefix: currentPrefix,
+            suffix: currentSuffix,
+            externVocal: "",
+            character: "",
+            difficulty: Difficulty.getString()
+          }, 'INST');
+      FlxG.sound.playMusic(instSound, 0);
       FlxG.sound.music.pause();
       FlxG.sound.music.time = time;
       FlxG.sound.music.onComplete = (function() songFinished = true);
@@ -1895,15 +1927,16 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
         final currentSuffix:String = (PlayState.SONG.options.vocalsSuffix != null ? PlayState.SONG.options.vocalsSuffix : '');
         final vocalPl:String = (characterData.vocalsP1 == null || characterData.vocalsP1.length < 1) ? 'Player' : characterData.vocalsP1;
         final normalVocals:Sound = Paths.voices(currentPrefix, PlayState.SONG.songId, currentSuffix);
-        var playerVocals:Sound = SoundUtil.findVocal(
-          {
-            song: PlayState.SONG.songId,
-            prefix: currentPrefix,
-            suffix: currentSuffix,
-            externVocal: vocalPl,
-            character: characterData.vocalsP1,
-            difficulty: Difficulty.getString()
-          });
+        var playerVocals:Sound = SoundUtil.findVocalOrInst((PlayState.SONG._extraData != null
+          && PlayState.SONG._extraData._vocalSettings != null) ? PlayState.SONG._extraData._vocalSettings :
+            {
+              song: PlayState.SONG.songId,
+              prefix: currentPrefix,
+              suffix: currentSuffix,
+              externVocal: vocalPl,
+              character: characterData.vocalsP1,
+              difficulty: Difficulty.getString()
+            });
         vocals.loadEmbedded(playerVocals != null ? playerVocals : normalVocals);
         vocals.volume = 0;
         vocals.play();
@@ -1911,15 +1944,16 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
         vocals.time = time;
 
         final vocalOp:String = (characterData.vocalsP2 == null || characterData.vocalsP2.length < 1) ? 'Opponent' : characterData.vocalsP2;
-        var oppVocals:Sound = SoundUtil.findVocal(
-          {
-            song: PlayState.SONG.songId,
-            prefix: currentPrefix,
-            suffix: currentSuffix,
-            externVocal: vocalOp,
-            character: characterData.vocalsP2,
-            difficulty: Difficulty.getString()
-          });
+        var oppVocals:Sound = SoundUtil.findVocalOrInst((PlayState.SONG._extraData != null
+          && PlayState.SONG._extraData._vocalOppSettings != null) ? PlayState.SONG._extraData._vocalOppSettings :
+            {
+              song: PlayState.SONG.songId,
+              prefix: currentPrefix,
+              suffix: currentSuffix,
+              externVocal: vocalOp,
+              character: characterData.vocalsP2,
+              difficulty: Difficulty.getString()
+            });
         if (oppVocals != null && oppVocals.length > 0)
         {
           opponentVocals.loadEmbedded(oppVocals);
@@ -2894,6 +2928,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
         }
         else if (selectedNotes.length == 1) selectedNotes[0].setSustainLength(susLengthStepper.value, Conductor.stepCrochet, curZoom);
         susLengthLastVal = susLengthStepper.value;
+        FlxG.sound.play(Paths.sound('chartingSounds/stretchSNAP_UI'), 0.7);
       }
     };
 
@@ -2909,6 +2944,8 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
         note.strumTime = Math.max(-5000, strumTimeStepper.value + (note.strumTime - firstTime));
         positionNoteYOnTime(note, curSec);
+
+        if (note.isEvent) cast(note, EventMetaNote).updateEventText();
       }
       softReloadNotes();
     };
@@ -3140,25 +3177,21 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
       pasteCopiedNotesToSection(affectNotes.checked, affectEvents.checked);
     });
     var clearButton:PsychUIButton = new PsychUIButton(objX + 200, objY, 'Clear', function() {
-      if (affectNotes.checked)
+      for (note in curRenderedNotes)
       {
-        for (note in curRenderedNotes)
-        {
-          if (note == null || note.isEvent) continue;
+        if (note == null) continue;
 
-          selectedNotes.remove(note);
+        if (!note.isEvent && affectNotes.checked)
+        {
           notes.remove(note);
+          trace('removed normal note');
         }
-      }
-      if (affectEvents.checked)
-      {
-        for (event in curRenderedNotes)
+        if (note.isEvent && affectEvents.checked)
         {
-          if (event == null || !event.isEvent) continue;
-
-          selectedNotes.remove(event);
-          events.remove(cast(event, EventMetaNote));
+          events.remove(cast(note, EventMetaNote));
+          trace('removed event note');
         }
+        selectedNotes.remove(note);
       }
       softReloadNotes(true);
     });
@@ -5107,6 +5140,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
       case SELECT_NOTE:
         resetSelectedNotes();
         selectedNotes = action.data.old;
+        if (lockedEvents) selectedNotes = selectedNotes.filter((note:MetaNote) -> !note.isEvent);
         onSelectNote();
     }
     showOutput('Undo #${currentUndo + 1}: ${action.action}');
@@ -5140,6 +5174,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
       case SELECT_NOTE:
         resetSelectedNotes();
         selectedNotes = action.data.current;
+        if (lockedEvents) selectedNotes = selectedNotes.filter((note:MetaNote) -> !note.isEvent);
         onSelectNote();
     }
     showOutput('Redo #${currentUndo + 1}: ${action.action}');
@@ -5178,20 +5213,27 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
   function actionRemoveNotes(dataNotes:Array<MetaNote>, dataEvents:Array<EventMetaNote>)
   {
-    if (dataNotes != null && dataNotes.length > 0) for (note in dataNotes)
-      if (note != null)
+    {
+      for (note in dataNotes)
       {
-        notes.remove(note);
-        selectedNotes.remove(note);
+        if (note != null)
+        {
+          notes.remove(note);
+          selectedNotes.remove(note);
+        }
       }
-
-    if (dataEvents != null && dataEvents.length > 0) for (event in dataEvents)
-      if (event != null)
+    }
+    if (dataEvents != null && dataEvents.length > 0)
+    {
+      for (event in dataEvents)
       {
-        events.remove(event);
-        selectedNotes.remove(event);
+        if (event != null)
+        {
+          trace(events.remove(event));
+          selectedNotes.remove(event);
+        }
       }
-
+    }
     softReloadNotes();
   }
 

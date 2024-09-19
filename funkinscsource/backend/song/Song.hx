@@ -10,6 +10,7 @@ class Song
 {
   public var song:String;
   public var songId:String;
+  public var displayName:String;
 
   public var notes:Array<SwagSection>;
   public var events:Array<Dynamic>;
@@ -24,6 +25,8 @@ class Song
   public var options:OptionsData;
   public var gameOverData:GameOverData;
   public var characters:CharacterData;
+
+  public var extraData:Dynamic;
 
   public static function convert(songJson:Dynamic) // Convert old charts to psych_v1 format
   {
@@ -86,6 +89,8 @@ class Song
   public static var chartPath:String;
   public static var loadedSongName:String;
   public static var formattedSongName:String;
+  public static var displayedName:String;
+  public static var formattedDisplayedName:String;
 
   public static function loadFromJson(jsonInput:String, ?folder:String):SwagSong
   {
@@ -97,25 +102,27 @@ class Song
     Debug.logInfo(_lastPath);
     Debug.logInfo(chartPath);
     StageData.loadDirectory(PlayState.SONG);
+    displayedName = PlayState.SONG.displayName != null ? PlayState.SONG.displayName : folder;
+    formattedDisplayedName = PlayState.SONG.displayName != null ? Paths.formatToSongPath(displayedName, '') : Paths.formatToSongPath(PlayState.SONG.songId, '');
     return PlayState.SONG;
   }
 
   static var _lastPath:String;
 
-  public static function getChart(jsonInput:String, ?folder:String):SwagSong
+  public static function getChart(jsonInput:String, ?folder:String, ?isExternal:Bool = false):SwagSong
   {
     if (folder == null) folder = jsonInput;
     var rawData:String = null;
 
-    var formattedFolder:String = Paths.formatToSongPath(folder);
-    var formattedSong:String = Paths.formatToSongPath(jsonInput);
-    _lastPath = Paths.json('songs/$formattedFolder/$formattedSong');
+    var formattedFolder:String = Paths.formatToSongPath(folder, isExternal ? '' : 'lowercased');
+    var formattedSong:String = Paths.formatToSongPath(jsonInput, isExternal ? '' : 'lowercased');
+    _lastPath = isExternal ? Paths.getPath('$formattedFolder$formattedSong.json') : Paths.json('songs/$formattedFolder/$formattedSong');
+    Debug.logInfo('$_lastPath');
     #if MODS_ALLOWED
     if (FileSystem.exists(_lastPath)) rawData = File.getContent(_lastPath);
     else
     #end
     rawData = Assets.getText(_lastPath);
-
     return rawData != null ? parseJSON(rawData, jsonInput) : null;
   }
 
@@ -146,6 +153,10 @@ class Song
     }
 
     processSongDataToSCEData(songJson);
+
+    var sectionsData:Array<SwagSection> = songJson.notes;
+    if (sectionsData != null) for (i => sections in sectionsData)
+      sections.index = i;
     return songJson;
   }
 

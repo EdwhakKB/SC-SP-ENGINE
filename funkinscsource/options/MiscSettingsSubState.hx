@@ -38,8 +38,11 @@ class MiscSettingsSubState extends BaseOptionsMenu
       BOOL);
     addOption(option);
 
-    var option:Option = new Option('Results Screen Type', "Choose if you have a results screen, if choosen, choose what type.", 'resultsScreenType', STRING,
-      ['NONE', 'KADE']);
+    var resultArray:Array<String> = ['NONE', 'KADE'];
+
+    #if BASE_GAME_FILES resultArray.push('VSLICE'); #end
+    var option:Option = new Option('Behavior Engine Type', "May change resultsScreen and/or may change state switching transitions!", 'behaviourType', STRING,
+      resultArray);
     addOption(option);
 
     var option:Option = new Option('Clear Logs Folder On TitleState', "Clear the 'logs' folder", 'clearFolderOnStart', BOOL);

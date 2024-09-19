@@ -50,13 +50,6 @@ enum abstract FileInstance(String) to String from String
 
 class FunkinLua
 {
-  public static var Function_Stop:Dynamic = "##PSYCHLUA_FUNCTIONSTOP";
-  public static var Function_Continue:Dynamic = "##PSYCHLUA_FUNCTIONCONTINUE";
-  public static var Function_StopLua:Dynamic = "##PSYCHLUA_FUNCTIONSTOPLUA";
-
-  public static var Function_StopHScript:Dynamic = "##PSYCHLUA_FUNCTIONSTOPHSCRIPT";
-  public static var Function_StopAll:Dynamic = "##PSYCHLUA_FUNCTIONSTOPALL";
-
   public var lua:State = null;
   public var camTarget:FlxCamera;
   public var modFolder:String = null;
@@ -1153,11 +1146,24 @@ class FunkinLua
           FlxTransitionableState.skipNextTransOut = true;
         }
 
-        if (PlayState.isStoryMode) MusicBeatState.switchState(new StoryMenuState());
+        if (ClientPrefs.data.behaviourType != 'VSLICE')
+        {
+          if (PlayState.isStoryMode) MusicBeatState.switchState(new StoryMenuState());
+          else
+            MusicBeatState.switchState(new states.freeplay.FreeplayState());
+        }
+        #if BASE_GAME_FILES
         else
-          MusicBeatState.switchState(new states.freeplay.FreeplayState());
-
-        #if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
+        {
+          if (PlayState.isStoryMode)
+          {
+            PlayState.storyPlaylist = [];
+            game.openSubState(new vslice.transition.StickerSubState(null, (sticker) -> new StoryMenuState(sticker)));
+          }
+          else
+            game.openSubState(new vslice.transition.StickerSubState(null, (sticker) -> new states.freeplay.FreeplayState(sticker)));
+        }
+        #end
 
         FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
         PlayState.changedDifficulty = false;
@@ -1165,7 +1171,6 @@ class FunkinLua
         PlayState.modchartMode = false;
         game.transitioning = true;
         FlxG.camera.followLerp = 0;
-        Mods.loadTopMod();
         if (PlayState.forceMiddleScroll)
         {
           if (PlayState.savePrefixScrollR && PlayState.prefixRightScroll)
@@ -2036,7 +2041,10 @@ class FunkinLua
         FlxG.sound.play(Paths.sound(sound), volume);
       });
       set("stopSound", function(tag:String) {
-        if (tag == null || tag.length < 1) if (FlxG.sound.music != null) FlxG.sound.music.stop();
+        if (tag == null || tag.length < 1)
+        {
+          if (FlxG.sound.music != null) FlxG.sound.music.stop();
+        }
         else
         {
           tag = LuaUtils.checkVariable(tag, 'sound_');
@@ -2050,7 +2058,10 @@ class FunkinLua
         }
       });
       set("pauseSound", function(tag:String) {
-        if (tag == null || tag.length < 1) if (FlxG.sound.music != null) FlxG.sound.music.pause();
+        if (tag == null || tag.length < 1)
+        {
+          if (FlxG.sound.music != null) FlxG.sound.music.pause();
+        }
         else
         {
           tag = LuaUtils.checkVariable(tag, 'sound_');
@@ -2059,7 +2070,10 @@ class FunkinLua
         }
       });
       set("resumeSound", function(tag:String) {
-        if (tag == null || tag.length < 1) if (FlxG.sound.music != null) FlxG.sound.music.play();
+        if (tag == null || tag.length < 1)
+        {
+          if (FlxG.sound.music != null) FlxG.sound.music.play();
+        }
         else
         {
           tag = LuaUtils.checkVariable(tag, 'sound_');

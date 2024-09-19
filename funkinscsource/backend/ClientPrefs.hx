@@ -159,7 +159,7 @@ import states.TitleState;
 
   public var popupScoreForOp:Bool = true;
 
-  public var resultsScreenType:String = 'NONE';
+  public var behaviourType:String = 'NONE';
 
   public var systemUserName:String = "";
 

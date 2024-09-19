@@ -227,7 +227,7 @@ class FunkinSCSprite extends FlxSkewed
       _lastPlayedAnimation = AnimName;
 
       var daOffset = this.getAnimOffset(AnimName);
-      if (daOffset != null && daOffset.length > 1) this.offset.set(daOffset[0], daOffset[1]);
+      if (daOffset != null && daOffset.length > 1) this.offset.set(daOffset[0] * scale.x, daOffset[1] * scale.y);
     }
   }
 
@@ -401,10 +401,10 @@ class FunkinSCSprite extends FlxSkewed
 
   override public function destroy()
   {
-    this.animOffsets.clear();
+    if (this.animOffsets != null) this.animOffsets.clear();
 
     #if flxanimate
-    this.atlas = flixel.util.FlxDestroyUtil.destroy(this.atlas);
+    if (this.atlas != null) this.atlas = flixel.util.FlxDestroyUtil.destroy(this.atlas);
     #end
     super.destroy();
   }

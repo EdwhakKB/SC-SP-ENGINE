@@ -16,6 +16,7 @@ import objects.CoolText;
 import substates.GameplayChangersSubstate;
 import substates.ResetScoreSubState;
 import utils.SoundUtil;
+import states.freeplay.FreeplaySongMetaData;
 
 class FreeplayState extends MusicBeatState
 {
@@ -62,11 +63,11 @@ class FreeplayState extends MusicBeatState
   var lerpSelected:Float = 0;
   var curDifficulty:Int = -1;
 
-  var lerpScore:Int = 0;
-  var lerpRating:Float = 0;
+  var lerpScore:Int;
+  var lerpAccuracy:Float = 0;
   var intendedScore:Int = 0;
-  var intendedRating:Float = 0;
-  var letter:String;
+  var intendedAccuracy:Float = 0;
+  var rating:String;
   var combo:String = 'N/A';
 
   var missingTextBG:FlxSprite;
@@ -79,11 +80,21 @@ class FreeplayState extends MusicBeatState
   var grid:FlxBackdrop;
   var player:MusicPlayer;
 
+  #if BASE_GAME_FILES
+  var stickerSubState:vslice.transition.StickerSubState;
+
+  public function new(?stickers:vslice.transition.StickerSubState)
+  {
+    if (stickers != null) stickerSubState = stickers;
+    super();
+  }
+  #end
+
   override function create()
   {
     instance = this;
-    Paths.clearStoredMemory();
-    Paths.clearUnusedMemory();
+    Paths.clearStoredMemory(#if BASE_GAME_FILES if (stickerSubState == null) "All" else "Sound" #else "All" #end);
+    Paths.clearUnusedMemory(#if BASE_GAME_FILES if (stickerSubState == null) true else false #else true #end);
 
     persistentUpdate = true;
     PlayState.isStoryMode = false;
@@ -100,6 +111,14 @@ class FreeplayState extends MusicBeatState
       }));
       return;
     }
+
+    #if BASE_GAME_FILES
+    if (stickerSubState != null)
+    {
+      openSubState(stickerSubState);
+      stickerSubState.degenStickers();
+    }
+    #end
 
     #if DISCORD_ALLOWED
     // Updating Discord Rich Presence
@@ -135,12 +154,14 @@ class FreeplayState extends MusicBeatState
       WeekData.setDirectoryFromWeek(leWeek);
       for (song in leWeek.songs)
       {
-        var colors:Array<Int> = song[2];
-        if (colors == null || colors.length < 3)
-        {
-          colors = [146, 113, 253];
-        }
-        addSong(song[0], i, song[1], FlxColor.fromRGB(colors[0], colors[1], colors[2]));
+        addSong(
+          {
+            song: song[0],
+            week: i,
+            songCharacter: song[1],
+            color: (song[2] == null || song[2].length < 3) ? FlxColor.fromRGB(146, 113, 253) : FlxColor.fromRGB(song[2][0], song[2][1], song[2][2]),
+            blockOpponentMode: song[3] != null ? song[3] : false
+          });
       }
     }
     Mods.loadTopMod();
@@ -289,13 +310,14 @@ class FreeplayState extends MusicBeatState
     opponentMode = ClientPrefs.getGameplaySetting('opponent');
     opponentText.text = "OPPONENT MODE: " + (opponentMode ? "ON" : "OFF");
     opponentText.updateHitbox();
+    changeDiff(0);
     persistentUpdate = true;
     super.closeSubState();
   }
 
-  public function addSong(songName:String, weekNum:Int, songCharacter:String, color:Int)
+  public function addSong(songMetaData:SongFreeplayMeta = null)
   {
-    songs.push(new FreeplaySongMetaData(songName, weekNum, songCharacter, color));
+    if (songMetaData != null) songs.push(new FreeplaySongMetaData(songMetaData));
   }
 
   function weekIsLocked(name:String):Bool
@@ -335,7 +357,7 @@ class FreeplayState extends MusicBeatState
     #end
 
     lerpScore = Math.floor(FlxMath.lerp(intendedScore, lerpScore, Math.exp(-elapsed * 24)));
-    lerpRating = FlxMath.lerp(intendedRating, lerpRating, Math.exp(-elapsed * 12));
+    lerpAccuracy = FlxMath.lerp(intendedAccuracy, lerpAccuracy, Math.exp(-elapsed * 12));
 
     if (player != null && player.playingMusic)
     {
@@ -373,6 +395,8 @@ class FreeplayState extends MusicBeatState
     if (!player.playingMusic)
     {
       if (FlxG.camera.zoom != 1) FlxG.camera.zoom = 1;
+      if (grid.velocity.x != -90) grid.velocity.x = -90;
+      if (grid.velocity.y != 90) grid.velocity.y = 90;
       #if DISCORD_ALLOWED
       DiscordClient.changePresence('Searching to play song - Freeplay Menu', null);
       #end
@@ -400,9 +424,9 @@ class FreeplayState extends MusicBeatState
     bg.offset.set();
 
     if (Math.abs(lerpScore - intendedScore) <= 10) lerpScore = intendedScore;
-    if (Math.abs(lerpRating - intendedRating) <= 0.01) lerpRating = intendedRating;
+    if (Math.abs(lerpAccuracy - intendedAccuracy) <= 0.01) lerpAccuracy = intendedAccuracy;
 
-    var ratingSplit:Array<String> = Std.string(CoolUtil.floorDecimal(lerpRating * 100, 2)).split('.');
+    var ratingSplit:Array<String> = Std.string(CoolUtil.floorDecimal(lerpAccuracy * 100, 2)).split('.');
     if (ratingSplit.length < 2) // No decimals, add an empty space
       ratingSplit.push('');
 
@@ -419,13 +443,13 @@ class FreeplayState extends MusicBeatState
     }
     else
     {
-      comboText.text = Language.getPhrase('fp_ranking', "RANK: {1} | {2} ({3}" + "%)\n", [letter, combo, ratingSplit.join('.')]);
+      comboText.text = Language.getPhrase('fp_ranking', "RANK: {1} | {2} ({3}" + "%)\n", [rating, combo, ratingSplit.join('.')]);
       comboText.alpha = 1;
     }
 
     comboText.updateHitbox();
 
-    opponentMode = ClientPrefs.getGameplaySetting('opponent');
+    opponentMode = (ClientPrefs.getGameplaySetting('opponent') && !songs[curSelected].blockOpponentMode);
     opponentText.text = Language.getPhrase('fp_opponent_mode', "OPPONENT MODE: {1}", [opponentMode ? "ON" : "OFF"]);
     opponentText.updateHitbox();
 
@@ -565,7 +589,7 @@ class FreeplayState extends MusicBeatState
     else if (controls.RESET && !player.playingMusic)
     {
       persistentUpdate = false;
-      openSubState(new ResetScoreSubState(songs[curSelected].songName, curDifficulty, songs[curSelected].songCharacter));
+      openSubState(new ResetScoreSubState(songs[curSelected].songName, curDifficulty, songs[curSelected].songCharacter, -1, opponentMode));
       FlxG.sound.play(Paths.sound('scrollMenu'));
     }
     else
@@ -692,7 +716,7 @@ class FreeplayState extends MusicBeatState
 
           Mods.currentModDirectory = songs[curSelected].folder;
 
-          var poop:String = Highscore.formatSong(songs[curSelected].songName.toLowerCase(), curDifficulty);
+          var poop:String = Highscore.formatSong(songs[curSelected].songName, curDifficulty);
           Song.loadFromJson(poop, songs[curSelected].songName.toLowerCase());
           curInstPlayingtxt = instPlayingtxt = songs[curSelected].songName.toLowerCase();
 
@@ -708,15 +732,16 @@ class FreeplayState extends MusicBeatState
               final vocalPl:String = getFromCharacter(PlayState.SONG.characters.player).vocals_file;
               final vocalSuffix:String = (vocalPl != null && vocalPl.length > 0) ? vocalPl : 'Player';
               final normalVocals = Paths.voices(currentPrefix, songPath, currentSuffix);
-              var loadedPlayerVocals = SoundUtil.findVocal(
-                {
-                  song: songPath,
-                  prefix: currentPrefix,
-                  suffix: currentSuffix,
-                  externVocal: vocalSuffix,
-                  character: PlayState.SONG.characters.player,
-                  difficulty: Difficulty.getString(curDifficulty)
-                });
+              var loadedPlayerVocals = SoundUtil.findVocalOrInst((PlayState.SONG._extraData != null
+                && PlayState.SONG._extraData._vocalSettings != null) ? PlayState.SONG._extraData._vocalSettings :
+                  {
+                    song: songPath,
+                    prefix: currentPrefix,
+                    suffix: currentSuffix,
+                    externVocal: vocalSuffix,
+                    character: PlayState.SONG.characters.player,
+                    difficulty: Difficulty.getString(curDifficulty)
+                  });
               if (loadedPlayerVocals == null && normalVocals != null) loadedPlayerVocals = normalVocals;
 
               if (loadedPlayerVocals != null && loadedPlayerVocals.length > 0)
@@ -742,15 +767,16 @@ class FreeplayState extends MusicBeatState
             {
               final vocalOp:String = getFromCharacter(PlayState.SONG.characters.opponent).vocals_file;
               final vocalSuffix:String = (vocalOp != null && vocalOp.length > 0) ? vocalOp : 'Opponent';
-              var loadedVocals = SoundUtil.findVocal(
-                {
-                  song: songPath,
-                  prefix: currentPrefix,
-                  suffix: currentSuffix,
-                  externVocal: vocalSuffix,
-                  character: PlayState.SONG.characters.opponent,
-                  difficulty: Difficulty.getString(curDifficulty)
-                });
+              var loadedVocals = SoundUtil.findVocalOrInst((PlayState.SONG._extraData != null
+                && PlayState.SONG._extraData._vocalOppSettings != null) ? PlayState.SONG._extraData._vocalOppSettings :
+                  {
+                    song: songPath,
+                    prefix: currentPrefix,
+                    suffix: currentSuffix,
+                    externVocal: vocalSuffix,
+                    character: PlayState.SONG.characters.opponent,
+                    difficulty: Difficulty.getString(curDifficulty)
+                  });
               if (loadedVocals != null && loadedVocals.length > 0)
               {
                 opponentVocals = new FlxSound().loadEmbedded(loadedVocals);
@@ -773,9 +799,19 @@ class FreeplayState extends MusicBeatState
 
           try
           {
-            inst = new FlxSound().loadEmbedded(Paths.inst((PlayState.SONG.options.instrumentalPrefix != null ? PlayState.SONG.options.instrumentalPrefix : ''),
-              songPath,
-              (PlayState.SONG.options.instrumentalSuffix != null ? PlayState.SONG.options.instrumentalSuffix : '')));
+            final currentPrefix:String = (PlayState.SONG.options.instrumentalPrefix != null ? PlayState.SONG.options.instrumentalPrefix : '');
+            final currentSuffix:String = (PlayState.SONG.options.instrumentalSuffix != null ? PlayState.SONG.options.instrumentalSuffix : '');
+            final instSound = SoundUtil.findVocalOrInst((PlayState.SONG._extraData != null
+              && PlayState.SONG._extraData._instSettings != null) ? PlayState.SONG._extraData._instSettings :
+                {
+                  song: songPath,
+                  prefix: currentPrefix,
+                  suffix: currentSuffix,
+                  externVocal: "",
+                  character: "",
+                  difficulty: Difficulty.getString(curDifficulty)
+                }, 'INST');
+            inst = new FlxSound().loadEmbedded(instSound);
             inst.volume = 0;
             add(inst);
           }
@@ -891,11 +927,12 @@ class FreeplayState extends MusicBeatState
     #end
     curDifficulty = FlxMath.wrap(curDifficulty + change, 0, Difficulty.list.length - 1);
 
+    final songData = Highscore.getSongScore(songs[curSelected].songName, curDifficulty, opponentMode);
     #if ! switch
-    intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty);
-    intendedRating = Highscore.getRating(songs[curSelected].songName, curDifficulty);
-    combo = Highscore.getCombo(songs[curSelected].songName, curDifficulty);
-    letter = Highscore.getLetter(songs[curSelected].songName, curDifficulty);
+    intendedScore = songData.mainData.score;
+    intendedAccuracy = songData.rankData.accuracy;
+    combo = songData.rankData.comboRank;
+    rating = songData.rankData.rating;
     #end
 
     lastDifficultyName = Difficulty.getString(curDifficulty, false);

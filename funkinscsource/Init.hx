@@ -17,7 +17,6 @@ class Init extends FlxState
   override function create()
   {
     FlxTransitionableState.skipNextTransOut = true;
-    Paths.clearStoredMemory();
 
     // Run this first so we can see logs.
     Debug.onInitProgram();

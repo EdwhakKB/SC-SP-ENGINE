@@ -3,11 +3,11 @@
 
 --Lua Stuff
 	local LuaStuff = {
-		'Function_StopLua', "Dynamic", "##PSYCHLUA_FUNCTIONSTOPLUA", "Stops Lua",
-		'Function_StopHScript', "Dynamic", "##PSYCHLUA_FUNCTIONSTOPHSCRIPT", "Stops HScript",
-		'Function_StopAll', "Dynamic", "##PSYCHLUA_FUNCTIONSTOPALL", "Stops Everything",
-		'Function_Stop', "Dynamic", "##PSYCHLUA_FUNCTIONSTOP" "Function to Stop",
-		'Function_Continue', "Dynamic", "##PSYCHLUA_FUNCTIONCONTINUE", "Function to Continue",
+		'Function_StopLua', "String", "##PSYCHLUA_FUNCTIONSTOPLUA", "Stops Lua",
+		'Function_StopHScript', "String", "##PSYCHLUA_FUNCTIONSTOPHSCRIPT", "Stops HScript",
+		'Function_StopAll', "String", "##PSYCHLUA_FUNCTIONSTOPALL", "Stops Everything",
+		'Function_Stop', "String", "##PSYCHLUA_FUNCTIONSTOP" "Function to Stop",
+		'Function_Continue', "String", "##PSYCHLUA_FUNCTIONCONTINUE", "Function to Continue",
 		'luaDebugMode', "Boolean", "false", "uses DebugMode?",
 		'luaDeprecatedWarnings', "Boolean", "true", "uses DeprecatedWarnings?",
 		'inChartEditor', "Boolean", "false", "in Chart Editor?",

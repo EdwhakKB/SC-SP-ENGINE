@@ -40,6 +40,7 @@ class BaseStage extends FlxBasic
   public var camFollow(get, never):FlxObject;
 
   public var stage:Stage = null;
+  public var stageZoom:Float = 1.05;
 
   // main callbacks
   public function buildStage(baseStage:Stage) {}

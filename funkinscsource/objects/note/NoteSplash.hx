@@ -49,7 +49,8 @@ class NoteSplash extends FunkinSCSprite
 
   function get_containedPixelTexture():Bool
   {
-    return (skin.contains('pixel') || babyArrow.texture.contains('pixel') || styleChoice.contains('pixel'));
+    var isPixel:Bool = (skin.contains('pixel') || babyArrow.texture.contains('pixel') || styleChoice.contains('pixel'));
+    return isPixel;
   }
 
   public var opponentSplashes:Bool = false;
@@ -270,6 +271,7 @@ class NoteSplash extends FunkinSCSprite
           useDefault();
       }
     }
+    if (config.allowPixel) rgbShader.containsPixel = containedPixelTexture || PlayState.isPixelStage;
     if (!config.allowPixel) rgbShader.containsPixel = false;
     rgbShader.copyValues(tempShader);
     if (!config.allowPixel) rgbShader.pixelSize = 1;

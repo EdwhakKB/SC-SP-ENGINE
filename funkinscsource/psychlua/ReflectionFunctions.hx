@@ -189,7 +189,7 @@ class ReflectionFunctions
           return false;
         }
 
-        var obj:Dynamic = Type.createInstance(myType, args);
+        var obj:Dynamic = Type.createInstance(myType, parseInstances(args));
         if (obj != null) MusicBeatState.getVariables().set(variableToSave, obj);
         else
           FunkinLua.luaTrace('createInstance: Failed to create $variableToSave, arguments are possibly wrong.', false, false, FlxColor.RED);

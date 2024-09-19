@@ -321,7 +321,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
           spr.scale.set(character.scale.x, character.scale.y);
           spr.updateHitbox();
 
-          spr.offset.set(character.offset.x * spr.scale.x, spr.offset.y * spr.scale.y);
+          spr.offset.set(character.offset.x, spr.offset.y);
           spr.visible = true;
 
           var otherSpr:FlxSprite = #if flxanimate (spr == animateGhost) ? ghost : animateGhost #else ghost #end;

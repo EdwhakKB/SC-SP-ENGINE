@@ -543,10 +543,8 @@ class Script extends FlxBasic implements IFlxDestroyable
   /**
    * PRIVATE HANDLERS - DO NOT TOUCH
    */
-  private function onCall(func:String, parameters:Array<Dynamic>):Dynamic
-  {
+  private function onCall(func:String = null, parameters:Array<Dynamic> = null):Dynamic
     return null;
-  }
 
   public function onCreate(path:String) {}
 

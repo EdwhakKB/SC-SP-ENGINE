@@ -407,14 +407,16 @@ class PauseSubState extends MusicBeatSubState
         game.practiceMode = !game.practiceMode;
         PlayState.changedDifficulty = true;
         practiceText.visible = game.practiceMode;
-      case "Restart Song":
+      case "Restart Song", "Leave Charting Mode", "Leave ModChart Mode":
         LoadingState.loadAndSwitchState(new PlayState());
-      case "Leave Charting Mode":
-        LoadingState.loadAndSwitchState(new PlayState());
-        PlayState.chartingMode = false;
-      case "Leave ModChart Mode":
-        LoadingState.loadAndSwitchState(new PlayState());
-        PlayState.modchartMode = false;
+
+        switch (daSelected)
+        {
+          case "Leave Charting Mode":
+            PlayState.chartingMode = false;
+          case "Leave ModChart Mode":
+            PlayState.modchartMode = false;
+        }
       case 'Skip Time':
         if (curTime < Conductor.songPosition)
         {
@@ -453,9 +455,24 @@ class PauseSubState extends MusicBeatSubState
 
         Mods.loadTopMod();
 
-        if (PlayState.isStoryMode) MusicBeatState.switchState(new StoryMenuState());
+        if (ClientPrefs.data.behaviourType != 'VSLICE')
+        {
+          if (PlayState.isStoryMode) MusicBeatState.switchState(new StoryMenuState());
+          else
+            MusicBeatState.switchState(new states.freeplay.FreeplayState());
+        }
+        #if BASE_GAME_FILES
         else
-          MusicBeatState.switchState(new states.freeplay.FreeplayState());
+        {
+          if (PlayState.isStoryMode)
+          {
+            PlayState.storyPlaylist = [];
+            openSubState(new vslice.transition.StickerSubState(null, (sticker) -> new StoryMenuState(sticker)));
+          }
+          else
+            openSubState(new vslice.transition.StickerSubState(null, (sticker) -> new states.freeplay.FreeplayState(sticker)));
+        }
+        #end
 
         game.canResync = false;
         FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));

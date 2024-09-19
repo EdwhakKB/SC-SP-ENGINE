@@ -14,7 +14,7 @@ class ShaderFunctions
     if (ClientPrefs.data.shaders)
     {
       funk.addLocalCallback("initLuaShader", function(name:String, ?glslVersion:Int = 120) {
-        #if (!flash && MODS_ALLOWED && sys)
+        #if (!flash && sys)
         return funk.initLuaShader(name, glslVersion);
         #else
         FunkinLua.luaTrace("initLuaShader: Platform unsupported for Runtime Shaders!", false, false, FlxColor.RED);
@@ -23,7 +23,7 @@ class ShaderFunctions
       });
 
       funk.addLocalCallback("setSpriteShader", function(obj:String, shader:String, ?keepOtherShaders:Bool = true) {
-        #if (!flash && MODS_ALLOWED && sys)
+        #if (!flash && sys)
         if (!funk.runtimeShaders.exists(shader) && !funk.initLuaShader(shader))
         {
           FunkinLua.luaTrace('setSpriteShader: Shader $shader is missing!', false, false, FlxColor.RED);
@@ -110,7 +110,7 @@ class ShaderFunctions
       });
 
       funk.set("getShaderBool", function(obj:String, prop:String, ?swagShader:String = "") {
-        #if (!flash && MODS_ALLOWED && sys)
+        #if (!flash && sys)
         var shader:FlxRuntimeShader = getShader(obj, funk, swagShader);
         if (shader == null)
         {
@@ -124,7 +124,7 @@ class ShaderFunctions
         #end
       });
       funk.set("getShaderBoolArray", function(obj:String, prop:String, ?swagShader:String = "") {
-        #if (!flash && MODS_ALLOWED && sys)
+        #if (!flash && sys)
         var shader:FlxRuntimeShader = getShader(obj, funk, swagShader);
         if (shader == null)
         {
@@ -138,7 +138,7 @@ class ShaderFunctions
         #end
       });
       funk.set("getShaderInt", function(obj:String, prop:String, ?swagShader:String = "") {
-        #if (!flash && MODS_ALLOWED && sys)
+        #if (!flash && sys)
         var shader:FlxRuntimeShader = getShader(obj, funk, swagShader);
         if (shader == null)
         {
@@ -152,7 +152,7 @@ class ShaderFunctions
         #end
       });
       funk.set("getShaderIntArray", function(obj:String, prop:String, ?swagShader:String = "") {
-        #if (!flash && MODS_ALLOWED && sys)
+        #if (!flash && sys)
         var shader:FlxRuntimeShader = getShader(obj, funk, swagShader);
         if (shader == null)
         {
@@ -166,7 +166,7 @@ class ShaderFunctions
         #end
       });
       funk.set("getShaderFloat", function(obj:String, prop:String, ?swagShader:String = "") {
-        #if (!flash && MODS_ALLOWED && sys)
+        #if (!flash && sys)
         var shader:FlxRuntimeShader = getShader(obj, funk, swagShader);
         if (shader == null)
         {
@@ -180,7 +180,7 @@ class ShaderFunctions
         #end
       });
       funk.set("getShaderFloatArray", function(obj:String, prop:String, ?swagShader:String = "") {
-        #if (!flash && MODS_ALLOWED && sys)
+        #if (!flash && sys)
         var shader:FlxRuntimeShader = getShader(obj, funk, swagShader);
         if (shader == null)
         {
@@ -195,7 +195,7 @@ class ShaderFunctions
       });
 
       funk.set("setShaderBool", function(obj:String, prop:String, value:Bool, ?swagShader:String = "") {
-        #if (!flash && MODS_ALLOWED && sys)
+        #if (!flash && sys)
         var shader:FlxRuntimeShader = getShader(obj, funk, swagShader);
         if (shader == null)
         {
@@ -210,7 +210,7 @@ class ShaderFunctions
         #end
       });
       funk.set("setShaderBoolArray", function(obj:String, prop:String, values:Dynamic, ?swagShader:String = "") {
-        #if (!flash && MODS_ALLOWED && sys)
+        #if (!flash && sys)
         var shader:FlxRuntimeShader = getShader(obj, funk, swagShader);
         if (shader == null)
         {
@@ -225,7 +225,7 @@ class ShaderFunctions
         #end
       });
       funk.set("setShaderInt", function(obj:String, prop:String, value:Int, ?swagShader:String = "") {
-        #if (!flash && MODS_ALLOWED && sys)
+        #if (!flash && sys)
         var shader:FlxRuntimeShader = getShader(obj, funk, swagShader);
         if (shader == null)
         {
@@ -240,7 +240,7 @@ class ShaderFunctions
         #end
       });
       funk.set("setShaderIntArray", function(obj:String, prop:String, values:Dynamic, ?swagShader:String = "") {
-        #if (!flash && MODS_ALLOWED && sys)
+        #if (!flash && sys)
         var shader:FlxRuntimeShader = getShader(obj, funk, swagShader);
         if (shader == null)
         {
@@ -255,7 +255,7 @@ class ShaderFunctions
         #end
       });
       funk.set("setShaderFloat", function(obj:String, prop:String, value:Float, ?swagShader:String = "") {
-        #if (!flash && MODS_ALLOWED && sys)
+        #if (!flash && sys)
         var shader:FlxRuntimeShader = getShader(obj, funk, swagShader);
         if (shader == null)
         {
@@ -270,7 +270,7 @@ class ShaderFunctions
         #end
       });
       funk.set("setShaderFloatArray", function(obj:String, prop:String, values:Dynamic, ?swagShader:String = "") {
-        #if (!flash && MODS_ALLOWED && sys)
+        #if (!flash && sys)
         var shader:FlxRuntimeShader = getShader(obj, funk, swagShader);
         if (shader == null)
         {
@@ -287,7 +287,7 @@ class ShaderFunctions
       });
 
       funk.set("setShaderSampler2D", function(obj:String, prop:String, bitmapdataPath:String, ?swagShader:String = "") {
-        #if (!flash && MODS_ALLOWED && sys)
+        #if (!flash && sys)
         var shader:FlxRuntimeShader = getShader(obj, funk, swagShader);
         if (shader == null)
         {
@@ -541,7 +541,7 @@ class ShaderFunctions
 
       funk.set("doTweenShaderFloat",
         function(tag:String, object:String, floatName:String, newFloat:Float, duration:Float, ease:String, ?swagShader:String = "") {
-          #if (!flash && MODS_ALLOWED && sys)
+          #if (!flash && sys)
           var tag = tag;
           var leObj:FlxRuntimeShader = getShader(object, funk, swagShader);
 

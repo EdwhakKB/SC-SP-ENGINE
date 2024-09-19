@@ -59,11 +59,9 @@ class HScriptSC
     }
   }
 
-  public function parseScript() {}
-
-  public function call(func:String, ?args:Array<Dynamic>):Dynamic
+  public function call(func:String, ?args:Array<Dynamic> = null):SCCall
   {
-    if (interp == null) return -1;
+    if (interp == null) return null;
     if (args == null) args = [];
 
     try
@@ -80,7 +78,13 @@ class HScriptSC
       if (logErrors) Debug.logError(e.message);
     }
 
-    return -1;
+    return null;
+  }
+
+  public function executeFunction(func:String = null, args:Array<Dynamic> = null):Dynamic
+  {
+    if (func == null || !exists(func)) return null;
+    return call(func, args);
   }
 
   public function set(key:String, value:Dynamic, overrideVar:Bool = true):Void

@@ -71,6 +71,7 @@ class Note extends ModchartArrow implements ICloneable<Note>
     '', // Always leave this one empty pls
     'Alt Animation',
     'Hey!',
+    'Cheer!',
     'Hurt Note',
     'GF Sing',
     'Mom Sing',
@@ -340,7 +341,6 @@ class Note extends ModchartArrow implements ICloneable<Note>
           hitsoundChartEditor = false;
         case 'Alt Animation':
           animSuffix = '-alt';
-
         case 'No Animation':
           noAnimation = true;
           noMissAnimation = true;
@@ -574,12 +574,6 @@ class Note extends ModchartArrow implements ICloneable<Note>
     else
       skin = customSkin;
 
-    if (!inEditor)
-    {
-      if (!skin.contains('noteSkins') && rgbShader.enabled) rgbShader.enabled = false;
-      else if (skin.contains('noteSkins') && !rgbShader.enabled) rgbShader.enabled = true;
-    }
-
     loadNoteTexture(skin, skinPostfix, skinPixel);
 
     if (!inEditor)
@@ -802,11 +796,6 @@ class Note extends ModchartArrow implements ICloneable<Note>
         if ((isSustainNote && prevNote.wasGoodHit) || strumTime <= Conductor.songPosition) wasGoodHit = true;
       }
     }
-
-    if (tooLate && !inEditor)
-    {
-      if (alpha > 0.3) alpha = 0.3;
-    }
   }
 
   public dynamic function followStrumArrow(myStrum:StrumArrow, fakeCrochet:Float, newFollowSpeed:Float = 1)
@@ -878,6 +867,11 @@ class Note extends ModchartArrow implements ICloneable<Note>
   @:access(flixel.FlxCamera)
   override public function draw():Void
   {
+    if (tooLate && !inEditor)
+    {
+      if (alpha > 0.3) alpha = 0.3;
+    }
+
     if (notITGNotes && drawManual)
     {
       if (alpha < 0 || vertices == null || indices == null || uvtData == null || _point == null || offset == null)
@@ -895,34 +889,34 @@ class Note extends ModchartArrow implements ICloneable<Note>
         getScreenPosition(_point, camera) /*.subtractPoint(offset)*/;
         var newGraphic:FlxGraphic = cast mapData();
 
-        /*var shader = this.shader != null ? this.shader : new FlxShader();
-          if (this.shader != shader) this.shader = shader;
+        var shader = this.shader != null ? this.shader : new FlxShader();
+        if (this.shader != shader) this.shader = shader;
 
-          shader.bitmap.input = graphic.bitmap;
-          shader.bitmap.filter = antialiasing ? LINEAR : NEAREST;
+        shader.bitmap.input = graphic.bitmap;
+        shader.bitmap.filter = antialiasing ? LINEAR : NEAREST;
 
-          var transforms:Array<ColorTransform> = [];
-          var transfarm:ColorTransform = new ColorTransform();
-          transfarm.redMultiplier = colorTransform.redMultiplier;
-          transfarm.greenMultiplier = colorTransform.greenMultiplier;
-          transfarm.blueMultiplier = colorTransform.blueMultiplier;
-          transfarm.redOffset = colorTransform.redOffset;
-          transfarm.greenOffset = colorTransform.greenOffset;
-          transfarm.blueOffset = colorTransform.blueOffset;
-          transfarm.alphaOffset = colorTransform.alphaOffset;
-          transfarm.alphaMultiplier = colorTransform.alphaMultiplier * camera.alpha;
+        var transforms:Array<ColorTransform> = [];
+        var transfarm:ColorTransform = new ColorTransform();
+        transfarm.redMultiplier = colorTransform.redMultiplier;
+        transfarm.greenMultiplier = colorTransform.greenMultiplier;
+        transfarm.blueMultiplier = colorTransform.blueMultiplier;
+        transfarm.redOffset = colorTransform.redOffset;
+        transfarm.greenOffset = colorTransform.greenOffset;
+        transfarm.blueOffset = colorTransform.blueOffset;
+        transfarm.alphaOffset = colorTransform.alphaOffset;
+        transfarm.alphaMultiplier = colorTransform.alphaMultiplier * camera.alpha;
 
-          for (n in 0...vertices.length)
-            transforms.push(transfarm);
+        for (n in 0...vertices.length)
+          transforms.push(transfarm);
 
-          var drawItem = camera.startTrianglesBatch(newGraphic, antialiasing, true, blend, true, shader);
+        var drawItem = camera.startTrianglesBatch(newGraphic, antialiasing, true, blend, true, shader);
 
-          @:privateAccess
-          {
-            drawItem.addTrianglesColorArray(vertices, indices, uvtData, null, _point, camera._bounds, transforms);
-        }*/
+        @:privateAccess
+        {
+          drawItem.addTrianglesColorArray(vertices, indices, uvtData, null, _point, camera._bounds, transforms);
+        }
 
-        camera.drawTriangles(newGraphic, vertices, indices, uvtData, null, _point, blend, true, antialiasing, colorTransform, shader);
+        // camera.drawTriangles(newGraphic, vertices, indices, uvtData, null, _point, blend, true, antialiasing, colorTransform, shader);
         // camera.drawTriangles(processedGraphic, vertices, indices, uvtData, null, _point, blend, true, antialiasing);
         // trace("we do be drawin... something?\n verts: \n" + vertices);
       }
@@ -939,7 +933,7 @@ class Note extends ModchartArrow implements ICloneable<Note>
     }
   }
 
-  function mapData():FlxGraphic
+  public function mapData():FlxGraphic
   {
     if (gpix == null || alpha != oalp || !animation.curAnim.finished || oanim != animation.curAnim.name)
     {
@@ -996,7 +990,8 @@ class Note extends ModchartArrow implements ICloneable<Note>
 
   override public function clone():Note
   {
-    return new Note(this.strumTime, this.noteData, this.isSustainNote, this.noteSkin, this.prevNote);
+    return new Note(this.strumTime, this.noteData, this.isSustainNote, this.noteSkin, this.prevNote, null, this.noteScrollSpeed, this.parentStrumline,
+      this.inEditor);
   }
 
   override public function destroy()

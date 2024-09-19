@@ -76,7 +76,7 @@ class CreditsState extends MusicBeatState
         "Riveren",
         "riveren",
         "Main Artist/Animator of Psych Engine",
-        "https://twitter.com/riverennn",
+        "https://x.com/riverennn",
         "14967B"
       ],
       [""],
@@ -85,93 +85,93 @@ class CreditsState extends MusicBeatState
         "bb-panzu",
         "bb",
         "Ex-Programmer of Psych Engine",
-        "https://twitter.com/bbsub3",
+        "https://x.com/bbsub3",
         "3E813A"
       ],
       [""],
       ["Engine Contributors"],
       [
-        "CrowPlexus",
         "crowplexus",
-        "Hscript Iris, Input System v3, and Other PRs",
-        "https://twitter.com/crowplexus",
+        "crowplexus",
+        "HScript Iris, Input System v3, and Other PRs",
+        "https://github.com/crowplexus",
         "CFCFCF"
       ],
       [
         "Kamizeta",
         "kamizeta",
         "Creator of Pessy, Psych Engine's mascot.",
-        "https://twitter.com/LittleCewwy",
+        "https://www.instagram.com/cewweey/",
         "D21C11"
       ],
       [
         "MaxNeton",
         "maxneton",
         "Loading Screen Easter Egg Artist/Animator.",
-        "https://twitter.com/MaxNeton",
+        "https://bsky.app/profile/maxneton.bsky.social",
         "3C2E4E"
       ],
       [
         "Keoiki",
         "keoiki",
         "Note Splash Animations and Latin Alphabet",
-        "https://twitter.com/Keoiki_",
+        "https://x.com/Keoiki_",
         "D2D2D2"
       ],
       [
         "SqirraRNG",
         "sqirra",
         "Crash Handler and Base code for\nChart Editor's Waveform",
-        "https://twitter.com/gedehari",
+        "https://x.com/gedehari",
         "E1843A"
       ],
       [
         "EliteMasterEric",
         "mastereric",
         "Runtime Shaders support and Other PRs",
-        "https://twitter.com/EliteMasterEric",
+        "https://x.com/EliteMasterEric",
         "FFBD40"
       ],
       [
         "MAJigsaw77",
         "majigsaw",
         ".MP4 Video Loader Library (hxvlc)",
-        "https://twitter.com/MAJigsaw77",
+        "https://x.com/MAJigsaw77",
         "5F5F5F"
       ],
       [
         "Tahir Toprak Karabekiroglu",
         "tahir",
         "Note Splash Editor and Other PRs",
-        "https://twitter.com/TahirKarabekir",
+        "https://x.com/TahirKarabekir",
         "A04397"
       ],
       [
         "iFlicky",
         "flicky",
-        "Composer of Psync and Tea Time\nMade the Dialogue Sounds",
-        "https://twitter.com/flicky_i",
+        "Composer of Psync and Tea Time\nAnd some sound effects",
+        "https://x.com/flicky_i",
         "9E29CF"
       ],
       [
         "KadeDev",
         "kade",
         "Fixed some issues on Chart Editor and Other PRs",
-        "https://twitter.com/kade0912",
+        "https://x.com/kade0912",
         "64A250"
       ],
       [
         "superpowers04",
         "superpowers04",
         "LUA JIT Fork",
-        "https://twitter.com/superpowers04",
+        "https://x.com/superpowers04",
         "B957ED"
       ],
       [
         "CheemsAndFriends",
         "cheems",
         "Creator of FlxAnimate",
-        "https://twitter.com/CheemsnFriendos",
+        "https://x.com/CheemsnFriendos",
         "E1E1E1"
       ],
       [""],
@@ -180,28 +180,28 @@ class CreditsState extends MusicBeatState
         "ninjamuffin99",
         "ninjamuffin99",
         "Programmer of Friday Night Funkin'",
-        "https://twitter.com/ninja_muffin99",
+        "https://x.com/ninja_muffin99",
         "CF2D2D"
       ],
       [
         "PhantomArcade",
         "phantomarcade",
         "Animator of Friday Night Funkin'",
-        "https://twitter.com/PhantomArcade3K",
+        "https://x.com/PhantomArcade3K",
         "FADC45"
       ],
       [
         "evilsk8r",
         "evilsk8r",
         "Artist of Friday Night Funkin'",
-        "https://twitter.com/evilsk8r",
+        "https://x.com/evilsk8r",
         "5ABD4B"
       ],
       [
         "kawaisprite",
         "kawaisprite",
         "Composer of Friday Night Funkin'",
-        "https://twitter.com/kawaisprite",
+        "https://x.com/kawaisprite",
         "378FC7"
       ],
       [''],

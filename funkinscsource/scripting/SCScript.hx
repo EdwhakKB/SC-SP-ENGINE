@@ -126,10 +126,16 @@ class SCScript extends flixel.FlxBasic
     presetScript();
   }
 
-  public function callFunc(func:String, ?args:Array<Dynamic>):Dynamic
+  public function callFunc(func:String, ?args:Array<Dynamic>):SCCall
   {
-    if (hsCode == null || !active || !exists) return -1;
+    if (hsCode == null || !active || !exists) return null;
     if (args == null) args = [];
+    return hsCode.call(func, args);
+  }
+
+  public function executeFunc(func:String = null, args:Array<Dynamic> = null):SCCall
+  {
+    if (hsCode == null || !active || !exists) return null;
     return hsCode.call(func, args);
   }
 

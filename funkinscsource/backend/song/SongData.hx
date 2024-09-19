@@ -482,6 +482,7 @@ typedef SwagSection =
   @:optional var changeBPM:Bool;
   @:optional var bpm:Float;
   @:optional var dType:Int;
+  @:optional var index:Int;
 }
 
 typedef SwagSong =
@@ -496,6 +497,11 @@ typedef SwagSong =
    */
   var songId:String;
 
+  /**
+   * Variable used to display a name.
+   */
+  var ?displayName:String;
+
   var notes:Array<SwagSection>;
   var events:Array<Dynamic>;
   var bpm:Float;
@@ -509,4 +515,9 @@ typedef SwagSong =
   var ?options:OptionsData;
   var ?gameOverData:GameOverData;
   var ?characters:CharacterData;
+
+  /**
+   * Using this, you can create custom data inside the song Json. But data only you can use for whatever else.
+   */
+  var ?_extraData:Dynamic;
 }

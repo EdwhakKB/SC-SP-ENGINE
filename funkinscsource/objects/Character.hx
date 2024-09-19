@@ -354,7 +354,7 @@ class Character extends FunkinSCSprite
       case 'pico-blazin', 'darnell-blazin':
         changeCharacter(character, isPlayer);
         stopIdle = false;
-				skipDance = true;
+        skipDance = true;
       default:
         changeCharacter(character, isPlayer);
     }
@@ -426,7 +426,8 @@ class Character extends FunkinSCSprite
     originalFlipX = flipX;
 
     skipDance = false;
-    hasMissAnimations = hasOffsetAnimation('singLEFTmiss') || hasOffsetAnimation('singDOWNmiss') || hasOffsetAnimation('singUPmiss') || hasOffsetAnimation('singRIGHTmiss');
+    hasMissAnimations = hasOffsetAnimation('singLEFTmiss') || hasOffsetAnimation('singDOWNmiss') || hasOffsetAnimation('singUPmiss')
+      || hasOffsetAnimation('singRIGHTmiss');
     isDancing = hasOffsetAnimation('danceLeft') && hasOffsetAnimation('danceRight');
     doMissThing = !hasOffsetAnimation('singUPmiss'); // if for some reason you only have an up miss, why?
 
@@ -686,7 +687,9 @@ class Character extends FunkinSCSprite
         if (isDancing)
         {
           danced = !danced;
-          if (altAnim && hasOffsetAnimation('danceRight-alt') && hasOffsetAnimation('danceLeft-alt')) animName = 'dance${danced ? 'Right' : 'Left'}-alt';
+          if (altAnim
+            && hasOffsetAnimation('danceRight-alt')
+            && hasOffsetAnimation('danceLeft-alt')) animName = 'dance${danced ? 'Right' : 'Left'}-alt';
           else
             animName = 'dance${(danced ? 'Right' : 'Left') + idleSuffix}';
         }
@@ -767,10 +770,7 @@ class Character extends FunkinSCSprite
       color = CoolUtil.blendColors(curColor, FlxColor.fromInt(0xFFCFAFFF));
       curColor = realCurColor;
     }
-    else if (color != curColor && doMissThing)
-    {
-      color = curColor;
-    }
+    else if (color != curColor && doMissThing) color = curColor;
 
     var daOffset = animOffsets.get(AnimName);
 
@@ -779,11 +779,11 @@ class Character extends FunkinSCSprite
     if (debugMode)
     {
       if ((hasOffsetAnimation(AnimName) && !isPlayer)
-        || (animPlayerOffsets.exists(AnimName) && isPlayer)) offset.set(daOffset[0] * scale.x * daZoom, daOffset[1] * scale.y * daZoom);
+        || (animPlayerOffsets.exists(AnimName) && isPlayer)) offset.set(daOffset[0] * daZoom, daOffset[1] * daZoom);
     }
     else
     {
-      if (hasOffsetAnimation(AnimName)) offset.set(daOffset[0] * scale.x * daZoom, daOffset[1] * scale.y * daZoom);
+      if (hasOffsetAnimation(AnimName)) offset.set(daOffset[0] * daZoom, daOffset[1] * daZoom);
     }
 
     if (doAfterAffectForAnimationName) doAfterAffectForName(AnimName);
@@ -825,19 +825,12 @@ class Character extends FunkinSCSprite
     var dancing:Bool = false;
     if (!useGFSpeed)
     {
-      if (beat % idleBeat == 0)
-      {
-        if (idleToBeat)
-          dancing = true;
-      }
-      else if (beat % idleBeat != 0)
-      {
-        if (isDancingType())
-          dancing = true;
-      }
+      if (beat % idleBeat == 0) dancing = idleToBeat;
+      else if (beat % idleBeat != 0) dancing = isDancingType();
       return dancing;
     }
-    else return (beat % gfSpeed == 0);
+    else
+      return (beat % gfSpeed == 0);
     return false;
   }
 
@@ -854,7 +847,6 @@ class Character extends FunkinSCSprite
       }
       if (tankManNotes) TankmenBG.animationNotes = animationNotes;
       animationNotes.sort(sortAnims);
-      Debug.logInfo('note lengths ${animationNotes.length}');
     }
     catch (e:haxe.Exception)
     {
@@ -984,15 +976,15 @@ class Character extends FunkinSCSprite
 
   override public function destroy()
   {
-    animOffsets.clear();
-    animInterrupt.clear();
-    animNext.clear();
-    animDanced.clear();
+    if (animOffsets != null) animOffsets.clear();
+    if (animInterrupt != null) animInterrupt.clear();
+    if (animNext != null) animNext.clear();
+    if (animDanced != null) animDanced.clear();
 
-    animationNotes.resize(0);
+    if (animationNotes != null && animationNotes.length > 0) animationNotes.resize(0);
 
     #if flxanimate
-    atlas = flixel.util.FlxDestroyUtil.destroy(atlas);
+    if (atlas != null) atlas = flixel.util.FlxDestroyUtil.destroy(atlas);
     #end
     super.destroy();
   }

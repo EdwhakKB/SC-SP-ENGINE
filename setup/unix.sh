@@ -9,7 +9,7 @@ haxelib git flixel https://github.com/glowsoony/flixel/tree/Main-SCE
 haxelib git flixel-addons https://github.com/glowsoony/flixel-addons/tree/dev
 haxelib install tjson
 haxelib install flixel-tools
-haxelib install hscript-iris 1.0.2
+haxelib install hscript-iris
 haxelib install hscript
 haxelib git hscript-improved https://github.com/glowsoony/hscript-improved/tree/custom-classes
 haxelib install hxgamejolt-api

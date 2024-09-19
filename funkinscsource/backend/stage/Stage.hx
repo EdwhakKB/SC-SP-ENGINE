@@ -147,6 +147,7 @@ class Stage extends backend.stage.base.BaseStage
 
     // Looks for two types of stages or more
     startStageScriptsNamed(curStage, preloading);
+    setOnScripts('stageSpriteHandler', stageSpriteHandler);
   }
 
   public var camZoom:Float = 1.05;
@@ -602,7 +603,7 @@ class Stage extends backend.stage.base.BaseStage
     {
       var times:Float = Date.now().getTime();
       newScript = new HScript(null, file, true, true);
-      newScript.call('onCreate');
+      newScript.executeFunction('onCreate');
       hscriptArray.push(newScript);
       Debug.logInfo('initialized Hscript interp successfully: $file (${Std.int(Date.now().getTime() - times)}ms)');
     }
@@ -647,7 +648,7 @@ class Stage extends backend.stage.base.BaseStage
       var times:Float = Date.now().getTime();
       newScript = new SCScript();
       newScript.loadScript(file);
-      newScript.callFunc('onCreate');
+      newScript.executeFunc('onCreate');
       scHSArray.push(newScript);
       Debug.logInfo('initialized SCHScript interp successfully: $file (${Std.int(Date.now().getTime() - times)}ms)');
     }
@@ -720,7 +721,7 @@ class Stage extends backend.stage.base.BaseStage
   public function callOnLuas(funcToCall:String, args:Array<Dynamic> = null, ignoreStops = false, exclusions:Array<String> = null,
       excludeValues:Array<Dynamic> = null):Dynamic
   {
-    var returnVal:Dynamic = LuaUtils.Function_Continue;
+    var returnVal:String = LuaUtils.Function_Continue;
     #if LUA_ALLOWED
     if (args == null) args = [];
     if (exclusions == null) exclusions = [];
@@ -760,7 +761,7 @@ class Stage extends backend.stage.base.BaseStage
   public function callOnHScript(funcToCall:String, args:Array<Dynamic> = null, ignoreStops:Bool = false, exclusions:Array<String> = null,
       excludeValues:Array<Dynamic> = null):Dynamic
   {
-    var returnVal:Dynamic = LuaUtils.Function_Continue;
+    var returnVal:String = LuaUtils.Function_Continue;
 
     #if HSCRIPT_ALLOWED
     if (exclusions == null) exclusions = new Array();
@@ -780,9 +781,9 @@ class Stage extends backend.stage.base.BaseStage
         var myValue:Dynamic = callValue.methodVal;
 
         // compiler fuckup fix
-        final stopHscript = myValue == LuaUtils.Function_StopHScript;
-        final stopAll = myValue == LuaUtils.Function_StopAll;
-        if ((stopHscript || stopAll) && !excludeValues.contains(myValue) && !ignoreStops)
+        if ((myValue == LuaUtils.Function_StopHScript || myValue == LuaUtils.Function_StopAll)
+          && !excludeValues.contains(myValue)
+          && !ignoreStops)
         {
           returnVal = myValue;
           break;
@@ -802,7 +803,7 @@ class Stage extends backend.stage.base.BaseStage
   public function callOnHSI(funcToCall:String, args:Array<Dynamic> = null, ignoreStops:Bool = false, exclusions:Array<String> = null,
       excludeValues:Array<Dynamic> = null):Dynamic
   {
-    var returnVal:Dynamic = LuaUtils.Function_Continue;
+    var returnVal:String = LuaUtils.Function_Continue;
 
     #if (HSCRIPT_ALLOWED && HScriptImproved)
     if (args == null) args = [];
@@ -815,9 +816,9 @@ class Stage extends backend.stage.base.BaseStage
     for (script in codeNameScripts.scripts)
     {
       var myValue:Dynamic = script.active ? script.call(funcToCall, args) : null;
-      final stopHscript = myValue == LuaUtils.Function_StopHScript;
-      final stopAll = myValue == LuaUtils.Function_StopAll;
-      if ((stopHscript || stopAll) && !excludeValues.contains(myValue) && !ignoreStops)
+      if ((myValue == LuaUtils.Function_StopHScript || myValue == LuaUtils.Function_StopAll)
+        && !excludeValues.contains(myValue)
+        && !ignoreStops)
       {
         returnVal = myValue;
         break;
@@ -832,7 +833,7 @@ class Stage extends backend.stage.base.BaseStage
   public function callOnSCHS(funcToCall:String, ?args:Array<Dynamic> = null, ?ignoreStops:Bool = false, exclusions:Array<String> = null,
       excludeValues:Array<Dynamic> = null):Dynamic
   {
-    var returnVal:Dynamic = LuaUtils.Function_Continue;
+    var returnVal:String = LuaUtils.Function_Continue;
 
     #if HSCRIPT_ALLOWED
     if (exclusions == null) exclusions = new Array();
@@ -851,9 +852,9 @@ class Stage extends backend.stage.base.BaseStage
         var myValue:Dynamic = callValue.funcValue;
 
         // compiler fuckup fix
-        final stopHscript = myValue == LuaUtils.Function_StopHScript;
-        final stopAll = myValue == LuaUtils.Function_StopAll;
-        if ((stopHscript || stopAll) && !excludeValues.contains(myValue) && !ignoreStops)
+        if ((myValue == LuaUtils.Function_StopHScript || myValue == LuaUtils.Function_StopAll)
+          && !excludeValues.contains(myValue)
+          && !ignoreStops)
         {
           returnVal = myValue;
           break;
@@ -1303,6 +1304,8 @@ class Stage extends backend.stage.base.BaseStage
     curStage = null;
     instance = null;
 
+    if (defaultStage != null) defaultStage.destroy();
+
     for (sprite in swagBacks.keys())
     {
       if (swagBacks[sprite] != null) swagBacks[sprite].destroy();
@@ -1314,7 +1317,7 @@ class Stage extends backend.stage.base.BaseStage
     for (script in hscriptArray)
       if (script != null)
       {
-        script.call('onDestroy');
+        script.executeFunction('onDestroy');
         script.destroy();
       }
     hscriptArray = null;
@@ -1322,7 +1325,7 @@ class Stage extends backend.stage.base.BaseStage
     for (script in scHSArray)
       if (script != null)
       {
-        script.callFunc('onDestroy');
+        script.executeFunc('onDestroy');
         script.destroy();
       }
     scHSArray = null;
