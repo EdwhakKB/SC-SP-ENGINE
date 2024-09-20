@@ -2,7 +2,6 @@ package psychlua;
 
 #if (!flash && sys)
 import flixel.addons.display.FlxRuntimeShader;
-import flixel.addons.system.macros.FlxRuntimeShaderMacro;
 #end
 import openfl.filters.ShaderFilter;
 import codenameengine.shaders.CustomShader;
@@ -91,7 +90,7 @@ class ShaderFunctions
             {
               var filter:ShaderFilter = daFilters[i];
 
-              if (filter.shader.glFragmentSource == processFragmentSource(arr[0]))
+              if (filter.shader.glFragmentSource == FlxRuntimeShader.processDataSource(arr[0], 'fragment'))
               {
                 swagFilters.remove(filter);
                 break;
@@ -574,21 +573,6 @@ class ShaderFunctions
   }
 
   #if (!flash && sys)
-  public static function processFragmentSource(value:String):String
-  {
-    if (ClientPrefs.data.shaders)
-    {
-      if (value != null)
-      {
-        @:privateAccess
-        value = value.replace("#pragma header", FlxRuntimeShaderMacro.retrieveMetadata('glFragmentHeader'))
-          .replace("#pragma body", FlxRuntimeShaderMacro.retrieveMetadata('glFragmentHeader'));
-      }
-      return value;
-    }
-    return value;
-  }
-
   public static function getShader(obj:String, funk:FunkinLua, ?swagShader:String):FlxRuntimeShader
   {
     if (ClientPrefs.data.shaders)
@@ -622,7 +606,7 @@ class ShaderFunctions
             {
               var filter:ShaderFilter = daFilters[i];
 
-              if (filter.shader.glFragmentSource == processFragmentSource(arr[0]))
+              if (filter.shader.glFragmentSource == FlxRuntimeShader.processDataSource(arr[0], 'frgament'))
               {
                 shader = filter.shader;
                 break;
