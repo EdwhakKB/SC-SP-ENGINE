@@ -7,10 +7,8 @@
     },
     {
       "name": "openfl",
-      "type": "git",
-      "dir": null,
-      "ref": "feature/shader-improvements",
-      "url": "https://github.com/FunkinCrew/openfl"
+      "type": "haxelib",
+      "version": null
     },
     {
       "name": "flixel-tools",
@@ -154,6 +152,13 @@
       "dir": null,
       "ref": "main",
       "url": "https://github.com/MAJigsaw77/hxvlc"
+    },
+    {
+      "name": "flxsoundfilters",
+      "type": "git",
+      "dir": null,
+      "ref": "main",
+      "url": "https://github.com/TheZoroForce240/FlxSoundFilters"
     }
   ]
 }

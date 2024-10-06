@@ -939,21 +939,9 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
     else
     {
     #end
-      var split:Array<String> = character.imageFile.split(',');
-      var charFrames:FlxAtlasFrames = Paths.getAtlas(split[0].trim());
-
-      if (split.length > 1)
-      {
-        var original:FlxAtlasFrames = charFrames;
-        charFrames = new FlxAtlasFrames(charFrames.parent);
-        charFrames.addAtlas(original, true);
-        for (i in 1...split.length)
-        {
-          var extraFrames:FlxAtlasFrames = Paths.getAtlas(split[i].trim());
-          if (extraFrames != null) charFrames.addAtlas(extraFrames, true);
-        }
-      }
-      character.frames = charFrames;
+      var spriteName:String = "characters/" + character.curCharacter;
+      if (character.imageFile != null) spriteName = character.imageFile;
+      character.loadSprite(Paths.checkForImage(spriteName), character.imageFile, spriteName);
     #if flxanimate
     }
     #end

@@ -3289,6 +3289,10 @@
 				"mustHitSection": true
 			}
 		],
+		"options": {
+			"strumSkin": "pixelUI",
+			"noteSkin": "pixelUI"
+		},
 		"gfVersion": "gf-pixel",
 		"events": [],
 		"player3": null,

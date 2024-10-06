@@ -43,7 +43,7 @@ class Stage extends backend.stage.base.BaseStage
   // Layering algorithm for noobs: Everything loads by the method of "On Top", example: You load wall first(Every other added BG layers on it), then you load road(comes on top of wall and doesn't clip through it), then loading street lights(comes on top of wall and road)
   public var swagBacks:Map<String, Dynamic> = new Map<String,
     Dynamic>(); // Store BGs here to use them later (for example with slowBacks, using your custom stage event or to adjust position in stage debug menu(press 8 while in PlayState with debug build of the game))
-  public var swagGroup:Map<String, FlxTypedGroup<Dynamic>> = new Map<String, FlxTypedGroup<Dynamic>>(); // Store Groups
+  public var swagGroups:Map<String, FlxTypedGroup<Dynamic>> = new Map<String, FlxTypedGroup<Dynamic>>(); // Store Groups
   public var animatedBacks:Array<FlxSprite> = []; // Store animated backgrounds and make them play animation(Animation must be named Idle!! Else use swagGroup/swagBacks and script it in stepHit/beatHit function of this file!!)
   public var animatedBacks2:Array<FlxSprite> = []; // doesn't interrupt if animation is playing, unlike animatedBacks
   public var layInFront:Array<Array<Dynamic>> = [[], [], [], [], []]; // BG layering, format: first [0] - in front of GF, second [1] - in front of opponent, third [2] - in front of boyfriend(and technically also opponent since Haxe layering moment), fourth [3] in front of arrows and stuff
@@ -104,7 +104,7 @@ class Stage extends backend.stage.base.BaseStage
     var missingJson:Bool = #if MODS_ALLOWED !FileSystem.exists(jsonPath) && #end!Assets.exists(jsonPath);
     if (missingJson)
     {
-      Debug.logWarn('Stage .json not found, using the default stage');
+      Debug.logWarn('$curStage.json not found, using the default stage');
       curStage = 'mainStage'; // defaults to stage if we can't find the path
     }
 
@@ -206,7 +206,7 @@ class Stage extends backend.stage.base.BaseStage
     var weekDir:String = stageDir;
     stageDir = null;
 
-    if (weekDir != null && weekDir.length > 0 && weekDir != '') directory = weekDir;
+    if (weekDir != null && weekDir.length > 0) directory = weekDir;
 
     Debug.logInfo('directory: $directory');
     Paths.setCurrentLevel(directory);
@@ -721,7 +721,7 @@ class Stage extends backend.stage.base.BaseStage
   public function callOnLuas(funcToCall:String, args:Array<Dynamic> = null, ignoreStops = false, exclusions:Array<String> = null,
       excludeValues:Array<Dynamic> = null):Dynamic
   {
-    var returnVal:String = LuaUtils.Function_Continue;
+    var returnVal:Dynamic = LuaUtils.Function_Continue;
     #if LUA_ALLOWED
     if (args == null) args = [];
     if (exclusions == null) exclusions = [];
@@ -761,7 +761,7 @@ class Stage extends backend.stage.base.BaseStage
   public function callOnHScript(funcToCall:String, args:Array<Dynamic> = null, ignoreStops:Bool = false, exclusions:Array<String> = null,
       excludeValues:Array<Dynamic> = null):Dynamic
   {
-    var returnVal:String = LuaUtils.Function_Continue;
+    var returnVal:Dynamic = LuaUtils.Function_Continue;
 
     #if HSCRIPT_ALLOWED
     if (exclusions == null) exclusions = new Array();
@@ -803,7 +803,7 @@ class Stage extends backend.stage.base.BaseStage
   public function callOnHSI(funcToCall:String, args:Array<Dynamic> = null, ignoreStops:Bool = false, exclusions:Array<String> = null,
       excludeValues:Array<Dynamic> = null):Dynamic
   {
-    var returnVal:String = LuaUtils.Function_Continue;
+    var returnVal:Dynamic = LuaUtils.Function_Continue;
 
     #if (HSCRIPT_ALLOWED && HScriptImproved)
     if (args == null) args = [];
@@ -833,7 +833,7 @@ class Stage extends backend.stage.base.BaseStage
   public function callOnSCHS(funcToCall:String, ?args:Array<Dynamic> = null, ?ignoreStops:Bool = false, exclusions:Array<String> = null,
       excludeValues:Array<Dynamic> = null):Dynamic
   {
-    var returnVal:String = LuaUtils.Function_Continue;
+    var returnVal:Dynamic = LuaUtils.Function_Continue;
 
     #if HSCRIPT_ALLOWED
     if (exclusions == null) exclusions = new Array();
@@ -849,7 +849,7 @@ class Stage extends backend.stage.base.BaseStage
       try
       {
         var callValue = script.callFunc(funcToCall, args);
-        var myValue:Dynamic = callValue.funcValue;
+        var myValue:Dynamic = callValue.funcReturn;
 
         // compiler fuckup fix
         if ((myValue == LuaUtils.Function_StopHScript || myValue == LuaUtils.Function_StopAll)
@@ -1248,7 +1248,7 @@ class Stage extends backend.stage.base.BaseStage
       else if (newTag.endsWith('-lower')) newTag = newTag.substring(0, newTag.length - 6).toLowerCase();
     }
 
-    if (swagedSprite != null) swagGroup[newTag] = swagedSprite;
+    if (swagedSprite != null) swagGroups[newTag] = swagedSprite;
   }
 
   public function addAnimatedBack(animatedBack:FlxSprite = null)
@@ -1267,7 +1267,7 @@ class Stage extends backend.stage.base.BaseStage
     #if (HSCRIPT_ALLOWED && HScriptImproved)
     for (ext in CoolUtil.haxeExtensions)
     {
-      if (haxe.io.Path.extension(file).toLowerCase().contains(ext))
+      if (file.toLowerCase().contains('.$ext'))
       {
         Debug.logInfo('INITIALIZED');
         var script = HScriptCode.create(file);
@@ -1297,8 +1297,6 @@ class Stage extends backend.stage.base.BaseStage
       lua.stop();
     }
     luaArray = null;
-    FunkinLua.customFunctions.clear();
-    LuaUtils.killShaders();
     #end
 
     curStage = null;
@@ -1337,7 +1335,7 @@ class Stage extends backend.stage.base.BaseStage
         script.call('onDestroy');
         script.destroy();
       }
-    codeNameScripts.scripts = null;
+    codeNameScripts = null;
     #end
     #end
 
@@ -1362,16 +1360,16 @@ class Stage extends backend.stage.base.BaseStage
       }
     }
 
-    for (swag in swagGroup.keys())
+    for (swag in swagGroups.keys())
     {
-      if (swagGroup[swag].members != null) for (member in swagGroup[swag].members)
+      if (swagGroups[swag].members != null) for (member in swagGroups[swag].members)
       {
-        swagGroup[swag].members.remove(member);
+        swagGroups[swag].members.remove(member);
         member.destroy();
       }
     }
 
-    swagGroup.clear();
+    swagGroups.clear();
   }
 
   public function checkNameMatch(stageName:String):Bool

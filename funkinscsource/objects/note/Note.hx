@@ -33,7 +33,10 @@ typedef NoteSplashData =
   useGlobalShader:Bool, // breaks r/g/b/a but makes it copy default colors for your custom note
   useRGBShader:Bool,
   antialiasing:Bool,
-  a:Float
+  a:Float,
+  ?r:FlxColor,
+  ?g:FlxColor,
+  ?b:FlxColor
 }
 
 typedef EventNote =
@@ -149,7 +152,10 @@ class Note extends ModchartArrow implements ICloneable<Note>
       antialiasing: !PlayState.isPixelStage,
       useGlobalShader: false,
       useRGBShader: (PlayState.SONG != null) ? !(PlayState.SONG.options.disableSplashRGB == true) : true,
-      a: ClientPrefs.data.splashAlpha
+      a: ClientPrefs.data.splashAlpha,
+      r: -1,
+      g: -1,
+      b: -1
     };
   public var offsetX:Float = 0;
   public var offsetY:Float = 0;
@@ -220,9 +226,8 @@ class Note extends ModchartArrow implements ICloneable<Note>
     return (!isAnimationNull() && getAnimationName().endsWith('end'));
   }
 
-  // Quant Stuff
-  public var quantColorsOnNotes:Bool = true;
-  public var quantizedNotes:Bool = false;
+  public var customColorsOnNotes:Bool = true;
+  public var customColoredNotes:Bool = false;
 
   // Extra support for textures
   public var containsPixelTexture:Bool = false;
@@ -308,7 +313,7 @@ class Note extends ModchartArrow implements ICloneable<Note>
   {
     // var skin:String = 'noteSplashes';
     // if (PlayState.SONG != null && PlayState.SONG.options.splashSkin != "") skin = PlayState.SONG.options.splashSkin;
-    quantizedNotes ? defaultRGBQuant() : defaultRGB();
+    customColoredNotes ? defaultRGBQuant() : defaultRGB();
 
     if (noteData > -1 && noteType != value)
     {
@@ -320,8 +325,8 @@ class Note extends ModchartArrow implements ICloneable<Note>
           // this used to change the note texture to HURTNOTE_assets.png,
           // but i've changed it to something more optimized with the implementation of RGBPalette:
 
-          // quant shit
-          quantColorsOnNotes = false;
+          // custom shit
+          customColorsOnNotes = false;
 
           // note colors
           rgbShader.r = 0xFF101010;
@@ -403,7 +408,7 @@ class Note extends ModchartArrow implements ICloneable<Note>
 
     if (noteData > -1)
     {
-      rgbShader = new RGBShaderReference(this, quantizedNotes ? initializeGlobalQuantRGBShader(noteData) : initializeGlobalRGBShader(noteData));
+      rgbShader = new RGBShaderReference(this, customColoredNotes ? initializeGlobalQuantRGBShader(noteData) : initializeGlobalRGBShader(noteData));
       texture = noteSkin;
       if (PlayState.SONG != null && PlayState.SONG.options.disableNoteRGB) rgbShader.enabled = false;
 
@@ -976,6 +981,12 @@ class Note extends ModchartArrow implements ICloneable<Note>
       oanim = animation.curAnim.name;
     }
     return gpix;
+  }
+
+  public function validTime(rate:Float = 1, ?ignoreMultSpeed:Bool = false):Bool
+  {
+    final time:Float = (spawnTime * rate) / (noteScrollSpeed < 1 ? noteScrollSpeed : 1) / (!ignoreMultSpeed && multSpeed < 1 ? multSpeed : 1);
+    return (strumTime - Conductor.songPosition < time);
   }
 
   @:noCompletion

@@ -20,9 +20,9 @@ class DeprecatedFunctions
       FunkinLua.luaTrace("objectPlayAnimation is deprecated! Use playAnim instead", false, true);
       var spr:FlxSprite = Reflect.getProperty(LuaUtils.getTargetInstance(), obj);
 
-      if (PlayState.instance.getLuaObject(obj) != null)
+      if (MusicBeatState.getVariables().get(obj) != null)
       {
-        spr = PlayState.instance.getLuaObject(obj);
+        spr = MusicBeatState.getVariables().get(obj);
         spr.animation.play(name, forced, false, startFrame);
         return true;
       }
@@ -50,7 +50,7 @@ class DeprecatedFunctions
             && PlayState.instance.mom.hasOffsetAnimation(anim)
             && ClientPrefs.data.characters) PlayState.instance.mom.playAnim(anim, forced);
         default:
-          character = LuaUtils.checkVariable(character, 'extraCharacter_');
+          character = LuaUtils.checkVariable(character, 'extraCharacter_', 'both');
           if (MusicBeatState.getVariables().exists(character) && ClientPrefs.data.characters)
           {
             var spr:Character = cast(MusicBeatState.getVariables().get(character), Character);
@@ -178,6 +178,15 @@ class DeprecatedFunctions
     funk.set("musicFadeOut", function(duration:Float, toValue:Float = 0) {
       FlxG.sound.music.fadeOut(duration, toValue);
       FunkinLua.luaTrace('musicFadeOut is deprecated! Use soundFadeOut instead.', false, true);
+    });
+    funk.set("updateHitboxFromGroup", function(group:String, index:Int) {
+      if (Std.isOfType(Reflect.getProperty(LuaUtils.getTargetInstance(), group), FlxTypedGroup))
+      {
+        Reflect.getProperty(LuaUtils.getTargetInstance(), group).members[index].updateHitbox();
+        return;
+      }
+      Reflect.getProperty(LuaUtils.getTargetInstance(), group)[index].updateHitbox();
+      FunkinLua.luaTrace('updateHitboxFromGroup is deprecated! Use updateHitbox instead.', false, true);
     });
   }
 }

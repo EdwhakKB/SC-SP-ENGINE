@@ -114,6 +114,8 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<assets path="assets/art" />
 	<assets path="assets/images" />
 
+	<assets path="assets/source"/>
+
 	<assets path="assets/shared"        exclude="*.ogg" if="web"/>
 	<assets path="assets/shared"        exclude="*.mp3" unless="web"/>
 	<assets path="assets/embed"         exclude="*.ogg" if="web" embed="true"/>
@@ -224,9 +226,6 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
 	<haxelib name="hscript-iris" if="HSCRIPT_ALLOWED"/>
 
-	<!--Avoid memory leaks with for loops in HScript-->
-	<haxedef name="loop_unroll_max_cost" value="25" />
-
 	<haxelib name="hxvlc" if="VIDEOS_ALLOWED"/>
 	<haxelib name="format"/>
 
@@ -257,12 +256,14 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<!-- Enables a terminal log prompt on debug builds -->
 	<haxelib name="hxcpp-debug-server" if="debug"/>
 	<haxedef name="HXC_LIBVLC_LOGGING" if="VIDEOS_ALLOWED debug" />
-	<haxedef name="HXVLC_NO_SHARE_DIRECTORY" />
+	<haxedef name="HXVLC_NO_SHARE_DIRECTORY" if="VIDEOS_ALLOWED" />
+	<define name="x86_BUILD" if="32bits" />
 
 	<haxelib name="thx.core"/>
 	<haxelib name="thx.semver"/>
 	<haxelib name="json2object"/>
 	<haxelib name="FlxPartialSound"/>
+	<haxelib name="flxsoundfilters" />
 
 	<!--Disable source traces for release builds-->
 	<haxeflag name="-D no-traces"/>

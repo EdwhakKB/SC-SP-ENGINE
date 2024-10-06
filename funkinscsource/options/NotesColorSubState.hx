@@ -12,7 +12,7 @@ import objects.note.Note;
 import shaders.RGBPalette;
 import shaders.RGBPalette.RGBShaderReference;
 
-class QuantSubState extends MusicBeatSubState
+class NotesColorSubState extends MusicBeatSubState
 {
   var onModeColumn:Bool = true;
   var curSelectedMode:Int = 0;
@@ -72,7 +72,7 @@ class QuantSubState extends MusicBeatSubState
     modeBG.alpha = 0.4;
     add(modeBG);
 
-    notesBG = new FlxSprite(20, 190).makeGraphic(710, 125, FlxColor.BLACK);
+    notesBG = new FlxSprite(140, 190).makeGraphic(480, 125, FlxColor.BLACK);
     notesBG.visible = false;
     notesBG.alpha = 0.4;
     add(notesBG);
@@ -89,6 +89,11 @@ class QuantSubState extends MusicBeatSubState
     var bg:FlxSprite = new FlxSprite(750, 160).makeGraphic(FlxG.width - 780, 540, FlxColor.BLACK);
     bg.alpha = 0.25;
     add(bg);
+
+    var text:Alphabet = new Alphabet(50, 86, 'CTRL', false);
+    text.alignment = CENTERED;
+    text.setScale(0.4);
+    add(text);
 
     copyButton = new FlxSprite(760, 50).loadGraphic(Paths.image('noteColorMenu/copy'));
     copyButton.alpha = 0.6;
@@ -242,13 +247,13 @@ class QuantSubState extends MusicBeatSubState
     var controllerPressed:Bool = (controls.controllerMode && controls.ACCEPT);
     //
 
-    /*if(FlxG.keys.justPressed.CONTROL)
-      {
-        onPixel = !onPixel;
-        spawnNotes();
-        updateNotes(true);
-        FlxG.sound.play(Paths.sound('scrollMenu'), 0.6);
-    }*/
+    if (FlxG.keys.justPressed.CONTROL)
+    {
+      onPixel = !onPixel;
+      spawnNotes();
+      updateNotes(true);
+      FlxG.sound.play(Paths.sound('scrollMenu'), 0.6);
+    }
 
     if (hexTypeNum > -1)
     {
@@ -383,8 +388,8 @@ class QuantSubState extends MusicBeatSubState
             modeBG.visible = notesBG.visible = false;
             curSelectedNote = note.ID;
             onModeColumn = false;
-            bigNote.rgbShader.parent = Note.globalQuantRgbShaders[note.ID];
-            bigNote.shader = Note.globalQuantRgbShaders[note.ID].shader;
+            bigNote.rgbShader.parent = Note.globalRgbShaders[note.ID];
+            bigNote.shader = Note.globalRgbShaders[note.ID].shader;
             updateNotes();
             FlxG.sound.play(Paths.sound('scrollMenu'), 0.6);
           }
@@ -406,6 +411,13 @@ class QuantSubState extends MusicBeatSubState
           Std.int((pointerY() - colorPalette.y) / colorPalette.scale.y)));
         FlxG.sound.play(Paths.sound('scrollMenu'), 0.6);
         updateColors();
+      }
+      else if (pointerOverlaps(skinNote))
+      {
+        onPixel = !onPixel;
+        spawnNotes();
+        updateNotes(true);
+        FlxG.sound.play(Paths.sound('scrollMenu'), 0.6);
       }
       else if (pointerY() >= hexTypeLine.y && pointerY() < hexTypeLine.y + hexTypeLine.height && Math.abs(pointerX() - 1000) <= 84)
       {
@@ -462,10 +474,10 @@ class QuantSubState extends MusicBeatSubState
     {
       if (FlxG.keys.pressed.SHIFT || FlxG.gamepads.anyPressed(LEFT_SHOULDER))
       {
-        for (i in 0...7)
+        for (i in 0...3)
         {
           var strumRGB:RGBShaderReference = myNotes.members[curSelectedNote].rgbShader;
-          var color:FlxColor = ClientPrefs.defaultData.arrowRGBQuantize[curSelectedNote][i];
+          var color:FlxColor = !onPixel ? ClientPrefs.defaultData.arrowRGB[curSelectedNote][i] : ClientPrefs.defaultData.arrowRGBPixel[curSelectedNote][i];
           switch (i)
           {
             case 0:
@@ -478,7 +490,7 @@ class QuantSubState extends MusicBeatSubState
           dataArray[curSelectedNote][i] = color;
         }
       }
-      setShaderColor(ClientPrefs.defaultData.arrowRGBQuantize[curSelectedNote][curSelectedMode]);
+      setShaderColor(!onPixel ? ClientPrefs.defaultData.arrowRGB[curSelectedNote][curSelectedMode] : ClientPrefs.defaultData.arrowRGBPixel[curSelectedNote][curSelectedMode]);
       FlxG.sound.play(Paths.sound('cancelMenu'), 0.6);
       updateColors();
     }
@@ -544,8 +556,8 @@ class QuantSubState extends MusicBeatSubState
 
     modeBG.visible = false;
     notesBG.visible = true;
-    bigNote.rgbShader.parent = Note.globalQuantRgbShaders[curSelectedNote];
-    bigNote.shader = Note.globalQuantRgbShaders[curSelectedNote].shader;
+    bigNote.rgbShader.parent = Note.globalRgbShaders[curSelectedNote];
+    bigNote.shader = Note.globalRgbShaders[curSelectedNote].shader;
     updateNotes();
     FlxG.sound.play(Paths.sound('scrollMenu'));
   }
@@ -561,14 +573,15 @@ class QuantSubState extends MusicBeatSubState
   }
 
   // notes sprites functions
+  var skinNote:FlxSprite;
   var modeNotes:FlxTypedGroup<FlxSprite>;
   var myNotes:FlxTypedGroup<StrumArrow>;
   var bigNote:Note;
-  var animationsForNotes:Array<String> = ['purple', 'blue', 'green', 'red', 'purple', 'blue', 'green', 'red'];
 
   public function spawnNotes()
   {
-    dataArray = ClientPrefs.data.arrowRGBQuantize;
+    dataArray = !onPixel ? ClientPrefs.data.arrowRGB : ClientPrefs.data.arrowRGBPixel;
+    if (onPixel) PlayState.stageUI = "pixel";
 
     // clear groups
     modeNotes.forEachAlive(function(note:FlxSprite) {
@@ -582,6 +595,11 @@ class QuantSubState extends MusicBeatSubState
     modeNotes.clear();
     myNotes.clear();
 
+    if (skinNote != null)
+    {
+      remove(skinNote);
+      skinNote.destroy();
+    }
     if (bigNote != null)
     {
       remove(bigNote);
@@ -589,24 +607,42 @@ class QuantSubState extends MusicBeatSubState
     }
 
     // respawn stuff
-    var res:Int = 160;
+    var res:Int = onPixel ? 160 : 17;
+    skinNote = new FlxSprite(48, 24).loadGraphic(Paths.image('noteColorMenu/' + (onPixel ? 'note' : 'notePixel')), true, res, res);
+    skinNote.antialiasing = ClientPrefs.data.antialiasing;
+    skinNote.setGraphicSize(68);
+    skinNote.updateHitbox();
+    skinNote.animation.add('anim', [0], 24, true);
+    skinNote.animation.play('anim', true);
+    if (!onPixel) skinNote.antialiasing = false;
+    add(skinNote);
+
+    var res:Int = !onPixel ? 160 : 17;
     for (i in 0...3)
     {
-      var newNote:FlxSprite = new FlxSprite(230 + (100 * i), 100).loadGraphic(Paths.image('noteColorMenu/note'), true, res, res);
+      var newNote:FlxSprite = new FlxSprite(230 + (100 * i),
+        100).loadGraphic(Paths.image('noteColorMenu/' + (!onPixel ? 'note' : 'notePixel')), true, res, res);
       newNote.antialiasing = ClientPrefs.data.antialiasing;
       newNote.setGraphicSize(85);
       newNote.updateHitbox();
       newNote.animation.add('anim', [i], 24, true);
       newNote.animation.play('anim', true);
       newNote.ID = i;
+      if (onPixel) newNote.antialiasing = false;
       modeNotes.add(newNote);
     }
 
-    Note.globalQuantRgbShaders = [];
+    var simpleNoteskin:String = (!onPixel ? 'noteSkins/NOTE_assets' + Note.getNoteSkinPostfix() : 'pixelUI/noteSkins/NOTE_assets' + Note.getNoteSkinPostfix());
+
+    Note.globalRgbShaders = [];
     for (i in 0...dataArray.length)
     {
-      Note.initializeGlobalQuantRGBShader(i);
-      var newNote:StrumArrow = new StrumArrow(25 + (680 / dataArray.length * i), 200, i, 0, 'normal', true);
+      Note.initializeGlobalRGBShader(i);
+      var newNote:StrumArrow = new StrumArrow(150 + (480 / dataArray.length * i), 200, i, 0, simpleNoteskin);
+      newNote.daStyle = simpleNoteskin;
+      newNote.texture = simpleNoteskin;
+      newNote.reloadNote(simpleNoteskin);
+      newNote.loadNoteAnims(simpleNoteskin, true);
       newNote.useRGBShader = true;
       newNote.setGraphicSize(102);
       newNote.updateHitbox();
@@ -614,16 +650,20 @@ class QuantSubState extends MusicBeatSubState
       myNotes.add(newNote);
     }
 
-    bigNote = new Note(0, 0, false, 'normal');
-    bigNote.quantizedNotes = true;
+    bigNote = new Note(0, 0, false, simpleNoteskin);
+    bigNote.texture = simpleNoteskin;
+    bigNote.noteSkin = simpleNoteskin;
+    bigNote.reloadNote(simpleNoteskin);
     bigNote.setPosition(250, 325);
     bigNote.setGraphicSize(250);
     bigNote.updateHitbox();
-    bigNote.rgbShader.parent = Note.globalQuantRgbShaders[curSelectedNote];
-    bigNote.shader = Note.globalQuantRgbShaders[curSelectedNote].shader;
-    for (i in 0...dataArray.length)
+    bigNote.rgbShader.parent = Note.globalRgbShaders[curSelectedNote];
+    bigNote.shader = Note.globalRgbShaders[curSelectedNote].shader;
+    for (i in 0...Note.colArray.length)
     {
-      bigNote.animation.addByPrefix('note$i', 'green0', 24, true);
+      if (!onPixel) bigNote.animation.addByPrefix('note$i', Note.colArray[i] + '0', 24, true);
+      else
+        bigNote.animation.add('note$i', [i + 4], 24, true);
     }
     insert(members.indexOf(myNotes) + 1, bigNote);
     _storedColor = getShaderColor();
@@ -682,10 +722,10 @@ class QuantSubState extends MusicBeatSubState
 
   function fixColors()
   {
-    for (i in 0...7)
+    for (i in 0...3)
     {
       var strumRGB:RGBShaderReference = myNotes.members[curSelectedNote].rgbShader;
-      var color:FlxColor = ClientPrefs.data.arrowRGBQuantize[curSelectedNote][i];
+      var color:FlxColor = !onPixel ? ClientPrefs.data.arrowRGB[curSelectedNote][i] : ClientPrefs.data.arrowRGBPixel[curSelectedNote][i];
       switch (i)
       {
         case 0:
@@ -697,7 +737,7 @@ class QuantSubState extends MusicBeatSubState
       }
       dataArray[curSelectedNote][i] = color;
     }
-    setShaderColor(ClientPrefs.data.arrowRGBQuantize[curSelectedNote][curSelectedMode]);
+    setShaderColor(!onPixel ? ClientPrefs.data.arrowRGB[curSelectedNote][curSelectedMode] : ClientPrefs.data.arrowRGBPixel[curSelectedNote][curSelectedMode]);
     updateColors();
   }
 
@@ -708,5 +748,5 @@ class QuantSubState extends MusicBeatSubState
     return dataArray[curSelectedNote][curSelectedMode];
 
   function getShader()
-    return Note.globalQuantRgbShaders[curSelectedNote];
+    return Note.globalRgbShaders[curSelectedNote];
 }

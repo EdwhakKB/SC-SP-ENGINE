@@ -9,7 +9,7 @@ class FlxAnimateFunctions
   {
     funk.set("makeFlxAnimateSprite", function(tag:String, ?x:Float = 0, ?y:Float = 0, ?loadFolder:String = null) {
       tag = tag.replace('.', '');
-      var lastSprite = PlayState.instance.variables.get(tag);
+      var lastSprite = cast MusicBeatState.getVariables().get(tag);
       if (lastSprite != null)
       {
         lastSprite.kill();
@@ -19,12 +19,12 @@ class FlxAnimateFunctions
 
       var mySprite:ModchartAnimateSprite = new ModchartAnimateSprite(x, y);
       if (loadFolder != null) Paths.loadAnimateAtlas(mySprite, loadFolder);
-      PlayState.instance.variables.set(tag, mySprite);
+      MusicBeatState.getVariables().set(tag, mySprite);
       mySprite.active = true;
     });
 
-    funk.set("loadAnimateAtlas", function(tag:String, folderOrImg:Dynamic, ?spriteJson:Dynamic = null, ?animationJson:Dynamic = null) {
-      var spr:FlxAnimate = PlayState.instance.variables.get(tag);
+    funk.set("loadAnimateAtlas", function(tag:String, folderOrImg:String, ?spriteJson:String = null, ?animationJson:String = null) {
+      var spr:FlxAnimate = cast MusicBeatState.getVariables().get(tag);
       if (spr != null) Paths.loadAnimateAtlas(spr, folderOrImg, spriteJson, animationJson);
     });
 

@@ -5,7 +5,21 @@ class HoldCoverGroup extends FlxTypedSpriteGroup<HoldCoverSprite>
   public var enabled:Bool = true;
   public var isPlayer:Bool = false;
   public var canSplash:Bool = false;
-  public var isReady:Bool = false;
+  public var isReady(get, never):Bool;
+
+  function get_isReady():Bool
+  {
+    if (PlayState.instance != null)
+    {
+      return (PlayState.instance.strumLineNotes != null
+        && PlayState.instance.strumLineNotes.members.length > 0
+        && !PlayState.instance.startingSong
+        && !PlayState.instance.inCutscene
+        && !PlayState.instance.inCinematic
+        && PlayState.instance.generatedMusic);
+    }
+    return false;
+  }
 
   public function new(enabled:Bool, isPlayer:Bool, canSplash:Bool = false)
   {

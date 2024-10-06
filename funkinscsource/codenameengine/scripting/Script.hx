@@ -224,7 +224,7 @@ class Script extends FlxBasic implements IFlxDestroyable
 
     // Functions & Variables
     set('setVar', function(name:String, value:Dynamic) {
-      MusicBeatState.getVariables().set(name, value);
+      MusicBeatState.getVariables().set(name, psychlua.ReflectionFunctions.parseSingleInstance(value));
     });
     set('getVar', function(name:String) {
       var result:Dynamic = null;

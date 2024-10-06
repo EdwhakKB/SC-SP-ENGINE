@@ -3,7 +3,7 @@ package utils;
 import openfl.media.Sound;
 
 /**
- * Props for vocal checking because I need variables from the place grabing the props to use here.
+ * Props for vocal/inst checking because I need variables from the place grabing the props to use here.
  */
 typedef SoundMusicPropsCheck =
 {
@@ -26,7 +26,7 @@ typedef SoundPropsCheck =
 }
 
 /**
- * Small class to help with getting mutiple outcomes of one sound.
+ * Small class to help with getting mutiple outcomes of one sound. Made by me -glow
  */
 class SoundUtil
 {
@@ -35,6 +35,7 @@ class SoundUtil
    * @param soundProps song, prefix, suffix, externalVocal (externVocal), character, difficulty.
    * @param soundType VOCALS or INST.
    * @param postFix if the sound should allow to look for sound with **-**
+   * @param list perfered list you want found instead of doing all of the rest.
    * @return Sound
    */
   public static function findVocalOrInst(soundProps:SoundMusicPropsCheck, soundType:String = 'VOCALS', postFix:Bool = true):Sound
@@ -146,7 +147,7 @@ class SoundUtil
 
     var completeVocal:String = postFix ? (vocal.startsWith('-') ? vocal : '-$vocal') : vocal;
     var soundPath:String = '$prefix$fileName$suffix$vocal';
-    var finalSound:Sound = Paths.returnSound(soundPath, folder, modsAllowed);
+    var finalSound:Sound = Paths.returnSound(soundPath, folder, modsAllowed, false, true);
 
     if (finalSound == null)
     {
@@ -154,7 +155,7 @@ class SoundUtil
       {
         completeVocal = postFix ? (external.contains('-') ? '-$external' : external) : external;
         soundPath = '$prefix$fileName$suffix$external';
-        finalSound = Paths.returnSound(soundPath, folder, modsAllowed);
+        finalSound = Paths.returnSound(soundPath, folder, modsAllowed, false, true);
         if (finalSound != null) return finalSound;
       }
     }

@@ -118,7 +118,6 @@ import states.TitleState;
   public var discordRPC:Bool = true;
 
   public var hudStyle:String = 'PSYCH';
-  public var quantNotes:Bool = false;
 
   public var gjUser:String = "";
   public var gjToken:String = "";
@@ -195,6 +194,8 @@ import states.TitleState;
 
   public var vanillaStrumAnimations:Bool = false;
   public var holdCoverPlay:Bool = true;
+
+  public var colorNoteType:String = 'None';
 }
 
 class ClientPrefs

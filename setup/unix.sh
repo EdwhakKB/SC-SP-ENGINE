@@ -4,7 +4,7 @@
 # REMINDER THAT YOU NEED HAXE INSTALLED PRIOR TO USING THIS
 # https://haxe.org/download/version/4.3.6/
 haxelib install lime
-haxelib git openfl https://github.com/FunkinCrew/openfl feature/shader-improvements
+haxelib install openfl
 haxelib git flixel https://github.com/glowsoony/flixel/tree/Main-SCE
 haxelib git flixel-addons https://github.com/glowsoony/flixel-addons/tree/dev
 haxelib install tjson
@@ -26,3 +26,4 @@ haxelib git thx.core https://github.com/FunkinCrew/thx.core/tree/22605ff44f01971
 haxelib git thx.semver https://github.com/FunkinCrew/thx.semver/tree/cf8d213589a2c7ce4a59b0fdba9e8ff36bc029fa
 haxelib git json2object https://github.com/FunkinCrew/json2object/tree/a8c26f18463c98da32f744c214fe02273e1823fa
 haxelib git hxvlc https://github.com/MAJigsaw77/hxvlc/tree/main
+haxelib git flxsoundfilters https://github.com/TheZoroForce240/FlxSoundFilters

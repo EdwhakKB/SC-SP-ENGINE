@@ -178,6 +178,9 @@ class VisualsSettingsSubState extends BaseOptionsMenu
     var option:Option = new Option('Vanilla Strum Animations', "If checked, Strums animations play like vanilla FNF.", 'vanillaStrumAnimations', BOOL);
     addOption(option);
 
+    var option:Option = new Option('Color Notes A Way', 'What kinda of RGB note coloring !(only if RGB shader is active)!', 'colorNoteType', STRING,
+      ['None', 'Quant', 'Rainbow']);
+
     super();
     add(notes);
   }

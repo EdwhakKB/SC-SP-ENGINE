@@ -256,15 +256,6 @@ class Paths
     return parts[0];
   }
 
-  public static function exists(file:String, ?type:AssetType = TEXT, ?parentFolder:String, ?modsAllowed:Bool = true):Bool
-  {
-    #if MODS_ALLOWED
-    return FileSystem.exists(getPath(file, type, parentFolder, modsAllowed));
-    #else
-    return Assets.exists(getPath(file, type, parentFolder, modsAllowed));
-    #end
-  }
-
   public static function getPath(file:String, ?type:AssetType = TEXT, ?parentfolder:String, ?modsAllowed:Bool = true):String
   {
     #if MODS_ALLOWED
@@ -404,11 +395,11 @@ class Paths
   {
     var songKey:String = '${formatToSongPath(song)}/${prefix}Voices${suffix}';
     if (postfix != null) songKey += postfix.startsWith('-') ? postfix : '-' + postfix;
-    return returnSound(songKey, 'songs', modsAllowed, false);
+    return returnSound(songKey, 'songs', modsAllowed, false, true);
   }
 
   inline static public function inst(?prefix:String = '', song:String, ?suffix:String = '', ?modsAllowed:Bool = true):Sound
-    return returnSound('${formatToSongPath(song)}/${prefix}Inst${suffix}', 'songs', modsAllowed, false);
+    return returnSound('${formatToSongPath(song)}/${prefix}Inst${suffix}', 'songs', modsAllowed, false, true);
 
   /**
    * Gets the path to an `Inst.mp3/ogg` song instrumental from songs:assets/songs/`song`/
@@ -749,6 +740,23 @@ class Paths
     return tempFramesCache[key] = loadFrames(justKey ? [key, firstPath] : [Paths.checkForImage(key, parentfolder, true), firstPath]);
   }
 
+  static public function getMultiAtlas(keys:Array<String>, ?parentFolder:String = null, ?allowGPU:Bool = true):FlxAtlasFrames
+  {
+    var parentFrames:FlxAtlasFrames = Paths.getAtlas(keys[0].trim());
+    if (keys.length > 1)
+    {
+      var original:FlxAtlasFrames = parentFrames;
+      parentFrames = new FlxAtlasFrames(parentFrames.parent);
+      parentFrames.addAtlas(original, true);
+      for (i in 1...keys.length)
+      {
+        var extraFrames:FlxAtlasFrames = Paths.getAtlas(keys[i].trim(), parentFolder, allowGPU);
+        if (extraFrames != null) parentFrames.addAtlas(extraFrames, true);
+      }
+    }
+    return parentFrames;
+  }
+
   inline static public function getSparrowAtlas(key:String, ?parentfolder:String = null, ?allowGPU:Bool = true):FlxAtlasFrames
   {
     var imageLoaded:FlxGraphic = image(key, parentfolder, allowGPU);
@@ -881,14 +889,6 @@ class Paths
         finalResult = finalResult.toLowerCase();
     }
     return finalResult;
-  }
-
-  inline static public function formatToSongPathUnlowercased(path:String)
-  {
-    final invalidChars = ~/[~&;:<>#\s]/g;
-    final hideChars = ~/[.,'"%?!]/g;
-
-    return hideChars.replace(invalidChars.replace(path, '-'), '').trim();
   }
 
   public static var currentTrackedSounds:Map<String, Sound> = [];

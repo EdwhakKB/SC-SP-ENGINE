@@ -308,18 +308,7 @@ class ShaderFunctions
         #end
       });
 
-      // shader bullshit
-      funk.set("setActorWaveCircleShader", function(id:String, ?speed:Float = 3, ?frequency:Float = 10, ?amplitude:Float = 0.25) {
-        var funnyShader:shaders.FunkinSourcedShaders.WaveCircleEffect = new shaders.FunkinSourcedShaders.WaveCircleEffect();
-        funnyShader.waveSpeed = speed;
-        funnyShader.waveFrequency = frequency;
-        funnyShader.waveAmplitude = amplitude;
-        FunkinLua.lua_Shaders.set(id, funnyShader);
-
-        if (LuaUtils.getObjectDirectly(id) != null) LuaUtils.getObjectDirectly(id).shader = funnyShader.shader;
-        if (LuaUtils.getActorByName(id) != null) LuaUtils.getActorByName(id).shader = funnyShader.shader;
-      });
-
+      // Shader stuff
       funk.set("setActorNoShader", function(id:String) {
         FunkinLua.lua_Shaders.remove(id);
         if (LuaUtils.getObjectDirectly(id) != null) LuaUtils.getObjectDirectly(id).shader = null;
@@ -400,7 +389,7 @@ class ShaderFunctions
             if (tag != null)
             {
               var originalTag:String = tag;
-              tag = LuaUtils.checkVariable(tag, 'tween_');
+              tag = LuaUtils.checkVariable(tag, 'tween_', 'both');
               variables.set(tag, FlxTween.num(startValue, value, time,
                 {
                   ease: ease,
@@ -509,7 +498,7 @@ class ShaderFunctions
             if (tag != null)
             {
               var originalTag:String = tag;
-              tag = LuaUtils.checkVariable(tag, 'tween_');
+              tag = LuaUtils.checkVariable(tag, 'tween_', 'both');
               var variables = MusicBeatState.getVariables();
               variables.set(tag, FlxTween.num(startValue, value, time,
                 {
@@ -548,7 +537,7 @@ class ShaderFunctions
           if (tag != null)
           {
             var originalTag:String = tag;
-            tag = LuaUtils.checkVariable(tag, 'tween_');
+            tag = LuaUtils.checkVariable(tag, 'tween_', 'both');
             var variables = MusicBeatState.getVariables();
             variables.set(tag, FlxTween.num(leObj.getFloat(floatName), newFloat, duration,
               {

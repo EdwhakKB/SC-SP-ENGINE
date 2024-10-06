@@ -79,15 +79,11 @@ class TitleState extends MusicBeatState
   override public function create():Void
   {
     Paths.clearStoredMemory();
+    super.create();
     Paths.clearUnusedMemory();
+
     FlxTransitionableState.skipNextTransOut = false;
     persistentUpdate = true;
-
-    #if (cpp && windows)
-    cpp.CPPInterface.darkMode();
-    #end
-
-    super.create();
 
     if (!skippedIntro && FlxG.sound.music != null) FlxG.sound.music = null;
     grayGrad = FlxGradient.createGradientFlxSprite(FlxG.width, 400, [0x0, FlxColor.WHITE]);
@@ -107,8 +103,14 @@ class TitleState extends MusicBeatState
     whiteGrad2.angle = -90;
     whiteGrad2.y += 0;
 
+    #if (cpp && windows)
+    cpp.CPPInterface.darkMode();
+    #end
+
+    #if dev
     checkInternetConnection();
     if (internetConnection) getBuildVer();
+    #end
 
     Assets.cache.enabled = true;
     ClientPrefs.data.SCEWatermark = ClientPrefs.data.SCEWatermark;
@@ -209,8 +211,8 @@ class TitleState extends MusicBeatState
     gf.frames = Paths.getSparrowAtlas(characterImage);
     if (!useIdle)
     {
-      gf.animation.addByIndices('danceLeft', animationName, [30, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], "", 24, false);
-      gf.animation.addByIndices('danceRight', animationName, [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29], "", 24, false);
+      gf.animation.addByIndices('danceLeft', animationName, danceLeftFrames, "", 24, false);
+      gf.animation.addByIndices('danceRight', animationName, danceRightFrames, "", 24, false);
       gf.animation.play('danceRight');
     }
     else
@@ -615,6 +617,7 @@ class TitleState extends MusicBeatState
     while (textGroup.members.length > 0)
       textGroup.remove(textGroup.members[0], true);
 
+  #if dev
   public function checkInternetConnection()
   {
     var http = new haxe.Http("https://www.google.com");
@@ -637,9 +640,10 @@ class TitleState extends MusicBeatState
 
     http.request();
   }
+  #end
 
   // JSON data
-  var characterImage:String = 'gfTitle';
+  var characterImage:String = 'gfDanceTitle';
   var animationName:String = 'gf';
 
   var gfPosition:FlxPoint = FlxPoint.get(512, 40);
@@ -653,9 +657,9 @@ class TitleState extends MusicBeatState
 
   function loadJsonData()
   {
-    if (Paths.fileExists('images/gfTitle.json', TEXT))
+    if (Paths.fileExists('images/gfDanceTitle.json', TEXT))
     {
-      var titleRaw:String = Paths.getTextFromFile('images/gfTitle.json');
+      var titleRaw:String = Paths.getTextFromFile('images/gfDanceTitle.json');
       if (titleRaw != null && titleRaw.length > 0)
       {
         try

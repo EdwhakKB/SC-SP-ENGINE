@@ -6,7 +6,7 @@
 		'Function_StopLua', "String", "##PSYCHLUA_FUNCTIONSTOPLUA", "Stops Lua",
 		'Function_StopHScript', "String", "##PSYCHLUA_FUNCTIONSTOPHSCRIPT", "Stops HScript",
 		'Function_StopAll', "String", "##PSYCHLUA_FUNCTIONSTOPALL", "Stops Everything",
-		'Function_Stop', "String", "##PSYCHLUA_FUNCTIONSTOP" "Function to Stop",
+		'Function_Stop', "String", "##PSYCHLUA_FUNCTIONSTOP", "Function to Stop",
 		'Function_Continue', "String", "##PSYCHLUA_FUNCTIONCONTINUE", "Function to Continue",
 		'luaDebugMode', "Boolean", "false", "uses DebugMode?",
 		'luaDeprecatedWarnings', "Boolean", "true", "uses DeprecatedWarnings?",

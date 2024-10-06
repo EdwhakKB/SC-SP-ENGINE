@@ -13,6 +13,7 @@ class MetaNote extends Note
   public var sustainSprite:Note;
   public var endSprite:Note;
   public var chartY:Float = 0;
+  public var chartNoteData:Int = 0;
   public var editorVisualSusLength:Float = 0;
 
   public function new(time:Float, data:Int, songData:Array<Dynamic>)
@@ -20,10 +21,12 @@ class MetaNote extends Note
     super(time, data, false, PlayState.SONG?.options?.arrowSkin, null, null, 1.0, null, true);
     this.songData = songData;
     this.strumTime = time;
+    this.chartNoteData = data;
   }
 
   public function changeNoteData(v:Int)
   {
+    this.chartNoteData = v; // despite being so arbitrary its sadly needed to fix a bug on moving notes
     this.songData[1] = v;
     this.noteData = v % ChartingState.GRID_COLUMNS_PER_PLAYER;
     this.mustPress = (v < ChartingState.GRID_COLUMNS_PER_PLAYER);

@@ -120,8 +120,8 @@ class PhillyBlazin extends BaseStage
     }
     abot.color = 0xFF888888;
 
-    var unspawnNotes:Array<Note> = cast game.unspawnNotes;
-    for (note in unspawnNotes)
+    var unspawnNotes:CustomArrayGroup<Note> = cast game.unspawnNotes;
+    for (note in unspawnNotes.members)
     {
       if (note == null) continue;
 

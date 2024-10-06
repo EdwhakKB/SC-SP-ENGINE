@@ -15,7 +15,7 @@ class GroupFunctions
       try
       {
         tag = tag.replace('.', '');
-        LuaUtils.destroyObject(tag);
+        LuaUtils.findToDestroy(tag);
         var group:FlxSpriteGroup = new FlxSpriteGroup(x, y, maxSize);
         if (funk.isStageLua && !funk.preloading) Stage.instance.swagBacks.set(tag, group);
         else
@@ -31,7 +31,7 @@ class GroupFunctions
       try
       {
         tag = tag.replace('.', '');
-        LuaUtils.destroyObject(tag);
+        LuaUtils.findToDestroy(tag);
         var group:FlxSkewedSpriteGroup = new FlxSkewedSpriteGroup(x, y, maxSize);
         if (funk.isStageLua && !funk.preloading) Stage.instance.swagBacks.set(tag, group);
         else
@@ -51,24 +51,6 @@ class GroupFunctions
         {
           FunkinLua.luaTrace("Group is null, can't dont any actions!, returning this trace!");
           return false;
-        }
-        var realObject = cast(MusicBeatState.getVariables().get(obj), FlxSprite);
-        if (realObject != null)
-        {
-          if (removeFromGroup) group.remove(realObject, true);
-          group.insert(pos, realObject);
-          return true;
-        }
-
-        if (Stage.instance.swagBacks.exists(obj))
-        {
-          var real:FlxSprite = LuaUtils.changeSpriteClass(Stage.instance.swagBacks.get(obj));
-          if (real != null)
-          {
-            if (removeFromGroup) group.remove(real, true);
-            group.insert(pos, real);
-            return true;
-          }
         }
 
         var split:Array<String> = obj.split('.');
@@ -106,24 +88,6 @@ class GroupFunctions
           FunkinLua.luaTrace("Group is null, can't dont any actions!, returning this trace!");
           return false;
         }
-        var realObject = cast(MusicBeatState.getVariables().get(obj), FlxSkewed);
-        if (realObject != null)
-        {
-          if (removeFromGroup) group.remove(realObject, true);
-          group.insert(pos, realObject);
-          return true;
-        }
-
-        if (Stage.instance.swagBacks.exists(obj))
-        {
-          var real:FlxSkewed = LuaUtils.changeSkewedSpriteClass(Stage.instance.swagBacks.get(obj));
-          if (real != null)
-          {
-            if (removeFromGroup) group.remove(real, true);
-            group.insert(pos, real);
-            return true;
-          }
-        }
 
         var split:Array<String> = obj.split('.');
         var object:FlxBasic = LuaUtils.getObjectDirectly(split[0]);
@@ -160,22 +124,6 @@ class GroupFunctions
           FunkinLua.luaTrace("Group is null, can't dont any actions!, returning this trace!");
           return false;
         }
-        var realObject = cast(MusicBeatState.getVariables().get(obj), FlxSprite);
-        if (realObject != null)
-        {
-          group.remove(realObject, splice);
-          return true;
-        }
-
-        if (Stage.instance.swagBacks.exists(obj))
-        {
-          var real:FlxSprite = LuaUtils.changeSpriteClass(Stage.instance.swagBacks.get(obj));
-          if (real != null)
-          {
-            group.remove(real, splice);
-            return true;
-          }
-        }
 
         var split:Array<String> = obj.split('.');
         var object:FlxBasic = LuaUtils.getObjectDirectly(split[0]);
@@ -210,22 +158,6 @@ class GroupFunctions
         {
           FunkinLua.luaTrace("Group is null, can't dont any actions!, returning this trace!");
           return false;
-        }
-        var realObject = cast(MusicBeatState.getVariables().get(obj), FlxSkewed);
-        if (realObject != null)
-        {
-          group.remove(realObject, splice);
-          return true;
-        }
-
-        if (Stage.instance.swagBacks.exists(obj))
-        {
-          var real:FlxSkewed = LuaUtils.changeSkewedSpriteClass(Stage.instance.swagBacks.get(obj));
-          if (real != null)
-          {
-            group.remove(real, splice);
-            return true;
-          }
         }
 
         var split:Array<String> = obj.split('.');
@@ -262,22 +194,6 @@ class GroupFunctions
           FunkinLua.luaTrace("Group is null, can't dont any actions!, returning this trace!");
           return false;
         }
-        var realObject = cast(MusicBeatState.getVariables().get(obj), FlxSprite);
-        if (realObject != null)
-        {
-          group.add(realObject);
-          return true;
-        }
-
-        if (Stage.instance.swagBacks.exists(obj))
-        {
-          var real:FlxSprite = LuaUtils.changeSpriteClass(Stage.instance.swagBacks.get(obj));
-          if (real != null)
-          {
-            group.add(real);
-            return true;
-          }
-        }
 
         var split:Array<String> = obj.split('.');
         var object:FlxBasic = LuaUtils.getObjectDirectly(split[0]);
@@ -312,22 +228,6 @@ class GroupFunctions
         {
           FunkinLua.luaTrace("Group is null, can't dont any actions!, returning this trace!");
           return false;
-        }
-        var realObject = cast(MusicBeatState.getVariables().get(obj), FlxSkewed);
-        if (realObject != null)
-        {
-          group.add(realObject);
-          return true;
-        }
-
-        if (Stage.instance.swagBacks.exists(obj))
-        {
-          var real:FlxSkewed = LuaUtils.changeSkewedSpriteClass(Stage.instance.swagBacks.get(obj));
-          if (real != null)
-          {
-            group.add(real);
-            return true;
-          }
         }
 
         var split:Array<String> = obj.split('.');

@@ -15,7 +15,7 @@ typedef OptionsData =
    */
   @:optional
   @:default(false)
-  var disableNoteQuantRGB:Bool;
+  var disableNoteCustomRGB:Bool;
 
   /**
    * Disables the Strums RGB Shader.
@@ -196,7 +196,7 @@ class SongOptionsData
    */
   @:optional
   @:default(false)
-  public var disableNoteQuantRGB:Bool = false;
+  public var disableNoteCustomRGB:Bool = false;
 
   /**
    * Disables the Strums RGB Shader.

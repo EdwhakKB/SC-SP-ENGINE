@@ -81,7 +81,7 @@ class HealthIcon extends FunkinSCSprite
       iconSuffix = '';
     }
 
-    if (iconSuffix != '')
+    if (iconSuffix.length > 0)
     {
       name = name + char;
       if (!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/' + iconSuffix + 'face';

@@ -174,7 +174,7 @@ class SCScript extends flixel.FlxBasic
 
     // Functions & Variables
     setVar('setVar', function(name:String, value:Dynamic) {
-      MusicBeatState.getVariables().set(name, value);
+      MusicBeatState.getVariables().set(name, psychlua.ReflectionFunctions.parseSingleInstance(value));
     });
     setVar('getVar', function(name:String) {
       var result:Dynamic = null;

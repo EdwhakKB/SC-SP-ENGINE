@@ -283,6 +283,14 @@ class PauseSubState extends MusicBeatSubState
         }
     }
 
+    if (FlxG.keys.justPressed.F5 && !inCountDown)
+    {
+      FlxTransitionableState.skipNextTransIn = true;
+      FlxTransitionableState.skipNextTransOut = true;
+      PlayState.nextReloadAll = true;
+      MusicBeatState.resetState();
+    }
+
     if ((controls.ACCEPT && (cantUnpause <= 0 || !controls.controllerMode)) && !inCountDown)
     {
       // Finally
@@ -446,7 +454,7 @@ class PauseSubState extends MusicBeatSubState
       case 'End Song':
         close();
         game.notes.clear();
-        game.unspawnNotes = [];
+        game.unspawnNotes.clear();
         game.finishSong(true);
       case "Exit to menu":
         #if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
@@ -542,12 +550,12 @@ class PauseSubState extends MusicBeatSubState
       {
         introAlts = introAssets.get(value);
 
-        if (game.stageIntroSoundsSuffix != '' || game.stageIntroSoundsSuffix != null || game.stageIntroSoundsSuffix != "")
+        if (game.stageIntroSoundsSuffix != null && game.stageIntroSoundsSuffix.length > 0)
           game.introSoundsSuffix = game.stageIntroSoundsSuffix;
         else
           game.introSoundsSuffix = '';
 
-        if (game.stageIntroSoundsPrefix != '' || game.stageIntroSoundsPrefix != null || game.stageIntroSoundsPrefix != "")
+        if (game.stageIntroSoundsPrefix != null && game.stageIntroSoundsPrefix.length > 0)
           game.introSoundsPrefix = game.stageIntroSoundsPrefix;
         else
           game.introSoundsPrefix = '';

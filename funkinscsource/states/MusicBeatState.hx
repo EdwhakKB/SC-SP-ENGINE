@@ -63,7 +63,7 @@ class MusicBeatState extends #if SCEModchartingTools modcharting.ModchartMusicBe
 
   var _psychCameraInitialized:Bool = false;
 
-  public static var time:Float = 0.7;
+  public static var time:Float = 0.5;
 
   public var variables:Map<String, Dynamic> = new Map<String, Dynamic>();
 
@@ -148,7 +148,7 @@ class MusicBeatState extends #if SCEModchartingTools modcharting.ModchartMusicBe
   }
 
   // Custom made Trans in
-  public static function startTransition(nextState:FlxState = null, ?time:Float = 0.75)
+  public static function startTransition(nextState:FlxState = null, ?time:Float = 0.5)
   {
     if (nextState == null) nextState = FlxG.state;
 

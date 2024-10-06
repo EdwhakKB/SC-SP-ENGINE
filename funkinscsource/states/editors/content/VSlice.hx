@@ -256,7 +256,7 @@ class VSlice
           options:
             {
               disableNoteRGB: false,
-              disableNoteQuantRGB: false,
+              disableNoteCustomRGB: false,
               disableStrumRGB: false,
               disableSplashRGB: false,
               disableHoldCoversRGB: false,
@@ -458,7 +458,7 @@ class VSlice
     events.sort(sortByTime);
     notes.sort(sortByTime);
 
-    if (timeChanges.length < 1) timeChanges.push({t: 0, bpm: bpm}); // failsafe
+    timeChanges.push({t: 0, bpm: bpm}); // so there was first bpm issue (if the song has multiplier bpm)
 
     // try to find composer despite it not being a value on psych charts
     var composer:String = 'Unknown';

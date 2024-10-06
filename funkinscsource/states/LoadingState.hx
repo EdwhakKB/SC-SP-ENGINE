@@ -159,7 +159,7 @@ class LoadingState extends MusicBeatState
     var weekDir:String = StageData.forceNextDirectory;
     StageData.forceNextDirectory = null;
 
-    if (weekDir != null && weekDir.length > 0 && weekDir != '') directory = weekDir;
+    if (weekDir != null && weekDir.length > 0) directory = weekDir;
 
     Paths.setCurrentLevel(directory);
     Debug.logInfo('Setting asset folder to ' + directory);
@@ -201,7 +201,7 @@ class LoadingState extends MusicBeatState
 
   static var Stage:Stage;
 
-  public static function prepareToSong(song:SwagSong)
+  public static function prepareToSong()
   {
     imagesToPrepare = [];
     soundsToPrepare = [];
@@ -222,7 +222,8 @@ class LoadingState extends MusicBeatState
       }
     }
 
-    var folder:String = Paths.formatToSongPath(song.songId);
+    final song:SwagSong = PlayState.SONG;
+    final folder:String = Paths.formatToSongPath(Song.loadedSongName);
     Thread.create(() -> {
       // LOAD NOTE IMAGE
       var noteSkin:String = Note.defaultNoteSkin;
@@ -308,7 +309,7 @@ class LoadingState extends MusicBeatState
     Thread.create(() -> {
       if (song.stage == null || song.stage.length < 1) song.stage = StageData.vanillaSongStage(folder);
 
-      var stageData:StageFile = StageData.getStageFile(song.stage);
+      final stageData:StageFile = StageData.getStageFile(song.stage);
       if (stageData != null)
       {
         var imgs:Array<String> = [];
@@ -559,15 +560,14 @@ class LoadingState extends MusicBeatState
     {
       if (#if sys FileSystem.exists(file) || #end OpenFlAssets.exists(file, SOUND))
       {
-        var sound:Sound = OpenFlAssets.getSound(file, false);
+        var sound:Sound = #if sys Sound.fromFile(file) #else OpenFlAssets.getSound(file, false) #end;
         mutex.acquire();
         Paths.currentTrackedSounds.set(file, sound);
         mutex.release();
       }
       else if (beepOnNull)
       {
-        trace('SOUND NOT FOUND: $key, PATH: $path');
-        FlxG.log.error('SOUND NOT FOUND: $key, PATH: $path');
+        Debug.logError('SOUND NOT FOUND: $key, PATH: $path');
         return FlxAssets.getSound('flixel/sounds/beep');
       }
     }
@@ -592,11 +592,7 @@ class LoadingState extends MusicBeatState
         var file:String = Paths.getPath(requestKey, IMAGE);
         if (#if sys FileSystem.exists(file) || #end OpenFlAssets.exists(file, IMAGE))
         {
-          #if sys
-          var bitmap:BitmapData = BitmapData.fromFile(file);
-          #else
-          var bitmap:BitmapData = OpenFlAssets.getBitmapData(file, false);
-          #end
+          var bitmap:BitmapData = #if sys BitmapData.fromFile(file) #else OpenFlAssets.getBitmapData(file, false) #end;
           mutex.acquire();
           requestedBitmaps.set(file, bitmap);
           originalBitmapKeys.set(file, requestKey);
@@ -604,14 +600,14 @@ class LoadingState extends MusicBeatState
           return bitmap;
         }
         else
-          trace('no such image $key exists');
+          Debug.logWarn('no such image $key exists');
       }
 
       return Paths.currentTrackedAssets.get(requestKey).bitmap;
     }
     catch (e:haxe.Exception)
     {
-      trace('ERROR! fail on preloading image $key');
+      Debug.logError('ERROR! fail on preloading image $key');
     }
 
     return null;

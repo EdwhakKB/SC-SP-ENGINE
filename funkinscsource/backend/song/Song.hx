@@ -171,7 +171,7 @@ class Song
       songJson.options =
         {
           disableNoteRGB: false,
-          disableNoteQuantRGB: false,
+          disableNoteCustomRGB: false,
           disableStrumRGB: false,
           disableSplashRGB: false,
           disableHoldCoversRGB: false,
@@ -301,7 +301,7 @@ class Song
       var options:Array<String> = [
         // RGB Bools
         'disableNoteRGB',
-        'disableNoteQuantRGB',
+        'disableNoteCustomRGB',
         'disableStrumRGB',
         'disableSplashRGB',
         'disableHoldCoversRGB',
@@ -332,7 +332,7 @@ class Song
 
       var defaultOptionValues:Map<String, Dynamic> = [
         'disableNoteRGB' => false,
-        'disableNoteQuantRGB' => false,
+        'disableNoteCustomRGB' => false,
         'disableStrumRGB' => false,
         'disableSplashRGB' => false,
         'disableHoldCoversRGB' => false,
@@ -437,12 +437,9 @@ class Song
         if (Reflect.hasField(songJson, 'player3')) Reflect.deleteField(songJson, 'player3');
       }
 
-      if (songJson.options.arrowSkin == '' || songJson.options.arrowSkin == "" || songJson.options.arrowSkin == null)
-        songJson.options.arrowSkin = "noteSkins/NOTE_assets"
+      if (songJson.options.arrowSkin == null || songJson.options.arrowSkin.length < 1) songJson.options.arrowSkin = "noteSkins/NOTE_assets"
         + Note.getNoteSkinPostfix();
-
-      if (songJson.options.strumSkin == '' || songJson.options.strumSkin == "" || songJson.options.strumSkin == null)
-        songJson.options.strumSkin = "noteSkins/NOTE_assets"
+      if (songJson.options.strumSkin == null || songJson.options.strumSkin.length < 1) songJson.options.strumSkin = "noteSkins/NOTE_assets"
         + Note.getNoteSkinPostfix();
 
       if (songJson.song != null && songJson.songId == null) songJson.songId = songJson.song;
@@ -454,8 +451,6 @@ class Song
     }
   }
 }
-//-----------------------------//
 /**
  * TO DO: V-Slice Chart Data here.
  */
-//-----------------------------//
