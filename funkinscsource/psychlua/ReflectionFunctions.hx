@@ -26,7 +26,6 @@ class ReflectionFunctions
         }
         if (split.length > 1)
         {
-          if (FunkinLua.lua_Shaders.exists(split[0])) return Reflect.getProperty(FunkinLua.lua_Shaders.get(split[0]), split[1]);
           if (FunkinLua.lua_Custom_Shaders.exists(split[0])) return FunkinLua.lua_Custom_Shaders.get(split[0]).hget(split[1]);
           return LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split, true, allowMaps), split[split.length - 1], allowMaps);
         }
@@ -50,11 +49,6 @@ class ReflectionFunctions
         }
         if (split.length > 1)
         {
-          if (FunkinLua.lua_Shaders.exists(split[0]))
-          {
-            Reflect.setProperty(FunkinLua.lua_Shaders.get(split[0]), split[1], value);
-            return value;
-          }
           if (FunkinLua.lua_Custom_Shaders.exists(split[0]))
           {
             FunkinLua.lua_Custom_Shaders.get(split[0]).hset(split[1], value);

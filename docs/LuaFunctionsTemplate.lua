@@ -177,19 +177,11 @@ setShaderFloatArray(obj, prop, value)
 
 setShaderSampler2D(obj, prop, bitmapdataPath)
 
-setActorWaveCircleShader(id, speed, frequency, amplitude)
-
 setActorNoShader(id)
 
 initShaderFromSource(name, classString)
 
 setActorShader(actorStr, shaderName)
-
-setShaderProperty(shaderName, prop, value)
-
-getShaderProperty(shaderName, prop)
-
-tweenShaderProperty(shaderName, prop, value, time, easeStr)
 
 setCameraShader(camStr, shaderName)
 
@@ -207,11 +199,7 @@ pushShaderToCamera(id, camera)
 
 setCameraNoCustomShader(shader)
 
-getCustomShaderProperty(id, property)
-
-setCustomShaderProperty(id, property, value)
-
-tweenCustomShaderProperty(shaderName, prop, value, time, easeStr)
+doTweenCustomShaderFloat(shaderName, prop, value, time, easeStr)
 
 doTweenShaderFloat(tag, object, nameOfFloatVar, newFloat, duration, easeType, swagShader) --Swag Shader is a set shader.
 

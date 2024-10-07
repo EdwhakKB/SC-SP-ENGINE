@@ -1,5 +1,6 @@
 package shaders;
 
+import openfl.utils.Assets;
 import flixel.addons.display.FlxRuntimeShader;
 
 class ShaderBase
@@ -8,12 +9,12 @@ class ShaderBase
   public var id:String = null;
   public var tweens:Array<FlxTween> = [];
 
-  public function new(file:String, ?library:String = 'source', ?version:String = "120")
+  public function new(file:String)
   {
-    var fragShaderPath:String = Paths.shaderFragment(file, library);
-    var vertShaderPath:String = Paths.shaderVertex(file, library);
-    var fragCode:String = getCode(fragShaderPath);
-    var vertCode:String = getCode(vertShaderPath);
+    final fragShaderPath:String = Paths.shaderFragment(file);
+    final vertShaderPath:String = Paths.shaderVertex(file);
+    final fragCode:String = getCode(fragShaderPath);
+    final vertCode:String = getCode(vertShaderPath);
 
     shader = new FlxRuntimeShader(fragCode, vertCode);
   }
@@ -23,15 +24,12 @@ class ShaderBase
 
   public function update(elapsed:Float) {}
 
-  public function getShader() {}
+  public function getShader():FlxRuntimeShader
+    return shader;
 
-  public function clear() {}
-
-  public function destroy() {}
+  public function destroy()
+    shader = null;
 
   public function getCode(path:String):String
-  {
-    var code:String = #if MODS_ALLOWED FileSystem.exists(path) ? File.getContent(path) : null #else Assets.exists(path) ? Assets.getText(path) : null #end;
-    return code;
-  }
+    return #if MODS_ALLOWED FileSystem.exists(path) ? File.getContent(path) : null #else Assets.exists(path) ? Assets.getText(path) : null #end;
 }

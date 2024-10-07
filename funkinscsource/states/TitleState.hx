@@ -659,7 +659,7 @@ class TitleState extends MusicBeatState
   {
     if (Paths.fileExists('images/gfDanceTitle.json', TEXT))
     {
-      var titleRaw:String = Paths.getTextFromFile('images/gfDanceTitle.json');
+      final titleRaw:String = Paths.getTextFromFile('images/gfDanceTitle.json');
       if (titleRaw != null && titleRaw.length > 0)
       {
         try
@@ -671,7 +671,7 @@ class TitleState extends MusicBeatState
               titlex: titleJsonFile.titlex,
               titley: titleJsonFile.titley,
               startx: titleJsonFile.startx,
-              starty: titleJsonFile.startx,
+              starty: titleJsonFile.starty,
               gfx: titleJsonFile.gfx,
               gfy: titleJsonFile.gfy,
               backgroundSprite: titleJsonFile.backgroundSprite,
@@ -695,7 +695,7 @@ class TitleState extends MusicBeatState
 
           if (titleJson.backgroundSprite != null && titleJson.backgroundSprite.trim().length > 0)
           {
-            var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image(titleJson.backgroundSprite));
+            final bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image(titleJson.backgroundSprite));
             bg.antialiasing = titleJson.backgroundSprite.endsWith('-pixel') ? false : ClientPrefs.data.antialiasing;
             add(bg);
           }

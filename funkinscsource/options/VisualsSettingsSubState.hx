@@ -169,7 +169,7 @@ class VisualsSettingsSubState extends BaseOptionsMenu
     addOption(option);
 
     var option:Option = new Option('Note Splashes Option', "Different options on how the splashes show.", 'splashOption', STRING,
-      ['Player', 'Opponent', 'Both']);
+      ['None', 'Player', 'Opponent', 'Both']);
     addOption(option);
 
     var option:Option = new Option('Hold Cover Animation And Splash', "If checked, A Splash and Hold Note animation wil show.", 'holdCoverPlay', BOOL);

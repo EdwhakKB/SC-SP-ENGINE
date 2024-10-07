@@ -1337,6 +1337,9 @@ class LuaUtils
       cam.shaders = [];
       cam.shaderNames = [];
     }
+
+    for (shader in FunkinLua.lua_Shaders.keys())
+      FunkinLua.lua_Shaders.get(shader).destroy();
   }
 
   public static function getActorByName(id:String):Dynamic // kade to psych

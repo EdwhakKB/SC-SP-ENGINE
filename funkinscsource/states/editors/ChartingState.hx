@@ -3208,7 +3208,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
     copyLastSecButton.resize(80, 26);
     copyLastSecStepper = new PsychUINumericStepper(objX + 90, objY + 2, 1, 1, -999, 999, 0);
 
-    beatsPerSecStepper = new PsychUINumericStepper(copyLastSecStepper.x + 70, objY + 2, 1, 4, 1, 7, 2);
+    beatsPerSecStepper = new PsychUINumericStepper(copyLastSecStepper.x + 100, objY + 2, 1, 4, 1, 7, 2);
     beatsPerSecStepper.onValueChange = function() {
       var sec = getCurChartSection();
       if (sec != null)
