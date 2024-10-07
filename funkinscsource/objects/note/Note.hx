@@ -430,7 +430,7 @@ class Note extends ModchartArrow implements ICloneable<Note>
       alpha = 0.6;
       multAlpha = 0.6;
       hitsoundDisabled = true;
-      if (ClientPrefs.data.downScroll) flipY = true;
+      if (ClientPrefs.data.downScroll && !inEditor) flipY = true;
 
       offsetX += width / 2;
       copyAngle = false;

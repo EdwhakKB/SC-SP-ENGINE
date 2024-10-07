@@ -8,10 +8,10 @@ class ShaderBase
   public var id:String = null;
   public var tweens:Array<FlxTween> = [];
 
-  public function new(file:String, ?version:String = "120")
+  public function new(file:String, ?library:String = 'source', ?version:String = "120")
   {
-    var fragShaderPath:String = Paths.shaderFragment(file, 'source');
-    var vertShaderPath:String = Paths.shaderVertex(file, 'source');
+    var fragShaderPath:String = Paths.shaderFragment(file, library);
+    var vertShaderPath:String = Paths.shaderVertex(file, library);
     var fragCode:String = getCode(fragShaderPath);
     var vertCode:String = getCode(vertShaderPath);
 
