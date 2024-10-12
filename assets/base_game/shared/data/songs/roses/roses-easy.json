@@ -1,5 +1,5 @@
 {
-	"song": {
+  "song": {
     "player1": "bf-pixel",
     "player2": "senpai-angry",
     "notes": [
@@ -514,7 +514,7 @@
     ],
     "options": {
       "strumSkin": "pixelUI",
-      "noteSkin": "pixelUI"
+      "arrowSkin": "pixelUI"
     },
     "gfVersion": "gf-pixel",
     "events": [],

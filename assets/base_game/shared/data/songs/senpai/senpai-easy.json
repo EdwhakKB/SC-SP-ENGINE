@@ -644,7 +644,7 @@
     ],
     "options": {
       "strumSkin": "pixelUI",
-      "noteSkin": "pixelUI"
+      "arrowSkin": "pixelUI"
     },
     "gfVersion": "gf-pixel",
     "events": [],

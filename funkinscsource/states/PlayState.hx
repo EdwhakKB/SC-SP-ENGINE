@@ -3357,7 +3357,7 @@ class PlayState extends MusicBeatState
       return;
     }
 
-    if (paused && !isDead) //Updates on game over state, causes variables to be unknown is taken && !isDead
+    if (paused && !isDead) // Updates on game over state, causes variables to be unknown is taken && !isDead
     {
       callOnScripts('onUpdate', [elapsed]);
       callOnScripts('update', [elapsed]);
@@ -3549,18 +3549,16 @@ class PlayState extends MusicBeatState
     {
       if (updateTime)
       {
-        final curTime:Float = Math.max(0, Conductor.songPosition - ClientPrefs.data.noteOffset);
+        var curTime:Float = Math.max(0, Conductor.songPosition - ClientPrefs.data.noteOffset);
         songPercent = (curTime / songLength);
-        final songCalc:Float = ClientPrefs.data.timeBarType == 'Time Elapsed' ? curTime : (songLength - curTime) / playbackRate; // time fix
-        final secondsTotal:Int = Math.floor(songCalc / 1000) < 0 ? 0 : Math.floor(songCalc / 100);
+        var songCalc:Float = ClientPrefs.data.timeBarType == 'Time Elapsed' ? curTime : (songLength - curTime) / playbackRate; // time fix
+        var secondsTotal:Int = Math.floor(songCalc / 1000) < 0 ? 0 : Math.floor(songCalc / 100);
         if (ClientPrefs.data.timeBarType != 'Song Name') timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
       }
     }
 
     try
-    {
-      moveCameraToTarget(cameraTargeted);
-    }
+      moveCameraToTarget(cameraTargeted)
     catch (e)
     {
       moveCameraToTarget(null);
@@ -7909,7 +7907,7 @@ class PlayState extends MusicBeatState
   {
     if (chartingMode || modchartMode) return;
 
-    final usedPractice:Bool = (ClientPrefs.getGameplaySetting('practice') || ClientPrefs.getGameplaySetting('botplay'));
+    var usedPractice:Bool = (ClientPrefs.getGameplaySetting('practice') || ClientPrefs.getGameplaySetting('botplay'));
 
     if (cpuControlled) return;
 
