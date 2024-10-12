@@ -92,6 +92,12 @@ class MetaNote extends Note
     setSustainLength(sustainLength, stepCrochet, zoom);
   }
 
+  public function updateSustainToStepCrochet(stepCrochet:Float)
+  {
+    if (_lastZoom < 0) return;
+    setSustainLength(sustainLength, stepCrochet, _lastZoom);
+  }
+
   var _noteTypeText:FlxText;
 
   public function findNoteTypeText(num:Int)

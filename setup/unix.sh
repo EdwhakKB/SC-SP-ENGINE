@@ -16,7 +16,7 @@ haxelib install hxgamejolt-api
 haxelib install markdown
 haxelib install format
 haxelib git linc_luajit https://github.com/superpowers04/linc_luajit
-haxelib git flxanimate https://github.com/Dot-Stuff/flxanimate funkin-mask
+haxelib git flxanimate https://github.com/Dot-Stuff/flxanimate dev
 haxelib git FlxPartialSound https://github.com/FunkinCrew/FlxPartialSound/tree/f986332ba5ab02abd386ce662578baf04904604a
 haxelib git fnf-modcharting-tools https://github.com/glowsoony/FNF-Modcharting-Tools main-old
 haxelib git hxdiscord_rpc https://github.com/FNF-CNE-Devs/hxdiscord_rpc/tree/main

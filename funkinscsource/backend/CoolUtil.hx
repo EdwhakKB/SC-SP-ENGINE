@@ -196,7 +196,7 @@ class CoolUtil
 
   inline public static function numberArray(max:Int, ?min:Int = 0):Array<Int>
   {
-    return [for (i in min...max) i];
+    return [for (i in min...max + 1) i];
   }
 
   inline public static function browserLoad(site:String)

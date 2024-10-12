@@ -2814,8 +2814,8 @@ class PlayState extends MusicBeatState
           final swagNote:Note = new Note(spawnTime, noteColumn, false, noteSkinUsed, oldNote, this, songSpeed, gottaHitNote ? playerStrums : opponentStrums,
             false);
           var altName:String = gottaHitNote ? ((section.altAnim
-            || (!opponentMode ? section.CPUAltAnim : section.playerAltAnim)) ? '-alt' : '') : ((section.altAnim
-              || (opponentMode ? section.CPUAltAnim : section.playerAltAnim)) ? '-alt' : '');
+            || (!opponentMode ? section.playerAltAnim : section.CPUAltAnim)) ? '-alt' : '') : ((section.altAnim
+              || (opponentMode ? section.playerAltAnim : section.CPUAltAnim)) ? '-alt' : '');
           final isPixelNote:Bool = (swagNote.texture.contains('pixel') || swagNote.noteSkin.contains('pixel') || noteSkinDad.contains('pixel')
             || noteSkinBF.contains('pixel'));
           swagNote.setupNote(gottaHitNote, gottaHitNote ? 1 : 0, daSection, noteType);
@@ -3357,7 +3357,7 @@ class PlayState extends MusicBeatState
       return;
     }
 
-    if (paused)
+    if (paused && !isDead) //Updates on game over state, causes variables to be unknown is taken && !isDead
     {
       callOnScripts('onUpdate', [elapsed]);
       callOnScripts('update', [elapsed]);
@@ -3379,21 +3379,18 @@ class PlayState extends MusicBeatState
     }
     #end
 
-    for (value in MusicBeatState.getVariables().keys())
+    for (value in MusicBeatState.getVariables("Character").keys())
     {
-      if (MusicBeatState.getVariables().get(value) != null && MusicBeatState.getVariables().exists(value))
+      if (MusicBeatState.getVariables("Character").get(value) != null && MusicBeatState.getVariables("Character").exists(value))
       {
-        if (value.startsWith('extraCharacter_'))
+        final daChar:Character = MusicBeatState.getVariables("Character").get(value);
+        if (daChar != null)
         {
-          final daChar:Character = cast(MusicBeatState.getVariables().get(value), Character);
-          if (daChar != null)
+          if ((daChar.isPlayer && !daChar.flipMode || !daChar.isPlayer && daChar.flipMode))
           {
-            if ((daChar.isPlayer && !daChar.flipMode || !daChar.isPlayer && daChar.flipMode))
-            {
-              if (daChar.getLastAnimationPlayed().startsWith('sing')) daChar.holdTimer += elapsed;
-              else
-                daChar.holdTimer = 0;
-            }
+            if (daChar.getLastAnimationPlayed().startsWith('sing')) daChar.holdTimer += elapsed;
+            else
+              daChar.holdTimer = 0;
           }
         }
       }
@@ -3409,9 +3406,12 @@ class PlayState extends MusicBeatState
 
     if (stage != null) stage.onUpdate(elapsed);
 
-    for (shaderKeys in FunkinLua.lua_Shaders.keys())
-      if (FunkinLua.lua_Shaders.exists(shaderKeys)) if (FunkinLua.lua_Shaders.get(shaderKeys)
-        .canUpdate()) FunkinLua.lua_Shaders.get(shaderKeys).update(elapsed);
+    if (FunkinLua.lua_Shaders != null)
+    {
+      for (shaderKeys in FunkinLua.lua_Shaders.keys())
+        if (FunkinLua.lua_Shaders.exists(shaderKeys)) if (FunkinLua.lua_Shaders.get(shaderKeys)
+          .canUpdate()) FunkinLua.lua_Shaders.get(shaderKeys).update(elapsed);
+    }
 
     if (showCaseMode)
     {
@@ -3424,15 +3424,12 @@ class PlayState extends MusicBeatState
         i.alpha = 0;
       }
 
-      for (value in MusicBeatState.getVariables().keys())
+      for (value in MusicBeatState.getVariables("Icon").keys())
       {
-        if (MusicBeatState.getVariables().get(value) != null && MusicBeatState.getVariables().exists(value))
+        if (MusicBeatState.getVariables("Icon").get(value) != null && MusicBeatState.getVariables("Icon").exists(value))
         {
-          if (value.startsWith('extraIcon_'))
-          {
-            cast(MusicBeatState.getVariables().get(value), HealthIcon).visible = false;
-            cast(MusicBeatState.getVariables().get(value), HealthIcon).alpha = 0;
-          }
+          cast(MusicBeatState.getVariables("Icon").get(value), HealthIcon).visible = false;
+          cast(MusicBeatState.getVariables("Icon").get(value), HealthIcon).alpha = 0;
         }
       }
     }
@@ -3923,18 +3920,15 @@ class PlayState extends MusicBeatState
     icons[0].setIconScale = playerIconScale;
     icons[1].setIconScale = opponentIconScale;
 
-    for (value in MusicBeatState.getVariables().keys())
+    for (value in MusicBeatState.getVariables("Icon").keys())
     {
-      if (MusicBeatState.getVariables().get(value) != null && MusicBeatState.getVariables().exists(value))
+      if (MusicBeatState.getVariables("Icon").get(value) != null && MusicBeatState.getVariables("Icon").exists(value))
       {
-        if (value.startsWith('extraIcon_'))
-        {
-          cast(MusicBeatState.getVariables().get(value), HealthIcon).percent20or80 = percent20or80;
-          cast(MusicBeatState.getVariables().get(value), HealthIcon).percent80or20 = percent80or20;
+        cast(MusicBeatState.getVariables("Icon").get(value), HealthIcon).percent20or80 = percent20or80;
+        cast(MusicBeatState.getVariables("Icon").get(value), HealthIcon).percent80or20 = percent80or20;
 
-          cast(MusicBeatState.getVariables().get(value), HealthIcon).healthIndication = health;
-          cast(MusicBeatState.getVariables().get(value), HealthIcon).speedBopLerp = playbackRate;
-        }
+        cast(MusicBeatState.getVariables("Icon").get(value), HealthIcon).healthIndication = health;
+        cast(MusicBeatState.getVariables("Icon").get(value), HealthIcon).speedBopLerp = playbackRate;
       }
     }
   }
@@ -4586,9 +4580,7 @@ class PlayState extends MusicBeatState
           case 'mom' | '3':
             char = mom;
           default:
-            var tag = eventParams[1];
-            tag = LuaUtils.checkVariable(tag, 'extraCharacter_', 'both');
-            char = cast(MusicBeatState.getVariables().get(tag), Character);
+            char = MusicBeatState.getVariables("Character").get(eventParams[0]);
         }
 
         characterAnimToPlay(eventParams[0], char);
@@ -4621,8 +4613,7 @@ class PlayState extends MusicBeatState
           case 'mom':
             char = mom;
           default:
-            var tag = LuaUtils.checkVariable(eventParams[0], 'extraCharacter_', 'both');
-            char = MusicBeatState.getVariables().get(tag);
+            char = MusicBeatState.getVariables("Character").get(eventParams[0]);
         }
 
         if (char != null) char.idleSuffix = eventParams[1];
@@ -4667,8 +4658,7 @@ class PlayState extends MusicBeatState
             if (mom != null) LuaUtils.changeMomAuto(eventParams[1]);
 
           default:
-            var char:Character = MusicBeatState.getVariables().get('extraCharacter_' + eventParams[0]);
-
+            var char:Character = MusicBeatState.getVariables("Character").get(eventParams[0]);
             if (char != null)
             {
               LuaUtils.makeLuaCharacter(eventParams[0], eventParams[1], char.isPlayer, char.flipMode);
@@ -4757,8 +4747,7 @@ class PlayState extends MusicBeatState
           case 'mom' | '3':
             char = mom;
           default:
-            var tag = LuaUtils.checkVariable(eventParams[0], 'extraCharacter_', 'both');
-            char = MusicBeatState.getVariables().get(tag);
+            char = MusicBeatState.getVariables("Character").get(eventParams[0]);
         }
 
         if (char != null) char.resetAnimationVars();
@@ -6148,19 +6137,16 @@ class PlayState extends MusicBeatState
         boyfriend.danceConditions(bfConditions, forcedToIdle);
       }
 
-      for (value in MusicBeatState.getVariables().keys())
+      for (value in MusicBeatState.getVariables("Character").keys())
       {
-        if (MusicBeatState.getVariables().get(value) != null && MusicBeatState.getVariables().exists(value))
+        if (MusicBeatState.getVariables("Character").get(value) != null && MusicBeatState.getVariables("Character").exists(value))
         {
-          if (value.startsWith('extraCharacter_'))
+          var daChar:Character = MusicBeatState.getVariables("Character").get(value);
+          if (daChar != null)
           {
-            var daChar:Character = cast(MusicBeatState.getVariables().get(value), Character);
-            if (daChar != null)
-            {
-              var daCharConditions:Bool = daChar.allowHoldTimer();
+            var daCharConditions:Bool = daChar.allowHoldTimer();
 
-              if ((daChar.isPlayer && !daChar.flipMode || !daChar.isPlayer && daChar.flipMode)) daChar.danceConditions(daCharConditions);
-            }
+            if ((daChar.isPlayer && !daChar.flipMode || !daChar.isPlayer && daChar.flipMode)) daChar.danceConditions(daCharConditions);
           }
         }
       }
@@ -7105,15 +7091,13 @@ class PlayState extends MusicBeatState
     gfSpeed = value;
     for (char in [boyfriend, dad, mom, gf])
       if (char != null) char.gfSpeed = value;
-    for (characterValue in MusicBeatState.getVariables().keys())
+    for (characterValue in MusicBeatState.getVariables("Character").keys())
     {
-      if (MusicBeatState.getVariables().get(characterValue) != null && MusicBeatState.getVariables().exists(characterValue))
+      if (MusicBeatState.getVariables("Character").get(characterValue) != null
+        && MusicBeatState.getVariables("Character").exists(characterValue))
       {
-        if (characterValue.startsWith('extraCharacter_'))
-        {
-          var daChar:Character = cast(MusicBeatState.getVariables().get(characterValue), Character);
-          if (daChar != null) daChar.gfSpeed = value;
-        }
+        var daChar:Character = MusicBeatState.getVariables("Character").get(characterValue);
+        if (daChar != null) daChar.gfSpeed = value;
       }
     }
     return value;
@@ -7128,15 +7112,12 @@ class PlayState extends MusicBeatState
     if (dad != null && dad.beatDance(beat)) dad.danceChar('opponent', cpuAlt, forcedToIdle, allowedToPlayAnimationsDAD);
     if (mom != null && mom.beatDance(beat)) mom.danceChar('opponent', cpuAlt, forcedToIdle, allowedToPlayAnimationsMOM);
     if (gf != null && gf.beatDance(beat)) gf.danceChar('girlfriend');
-    for (value in MusicBeatState.getVariables().keys())
+    for (value in MusicBeatState.getVariables("Character").keys())
     {
-      if (MusicBeatState.getVariables().get(value) != null && MusicBeatState.getVariables().exists(value))
+      if (MusicBeatState.getVariables("Character").get(value) != null && MusicBeatState.getVariables("Character").exists(value))
       {
-        if (value.startsWith('extraCharacter_'))
-        {
-          var daChar:Character = cast(MusicBeatState.getVariables().get(value), Character);
-          if (daChar != null && daChar.beatDance(beat)) daChar.danceChar('custom_char');
-        }
+        var daChar:Character = MusicBeatState.getVariables("Character").get(value);
+        if (daChar != null && daChar.beatDance(beat)) daChar.danceChar('custom_char');
       }
     }
   }
@@ -8065,7 +8046,7 @@ class PlayState extends MusicBeatState
     #end
   }
 
-  public function initLuaShader(name:String, ?glslVersion:Int = 120)
+  public function initLuaShader(name:String)
   {
     if (!ClientPrefs.data.shaders) return false;
 

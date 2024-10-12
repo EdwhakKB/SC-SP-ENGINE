@@ -830,11 +830,6 @@ class GreyscaleEffectNew extends ShaderBase
     shader.setFloat('strength', 0);
   }
 
-  override public function update(elapsed:Float):Void
-  {
-    shader.setFloat('strength', strength);
-  }
-
   function set_strength(value:Float):Float
   {
     strength = value;
@@ -1266,7 +1261,7 @@ class RayMarchEffect extends ShaderBase
   override public function update(elapsed:Float)
   {
     shader.setFloatArray('iResolution', [FlxG.width, FlxG.height]);
-    shader.setFloatArray('resolution', [x * FlxAngle.TO_RAD, y * FlxAngle.TO_RAD, z * FlxAngle.TO_RAD]);
+    shader.setFloatArray('rotation', [x * FlxAngle.TO_RAD, y * FlxAngle.TO_RAD, z * FlxAngle.TO_RAD]);
   }
 
   function set_zoom(value:Float):Float

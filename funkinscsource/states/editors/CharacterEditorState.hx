@@ -1019,10 +1019,11 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
     if (FlxG.keys.pressed.CONTROL) ctrlMult = 0.25;
 
     // CAMERA CONTROLS
-    if (FlxG.keys.pressed.J) FlxG.camera.scroll.x -= elapsed * 500 * shiftMult * ctrlMult;
-    if (FlxG.keys.pressed.K) FlxG.camera.scroll.y += elapsed * 500 * shiftMult * ctrlMult;
-    if (FlxG.keys.pressed.L) FlxG.camera.scroll.x += elapsed * 500 * shiftMult * ctrlMult;
-    if (FlxG.keys.pressed.I) FlxG.camera.scroll.y -= elapsed * 500 * shiftMult * ctrlMult;
+    var camMove:Float = elapsed * 500 * shiftMult * ctrlMult;
+    if (FlxG.keys.pressed.J) FlxG.camera.scroll.x -= camMove;
+    if (FlxG.keys.pressed.K) FlxG.camera.scroll.y += camMove;
+    if (FlxG.keys.pressed.L) FlxG.camera.scroll.x += camMove;
+    if (FlxG.keys.pressed.I) FlxG.camera.scroll.y -= camMove;
 
     var mouse = FlxG.mouse.getScreenPosition();
     if (FlxG.mouse.justPressed && !FlxG.mouse.overlaps(UI_characterbox))

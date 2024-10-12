@@ -451,6 +451,3 @@ class Song
     }
   }
 }
-/**
- * TO DO: V-Slice Chart Data here.
- */

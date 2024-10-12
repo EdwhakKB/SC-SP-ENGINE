@@ -962,7 +962,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
             if (shiftAdd > 0)
             {
               loadSection(curSec - shiftAdd);
-              Conductor.songPosition = FlxG.sound.music.time = cachedSectionTimes[curSec] + 0.000001;
+              Conductor.songPosition = FlxG.sound.music.time = cachedSectionTimes[curSec] - Conductor.offset + 0.000001;
             }
           }
           else if (FlxG.keys.justPressed.D)
@@ -972,7 +972,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
             if (shiftAdd > 0)
             {
               loadSection(curSec + shiftAdd);
-              Conductor.songPosition = FlxG.sound.music.time = cachedSectionTimes[curSec] + 0.000001;
+              Conductor.songPosition = FlxG.sound.music.time = cachedSectionTimes[curSec] - Conductor.offset + 0.000001;
             }
           }
         }
@@ -1188,6 +1188,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
               curSectionTime = cachedSectionTimes[noteSec];
             }
             positionNoteYOnTime(note, noteSec);
+            note.updateSustainToZoom(cachedSectionCrochets[noteSec] / 4, curZoom);
           }
           for (event in events)
           {
@@ -1525,7 +1526,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
             if (strumNote != null)
             {
               strumNote.playAnim('confirm', true);
-              strumNote.resetAnim = Math.max(200, note.sustainLength) / 1000.0;
+              strumNote.resetAnim = (note.sustainLength + Conductor.stepCrochet * 1.25) / 1000 / playbackRate;
             }
           }
         }
@@ -1551,6 +1552,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
 
       if (qPress != ePress && selectedNotes.length != 1) susLengthStepper.value += addSus;
 
+      var noteSec:Int = 0;
       for (note in selectedNotes)
       {
         if (note == null || !note.exists) continue;
@@ -1559,8 +1561,11 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
         {
           if (qPress != ePress)
           {
+            while (cachedSectionTimes.length > noteSec + 1 && cachedSectionTimes[noteSec + 1] <= note.strumTime)
+              noteSec++;
+
             FlxG.sound.play(Paths.sound('chartingSounds/stretchSNAP_UI'), 0.7);
-            note.setSustainLength(note.sustainLength + addSus, Conductor.stepCrochet, curZoom);
+            note.setSustainLength(note.sustainLength + addSus, cachedSectionCrochets[noteSec] / 4, curZoom);
             if (selectedNotes.length == 1) susLengthStepper.value = note.sustainLength;
           }
           note.animation.update(elapsed); // let selected notes be animated for better visibility
@@ -4864,6 +4869,7 @@ class ChartingState extends MusicBeatState implements PsychUIEventHandler.PsychU
       if (shouldBound) note.setStrumTime(FlxMath.bound(note.strumTime, curSectionTime, nextSectionTime));
 
       positionNoteYOnTime(note, noteSec);
+      note.updateSustainToStepCrochet(cachedSectionCrochets[noteSec] / 4);
     }
 
     for (event in events)

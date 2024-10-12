@@ -51,7 +51,7 @@ class CustomSubstate extends MusicBeatSubState
   {
     if (instance != null)
     {
-      var tagObject:FlxObject = cast(MusicBeatState.getVariables(), FlxObject);
+      var tagObject:FlxObject = MusicBeatState.variableMap(tag).get(tag);
       if (tagObject != null)
       {
         if (pos < 0) instance.add(tagObject);

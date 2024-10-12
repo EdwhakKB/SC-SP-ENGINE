@@ -19,7 +19,7 @@ class GroupFunctions
         var group:FlxSpriteGroup = new FlxSpriteGroup(x, y, maxSize);
         if (funk.isStageLua && !funk.preloading) Stage.instance.swagBacks.set(tag, group);
         else
-          MusicBeatState.getVariables().set(tag, group);
+          MusicBeatState.getVariables("Group").set(tag, group);
       }
       catch (e:haxe.Exception)
       {
@@ -35,7 +35,7 @@ class GroupFunctions
         var group:FlxSkewedSpriteGroup = new FlxSkewedSpriteGroup(x, y, maxSize);
         if (funk.isStageLua && !funk.preloading) Stage.instance.swagBacks.set(tag, group);
         else
-          MusicBeatState.getVariables().set(tag, group);
+          MusicBeatState.getVariables("Group").set(tag, group);
       }
       catch (e:haxe.Exception)
       {
@@ -46,7 +46,7 @@ class GroupFunctions
     funk.set('groupInsertSprite', function(tag:String, obj:String, pos:Int = 0, ?removeFromGroup:Bool = true) {
       try
       {
-        var group:FlxSpriteGroup = MusicBeatState.getVariables().get(tag);
+        var group:FlxSpriteGroup = MusicBeatState.variableMap(tag).get(tag);
         if (group == null)
         {
           FunkinLua.luaTrace("Group is null, can't dont any actions!, returning this trace!");
@@ -82,7 +82,7 @@ class GroupFunctions
     funk.set('groupInsertSkewedSprite', function(tag:String, obj:String, pos:Int = 0, ?removeFromGroup:Bool = true) {
       try
       {
-        var group:FlxSkewedSpriteGroup = MusicBeatState.getVariables().get(tag);
+        var group:FlxSkewedSpriteGroup = MusicBeatState.variableMap(tag).get(tag);
         if (group == null)
         {
           FunkinLua.luaTrace("Group is null, can't dont any actions!, returning this trace!");
@@ -118,7 +118,7 @@ class GroupFunctions
     funk.set('groupRemoveSprite', function(tag:String, obj:String, splice:Bool = false) {
       try
       {
-        var group:FlxSpriteGroup = MusicBeatState.getVariables().get(tag);
+        var group:FlxSpriteGroup = MusicBeatState.variableMap(tag).get(tag);
         if (group == null)
         {
           FunkinLua.luaTrace("Group is null, can't dont any actions!, returning this trace!");
@@ -153,7 +153,7 @@ class GroupFunctions
     funk.set('groupRemoveSkewedSprite', function(tag:String, obj:String, splice:Bool = false) {
       try
       {
-        var group:FlxSkewedSpriteGroup = MusicBeatState.getVariables().get(tag);
+        var group:FlxSkewedSpriteGroup = MusicBeatState.variableMap(tag).get(tag);
         if (group == null)
         {
           FunkinLua.luaTrace("Group is null, can't dont any actions!, returning this trace!");
@@ -188,7 +188,7 @@ class GroupFunctions
     funk.set('groupAddSprite', function(tag:String, obj:String) {
       try
       {
-        var group:FlxSpriteGroup = MusicBeatState.getVariables().get(tag);
+        var group:FlxSpriteGroup = MusicBeatState.variableMap(tag).get(tag);
         if (group == null)
         {
           FunkinLua.luaTrace("Group is null, can't dont any actions!, returning this trace!");
@@ -223,7 +223,7 @@ class GroupFunctions
     funk.set('groupAddSkewedSprite', function(tag:String, obj:String) {
       try
       {
-        var group:FlxSkewedSpriteGroup = MusicBeatState.getVariables().get(tag);
+        var group:FlxSkewedSpriteGroup = MusicBeatState.variableMap(tag).get(tag);
         if (group == null)
         {
           FunkinLua.luaTrace("Group is null, can't dont any actions!, returning this trace!");
@@ -258,7 +258,7 @@ class GroupFunctions
     funk.set('setSpriteGroupCameras', function(tag:String, cams:Array<String> = null) {
       try
       {
-        var group:FlxSpriteGroup = MusicBeatState.getVariables().get(tag);
+        var group:FlxSpriteGroup = MusicBeatState.variableMap(tag).get(tag);
         var cameras:Array<FlxCamera> = [];
         for (i in 0...cams.length)
         {
@@ -275,7 +275,7 @@ class GroupFunctions
     funk.set('setSkewedSpriteGroupCameras', function(tag:String, cams:Array<String> = null) {
       try
       {
-        var group:FlxSkewedSpriteGroup = MusicBeatState.getVariables().get(tag);
+        var group:FlxSkewedSpriteGroup = MusicBeatState.variableMap(tag).get(tag);
         var cameras:Array<FlxCamera> = [];
         for (i in 0...cams.length)
         {
@@ -292,7 +292,7 @@ class GroupFunctions
     funk.set('setSpriteGroupCamera', function(tag:String, cam:String = null) {
       try
       {
-        var group:FlxSpriteGroup = MusicBeatState.getVariables().get(tag);
+        var group:FlxSpriteGroup = MusicBeatState.variableMap(tag).get(tag);
         if (group != null && cam != null) group.camera = LuaUtils.cameraFromString(cam);
       }
       catch (e:haxe.Exception)
@@ -304,7 +304,7 @@ class GroupFunctions
     funk.set('setSkewedSpriteGroupCamera', function(tag:String, cam:String = null) {
       try
       {
-        var group:FlxSkewedSpriteGroup = MusicBeatState.getVariables().get(tag);
+        var group:FlxSkewedSpriteGroup = MusicBeatState.variableMap(tag).get(tag);
         if (group != null && cam != null) group.camera = LuaUtils.cameraFromString(cam);
       }
       catch (e:haxe.Exception)

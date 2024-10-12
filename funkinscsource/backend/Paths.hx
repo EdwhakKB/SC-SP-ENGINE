@@ -521,7 +521,7 @@ class Paths
 
   inline static public function getTextFromFile(key:String, ?ignoreMods:Bool = false):String
   {
-    var path:String = getPath(key, TEXT, true);
+    final path:String = getPath(key, TEXT, !ignoreMods);
     #if sys
     return (FileSystem.exists(path)) ? File.getContent(path) : null;
     #else
@@ -532,7 +532,7 @@ class Paths
   inline static public function font(key:String):String
   {
     #if MODS_ALLOWED
-    var file:String = modsFont(key);
+    final file:String = modsFont(key);
     if (FileSystem.exists(file)) return file;
     #end
     return 'assets/shared/data/fonts/$key';
@@ -543,16 +543,12 @@ class Paths
     #if MODS_ALLOWED
     if (!ignoreMods)
     {
-      var modKey:String = key;
-      if (parentfolder == 'songs') modKey = 'songs/$key';
-
+      final modKey:String = parentfolder == 'songs' ? 'songs/$key' : key;
       for (mod in Mods.getGlobalMods())
         if (FileSystem.exists(mods('$mod/$modKey'))) return true;
-
       if (FileSystem.exists(mods(Mods.currentModDirectory + '/' + modKey)) || FileSystem.exists(mods(modKey))) return true;
     }
     #end
-
     return (OpenFlAssets.exists(getPath(key, type, parentfolder, false)));
   }
 
@@ -560,8 +556,8 @@ class Paths
   static public function getAtlas(key:String, ?parentfolder:String = null, ?allowGPU:Bool = true):FlxAtlasFrames
   {
     var useMod = false;
-    var imageLoaded:FlxGraphic = image(key, parentfolder, allowGPU);
-    var myXml:Dynamic = getPath('images/$key.xml', TEXT, parentfolder, true);
+    final imageLoaded:FlxGraphic = image(key, parentfolder, allowGPU);
+    final myXml:Dynamic = getPath('images/$key.xml', TEXT, parentfolder, true);
     if (OpenFlAssets.exists(myXml) #if MODS_ALLOWED || (FileSystem.exists(myXml) && (useMod = true)) #end)
     {
       #if MODS_ALLOWED
@@ -572,7 +568,7 @@ class Paths
     }
     else
     {
-      var myJson:Dynamic = getPath('images/$key.json', TEXT, parentfolder, true);
+      final myJson:Dynamic = getPath('images/$key.json', TEXT, parentfolder, true);
       if (OpenFlAssets.exists(myJson) #if MODS_ALLOWED || (FileSystem.exists(myJson) && (useMod = true)) #end)
       {
         #if MODS_ALLOWED

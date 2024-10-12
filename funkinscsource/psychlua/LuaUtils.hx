@@ -45,16 +45,16 @@ class LuaUtils
 
   public static function getLuaTween(options:Dynamic)
   {
-    if (options == null) options = {}
-    return {
-      type: getTweenTypeByString(options.type),
-      startDelay: options.startDelay,
-      onUpdate: options.onUpdate,
-      onStart: options.onStart,
-      onComplete: options.onComplete,
-      loopDelay: options.loopDelay,
-      ease: getTweenEaseByString(options.ease)
-    };
+    return (options != null) ?
+      {
+        type: getTweenTypeByString(options.type),
+        startDelay: options.startDelay,
+        onUpdate: options.onUpdate,
+        onStart: options.onStart,
+        onComplete: options.onComplete,
+        loopDelay: options.loopDelay,
+        ease: getTweenEaseByString(options.ease)
+      } : null;
   }
 
   public static function setVarInArray(instance:Dynamic, variable:String, value:Dynamic, allowMaps:Bool = false):Any
@@ -65,9 +65,9 @@ class LuaUtils
     if (splitProps.length > 1)
     {
       var target:Dynamic = null;
-      if (MusicBeatState.getVariables().exists(splitProps[0]))
+      if (MusicBeatState.findVariableObj(splitProps[0]))
       {
-        var retVal:Dynamic = MusicBeatState.getVariables().get(splitProps[0]);
+        var retVal:Dynamic = MusicBeatState.variableMap(splitProps[0]).get(splitProps[0]);
         if (retVal != null) target = retVal;
       }
       else if (PlayState.instance.stage.swagBacks.exists(splitProps[0]))
@@ -110,12 +110,12 @@ class LuaUtils
       return value;
     }
 
-    if (MusicBeatState.getVariables().exists(variable))
+    if (MusicBeatState.findVariableObj(variable))
     {
-      MusicBeatState.getVariables().set(variable, value);
+      MusicBeatState.variableMap(variable).set(variable, value);
       return value;
     }
-    if (PlayState.instance.stage.swagBacks.exists(variable))
+    else if (PlayState.instance.stage.swagBacks.exists(variable))
     {
       PlayState.instance.stage.setPropertyObject(variable, value);
       return value;
@@ -135,6 +135,7 @@ class LuaUtils
       Stage.instance.swagGroups.set(variable, value);
       return value;
     }
+
     Reflect.setProperty(instance, variable, value);
     return value;
   }
@@ -145,9 +146,9 @@ class LuaUtils
     if (splitProps.length > 1)
     {
       var target:Dynamic = null;
-      if (MusicBeatState.getVariables().exists(splitProps[0]))
+      if (MusicBeatState.findVariableObj(splitProps[0]))
       {
-        var retVal:Dynamic = MusicBeatState.getVariables().get(splitProps[0]);
+        var retVal:Dynamic = MusicBeatState.variableMap(variable).get(splitProps[0]);
         if (retVal != null) target = retVal;
       }
       else if (PlayState.instance.stage.swagBacks.exists(splitProps[0]))
@@ -186,9 +187,9 @@ class LuaUtils
       return instance.get(variable);
     }
 
-    if (MusicBeatState.getVariables().exists(variable))
+    if (MusicBeatState.findVariableObj(variable))
     {
-      var retVal:Dynamic = MusicBeatState.getVariables().get(variable);
+      var retVal:Dynamic = MusicBeatState.variableMap(variable).get(variable);
       if (retVal != null) return retVal;
     }
     if (PlayState.instance.stage.swagBacks.exists(variable))
@@ -209,6 +210,7 @@ class LuaUtils
     if (Stage.instance.swagGroups.exists(variable))
     {
       var retVal:Dynamic = Stage.instance.swagGroups.get(variable);
+      if (retVal != null) return retVal;
     }
     return Reflect.getProperty(instance, variable);
   }
@@ -362,8 +364,7 @@ class LuaUtils
         else if (Stage.instance.swagGroups.exists(objectName)) obj = Stage.instance.swagGroups.get(objectName);
         else if (PlayState.instance.stage.swagBacks.exists(objectName)) obj = PlayState.instance.stage.swagBacks.get(objectName);
         else if (PlayState.instance.stage.swagGroups.exists(objectName)) obj = PlayState.instance.stage.swagGroups.get(objectName);
-        else if (MusicBeatState.getVariables().exists(objectName)) obj = MusicBeatState.getVariables().get(objectName);
-        else if (Reflect.getProperty(getTargetInstance(), objectName) != null) obj = Reflect.getProperty(getTargetInstance(), objectName);
+        else if (MusicBeatState.findVariableObj(objectName)) obj = MusicBeatState.variableObj(objectName);
 
         if (obj == null) obj = getVarInArray(getTargetInstance(), objectName, allowMaps);
         if (obj == null) obj = getActorByName(objectName);
@@ -474,7 +475,8 @@ class LuaUtils
 
   public static function destroyObject(tag:String, destroy:Bool = true, ?group:String = null)
   {
-    var variables = MusicBeatState.getVariables();
+    var variables = MusicBeatState.variableMap(tag);
+    if (variables == null) return;
     final obj:FlxBasic = variables.get(tag);
     if (obj == null || obj.destroy == null) return;
 
@@ -489,12 +491,12 @@ class LuaUtils
       obj.destroy();
       variables.remove(tag);
     }
-    return;
   }
 
   public static function destroyStageObject(tag:String, destroy:Bool = true, ?group:String = null)
   {
     var variables = Stage.instance.swagBacks;
+    if (variables == null) return;
     var obj:FlxBasic = variables.get(tag);
     if (obj == null || obj.destroy == null) return;
 
@@ -510,13 +512,12 @@ class LuaUtils
       obj.destroy();
       Stage.instance.swagBacks.remove(tag);
     }
-    return;
   }
 
   public static function cancelTween(tag:String)
   {
-    tag = checkVariable(tag, 'tween_', 'both');
-    var variables = MusicBeatState.getVariables();
+    var variables = MusicBeatState.variableMap(tag);
+    if (variables == null) return;
     var twn:FlxTween = variables.get(tag);
     if (twn != null)
     {
@@ -528,8 +529,8 @@ class LuaUtils
 
   public static function cancelTimer(tag:String)
   {
-    tag = checkVariable(tag, 'timer_', 'both');
-    var variables = MusicBeatState.getVariables();
+    var variables = MusicBeatState.variableMap(tag);
+    if (variables == null) return;
     var tmr:FlxTimer = variables.get(tag);
     if (tmr != null)
     {
@@ -869,7 +870,7 @@ class LuaUtils
       }
 
       // modded cameras
-      var camera:Dynamic = MusicBeatState.getVariables().get(cam);
+      var camera:Dynamic = MusicBeatState.variableMap(cam).get(cam);
       if (camera == null || !Std.isOfType(camera, FlxCamera)) camera = PlayState.instance.camGame;
       return camera;
     }
@@ -895,7 +896,7 @@ class LuaUtils
       case 'maincam', 'main':
         camera = 'mainCam';
       default:
-        var cam:FlxCamera = MusicBeatState.getVariables().get(camera);
+        var cam:Dynamic = MusicBeatState.variableMap(camera).get(camera);
         if (cam == null || !Std.isOfType(cam, FlxCamera)) camera = 'camGame';
     }
     return camera;
@@ -903,17 +904,16 @@ class LuaUtils
 
   public static function makeLuaCharacter(tag:String, character:String, isPlayer:Bool = false, flipped:Bool = false, characterType:String = 'OTHER')
   {
-    tag = checkVariable(tag, 'extraCharacter_', 'both');
-
+    tag = tag.replace('.', '');
     var animationName:String = "no way anyone have an anim name this big";
     var animationFrame:Int = 0;
     var position:Int = -1;
 
     if (ClientPrefs.data.characters)
     {
-      if (MusicBeatState.getVariables().get(tag) != null && MusicBeatState.getVariables().exists(tag))
+      if (MusicBeatState.getVariables("Character").exists(tag))
       {
-        var daChar:Character = cast(MusicBeatState.getVariables().get(tag), Character);
+        var daChar:Character = MusicBeatState.getVariables("Character").get(tag);
         if (daChar.playAnimationBeforeSwitch)
         {
           animationName = daChar.animation.curAnim.name;
@@ -923,11 +923,12 @@ class LuaUtils
       }
     }
 
+    findToDestroy(tag);
     var leSprite:Character = new Character(0, 0, character, isPlayer, characterType);
     leSprite.flipMode = flipped;
     leSprite.isCustomCharacter = true;
-    MusicBeatState.getVariables().set(tag, leSprite); // yes
-    var shit:Character = cast(MusicBeatState.getVariables().get(tag), Character);
+    MusicBeatState.getVariables("Character").set(tag, leSprite); // yes
+    var shit:Character = MusicBeatState.getVariables("Character").get(tag);
     if (ClientPrefs.data.characters)
     {
       getTargetInstance().add(shit);
@@ -1097,7 +1098,7 @@ class LuaUtils
     PlayState.instance.boyfriend.resetAnimationVars();
 
     PlayState.instance.removeObject(PlayState.instance.boyfriend);
-    PlayState.instance.destroyObject(PlayState.instance.boyfriend);
+    PlayState.instance.boyfriend.destroy();
     PlayState.instance.boyfriend = new Character(0, 0, id, !flipped, 'BF');
     PlayState.instance.boyfriend.flipMode = flipped;
 
@@ -1167,8 +1168,8 @@ class LuaUtils
       animationFrame = PlayState.instance.dad.animation.curAnim.curFrame;
     }
 
-    PlayState.instance.removeObject(PlayState.instance.dad);
-    PlayState.instance.destroyObject(PlayState.instance.dad);
+    PlayState.instance.remove(PlayState.instance.dad);
+    PlayState.instance.dad.destroy();
     PlayState.instance.dad = new Character(0, 0, id, flipped, 'DAD');
     PlayState.instance.dad.flipMode = flipped;
 
@@ -1211,7 +1212,7 @@ class LuaUtils
       + charY
       + PlayState.instance.DAD_Y);
 
-    PlayState.instance.addObject(PlayState.instance.dad);
+    PlayState.instance.add(PlayState.instance.dad);
 
     PlayState.instance.iconP2.changeIcon(PlayState.instance.dad.healthIcon);
 
@@ -1238,8 +1239,8 @@ class LuaUtils
       animationFrame = PlayState.instance.gf.animation.curAnim.curFrame;
     }
 
-    PlayState.instance.removeObject(PlayState.instance.gf);
-    PlayState.instance.destroyObject(PlayState.instance.gf);
+    PlayState.instance.remove(PlayState.instance.gf);
+    PlayState.instance.gf.destroy();
     PlayState.instance.gf = new Character(0, 0, id, flipped, 'GF');
     PlayState.instance.gf.flipMode = flipped;
 
@@ -1276,8 +1277,8 @@ class LuaUtils
       animationFrame = PlayState.instance.mom.animation.curAnim.curFrame;
     }
 
-    PlayState.instance.removeObject(PlayState.instance.mom);
-    PlayState.instance.destroyObject(PlayState.instance.mom);
+    PlayState.instance.remove(PlayState.instance.mom);
+    PlayState.instance.mom.destroy();
     PlayState.instance.mom = new Character(0, 0, id, flipped, 'DAD');
     PlayState.instance.mom.flipMode = flipped;
 
@@ -1295,7 +1296,7 @@ class LuaUtils
       + charY
       + PlayState.instance.MOM_Y);
 
-    PlayState.instance.addObject(PlayState.instance.mom);
+    PlayState.instance.add(PlayState.instance.mom);
 
     if (PlayState.instance.mom.playAnimationBeforeSwitch)
     {
@@ -1337,9 +1338,14 @@ class LuaUtils
       cam.shaders = [];
       cam.shaderNames = [];
     }
+    FunkinLua.lua_Cameras = [];
 
     for (shader in FunkinLua.lua_Shaders.keys())
+    {
       FunkinLua.lua_Shaders.get(shader).destroy();
+      FunkinLua.lua_Shaders.remove(shader);
+    }
+    FunkinLua.lua_Shaders = [];
   }
 
   public static function getActorByName(id:String):Dynamic // kade to psych
@@ -1349,7 +1355,7 @@ class LuaUtils
     else if (FunkinLua.lua_Custom_Shaders.exists(id)) return FunkinLua.lua_Custom_Shaders.get(id);
 
     // pre defined names
-    if (PlayState.instance != null)
+    if (getTargetInstance() == PlayState.instance)
     {
       switch (id)
       {
@@ -1364,20 +1370,25 @@ class LuaUtils
       }
     }
 
-    if (id.contains('stage-'))
+    if (id.contains('stage-') && getTargetInstance() == PlayState.instance)
     {
       var daID:String = id.split('-')[1];
       return PlayState.instance.stage.swagBacks[daID];
     }
 
-    if (Reflect.getProperty(PlayState.instance, id) != null) return Reflect.getProperty(PlayState.instance, id);
-    else if (Reflect.getProperty(PlayState, id) != null) return Reflect.getProperty(PlayState, id);
+    if (getTargetInstance() == PlayState.instance)
+    {
+      if (Reflect.getProperty(PlayState.instance, id) != null) return Reflect.getProperty(PlayState.instance, id);
+      else if (Reflect.getProperty(PlayState, id) != null) return Reflect.getProperty(PlayState, id);
+    }
 
-    if (MusicBeatState.getVariables().exists(id)) return MusicBeatState.getVariables().get(id);
+    if (MusicBeatState.variableMap(id).exists(id)) return MusicBeatState.variableMap(id).get(id);
 
     if (Std.parseInt(id) == null) return Reflect.getProperty(getTargetInstance(), id);
-    else
+    else if (getTargetInstance() == PlayState.instance)
+    {
       return PlayState.instance.strumLineNotes.members[Std.parseInt(id)];
+    }
     return "No such item!";
   }
 
@@ -1452,6 +1463,7 @@ class LuaUtils
   public static function changeStageOffsets(char:String, x:Float = -10000,
       ?y:Float = -10000) // in case you need to change or test the stage offsets for the auto commands
   {
+    if (getTargetInstance() != PlayState.instance) return;
     switch (char)
     {
       case 'boyfriend' | 'bf':

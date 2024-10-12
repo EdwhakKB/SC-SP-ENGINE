@@ -222,6 +222,12 @@ class StoryMenuState extends MusicBeatState
   {
     if (WeekData.weeksList.length < 1)
     {
+      if (controls.BACK && !movedBack && !selectedWeek)
+      {
+        FlxG.sound.play(Paths.sound('cancelMenu'));
+        movedBack = true;
+        MusicBeatState.switchState(new MainMenuState());
+      }
       super.update(elapsed);
       return;
     }
