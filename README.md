@@ -3,13 +3,16 @@
 * SCE brings NotITG modchart support along with many other features!
 * This engine is made with **Psych Engine**!
 
-## Extra Engine Features
+## Credits To Other Engine / Most Engine Features And Where They Come From! (Sorry if only now the credits exist!, extermely sorry!)
 * BETADCIU Engine By Blantados [Stuff like character change and others are used from here!](https://github.com/Blantados/BETADCIU-Engine-Source/tree/main)
 * Kade stuff added from original stuff and my friend bolo! TYSM [Kade ResultsScreen and most stuff](https://github.com/BoloVEVO/Kade-Engine)
 * Newer versions of flixel fixes by system32unknown [FlxRuntimerShader, FlxAnimationController, Main](https://github.com/ShadowMario/FNF-PsychEngine/pull/13422)
 * FlxCustomColor Stuff from TheLeerName [Thanks](https://github.com/ShadowMario/FNF-PsychEngine/pull/13323)
 * Most other fixes, noteskin support, char json edits, and more all by me *glowsoony*
-
+* Scripting HX from codeNameEngine/Macros for compiling [Macro class, Hx Scripting, Custom Shaders, MultiFramesCollection](https://github.com/FNF-CNE-Devs/CodenameEngine) //So sorry for not crediting, I completely did plan but forgot 😭🙏
+* Lots of code from original game, V-SLICE FNF [ReflectUtil, WaveFormSprite, Audio, Scoring, Results](https://github.com/FunkinCrew/Funkin)
+* Most shaders originally from Voiid-Chronicles V2[RayMarch, ChromaticAbberation, ThreeD, WaveCircle, etc..](https://github.com/TheZoroForce240/Voiid-Chronicles-V2-Source)
+* FPS Plus [WaveformSprite](https://github.com/ThatRozebudDude/FPS-Plus-Public)
 * [Input Rewrite! by this psych pull request!](https://github.com/ShadowMario/FNF-PsychEngine/pull/13448)
 
 ## Installation:
