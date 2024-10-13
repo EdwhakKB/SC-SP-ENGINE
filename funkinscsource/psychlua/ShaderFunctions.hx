@@ -405,8 +405,7 @@ class ShaderFunctions
 
     if (Std.isOfType(target, FlxCamera))
     {
-      var daFilters = null;
-      daFilters = (target.filters != null) ? target.filters : [];
+      final daFilters = (target.filters != null) ? target.filters : [];
 
       if (swagShader != null && swagShader.length > 0)
       {
@@ -442,8 +441,7 @@ class ShaderFunctions
     final isBool:Bool = isArray ? func.contains('Bool') : Std.isOfType(value, Bool);
     final isInt:Bool = isArray ? func.contains('Int') : Std.isOfType(value, Int);
     final isSampler2D:Bool = Std.isOfType(value, String);
-    final warningNameParts:Array<String> = !func.contains('get') ? func.split("set") : func.split("get");
-    final warningName:String = warningNameParts[0] + "Shader" + warningNameParts[1];
+    final warningName:String = (func.contains('get') ? 'get' : 'set') + "Shader" + func.replace('set', '').replace('get', '');
     final isSet:Bool = func.startsWith('set');
 
     #if (!flash && sys)
@@ -456,8 +454,6 @@ class ShaderFunctions
       FunkinLua.luaTrace('$warningName: Shader is not FlxRuntimeShader or is null!', false, false, FlxColor.RED);
       return null;
     }
-
-    Debug.logInfo('$warningName, $isLuaShader, $foundAObject');
 
     if (!isLuaShader)
     {
