@@ -26,6 +26,20 @@ import lime.math.Vector2;
 
 using StringTools;
 
+// Starting data when first created! / Can be ediuted too
+typedef NoteSpriteStartData =
+{
+  strumTime:Float,
+  noteData:Int,
+  isSustainNote:Bool,
+  noteSkin:String,
+  ?prevNote:Note,
+  ?createdFrom:Dynamic,
+  ?scrollSpeed:Float,
+  ?parentStrumline:Strumline,
+  ?inEditor:Bool
+}
+
 typedef NoteSplashData =
 {
   disabled:Bool,
@@ -380,43 +394,48 @@ class Note extends ModchartArrow implements ICloneable<Note>
   public var allowStrumFollow:Bool = true;
   public var allowNotesToHit:Bool = true;
 
-  public function new(strumTime:Float, noteData:Int, sustainNote:Bool = false, noteSkin:String, ?prevNote:Note, ?createdFrom:Dynamic = null,
-      ?scrollSpeed:Float, ?parentStrumline:Strumline, ?inEditor:Bool = false)
+  public function new(data:NoteSpriteStartData)
   {
     super();
 
     antialiasing = ClientPrefs.data.antialiasing;
-    if (createdFrom == null) createdFrom = PlayState.instance;
-
-    if (prevNote == null) prevNote = this;
-
-    this.prevNote = prevNote;
-    this.isSustainNote = sustainNote;
-    this.noteSkin = noteSkin;
     this.moves = false;
-    this.inEditor = inEditor;
 
     x += (ClientPrefs.data.middleScroll ? PlayState.STRUM_X_MIDDLESCROLL : PlayState.STRUM_X) + 50;
     // MAKE SURE ITS DEFINITELY OFF SCREEN?
     y -= 2000;
-    this.strumTime = strumTime;
+
+    startNoteData(data);
+  }
+
+  public dynamic function startNoteData(data:NoteSpriteStartData)
+  {
+    if (data.createdFrom == null) data.createdFrom = PlayState.instance;
+    if (data.prevNote == null) data.prevNote = this;
+
+    this.prevNote = data.prevNote;
+    this.isSustainNote = data.isSustainNote;
+    this.noteSkin = data.noteSkin;
+    this.inEditor = data.inEditor;
+
+    this.strumTime = data.strumTime;
     if (!inEditor) this.strumTime += ClientPrefs.data.noteOffset;
 
-    this.noteData = noteData;
-    this.parentStrumline = parentStrumline;
-    this.noteScrollSpeed = scrollSpeed;
+    this.noteData = data.noteData;
+    this.parentStrumline = data.parentStrumline;
+    this.noteScrollSpeed = data.scrollSpeed;
 
-    if (noteData > -1)
+    if (data.noteData > -1)
     {
-      rgbShader = new RGBShaderReference(this, customColoredNotes ? initializeGlobalQuantRGBShader(noteData) : initializeGlobalRGBShader(noteData));
-      texture = noteSkin;
+      rgbShader = new RGBShaderReference(this, customColoredNotes ? initializeGlobalQuantRGBShader(data.noteData) : initializeGlobalRGBShader(data.noteData));
+      texture = data.noteSkin;
       if (PlayState.SONG != null && PlayState.SONG.options.disableNoteRGB) rgbShader.enabled = false;
 
-      x += swagWidth * (noteData);
+      x += swagWidth * (data.noteData);
       if (!isSustainNote && noteData < colArray.length)
       { // Doing this 'if' check to fix the warnings on Senpai songs
         var animToPlay:String = '';
-        animToPlay = colArray[noteData % colArray.length];
+        animToPlay = colArray[data.noteData % colArray.length];
         animation.play(animToPlay + 'Scroll');
       }
     }
@@ -803,7 +822,7 @@ class Note extends ModchartArrow implements ICloneable<Note>
     }
   }
 
-  public dynamic function followStrumArrow(myStrum:StrumArrow, fakeCrochet:Float, newFollowSpeed:Float = 1)
+  public dynamic function followStrumArrow(myStrum:StrumArrow, newFollowSpeed:Float = 1)
   {
     var strumX:Float = myStrum.x;
     var strumY:Float = myStrum.y;
@@ -1001,8 +1020,18 @@ class Note extends ModchartArrow implements ICloneable<Note>
 
   override public function clone():Note
   {
-    return new Note(this.strumTime, this.noteData, this.isSustainNote, this.noteSkin, this.prevNote, null, this.noteScrollSpeed, this.parentStrumline,
-      this.inEditor);
+    return new Note(
+      {
+        strumTime: this.strumTime,
+        noteData: this.noteData,
+        isSustainNote: this.isSustainNote,
+        noteSkin: this.noteSkin,
+        prevNote: this.prevNote,
+        createdFrom: null,
+        scrollSpeed: this.noteScrollSpeed,
+        parentStrumline: this.parentStrumline,
+        inEditor: this.inEditor
+      });
   }
 
   override public function destroy()

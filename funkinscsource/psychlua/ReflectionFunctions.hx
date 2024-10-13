@@ -17,54 +17,37 @@ class ReflectionFunctions
   public static function implement(funk:FunkinLua)
   {
     funk.set("getProperty", function(variable:String, ?allowMaps:Bool = false) {
-      try
+      var split:Array<String> = variable.split('.');
+      if (Stage.instance.swagBacks.exists(split[0]))
       {
-        var split:Array<String> = variable.split('.');
-        if (Stage.instance.swagBacks.exists(split[0]))
-        {
-          return Stage.instance.getPropertyObject(variable);
-        }
-        if (split.length > 1)
-        {
-          if (FunkinLua.lua_Custom_Shaders.exists(split[0])) return FunkinLua.lua_Custom_Shaders.get(split[0]).hget(split[1]);
-          return LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split, true, allowMaps), split[split.length - 1], allowMaps);
-        }
-        return LuaUtils.getVarInArray(LuaUtils.getTargetInstance(), variable, allowMaps);
+        return Stage.instance.getPropertyObject(variable);
       }
-      catch (e)
+      if (split.length > 1)
       {
-        Debug.displayAlert("Unknown 'Get' Variable: " + variable, "Variable Not Found");
-        return false;
+        if (FunkinLua.lua_Custom_Shaders.exists(split[0])) return FunkinLua.lua_Custom_Shaders.get(split[0]).hget(split[1]);
+        return LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split, true, allowMaps), split[split.length - 1], allowMaps);
       }
-      return false;
+      return LuaUtils.getVarInArray(LuaUtils.getTargetInstance(), variable, allowMaps);
     });
     funk.set("setProperty", function(variable:String, value:Dynamic, allowMaps:Bool = false, ?allowInstances:Bool = false) {
-      try
+      var split:Array<String> = variable.split('.');
+      if (Stage.instance.swagBacks.exists(split[0]))
       {
-        var split:Array<String> = variable.split('.');
-        if (Stage.instance.swagBacks.exists(split[0]))
-        {
-          Stage.instance.setPropertyObject(variable, allowInstances ? parseSingleInstance(value) : value);
-          return value;
-        }
-        if (split.length > 1)
-        {
-          if (FunkinLua.lua_Custom_Shaders.exists(split[0]))
-          {
-            FunkinLua.lua_Custom_Shaders.get(split[0]).hset(split[1], value);
-            return value;
-          }
-          LuaUtils.setVarInArray(LuaUtils.getPropertyLoop(split, true, allowMaps), split[split.length - 1],
-            allowInstances ? parseSingleInstance(value) : value, allowMaps);
-          return value;
-        }
-        LuaUtils.setVarInArray(LuaUtils.getTargetInstance(), variable, allowInstances ? parseSingleInstance(value) : value, allowMaps);
+        Stage.instance.setPropertyObject(variable, allowInstances ? parseSingleInstance(value) : value);
         return value;
       }
-      catch (e)
+      if (split.length > 1)
       {
-        Debug.displayAlert("Unknown 'Set' Variable: " + variable, "Variable Not Found");
+        if (FunkinLua.lua_Custom_Shaders.exists(split[0]))
+        {
+          FunkinLua.lua_Custom_Shaders.get(split[0]).hset(split[1], value);
+          return value;
+        }
+        LuaUtils.setVarInArray(LuaUtils.getPropertyLoop(split, true, allowMaps), split[split.length - 1], allowInstances ? parseSingleInstance(value) : value,
+          allowMaps);
+        return value;
       }
+      LuaUtils.setVarInArray(LuaUtils.getTargetInstance(), variable, allowInstances ? parseSingleInstance(value) : value, allowMaps);
       return value;
     });
     funk.set("getPropertyFromClass", function(classVar:String, variable:String, ?allowMaps:Bool = false) {

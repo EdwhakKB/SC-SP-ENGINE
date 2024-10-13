@@ -1338,10 +1338,8 @@ class FunkinLua
         leSprite.active = true;
       });
       set("makeLuaSprite", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0) {
-        Debug.logInfo('tag set? $tag, isStage $isStageLua is preloading $preloading');
         tag = tag.replace('.', '');
         LuaUtils.findToDestroy(tag);
-        Debug.logInfo('tag set? $tag, isStage $isStageLua is preloading $preloading');
         var leSprite:ModchartSprite = new ModchartSprite(x, y);
         if (image != null && image.length > 0)
         {
@@ -1350,7 +1348,6 @@ class FunkinLua
         if (isStageLua && !preloading) Stage.instance.swagBacks.set(tag, leSprite);
         else
           MusicBeatState.getVariables("Graphic").set(tag, leSprite);
-        Debug.logInfo('tag set? ${MusicBeatState.getVariables("Graphic").get(tag) != null}, isStage $isStageLua is preloading $preloading');
         leSprite.active = true;
       });
       set("makeSkewedSprite", function(tag:String, ?image:String = null, ?x:Float = 0, ?y:Float = 0) {
@@ -1361,7 +1358,6 @@ class FunkinLua
         {
           leSprite.loadGraphic(Paths.image(image));
         }
-        Debug.logInfo('tag set? $tag, isStage $isStageLua is preloading $preloading');
         if (isStageLua && !preloading) Stage.instance.swagBacks.set(tag, leSprite);
         else
           MusicBeatState.getVariables("Graphic").set(tag, leSprite);
@@ -1373,14 +1369,13 @@ class FunkinLua
         var leSprite:ModchartSprite = new ModchartSprite(x, y);
 
         LuaUtils.loadFrames(leSprite, image, spriteType);
-        Debug.logInfo('tag set? $tag, isStage $isStageLua is preloading $preloading');
         if (isStageLua && !preloading) Stage.instance.swagBacks.set(tag, leSprite);
         else
           MusicBeatState.getVariables("Graphic").set(tag, leSprite);
       });
 
       set("makeGraphic", function(obj:String, width:Int = 256, height:Int = 256, color:String = 'FFFFFF') {
-        var spr:FlxSprite = LuaUtils.getObjectDirectly(obj);
+        final spr:FlxSprite = LuaUtils.getObjectDirectly(obj);
         if (spr != null) spr.makeGraphic(width, height, CoolUtil.colorFromString(color));
       });
       set("addAnimationByPrefix", function(obj:String, name:String, prefix:String, framerate:Float = 24, loop:Bool = true) {
@@ -1409,9 +1404,9 @@ class FunkinLua
       });
 
       set("playActorAnimation", function(obj:String, anim:String, force:Bool = false, reverse:Bool = false, ?frame:Int = 0) {
-        var char:Character = LuaUtils.getObjectDirectly(obj);
+        final char:Character = LuaUtils.getObjectDirectly(obj);
 
-        if (char != null && Std.isOfType(char, Character) && ClientPrefs.data.characters)
+        if (char != null && ClientPrefs.data.characters)
         { // what am I doing? of course it'll be a character
           char.playAnim(anim, force, reverse, frame);
           return;

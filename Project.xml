@@ -295,7 +295,7 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<haxedef name="HXCPP_CHECK_POINTER" if="CRASH_HANDLER" />
 	<haxedef name="HXCPP_STACK_LINE" if="CRASH_HANDLER" />
 
-	<haxedef name="hscriptPos" /> <!-- for logging -->
+	<haxedef name="hscriptPos" if="HSCRIPT_ALLOWED"/> <!-- for logging -->
 
 	<!-- Enable this on platforms which do not support dropping files onto the window. -->
 	<haxedef name="FILE_DROP_UNSUPPORTED" if="mac" />

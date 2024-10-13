@@ -614,7 +614,13 @@ class NotesQuantSubState extends MusicBeatSubState
       myNotes.add(newNote);
     }
 
-    bigNote = new Note(0, 0, false, 'normal');
+    bigNote = new Note(
+      {
+        strumTime: 0,
+        noteData: 0,
+        isSustainNote: false,
+        noteSkin: 'normal'
+      });
     bigNote.customColoredNotes = true;
     bigNote.setPosition(250, 325);
     bigNote.setGraphicSize(250);

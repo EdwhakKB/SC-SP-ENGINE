@@ -12,17 +12,14 @@ class VideoFunctions
     funk.set("makeVideoSprite", function(tag:String, video:String, ext:String = 'mp4', ?x:Float = 0, ?y:Float = 0, ?loop:Dynamic = false) {
       tag = tag.replace('.', '');
       LuaUtils.findToDestroy(tag);
-      var leVideo:VideoSprite = new VideoSprite(Paths.video(video, ext), true, false, loop, false);
+      final leVideo:VideoSprite = new VideoSprite(Paths.video(video, ext), true, false, loop, false);
       leVideo.setPosition(x, y);
       MusicBeatState.getVariables("Video").set(tag, leVideo);
     });
     funk.set("setVideoSize", function(tag:String, x:Int, y:Int = 0, updateHitbox:Bool = true) {
       final split:Array<String> = tag.split('.');
-      var poop:VideoSprite = LuaUtils.getObjectDirectly(split[0]);
-      if (split.length > 1)
-      {
-        poop = LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1]);
-      }
+      final poop:VideoSprite = split.length > 1 ? LuaUtils.getVarInArray(LuaUtils.getPropertyLoop(split),
+        split[split.length - 1]) : LuaUtils.getObjectDirectly(split[0]);
 
       if (poop != null)
       {

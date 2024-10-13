@@ -241,7 +241,13 @@ class NoteSplash extends FunkinSCSprite
     var tempShader:RGBPalette = null;
     if (config.allowRGB)
     {
-      if (note == null) note = new Note(0, noteData, false, "");
+      if (note == null) note = new Note(
+        {
+          strumTime: 0,
+          noteData: noteData,
+          isSustainNote: false,
+          noteSkin: ""
+        });
       Note.initializeGlobalRGBShader(noteData % Note.colArray.length);
       function useDefault()
       {

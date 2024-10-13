@@ -1311,28 +1311,24 @@ class SupportBETAFunctions
     });
 
     funk.set("stopIdle", function(id:String, stopped:Bool) {
-      if (ClientPrefs.data.characters)
+      if (!ClientPrefs.data.characters) return;
+      if (MusicBeatState.variableMap(id).exists(id))
       {
-        if (MusicBeatState.variableMap(id).exists(id))
-        {
-          cast(MusicBeatState.variableMap(id).get(id), Character).stopIdle = stopped;
-          return;
-        }
-        cast(LuaUtils.getActorByName(id), Character).stopIdle = stopped;
+        cast(MusicBeatState.variableMap(id).get(id), Character).stopIdle = stopped;
+        return;
       }
+      cast(LuaUtils.getActorByName(id), Character).stopIdle = stopped;
     });
 
     funk.set("characterDance", function(character:String) {
-      if (ClientPrefs.data.characters)
+      if (!ClientPrefs.data.characters) return;
+      if (MusicBeatState.variableMap(character).exists(character))
       {
-        if (MusicBeatState.variableMap(character).exists(character))
-        {
-          final spr:Character = MusicBeatState.variableMap(character).get(character);
-          spr.dance();
-        }
-        else
-          cast(LuaUtils.getObjectDirectly(character), Character).dance();
+        final spr:Character = MusicBeatState.variableMap(character).get(character);
+        spr.dance();
       }
+      else
+        cast(LuaUtils.getObjectDirectly(character), Character).dance();
     });
 
     // New Stuff

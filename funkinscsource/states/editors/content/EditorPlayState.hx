@@ -179,12 +179,11 @@ class EditorPlayState extends MusicBeatSubState
     keysCheck();
     if (notes.length > 0)
     {
-      var fakeCrochet:Float = (60 / PlayState.SONG.bpm) * 1000;
       notes.forEachAlive(function(daNote:Note) {
         var strumGroup:FlxTypedGroup<StrumArrow> = playerStrums;
         if (!daNote.mustPress) strumGroup = opponentStrums;
         var strum:StrumArrow = strumGroup.members[daNote.noteData];
-        daNote.followStrumArrow(strum, fakeCrochet, daNote.noteScrollSpeed / playbackRate);
+        daNote.followStrumArrow(strum, daNote.noteScrollSpeed / playbackRate);
         if (!daNote.mustPress && daNote.wasGoodHit && !daNote.hitByOpponent && !daNote.ignoreNote) opponentNoteHit(daNote);
         if (daNote.isSustainNote && strum.sustainReduce) daNote.clipToStrumArrow(strum);
         // Kill extremely late notes and cause misses
@@ -300,8 +299,18 @@ class EditorPlayState extends MusicBeatSubState
         }
       }
 
-      var swagNote:Note = new Note(note.strumTime, note.noteData, false, PlayState.SONG.options.arrowSkin, oldNote, this, songSpeed,
-        note.mustPress ? playerStrums : opponentStrums, false);
+      final swagNote:Note = new Note(
+        {
+          strumTime: note.strumTime,
+          noteData: note.noteData,
+          isSustainNote: false,
+          noteSkin: PlayState.SONG.options.arrowSkin,
+          prevNote: oldNote,
+          createdFrom: this,
+          scrollSpeed: songSpeed,
+          parentStrumline: note.mustPress ? playerStrums : opponentStrums,
+          inEditor: false
+        });
       swagNote.setupNote(note.mustPress, note.mustPress ? 1 : 0, 0, note.noteType);
       swagNote.sustainLength = note.sustainLength;
       swagNote.gfNote = note.gfNote;
@@ -315,8 +324,18 @@ class EditorPlayState extends MusicBeatSubState
         {
           oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
 
-          var sustainNote:Note = new Note(note.strumTime + (Conductor.stepCrochet * susNote), note.noteData, true, PlayState.SONG.options.arrowSkin, oldNote,
-            this, songSpeed, note.mustPress ? playerStrums : opponentStrums, false);
+          final sustainNote:Note = new Note(
+            {
+              strumTime: note.strumTime + (Conductor.stepCrochet * susNote),
+              noteData: note.noteData,
+              isSustainNote: true,
+              noteSkin: PlayState.SONG.options.arrowSkin,
+              prevNote: oldNote,
+              createdFrom: this,
+              scrollSpeed: songSpeed,
+              parentStrumline: note.mustPress ? playerStrums : opponentStrums,
+              inEditor: false
+            });
           sustainNote.setupNote(swagNote.mustPress, swagNote.mustPress ? 1 : 0, 0, swagNote.noteType);
           sustainNote.gfNote = swagNote.gfNote;
           sustainNote.scrollFactor.set();

@@ -2811,8 +2811,18 @@ class PlayState extends MusicBeatState
             }
           }
 
-          final swagNote:Note = new Note(spawnTime, noteColumn, false, noteSkinUsed, oldNote, this, songSpeed, gottaHitNote ? playerStrums : opponentStrums,
-            false);
+          final swagNote:Note = new Note(
+              {
+                strumTime: spawnTime,
+                noteData: noteColumn,
+                isSustainNote: false,
+                noteSkin: noteSkinUsed,
+                prevNote: oldNote,
+                createdFrom: this,
+                scrollSpeed: songSpeed,
+                parentStrumline: gottaHitNote ? playerStrums : opponentStrums,
+                inEditor: false
+              });
           var altName:String = gottaHitNote ? ((section.altAnim
             || (!opponentMode ? section.playerAltAnim : section.CPUAltAnim)) ? '-alt' : '') : ((section.altAnim
               || (opponentMode ? section.playerAltAnim : section.CPUAltAnim)) ? '-alt' : '');
@@ -2838,8 +2848,18 @@ class PlayState extends MusicBeatState
             {
               oldNote = unspawnNotes[Std.int(unspawnNotes.length - 1)];
 
-              final sustainNote:Note = new Note(spawnTime + (curStepCrochet * susNote), noteColumn, true, noteSkinUsed, oldNote, this, songSpeed,
-                gottaHitNote ? playerStrums : opponentStrums, false);
+              final sustainNote:Note = new Note(
+                {
+                  strumTime: spawnTime + (curStepCrochet * susNote),
+                  noteData: noteColumn,
+                  isSustainNote: true,
+                  noteSkin: noteSkinUsed,
+                  prevNote: oldNote,
+                  createdFrom: this,
+                  scrollSpeed: songSpeed,
+                  parentStrumline: gottaHitNote ? playerStrums : opponentStrums,
+                  inEditor: false
+                });
               final isPixelNoteSus:Bool = (sustainNote.texture.contains('pixel')
                 || sustainNote.noteSkin.contains('pixel')
                 || oldNote.texture.contains('pixel')
@@ -3638,11 +3658,10 @@ class PlayState extends MusicBeatState
         {
           if (startedCountdown)
           {
-            final fakeCrochet:Float = (60 / SONG.bpm) * 1000;
             notes.forEachAlive(function(daNote:Note) {
               final strumGroup:Strumline = !daNote.mustPress ? opponentStrums : playerStrums;
               final strum:StrumArrow = strumGroup.members[daNote.noteData];
-              if (daNote.allowStrumFollow) daNote.followStrumArrow(strum, fakeCrochet, daNote.noteScrollSpeed / playbackRate);
+              if (daNote.allowStrumFollow) daNote.followStrumArrow(strum, daNote.noteScrollSpeed / playbackRate);
 
               if (!isPixelNotes && daNote.noteSkin.contains('pixel')) isPixelNotes = true;
               else if (isPixelNotes && !daNote.noteSkin.contains('pixel')) isPixelNotes = false;
@@ -4578,7 +4597,7 @@ class PlayState extends MusicBeatState
           case 'mom' | '3':
             char = mom;
           default:
-            char = MusicBeatState.getVariables("Character").get(eventParams[0]);
+            char = MusicBeatState.getVariables("Character").get(eventParams[1]);
         }
 
         characterAnimToPlay(eventParams[0], char);
@@ -4706,16 +4725,15 @@ class PlayState extends MusicBeatState
       case 'Set Property':
         try
         {
-          var split:Array<String> = eventParams[0].split('.');
-
-          if (split.length > 1)
-          {
-            LuaUtils.setVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1], eventParams[1]);
-          }
+          var trueValue:Dynamic = eventParams[1].trim();
+          if (trueValue == 'true' || trueValue == 'false') trueValue = trueValue == 'true';
+          else if (flValues[1] != null) trueValue = flValues[1];
           else
-          {
-            LuaUtils.setVarInArray(this, eventParams[0], eventParams[1]);
-          }
+            trueValue = eventParams[1];
+
+          final split:Array<String> = eventParams[0].split('.');
+          if (split.length > 1) LuaUtils.setVarInArray(LuaUtils.getPropertyLoop(split), split[split.length - 1], trueValue);
+          else LuaUtils.setVarInArray(this, eventParams[0], trueValue);
         }
         catch (e:Dynamic)
         {
@@ -4754,15 +4772,15 @@ class PlayState extends MusicBeatState
         changeStage(eventParams[0]);
 
       case 'Add Cinematic Bars':
-        var valueForFloat1:Float = Std.parseFloat(eventParams[0]);
+        var valueForFloat1:Float = flValues[0];
         if (Math.isNaN(valueForFloat1)) valueForFloat1 = 0;
 
-        var valueForFloat2:Float = Std.parseFloat(eventParams[1]);
+        var valueForFloat2:Float = flValues[1];
         if (Math.isNaN(valueForFloat2)) valueForFloat2 = 0;
 
         addCinematicBars(valueForFloat1, valueForFloat2);
       case 'Remove Cinematic Bars':
-        var valueForFloat1:Float = Std.parseFloat(eventParams[0]);
+        var valueForFloat1:Float = flValues[0];
         if (Math.isNaN(valueForFloat1)) valueForFloat1 = 0;
 
         removeCinematicBars(valueForFloat1);
@@ -4792,18 +4810,11 @@ class PlayState extends MusicBeatState
         if (checkString(eventParams[0])) cameraTargeted = eventParams[0];
 
       case 'Change Camera Props':
-        if (eventParams[4] == 'disable' || eventParams[4] == '')
+        FlxTween.cancelTweensOf(camFollow);
+        FlxTween.cancelTweensOf(defaultCamZoom);
+        isCameraFocusedOnCharacters = (eventParams[4] == 'disable' || eventParams[4] == '');
+        if (!isCameraFocusedOnCharacters)
         {
-          isCameraFocusedOnCharacters = true;
-          FlxTween.cancelTweensOf(camFollow);
-          FlxTween.cancelTweensOf(defaultCamZoom);
-        }
-        else
-        {
-          isCameraFocusedOnCharacters = false;
-          FlxTween.cancelTweensOf(camFollow);
-          FlxTween.cancelTweensOf(defaultCamZoom);
-
           // Props split up from one value.
           final camProps:Array<String> = eventParams[0].split(',');
           final followX:Float = (checkString(camProps[0]) ? Std.parseFloat(camProps[0]) : 0);
@@ -6156,15 +6167,6 @@ class PlayState extends MusicBeatState
 
   public dynamic function noteMiss(daNote:Note):Void
   {
-    var result:Dynamic = callOnLuas('noteMissPre', [
-      notes.members.indexOf(daNote),
-      daNote.noteData,
-      daNote.noteType,
-      daNote.isSustainNote
-    ]);
-    var result2:Dynamic = callOnAllHS('noteMissPre', [daNote]);
-    if (result == LuaUtils.Function_Stop || result2 == LuaUtils.Function_Stop) return
-      ; // You didn't hit the key and let it go offscreen, also used by Hurt Notes
     notes.forEachAlive(function(note:Note) {
       if (daNote != note
         && daNote.mustPress

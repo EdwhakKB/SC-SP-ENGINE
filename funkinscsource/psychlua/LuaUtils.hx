@@ -59,8 +59,6 @@ class LuaUtils
 
   public static function setVarInArray(instance:Dynamic, variable:String, value:Dynamic, allowMaps:Bool = false):Any
   {
-    if (value == "true") value = true;
-
     var splitProps:Array<String> = variable.split('[');
     if (splitProps.length > 1)
     {
@@ -360,13 +358,13 @@ class LuaUtils
       default:
         var obj:Dynamic = null;
 
-        if (Stage.instance.swagBacks.exists(objectName)) obj = Stage.instance.swagBacks.get(objectName);
+        if (MusicBeatState.findVariableObj(objectName)) obj = MusicBeatState.variableObj(objectName);
+        else if (Stage.instance.swagBacks.exists(objectName)) obj = Stage.instance.swagBacks.get(objectName);
         else if (Stage.instance.swagGroups.exists(objectName)) obj = Stage.instance.swagGroups.get(objectName);
         else if (PlayState.instance.stage.swagBacks.exists(objectName)) obj = PlayState.instance.stage.swagBacks.get(objectName);
         else if (PlayState.instance.stage.swagGroups.exists(objectName)) obj = PlayState.instance.stage.swagGroups.get(objectName);
-        else if (MusicBeatState.findVariableObj(objectName)) obj = MusicBeatState.variableObj(objectName);
 
-        if (obj == null) obj = getVarInArray(getTargetInstance(), objectName, allowMaps);
+        if (obj == null) obj = getVarInArray(MusicBeatState.getState(), objectName, allowMaps);
         if (obj == null) obj = getActorByName(objectName);
         return obj;
     }
@@ -386,12 +384,11 @@ class LuaUtils
 
   public static function getTargetInstance()
   {
-    var instance:Dynamic = null;
+    var instance:Dynamic = Stage.instance;
     if (PlayState.instance != null)
     {
       instance = PlayState.instance.isDead ? GameOverSubstate.instance : PlayState.instance;
     }
-    if (instance == null) instance = Stage.instance;
     if (instance != null) return instance;
     return MusicBeatState.getState();
   }
@@ -475,15 +472,11 @@ class LuaUtils
 
   public static function destroyObject(tag:String, destroy:Bool = true, ?group:String = null)
   {
-    var variables = MusicBeatState.variableMap(tag);
+    final variables = MusicBeatState.variableMap(tag);
+    final groupObj:Dynamic = group != null ? getObjectDirectly(group) : getTargetInstance();
     if (variables == null) return;
     final obj:FlxBasic = variables.get(tag);
     if (obj == null || obj.destroy == null) return;
-
-    var groupObj:Dynamic = null;
-    if (group == null) groupObj = getTargetInstance();
-    else
-      groupObj = getObjectDirectly(group);
 
     groupObj.remove(obj, true);
     if (destroy)
@@ -495,18 +488,13 @@ class LuaUtils
 
   public static function destroyStageObject(tag:String, destroy:Bool = true, ?group:String = null)
   {
-    var variables = Stage.instance.swagBacks;
+    final variables = Stage.instance.swagBacks;
+    final groupObj:Dynamic = group != null ? getObjectDirectly(group) : getTargetInstance();
     if (variables == null) return;
-    var obj:FlxBasic = variables.get(tag);
+    final obj:FlxBasic = variables.get(tag);
     if (obj == null || obj.destroy == null) return;
 
-    var groupObj:Dynamic = null;
-    if (group == null) groupObj = getTargetInstance();
-    else
-      groupObj = getObjectDirectly(group);
-
     groupObj.remove(obj, true);
-
     if (destroy)
     {
       obj.destroy();
@@ -516,9 +504,9 @@ class LuaUtils
 
   public static function cancelTween(tag:String)
   {
-    var variables = MusicBeatState.variableMap(tag);
+    final variables = MusicBeatState.variableMap(tag);
     if (variables == null) return;
-    var twn:FlxTween = variables.get(tag);
+    final twn:FlxTween = variables.get(tag);
     if (twn != null)
     {
       twn.cancel();
@@ -529,9 +517,9 @@ class LuaUtils
 
   public static function cancelTimer(tag:String)
   {
-    var variables = MusicBeatState.variableMap(tag);
+    final variables = MusicBeatState.variableMap(tag);
     if (variables == null) return;
-    var tmr:FlxTimer = variables.get(tag);
+    final tmr:FlxTimer = variables.get(tag);
     if (tmr != null)
     {
       tmr.cancel();
@@ -905,39 +893,35 @@ class LuaUtils
   public static function makeLuaCharacter(tag:String, character:String, isPlayer:Bool = false, flipped:Bool = false, characterType:String = 'OTHER')
   {
     tag = tag.replace('.', '');
+    if (!ClientPrefs.data.characters) return;
     var animationName:String = "no way anyone have an anim name this big";
     var animationFrame:Int = 0;
     var position:Int = -1;
 
-    if (ClientPrefs.data.characters)
+    if (MusicBeatState.getVariables("Character").get(tag) != null)
     {
-      if (MusicBeatState.getVariables("Character").exists(tag))
+      var daChar:Character = MusicBeatState.getVariables("Character").get(tag);
+      if (daChar.playAnimationBeforeSwitch)
       {
-        var daChar:Character = MusicBeatState.getVariables("Character").get(tag);
-        if (daChar.playAnimationBeforeSwitch)
-        {
-          animationName = daChar.animation.curAnim.name;
-          animationFrame = daChar.animation.curAnim.curFrame;
-        }
-        position = getTargetInstance().members.indexOf(daChar);
+        animationName = daChar.animation.curAnim.name;
+        animationFrame = daChar.animation.curAnim.curFrame;
       }
+      position = LuaUtils.getTargetInstance().members.indexOf(daChar);
     }
 
-    findToDestroy(tag);
+    LuaUtils.findToDestroy(tag);
     var leSprite:Character = new Character(0, 0, character, isPlayer, characterType);
     leSprite.flipMode = flipped;
     leSprite.isCustomCharacter = true;
     MusicBeatState.getVariables("Character").set(tag, leSprite); // yes
     var shit:Character = MusicBeatState.getVariables("Character").get(tag);
-    if (ClientPrefs.data.characters)
-    {
-      getTargetInstance().add(shit);
 
-      if (position >= 0) // this should keep them in the same spot if they switch
-      {
-        getTargetInstance().remove(shit, true);
-        getTargetInstance().insert(position, shit);
-      }
+    LuaUtils.getTargetInstance().add(shit);
+
+    if (position >= 0) // this should keep them in the same spot if they switch
+    {
+      LuaUtils.getTargetInstance().remove(shit, true);
+      LuaUtils.getTargetInstance().insert(position, shit);
     }
 
     var charOffset = new CharacterOffsets(character, flipped);
@@ -1019,15 +1003,12 @@ class LuaUtils
       shit.y = PlayState.instance.stage.bfYOffset + charY + PlayState.instance.BF_Y;
     }
 
-    if (ClientPrefs.data.characters)
+    if (shit.playAnimationBeforeSwitch)
     {
-      if (shit.playAnimationBeforeSwitch)
-      {
-        if (shit.hasOffsetAnimation(animationName)) shit.playAnim(animationName, true, false, animationFrame);
-      }
-
-      shit.loadCharacterScript(shit.curCharacter);
+      if (shit.hasOffsetAnimation(animationName)) shit.playAnim(animationName, true, false, animationFrame);
     }
+
+    shit.loadCharacterScript(shit.curCharacter);
   }
 
   // Kade why tf is it not like in PlayState???
@@ -1128,7 +1109,7 @@ class LuaUtils
       }
     }
 
-    if (PlayState.instance.boyfriend.hardCodedCharacter)
+    if (!PlayState.instance.boyfriend.hardCodedCharacter)
     {
       charX = PlayState.instance.boyfriend.positionArray[0];
       charY = PlayState.instance.boyfriend.positionArray[1] - 350;

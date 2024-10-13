@@ -129,7 +129,7 @@ class Character extends FunkinSCSprite
   public var noteSkin:String;
 
   /**
-   * Custom sturm skin the overrides while playing unless its null.
+   * Custom strum skin the overrides while playing unless its null.
    */
   public var strumSkin:String;
 
@@ -257,7 +257,7 @@ class Character extends FunkinSCSprite
   public var noteSkinStyleOfCharacter:String = 'noteSkins/NOTE_assets';
 
   /**
-   * Sturm skin style of the character (really a backup for finding the original null).
+   * Strum skin style of the character (really a backup for finding the original null).
    */
   public var strumSkinStyleOfCharacter:String = 'noteSkins/NOTE_assets';
 
@@ -826,7 +826,7 @@ class Character extends FunkinSCSprite
 
   public var doAffectForAnimationName:Bool = true;
 
-  public dynamic function doAffectForName(name:String)
+  public dynamic function doAffectForName(name:String):String
   {
     if (name.endsWith('alt') && !hasOffsetAnimation(name)) name = name.split('-')[0];
     if (name == 'laugh' && !hasOffsetAnimation(name)) name = 'singUP';
@@ -841,6 +841,8 @@ class Character extends FunkinSCSprite
       if (isDancing && hasOffsetAnimation('danceRight')) name = 'danceRight';
       else if (hasOffsetAnimation('idle')) name = 'idle';
     }
+
+    return name;
   }
 
   public var doAfterAffectForAnimationName:Bool = true;
@@ -877,7 +879,7 @@ class Character extends FunkinSCSprite
 
     if (nonanimated || charNotPlaying) return;
 
-    if (doAffectForAnimationName) doAffectForName(AnimName);
+    if (doAffectForAnimationName) AnimName = doAffectForName(AnimName);
 
     if (!isAnimateAtlas) animation.play(AnimName, Force, Reversed, Frame);
     #if flxanimate
@@ -962,7 +964,7 @@ class Character extends FunkinSCSprite
     return false;
   }
 
-  public function loadMappedAnims(json:String = '', tankManNotes:Bool = false):Void
+  public dynamic function loadMappedAnims(json:String = '', tankManNotes:Bool = false):Void
   {
     try
     {
@@ -982,7 +984,7 @@ class Character extends FunkinSCSprite
     }
   }
 
-  public function sortAnims(Obj1:Array<Dynamic>, Obj2:Array<Dynamic>):Int
+  public dynamic function sortAnims(Obj1:Array<Dynamic>, Obj2:Array<Dynamic>):Int
   {
     return FlxSort.byValues(FlxSort.ASCENDING, Obj1[0], Obj2[0]);
   }
@@ -1165,7 +1167,7 @@ class Character extends FunkinSCSprite
   #if (LUA_ALLOWED || HSCRIPT_ALLOWED)
   public function loadCharacterScript(name:String = "", preloading:Bool = false)
   {
-    var scriptName:String = (name != null && name.length > 0) ? name : curCharacter;
+    final scriptName:String = (name != null && name.length > 0) ? name : curCharacter;
     #if LUA_ALLOWED
     startLuasNamed('data/characters/' + scriptName, false);
     #end

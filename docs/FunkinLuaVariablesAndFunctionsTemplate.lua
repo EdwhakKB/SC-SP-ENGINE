@@ -94,7 +94,7 @@
 		'holdsActive', "Boolean", "true", "Long notes are active", --Grabs game.holdsActive;
 	}
 
---Sturms
+--Strums
 	for i = 0, 4 do
 		local defaultPlayerStrumsX = {'defaultPlayerStrumX'..i, "Float", "0", "Default Player X Strum Number"..i}
 		local defaultPlayerStrumsY = {'defaultPlayerStrumY'..i, "Float", "0", "Default Player Y Strum Number"..i}
