@@ -13,6 +13,7 @@ import openfl.display.Shader;
 import flixel.system.FlxAssets.FlxShader;
 
 // Code from CNE (CodenameEngine)
+// Edited by me -glow
 class FunkinSCSprite extends FlxSkewed
 {
   public var extraSpriteData:Map<String, Dynamic> = new Map<String, Dynamic>();

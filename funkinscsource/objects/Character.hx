@@ -836,7 +836,7 @@ class Character extends FunkinSCSprite
       if (doMissThing) missed = true;
     }
 
-    if (hasOffsetAnimation(name)) // if it's STILL null, just play idle, and if you REALLY messed up, it'll look in the xml for a valid anim
+    if (!hasOffsetAnimation(name)) // if it's STILL null, just play idle, and if you REALLY messed up, it'll look in the xml for a valid anim
     {
       if (isDancing && hasOffsetAnimation('danceRight')) name = 'danceRight';
       else if (hasOffsetAnimation('idle')) name = 'idle';

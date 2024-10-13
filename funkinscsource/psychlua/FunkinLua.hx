@@ -1404,12 +1404,12 @@ class FunkinLua
       });
 
       set("playActorAnimation", function(obj:String, anim:String, force:Bool = false, reverse:Bool = false, ?frame:Int = 0) {
-        final char:Character = LuaUtils.getObjectDirectly(obj);
+        if (!ClientPrefs.data.characters) return;
 
-        if (char != null && ClientPrefs.data.characters)
+        final char:Character = LuaUtils.getObjectDirectly(obj);
+        if (char != null)
         { // what am I doing? of course it'll be a character
           char.playAnim(anim, force, reverse, frame);
-          return;
         }
       });
 
