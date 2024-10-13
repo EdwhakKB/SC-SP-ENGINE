@@ -859,6 +859,7 @@ class Character extends FunkinSCSprite
 
   override public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
   {
+    if (!ClientPrefs.data.characters) return;
     final result:Dynamic = callOnScripts('onPlayAnim', [AnimName, Force, Reversed, Frame]);
     final result2:Dynamic = callOnScripts('playAnim', [AnimName, Force, Reversed, Frame]);
     if (result == LuaUtils.Function_Stop || result2 == LuaUtils.Function_Stop) return;
@@ -869,8 +870,6 @@ class Character extends FunkinSCSprite
     final resultPost2:Dynamic = callOnScripts('playAnimPost', [AnimName, Force, Reversed, Frame]);
 
     if (resultPost == LuaUtils.Function_Stop || resultPost2 == LuaUtils.Function_Stop) return;
-
-    if (!ClientPrefs.data.characters) return;
 
     _lastPlayedAnimation = AnimName;
 
@@ -968,7 +967,7 @@ class Character extends FunkinSCSprite
   {
     try
     {
-      var songData:SwagSong = Song.getChart(json, Song.formattedSongName);
+      final songData:SwagSong = Song.getChart(json, Song.formattedSongName);
       if (songData != null)
       {
         for (section in songData.notes)

@@ -2353,7 +2353,7 @@ class FunkinLua
   public function addLocalCallback(name:String, myFunction:Dynamic)
   {
     callbacks.set(name, myFunction);
-    set(name, null); // just so that it gets called
+    Lua_helper.add_callback(lua, name, null); // just so that it gets called
   }
 
   #if (MODS_ALLOWED && !flash && sys)
@@ -2367,12 +2367,8 @@ class FunkinLua
     #if (MODS_ALLOWED && !flash && sys)
     if (runtimeShaders.exists(name))
     {
-      var shaderData:Array<String> = runtimeShaders.get(name);
-      if (shaderData != null && (shaderData[0] != null || shaderData[1] != null))
-      {
-        luaTrace('Shader $name was already initialized!');
-        return true;
-      }
+      luaTrace('Shader $name was already initialized!');
+      return true;
     }
 
     var foldersToCheck:Array<String> = [Paths.mods('data/shaders/')];
