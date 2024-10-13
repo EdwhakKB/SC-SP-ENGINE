@@ -202,10 +202,10 @@ class ShaderFunctions
 
     funk.set("tweenShaderFloat",
       function(tag:String, shaderName:String, prop:String, value:Dynamic, time:Float, easeStr:String = "linear", startVal:Null<Float> = null) {
-        var shad = FunkinLua.lua_Shaders.get(shaderName).getShader();
+        var shad = FunkinLua.lua_Shaders.get(shaderName);
         var ease = LuaUtils.getTweenEaseByString(easeStr);
         var startValue:Null<Float> = startVal;
-        if (startValue == null) startValue = shad.getFloat(prop);
+        if (startValue == null) startValue = Reflect.getProperty(shad, prop);
 
         if (shad != null)
         {
@@ -220,7 +220,7 @@ class ShaderFunctions
                 },
                 onUpdate: function(tween:FlxTween) {
                   var ting = FlxMath.lerp(startValue, value, ease(tween.percent));
-                  shad.setFloat(prop, ting);
+                  Reflect.setProperty(shad, prop, ting);
                 }
               }));
           }
@@ -231,7 +231,7 @@ class ShaderFunctions
                 ease: ease,
                 onUpdate: function(tween:FlxTween) {
                   var ting = FlxMath.lerp(startValue, value, ease(tween.percent));
-                  shad.setFloat(prop, ting);
+                  Reflect.setProperty(shad, prop, ting);
                 }
               });
           }
