@@ -38,7 +38,7 @@ class ShaderFunctions
         final arr:Array<String> = findOther ? [FunkinLua.lua_Shaders.get(shader)
           .getShader()
           .glFragmentSource, FunkinLua.lua_Shaders.get(shader).getShader().glVertexSource] : funk.runtimeShaders.get(shader);
-        final daShader:FlxRuntimeShader = new FlxRuntimeShader(findOther?arr[0], arr[1]);
+        final daShader:FlxRuntimeShader = new FlxRuntimeShader(arr[0], arr[1]);
 
         if (Std.isOfType(leObj, FlxCamera))
         {
