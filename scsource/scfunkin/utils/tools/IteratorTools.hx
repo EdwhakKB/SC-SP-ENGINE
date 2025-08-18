@@ -15,7 +15,6 @@ class IteratorTools
   public static function count<T>(iterator:Iterator<T>, ?predicate:(item:T) -> Bool):Int
   {
     var n = 0;
-
     if (predicate == null)
     {
       for (_ in iterator)
@@ -26,7 +25,6 @@ class IteratorTools
       for (x in iterator)
         if (predicate(x)) n++;
     }
-
     return n;
   }
 }

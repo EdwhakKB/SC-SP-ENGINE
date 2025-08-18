@@ -11,9 +11,11 @@ import flixel.math.FlxRect;
 import flixel.system.FlxAssets;
 import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
+import flixel.util.FlxDirectionFlags;
 import flixel.util.FlxSort;
 
 /**
+ * Made by glowsoony
  * `FlxSkewedSpriteGroup` is a special `FlxSkewed` that can be treated like a single sprite even if it's
  * made up of several member sprites. It shares the `FlxGroup` API, but it doesn't inherit from it.
  * Note that `FlxSkewedSpriteContainer` also exists.
@@ -105,6 +107,7 @@ class FlxSkewedTypedSpriteGroup<T:FlxSkewed> extends FlxSkewed
     scale = new FlxCallbackPoint(scaleCallback);
     scrollFactor = new FlxCallbackPoint(scrollFactorCallback);
 
+    skew.set(0, 0);
     scale.set(1, 1);
     scrollFactor.set(1, 1);
 
@@ -127,6 +130,7 @@ class FlxSkewedTypedSpriteGroup<T:FlxSkewed> extends FlxSkewed
     offset = FlxDestroyUtil.destroy(offset);
     origin = FlxDestroyUtil.destroy(origin);
     scale = FlxDestroyUtil.destroy(scale);
+    skew = FlxDestroyUtil.destroy(skew);
     scrollFactor = FlxDestroyUtil.destroy(scrollFactor);
 
     @:bypassAccessor
@@ -618,27 +622,6 @@ class FlxSkewedTypedSpriteGroup<T:FlxSkewed> extends FlxSkewed
   }
 
   /**
-   * Helper function to set the coordinates of this object.
-   * Handy since it only requires one line of code.
-   *
-   * @param   X   The new x skew
-   * @param   Y   The new y skew
-   */
-  public function setSkew(X:Float = 0, Y:Float = 0):Void
-  {
-    // Transform children by the movement delta
-    var dx:Float = X - skew.x;
-    var dy:Float = Y - skew.y;
-    multiTransformChildren([skewXTransform, skewYTransform], [dx, dy]);
-
-    // don't transform children twice
-    _skipTransformChildren = true;
-    skew.x = X; // this calls nothing
-    skew.y = Y; // this calls nothing
-    _skipTransformChildren = false;
-  }
-
-  /**
    * Handy function that allows you to quickly transform one property of sprites in this group at a time.
    *
    * @param   Function   Function to transform the sprites. Example:
@@ -754,7 +737,7 @@ class FlxSkewedTypedSpriteGroup<T:FlxSkewed> extends FlxSkewed
     return alpha = Value;
   }
 
-  override function set_facing(Value:Int):Int
+  override function set_facing(Value:FlxDirectionFlags):FlxDirectionFlags
   {
     if (exists && facing != Value) transformChildren(facingTransform, Value);
     return facing = Value;
@@ -848,7 +831,7 @@ class FlxSkewedTypedSpriteGroup<T:FlxSkewed> extends FlxSkewed
       if (member == null) continue;
 
       var minX:Float;
-      if (member.flixelType == SPRITEGROUP) minX = (cast member : FlxSpriteGroup).findMinX();
+      if (member.flixelType == SPRITEGROUP) minX = (cast member : FlxSkewedSpriteGroup).findMinX();
       else
         minX = member.x;
 
@@ -876,7 +859,7 @@ class FlxSkewedTypedSpriteGroup<T:FlxSkewed> extends FlxSkewed
       if (member == null) continue;
 
       var maxX:Float;
-      if (member.flixelType == SPRITEGROUP) maxX = (cast member : FlxSpriteGroup).findMaxX();
+      if (member.flixelType == SPRITEGROUP) maxX = (cast member : FlxSkewedSpriteGroup).findMaxX();
       else
         maxX = member.x + member.width;
 
@@ -919,7 +902,7 @@ class FlxSkewedTypedSpriteGroup<T:FlxSkewed> extends FlxSkewed
       if (member == null) continue;
 
       var minY:Float;
-      if (member.flixelType == SPRITEGROUP) minY = (cast member : FlxSpriteGroup).findMinY();
+      if (member.flixelType == SPRITEGROUP) minY = (cast member : FlxSkewedSpriteGroup).findMinY();
       else
         minY = member.y;
 
@@ -947,7 +930,7 @@ class FlxSkewedTypedSpriteGroup<T:FlxSkewed> extends FlxSkewed
       if (member == null) continue;
 
       var maxY:Float;
-      if (member.flixelType == SPRITEGROUP) maxY = (cast member : FlxSpriteGroup).findMaxY();
+      if (member.flixelType == SPRITEGROUP) maxY = (cast member : FlxSkewedSpriteGroup).findMaxY();
       else
         maxY = member.y + member.height;
 
@@ -986,12 +969,6 @@ class FlxSkewedTypedSpriteGroup<T:FlxSkewed> extends FlxSkewed
   inline function yTransform(Sprite:FlxSkewed, Y:Float)
     Sprite.y += Y; // addition
 
-  inline function skewXTransform(Sprite:FlxSkewed, X:Float)
-    Sprite.skew.x += X;
-
-  inline function skewYTransform(Sprite:FlxSkewed, Y:Float)
-    Sprite.skew.y += Y;
-
   inline function angleTransform(Sprite:FlxSkewed, Angle:Float)
     Sprite.angle += Angle; // addition
 
@@ -1005,7 +982,7 @@ class FlxSkewedTypedSpriteGroup<T:FlxSkewed> extends FlxSkewed
   inline function directAlphaTransform(Sprite:FlxSkewed, Alpha:Float)
     Sprite.alpha = Alpha; // direct set
 
-  inline function facingTransform(Sprite:FlxSkewed, Facing:Int)
+  inline function facingTransform(Sprite:FlxSkewed, Facing:FlxDirectionFlags)
     Sprite.facing = Facing;
 
   inline function flipXTransform(Sprite:FlxSkewed, FlipX:Bool)
@@ -1059,6 +1036,9 @@ class FlxSkewedTypedSpriteGroup<T:FlxSkewed> extends FlxSkewed
   inline function scaleTransform(Sprite:FlxSkewed, Scale:FlxPoint)
     Sprite.scale.copyFrom(Scale);
 
+  inline function skewTransform(Sprite:FlxSkewed, Skew:FlxPoint)
+    Sprite.skew.copyFrom(Skew);
+
   inline function scrollFactorTransform(Sprite:FlxSkewed, ScrollFactor:FlxPoint)
     Sprite.scrollFactor.copyFrom(ScrollFactor);
 
@@ -1081,6 +1061,9 @@ class FlxSkewedTypedSpriteGroup<T:FlxSkewed> extends FlxSkewed
 
   inline function scrollFactorCallback(ScrollFactor:FlxPoint)
     transformChildren(scrollFactorTransform, ScrollFactor);
+
+  inline function skewCallback(Skew:FlxPoint)
+    transformChildren(skewTransform, Skew);
 
   // NON-SUPPORTED FUNCTIONALITY
   // THESE METHODS ARE OVERRIDDEN FOR SAFETY PURPOSES
@@ -1115,7 +1098,7 @@ class FlxSkewedTypedSpriteGroup<T:FlxSkewed> extends FlxSkewed
       ?Key:String):FlxSkewed
   {
     #if FLX_DEBUG
-    throw "This function is not supported in FlxSpriteGroup";
+    throw "This function is not supported in FlxSkewedSpriteGroup";
     #end
     return this;
   }
@@ -1127,7 +1110,7 @@ class FlxSkewedTypedSpriteGroup<T:FlxSkewed> extends FlxSkewed
   override public function makeGraphic(Width:Int, Height:Int, Color:Int = FlxColor.WHITE, Unique:Bool = false, ?Key:String):FlxSkewed
   {
     #if FLX_DEBUG
-    throw "This function is not supported in FlxSpriteGroup";
+    throw "This function is not supported in FlxSkewedSpriteGroup";
     #end
     return this;
   }

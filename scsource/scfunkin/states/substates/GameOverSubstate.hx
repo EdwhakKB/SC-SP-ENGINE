@@ -22,12 +22,12 @@ class GameOverSubstate extends MusicBeatSubState
 
   var stageSuffix:String = "";
 
-  public function new(?playStateBoyfriend:Character = null)
+  public function new(?fromBoyfriend:Character = null)
   {
-    if (playStateBoyfriend != null
-      && playStateBoyfriend.curCharacter == characterName) // Avoids spawning a second boyfriend cuz animate atlas is laggy
+    if (fromBoyfriend != null
+      && fromBoyfriend._data.curCharacter == characterName) // Avoids spawning a second boyfriend cuz animate atlas is laggy
     {
-      this.boyfriend = playStateBoyfriend;
+      this.boyfriend = fromBoyfriend;
     }
     super();
   }
@@ -40,7 +40,7 @@ class GameOverSubstate extends MusicBeatSubState
     endSoundName = 'gameOverEnd';
     deathDelay = 0;
 
-    var _song:GameOverData = PlayState.SONG.getSongData('gameOverData');
+    var _song:SongGameOverData = PlayState.SONG.getSongData('gameOverData');
     if (_song != null)
     {
       if (_song.gameOverChar != null && _song.gameOverChar.trim().length > 0) characterName = _song.gameOverChar;
@@ -64,10 +64,10 @@ class GameOverSubstate extends MusicBeatSubState
 
     if (boyfriend == null)
     {
-      boyfriend = new Character(PlayState.instance.boyfriend.getScreenPosition().x, PlayState.instance.boyfriend.getScreenPosition().y, characterName, true,
-        'BF');
-      boyfriend.x += boyfriend.positionArray[0] - PlayState.instance.boyfriend.positionArray[0];
-      boyfriend.y += boyfriend.positionArray[1] - PlayState.instance.boyfriend.positionArray[1];
+      boyfriend = new Character(PlayState.instance.stage.boyfriend.getScreenPosition().x, PlayState.instance.stage.boyfriend.getScreenPosition().y,
+        characterName, true, 'BF');
+      boyfriend.x += boyfriend._data.positionArray[0] - PlayState.instance.stage.boyfriend._data.positionArray[0];
+      boyfriend.y += boyfriend._data.positionArray[1] - PlayState.instance.stage.boyfriend._data.positionArray[1];
     }
     boyfriend.skipDance = true;
     add(boyfriend);
@@ -79,13 +79,14 @@ class GameOverSubstate extends MusicBeatSubState
     boyfriend.playAnim('firstDeath');
 
     camFollow = new FlxObject(0, 0, 1, 1);
-    camFollow.setPosition(boyfriend.getGraphicMidpoint().x + boyfriend.cameraPosition[0], boyfriend.getGraphicMidpoint().y + boyfriend.cameraPosition[1]);
+    camFollow.setPosition(boyfriend.getGraphicMidpoint().x + boyfriend._data.cameraPosition[0],
+      boyfriend.getGraphicMidpoint().y + boyfriend._data.cameraPosition[1]);
     FlxG.camera.focusOn(new FlxPoint(FlxG.camera.scroll.x + (FlxG.camera.width / 2), FlxG.camera.scroll.y + (FlxG.camera.height / 2)));
     FlxG.camera.follow(camFollow, LOCKON, 0.01);
     add(camFollow);
 
-    PlayState.instance.setOnScripts('inGameOver', true);
-    PlayState.instance.callOnScripts('onGameOverStart', []);
+    PlayState.instance.setOnType('inGameOver', true, "All");
+    PlayState.instance.callOnType(new CallData('onGameOverStart'), "All");
     FlxG.sound.music.loadEmbedded(Paths.music(loopSoundName), true);
 
     if (characterName == 'pico-dead')
@@ -94,7 +95,7 @@ class GameOverSubstate extends MusicBeatSubState
       overlay.frames = Paths.getSparrowAtlas('Pico_Death_Retry');
       overlay.animation.addByPrefix('deathLoop', 'Retry Text Loop', 24, true);
       overlay.animation.addByPrefix('deathConfirm', 'Retry Text Confirm', 24, false);
-      overlay.antialiasing = ClientPrefs.data.antialiasing;
+      overlay.antialiasing = Save.get('antialiasing');
       overlayConfirmOffsets.set(250, 200);
       overlay.visible = false;
       add(overlay);
@@ -114,12 +115,12 @@ class GameOverSubstate extends MusicBeatSubState
         }
       }
 
-      if (PlayState.instance.gf != null && PlayState.instance.gf.curCharacter == 'nene')
+      if (PlayState.instance.stage.gf != null && PlayState.instance.stage.gf._data.curCharacter == 'nene')
       {
         var neneKnife:FlxSprite = new FlxSprite(boyfriend.x - 450, boyfriend.y - 250);
         neneKnife.frames = Paths.getSparrowAtlas('NeneKnifeToss');
         neneKnife.animation.addByPrefix('anim', 'knife toss', 24, false);
-        neneKnife.antialiasing = ClientPrefs.data.antialiasing;
+        neneKnife.antialiasing = Save.get('antialiasing');
         neneKnife.animation.finishCallback = function(_) {
           remove(neneKnife);
           neneKnife.destroy();
@@ -136,10 +137,10 @@ class GameOverSubstate extends MusicBeatSubState
   {
     super.update(elapsed);
 
-    PlayState.instance.callOnScripts('onUpdate', [elapsed]);
+    PlayState.instance.callOnType(new CallData('onUpdate', [elapsed]), "All");
 
     var justPlayedLoop:Bool = false;
-    if (!boyfriend.isAnimationNull() && boyfriend.getLastAnimationPlayed() == 'firstDeath' && boyfriend.isAnimationFinished())
+    if (!boyfriend.isAnimNull() && boyfriend.getLastAnimPlayed() == 'firstDeath' && boyfriend.isAnimFinished())
     {
       boyfriend.playAnim('deathLoop');
       if (overlay != null && overlay.animation.exists('deathLoop'))
@@ -152,10 +153,7 @@ class GameOverSubstate extends MusicBeatSubState
 
     if (!isEnding)
     {
-      if (controls.ACCEPT)
-      {
-        endBullshit();
-      }
+      if (controls.ACCEPT) endBullshit();
       else if (controls.BACK)
       {
         #if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
@@ -164,9 +162,8 @@ class GameOverSubstate extends MusicBeatSubState
         PlayState.deathCounter = 0;
         PlayState.seenCutscene = false;
         PlayState.chartingMode = false;
-        PlayState.modchartMode = false;
 
-        if (ClientPrefs.data.behaviourType != 'VSLICE')
+        if (Save.get('behaviourType') != 'VSLICE')
         {
           if (PlayState.isStoryMode) MusicBeatState.switchState(new scfunkin.states.menu.StoryMenuState());
           else
@@ -185,8 +182,8 @@ class GameOverSubstate extends MusicBeatSubState
         }
         #end
 
-        FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
-        PlayState.instance.callOnScripts('onGameOverConfirm', [false]);
+        FlxG.sound.playMusic(Paths.music("freakyMenu"));
+        PlayState.instance.callOnType(new CallData('onGameOverConfirm', [false]), "All");
       }
       else if (justPlayedLoop)
       {
@@ -196,7 +193,7 @@ class GameOverSubstate extends MusicBeatSubState
             coolStartDeath(0.2);
 
             var exclude:Array<Int> = [];
-            // if(!ClientPrefs.cursing) exclude = [1, 3, 8, 13, 17, 21];
+            // if(!Save.cursing) exclude = [1, 3, 8, 13, 17, 21];
             FlxG.sound.play(Paths.sound('jeffGameover/jeffGameover-' + FlxG.random.int(1, 25, exclude)), 1, false, null, true, function() {
               if (!isEnding)
               {
@@ -220,11 +217,9 @@ class GameOverSubstate extends MusicBeatSubState
         }
       }
     }
-    if (!isEnding && timesMusicRepeated == 2) // Really? you let the music repeat 2 times now?
-    {
-      endBullshit();
-    }
-    PlayState.instance.callOnScripts('onUpdatePost', [elapsed]);
+    // Really? you let the music repeat 2 times now?
+    if (!isEnding && timesMusicRepeated == 2) endBullshit();
+    PlayState.instance.callOnType(new CallData('onUpdatePost', [elapsed]), "All");
   }
 
   var timesMusicRepeated:Int = 0;
@@ -241,7 +236,7 @@ class GameOverSubstate extends MusicBeatSubState
     if (!isEnding)
     {
       isEnding = true;
-      if (boyfriend.hasOffsetAnimation('deathConfirm')) boyfriend.playAnim('deathConfirm', true);
+      if (boyfriend.hasOffset('deathConfirm')) boyfriend.playAnim('deathConfirm', true);
 
       if (overlay != null && overlay.animation.exists('deathConfirm'))
       {
@@ -256,7 +251,7 @@ class GameOverSubstate extends MusicBeatSubState
           LoadingState.loadAndSwitchState(new PlayState());
         });
       });
-      PlayState.instance.callOnScripts('onGameOverConfirm', [true]);
+      PlayState.instance.callOnType(new CallData('onGameOverConfirm', [true]), "All");
     }
   }
 

@@ -34,6 +34,9 @@
   "camera_position": [0, 0],
   "sing_duration": 4,
   "scale": 1,
-  "isDancing": true,
-  "useGFSpeed": true
+  "dancingData": {
+    "isDancing": true,
+    "useGFSpeed": true,
+    "gfSpeed": 1
+  }
 }

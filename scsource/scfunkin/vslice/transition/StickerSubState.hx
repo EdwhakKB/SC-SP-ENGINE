@@ -1,20 +1,14 @@
 package scfunkin.vslice.transition;
 
-import flixel.FlxState;
-import flixel.math.FlxMath;
 import flixel.util.FlxSort;
 import flixel.util.FlxSignal;
 import flixel.addons.transition.FlxTransitionableState;
-import openfl.geom.Matrix;
 import openfl.display.BitmapData;
-import openfl.display.Sprite;
 import openfl.display.Bitmap;
+import openfl.display.Sprite;
+import openfl.geom.Matrix;
 import scfunkin.states.MainMenuState;
-import haxe.Json;
 import sys.io.File;
-
-using Lambda;
-using StringTools;
 
 class StickerSubState extends MusicBeatSubState
 {
@@ -37,9 +31,7 @@ class StickerSubState extends MusicBeatSubState
 
   // sound folder selection
   var soundKeyFolders:Array<String> = [];
-
   var soundKey:String = "";
-
   var sounds:Array<String> = [];
 
   public function new(?oldStickers:Array<StickerSprite>, ?targetState:StickerSubState->FlxState):Void
@@ -60,6 +52,7 @@ class StickerSubState extends MusicBeatSubState
       for (folder in Mods.directoriesWithFile(Paths.getSharedPath(), 'sounds/$soundFolder/'))
         for (subFolder in FileSystem.readDirectory(folder))
           soundKeyFolders.push(subFolder);
+
     for (stickerFolder in soundSelections)
       for (soundKeyFolder in soundKeyFolders)
         for (folder in Mods.directoriesWithFile(Paths.getSharedPath(), 'sounds/$stickerFolder/$soundKeyFolder/'))
@@ -71,22 +64,17 @@ class StickerSubState extends MusicBeatSubState
     {
       Debug.logInfo(soundSelections);
       while (soundSelections.contains(i))
-      {
         soundSelections.remove(i);
-      }
       soundSelections.push(i);
     }
 
     trace(soundSelections);
 
     soundKey = FlxG.random.getObject(soundKeyFolders);
-
     soundSelection = FlxG.random.getObject(soundSelections);
 
     trace(sounds);
-
-    grpStickers = new FlxTypedGroup<StickerSprite>();
-    add(grpStickers);
+    add(grpStickers = new FlxTypedGroup<StickerSprite>());
 
     // makes the stickers on the most recent camera, which is more often than not... a UI camera!!
     // grpStickers.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
@@ -95,10 +83,7 @@ class StickerSubState extends MusicBeatSubState
     if (oldStickers != null)
     {
       for (sticker in oldStickers)
-      {
         grpStickers.add(sticker);
-      }
-
       degenStickers();
     }
     else
@@ -128,31 +113,23 @@ class StickerSubState extends MusicBeatSubState
     {
       new FlxTimer().start(sticker.timing, _ -> {
         sticker.visible = false;
-        var daSound:String = soundSelection + '/' + soundKey + '/' + FlxG.random.getObject(sounds);
-        FlxG.sound.play(Paths.sound(daSound));
+        FlxG.sound.play(Paths.sound(soundSelection + '/' + soundKey + '/' + FlxG.random.getObject(sounds)));
 
-        if (grpStickers == null || ind == grpStickers.members.length - 1)
-        {
-          switchingState = false;
-          close();
-        }
+        if (grpStickers != null || ind != grpStickers.members.length - 1) return;
+        switchingState = false;
+        close();
       });
     }
   }
 
   function regenStickers():Void
   {
-    if (grpStickers.members.length > 0)
-    {
-      grpStickers.clear();
-    }
-
-    var stickerInfo:StickerInfo = new StickerInfo('stickers-set-1');
-    var stickers:Map<String, Array<String>> = new Map<String, Array<String>>();
-    for (stickerSets in stickerInfo.getPack("all"))
-    {
-      stickers.set(stickerSets, stickerInfo.getStickers(stickerSets));
-    }
+    if (grpStickers.members.length > 0) grpStickers.clear();
+    final stickerInfo:StickerInfo = new StickerInfo('stickers-set-1');
+    final stickers:Map<String, Array<String>> = [
+      for (stickerSets in stickerInfo.getPack("all"))
+        stickerSets => stickerInfo.getStickers(stickerSets)
+    ];
 
     var xPos:Float = -100;
     var yPos:Float = -100;
@@ -162,7 +139,6 @@ class StickerSubState extends MusicBeatSubState
       var sticker:String = FlxG.random.getObject(stickers.get(stickerSet));
       var sticky:StickerSprite = new StickerSprite(0, 0, stickerInfo.name, sticker);
       sticky.visible = false;
-
       sticky.x = xPos;
       sticky.y = yPos;
       xPos += sticky.frameWidth * 0.5;
@@ -260,9 +236,7 @@ class StickerSubState extends MusicBeatSubState
       });
     }
 
-    grpStickers.sort((ord, a, b) -> {
-      return FlxSort.byValues(ord, a.timing, b.timing);
-    });
+    grpStickers.sort((ord, a, b) -> return FlxSort.byValues(ord, a.timing, b.timing));
 
     // centers the very last sticker
     var lastOne:StickerSprite = grpStickers.members[grpStickers.members.length - 1];
@@ -321,46 +295,27 @@ class StickerInfo
   public function new(stickerSet:String):Void
   {
     var path = Paths.getPath('images/transitionSwag/' + stickerSet + '/stickers.json');
-    var json = Json.parse(#if MODS_ALLOWED File.getContent(path) #else openfl.Assets.getText(path) #end);
+    var json = HaxeJson.parse(#if MODS_ALLOWED File.getContent(path) #else openfl.Assets.getText(path) #end);
 
     // doin this dipshit nonsense cuz i dunno how to deal with casting a json object with
     // a dash in its name (sticker-packs)
     var jsonInfo:StickerShit = cast json;
+    if (jsonInfo == null) return;
 
     this.name = jsonInfo.name;
     this.artist = jsonInfo.artist;
 
-    stickerPacks = new Map<String, Array<String>>();
-
-    for (field in Reflect.fields(json.stickerPacks))
-    {
-      var stickerFunny = json.stickerPacks;
-      var stickerStuff = Reflect.field(stickerFunny, field);
-
-      stickerPacks.set(field, cast stickerStuff);
-    }
+    stickerPacks = cast scfunkin.utils.ReflectUtil.structureToMap(json.stickerPacks);
 
     // creates a similar for loop as before but for the stickers
-    stickers = new Map<String, Array<String>>();
-
-    for (field in Reflect.fields(json.stickers))
-    {
-      var stickerFunny = json.stickers;
-      var stickerStuff = Reflect.field(stickerFunny, field);
-
-      stickers.set(field, cast stickerStuff);
-    }
+    stickers = cast scfunkin.utils.ReflectUtil.structureToMap(json.stickers);
   }
 
   public function getStickers(stickerName:String):Array<String>
-  {
     return this.stickers[stickerName];
-  }
 
   public function getPack(packName:String):Array<String>
-  {
     return this.stickerPacks[packName];
-  }
 } // somethin damn cute just for the json to cast to!
 
 typedef StickerShit =

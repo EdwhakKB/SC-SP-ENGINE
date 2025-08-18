@@ -1,7 +1,5 @@
 package scfunkin.objects.cutscenes;
 
-import flixel.FlxBasic;
-import flixel.util.FlxSort;
 import flixel.util.FlxDestroyUtil;
 import flixel.addons.display.FlxPieDial;
 
@@ -61,7 +59,7 @@ class CutsceneHandler extends FlxBasic
   {
     super.update(elapsed);
 
-    if (FlxG.state != PlayState.instance || !firstFrame)
+    if (!firstFrame)
     {
       firstFrame = true;
       return;
@@ -120,11 +118,6 @@ class CutsceneHandler extends FlxBasic
   public function timer(time:Float, func:Void->Void)
   {
     timedEvents.push({time: time, func: func});
-    timedEvents.sort(sortByTime);
-  }
-
-  function sortByTime(Obj1:CutsceneEvent, Obj2:CutsceneEvent):Int
-  {
-    return FlxSort.byValues(FlxSort.ASCENDING, Obj1.time, Obj2.time);
+    timedEvents.sort(function(a:CutsceneEvent, b:CutsceneEvent):Int->SortUtil.byGivenVar(FlxSort.ASCENDING, a, b, 'time'));
   }
 }

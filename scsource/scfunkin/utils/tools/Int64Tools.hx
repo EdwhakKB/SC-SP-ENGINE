@@ -10,11 +10,7 @@ class Int64Tools
   private inline static var MAX_32_PRECISION:Float = 4294967296.0;
 
   public static function fromFloat(f:Float):Int64
-  {
-    var h = Std.int(f / MAX_32_PRECISION);
-    var l = Std.int(f);
-    return Int64.make(h, l);
-  }
+    return Int64.make(Std.int(f / MAX_32_PRECISION), Std.int(f));
 
   public static function toFloat(i:Int64):Float
   {
@@ -29,12 +25,8 @@ class Int64Tools
   public static function toIntSafe(i:Int64):Int
   {
     try
-    {
-      return Int64.toInt(i);
-    }
+      return Int64.toInt(i)
     catch (e:Dynamic)
-    {
       throw 'Could not represent value "${Int64.toStr(i)}" as an integer.';
-    }
   }
 }

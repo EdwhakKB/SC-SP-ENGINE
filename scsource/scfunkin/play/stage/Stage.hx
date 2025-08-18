@@ -1,1368 +1,715 @@
 package scfunkin.play.stage;
 
-import flixel.FlxBasic;
-import openfl.utils.Assets as OpenFlAssets;
-import openfl.Assets;
+import flixel.group.FlxContainer;
 import openfl.display.BlendMode;
 import scfunkin.play.stage.*;
 import scfunkin.play.stage.base.*;
-import scfunkin.backend.data.StageData;
-import scfunkin.backend.misc.Countdown;
+import scfunkin.backend.data.StageJsonData;
+import scfunkin.objects.ui.Countdown.CountdownTick;
 import scfunkin.objects.ui.Character;
 import scfunkin.objects.note.Note.EventNote;
 import scfunkin.objects.note.Note;
 import scfunkin.objects.cutscenes.CutsceneHandler;
 import scfunkin.objects.cutscenes.DialogueBox;
 import scfunkin.states.substates.GameOverSubstate;
+import scfunkin.backend.data.StageData;
+import scfunkin.backend.data.packed.character.CharacterData;
 #if LUA_ALLOWED
-import scfunkin.backend.scripting.psych.*;
-#else
-import scfunkin.backend.scripting.psych.HScript;
+import scfunkin.backend.scripting.psych.luas.FunkinLua;
 #end
-#if (HSCRIPT_ALLOWED && HScriptImproved)
-import scfunkin.backend.scripting.codename.Script as HScriptCode;
-#end
-#if HSCRIPT_ALLOWED
-import scfunkin.backend.scripting.ScriptType;
-import scfunkin.backend.scripting.sc.*;
-import crowplexus.iris.Iris;
-#end
-import scfunkin.utils.*;
 
-class Stage extends scfunkin.play.stage.base.BaseStage
+@:structInit
+class StageChangeStoreage
 {
-  public static var instance:Stage = null;
+  var handler:LuaVariablesHandler;
+  var members:Array<FlxBasic>;
 
-  // Stage stuff
-  public var curStage:String = '';
+  public function new(hand:LuaVariablesHandler, mem:Array<FlxBasic>)
+  {
+    this.handler = hand.copy();
+    this.members = mem.copy();
+  }
+}
 
-  public var hideLastBG:Bool = false; // True = hide last BGs and show ones from slowBacks on certain step, False = Toggle visibility of BGs from SlowBacks on certain step
-  // Use visible property to manage if BG would be visible or not at the start of the game
-  public var tweenDuration:Float = 2; // How long will it tween hiding/showing BGs, variable above must be set to True for tween to activate
-  public var toAdd:Array<Dynamic> = []; // Add BGs on stage startup, load BG in by using "toAdd.push(bgVar);"
-  // Layering algorithm for noobs: Everything loads by the method of "On Top", example: You load wall first(Every other added BG layers on it), then you load road(comes on top of wall and doesn't clip through it), then loading street lights(comes on top of wall and road)
-  public var swagBacks:Map<String, Dynamic> = new Map<String,
-    Dynamic>(); // Store BGs here to use them later (for example with slowBacks, using your custom stage event or to adjust position in stage debug menu(press 8 while in PlayState with debug build of the game))
-  public var swagGroups:Map<String, FlxTypedGroup<Dynamic>> = new Map<String, FlxTypedGroup<Dynamic>>(); // Store Groups
-  public var animatedBacks:Array<FlxSprite> = []; // Store animated backgrounds and make them play animation(Animation must be named Idle!! Else use swagGroup/swagBacks and script it in stepHit/beatHit function of this file!!)
-  public var animatedBacks2:Array<FlxSprite> = []; // doesn't interrupt if animation is playing, unlike animatedBacks
-  public var layInFront:Array<Array<Dynamic>> = [[], [], [], [], []]; // BG layering, format: first [0] - in front of GF, second [1] - in front of opponent, third [2] - in front of boyfriend(and technically also opponent since Haxe layering moment), fourth [3] in front of arrows and stuff
-  public var slowBacks:Map<Int,
-    Array<FlxSprite>> = []; // Change/add/remove backgrounds mid song! Format: "slowBacks[StepToBeActivated] = [Sprites,To,Be,Changed,Or,Added];"
+class Stage extends FlxContainer implements IScriptCaller implements IBeatCaller implements IVariableHandler<LuaVariablesHandler>
+{
+  public var automaticCaller:Bool = false;
 
-  public var stopBGDancing:Bool = false;
+  // Stage Script stuff
+  public var current:String = '';
 
-  public var songLowercase:String = '';
-
-  public var isCustomStage:Bool = false;
-  public var isLuaStage:Bool = false;
-  public var isHxStage:Bool = false;
-
-  #if LUA_ALLOWED public var luaArray:Array<FunkinLua> = []; #end
-
-  #if HSCRIPT_ALLOWED
-  public var hscriptArray:Array<scfunkin.backend.scripting.psych.HScript> = [];
-  public var scHSArray:Array<scfunkin.backend.scripting.sc.SCScript> = [];
-  #end
-
-  #if (HSCRIPT_ALLOWED && HScriptImproved)
-  public var codeNameScripts:scfunkin.backend.scripting.codename.ScriptPack;
-  #end
-
-  public var preloading:Bool = false;
+  public var handler:LuaVariablesHandler = null;
 
   public var stageName:String = "";
   public var stageId:String = "";
 
-  public function new(daStage:String, ?preloading:Bool = false)
+  public var dad:Character = null;
+  public var gf:Character = null;
+  public var mom:Character = null;
+  public var boyfriend:Character = null;
+
+  public var stages:Map<String, StageChangesStorage> = new Map();
+
+  public var game:Dynamic = null;
+
+  public final initialCharNameData:SongCharacterData =
+    {
+      player: "bf",
+      opponent: "dad",
+      secondOpponent: "",
+      girlfriend: "gf"
+    };
+
+  public var currentCharNameData:SongCharacterData =
+    {
+      player: "bf",
+      opponent: "dad",
+      secondOpponent: "",
+      girlfriend: "gf"
+    };
+
+  public var initial:String = "";
+
+  public function new(daStage:String, ?autoStart:Bool = true, ?newGame:Dynamic = null)
   {
+    this.handler = new LuaVariablesHandler(["Reserved" => []]);
+    this.game = newGame ?? cast FlxG.state;
+    Debug.logInfo([daStage, daStage == null]);
+    this.current = daStage ?? 'mainStage';
+    this.initial = daStage ?? 'mainStage';
+    Debug.logInfo([current, initial]);
+    function fallbackString(incoming:String, fallback:String):String
+      return (incoming == null || incoming.length < 1) ? fallback : incoming;
+    initialCharNameData =
+      {
+        player: PlayState.SONG.getSongData('characters').player,
+        opponent: PlayState.SONG.getSongData('characters').opponent,
+        girlfriend: fallbackString(PlayState.SONG.getSongData('characters').girlfriend, 'gf'),
+        secondOpponent: PlayState.SONG.getSongData('characters').secondOpponent
+      };
+    currentCharNameData =
+      {
+        player: PlayState.SONG.getSongData('characters').player,
+        opponent: PlayState.SONG.getSongData('characters').opponent,
+        girlfriend: fallbackString(PlayState.SONG.getSongData('characters').girlfriend, 'gf'),
+        secondOpponent: PlayState.SONG.getSongData('characters').secondOpponent
+      };
+    Debug.logInfo([currentCharNameData, initialCharNameData]);
     super();
-    if (daStage == null) daStage = 'mainStage';
-
-    this.curStage = daStage;
-    this.preloading = preloading;
-
-    instance = this;
-
-    #if (HSCRIPT_ALLOWED && HScriptImproved)
-    if (codeNameScripts == null) (codeNameScripts = new scfunkin.backend.scripting.codename.ScriptPack('Stage')).setParent(this);
-    #end
+    if (autoStart) init();
   }
 
-  public var defaultStage:scfunkin.play.stage.base.BaseStage = null;
-
-  public function setupStageProperties(songName:String, ?stageChanged:Bool = false)
+  public function setVHVar(variable:String, value:Dynamic, ?map:String):Void
   {
-    if (!ClientPrefs.data.background) return;
-    if (songName != null) songLowercase = songName.toLowerCase();
-    loadStageJson(curStage, stageChanged);
-
-    var jsonPath:String = Paths.getPath('data/stages/$curStage.json', TEXT);
-    Debug.logInfo('STAGE INFO JSON ? $jsonPath');
-
-    isCustomStage = true;
-    var missingJson:Bool = #if MODS_ALLOWED !FileSystem.exists(jsonPath) && #end!Assets.exists(jsonPath);
-    if (missingJson)
+    if (handler == null) return;
+    if (map != null && map.length > 0)
     {
-      Debug.logWarn('$curStage.json not found, using the default stage');
-      curStage = 'mainStage'; // defaults to stage if we can't find the path
-    }
-
-    #if BASE_GAME_FILES
-    switch (curStage)
-    {
-      case 'mainStage':
-        defaultStage = new MainStage();
-      case 'spookyMansion':
-        defaultStage = new SpookyMansion();
-      case 'phillyTrain':
-        defaultStage = new PhillyTrain();
-      case 'phillyBlazin':
-        defaultStage = new PhillyBlazin();
-      case 'phillyStreets':
-        defaultStage = new PhillyStreets();
-      case 'limoRide':
-        defaultStage = new LimoRide();
-      case 'mallXMas':
-        defaultStage = new MallXMas();
-      case 'mallEvil':
-        defaultStage = new MallEvil();
-      case 'school':
-        defaultStage = new School();
-      case 'schoolEvil':
-        defaultStage = new SchoolEvil();
-      case 'tankmanBattlefield':
-        defaultStage = new TankmanBattlefield();
-    }
-    #end
-
-    if (defaultStage != null)
-    {
-      defaultStage.buildStage(this);
+      handler.variables[map].set(variable, value);
       return;
     }
-
-    isLuaStage = true;
-    isHxStage = true;
-
-    // Looks for two types of stages or more
-    startStageScriptsNamed(curStage, preloading);
-    setOnScripts('currentStage', this);
-    setOnScripts('stageSpriteHandler', stageSpriteHandler);
+    handler.variableMap(variable).set(variable, value);
   }
 
-  public var camZoom:Float = 1.05;
-
-  // moving the offset shit here too
-  public var gfXOffset:Float = 0;
-  public var dadXOffset:Float = 0;
-  public var bfXOffset:Float = 0;
-  public var momXOffset:Float = 0;
-  public var gfYOffset:Float = 0;
-  public var dadYOffset:Float = 0;
-  public var bfYOffset:Float = 0;
-  public var momYOffset:Float = 0;
-
-  public var bfScrollFactor:Array<Float> = [1, 1]; // ye damn scroll factors!
-  public var dadScrollFactor:Array<Float> = [1, 1];
-  public var gfScrollFactor:Array<Float> = [0.95, 0.95];
-
-  // stage stuff for easy stuff now softcoded into the stage.json
-  // Rating Stuff
-  public var stageUISuffixShit:String = '';
-  public var stageUIPrefixShit:String = '';
-
-  // CountDown Stuff
-  public var stageIntroAssets:Array<String> = null;
-  public var stageIntroSoundsSuffix:String = '';
-  public var stageIntroSoundsPrefix:String = '';
-
-  public var boyfriendCameraOffset:Array<Float> = [0, 0];
-  public var opponentCameraOffset:Array<Float> = [0, 0];
-  public var opponent2CameraOffset:Array<Float> = [0, 0];
-  public var girlfriendCameraOffset:Array<Float> = [0, 0];
-
-  public var hideGirlfriend:Bool = false;
-
-  public var stageCameraSpeed:Float = 1;
-
-  public var stageRatingOffsetXPlayer:Float = 0;
-  public var stageRatingOffsetYPlayer:Float = 0;
-
-  public var stageRatingOffsetXOpponent:Float = 0;
-  public var stageRatingOffsetYOpponent:Float = 0;
-
-  public var stageIntroSpriteScales:Array<Array<Float>> = null;
-
-  public var stageRatingScales:Array<Float> = null;
-
-  public var disabledIntroSounds:Bool = false;
-
-  public var cameraCharacters:Map<String, Array<Float>> = new Map<String, Array<Float>>();
-
-  public function setupWeekDir(stage:String, stageDir:String)
+  public function getVHVar(variable:String, ?map:String):Dynamic
   {
-    var directory:String = 'shared';
-    final weekDir:String = stageDir;
-    stageDir = null;
-
-    if (weekDir != null && weekDir.length > 0) directory = weekDir;
-
-    Debug.logInfo('directory: $directory');
-    Paths.setCurrentLevel(directory);
+    if (handler == null) return null;
+    if (map != null && map.length > 0) return handler.variables[map].get(variable);
+    return handler.variableMap(variable).get(variable);
   }
 
-  public function loadStageJson(stage:String, ?stageChanged:Bool = false)
+  public function removeVHVar(variable:String, ?map:String):Bool
   {
-    final stageData:StageFile = StageData.getStageFile(stage);
-    final stageDir:String = stageData.directory;
-    if (stageData == null)
+    if (handler == null) return false;
+    if (map != null && map.length > 0) return handler.variables[map].remove(variable);
+    return handler.variableMap(variable).remove(variable);
+  }
+
+  public function hasVHVar(variable:String, ?map:String):Bool
+  {
+    if (handler == null) return false;
+    if (map != null && map.length > 0) return handler.variables[map].exists(variable);
+    return handler.variableMap(variable).exists(variable);
+  }
+
+  public function getMapFromVH(variable:String, ?map:String):Map<String, Dynamic>
+  {
+    if (variable != null && variable.length < 1) variable = "Graphic";
+    if (map == null || map.length < 0) return handler.variableMap(variable);
+    return handler.variables[map];
+  }
+
+  public function init()
+  {
+    loadJson();
+    // Looks for two types of stages or more <--Don't use onCreate!-->
+    startScriptsNamed(this.current); // Don't use onCreate!
+    callOnType(new CallData('onStageLoad'), "All");
+    setupProperties();
+    callOnType(new CallData('onStageLoadPost'), "All");
+    resortZIndex();
+    if (!stages.exists(this.current)) stages.set(this.current, new StageChangeStorage(this.handler, this.members));
+  }
+
+  public function initCharacters()
+  {
+    callOnType(new CallData('onCharacterLoad'), "All");
+
+    gf = new Character(0, 0, currentCharNameData.girlfriend, false, SPECTATOR);
+    gf.setPosition(_data.girlfriend[0], _data.girlfriend[1]);
+    startCharacterData(gf);
+    gf.scrollFactor.set(0.95, 0.95);
+    Debug.logInfo([gf, gf._data]);
+
+    if (_data.hide_girlfriend) gf.alpha = 0.0001;
+
+    dad = new Character(0, 0, currentCharNameData.opponent, false, OPPONENT);
+    dad.setPosition(_data.opponent[0], _data.opponent[1]);
+    startCharacterData(dad);
+
+    mom = new Character(0, 0, currentCharNameData.secondOpponent, false, SPECTATOR);
+    mom.setPosition(_data.boyfriend[0], _data.boyfriend[1]);
+    startCharacterData(mom);
+
+    if (currentCharNameData.secondOpponent == null || currentCharNameData.secondOpponent.length < 1)
     {
-      // Stage couldn't be found, create a dummy stage for preventing a crash
-      Debug.logInfo('stage failed to have .json or .json didn\'t load properly, loading stage.json....');
-    }
-    if (stageChanged) setupWeekDir(stage, stageDir);
-
-    camZoom = stageData.defaultZoom;
-
-    if (stageData.ratingSkin != null)
-    {
-      stageUIPrefixShit = stageData.ratingSkin[0];
-      stageUISuffixShit = stageData.ratingSkin[1];
-    }
-
-    if (stageData.countDownAssets != null) stageIntroAssets = stageData.countDownAssets;
-
-    if (stageData.introSoundsSuffix != null)
-    {
-      stageIntroSoundsSuffix = stageData.introSoundsSuffix;
-    }
-    else
-      stageIntroSoundsSuffix = stageData.isPixelStage ? '-pixel' : '';
-
-    if (stageData.introSoundsPrefix != null)
-    {
-      stageIntroSoundsPrefix = stageData.introSoundsPrefix;
-    }
-    else
-      stageIntroSoundsPrefix = '';
-
-    if (stageData.introSpriteScales != null)
-    {
-      stageIntroSpriteScales = stageData.introSpriteScales;
-    }
-    else
-      stageIntroSpriteScales = stageData.isPixelStage ? [[6, 6], [6, 6], [6, 6], [6, 6]] : [[1, 1], [1, 1], [1, 1], [1, 1]];
-
-    disabledIntroSounds = stageData.disableIntroSounds == true ? true : false;
-
-    if (stageData.ratingOffsets != null)
-    {
-      stageRatingOffsetXPlayer = stageData.ratingOffsets[0][0];
-      stageRatingOffsetYPlayer = stageData.ratingOffsets[0][1];
-
-      stageRatingOffsetXOpponent = stageData.ratingOffsets[1][0];
-      stageRatingOffsetYOpponent = stageData.ratingOffsets[1][1];
-    }
-
-    if (stageData.ratingScales != null) stageRatingScales = stageData.ratingScales;
-
-    PlayState.stageUI = "normal";
-    if (stageData.stageUI != null && stageData.stageUI.trim().length > 0) PlayState.stageUI = stageData.stageUI;
-    else if (stageData.isPixelStage == true) // Backward compatibility
-      PlayState.stageUI = "pixel";
-
-    hideGirlfriend = stageData.hide_girlfriend != null ? stageData.hide_girlfriend : false;
-
-    if (stageData.boyfriend != null)
-    {
-      bfXOffset = stageData.boyfriend[0] - 770;
-      bfYOffset = stageData.boyfriend[1] - 100;
-    }
-    if (stageData.girlfriend != null)
-    {
-      gfXOffset = stageData.girlfriend[0] - 400;
-      gfYOffset = stageData.girlfriend[1] - 130;
-    }
-    if (stageData.opponent != null)
-    {
-      dadXOffset = stageData.opponent[0] - 100;
-      dadYOffset = stageData.opponent[1] - 100;
-    }
-    if (stageData.opponent2 != null)
-    {
-      momXOffset = stageData.opponent2[0] - 100;
-      momYOffset = stageData.opponent2[1] - 100;
+      mom.alpha = 0.0001;
+      mom.missingCharacter = mom.visible = false;
     }
 
-    if (stageData.camera_speed != null) stageCameraSpeed = stageData.camera_speed;
+    boyfriend = new Character(0, 0, currentCharNameData.player, true, PLAYER);
+    boyfriend.setPosition(_data.boyfriend[0], _data.boyfriend[1]);
+    startCharacterData(boyfriend);
 
-    boyfriendCameraOffset = stageData.camera_boyfriend;
-    if (boyfriendCameraOffset == null) // Fucks sake should have done it since the start
-      boyfriendCameraOffset = [0, 0];
+    callOnType(new CallData('onCharacterLoadPost'), "All");
+    if (GameOverSubstate.characterName != (boyfriend._data?.deadChar ?? "bf-dead")) GameOverSubstate.characterName = boyfriend?._data?.deadChar ?? "bf-dead";
+  }
 
-    opponentCameraOffset = stageData.camera_opponent;
-    if (opponentCameraOffset == null) opponentCameraOffset = [0, 0];
+  public function startCharacterData(char:Character)
+  {
+    if (char == null) return;
+    char.x += char._data.positionArray[0];
+    char.y += char._data.positionArray[1];
+    applyPosition(char);
+    if (char.currentScriptName != char._data.curCharacter) char.loadScript();
+  }
 
-    girlfriendCameraOffset = stageData.camera_girlfriend;
-    if (girlfriendCameraOffset == null) girlfriendCameraOffset = [0, 0];
-
-    opponent2CameraOffset = stageData.camera_opponent2;
-    if (opponent2CameraOffset == null) opponent2CameraOffset = [0, 0];
-
-    stageId = stageData.id;
-    if (stageData.id == null) stageId = curStage + '-Stage';
-
-    stageName = stageData.name;
-    if (stageData.name == null) stageName = curStage;
-
-    if (stageData.objects != null && stageData.objects.length > 0)
+  public function applyPosition(char:Character)
+  {
+    if (char == null || _data.positionsData == null) return;
+    var data:StagePosData = null;
+    if (_data.positionsData.positions != null)
     {
-      final list:Map<String, FlxSprite> = StageData.addObjectsToState(stageData.objects, null, null, null, null, this);
+      data = _data.positionsData.positions.get(char._data.curCharacter);
+      if (data != null)
+      {
+        final pos:Array<Float> = char._data.isPlayer && data.playerPos != null ? data.playerPos : data.pos;
+        if (pos != null)
+        {
+          if (data.overridePos != null && data.overridePos == true) char.setPosition(pos[0], pos[1]);
+          else
+            char.setPosition(char.x + pos[0], char.y + pos[1]);
+        }
+      }
+    }
+    if (_data.positionsData.camera_positions != null)
+    {
+      data = _data.positionsData.camera_positions.get(char._data.curCharacter);
+      if (data != null)
+      {
+        final pos:Array<Float> = char._data.isPlayer && data.playerPos != null ? data.playerPos : data.pos;
+        if (pos != null)
+        {
+          if (data.overridePos != null && data.overridePos == true) char._data.cameraOffset.set(pos[0], pos[1]);
+          else
+            char._data.cameraOffset.set(char._data.cameraOffset.x + pos[0], char._data.cameraOffset.y + pos[1]);
+        }
+      }
+    }
+  }
+
+  public function checkCharacterData()
+  {
+    currentCharNameData =
+      {
+        player: currentCharNameData.player != initialCharNameData.player ? initialCharNameData.player : currentCharNameData.player,
+        girlfriend: currentCharNameData.player != initialCharNameData.girlfriend ? initialCharNameData.girlfriend : currentCharNameData.player,
+        opponent: currentCharNameData.player != initialCharNameData.opponent ? initialCharNameData.opponent : currentCharNameData.player,
+        secondOpponent: currentCharNameData.secondOpponent != initialCharNameData.secondOpponent ? initialCharNameData.secondOpponent : currentCharNameData.secondOpponent
+      }
+  }
+
+  public function resortZIndex()
+    sort(SortUtil.byZIndex, FlxSort.ASCENDING);
+
+  public var base:BaseStage = null;
+
+  // Code rewritten by Mr. Chaos (mr_chaoss) THANK YOU <3333333333
+  public function setupProperties()
+  {
+    initCharacters();
+
+    if (!Save.get('background')) return;
+    final baseClass = Type.resolveClass('scfunkin.play.stage.base.${current.charAt(0).toUpperCase() + current.substr(1)}');
+    base = Type.createInstance(baseClass, [this]) ?? new BaseStage(this);
+    create();
+
+    if ((_data?.objects ?? []).length > 0)
+    {
+      final list:Map<String, FlxSprite> = StageJsonData.addObjectsToState(_data.objects, _data.hide_girlfriend ? null : gf, dad, boyfriend, mom, this);
       for (key => spr in list)
-        if (!StageData.reservedNames.contains(key)) swagBacks.set(key, spr);
+        if (!StageJsonData.reservedNames.contains(key)) setVHVar(key, spr, "Reserved");
+    }
+    else
+    {
+      for (char in [gf, dad, mom, boyfriend])
+        if (char != null) add(char);
     }
 
-    final extraData:Dynamic = stageData._extraData;
-    if (extraData != null)
+    createPost();
+  }
+
+  public var _data:StageData = new StageData();
+
+  public function loadJson()
+  {
+    if (_data.currentName == this.current) return;
+    _data.apply(_data.load(this.current));
+    Debug.logInfo([this.current, _data.currentName]);
+    this.current = _data.currentName;
+  }
+
+  public function create()
+    base?.create();
+
+  public function createPost()
+    base?.createPost();
+
+  public function openSubState(SubState:flixel.FlxSubState)
+    base?.openSubState(SubState);
+
+  public function closeSubState():Void
+    base?.closeSubState();
+
+  override public function update(elapsed:Float):Void
+  {
+    base?.update(elapsed);
+    super.update(elapsed);
+    base?.updatePost(elapsed);
+  }
+
+  public function stepHit(step:Int):Void
+  {
+    if (base != null) base.curStep = step;
+    base?.stepHit();
+  }
+
+  public function beatHit(beat:Int):Void
+  {
+    danceCharacters(beat);
+    if (base != null) base.curBeat = beat;
+    base?.beatHit();
+  }
+
+  public function sectionHit(sec:Int):Void
+  {
+    if (base != null) base.curSection = sec;
+    base?.sectionHit();
+  }
+
+  public function eventCalledPre(event:EventNote):Void
+  {
+    base?.onEventPre(event);
+    if (callOnType(new CallData('onStageEventCalledPre', null, true), "All") != LuaUtil.Function_Stop)
     {
-      if (extraData._cameraMovement != null)
+      switch (event.name)
       {
-        cameraCharacters.set('player', extraData._cameraMovement.player != null ? extraData._cameraMovement.player : [50, 60]);
-        cameraCharacters.set('opponent', extraData._cameraMovement.opponent != null ? extraData._cameraMovement.opponent : [50, 60]);
-        cameraCharacters.set('girlfriend', extraData._cameraMovement.girlfriend != null ? extraData._cameraMovement.girlfriend : [50, 60]);
-      }
-    }
-
-    for (each in ['player', 'opponent', 'girlfriend'])
-      if (cameraCharacters.get(each) == null) cameraCharacters.set(each, [50, 60]);
-
-    if (cameraCharacters.get('player') == null && cameraCharacters.get('opponent') == null && cameraCharacters.get('girlfriend') == null)
-    {
-      cameraCharacters.set('player', [50, 60]);
-      cameraCharacters.set('opponent', [50, 60]);
-      cameraCharacters.set('girlfriend', [50, 60]);
-    }
-  }
-
-  public function onCreatePost()
-  {
-    if (defaultStage != null) defaultStage.createPost();
-  }
-
-  public function onOpenSubState(SubState:flixel.FlxSubState)
-  {
-    if (defaultStage != null) defaultStage.openSubState(SubState);
-  }
-
-  public function onCloseSubState():Void
-  {
-    if (defaultStage != null) defaultStage.closeSubState();
-  }
-
-  public function onUpdate(elapsed:Float):Void
-  {
-    if (defaultStage != null) defaultStage.update(elapsed);
-
-    callOnScripts('onStageUpdate', [elapsed]);
-    callOnScripts('stageUpdate', [elapsed]);
-  }
-
-  public function onStepHit(curStep:Int):Void
-  {
-    final array = slowBacks[curStep];
-    if (array != null && array.length > 0)
-    {
-      if (hideLastBG)
-      {
-        for (bg in swagBacks)
-        {
-          if (!array.contains(bg))
+        case 'Change Character':
+          switch (event.params[0].toLowerCase().trim())
           {
-            var tween = FlxTween.tween(bg, {alpha: 0}, tweenDuration,
-              {
-                onComplete: function(tween:FlxTween):Void {
-                  bg.visible = false;
-                }
-              });
+            case 'bf', 'boyfriend', '0': boyfriend = changeCharacter(boyfriend, event.params[1], false, true, boyfriend._data.characterType);
+            case 'dad', '1': dad = changeCharacter(dad, event.params[1], false, true, dad._data.characterType);
+            case 'gf', 'girlfriend', '2': gf = changeCharacter(gf, event.params[1], false, true, gf._data.characterType);
+            case 'mom', '3': mom = changeCharacter(mom, event.params[1], false, true, mom._data.characterType);
           }
-        }
-        for (bg in array)
-        {
-          bg.visible = true;
-          FlxTween.tween(bg, {alpha: 1}, tweenDuration);
-        }
       }
-      else
+    }
+  }
+
+  public function eventCalled(event:EventNote):Void
+  {
+    var flValues:Array<Null<Float>> = event.returnFLValues();
+    function checkString(e:String, failback:String):String
+      return (e != null && e.length > 0) ? e : failback;
+
+    base?.onEvent(event);
+
+    if (callOnType(new CallData('onStageEventCalled', null, true), "All") != LuaUtil.Function_Stop)
+    {
+      switch (event.name)
       {
-        for (bg in array)
-          bg.visible = !bg.visible;
+        case 'Hey!':
+          var chars:Array<Character> = [boyfriend, gf, dad, mom];
+          switch (event.params[0].toLowerCase().trim())
+          {
+            case 'bf' | 'boyfriend' | '0': chars = [boyfriend];
+            case 'gf' | 'girlfriend' | '1': chars = [gf];
+            case 'dad' | '2': chars = [dad];
+            case 'mom' | '3': chars = [mom];
+          }
+
+          if (flValues[1] == null || flValues[1] <= 0) flValues[1] ??= 0.6;
+          for (char in chars)
+          {
+            final checkAnim:String = checkString(event.params[2], (char == gf ? 'cheer' : 'hey'));
+            if (char == null || char.hasOffset(checkAnim) || char.skipHeyTimer) continue;
+            char.specialAnim = true;
+            char.heyTimer = flValues[1];
+          }
+
+        case 'Play Animation':
+          var animSprite:Dynamic = dad;
+          switch (event.params[1].toLowerCase().trim())
+          {
+            case 'dad' | '0': animSprite = dad;
+            case 'bf' | 'boyfriend' | '1': animSprite = boyfriend;
+            case 'gf' | 'girlfriend' | '2': animSprite = gf;
+            case 'mom' | '3': animSprite = mom;
+            default: animSprite = handler.variableMap(event.params[1]).get(event.params[1]);
+          }
+          var sprite:FlxSprite = cast animSprite;
+          if (sprite != null)
+          {
+            if (animSprite.playAnim != null)
+            {
+              animSprite.playAnim(event.params[0], true);
+              if (animSprite.specialAnim != null) animSprite.specialAnim = true;
+            }
+            else if (animSprite.anim.play != null) animSprite.anim.play(event.params[0]);
+            else
+              sprite.animation.play(event.params[0]);
+          }
       }
     }
-
-    if (defaultStage != null)
-    {
-      defaultStage.curStep = curStep;
-      defaultStage.stepHit();
-    }
-
-    setOnScripts('curStageStep', curStep);
-    callOnScripts('stageStepHit');
-    callOnScripts('onStageStepHit');
   }
 
-  public function onBeatHit(curBeat:Int):Void
+  public function countdownTick(count:CountdownTick, num:Int)
   {
-    if (!ClientPrefs.data.lowQuality && ClientPrefs.data.background && animatedBacks.length > 0)
-    {
-      for (bg in animatedBacks)
-      {
-        if (!stopBGDancing) bg.animation.play('idle', true);
-      }
-    }
-
-    if (!ClientPrefs.data.lowQuality && ClientPrefs.data.background && animatedBacks2.length > 0)
-    {
-      for (bg in animatedBacks2)
-      {
-        if (!stopBGDancing) bg.animation.play('idle');
-      }
-    }
-
-    if (defaultStage != null)
-    {
-      defaultStage.curBeat = curBeat;
-      defaultStage.beatHit();
-    }
-
-    setOnScripts('curStageBeat', curBeat);
-    callOnScripts('stageBeatHit');
-    callOnScripts('onStageBeatHit');
+    base?.countdownTick(count, num);
+    danceCharacters(num);
   }
 
-  public function onSectionHit(curSection:Int):Void
-  {
-    if (defaultStage != null)
-    {
-      defaultStage.curSection = curSection;
-      defaultStage.sectionHit();
-    }
-    setOnScripts('curStageSection', curSection);
-    callOnScripts('stageSectionHit');
-    callOnScripts('onStageSectionHit');
-  }
+  public function startSong()
+    base?.startSong();
 
-  public function eventCalledStage(eventName:String, eventParams:Array<String>, strumTime:Float):Void
-  {
-    var flValues:Array<Null<Float>> = [];
-    for (i in 0...eventParams.length - 1)
-    {
-      if (!Math.isNaN(Std.parseFloat(eventParams[i]))) flValues.push(Std.parseFloat(eventParams[i]));
-      else
-        flValues.push(null);
-    }
-
-    if (defaultStage != null) defaultStage.onEvent(eventName, eventParams, flValues, strumTime);
-  }
-
-  public function countdownTickStage(count:Countdown, num:Int)
-  {
-    if (defaultStage != null) defaultStage.countdownTick(count, num);
-  }
-
-  public function startSongStage()
-  {
-    if (defaultStage != null) defaultStage.startSong();
-  }
-
-  public function eventPushedStage(event:EventNote)
-  {
-    if (defaultStage != null) defaultStage.onEventPushed(event);
-  }
+  public function eventPushed(event:EventNote)
+    base?.onEventPushed(event);
 
   // Events
-  public function eventPushedUniqueStage(event:EventNote)
-  {
-    if (defaultStage != null) defaultStage.onEventPushedUnique(event);
-  }
+  public function eventPushedUnique(event:EventNote)
+    base?.onEventPushedUnique(event);
 
   // Note Hit/Miss
-  public function goodNoteHitStage(note:Note)
-  {
-    if (defaultStage != null) defaultStage.goodNoteHit(note);
-  }
+  public function goodNoteHit(note:Note)
+    base?.goodNoteHit(note);
 
-  public function opponentNoteHitStage(note:Note)
-  {
-    if (defaultStage != null) defaultStage.opponentNoteHit(note);
-  }
+  public function opponentNoteHit(note:Note)
+    base?.opponentNoteHit(note);
 
-  public function noteMissStage(note:Note)
-  {
-    if (defaultStage != null) defaultStage.noteMiss(note);
-  }
+  public function noteMiss(note:Note)
+    base?.noteMiss(note);
 
-  public function noteMissPressStage(direction:Int)
-  {
-    if (defaultStage != null) defaultStage.noteMissPress(direction);
-  }
+  public function noteMissPress(direction:Int)
+    base?.noteMissPress(direction);
 
   // start/end callback functions
-  public function setStartCallbackStage(myfn:Void->Void)
+  public var initStartCallBack:Void->Void = null;
+
+  public function setStartCallback(myfn:Void->Void)
   {
-    if (!onPlayState) return;
-    PlayState.instance.startCallback = myfn;
+    if (game != null)
+    {
+      if (initStartCallBack == null) initStartCallBack = game?.startCallback ?? () -> {};
+      game.startCallback = myfn;
+    }
   }
 
-  public function setEndCallbackStage(myfn:Void->Void)
+  public var initEndCallBack:Void->Void = null;
+
+  public function setEndCallback(myfn:Void->Void)
   {
-    if (!onPlayState) return;
-    PlayState.instance.endCallback = myfn;
+    if (game != null)
+    {
+      if (initEndCallBack == null) initEndCallBack = game?.endCallback ?? () -> {};
+      game.endCallback = myfn;
+    }
   }
 
   // overrides
-  public function startCountdownStage()
+  public function startCountdown():Void->Void
+    return (game != null && game.startCountdown != null) ? game.startCountdown() : null;
+
+  public function endSong():Void->Void
+    return (game != null && game.endSong != null) ? game.endSong() : null;
+
+  public function setDefaultGF(name:String) // Fix for the Chart Editor on Base Game stages
   {
-    if (onPlayState) return PlayState.instance.startCountdown();
-    else
-      return false;
+    currentCharNameData.girlfriend = PlayState.SONG.getSongData('characters').girlfriend;
+    if (currentCharNameData.girlfriend == null || currentCharNameData.girlfriend.length < 1)
+    {
+      currentCharNameData.girlfriend = name;
+      PlayState.SONG.getSongData('characters').girlfriend = currentCharNameData.girlfriend;
+    }
   }
 
-  public function endSongStage()
+  public function addToPos(spr:Dynamic, behind:String = "boyfriend", pos:Int = 0, ?removeSpr:Bool = true)
   {
-    if (onPlayState) return PlayState.instance.endSong();
-    else
-      return false;
+    if (removeSpr && members.contains(spr)) remove(spr, true);
+    var char:Character = null;
+    switch (behind)
+    {
+      case 'dad':
+        char = dad;
+      case 'gf', 'girlfriend':
+        char = _data.hide_girlfriend ? boyfriend : gf;
+      case "mom":
+        char = mom;
+      case 'boyfriend', 'bf':
+        char = boyfriend;
+    }
+    insert(char != null ? (members.indexOf(char) + pos) : pos, spr);
   }
 
-  #if (LUA_ALLOWED || HSCRIPT_ALLOWED)
-  public function startStageScriptsNamed(stage:String, preloading:Bool = false)
+  public function startScriptsNamed(stage:String)
+    ScriptMap.searchScriptInFolders(stage, this, "Stage", null, ['scripts/stages/']);
+
+  public function getCharacterCamPos(cam:String):Array<Float>
   {
-    #if LUA_ALLOWED
-    startLuasNamed('scripts/stages/' + stage, preloading);
-    #end
-    #if HSCRIPT_ALLOWED
-    startHScriptsNamed('scripts/stages/' + stage);
-    startSCHSNamed('scripts/stages/sc/' + stage);
-    #if HScriptImproved startHSIScriptsNamed('scripts/stages/advanced/' + stage); #end
-    #end
+    var mainOffset:Array<Float> = null;
+    try
+    {
+      switch (cam)
+      {
+        case "boyfriend", "bf":
+          if (boyfriend == null) return [0, 0];
+          mainOffset = [boyfriend.getMidpoint().x - 100, boyfriend.getMidpoint().y - 100];
+          mainOffset[0] -= boyfriend._data.cameraOffset.x - _data.camera_boyfriend[0];
+          mainOffset[1] += boyfriend._data.cameraOffset.y + _data.camera_boyfriend[1];
+        case "girlfriend", "gf":
+          if (gf == null) return [0, 0];
+          mainOffset = [gf.getMidpoint().x, gf.getMidpoint().y];
+          mainOffset[0] += gf._data.cameraOffset.x + _data.camera_girlfriend[0];
+          mainOffset[1] += gf._data.cameraOffset.y + _data.camera_girlfriend[1];
+        case "dad":
+          if (dad == null) return [0, 0];
+          mainOffset = [dad.getMidpoint().x + 150, dad.getMidpoint().y - 100];
+          mainOffset[0] += dad._data.cameraOffset.x + _data.camera_opponent[0];
+          mainOffset[1] += dad._data.cameraOffset.y + _data.camera_opponent[1];
+        case "mom":
+          if (mom == null) return [0, 0];
+          mainOffset = [mom.getMidpoint().x, mom.getMidpoint().y];
+          mainOffset[0] += mom._data.cameraOffset.x + _data.camera_opponent2[0];
+          mainOffset[1] += mom._data.cameraOffset.y + _data.camera_opponent2[1];
+      }
+    }
+    catch (e:haxe.Exception)
+      Debug.logInfo([e.message, e.stack, current, initial]);
+    final customPos:Array<Float> = callOnType(new CallData("onCharacterCamPos", [cam]), "All");
+    return mainOffset ?? customPos;
   }
-  #end
+
+  public function destroyAllContained(clearJustVariables:Bool = false)
+  {
+    callOnType(new CallData("onDestroyContained"), "All");
+    current = null;
+
+    base?.destroy();
+    base = null;
+
+    destroyScriptType("All");
+
+    if (!clearJustVariables)
+    {
+      if ((_data?.objects ?? []).length > 0)
+      {
+        var list:Map<String, FlxSprite> = StageJsonData.removeObjectsFromState(_data.objects, !_data.hide_girlfriend ? gf : null, dad, boyfriend, mom, this);
+        for (key => spr in list)
+          if (!StageJsonData.reservedNames.contains(key)) handler.getVariablesMap("Reserved").remove(key);
+      }
+      else
+      {
+        for (char in [boyfriend, dad, gf, mom])
+          if (char != null) remove(char);
+      }
+    }
+
+    if (handler != null)
+    {
+      for (variable in handler.defaultTypes)
+      {
+        if (variable == "Reserved") continue;
+        for (key in handler.getVariablesMap(variable).keys())
+        {
+          final item = handler.getVariablesMap(variable).get(key);
+          if (item != null)
+          {
+            remove(item);
+            handler.getVariablesMap(variable).remove(key);
+          }
+        }
+      }
+
+      handler.clearVars();
+    }
+
+    if (!clearJustVariables)
+    {
+      setStartCallback(initStartCallBack);
+      setEndCallback(initEndCallBack);
+    }
+  }
+
+  override public function destroy()
+  {
+    destroyAllContained(true);
+    currentCharNameData = initialCharNameData;
+    super.destroy();
+  }
+
+  public function setCharGFSpeed(speed:Int)
+  {
+    for (char in [boyfriend, dad, mom, gf])
+      if (char != null) char._data.dancingData.gfSpeed = speed;
+  }
+
+  public function danceCharacters(beat:Int)
+  {
+    for (index => char in [boyfriend, dad, mom, gf])
+      if (char != null && char.danceTime(beat)) char.danceChar(['player', 'opponent', 'opponent', 'girlfriend'][index]);
+  }
+
+  public function matchesStageName(newStageName:String):Bool
+    return (this.stageId == newStageName || this.stageName == newStageName || this.current == newStageName);
+
+  public function getLowestCharacterPlacement():Character
+  {
+    var char:Character = _data.hide_girlfriend ? boyfriend : gf;
+    var pos:Int = members.indexOf(char);
+
+    var newPos:Int = members.indexOf(boyfriend);
+    if (newPos < pos)
+    {
+      char = boyfriend;
+      pos = newPos;
+    }
+
+    newPos = members.indexOf(dad);
+    if (newPos < pos)
+    {
+      char = dad;
+      pos = newPos;
+    }
+
+    newPos = members.indexOf(mom);
+    if (newPos < pos)
+    {
+      char = mom;
+      pos = newPos;
+    }
+    return char;
+  }
 
   #if LUA_ALLOWED
-  public function startLuasNamed(luaFile:String, ?preloading:Bool = false)
+  public dynamic function makeCharacter(funkin:FunkinLua, tag:String, character:String, isPlayer:Bool = false, flipped:Bool = false,
+      characterType:String = 'CUSTOM')
   {
-    var scriptFilelua:String = luaFile + '.lua';
-    #if MODS_ALLOWED
-    var luaToLoad:String = Paths.modFolders(scriptFilelua);
-    if (!FileSystem.exists(luaToLoad)) luaToLoad = Paths.getSharedPath(scriptFilelua);
+    if (funkin == null || !Save.get('characters')) return;
+    final position:Int = members.indexOf(cast(funkin.getVariable(tag, "Character"), Character) ?? getLowestCharacterPlacement());
+    funkin.findObjectToDestroy(tag);
+    final leSprite:Character = new Character(0, 0, character, isPlayer, characterType);
+    if (flipped) leSprite.flipMode = true;
+    leSprite.isCustomCharacter = true;
+    funkin.setVariable(tag, leSprite, "Character"); // yes
+    add(leSprite);
 
-    if (FileSystem.exists(luaToLoad))
-    #elseif sys
-    var luaToLoad:String = Paths.getSharedPath(scriptFilelua);
-    if (OpenFlAssets.exists(luaToLoad))
-    #end
+    if (position >= 0) // this should keep them in the same spot if they switch
     {
-      for (script in luaArray)
-        if (script.scriptName == luaToLoad) return false;
-
-      new FunkinLua(luaToLoad, 'STAGE', preloading);
-      return true;
+      remove(leSprite, true);
+      insert(position, leSprite);
     }
-    return false;
+    leSprite.setPosition((isPlayer ? _data.boyfriend : _data.opponent)[0], (isPlayer ? _data.boyfriend : _data.opponent)[1]);
+    startCharacterData(leSprite);
   }
   #end
 
-  #if HSCRIPT_ALLOWED
-  public function startHScriptsNamed(scriptFile:String)
+  public function changeCharacter(character:Character, id:String, ?flipped:Bool = false, ?defaultChar:Bool = false, ?characterType:String = "CUSTOM"):Character
   {
-    for (extn in CoolUtil.haxeExtensions)
+    if (!Save.get('characters') || character == null || character != null && character._data.curCharacter == id) return character;
+    final charType:String = characterType;
+    var charName:String = null;
+    var type:String = null;
+    var posName:String = 'character';
+    switch (characterType)
     {
-      var scriptFileHx:String = scriptFile + '.$extn';
-      #if MODS_ALLOWED
-      var scriptToLoad:String = Paths.modFolders(scriptFileHx);
-      if (!FileSystem.exists(scriptToLoad)) scriptToLoad = Paths.getSharedPath(scriptFileHx);
-      #else
-      var scriptToLoad:String = Paths.getSharedPath(scriptFileHx);
-      #end
-
-      if (FileSystem.exists(scriptToLoad))
+      case 'PLAYER':
+        posName = 'boyfriend';
+      case 'SPECTATOR':
+        posName = 'girlfriend';
+      case 'OPPONENT':
+        posName = (defaultChar && character == mom) ? 'opponent2' : 'opponent';
+    }
+    if (defaultChar)
+    {
+      if (character == boyfriend)
       {
-        if (Iris.instances.exists(scriptToLoad)) return false;
-
-        initHScript(scriptToLoad);
-        return true;
+        charName = 'boyfriendName';
+        type = 'player';
+      }
+      else if (character == gf)
+      {
+        charName = 'gfName';
+        type = 'girlfriend';
+      }
+      else if (character == dad)
+      {
+        charName = 'dadName';
+        type = 'opponent';
+      }
+      else if (character == mom)
+      {
+        charName = 'momName';
+        type = 'secondOpponent';
       }
     }
-    return false;
-  }
-
-  public function initHScript(file:String)
-  {
-    final times:Float = Date.now().getTime();
-    var newScript:HScript = new HScript(null, file, null, false, this);
-
-    try
+    character?.resetAnimationVars();
+    if (CacheUtil.cachedCharacters.exists(id))
     {
-      newScript.parse(true);
-      newScript.run('onCreate');
-      hscriptArray.push(newScript);
-      Debug.logInfo('initialized Hscript interp successfully: $file (${Std.int(Date.now().getTime() - times)}ms)');
-    }
-    catch (e:crowplexus.hscript.Expr.Error)
-    {
-      newScript.errorCaught(e);
-      newScript.destroy();
-    }
-  }
-
-  public function startSCHSNamed(scriptFile:String)
-  {
-    for (extn in CoolUtil.haxeExtensions)
-    {
-      var scriptFileHx:String = scriptFile + '.$extn';
-      #if MODS_ALLOWED
-      var scriptToLoad:String = Paths.modFolders(scriptFileHx);
-      if (!FileSystem.exists(scriptToLoad)) scriptToLoad = Paths.getSharedPath(scriptFileHx);
-      #else
-      var scriptToLoad:String = Paths.getSharedPath(scriptFileHx);
-      #end
-
-      if (FileSystem.exists(scriptToLoad))
+      final positions:Array<Float> = cast Reflect.getProperty(_data, posName) ?? [100, 100];
+      final flippedArgument:Bool = charType == 'PLAYER' ? !flipped : flipped;
+      character = CacheUtil.getCharacter(id);
+      character.change(id, flippedArgument, charType);
+      Debug.logInfo([character, character._data, CacheUtil.cachedCharacters]);
+      character.flipMode = flipped;
+      character.setPosition(positions[0], positions[1]);
+      startCharacterData(character);
+      add(character);
+      if (defaultChar)
       {
-        for (script in scHSArray)
-          if (script.hsCode.path == scriptToLoad) return false;
-
-        initSCHS(scriptToLoad);
-        return true;
+        if (type != null) Reflect.setField(currentCharNameData, type, character._data.curCharacter);
+        if (charName != null) setOnType(charName, character._data.curCharacter, "All");
       }
     }
-    return false;
+    return character;
   }
 
-  public function initSCHS(file:String)
-  {
-    var newScript:SCScript = null;
-    try
-    {
-      var times:Float = Date.now().getTime();
-      newScript = new SCScript();
-      newScript.loadScript(file);
-      newScript.executeFunc('onCreate');
-      scHSArray.push(newScript);
-      Debug.logInfo('initialized SCHScript interp successfully: $file (${Std.int(Date.now().getTime() - times)}ms)');
-    }
-    catch (e:Dynamic)
-    {
-      var script:SCScript = null;
-      for (scripts in scHSArray)
-        if (scripts.hsCode.path == file) script = scripts;
-      var newScript:SCScript = script;
-      // addTextToDebug('ERROR ON LOADING ($file) - $e', FlxColor.RED);
+  public function callOnType(call:CallData, type:ScriptType):Dynamic
+    return ScriptMap.callOnScriptType("Stage", call, type);
 
-      if (newScript != null) newScript.destroy();
-    }
-  }
+  public function getOnType(variable:String, arg:String, type:ScriptType, ?exclusions:Array<String>):Dynamic
+    return ScriptMap.getOnScriptType("Stage", variable, arg, type, exclusions);
 
-  #if HScriptImproved
-  public function startHSIScriptsNamed(scriptFile:String)
-  {
-    for (extn in CoolUtil.haxeExtensions)
-    {
-      var scriptFileHx:String = scriptFile + '.$extn';
-      #if MODS_ALLOWED
-      var scriptToLoad:String = Paths.modFolders(scriptFileHx);
-      if (!FileSystem.exists(scriptToLoad)) scriptToLoad = Paths.getSharedPath(scriptFileHx);
-      #else
-      var scriptToLoad:String = Paths.getSharedPath(scriptFileHx);
-      #end
+  public function setOnType(variable:String, arg:Dynamic, type:ScriptType, ?exclusions:Array<String>):Void
+    ScriptMap.setOnScriptType("Stage", variable, arg, type, exclusions);
 
-      if (FileSystem.exists(scriptToLoad))
-      {
-        for (script in codeNameScripts.scripts)
-          if (script.fileName == scriptToLoad) return false;
-        initHSIScript(scriptToLoad);
-        return true;
-      }
-    }
-    return false;
-  }
-
-  public function initHSIScript(scriptFile:String)
-  {
-    try
-    {
-      var times:Float = Date.now().getTime();
-      addScript(scriptFile);
-      Debug.logInfo('initialized hscript-improved interp successfully: $scriptFile (${Std.int(Date.now().getTime() - times)}ms)');
-    }
-    catch (e)
-    {
-      Debug.logError('Error on loading Script! $e');
-    }
-  }
-  #end
-  #end
-  public function callOnScripts(funcToCall:String, args:Array<Dynamic> = null, ignoreStops = false, exclusions:Array<String> = null,
-      excludeValues:Array<Dynamic> = null):Dynamic
-  {
-    var returnVal:Dynamic = LuaUtil.Function_Continue;
-    if (args == null) args = [];
-    if (exclusions == null) exclusions = [];
-    if (excludeValues == null) excludeValues = [LuaUtil.Function_Continue];
-
-    var result:Dynamic = callOnLuas(funcToCall, args, ignoreStops, exclusions, excludeValues);
-    if (result == null || excludeValues.contains(result)) result = callOnHScript(funcToCall, args, ignoreStops, exclusions, excludeValues);
-    if (result == null || excludeValues.contains(result)) result = callOnHSI(funcToCall, args, ignoreStops, exclusions, excludeValues);
-    if (result == null || excludeValues.contains(result)) result = callOnSCHS(funcToCall, args, ignoreStops, exclusions, excludeValues);
-    return result;
-  }
-
-  public function callOnLuas(funcToCall:String, args:Array<Dynamic> = null, ignoreStops = false, exclusions:Array<String> = null,
-      excludeValues:Array<Dynamic> = null):Dynamic
-  {
-    var returnVal:Dynamic = LuaUtil.Function_Continue;
-    #if LUA_ALLOWED
-    if (args == null) args = [];
-    if (exclusions == null) exclusions = [];
-    if (excludeValues == null) excludeValues = [LuaUtil.Function_Continue];
-
-    var arr:Array<FunkinLua> = [];
-    for (script in luaArray)
-    {
-      if (script.closed)
-      {
-        arr.push(script);
-        continue;
-      }
-
-      if (exclusions.contains(script.scriptName)) continue;
-
-      var myValue:Dynamic = script.call(funcToCall, args);
-      if ((myValue == LuaUtil.Function_StopLua || myValue == LuaUtil.Function_StopAll) && !excludeValues.contains(myValue) && !ignoreStops)
-      {
-        returnVal = myValue;
-        break;
-      }
-
-      if (myValue != null && !excludeValues.contains(myValue)) returnVal = myValue;
-
-      if (script.closed) arr.push(script);
-    }
-
-    if (arr.length > 0) for (script in arr)
-      luaArray.remove(script);
-    #end
-    return returnVal;
-  }
-
-  public function callOnHScript(funcToCall:String, args:Array<Dynamic> = null, ignoreStops:Bool = false, exclusions:Array<String> = null,
-      excludeValues:Array<Dynamic> = null):Dynamic
-  {
-    var returnVal:Dynamic = LuaUtil.Function_Continue;
-
-    #if HSCRIPT_ALLOWED
-    if (exclusions == null) exclusions = new Array();
-    if (excludeValues == null) excludeValues = new Array();
-    excludeValues.push(LuaUtil.Function_Continue);
-
-    var len:Int = hscriptArray.length;
-    if (len < 1) return returnVal;
-    for (script in hscriptArray)
-    {
-      @:privateAccess
-      if (script == null || !script.exists(funcToCall) || exclusions.contains(script.origin)) continue;
-
-      var callValue:Dynamic = script.run(funcToCall, args);
-      if (callValue == null) continue;
-
-      if (!excludeValues.contains(callValue))
-      {
-        if ((callValue == LuaUtil.Function_StopHScript || callValue == LuaUtil.Function_StopAll) && !ignoreStops) return callValue;
-        if (callValue != null && !excludeValues.contains(callValue)) returnVal = callValue;
-      }
-    }
-    #end
-
-    return returnVal;
-  }
-
-  public function callOnHSI(funcToCall:String, args:Array<Dynamic> = null, ignoreStops:Bool = false, exclusions:Array<String> = null,
-      excludeValues:Array<Dynamic> = null):Dynamic
-  {
-    var returnVal:Dynamic = LuaUtil.Function_Continue;
-
-    #if (HSCRIPT_ALLOWED && HScriptImproved)
-    if (args == null) args = [];
-    if (exclusions == null) exclusions = [];
-    if (excludeValues == null) excludeValues = [LuaUtil.Function_Continue];
-
-    var len:Int = codeNameScripts.scripts.length;
-    if (len < 1) return returnVal;
-
-    for (script in codeNameScripts.scripts)
-    {
-      var myValue:Dynamic = script.active ? script.call(funcToCall, args) : null;
-      if ((myValue == LuaUtil.Function_StopHScript || myValue == LuaUtil.Function_StopAll)
-        && !excludeValues.contains(myValue)
-        && !ignoreStops)
-      {
-        returnVal = myValue;
-        break;
-      }
-      if (myValue != null && !excludeValues.contains(myValue)) returnVal = myValue;
-    }
-    #end
-
-    return returnVal;
-  }
-
-  public function callOnSCHS(funcToCall:String, ?args:Array<Dynamic> = null, ?ignoreStops:Bool = false, exclusions:Array<String> = null,
-      excludeValues:Array<Dynamic> = null):Dynamic
-  {
-    var returnVal:Dynamic = LuaUtil.Function_Continue;
-
-    #if HSCRIPT_ALLOWED
-    if (exclusions == null) exclusions = new Array();
-    if (excludeValues == null) excludeValues = new Array();
-    excludeValues.push(LuaUtil.Function_Continue);
-
-    var len:Int = scHSArray.length;
-    if (len < 1) return returnVal;
-    for (script in scHSArray)
-    {
-      if (script == null || !script.existsVar(funcToCall) || exclusions.contains(script.hsCode.path)) continue;
-
-      try
-      {
-        var callValue = script.callFunc(funcToCall, args);
-        var myValue:Dynamic = callValue.funcReturn;
-
-        // compiler fuckup fix
-        if ((myValue == LuaUtil.Function_StopHScript || myValue == LuaUtil.Function_StopAll)
-          && !excludeValues.contains(myValue)
-          && !ignoreStops)
-        {
-          returnVal = myValue;
-          break;
-        }
-        if (myValue != null && !excludeValues.contains(myValue)) returnVal = myValue;
-      }
-      catch (e:Dynamic) {}
-    }
-    #end
-
-    return returnVal;
-  }
-
-  public function setOnScripts(variable:String, arg:Dynamic, exclusions:Array<String> = null)
-  {
-    if (exclusions == null) exclusions = [];
-    setOnLuas(variable, arg, exclusions);
-    setOnHScript(variable, arg, exclusions);
-    setOnHSI(variable, arg, exclusions);
-    setOnSCHS(variable, arg, exclusions);
-  }
-
-  public function setOnLuas(variable:String, arg:Dynamic, exclusions:Array<String> = null)
-  {
-    #if LUA_ALLOWED
-    if (exclusions == null) exclusions = [];
-    for (script in luaArray)
-    {
-      if (exclusions.contains(script.scriptName)) continue;
-
-      script.set(variable, arg);
-    }
-    #end
-  }
-
-  public function setOnHScript(variable:String, arg:Dynamic, exclusions:Array<String> = null)
-  {
-    #if HSCRIPT_ALLOWED
-    if (exclusions == null) exclusions = [];
-    for (script in hscriptArray)
-    {
-      if (exclusions.contains(script.origin)) continue;
-
-      script.set(variable, arg);
-    }
-    #end
-  }
-
-  public function setOnHSI(variable:String, arg:Dynamic, exclusions:Array<String> = null)
-  {
-    #if (HSCRIPT_ALLOWED && HScriptImproved)
-    if (exclusions == null) exclusions = [];
-    for (script in codeNameScripts.scripts)
-    {
-      if (exclusions.contains(script.fileName)) continue;
-
-      script.set(variable, arg);
-    }
-    #end
-  }
-
-  public function setOnSCHS(variable:String, arg:Dynamic, exclusions:Array<String> = null)
-  {
-    #if HSCRIPT_ALLOWED
-    if (exclusions == null) exclusions = [];
-    for (script in scHSArray)
-    {
-      if (exclusions.contains(script.hsCode.path)) continue;
-
-      script.setVar(variable, arg);
-    }
-    #end
-  }
-
-  public function getOnScripts(variable:String, arg:String, exclusions:Array<String> = null)
-  {
-    if (exclusions == null) exclusions = [];
-    getOnLuas(variable, arg, exclusions);
-    getOnHScript(variable, exclusions);
-    getOnHSI(variable, exclusions);
-    getOnSCHS(variable, exclusions);
-  }
-
-  public function getOnLuas(variable:String, arg:String, exclusions:Array<String> = null)
-  {
-    #if LUA_ALLOWED
-    if (exclusions == null) exclusions = [];
-    for (script in luaArray)
-    {
-      if (exclusions.contains(script.scriptName)) continue;
-
-      script.get(variable, arg);
-    }
-    #end
-  }
-
-  public function getOnHScript(variable:String, exclusions:Array<String> = null)
-  {
-    #if HSCRIPT_ALLOWED
-    if (exclusions == null) exclusions = [];
-    for (script in hscriptArray)
-    {
-      if (exclusions.contains(script.origin)) continue;
-
-      script.get(variable);
-    }
-    #end
-  }
-
-  public function getOnHSI(variable:String, exclusions:Array<String> = null)
-  {
-    #if (HSCRIPT_ALLOWED && HScriptImproved)
-    if (exclusions == null) exclusions = [];
-    for (script in codeNameScripts.scripts)
-    {
-      if (exclusions.contains(script.fileName)) continue;
-
-      script.get(variable);
-    }
-    #end
-  }
-
-  public function getOnSCHS(variable:String, exclusions:Array<String> = null)
-  {
-    #if HSCRIPT_ALLOWED
-    if (exclusions == null) exclusions = [];
-    for (script in scHSArray)
-    {
-      if (exclusions.contains(script.hsCode.path)) continue;
-
-      script.getVar(variable);
-    }
-    #end
-  }
-
-  public function searchForVarsOnScripts(variable:String, arg:String, result:Bool)
-  {
-    var result:Dynamic = searchLuaVar(variable, arg, result);
-    if (result == null)
-    {
-      result = searchHxVar(variable, arg, result);
-      if (result == null) result = searchHSIVar(variable, arg, result);
-    }
-    return result;
-  }
-
-  public function searchLuaVar(variable:String, arg:String, result:Bool)
-  {
-    #if LUA_ALLOWED
-    for (script in luaArray)
-    {
-      if (script.get(variable, arg) == result)
-      {
-        return result;
-      }
-    }
-    #end
-    return !result;
-  }
-
-  public function searchHxVar(variable:String, arg:String, result:Bool)
-  {
-    #if HSCRIPT_ALLOWED
-    for (script in hscriptArray)
-    {
-      if (LuaUtil.convert(script.get(variable), arg) == result)
-      {
-        return result;
-      }
-    }
-    #end
-    return !result;
-  }
-
-  public function searchHSIVar(variable:String, arg:String, result:Bool)
-  {
-    #if (HSCRIPT_ALLOWED && HScriptImproved)
-    for (script in codeNameScripts.scripts)
-    {
-      if (LuaUtil.convert(script.get(variable), arg) == result)
-      {
-        return result;
-      }
-    }
-    #end
-    return !result;
-  }
-
-  public function getHxNewVar(name:String, type:String):Dynamic
-  {
-    #if HSCRIPT_ALLOWED
-    var hxVar:Dynamic = null;
-
-    // we prioritize modchart cuz frick you
-
-    for (script in hscriptArray)
-    {
-      var newHxVar = Std.isOfType(script.get(name), Type.resolveClass(type));
-      hxVar = newHxVar;
-    }
-
-    if (hxVar != null) return hxVar;
-    #end
-
-    return null;
-  }
-
-  public function getLuaNewVar(name:String, type:String):Dynamic
-  {
-    #if LUA_ALLOWED
-    var luaVar:Dynamic = null;
-
-    // we prioritize modchart cuz frick you
-
-    for (script in luaArray)
-    {
-      var newLuaVar = script.get(name, type).getVar(name, type);
-
-      if (newLuaVar != null) luaVar = newLuaVar;
-    }
-
-    if (luaVar != null) return luaVar;
-    #end
-
-    return null;
-  }
-
-  public function setSwagGraphicSize(name:String, val:Float = 1, ?updateHitBox:Bool = true)
-  {
-    // because this is different apparently
-
-    if (swagBacks.exists(name))
-    {
-      var shit = swagBacks.get(name);
-
-      shit.setGraphicSize(Std.int(shit.width * val));
-      if (updateHitBox) shit.updateHitbox();
-    }
-  }
-
-  public function getPropertyObject(variable:String)
-  {
-    var split:Array<String> = variable.split('.');
-    if (split.length > 1)
-    {
-      var refelectedItem:Dynamic = null;
-
-      refelectedItem = swagBacks.get(split[0]);
-
-      for (i in 1...split.length - 1)
-      {
-        refelectedItem = Reflect.getProperty(refelectedItem, split[i]);
-      }
-      return Reflect.getProperty(refelectedItem, split[split.length - 1]);
-    }
-    return Reflect.getProperty(Stage.instance, swagBacks.get(variable));
-  }
-
-  public function setPropertyObject(variable:String, value:Dynamic)
-  {
-    var split:Array<String> = variable.split('.');
-    if (split.length > 1)
-    {
-      var refelectedItem:Dynamic = null;
-
-      refelectedItem = swagBacks.get(split[0]);
-
-      for (i in 1...split.length - 1)
-      {
-        refelectedItem = Reflect.getProperty(refelectedItem, split[i]);
-      }
-      return Reflect.setProperty(refelectedItem, split[split.length - 1], value);
-    }
-    return Reflect.setProperty(Stage.instance, swagBacks.get(variable), value);
-  }
-
-  public function getPropertyNoInstance(variable:String)
-  {
-    var split:Array<String> = variable.split('.');
-    if (split.length > 1)
-    {
-      var refelectedItem:Dynamic = null;
-
-      refelectedItem = split[0];
-
-      for (i in 1...split.length - 1)
-      {
-        refelectedItem = Reflect.getProperty(refelectedItem, split[i]);
-      }
-      return Reflect.getProperty(refelectedItem, split[split.length - 1]);
-    }
-    return Reflect.getProperty(Stage, variable);
-  }
-
-  public function setPropertyNoInstance(variable:String, value:Dynamic)
-  {
-    var split:Array<String> = variable.split('.');
-    if (split.length > 1)
-    {
-      var refelectedItem:Dynamic = null;
-
-      refelectedItem = split[0];
-
-      for (i in 1...split.length - 1)
-      {
-        refelectedItem = Reflect.getProperty(refelectedItem, split[i]);
-      }
-      return Reflect.setProperty(refelectedItem, split[split.length - 1], value);
-    }
-    return Reflect.setProperty(Stage, variable, value);
-  }
-
-  public function getPropertyInstance(variable:String)
-  {
-    var split:Array<String> = variable.split('.');
-    if (split.length > 1)
-    {
-      var refelectedItem:Dynamic = null;
-
-      refelectedItem = swagBacks.get(split[0]);
-
-      for (i in 1...split.length - 1)
-      {
-        refelectedItem = Reflect.getProperty(refelectedItem, split[i]);
-      }
-      return Reflect.getProperty(refelectedItem, split[split.length - 1]);
-    }
-    return Reflect.getProperty(Stage.instance, swagBacks.get(variable));
-  }
-
-  public function setPropertyInstance(variable:String, value:Dynamic)
-  {
-    var split:Array<String> = variable.split('.');
-    if (split.length > 1)
-    {
-      var refelectedItem:Dynamic = null;
-
-      refelectedItem = split[0];
-
-      for (i in 1...split.length - 1)
-      {
-        refelectedItem = Reflect.getProperty(refelectedItem, split[i]);
-      }
-      return Reflect.setProperty(refelectedItem, split[split.length - 1], value);
-    }
-    return Reflect.setProperty(Stage, variable, value);
-  }
-
-  public function stageSpriteHandler(sprite:Dynamic = null, place:Int = -1, tag:String = '', ?addToGroup:Bool = false):Void
-  {
-    if (sprite == null) return;
-
-    if (place > -1)
-    {
-      /*
-        for those who don't know
-        layInFront[0].push(sprite) what the 0 means is that the "sprite" is on top of gf but no other characters
-        layInFront[1].push(sprite) what the 1 means is that the "sprite" is on top of mom but no other characters
-        layInFront[2].push(sprite) what the 2 means is that the "sprite" is on top of dad ???
-        layInFront[3].push(sprite) what the 3 means is that the "sprite" is on top of bf (but since haxeflixel is goofy it also means on top of dad) ??
-        layInFront[4].push(sprite) what the 4 means is that the "sprite" is on top of all of the characters
-        also .push(sprite) means it is adding the sprite like the rest from toAddPushed(sprite) but with layering
-       */
-      layInFront[place].push(sprite);
-    }
-    else
-    {
-      /*
-        just adding the sprite.
-       */
-      toAdd.push(sprite);
-    }
-
-    var newTag:String = tag;
-
-    if (newTag.endsWith('-UPPER')) newTag = newTag.substring(0, newTag.length - 6).toUpperCase();
-    else if (newTag.endsWith('-lower')) newTag = newTag.substring(0, newTag.length - 6).toLowerCase();
-
-    if (addToGroup) setSwagGroup(newTag, sprite, true);
-    else
-      swagBacks[newTag] = sprite;
-  }
-
-  public function setSwagGroup(tag:String, swagedSprite:FlxTypedGroup<Dynamic> = null, ?skipTagAdjust:Bool = false)
-  {
-    var newTag:String = tag;
-
-    if (!skipTagAdjust)
-    {
-      if (newTag.endsWith('-UPPER')) newTag = newTag.substring(0, newTag.length - 6).toUpperCase();
-      else if (newTag.endsWith('-lower')) newTag = newTag.substring(0, newTag.length - 6).toLowerCase();
-    }
-
-    if (swagedSprite != null) swagGroups[newTag] = swagedSprite;
-  }
-
-  public function addAnimatedBack(animatedBack:FlxSprite = null)
-    if (animatedBack != null) animatedBacks.push(animatedBack);
-
-  public function addAnimatedBack2(animatedBack2:FlxSprite = null)
-    if (animatedBack2 != null) animatedBacks2.push(animatedBack2);
-
-  public function addSlowBackAction(curStep:Int, slowedBacks:Array<FlxSprite> = null)
-  {
-    if (slowedBacks != null) slowBacks[curStep] = slowedBacks;
-  }
-
-  public function addScript(file:String)
-  {
-    #if (HSCRIPT_ALLOWED && HScriptImproved)
-    for (ext in CoolUtil.haxeExtensions)
-    {
-      if (file.toLowerCase().contains('.$ext'))
-      {
-        Debug.logInfo('INITIALIZED');
-        var script = HScriptCode.create(file);
-        if (!(script is scfunkin.backend.scripting.codename.DummyScript))
-        {
-          codeNameScripts.add(script);
-
-          // Set the things first
-          script.set("game", PlayState?.instance);
-          script.set("songLowercase", songLowercase);
-
-          // Then CALL SCRIPT
-          script.load();
-          script.call('onCreate');
-        }
-      }
-    }
-    #end
-  }
-
-  public function onDestroy():Void
-  {
-    #if LUA_ALLOWED
-    for (lua in luaArray)
-    {
-      lua.call('onDestroy', []);
-      lua.stop();
-    }
-    luaArray = null;
-    #end
-
-    curStage = null;
-    instance = null;
-
-    if (defaultStage != null) defaultStage.destroy();
-
-    #if HSCRIPT_ALLOWED
-    for (script in hscriptArray)
-      if (script != null)
-      {
-        var ny:Dynamic = script.get('onDestroy');
-        if (ny != null && Reflect.isFunction(ny)) ny();
-        script.destroy();
-      }
-    hscriptArray = null;
-
-    for (script in scHSArray)
-      if (script != null)
-      {
-        script.executeFunc('onDestroy');
-        script.destroy();
-      }
-    scHSArray = null;
-
-    #if HScriptImproved
-    for (script in codeNameScripts.scripts)
-      if (script != null)
-      {
-        script.call('onDestroy');
-        script.destroy();
-      }
-    codeNameScripts = null;
-    #end
-    #end
-
-    for (sprite in swagBacks.keys())
-    {
-      if (swagBacks[sprite] != null) swagBacks[sprite].destroy();
-    }
-
-    swagBacks.clear();
-
-    while (toAdd.length > 0)
-    {
-      toAdd.remove(toAdd[0]);
-      if (toAdd[0] != null) toAdd[0].destroy();
-    }
-
-    while (animatedBacks.length > 0)
-    {
-      animatedBacks.remove(animatedBacks[0]);
-      if (animatedBacks[0] != null) animatedBacks[0].destroy();
-    }
-
-    for (array in layInFront)
-    {
-      for (sprite in array)
-      {
-        if (sprite != null) sprite.destroy();
-        array.remove(sprite);
-      }
-    }
-
-    for (swag in swagGroups.keys())
-    {
-      if (swagGroups[swag].members != null) for (member in swagGroups[swag].members)
-      {
-        swagGroups[swag].members.remove(member);
-        member.destroy();
-      }
-    }
-
-    swagGroups.clear();
-  }
-
-  public function checkNameMatch(stageName:String):Bool
-  {
-    if (this.stageId == stageName || this.stageName == stageName || this.curStage == stageName) return true;
-    return false;
-  }
+  public function destroyScriptType(type:ScriptType):Void
+    ScriptMap.destroyScriptType("Stage", type);
 }

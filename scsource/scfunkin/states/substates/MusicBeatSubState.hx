@@ -4,28 +4,10 @@ import flixel.FlxSubState;
 import scfunkin.backend.events.SBSEvent;
 import scfunkin.play.Conductor;
 import haxe.ds.Either;
-#if LUA_ALLOWED
-import scfunkin.backend.scripting.psych.*;
-#else
-import scfunkin.backend.scripting.psych.HScript;
-#end
-#if (HSCRIPT_ALLOWED && HScriptImproved)
-import scfunkin.backend.scripting.codename.Script as HScriptCode;
-#end
-#if HSCRIPT_ALLOWED
-import scfunkin.backend.scripting.sc.*;
-import scfunkin.backend.scripting.ScriptType;
-import crowplexus.iris.Iris;
-#end
-import scfunkin.utils.*;
+import scfunkin.utils.ReflectUtil;
 
-class MusicBeatSubState extends FlxSubState
+class MusicBeatSubState extends FlxSubState implements IScriptCaller
 {
-  public function new()
-  {
-    super();
-  }
-
   public var curSection:Int = 0;
   public var stepsToDo:Int = 0;
 
@@ -42,86 +24,19 @@ class MusicBeatSubState extends FlxSubState
   public var beatHitEvents:Array<SBSEvent> = [];
   public var sectionHitEvents:Array<SBSEvent> = [];
 
-  #if LUA_ALLOWED public var luaArray:Array<FunkinLua> = []; #end
-
-  #if HSCRIPT_ALLOWED
-  public var hscriptArray:Array<scfunkin.backend.scripting.psych.HScript> = [];
-  public var scHSArray:Array<scfunkin.backend.scripting.sc.SCScript> = [];
-
-  #if HScriptImproved
-  public var codeNameScripts:scfunkin.backend.scripting.codename.ScriptPack;
-  #end
-  #end
   public var controls(get, never):Controls;
 
   inline function get_controls():Controls
     return Controls.instance;
 
-  override function create():Void
-  {
-    super.create();
-  }
-
   public override function destroy():Void
   {
-    #if LUA_ALLOWED
-    if (luaArray != null)
-    {
-      for (lua in luaArray)
-      {
-        lua.call('onDestroy', []);
-        lua.stop();
-      }
-      luaArray = null;
-      FunkinLua.customFunctions.clear();
-      LuaUtil.killShaders();
-    }
-    #end
-
     #if (LUA_ALLOWED || HSCRIPT_ALLOWED)
     if (luaDebugGroup != null)
     {
       remove(luaDebugGroup);
       luaDebugGroup.destroy();
     }
-    #end
-
-    #if HSCRIPT_ALLOWED
-    if (hscriptArray != null)
-    {
-      for (script in hscriptArray)
-        if (script != null)
-        {
-          var ny:Dynamic = script.get('onDestroy');
-          if (ny != null && Reflect.isFunction(ny)) ny();
-          script.destroy();
-        }
-      hscriptArray = null;
-    }
-
-    if (scHSArray != null)
-    {
-      for (script in scHSArray)
-        if (script != null)
-        {
-          script.executeFunc('onDestroy');
-          script.destroy();
-        }
-      scHSArray = null;
-    }
-
-    #if HScriptImproved
-    if (codeNameScripts != null)
-    {
-      for (script in codeNameScripts.scripts)
-        if (script != null)
-        {
-          script.call('onDestroy');
-          script.destroy();
-        }
-      codeNameScripts = null;
-    }
-    #end
     #end
     super.destroy();
   }
@@ -199,7 +114,7 @@ class MusicBeatSubState extends FlxSubState
   private function updateCurStep():Void
   {
     final lastChange = Conductor.getBPMFromSeconds(Conductor.songPosition);
-    final shit = ((Conductor.songPosition - ClientPrefs.data.noteOffset) - lastChange.songTime) / lastChange.stepCrochet;
+    final shit = ((Conductor.songPosition + Save.get('songOffset')) - lastChange.songTime) / lastChange.stepCrochet;
     curDecStep = lastChange.stepTime + shit;
     curStep = Math.floor(lastChange.stepTime) + Math.floor(shit);
   }
@@ -218,6 +133,9 @@ class MusicBeatSubState extends FlxSubState
       }
     }
     if (curStep % 4 == 0) beatHit();
+
+    setOnType('curStep', curStep, "All");
+    callOnType(new CallData('onStepHit'), "All");
   }
 
   public function beatHit():Void
@@ -233,6 +151,9 @@ class MusicBeatSubState extends FlxSubState
         }
       }
     }
+
+    setOnType('curBeat', curBeat, "All");
+    callOnType(new CallData('onBeatHit'), "All");
   }
 
   public function sectionHit():Void
@@ -248,10 +169,14 @@ class MusicBeatSubState extends FlxSubState
         }
       }
     }
+
+    setOnType('curSection', curSection, "All");
+    callOnType(new CallData('onSectionHit'), "All");
   }
 
   public function addSBSEvent(position:Int, callBack:Void->Void, sbsType:SBS)
   {
+    if (Math.isNaN(position) || callBack == null || sbsType == null) return;
     final event:SBSEvent = new SBSEvent(position, callBack, sbsType);
     switch (sbsType)
     {
@@ -266,6 +191,7 @@ class MusicBeatSubState extends FlxSubState
 
   public function removeSBSEvent(event:SBSEvent)
   {
+    if (event == null) return;
     switch (event.sbsType)
     {
       case "SECTION":
@@ -279,6 +205,7 @@ class MusicBeatSubState extends FlxSubState
 
   public function addMultiSBSEvents(positions:Array<Int>, callBacks:Array<Void->Void>, type:SBS)
   {
+    if (positions == null || positions.length < 1 || callBacks == null || callBacks.length < 1 || type == null) return;
     if (callBacks.length == 1)
     {
       for (pos in 0...positions.length)
@@ -291,18 +218,17 @@ class MusicBeatSubState extends FlxSubState
 
   public function removeMultiSBSEvents(events:Array<SBSEvent>)
   {
+    if (events == null) return;
     for (event in events)
       removeSBSEvent(event);
   }
 
-  public function refresh()
+  public function refreshZIndex()
     sort(scfunkin.utils.SortUtil.byZIndex, flixel.util.FlxSort.ASCENDING);
 
   #if (LUA_ALLOWED || HSCRIPT_ALLOWED)
   public var luaDebugGroup:FlxTypedGroup<scfunkin.objects.ui.scripting.DebugLuaText>;
-  #end
 
-  #if (LUA_ALLOWED || HSCRIPT_ALLOWED)
   public function addTextToDebug(text:String, color:FlxColor, ?timeTaken:Float = 6)
   {
     if (luaDebugGroup != null)
@@ -313,10 +239,7 @@ class MusicBeatSubState extends FlxSubState
       newText.disableTime = timeTaken;
       newText.alpha = 1;
       newText.setPosition(10, 8 - newText.height);
-
-      luaDebugGroup.forEachAlive(function(spr:scfunkin.objects.ui.scripting.DebugLuaText) {
-        spr.y += newText.height + 2;
-      });
+      luaDebugGroup.forEachAlive(function(spr:scfunkin.objects.ui.scripting.DebugLuaText) spr.y += newText.height + 2);
       luaDebugGroup.add(newText);
     }
 
@@ -324,502 +247,15 @@ class MusicBeatSubState extends FlxSubState
   }
   #end
 
-  #if LUA_ALLOWED
-  public function startLuasNamed(luaFile:String, ?defaultState:String = 'PLAYSTATE')
-  {
-    var scriptFilelua:String = luaFile + '.lua';
-    #if MODS_ALLOWED
-    var luaToLoad:String = Paths.modFolders(scriptFilelua);
-    if (!FileSystem.exists(luaToLoad)) luaToLoad = Paths.getSharedPath(scriptFilelua);
+  public function callOnType(call:CallData, type:ScriptType):Dynamic
+    return ScriptMap.callOnScriptType(ReflectUtil.getClassNameOf(FlxG.state.subState).split('.').pop(), call, type);
 
-    if (FileSystem.exists(luaToLoad))
-    #elseif sys
-    var luaToLoad:String = Paths.getSharedPath(scriptFilelua);
-    if (OpenFlAssets.exists(luaToLoad))
-    #end
-    {
-      for (script in luaArray)
-        if (script.scriptName == luaToLoad) return false;
+  public function getOnType(variable:String, arg:String, type:ScriptType, ?exclusions:Array<String>):Dynamic
+    return ScriptMap.getOnScriptType(ReflectUtil.getClassNameOf(FlxG.state.subState).split('.').pop(), variable, arg, type, exclusions);
 
-      addScript(luaToLoad, LUA, defaultState, ['PLAYSTATE', false]);
-      return true;
-    }
-    return false;
-  }
-  #end
+  public function setOnType(variable:String, arg:Dynamic, type:ScriptType, ?exclusions:Array<String>):Void
+    ScriptMap.setOnScriptType(ReflectUtil.getClassNameOf(FlxG.state.subState).split('.').pop(), variable, arg, type, exclusions);
 
-  #if HSCRIPT_ALLOWED
-  public function startHScriptsNamed(scriptFile:String, ?defaultState:String = 'PLAYSTATE')
-  {
-    for (extn in CoolUtil.haxeExtensions)
-    {
-      var scriptFileHx:String = scriptFile + '.$extn';
-      #if MODS_ALLOWED
-      var scriptToLoad:String = Paths.modFolders(scriptFileHx);
-      if (!FileSystem.exists(scriptToLoad)) scriptToLoad = Paths.getSharedPath(scriptFileHx);
-      #else
-      var scriptToLoad:String = Paths.getSharedPath(scriptFileHx);
-      #end
-
-      if (FileSystem.exists(scriptToLoad))
-      {
-        if (Iris.instances.exists(scriptToLoad)) return false;
-
-        addScript(scriptToLoad, IRIS, defaultState);
-        return true;
-      }
-    }
-    return false;
-  }
-
-  public function initHScript(file:String)
-  {
-    final times:Float = Date.now().getTime();
-    var newScript:HScript = new HScript(null, file, null, false, FlxG.state.subState);
-
-    try
-    {
-      newScript.parse(true);
-      newScript.run('onCreate');
-      hscriptArray.push(newScript);
-      Debug.logInfo('initialized Hscript interp successfully: $file (${Std.int(Date.now().getTime() - times)}ms)');
-    }
-    catch (e:crowplexus.hscript.Expr.Error)
-    {
-      newScript.errorCaught(e);
-      newScript.destroy();
-    }
-  }
-
-  public function startSCHSNamed(scriptFileHx:String)
-  {
-    #if MODS_ALLOWED
-    var scriptToLoad:String = Paths.modFolders(scriptFileHx);
-    if (!FileSystem.exists(scriptToLoad)) scriptToLoad = Paths.getSharedPath(scriptFileHx);
-    #else
-    var scriptToLoad:String = Paths.getSharedPath(scriptFileHx);
-    #end
-
-    if (FileSystem.exists(scriptToLoad))
-    {
-      for (script in scHSArray)
-        if (script.hsCode.path == scriptToLoad) return false;
-
-      addScript(scriptToLoad, SC);
-      return true;
-    }
-    return false;
-  }
-
-  public function initSCHS(file:String)
-  {
-    var newScript:SCScript = null;
-    try
-    {
-      var times:Float = Date.now().getTime();
-      newScript = new SCScript();
-      newScript.loadScript(file);
-      newScript.executeFunc('onCreate');
-      scHSArray.push(newScript);
-      Debug.logInfo('initialized SCHScript interp successfully: $file (${Std.int(Date.now().getTime() - times)}ms)');
-    }
-    catch (e:Dynamic)
-    {
-      var script:SCScript = null;
-      for (scripts in scHSArray)
-        if (scripts.hsCode.path == file) script = scripts;
-      if (script != null) script.destroy();
-    }
-  }
-
-  #if HScriptImproved
-  public function startHSIScriptsNamed(scriptFile:String)
-  {
-    for (extn in CoolUtil.haxeExtensions)
-    {
-      var scriptFileHx:String = scriptFile + '.$extn';
-      #if MODS_ALLOWED
-      var scriptToLoad:String = Paths.modFolders(scriptFileHx);
-      if (!FileSystem.exists(scriptToLoad)) scriptToLoad = Paths.getSharedPath(scriptFileHx);
-      #else
-      var scriptToLoad:String = Paths.getSharedPath(scriptFileHx);
-      #end
-
-      if (FileSystem.exists(scriptToLoad))
-      {
-        for (script in codeNameScripts.scripts)
-          if (script.fileName == scriptToLoad) return false;
-        addScript(scriptToLoad, CODENAME);
-        return true;
-      }
-    }
-    return false;
-  }
-
-  public function initHSIScript(scriptFile:String)
-  {
-    try
-    {
-      var times:Float = Date.now().getTime();
-      #if (HSCRIPT_ALLOWED && HScriptImproved)
-      for (ext in CoolUtil.haxeExtensions)
-      {
-        if (scriptFile.toLowerCase().contains('.$ext'))
-        {
-          Debug.logInfo('INITIALIZED SCRIPT: ' + scriptFile);
-          var script = HScriptCode.create(scriptFile);
-          if (!(script is scfunkin.backend.scripting.codename.DummyScript))
-          {
-            codeNameScripts.add(script);
-
-            // Set the things first
-            script.set("SONG", PlayState.SONG);
-
-            if (PlayState.instance == MusicBeatState.getState() && PlayState.instance.stage != null)
-            {
-              script.set("stageManager", scfunkin.play.stage.Stage.instance);
-              // Difference between "Stage" and "gameStageAccess" is that "Stage" is the main class while "gameStageAccess" is the current "Stage" of this class.
-              script.set("gameStageAccess", PlayState.instance.stage);
-            }
-
-            // Then CALL SCRIPT
-            script.load();
-            script.call('onCreate');
-          }
-        }
-      }
-      #end
-      Debug.logInfo('initialized hscript-improved interp successfully: $scriptFile (${Std.int(Date.now().getTime() - times)}ms)');
-    }
-    catch (e)
-    {
-      Debug.logError('Error on loading Script!' + e);
-    }
-  }
-  #end
-  #end
-  // Script stuff
-  public function callOnAllHS(funcToCall:String, args:Array<Dynamic> = null, ignoreStops = false, exclusions:Array<String> = null,
-      excludeValues:Array<Dynamic> = null):Dynamic
-  {
-    if (args == null) args = [];
-    if (exclusions == null) exclusions = [];
-    if (excludeValues == null) excludeValues = [LuaUtil.Function_Continue];
-
-    var result:Dynamic = callOnHScript(funcToCall, args, ignoreStops, exclusions, excludeValues);
-    if (result == null || excludeValues.contains(result)) result = callOnHSI(funcToCall, args, ignoreStops, exclusions, excludeValues);
-    if (result == null || excludeValues.contains(result)) result = callOnSCHS(funcToCall, args, ignoreStops, exclusions, excludeValues);
-    return result;
-  }
-
-  public function callOnScripts(funcToCall:String, args:Array<Dynamic> = null, ignoreStops = false, exclusions:Array<String> = null,
-      excludeValues:Array<Dynamic> = null):Dynamic
-  {
-    if (args == null) args = [];
-    if (exclusions == null) exclusions = [];
-    if (excludeValues == null) excludeValues = [LuaUtil.Function_Continue];
-
-    var result:Dynamic = callOnLuas(funcToCall, args, ignoreStops, exclusions, excludeValues);
-    if (result == null || excludeValues.contains(result))
-    {
-      result = callOnHScript(funcToCall, args, ignoreStops, exclusions, excludeValues);
-      if (result == null || excludeValues.contains(result)) result = callOnHSI(funcToCall, args, ignoreStops, exclusions, excludeValues);
-      if (result == null || excludeValues.contains(result)) result = callOnSCHS(funcToCall, args, ignoreStops, exclusions, excludeValues);
-    }
-    return result;
-  }
-
-  public function callOnLuas(funcToCall:String, args:Array<Dynamic> = null, ignoreStops = false, exclusions:Array<String> = null,
-      excludeValues:Array<Dynamic> = null):Dynamic
-  {
-    var returnVal:Dynamic = LuaUtil.Function_Continue;
-    #if LUA_ALLOWED
-    if (args == null) args = [];
-    if (exclusions == null) exclusions = [];
-    if (excludeValues == null) excludeValues = [LuaUtil.Function_Continue];
-
-    var arr:Array<FunkinLua> = [];
-    for (script in luaArray)
-    {
-      if (script.closed)
-      {
-        arr.push(script);
-        continue;
-      }
-
-      if (exclusions.contains(script.scriptName)) continue;
-
-      var myValue:Dynamic = script.call(funcToCall, args);
-      if ((myValue == LuaUtil.Function_StopLua || myValue == LuaUtil.Function_StopAll) && !excludeValues.contains(myValue) && !ignoreStops)
-      {
-        returnVal = myValue;
-        break;
-      }
-
-      if (myValue != null && !excludeValues.contains(myValue)) returnVal = myValue;
-
-      if (script.closed) arr.push(script);
-    }
-
-    if (arr.length > 0) for (script in arr)
-      luaArray.remove(script);
-    #end
-    return returnVal;
-  }
-
-  public function callOnHScript(funcToCall:String, ?args:Array<Dynamic> = null, ?ignoreStops:Bool = false, exclusions:Array<String> = null,
-      excludeValues:Array<Dynamic> = null):Dynamic
-  {
-    var returnVal:Dynamic = LuaUtil.Function_Continue;
-
-    #if HSCRIPT_ALLOWED
-    if (exclusions == null) exclusions = new Array();
-    if (excludeValues == null) excludeValues = new Array();
-    excludeValues.push(LuaUtil.Function_Continue);
-
-    var len:Int = hscriptArray.length;
-    if (len < 1) return returnVal;
-    for (script in hscriptArray)
-    {
-      @:privateAccess
-      if (script == null || !script.exists(funcToCall) || exclusions.contains(script.origin)) continue;
-
-      var callValue:Dynamic = script.run(funcToCall, args);
-      if (callValue == null) continue;
-
-      if (!excludeValues.contains(callValue))
-      {
-        if ((callValue == LuaUtil.Function_StopHScript || callValue == LuaUtil.Function_StopAll) && !ignoreStops) return callValue;
-        if (callValue != null && !excludeValues.contains(callValue)) returnVal = callValue;
-      }
-    }
-    #end
-
-    return returnVal;
-  }
-
-  public function callOnHSI(funcToCall:String, ?args:Array<Dynamic> = null, ?ignoreStops:Bool = false, exclusions:Array<String> = null,
-      excludeValues:Array<Dynamic> = null):Dynamic
-  {
-    var returnVal:Dynamic = LuaUtil.Function_Continue;
-
-    #if (HSCRIPT_ALLOWED && HScriptImproved)
-    if (args == null) args = [];
-    if (exclusions == null) exclusions = [];
-    if (excludeValues == null) excludeValues = [LuaUtil.Function_Continue];
-
-    var len:Int = codeNameScripts.scripts.length;
-    if (len < 1) return returnVal;
-
-    for (script in codeNameScripts.scripts)
-    {
-      var myValue:Dynamic = script.active ? script.call(funcToCall, args) : null;
-      if ((myValue == LuaUtil.Function_StopHScript || myValue == LuaUtil.Function_StopAll)
-        && !excludeValues.contains(myValue)
-        && !ignoreStops)
-      {
-        returnVal = myValue;
-        break;
-      }
-      if (myValue != null && !excludeValues.contains(myValue)) returnVal = myValue;
-    }
-    #end
-
-    return returnVal;
-  }
-
-  public function callOnSCHS(funcToCall:String, ?args:Array<Dynamic> = null, ?ignoreStops:Bool = false, exclusions:Array<String> = null,
-      excludeValues:Array<Dynamic> = null):Dynamic
-  {
-    var returnVal:Dynamic = LuaUtil.Function_Continue;
-
-    #if HSCRIPT_ALLOWED
-    if (exclusions == null) exclusions = new Array();
-    if (excludeValues == null) excludeValues = new Array();
-    excludeValues.push(LuaUtil.Function_Continue);
-
-    var len:Int = scHSArray.length;
-    if (len < 1) return returnVal;
-    for (script in scHSArray)
-    {
-      if (script == null || !script.existsVar(funcToCall) || exclusions.contains(script.hsCode.path)) continue;
-
-      try
-      {
-        var callValue = script.callFunc(funcToCall, args);
-        var myValue:Dynamic = callValue.funcReturn;
-
-        // compiler fuckup fix
-        if ((myValue == LuaUtil.Function_StopHScript || myValue == LuaUtil.Function_StopAll)
-          && !excludeValues.contains(myValue)
-          && !ignoreStops)
-        {
-          returnVal = myValue;
-          break;
-        }
-        if (myValue != null && !excludeValues.contains(myValue)) returnVal = myValue;
-      }
-      catch (e:Dynamic)
-      {
-        addTextToDebug('ERROR (${script.hsCode.path}: $funcToCall) - $e', FlxColor.RED);
-      }
-    }
-    #end
-
-    return returnVal;
-  }
-
-  public function setOnScripts(variable:String, arg:Dynamic, exclusions:Array<String> = null)
-  {
-    if (exclusions == null) exclusions = [];
-    setOnLuas(variable, arg, exclusions);
-    setOnHScript(variable, arg, exclusions);
-    setOnHSI(variable, arg, exclusions);
-    setOnSCHS(variable, arg, exclusions);
-  }
-
-  public function setOnLuas(variable:String, arg:Dynamic, exclusions:Array<String> = null)
-  {
-    #if LUA_ALLOWED
-    if (exclusions == null) exclusions = [];
-    for (script in luaArray)
-    {
-      if (exclusions.contains(script.scriptName)) continue;
-
-      script.set(variable, arg);
-    }
-    #end
-  }
-
-  public function setOnHScript(variable:String, arg:Dynamic, exclusions:Array<String> = null)
-  {
-    #if HSCRIPT_ALLOWED
-    if (exclusions == null) exclusions = [];
-    for (script in hscriptArray)
-    {
-      if (exclusions.contains(script.origin)) continue;
-
-      script.set(variable, arg);
-    }
-    #end
-  }
-
-  public function setOnHSI(variable:String, arg:Dynamic, exclusions:Array<String> = null)
-  {
-    #if (HSCRIPT_ALLOWED && HScriptImproved)
-    if (exclusions == null) exclusions = [];
-    for (script in codeNameScripts.scripts)
-    {
-      if (exclusions.contains(script.fileName)) continue;
-
-      script.set(variable, arg);
-    }
-    #end
-  }
-
-  public function setOnSCHS(variable:String, arg:Dynamic, exclusions:Array<String> = null)
-  {
-    #if HSCRIPT_ALLOWED
-    if (exclusions == null) exclusions = [];
-    for (script in scHSArray)
-    {
-      if (exclusions.contains(script.hsCode.path)) continue;
-
-      script.setVar(variable, arg);
-    }
-    #end
-  }
-
-  public function getOnScripts(variable:String, arg:String, exclusions:Array<String> = null)
-  {
-    if (exclusions == null) exclusions = [];
-    getOnLuas(variable, arg, exclusions);
-    getOnHScript(variable, exclusions);
-    getOnHSI(variable, exclusions);
-    getOnSCHS(variable, exclusions);
-  }
-
-  public function getOnLuas(variable:String, arg:String, exclusions:Array<String> = null)
-  {
-    #if LUA_ALLOWED
-    if (exclusions == null) exclusions = [];
-    for (script in luaArray)
-    {
-      if (exclusions.contains(script.scriptName)) continue;
-
-      script.get(variable, arg);
-    }
-    #end
-  }
-
-  public function getOnHScript(variable:String, exclusions:Array<String> = null)
-  {
-    #if HSCRIPT_ALLOWED
-    if (exclusions == null) exclusions = [];
-    for (script in hscriptArray)
-    {
-      if (exclusions.contains(script.origin)) continue;
-
-      script.get(variable);
-    }
-    #end
-  }
-
-  public function getOnHSI(variable:String, exclusions:Array<String> = null)
-  {
-    #if (HSCRIPT_ALLOWED && HScriptImproved)
-    if (exclusions == null) exclusions = [];
-    for (script in codeNameScripts.scripts)
-    {
-      if (exclusions.contains(script.fileName)) continue;
-
-      script.get(variable);
-    }
-    #end
-  }
-
-  public function getOnSCHS(variable:String, exclusions:Array<String> = null)
-  {
-    #if (HSCRIPT_ALLOWED && HScriptImproved)
-    if (exclusions == null) exclusions = [];
-    for (script in scHSArray)
-    {
-      if (exclusions.contains(script.hsCode.path)) continue;
-
-      script.getVar(variable);
-    }
-    #end
-  }
-
-  public function searchLuaVar(variable:String, arg:String, result:Bool)
-  {
-    #if LUA_ALLOWED
-    for (script in luaArray)
-    {
-      if (script.get(variable, arg) == result)
-      {
-        return result;
-      }
-    }
-    #end
-    return !result;
-  }
-
-  public function addScript(file:String, type:ScriptType = CODENAME, ?defaultState:String = 'PLAYSTATE', ?externalArguments:Array<Dynamic> = null)
-  {
-    if (externalArguments == null) externalArguments = [];
-    switch (type)
-    {
-      case CODENAME:
-        initHSIScript(file);
-      case IRIS:
-        initHScript(file);
-      case SC:
-        initSCHS(file);
-      case LUA:
-        final state:String = (externalArguments[0] != null && externalArguments[0].length > 0) ? externalArguments[0] : defaultState;
-        final preload:Bool = externalArguments[1] != null ? externalArguments[1] : false;
-        new FunkinLua(file, state, preload);
-    }
-  }
+  public function destroyScriptType(type:ScriptType):Void
+    ScriptMap.destroyScriptType(ReflectUtil.getClassNameOf(FlxG.state.subState).split('.').pop(), type);
 }

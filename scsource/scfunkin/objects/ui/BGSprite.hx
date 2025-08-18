@@ -32,7 +32,7 @@ class BGSprite extends FunkinSCSprite
       active = false;
     }
     scrollFactor.set(scrollX, scrollY);
-    antialiasing = ClientPrefs.data.antialiasing;
+    antialiasing = Save.get('antialiasing');
   }
 
   public function dance(?forceplay:Bool = false)

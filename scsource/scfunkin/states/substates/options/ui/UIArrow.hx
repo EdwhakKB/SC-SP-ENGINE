@@ -19,7 +19,7 @@ class UIArrow extends FlxSpriteGroup
     add(arrowBG);
 
     arrow = new FlxSprite().loadGraphic(Paths.image('ui/Arrow'));
-    arrow.antialiasing = ClientPrefs.data.antialiasing;
+    arrow.antialiasing = Save.get('antialiasing');
     add(arrow);
 
     arrowBG.sprTracker = arrow;

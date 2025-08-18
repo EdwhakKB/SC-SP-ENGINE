@@ -1,8 +1,5 @@
 package scfunkin.shaders;
 
-import haxe.Json;
-import openfl.utils.Assets;
-
 typedef FishEyeNewJSON =
 {
   var presets:Array<Array<Float>>;
@@ -60,8 +57,8 @@ void mainImage()
   {
     super();
 
-    var jsonTxt:String = Assets.getText(Paths.json(' shader / fisheyenew '));
-    json = cast Json.parse(jsonTxt);
+    var jsonTxt:String = OpenFlAssets.getText(Paths.json('shade /fisheyenew'));
+    json = cast HaxeJson.parse(jsonTxt);
 
     iTime.value = [0];
     this.preset = preset;

@@ -12,6 +12,7 @@ import scfunkin.debug.Debug;
 import scfunkin.debug.FPSCounter;
 #if HSCRIPT_ALLOWED
 import crowplexus.iris.Iris;
+import scfunkin.backend.scripting.psych.HScript;
 import scfunkin.backend.scripting.psych.HScript.HScriptInfos;
 #end
 
@@ -48,9 +49,14 @@ class Init extends FlxState
 
     FlxG.autoPause = false;
 
+    scfunkin.utils.WindowUtil.windowExit.add(function(exitCode:Int) {
+      Save.flush();
+    });
+
     #if HSCRIPT_ALLOWED
     Iris.warn = function(x, ?pos:haxe.PosInfos) {
       Iris.logLevel(WARN, x, pos);
+      HScript.hscriptLog(WARN, x, pos);
       var newPos:HScriptInfos = cast pos;
       if (newPos.showLine == null) newPos.showLine = true;
       var msgInfo:String = (newPos.funcName != null ? '(${newPos.funcName}) - ' : '') + '${newPos.fileName}:';
@@ -66,11 +72,11 @@ class Init extends FlxState
         msgInfo += '${newPos.lineNumber}:';
       }
       msgInfo += ' $x';
-      Debug.logInfo('WARNING: $msgInfo');
       if (PlayState.instance != null) PlayState.instance.addTextToDebug('WARNING: $msgInfo', FlxColor.YELLOW);
     }
     Iris.error = function(x, ?pos:haxe.PosInfos) {
       Iris.logLevel(ERROR, x, pos);
+      HScript.hscriptLog(ERROR, x, pos);
       var newPos:HScriptInfos = cast pos;
       if (newPos.showLine == null) newPos.showLine = true;
       var msgInfo:String = (newPos.funcName != null ? '(${newPos.funcName}) - ' : '') + '${newPos.fileName}:';
@@ -86,7 +92,6 @@ class Init extends FlxState
         msgInfo += '${newPos.lineNumber}:';
       }
       msgInfo += ' $x';
-      Debug.logInfo('ERROR: $msgInfo');
       if (PlayState.instance != null) PlayState.instance.addTextToDebug('ERROR: $msgInfo', FlxColor.RED);
     }
     Iris.fatal = function(x, ?pos:haxe.PosInfos) {
@@ -106,7 +111,6 @@ class Init extends FlxState
         msgInfo += '${newPos.lineNumber}:';
       }
       msgInfo += ' $x';
-      Debug.logInfo('FATAL: $msgInfo');
       if (PlayState.instance != null) PlayState.instance.addTextToDebug('FATAL: $msgInfo', 0xFFBB0000);
     }
     #end
@@ -124,26 +128,25 @@ class Init extends FlxState
     #end
     Mods.loadTopMod();
 
-    FlxG.save.bind('funkin', scfunkin.utils.CoolUtil.getSavePath());
+    FlxG.save.bind('sce', scfunkin.utils.CoolUtil.getSavePath());
 
-    ClientPrefs.loadPrefs();
-    ClientPrefs.keybindSaveLoad();
+    Save.load();
+    Controls.load();
     Language.reloadPhrases();
 
     FlxG.fixedTimestep = false;
     FlxG.game.focusLostFramerate = 60;
     FlxG.keys.preventDefaultKeys = [TAB];
 
-    FlxG.updateFramerate = FlxG.drawFramerate = ClientPrefs.data.framerate;
+    FlxG.updateFramerate = FlxG.drawFramerate = Save.get('framerate');
     FlxG.mouse.enabled = FlxG.mouse.visible = true;
 
     #if !mobile
-    if (Main.fpsVar != null) Main.fpsVar.visible = ClientPrefs.data.showFPS;
+    if (Main.fpsVar != null) Main.fpsVar.visible = Save.get('showFPS');
     #end
 
     #if LUA_ALLOWED llua.Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(scfunkin.backend.scripting.psych.LuaCallbackHandler.call)); #end
     Controls.instance = new Controls();
-    ClientPrefs.loadDefaultKeys();
     #if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
     Highscore.load();
 
@@ -158,16 +161,28 @@ class Init extends FlxState
     cpp.NativeGc.run(true);
     #end
 
+    #if LUA_ALLOWED
+    scfunkin.backend.scripting.ScriptMap.setLuaHandler("PlayState", (create) -> {
+      Debug.logInfo(['Init ${create.instanceName}', 'name ${create.file}']);
+      new scfunkin.backend.scripting.psych.luas.FunkinPlayStateLua(create.file, create.noFileName);
+    });
+    scfunkin.backend.scripting.ScriptMap.setLuaHandler("Stage", (create) -> {
+      Debug.logInfo(['Init ${create.instanceName}', 'name ${create.file}']);
+      new scfunkin.backend.scripting.psych.luas.FunkinStageLua(create.file, create.noFileName);
+    });
+    #end
+
     // Finish up loading debug tools.
     Debug.onGameStart();
 
-    if (Main.checkGJKeysAndId())
-    {
-      GameJoltAPI.connect();
-      GameJoltAPI.authDaUser(ClientPrefs.data.gjUser, ClientPrefs.data.gjToken, true);
-    }
+    // if (Main.checkGJKeysAndId())
+    // {
+    //   GameJoltAPI.connect();
+    //   GameJoltAPI.authDaUser(Save.get('gjUser'), Save.get('gjToken'), true);
+    // }
 
-    if (ClientPrefs.data.gjUser.toLowerCase() == 'glowsoony') FlxG.scaleMode = new flixel.system.scaleModes.FillScaleMode();
+    if (Save.get('gjUser') != null
+      && Save.get('gjUser').toLowerCase() == 'glowsoony') FlxG.scaleMode = new flixel.system.scaleModes.FillScaleMode();
 
     if (FlxG.save.data != null && FlxG.save.data.fullscreen) FlxG.fullscreen = FlxG.save.data.fullscreen;
 

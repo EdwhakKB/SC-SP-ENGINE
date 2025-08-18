@@ -131,7 +131,7 @@ class StoryMenuState extends MusicBeatState
         if (isLocked)
         {
           var lock:FlxSprite = new FlxSprite(weekThing.width + 10 + weekThing.x);
-          lock.antialiasing = ClientPrefs.data.antialiasing;
+          lock.antialiasing = Save.get('antialiasing');
           lock.frames = ui_tex;
           lock.animation.addByPrefix('lock', 'lock');
           lock.animation.play('lock');
@@ -159,7 +159,7 @@ class StoryMenuState extends MusicBeatState
     add(difficultySelectors);
 
     leftArrow = new FlxSprite(450, 10);
-    leftArrow.antialiasing = ClientPrefs.data.antialiasing;
+    leftArrow.antialiasing = Save.get('antialiasing');
     leftArrow.frames = ui_tex;
     leftArrow.animation.addByPrefix('idle', "arrow left");
     leftArrow.animation.addByPrefix('press', "arrow push left");
@@ -174,17 +174,17 @@ class StoryMenuState extends MusicBeatState
     curDifficulty = Math.round(Math.max(0, Difficulty.list.indexOf(lastDifficultyName)));
 
     sprDifficulty = new FlxSprite(0, leftArrow.y);
-    sprDifficulty.antialiasing = ClientPrefs.data.antialiasing;
+    sprDifficulty.antialiasing = Save.get('antialiasing');
     difficultySelectors.add(sprDifficulty);
 
     nightmareDifficulty = new FlxSprite(0, leftArrow.y);
     nightmareDifficulty.frames = Paths.getSparrowAtlas('menudifficulties/nightmare');
     nightmareDifficulty.animation.addByPrefix("idle", "idle", 24, true);
-    nightmareDifficulty.antialiasing = ClientPrefs.data.antialiasing;
+    nightmareDifficulty.antialiasing = Save.get('antialiasing');
     difficultySelectors.add(nightmareDifficulty);
 
     rightArrow = new FlxSprite(leftArrow.x + 376, leftArrow.y);
-    rightArrow.antialiasing = ClientPrefs.data.antialiasing;
+    rightArrow.antialiasing = Save.get('antialiasing');
     rightArrow.frames = ui_tex;
     rightArrow.animation.addByPrefix('idle', 'arrow right');
     rightArrow.animation.addByPrefix('press', "arrow push right", 24, false);
@@ -192,7 +192,7 @@ class StoryMenuState extends MusicBeatState
     difficultySelectors.add(rightArrow);
 
     var tracksSprite:FlxSprite = new FlxSprite(FlxG.width * 0.07 + 100, bgSprite.y + 425).loadGraphic(Paths.image('Menu_Tracks'));
-    tracksSprite.antialiasing = ClientPrefs.data.antialiasing;
+    tracksSprite.antialiasing = Save.get('antialiasing');
     tracksSprite.x -= tracksSprite.width / 2;
     add(tracksSprite);
 
@@ -200,7 +200,7 @@ class StoryMenuState extends MusicBeatState
     txtTracklist.alignment = CENTER;
     txtTracklist.font = Paths.font("vcr.ttf");
     txtTracklist.color = 0xFFe55777;
-    txtTracklist.antialiasing = ClientPrefs.data.antialiasing;
+    txtTracklist.antialiasing = Save.get('antialiasing');
     add(txtTracklist);
     add(scoreText);
     add(txtWeekTitle);
@@ -329,7 +329,7 @@ class StoryMenuState extends MusicBeatState
     {
       Conductor.bpm = 102.0;
       MainMenuState.freakyPlaying = true;
-      FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
+      FlxG.sound.playMusic(Paths.music("freakyMenu"));
       FlxG.sound.play(Paths.sound('cancelMenu'));
       movedBack = true;
       MusicBeatState.switchState(new MainMenuState());
@@ -380,7 +380,7 @@ class StoryMenuState extends MusicBeatState
             jsonInput: PlayState.storyPlaylist[0].toLowerCase() + diffic,
             folder: PlayState.storyPlaylist[0].toLowerCase(),
             difficulty: diffic,
-            inputNoDiff: PlayState.storyPlaylist[0].toLowerCase()
+            inputNoDiff: Paths.formatString(PlayState.storyPlaylist[0].toLowerCase())
           });
       }
       catch (e:Dynamic)
@@ -409,11 +409,17 @@ class StoryMenuState extends MusicBeatState
         stopspamming = true;
       }
 
-      Highscore.weekHighScoreData = Highscore.resetScoreData();
+      Highscore.averageScoreData = Highscore.resetScoreData();
 
-      var directory = StageData.forceNextDirectory;
+      var directory = StageJsonData.forceNextDirectory;
       LoadingState.loadNextDirectory();
-      StageData.forceNextDirectory = directory;
+      StageJsonData.forceNextDirectory = directory;
+      @:privateAccess
+      if (PlayState._lastLoadedModDirectory != Mods.currentModDirectory)
+      {
+        trace('CHANGED MOD DIRECTORY, RELOADING STUFF');
+        Paths.freeGraphicsFromMemory();
+      }
       LoadingState.prepareToSong();
       new FlxTimer().start(1, function(tmr:FlxTimer) {
         #if !SHOW_LOADING_SCREEN FlxG.sound.music.stop(); #end
@@ -440,7 +446,7 @@ class StoryMenuState extends MusicBeatState
     WeekData.setDirectoryFromWeek(loadedWeeks[curWeek]);
 
     var diff:String = Difficulty.getString(curDifficulty, false);
-    var newImage:FlxGraphic = Paths.image('menudifficulties/' + Paths.formatToSongPath(diff));
+    var newImage:FlxGraphic = Paths.image('menudifficulties/' + Paths.formatString(diff));
 
     var becameNightmare:Bool = (diff.toLowerCase().contains('nightmare'));
 
@@ -476,9 +482,7 @@ class StoryMenuState extends MusicBeatState
     lastDifficultyName = diff;
 
     #if ! switch
-    var songOpponentModeBlock:Bool = loadedWeeks[curWeek].blockOpponentMode != null ? loadedWeeks[curWeek].blockOpponentMode : false;
-    var opponentMode:Bool = (ClientPrefs.getGameplaySetting('opponent') && !songOpponentModeBlock);
-    intendedScore = Highscore.getWeekScore(loadedWeeks[curWeek].fileName, curDifficulty, opponentMode).mainData.score;
+    intendedScore = Highscore.getWeekScore(loadedWeeks[curWeek].fileName, curDifficulty).mainData.score;
     #end
   }
 
@@ -547,7 +551,7 @@ class StoryMenuState extends MusicBeatState
     var weekArray:Array<String> = loadedWeeks[curWeek].weekCharacters;
     for (i in 0...grpWeekCharacters.length)
     {
-      grpWeekCharacters.members[i].changeCharacter(weekArray[i]);
+      grpWeekCharacters.members[i].change(weekArray[i]);
     }
 
     var leWeek:WeekData = loadedWeeks[curWeek];
@@ -570,9 +574,7 @@ class StoryMenuState extends MusicBeatState
     txtTracklist.x -= FlxG.width * 0.35;
 
     #if ! switch
-    var songOpponentModeBlock:Bool = loadedWeeks[curWeek].blockOpponentMode != null ? loadedWeeks[curWeek].blockOpponentMode : false;
-    var opponentMode:Bool = (ClientPrefs.getGameplaySetting('opponent') && !songOpponentModeBlock);
-    intendedScore = Highscore.getWeekScore(loadedWeeks[curWeek].fileName, curDifficulty, opponentMode).mainData.score;
+    intendedScore = Highscore.getWeekScore(loadedWeeks[curWeek].fileName, curDifficulty).mainData.score;
     #end
   }
 }

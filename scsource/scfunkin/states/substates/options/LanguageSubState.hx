@@ -14,13 +14,13 @@ class LanguageSubState extends MusicBeatSubState
 
     var bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
     bg.color = 0xFFea71fd;
-    bg.antialiasing = ClientPrefs.data.antialiasing;
+    bg.antialiasing = Save.get('antialiasing');
     bg.screenCenter();
     add(bg);
     add(grpLanguages);
 
-    languages.push(ClientPrefs.defaultData.language); // English (US)
-    displayLanguages.set(ClientPrefs.defaultData.language, Language.defaultLangName);
+    languages.push(Save.get('language', true)); // English (US)
+    displayLanguages.set(Save.get('language', true), Language.defaultLangName);
     var directories:Array<String> = Mods.directoriesWithFile(Paths.getSharedPath(), 'data/');
     for (directory in directories)
     {
@@ -60,11 +60,11 @@ class LanguageSubState extends MusicBeatSubState
       return 0;
     });
 
-    curSelected = languages.indexOf(ClientPrefs.data.language);
+    curSelected = languages.indexOf(Save.get('language'));
     if (curSelected < 0)
     {
-      ClientPrefs.data.language = ClientPrefs.defaultData.language;
-      curSelected = Std.int(Math.max(0, languages.indexOf(ClientPrefs.data.language)));
+      Save.set('language', Save.get('language', true));
+      curSelected = Std.int(Math.max(0, languages.indexOf(Save.get('language'))));
     }
 
     for (num => lang in languages)
@@ -118,8 +118,8 @@ class LanguageSubState extends MusicBeatSubState
     if (controls.ACCEPT)
     {
       FlxG.sound.play(Paths.sound('confirmMenu'), 0.6);
-      ClientPrefs.data.language = languages[curSelected];
-      ClientPrefs.saveSettings();
+      Save.set('language', languages[curSelected]);
+      Save.flush();
       Language.reloadPhrases();
       changedLanguage = true;
     }

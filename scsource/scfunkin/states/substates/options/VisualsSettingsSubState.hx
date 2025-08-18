@@ -26,8 +26,8 @@ class VisualsSettingsSubState extends BaseOptionsMenu
       stringedNote = (OptionsState.onPlayState ? (PlayState.isPixelStage ? 'pixelUI/noteSkins/NOTE_assets' + Note.getNoteSkinPostfix() : 'noteSkins/NOTE_assets'
         + Note.getNoteSkinPostfix()) : 'noteSkins/NOTE_assets'
         + Note.getNoteSkinPostfix());
-      var note:StrumArrow = new StrumArrow((ClientPrefs.data.middleScroll ? 370 + (560 / Note.colArray.length) * i : 620 + (560 / Note.colArray.length) * i),
-        !ClientPrefs.data.downScroll ? -200 : 760, i, 0, stringedNote);
+      var note:StrumArrow = new StrumArrow((Save.get('middleScroll') ? 370 + (560 / Note.colArray.length) * i : 620 + (560 / Note.colArray.length) * i),
+        !Save.get('downScroll') ? -200 : 760, i, 0, stringedNote);
       note.centerOffsets();
       note.centerOrigin();
       note.reloadNote(stringedNote);
@@ -49,10 +49,9 @@ class VisualsSettingsSubState extends BaseOptionsMenu
     var noteSkins:Array<String> = Mods.mergeAllTextsNamed('images/noteSkins/list.txt');
     if (noteSkins.length > 0)
     {
-      if (!noteSkins.contains(ClientPrefs.data.noteSkin))
-        ClientPrefs.data.noteSkin = ClientPrefs.defaultData.noteSkin; // Reset to default if saved noteskin couldnt be found
+      if (!noteSkins.contains(Save.get('noteSkin'))) Save.set('noteSkin', Save.get('noteSkin', true)); // Reset to default if saved noteskin couldnt be found
 
-      noteSkins.insert(0, ClientPrefs.defaultData.noteSkin); // Default skin always comes first
+      noteSkins.insert(0, Save.get('noteSkin', true)); // Default skin always comes first
       var option:Option = new Option('Note Skins:', "Select your prefered Note skin.", 'noteSkin', STRING, noteSkins);
       addOption(option);
       option.onChange = onChangeNoteSkin;
@@ -62,10 +61,10 @@ class VisualsSettingsSubState extends BaseOptionsMenu
     var noteSplashes:Array<String> = Mods.mergeAllTextsNamed('images/noteSplashes/list.txt');
     if (noteSplashes.length > 0)
     {
-      if (!noteSplashes.contains(ClientPrefs.data.splashSkin))
-        ClientPrefs.data.splashSkin = ClientPrefs.defaultData.splashSkin; // Reset to default if saved splashskin couldnt be found
+      // Reset to default if saved splashskin couldnt be found
+      if (!noteSplashes.contains(Save.get('splashSkin'))) Save.set('splashSkin', Save.get('splashSkin', true));
 
-      noteSplashes.insert(0, ClientPrefs.defaultData.splashSkin); // Default skin always comes first
+      noteSplashes.insert(0, Save.get('splashSkin', true)); // Default skin always comes first
       var option:Option = new Option('Note Splashes:', "Select your prefered Note Splash variation or turn it off.", 'splashSkin', STRING, noteSplashes);
       addOption(option);
       option.onChange = onChangeSplashSkin;
@@ -80,17 +79,6 @@ class VisualsSettingsSubState extends BaseOptionsMenu
     addOption(option);
     option.onChange = playNoteSplashes;
 
-    var option:Option = new Option('Note Lanes Opacity', 'How much transparent should the lanes under the notes be?', 'laneTransparency', PERCENT);
-    option.scrollSpeed = 1.6;
-    option.minValue = 0.0;
-    option.maxValue = 1;
-    option.changeValue = 0.1;
-    option.decimals = 1;
-    addOption(option);
-
-    var option:Option = new Option('Note Splash Opacity As Strum Opacity', 'Should splashes be transparent as strums?', 'splashAlphaAsStrumAlpha', BOOL);
-    addOption(option);
-
     var option:Option = new Option('Hide HUD', 'If checked, hides most HUD elements.', 'hideHud', BOOL);
     addOption(option);
 
@@ -99,10 +87,6 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 
     var option:Option = new Option('Time Bar:', "What should the Time Bar display?", 'timeBarType', STRING,
       ['Time Left', 'Time Elapsed', 'Song Name', 'Disabled']);
-    addOption(option);
-
-    var option:Option = new Option('Time Bar Color:', "What colors should the Time Bar display?", 'colorBarType', STRING,
-      ['No Colors', 'Main Colors', 'Reversed Colors']);
     addOption(option);
 
     var option:Option = new Option('Flashing Lights', "Uncheck this if you're sensitive to flashing lights!", 'flashing', BOOL);
@@ -148,35 +132,6 @@ class VisualsSettingsSubState extends BaseOptionsMenu
     var option:Option = new Option('Judgement Counter', "If checked, A Judgement Counter is shown", 'judgementCounter', BOOL);
     addOption(option);
 
-    var option:Option = new Option('Game Combo', "If checked, Combo UI will be automated to camGame (stage, pl, op, gf)", 'gameCombo', BOOL);
-    addOption(option);
-
-    var option:Option = new Option('Show Combo', "If checked, Combo Sprite will appear when note is hit.", 'showCombo', BOOL);
-    addOption(option);
-
-    var option:Option = new Option('Show Combo Num', "If checked, Combo Number Sprite will appear when note is hit.", 'showComboNum', BOOL);
-    addOption(option);
-
-    var option:Option = new Option('Show Rating', "If checked, Rating Sprite will appear when note is hit.", 'showRating', BOOL);
-    addOption(option);
-
-    var option:Option = new Option('Voiid Chronicles BreakTimer', "If checked, A timer will appear to tell you when next notes are.", 'breakTimer', BOOL);
-    addOption(option);
-
-    var option:Option = new Option('Lights Opponent Strums Notes', 'If unchecked, opponent Strums wont light up.', 'LightUpStrumsOP', BOOL);
-    addOption(option);
-
-    var option:Option = new Option('Icon Movement', "Do you want Icon to have some movement?", 'iconMovement', STRING, ['None', 'Angled']);
-    addOption(option);
-
-    var option:Option = new Option('Gradient System For Old Bars.', 'A gradient system will be used if the old bar system is activated in PlayState.',
-      'gradientSystemForOldBars', BOOL);
-    addOption(option);
-
-    var option:Option = new Option('Colored Changing Text.',
-      'Mainly all text in playstate will change color on character change and will start with dad\'s character color.', 'coloredText', BOOL);
-    addOption(option);
-
     var option:Option = new Option('Note Splashes Option', "Different options on how the splashes show.", 'splashOption', STRING,
       ['None', 'Player', 'Opponent', 'Both']);
     addOption(option);
@@ -187,10 +142,6 @@ class VisualsSettingsSubState extends BaseOptionsMenu
     var option:Option = new Option('Vanilla Strum Animations', "If checked, Strums animations play like vanilla FNF.", 'vanillaStrumAnimations', BOOL);
     addOption(option);
 
-    var option:Option = new Option('Color Notes A Way', 'What kinda of RGB note coloring !(only if RGB shader is active)!', 'colorNoteType', STRING,
-      ['None', 'Quant', 'Rainbow']);
-    addOption(option);
-
     super();
     add(notes);
     add(splashes);
@@ -198,7 +149,7 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 
   function onChangediscord()
   {
-    if (ClientPrefs.data.discordRPC) DiscordClient.initialize();
+    if (Save.get('discordRPC')) DiscordClient.initialize();
     else
       DiscordClient.shutdown();
   }
@@ -239,9 +190,9 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 
   function onChangePauseMusic()
   {
-    if (ClientPrefs.data.pauseMusic == 'None') FlxG.sound.music.volume = 0;
+    if (Save.get('pauseMusic') == 'None') FlxG.sound.music.volume = 0;
     else
-      FlxG.sound.playMusic(Paths.music(Paths.formatToSongPath(ClientPrefs.data.pauseMusic)));
+      FlxG.sound.playMusic(Paths.music(Paths.formatString(Save.get('pauseMusic'))));
 
     changedMusic = true;
   }
@@ -315,7 +266,7 @@ class VisualsSettingsSubState extends BaseOptionsMenu
 
   override function destroy()
   {
-    if (changedMusic && !OptionsState.onPlayState) FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"), 1, true);
+    if (changedMusic && !OptionsState.onPlayState) FlxG.sound.playMusic(Paths.music("freakyMenu"), 1, true);
     Note.globalRgbShaders = [];
     super.destroy();
   }

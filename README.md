@@ -13,7 +13,7 @@
 * Kade stuff added from original stuff and my friend bolo! TYSM [Kade ResultsScreen and most stuff](https://github.com/BoloVEVO/Kade-Engine)
 * FlxCustomColor Stuff from TheLeerName [Thanks](https://github.com/ShadowMario/FNF-PsychEngine/pull/13323)
 * Most other fixes, noteskin support, char json edits, and more all by me *glowsoony*
-* Scripting HX from codeNameEngine/Macros for compiling [Macro class, Hx Scripting, Custom Shaders, MultiFramesCollection](https://github.com/FNF-CNE-Devs/CodenameEngine) //So sorry for not crediting, I completely did plan but forgot 😭🙏
+* Shaders and Macros for compiling [Macro class, Custom Shaders](https://github.com/FNF-CNE-Devs/CodenameEngine) //So sorry for not crediting, I completely did plan but forgot 😭🙏
 * Lots of code from original game, V-SLICE FNF [ReflectUtil, WaveFormSprite, Audio, Scoring, Results](https://github.com/FunkinCrew/Funkin)
 * Most shaders originally from Voiid-Chronicles V2 [RayMarch, ChromaticAbberation, ThreeD, WaveCircle, etc..](https://github.com/TheZoroForce240/Voiid-Chronicles-V2-Source)
 * FPS Plus [WaveformSprite](https://github.com/ThatRozebudDude/FPS-Plus-Public)

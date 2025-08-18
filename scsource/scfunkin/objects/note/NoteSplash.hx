@@ -48,6 +48,12 @@ typedef NoteSplashConfig =
 
 class NoteSplash extends FunkinSCSprite
 {
+  public static function splashOption(type:String):Bool
+  {
+    if (type != 'Both') return Save.get('splashOption') == type;
+    return Save.get('splashOption') == 'Both';
+  }
+
   private var _textureLoaded:String = null;
 
   public var skin:String;
@@ -62,10 +68,7 @@ class NoteSplash extends FunkinSCSprite
   public var containedPixelTexture(get, never):Bool;
 
   function get_containedPixelTexture():Bool
-  {
-    var isPixel:Bool = (skin.contains('pixel') || babyArrow.texture.contains('pixel') || styleChoice.contains('pixel'));
-    return isPixel;
-  }
+    return (skin.contains('pixel') || babyArrow.texture.contains('pixel') || styleChoice.contains('pixel'));
 
   public var opponentSplashes:Bool = false;
   public var styleChoice:String = '';
@@ -74,10 +77,12 @@ class NoteSplash extends FunkinSCSprite
   public var rgbShader:RGBPixelShaderReference;
 
   public var babyArrow:StrumArrow;
+  public var strumLine:StrumLine;
   public var noteData:Int = 0;
 
   public var copyX:Bool = true;
   public var copyY:Bool = true;
+  public var copyAlpha:Bool = false;
   public var inEditor:Bool = false;
 
   public var neededOffsetCorrection:Bool = false;
@@ -134,7 +139,7 @@ class NoteSplash extends FunkinSCSprite
       }
     }
 
-    var configPath:String = chooseSplashPathJson(skin);
+    var configPath:String = chooseSplashPath(skin, '.json');
 
     if (!stop && configPath != null && configPath.length > 0)
     {
@@ -179,7 +184,7 @@ class NoteSplash extends FunkinSCSprite
       }
     }
 
-    configPath = chooseSplashPathTxt(skin);
+    configPath = chooseSplashPath(skin, '.txt');
 
     // Splashes with no json
     var tempConfig:NoteSplashConfig = createConfig();
@@ -247,37 +252,20 @@ class NoteSplash extends FunkinSCSprite
     configs.set(configPath, this.config);
   }
 
-  function chooseSplashPathJson(newSkin:String):String
+  function chooseSplashPath(newSkin:String, ext:String = '.json'):String
   {
-    if (Paths.fileExists('images/noteSplashes/$newSkin.json', TEXT)) return 'images/noteSplashes/$newSkin.json';
-    if (Paths.fileExists('images/$newSkin.json', TEXT)) return 'images/$newSkin.json';
-    if (Paths.fileExists('$newSkin.json', TEXT)) return '$newSkin.json';
+    if (Paths.fileExists('images/noteSplashes/$newSkin$ext', TEXT)) return 'images/noteSplashes/$newSkin$ext';
+    if (Paths.fileExists('images/$newSkin$ext', TEXT)) return 'images/$newSkin$ext';
+    if (Paths.fileExists('$newSkin$ext', TEXT)) return '$newSkin$ext';
     Debug.logInfo('Failed to locate $newSkin.json, returning nothing');
-    return null;
-  }
-
-  function chooseSplashPathTxt(newSkin:String):String
-  {
-    if (Paths.fileExists('images/noteSplashes/$newSkin.txt', TEXT)) return 'images/noteSplashes/$newSkin.txt';
-    if (Paths.fileExists('images/$newSkin.txt', TEXT)) return 'images/$newSkin.txt';
-    if (Paths.fileExists('$newSkin.txt', TEXT)) return '$newSkin.txt';
-    Debug.logInfo('Failed to locate $newSkin.txt, returning nothing');
     return null;
   }
 
   function getTexture(?opponentSplashes:Bool = false, ?note:Note = null):String
   {
     var finalSplashSkin:String = null;
-    if (PlayState.instance != null)
-    {
-      if (ClientPrefs.getGameplaySetting('opponent')
-        && !ClientPrefs.data.middleScroll) styleChoice = opponentSplashes ? PlayState.instance.bfStrumStyle : PlayState.instance.dadStrumStyle;
-      else
-        styleChoice = opponentSplashes ? PlayState.instance.bfStrumStyle : PlayState.instance.dadStrumStyle;
-
-      string1NoteSkin = "noteSplashes-" + styleChoice;
-      string2NoteSkin = "notes/noteSplashes-" + styleChoice;
-    }
+    string1NoteSkin = "noteSplashes-" + styleChoice;
+    string2NoteSkin = "notes/noteSplashes-" + styleChoice;
     var firstPath:Bool = #if MODS_ALLOWED FileSystem.exists(Paths.getPath('images/$string1NoteSkin.png')) || #end Assets.exists(Paths.getPath('images/$string1NoteSkin.png'));
     var secondPath:Bool = #if MODS_ALLOWED FileSystem.exists(Paths.getPath('images/$string2NoteSkin.png')) || #end Assets.exists(Paths.getPath('images/$string2NoteSkin.png'));
     if (note != null && note.noteSplashData.texture != null) finalSplashSkin = note.noteSplashData.texture;
@@ -346,16 +334,15 @@ class NoteSplash extends FunkinSCSprite
         // If Note RGB is enabled:
         if ((note == null || !note.noteSplashData.useGlobalShader) || inEditor)
         {
-          var colors = config.rgb;
+          final colors = config.rgb;
           if (colors != null)
           {
             for (i in 0...colors.length)
             {
               if (i > 2) break;
 
-              var arr:Array<FlxColor> = ClientPrefs.data.arrowRGB[noteData % Note.colArray.length];
-              if (PlayState.isPixelStage) arr = ClientPrefs.data.arrowRGBPixel[noteData % Note.colArray.length];
-              var rgb = colors[i];
+              final arr:Array<FlxColor> = Save.get('arrowRGB${PlayState.isPixelStage ? 'Pixel' : ''}').arrowRGB[noteData % Note.colArray.length];
+              final rgb = colors[i];
               if (rgb == null)
               {
                 if (i == 0) tempShader.r = arr[0];
@@ -395,8 +382,7 @@ class NoteSplash extends FunkinSCSprite
           tempShader.copyValues(Note.globalRgbShaders[noteData % Note.colArray.length]);
       }
     }
-    if (config.allowPixel) rgbShader.containsPixel = containedPixelTexture || PlayState.isPixelStage;
-    if (!config.allowPixel) rgbShader.containsPixel = false;
+    rgbShader.containsPixel = config.allowPixel ? (containedPixelTexture || PlayState.isPixelStage) : false;
     rgbShader.copyValues(tempShader);
     if (!config.allowPixel) rgbShader.pixelSize = 1;
 
@@ -415,10 +401,10 @@ class NoteSplash extends FunkinSCSprite
       spawned = false;
     };
 
-    if (!ClientPrefs.data.splashAlphaAsStrumAlpha) alpha = ClientPrefs.data.splashAlpha;
+    if (!copyAlpha) alpha = Save.get('splashAlpha');
     if (note != null) alpha = note.noteSplashData.a;
 
-    antialiasing = ClientPrefs.data.antialiasing;
+    antialiasing = Save.get('antialiasing');
     if (note != null) antialiasing = note.noteSplashData.antialiasing;
     if ((PlayState.isPixelStage && config.allowPixel) || containedPixelTexture) antialiasing = false;
 
@@ -447,7 +433,7 @@ class NoteSplash extends FunkinSCSprite
   public static function getSplashSkinPostfix()
   {
     var skin:String = '';
-    if (ClientPrefs.data.splashSkin != ClientPrefs.defaultData.splashSkin) skin = '-' + ClientPrefs.data.splashSkin.trim().toLowerCase().replace(' ', '-');
+    if (Save.get('splashSkin') != Save.get('splashSkin', true)) skin = '-' + cast(Save.get('splashSkin'), String).trim().toLowerCase().replace(' ', '-');
     return skin;
   }
 
@@ -469,7 +455,7 @@ class NoteSplash extends FunkinSCSprite
     if (spawned)
     {
       aliveTime += elapsed;
-      if (animation.curAnim == null && aliveTime >= buggedKillTime)
+      if (isAnimNull() && aliveTime >= buggedKillTime)
       {
         kill();
         spawned = false;
@@ -479,8 +465,8 @@ class NoteSplash extends FunkinSCSprite
     if (babyArrow != null)
     {
       if (copyX) x = babyArrow.x - Note.swagWidth * 0.95;
-
       if (copyY) y = babyArrow.y - Note.swagWidth;
+      if (copyAlpha) alpha = babyArrow.alpha;
     }
     super.update(elapsed);
   }
@@ -499,7 +485,7 @@ class NoteSplash extends FunkinSCSprite
   public static function addAnimationToConfig(config:NoteSplashConfig, scale:Float, name:String, prefix:String, fps:Array<Int>, offsets:Array<Float>,
       indices:Array<Int>, noteData:Int):NoteSplashConfig
   {
-    if (config == null) config = createConfig();
+    config ??= createConfig();
     config.animations.set(name,
       {
         name: name,

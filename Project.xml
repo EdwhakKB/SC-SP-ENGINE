@@ -164,10 +164,6 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	Reduces compilation time at the cost of limited HScript flexibility. !-->
 	<define name="COMPILE_ALL_CLASSES" />
 
-	<!-- Comment this out to prevent extending classes in hscript.
-		Reduces compilation time at the cost of limited HScript flexibility. !-->
-	<define name="CUSTOM_CLASSES" />
-
 	<icon path="assets/art/icon16.png" size='16'/>
 	<icon path="assets/art/icon32.png" size='32'/>
 	<icon path="assets/art/icon64.png" size='64'/>
@@ -211,8 +207,6 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 
 	<!--<haxedef name="HXCPP_GC_GENERATIONAL"/>-->
 
-	<haxedef name="queue_experimental_optimization"/>
-
 	<!-- _______________________________ Libraries ______________________________ -->
 
 	<define name="disable-version-check" />
@@ -236,8 +230,7 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<haxelib name="hxvlc" if="VIDEOS_ALLOWED"/>
 	<haxelib name="format"/>
 
-	<!--if you don't need FlxAnimate for exporting or for a mod just null it-->
-	<haxelib name="flxanimate"/>
+	<haxelib name="flixel-animate"/>
 	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>
 
 	<haxelib name="hxgamejolt-api"/>
@@ -252,11 +245,7 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<haxelib name="hxtelemetry" if="telemetry"/>
 	<haxedef name="HXCPP_TELEMETRY"  if="telemetry"/>
 
-	<haxelib name="hscript-improved" />
 	<haxelib name="markdown"/>
-
-	<!-- Defines the SCE's version of modcharting Tools. -->
-	<define name="HScriptImproved" if="hscript-improved"/>
 
 	<!-- Enables a terminal log prompt on debug builds -->
 	<haxelib name="hxcpp-debug-server" if="debug"/>
@@ -270,7 +259,7 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 	<haxelib name="FlxPartialSound"/>
 	<haxelib name="flxsoundfilters" />
 
-	<!-- <define name="FunkinModcharting" /> --> <!--Not used because SCE adapter is not public-->
+	<define name="FunkinModcharting" /> <!--Not used because SCE adapter is not public-->
 	<section if="FunkinModcharting">
 		<haxedef name="FM_ENGINE" value="SCE"/>
 		<haxedef name="FM_ENGINE_VERSION" value="1.5.3"/>
@@ -278,7 +267,11 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 		<haxelib name="funkin-modchart" />
 
 		<define name="FunkinModchart" if="funkin-modchart"/>
+		<haxeflag name="--macro" value="modchart.backend.macros.Macro.includeFiles()"/>
 	</section>
+
+	<!--Allow Sections of ALT to be defined in a conversion-->
+	<define name="ALLOW_DOUBLE_CHECK"/>
 
 	<define name="MULTITHREADED_LOADING"/> <!-- UNCOMMENTING THIS LINE WILL ENABLE MULTITHREADED LOADING, WHICH IMPROVES LOADING TIMES, BUT WITH A LOW CHANCE FOR THE GAME FREEZE ON SONG LOAD -->
 

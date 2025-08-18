@@ -19,30 +19,16 @@ class ArrayTools
   }
 
   /**
-   * Remove all elements from the array, without creating a new array.
-   * @param array The array to clear.
-   */
-  public static function clear<T>(array:Array<T>):Void
-  {
-    // This method is faster than array.splice(0, array.length)
-    array.resize(0);
-  }
-
-  /**
    * Create a new array with all elements of the given array, to prevent modifying the original.
    */
   public static function clone<T>(array:Array<T>):Array<T>
-  {
     return [for (element in array) element];
-  }
 
   /**
    * Create a new array with clones of all elements of the given array, to prevent modifying the original.
    */
   public static function deepClone<T, U:ICloneable<T>>(array:Array<U>):Array<T>
-  {
     return [for (element in array) element.clone()];
-  }
 
   /**
    * Return true only if both arrays contain the same elements (possibly in a different order).
@@ -54,13 +40,9 @@ class ArrayTools
   {
     if (a.length != b.length) return false;
     for (element in a)
-    {
       if (!b.contains(element)) return false;
-    }
     for (element in b)
-    {
       if (!a.contains(element)) return false;
-    }
     return true;
   }
 
@@ -78,9 +60,7 @@ class ArrayTools
 
     // Check each element.
     for (element in subset)
-    {
       if (!superset.contains(element)) return false;
-    }
     return true;
   }
 

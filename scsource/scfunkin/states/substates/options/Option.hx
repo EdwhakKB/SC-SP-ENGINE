@@ -29,7 +29,7 @@ class Option
 
   public var scrollSpeed:Float = 50; // Only works on int/float, defines how fast it scrolls per second while holding left/right
 
-  public var variable(default, null):String = null; // Variable from ClientPrefs.hx
+  public var variable(default, null):String = null; // Variable from Save.hx
 
   public var defaultValue:Dynamic = null;
 
@@ -55,10 +55,9 @@ class Option
     this.description = Language.getPhrase('description_$_translationKey', description);
     this.variable = variable;
     this.type = type;
-    this.defaultValue = Reflect.getProperty(ClientPrefs.defaultData, variable);
+    this.defaultValue = Save.get(variable, true);
     this.options = options;
 
-    if (this.type != KEYBIND) this.defaultValue = Reflect.getProperty(ClientPrefs.defaultData, variable);
     switch (type)
     {
       case BOOL:
@@ -75,10 +74,7 @@ class Option
         decimals = 2;
       case STRING:
         defaultValue = '';
-        if (options.length > 0)
-        {
-          defaultValue = options[0];
-        }
+        if (options.length > 0) defaultValue = options[0];
       case LINK:
         defaultValue = '';
       case KEYBIND:
@@ -94,7 +90,7 @@ class Option
       switch (type)
       {
         case STRING:
-          var num:Int = options.indexOf(getValue());
+          final num:Int = options.indexOf(getValue());
           if (num > -1) curOption = num;
         default:
       }
@@ -110,7 +106,7 @@ class Option
 
   dynamic public function getValue():Dynamic
   {
-    var value = Reflect.getProperty(ClientPrefs.data, variable);
+    var value = Save.get(variable);
     if (type == KEYBIND) return !Controls.instance.controllerMode ? value.keyboard : value.gamepad;
     return value;
   }
@@ -119,13 +115,13 @@ class Option
   {
     if (type == KEYBIND)
     {
-      var keys = Reflect.getProperty(ClientPrefs.data, variable);
+      var keys = Save.get(variable);
       if (!Controls.instance.controllerMode) keys.keyboard = value;
       else
         keys.gamepad = value;
       return value;
     }
-    return Reflect.setProperty(ClientPrefs.data, variable, value);
+    return Save.set(variable, value);
   }
 
   var _name:String = null;

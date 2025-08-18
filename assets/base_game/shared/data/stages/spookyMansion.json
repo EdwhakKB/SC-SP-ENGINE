@@ -20,8 +20,8 @@
   "introSoundsPrefix": "",
 
   "preload": {
-    "images": ["halloween_bg"],
-    "images_low": ["halloween_bg_low"]
+    "high": ["halloween_bg"],
+    "low": ["halloween_bg_low"]
   },
 
   "_editorMeta": {

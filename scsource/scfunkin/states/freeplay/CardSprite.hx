@@ -1,12 +1,8 @@
 package scfunkin.states.freeplay;
 
-import openfl.utils.Assets as OpenFLAssets;
-
 typedef CardMeta =
 {
   var name:String;
-  @:default(true)
-  var ?active:Bool;
   var image:String;
   @:default([])
   var ?scale:Array<Float>;
@@ -68,7 +64,7 @@ class CardSprite extends FunkinSCSprite
     {
       calls.onSelect = function() {
         final selectPath:String = Paths.getPath('images/' + data.metaData.image + '-Select');
-        final hasSelect:Bool = #if MODS_ALLOWED FileSystem.exists(selectPath) || #end OpenFLAssets.exists(selectPath);
+        final hasSelect:Bool = #if MODS_ALLOWED FileSystem.exists(selectPath) || #end OpenFlAssets.exists(selectPath);
         if (hasSelect) loadGraphic(Paths.image(data.metaData.image + '-Select'));
       }
 
@@ -78,14 +74,11 @@ class CardSprite extends FunkinSCSprite
 
       calls.onHover = function() {
         final hoverPath:String = Paths.getPath('images/' + data.metaData.image + '-Hover');
-        final hasHover:Bool = #if MODS_ALLOWED FileSystem.exists(hoverPath) || #end OpenFLAssets.exists(hoverPath);
+        final hasHover:Bool = #if MODS_ALLOWED FileSystem.exists(hoverPath) || #end OpenFlAssets.exists(hoverPath);
         if (hasHover) loadGraphic(Paths.image(data.metaData.image + '-Hover'));
       }
     }
-    if (data.metaData.scale != null && data.metaData.scale.length > 1)
-    {
-      scale.set(data.metaData.scale[0], data.metaData.scale[1]);
-    }
+    if (data.metaData.scale != null && data.metaData.scale.length > 1) scale.set(data.metaData.scale[0], data.metaData.scale[1]);
     else if (data.metaData.graphicScale != null && data.metaData.graphicScale.length > 1)
     {
       final widthApply:Bool = !Math.isNaN(data.metaData.graphicScale[0]) && data.metaData.graphicScale[0] != 0;

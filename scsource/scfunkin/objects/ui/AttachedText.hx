@@ -23,16 +23,9 @@ class AttachedText extends Alphabet
     if (sprTracker != null)
     {
       setPosition(sprTracker.x + offsetX, sprTracker.y + offsetY);
-      if (copyVisible)
-      {
-        visible = sprTracker.visible;
-      }
-      if (copyAlpha)
-      {
-        alpha = sprTracker.alpha;
-      }
+      if (copyVisible) visible = sprTracker.visible;
+      if (copyAlpha) alpha = sprTracker.alpha;
     }
-
     super.update(elapsed);
   }
 }

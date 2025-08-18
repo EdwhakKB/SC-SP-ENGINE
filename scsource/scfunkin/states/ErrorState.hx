@@ -11,7 +11,6 @@ class ErrorState extends MusicBeatState
     this.errorMsg = error;
     this.acceptCallback = accept;
     this.backCallback = back;
-
     super();
   }
 
@@ -20,9 +19,9 @@ class ErrorState extends MusicBeatState
 
   override function create()
   {
-    var bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
+    final bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
     bg.color = FlxColor.GRAY;
-    bg.antialiasing = ClientPrefs.data.antialiasing;
+    bg.antialiasing = Save.get('antialiasing');
     add(bg);
     bg.screenCenter();
 
@@ -42,7 +41,6 @@ class ErrorState extends MusicBeatState
 
     if (controls.ACCEPT && acceptCallback != null) acceptCallback();
     else if (controls.BACK && backCallback != null) backCallback();
-
     super.update(elapsed);
   }
 }

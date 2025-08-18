@@ -75,11 +75,9 @@ class Debug
    */
   public static function logTrace(input:Dynamic, ?pos:haxe.PosInfos):Void
   {
-    #if debug
     if (input == null) return;
     var output = formatOutput(input, pos);
     writeToLogFile(output, 'TRACE');
-    #end
   }
 
   /**
@@ -203,9 +201,9 @@ class Debug
     #end
     logInfo('Haxe Version: ' + haxe.macro.Compiler.getDefine("haxe"));
     logInfo('HaxeFlixel version: ${Std.string(FlxG.VERSION)}');
-    logInfo('Friday Night Funkin\' version: 0.4');
+    logInfo('Friday Night Funkin\' version: 0.6.4');
     logInfo('SC Engine version: ${scfunkin.states.MainMenuState.SCEVersion}');
-    logInfo('This is a custom build of PE. Current version: ${scfunkin.states.MainMenuState.psychEngineVersion}');
+    logInfo('This is a custom build of PE. Current version: 1.0.4');
   }
 
   /**
@@ -267,20 +265,6 @@ class Debug
    */
   inline static function defineConsoleCommands()
   {
-    // Example: This will display Boyfriend's sprite properties in a debug window.
-    addConsoleCommand("trackBoyfriend", function() {
-      Debug.logInfo("CONSOLE: Begin tracking Boyfriend...");
-      trackObject(PlayState.instance.boyfriend);
-    });
-    addConsoleCommand("trackGirlfriend", function() {
-      Debug.logInfo("CONSOLE: Begin tracking Girlfriend...");
-      trackObject(PlayState.instance.gf);
-    });
-    addConsoleCommand("trackDad", function() {
-      Debug.logInfo("CONSOLE: Begin tracking Dad...");
-      trackObject(PlayState.instance.dad);
-    });
-
     addConsoleCommand("setLogLevel", function(logLevel:String) {
       if (!DebugLogWriter.LOG_LEVELS.contains(logLevel))
       {

@@ -49,7 +49,7 @@ class DialogueEditorState extends MusicBeatState implements PsychUIEventHandler.
     add(character);
 
     box = new FlxSprite(70, 370);
-    box.antialiasing = ClientPrefs.data.antialiasing;
+    box.antialiasing = Save.get('antialiasing');
     box.frames = Paths.getSparrowAtlas('speech_bubble');
     box.scrollFactor.set();
     box.animation.addByPrefix('normal', 'speech bubble normal', 24);
@@ -172,14 +172,7 @@ class DialogueEditorState extends MusicBeatState implements PsychUIEventHandler.
       case 'left':
         box.flipX = true;
       case 'center':
-        if (isAngry)
-        {
-          anim = 'center-angry';
-        }
-        else
-        {
-          anim = 'center';
-        }
+        anim = 'center${isAngry ? '-angry' : ''}';
     }
     box.animation.play(anim, true);
     DialogueBoxPsych.updateBoxOffsets(box);
@@ -352,18 +345,18 @@ class DialogueEditorState extends MusicBeatState implements PsychUIEventHandler.
 
     if (PsychUIInputText.focusOn == null)
     {
-      ClientPrefs.toggleVolumeKeys(true);
+      Controls.reset(true);
       if (FlxG.keys.justPressed.SPACE)
       {
         reloadText(false);
       }
       if (FlxG.keys.justPressed.ESCAPE)
       {
-        ClientPrefs.toggleVolumeKeys(true);
+        Controls.reset(true);
         if (!unsavedProgress)
         {
           MusicBeatState.switchState(new scfunkin.states.editors.MasterEditorMenu());
-          FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
+          FlxG.sound.playMusic(Paths.music("freakyMenu"));
           transitioning = true;
         }
         else
@@ -417,7 +410,7 @@ class DialogueEditorState extends MusicBeatState implements PsychUIEventHandler.
       }
     }
     else
-      ClientPrefs.toggleVolumeKeys(false);
+      Controls.reset(false);
     super.update(elapsed);
   }
 

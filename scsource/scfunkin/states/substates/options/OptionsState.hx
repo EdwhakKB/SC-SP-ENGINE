@@ -1,7 +1,7 @@
 package scfunkin.states.substates.options;
 
 import flixel.FlxObject;
-import scfunkin.backend.data.StageData;
+import scfunkin.backend.data.StageJsonData;
 import scfunkin.states.MainMenuState;
 
 class OptionsState extends MusicBeatState
@@ -93,7 +93,7 @@ class OptionsState extends MusicBeatState
     add(selectorRight);
 
     changeSelection();
-    ClientPrefs.saveSettings();
+    Save.flush();
 
     super.create();
   }
@@ -101,7 +101,7 @@ class OptionsState extends MusicBeatState
   override function closeSubState()
   {
     super.closeSubState();
-    ClientPrefs.saveSettings();
+    Save.flush();
     #if DISCORD_ALLOWED
     DiscordClient.changePresence("Options Menu", null);
     #end
@@ -135,7 +135,7 @@ class OptionsState extends MusicBeatState
       FlxG.sound.play(Paths.sound('cancelMenu'));
       if (onPlayState)
       {
-        StageData.loadDirectory(PlayState.SONG);
+        StageJsonData.loadDirectory(PlayState.SONG);
         LoadingState.loadAndSwitchState(new PlayState());
         FlxG.sound.music.volume = 0;
       }
@@ -178,8 +178,8 @@ class OptionsState extends MusicBeatState
 
   override function destroy()
   {
-    ClientPrefs.loadPrefs();
-    ClientPrefs.keybindSaveLoad();
+    Save.load();
+    Controls.load();
     super.destroy();
   }
 }

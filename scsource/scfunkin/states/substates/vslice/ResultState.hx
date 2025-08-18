@@ -8,7 +8,6 @@ import flixel.util.FlxColor;
 import flixel.util.FlxGradient;
 import flixel.graphics.frames.FlxBitmapFont;
 import flixel.addons.display.FlxBackdrop;
-import flxanimate.FlxAtlasSprite;
 import scfunkin.vslice.scoring.Scoring;
 import scfunkin.vslice.results.ResultScore;
 import scfunkin.vslice.results.TallyCounter;
@@ -48,14 +47,14 @@ class ResultState extends MusicBeatSubState
   final cameraScroll:FlxCamera;
   final cameraEverything:FlxCamera;
 
-  var bfPerfect:Null<FlxAtlasSprite> = null;
-  var heartsPerfect:Null<FlxAtlasSprite> = null;
-  var bfExcellent:Null<FlxAtlasSprite> = null;
-  var bfGreat:Null<FlxAtlasSprite> = null;
-  var gfGreat:Null<FlxAtlasSprite> = null;
-  var bfGood:Null<FlxSprite> = null;
-  var gfGood:Null<FlxSprite> = null;
-  var bfShit:Null<FlxAtlasSprite> = null;
+  var bfPerfect:Null<FunkinSCSprite> = null;
+  var heartsPerfect:Null<FunkinSCSprite> = null;
+  var bfExcellent:Null<FunkinSCSprite> = null;
+  var bfGreat:Null<FunkinSCSprite> = null;
+  var gfGreat:Null<FunkinSCSprite> = null;
+  var bfGood:Null<FunkinSCSprite> = null;
+  var gfGood:Null<FunkinSCSprite> = null;
+  var bfShit:Null<FunkinSCSprite> = null;
 
   var rankBg:FunkinSCSprite;
 
@@ -157,147 +156,67 @@ class ResultState extends MusicBeatSubState
     switch (rank)
     {
       case PERFECT | PERFECT_GOLD:
-        heartsPerfect = new FlxAtlasSprite(1342, 370, "");
+        heartsPerfect = new FunkinSCSprite(1342, 370, "resultScreen/results-bf/resultsPERFECT/hearts");
         heartsPerfect.visible = false;
         heartsPerfect.zIndex = 501;
-        Paths.loadAnimateAtlas(heartsPerfect, 'resultScreen/results-bf/resultsPERFECT/hearts');
-        heartsPerfect.onLoadAtlas();
+        heartsPerfect.anim.addBySymbol('hearts', 'hearts full anim', 24);
         add(heartsPerfect);
+        heartsPerfect.animation.onLoop.add(function(name:String) if (heartsPerfect != null) heartsPerfect.animation.curAnim.curFrame = 43);
 
-        function heartPlay()
-        {
-          if (heartsPerfect != null)
-          {
-            // bfPerfect.anim.curFrame = 137;
-            heartsPerfect.anim.curFrame = 43;
-            heartsPerfect.anim.play(); // unpauses this anim, since it's on PlayOnce!
-          }
-        }
-
-        heartsPerfect.anim.onComplete.add(heartPlay);
-
-        bfPerfect = new FlxAtlasSprite(1342, 370, "");
+        bfPerfect = new FunkinSCSprite(1342, 370, "resultScreen/results-bf/resultsPERFECT");
         bfPerfect.visible = false;
         bfPerfect.zIndex = 500;
-        Paths.loadAnimateAtlas(bfPerfect, 'resultScreen/results-bf/resultsPERFECT');
-        bfPerfect.onLoadAtlas();
+        bfPerfect.anim.addBySymbol('perfect', 'INTRO', 24, false);
+        bfPerfect.anim.addBySymbol('perfect loop', 'LOOP START', 24, false);
         add(bfPerfect);
-
-        function perfectPlay()
-        {
-          if (bfPerfect != null)
-          {
-            // bfPerfect.anim.curFrame = 137;
-            bfPerfect.anim.curFrame = 137;
-            bfPerfect.anim.play(); // unpauses this anim, since it's on PlayOnce!
-          }
-        }
-
-        bfPerfect.anim.onComplete.add(perfectPlay);
+        bfPerfect.anim.onFinish.add(function(name:String) if (bfPerfect != null) bfPerfect.anim.play('perfect loop'));
 
       case EXCELLENT:
-        bfExcellent = new FlxAtlasSprite(1329, 429, "");
+        bfExcellent = new FunkinSCSprite(1329, 429, 'resultScreen/results-bf/resultsEXCELLENT');
         bfExcellent.visible = false;
         bfExcellent.zIndex = 500;
-        Paths.loadAnimateAtlas(bfExcellent, 'resultScreen/results-bf/resultsEXCELLENT');
-        bfExcellent.onLoadAtlas();
+        bfExcellent.anim.addBySymbol('excellent', 'RESULTS_BOYFRIEND_EXCELLENT_RANK_final_v2', 24);
         add(bfExcellent);
-
-        function excelPlay()
-        {
-          if (bfExcellent != null)
-          {
-            bfExcellent.anim.curFrame = 28;
-            bfExcellent.anim.play(); // unpauses this anim, since it's on PlayOnce!
-          }
-        }
-
-        bfExcellent.anim.onComplete.add(excelPlay);
+        bfExcellent.anim.onLoop.add(function(name:String) if (bfExcellent != null) bfExcellent.animation.curAnim.curFrame = 28);
 
       case GREAT:
-        gfGreat = new FlxAtlasSprite(802, 331, "");
+        gfGreat = new FunkinSCSprite(802, 331, 'resultScreen/results-bf/resultsGREAT/gf');
         gfGreat.visible = false;
         gfGreat.zIndex = 499;
-        Paths.loadAnimateAtlas(gfGreat, 'resultScreen/results-bf/resultsGREAT/gf');
-        gfGreat.onLoadAtlas();
+        gfGreat.anim.addBySymbol('great', 'gf jumping', 24);
         add(gfGreat);
-
         gfGreat.scale.set(0.93, 0.93);
+        gfGreat.animation.onLoop.add(function(name:String) if (gfGreat != null) gfGreat.animation.curAnim.curFrame = 9);
 
-        function gfGreatPlay()
-        {
-          if (gfGreat != null)
-          {
-            gfGreat.anim.curFrame = 9;
-            gfGreat.anim.play(); // unpauses this anim, since it's on PlayOnce!
-          }
-        }
-
-        gfGreat.anim.onComplete.add(gfGreatPlay);
-
-        bfGreat = new FlxAtlasSprite(929, 363);
+        bfGreat = new FunkinSCSprite(929, 363, 'resultScreen/results-bf/resultsGREAT/bf');
         bfGreat.visible = false;
         bfGreat.zIndex = 500;
-        Paths.loadAnimateAtlas(bfGreat, 'resultScreen/results-bf/resultsGREAT/bf');
-        bfGreat.onLoadAtlas();
+        bfGreat.anim.addBySymbol('great', 'bf jumping ', 24);
         add(bfGreat);
-
         bfGreat.scale.set(0.93, 0.93);
-
-        function bfGreatPlay()
-        {
-          if (bfGreat != null)
-          {
-            bfGreat.anim.curFrame = 15;
-            bfGreat.anim.play(); // unpauses this anim, since it's on PlayOnce!
-          }
-        }
-
-        bfGreat.anim.onComplete.add(bfGreatPlay);
+        bfGreat.anim.onLoop.add(function(name:String) if (bfGreat != null) bfGreat.animation.curAnim.curFrame = 15);
 
       case GOOD:
-        gfGood = new FlxSprite(625, 325);
-        gfGood.frames = Paths.getSparrowAtlas('resultScreen/results-bf/resultsGOOD/resultGirlfriendGOOD');
+        gfGood = new FunkinSCSprite(625, 325, 'resultScreen/results-bf/resultsGOOD/resultGirlfriendGOOD');
         gfGood.animation.addByPrefix("clap", "Girlfriend Good Anim", 24, false);
         gfGood.visible = false;
         gfGood.zIndex = 500;
-        gfGood.animation.finishCallback = _ -> {
-          if (gfGood != null)
-          {
-            gfGood.animation.play('clap', true, false, 9);
-          }
-        };
+        gfGood.animation.onFinish.add(function(name:String) gfGood?.playAnim('clap', true, false, 9));
         add(gfGood);
 
-        bfGood = new FlxSprite(640, -200);
-        bfGood.frames = Paths.getSparrowAtlas('resultScreen/results-bf/resultsGOOD/resultBoyfriendGOOD');
+        bfGood = new FunkinSCSprite(640, -200, 'resultScreen/results-bf/resultsGOOD/resultBoyfriendGOOD');
         bfGood.animation.addByPrefix("fall", "Boyfriend Good Anim0", 24, false);
         bfGood.visible = false;
         bfGood.zIndex = 501;
-        bfGood.animation.finishCallback = function(_) {
-          if (bfGood != null)
-          {
-            bfGood.animation.play('fall', true, false, 14);
-          }
-        };
+        bfGood.animation.onFinish.add(function(name:String) bfGood?.playAnim(name, true, false, 14));
         add(bfGood);
 
       case SHIT:
-        bfShit = new FlxAtlasSprite(0, 20, "");
+        bfShit = new FunkinSCSprite(0, 20, 'resultScreen/results-bf/resultsSHIT');
         bfShit.visible = false;
         bfShit.zIndex = 500;
-        Paths.loadAnimateAtlas(bfShit, 'resultScreen/results-bf/resultsSHIT');
-        bfShit.onLoadAtlas();
+        bfShit.anim.addBySymbol('loss', 'LOSS Animation', 24);
         add(bfShit);
-
-        function loopAnim()
-        {
-          if (bfShit != null)
-          {
-            bfShit.playAnimation('Loop Start');
-          }
-        }
-        bfShit.anim.onComplete.add(loopAnim);
     }
 
     var diffSpr:String = 'diff_${params?.difficultyId ?? 'Normal'}';
@@ -382,9 +301,7 @@ class ResultState extends MusicBeatSubState
         highscoreNew.animation.finishCallback = _ -> highscoreNew.animation.play("new", true, false, 16);
       }
       else
-      {
         highscoreNew.visible = false;
-      }
     });
 
     var hStuf:Int = 50;
@@ -470,7 +387,7 @@ class ResultState extends MusicBeatSubState
 
     rankBg.alpha = 0;
 
-    refresh();
+    refreshZIndex();
 
     super.create();
   }
@@ -561,7 +478,7 @@ class ResultState extends MusicBeatSubState
       };
     }
 
-    refresh();
+    refreshZIndex();
   }
 
   function displayRankText():Void
@@ -597,7 +514,7 @@ class ResultState extends MusicBeatSubState
       rankTextBack.velocity.x = (i % 2 == 0) ? -7.0 : 7.0;
     }
 
-    refresh();
+    refreshZIndex();
   }
 
   function afterRankTallySequence():Void
@@ -614,7 +531,7 @@ class ResultState extends MusicBeatSubState
         else
         {
           bfPerfect.visible = true;
-          bfPerfect.playAnimation('');
+          bfPerfect.anim.play('perfect');
         }
         new FlxTimer().start(106 / 24, _ -> {
           if (heartsPerfect == null)
@@ -624,7 +541,7 @@ class ResultState extends MusicBeatSubState
           else
           {
             heartsPerfect.visible = true;
-            heartsPerfect.playAnimation('');
+            heartsPerfect.playAnim('hearts');
           }
         });
       case EXCELLENT:
@@ -635,7 +552,7 @@ class ResultState extends MusicBeatSubState
         else
         {
           bfExcellent.visible = true;
-          bfExcellent.playAnimation('');
+          bfExcellent.playAnim('excellent');
         }
       case GREAT:
         if (bfGreat == null)
@@ -645,7 +562,7 @@ class ResultState extends MusicBeatSubState
         else
         {
           bfGreat.visible = true;
-          bfGreat.playAnimation('');
+          bfGreat.playAnim('great');
         }
 
         new FlxTimer().start(6 / 24, _ -> {
@@ -656,7 +573,7 @@ class ResultState extends MusicBeatSubState
           else
           {
             gfGreat.visible = true;
-            gfGreat.playAnimation('');
+            gfGreat.playAnim('great');
           }
         });
       case SHIT:
@@ -667,7 +584,7 @@ class ResultState extends MusicBeatSubState
         else
         {
           bfShit.visible = true;
-          bfShit.playAnimation('Intro');
+          bfShit.playAnim('loss');
         }
       case GOOD:
         if (bfGood == null)
@@ -741,7 +658,7 @@ class ResultState extends MusicBeatSubState
 
       clearPercentSmall.curNumber = clearPercentTarget;
       clearPercentSmall.zIndex = 1000;
-      refresh();
+      refreshZIndex();
     }
 
     new FlxTimer().start(2.5, _ -> {
@@ -881,7 +798,7 @@ class ResultState extends MusicBeatSubState
         Mods.loadTopMod();
         #if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
         openSubState(new scfunkin.vslice.transition.StickerSubState(null, (sticker) -> new StoryMenuState(sticker)));
-        FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
+        FlxG.sound.playMusic(Paths.music("freakyMenu"));
       }
       else
       {
@@ -897,7 +814,7 @@ class ResultState extends MusicBeatSubState
                 Mods.loadTopMod();
                 #if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
                 MusicBeatState.switchState(new FreeplayState());
-                FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
+                FlxG.sound.playMusic(Paths.music("freakyMenu"));
               }
             });
         }
@@ -907,7 +824,7 @@ class ResultState extends MusicBeatSubState
           Debug.logInfo('WENT BACK TO FREEPLAY?? - LOW SCORE');
           Mods.loadTopMod();
           openSubState(new scfunkin.vslice.transition.StickerSubState(null, (sticker) -> new FreeplayState(sticker)));
-          FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
+          FlxG.sound.playMusic(Paths.music("freakyMenu"));
         }
       }
     }

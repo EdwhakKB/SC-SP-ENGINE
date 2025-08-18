@@ -41,12 +41,8 @@ class WindowUtil
   public static function openFolder(targetPath:String):Void
   {
     #if CAN_OPEN_LINKS
-    #if windows
-    Sys.command('explorer', [targetPath.replace('/', '\\')]);
-    #elseif mac
-    Sys.command('open', [targetPath]);
-    #elseif linux
-    Sys.command('open', [targetPath]);
+    #if (windows || mac || linux)
+    Sys.command(#if windows 'explorer' #else 'open' #end, [#if windows targetPath.replace('/', '\\') #else targetPath #end]);
     #end
     #else
     throw 'Cannot open URLs on this platform.';
@@ -85,11 +81,8 @@ class WindowUtil
   public static function initWindowEvents():Void
   {
     // onUpdate is called every frame just before rendering.
-
     // onExit is called when the game window is closed.
-    openfl.Lib.current.stage.application.onExit.add(function(exitCode:Int) {
-      windowExit.dispatch(exitCode);
-    });
+    openfl.Lib.current.stage.application.onExit.add(function(exitCode:Int) windowExit.dispatch(exitCode));
   }
 
   /**

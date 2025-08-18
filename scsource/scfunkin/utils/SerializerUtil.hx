@@ -1,6 +1,5 @@
 package scfunkin.utils;
 
-import haxe.Json;
 import haxe.io.Bytes;
 import thx.semver.Version;
 
@@ -18,7 +17,7 @@ class SerializerUtil
    * And don't even THINK about using `haxe.Json.stringify` without the replacer!
    */
   public static function toJSON(input:Dynamic, pretty:Bool = true):String
-    return Json.stringify(input, replacer, pretty ? INDENT_CHAR : null);
+    return HaxeJson.stringify(input, replacer, pretty ? INDENT_CHAR : null);
 
   /**
    * Convert a JSON string to a Haxe object.
@@ -26,9 +25,7 @@ class SerializerUtil
   public static function fromJSON(input:String):Dynamic
   {
     try
-    {
-      return Json.parse(input);
-    }
+      return HaxeJson.parse(input)
     catch (e)
     {
       Debug.logInfo('An error occurred while parsing JSON from string data');
@@ -43,9 +40,7 @@ class SerializerUtil
   public static function fromJSONBytes(input:Bytes):Dynamic
   {
     try
-    {
-      return Json.parse(input.toString());
-    }
+      return HaxeJson.parse(input.toString())
     catch (e:Dynamic)
     {
       Debug.logInfo('An error occurred while parsing JSON from byte data');
@@ -119,7 +114,5 @@ class FunkinTypeResolver
   }
 
   public function resolveEnum(name:String):Enum<Dynamic>
-  {
     return Type.resolveEnum(name);
-  }
 }

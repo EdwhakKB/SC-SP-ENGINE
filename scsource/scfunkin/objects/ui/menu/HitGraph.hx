@@ -1,6 +1,6 @@
 package scfunkin.objects.ui.menu;
 
-import scfunkin.backend.data.judgement.Rating;
+import scfunkin.backend.data.judgement.Judgement;
 import openfl.text.TextFieldAutoSize;
 import openfl.text.TextFormat;
 import openfl.display.Sprite;
@@ -10,7 +10,7 @@ import flixel.util.FlxDestroyUtil;
 typedef HitNote =
 {
   var diff:Float;
-  var rating:RatingWindow;
+  var rating:Judgement;
   var strumTime:Float;
 }
 
@@ -63,7 +63,7 @@ class HitGraph extends Sprite
 
   private function drawJudgeLine(ms:Float, color:FlxColor)
   {
-    var y_position = FlxMath.remapToRange((_height / 2) + ms, (_height / 2), (_height / 2) + Rating.timingWindows[0].timingWindow, _height / 2, _height)
+    var y_position = FlxMath.remapToRange((_height / 2) + ms, (_height / 2), (_height / 2) + Judgement.judgements[0].timing, _height / 2, _height)
       + ((_rectHeight - _height) / 2);
 
     var daColor = color.to24Bit();
@@ -79,8 +79,8 @@ class HitGraph extends Sprite
     lateText = createTextField(7, 7, FlxColor.WHITE, 12);
     earlyText = createTextField(7, _rectHeight - 21, FlxColor.WHITE, 12);
 
-    earlyText.text = "Early (" + -Rating.timingWindows[0].timingWindow + "ms)";
-    lateText.text = "Late (" + Rating.timingWindows[0].timingWindow + "ms)";
+    earlyText.text = "Early (" + -Judgement.judgements[0].timing + "ms)";
+    lateText.text = "Late (" + Judgement.judgements[0].timing + "ms)";
 
     addChild(earlyText);
     addChild(lateText);
@@ -91,7 +91,7 @@ class HitGraph extends Sprite
     // MID LINE
     drawJudgeLine(0, 0xFFFFFF);
 
-    var posVals = Rating.timingWindows.copy();
+    var posVals = Judgement.judgements.copy();
 
     for (i in 0...(posVals.length * 2))
     {
@@ -110,8 +110,8 @@ class HitGraph extends Sprite
   {
     for (i in 0...history.length)
     {
-      var x_position = (history[i].strumTime / FlxG.sound.music.length / PlayState.instance.playbackRate) * (_width);
-      var y_position = FlxMath.remapToRange((_height / 2) + history[i].diff, (_height / 2), (_height / 2) + Rating.timingWindows[0].timingWindow, _height / 2,
+      var x_position = (history[i].strumTime / FlxG.sound.music.length / FlxG.sound.music.pitch) * (_width);
+      var y_position = FlxMath.remapToRange((_height / 2) + history[i].diff, (_height / 2), (_height / 2) + Judgement.judgements[0].timing, _height / 2,
         _height)
         + ((_rectHeight - _height) / 2);
 
@@ -126,7 +126,7 @@ class HitGraph extends Sprite
     drawHitNotes();
   }
 
-  public function addToHistory(noteDiff:Float, noteRating:RatingWindow, noteStrum:Float)
+  public function addToHistory(noteDiff:Float, noteRating:Judgement, noteStrum:Float)
   {
     history.push({diff: noteDiff, rating: noteRating, strumTime: noteStrum});
   }

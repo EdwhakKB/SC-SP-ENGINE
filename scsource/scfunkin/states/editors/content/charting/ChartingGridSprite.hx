@@ -85,7 +85,6 @@ class ChartingGridSprite extends FlxSprite
       {
         vortexLine.y += vortexLineSpace;
         if (vortexLine.y >= this.y + this.height) break;
-
         vortexLine.draw();
       }
     }

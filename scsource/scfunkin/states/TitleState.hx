@@ -14,21 +14,22 @@ import scfunkin.states.menu.StoryMenuState;
 import scfunkin.states.MainMenuState;
 
 @:structInit
+@:publicFields
 class TitleData
 {
-  public var titlex:Float = -150;
-  public var titley:Float = -100;
-  public var startx:Float = 100;
-  public var starty:Float = 576;
-  public var gfx:Float = 512;
-  public var gfy:Float = 40;
-  public var backgroundSprite:String = '';
-  public var bpm:Float = 102;
-  public var skipTime:Float = 0;
-  public var animation:String = '';
-  public var dance_right:Array<Int> = [];
-  public var dance_left:Array<Int> = [];
-  public var idle:Bool = false;
+  var titlex:Float = -150;
+  var titley:Float = -100;
+  var startx:Float = 100;
+  var starty:Float = 576;
+  var gfx:Float = 512;
+  var gfy:Float = 40;
+  var backgroundSprite:String = '';
+  var bpm:Float = 102;
+  var skipTime:Float = 0;
+  var animation:String = '';
+  var dance_right:Array<Int> = [];
+  var dance_left:Array<Int> = [];
+  var idle:Bool = false;
 }
 
 class TitleState extends MusicBeatState
@@ -112,8 +113,6 @@ class TitleState extends MusicBeatState
     #end
 
     Assets.cache.enabled = true;
-    ClientPrefs.data.SCEWatermark = ClientPrefs.data.SCEWatermark;
-
     loadJsonData();
 
     FlxTween.tween(whiteGrad2, {"pixels.height": 400, alpha: 0.7}, Conductor.crochet / 1900,
@@ -195,16 +194,19 @@ class TitleState extends MusicBeatState
     particlesUP.visible = false;
     particlesDOWN.visible = false;
 
-    add(particlesUP);
-    add(particlesDOWN);
+    if (Save.isQuality('high', '>='))
+    {
+      add(particlesUP);
+      add(particlesDOWN);
 
-    add(whiteGrad);
-    add(whiteGrad2);
-    add(grayGrad);
-    add(grayGrad2);
+      add(whiteGrad);
+      add(whiteGrad2);
+      add(grayGrad);
+      add(grayGrad2);
+    }
 
     gf = new FlxSprite(gfPosition.x, gfPosition.y);
-    gf.antialiasing = ClientPrefs.data.antialiasing;
+    gf.antialiasing = Save.get('antialiasing');
     gf.alpha = 0.0001;
     add(gf);
     gf.frames = Paths.getSparrowAtlas(characterImage);
@@ -222,13 +224,13 @@ class TitleState extends MusicBeatState
 
     logo = new FlxSprite(logoPosition.x, logoPosition.y);
     logo.frames = Paths.getSparrowAtlas('logoBumpin');
-    logo.antialiasing = ClientPrefs.data.antialiasing;
+    logo.antialiasing = Save.get('antialiasing');
     logo.animation.addByPrefix('bump', 'logo bumpin', 24, false);
     logo.animation.play('bump');
     logo.alpha = 0.0001;
     add(logo);
 
-    if (ClientPrefs.data.shaders)
+    if (Save.get('shaders'))
     {
       colourSwap = new ColorSwap();
       gf.shader = colourSwap.shader;
@@ -248,7 +250,7 @@ class TitleState extends MusicBeatState
     if (newTitle = animFrames.length > 0)
     {
       titleText.animation.addByPrefix('idle', "ENTER IDLE", 24);
-      titleText.animation.addByPrefix('press', ClientPrefs.data.flashing ? "ENTER PRESSED" : "ENTER FREEZE", 24);
+      titleText.animation.addByPrefix('press', Save.get('flashing') ? "ENTER PRESSED" : "ENTER FREEZE", 24);
     }
     else
     {
@@ -274,9 +276,9 @@ class TitleState extends MusicBeatState
       ngSpr.setGraphicSize(Std.int(ngSpr.width * 0.8));
       ngSpr.updateHitbox();
       ngSpr.screenCenter(X);
-      ngSpr.antialiasing = ClientPrefs.data.antialiasing;
+      ngSpr.antialiasing = Save.get('antialiasing');
 
-      FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"), 0);
+      FlxG.sound.playMusic(Paths.music("freakyMenu"), 0);
       MainMenuState.freakyPlaying = true;
 
       FlxG.sound.music.fadeIn(4, 0, 0.7);
@@ -287,18 +289,9 @@ class TitleState extends MusicBeatState
 
   function getIntroTextShit():Array<Array<String>>
   {
-    #if MODS_ALLOWED
-    final firstArray:Array<String> = Mods.mergeAllTextsNamed('data/introText.txt');
-    #else
-    final fullText:String = Assets.getText(Paths.txt('introText'));
-    final firstArray:Array<String> = fullText.split('\n');
-    #end
-    final swagGoodArray:Array<Array<String>> = [];
-
-    for (i in firstArray)
-      swagGoodArray.push(i.split('--'));
-
-    return swagGoodArray;
+    final firstArray:Array<String> = #if MODS_ALLOWED Mods.mergeAllTextsNamed('data/introText.txt'); #else Assets.getText(Paths.txt('introText'))
+      .split('\n'); #end
+    return [for (i in firstArray) i.split('--')];
   }
 
   override function update(elapsed:Float)
@@ -350,12 +343,8 @@ class TitleState extends MusicBeatState
   {
     super.beatHit();
 
-    if (!useIdle)
-    {
-      gf.animation.play(curBeat % 2 == 0 ? 'danceRight' : 'danceLeft');
-    }
+    if (!useIdle) gf.animation.play(curBeat % 2 == 0 ? 'danceRight' : 'danceLeft');
     else if (curBeat % 2 == 0) gf.animation.play('idle', true);
-    gf.animation.play(curBeat % 2 == 0 ? 'left' : 'right', true);
     logo.animation.play('bump', true);
 
     FlxG.camera.zoom = 1.125;
@@ -368,56 +357,55 @@ class TitleState extends MusicBeatState
     if (!skippedIntro) gradsUpdate(curBeat % 2 == 0 ? (FlxG.random.bool(50) ? 'left' : 'up') : (FlxG.random.bool(50) ? 'right' : 'down'));
     else
       gradsUpdate('all');
-    if (!skippedIntro)
-    {
-      switch (curBeat)
-      {
-        case 2:
-          if (ClientPrefs.data.SCEWatermark) createText(['Sick Coders Engine by'], 40, "#6497B1");
-          else
-            createText(['ninjamuffin99', 'PhantomArcade', 'Kawai sprite', 'evilsk8er'], 0, "#6497B1");
-        case 3:
-          if (ClientPrefs.data.SCEWatermark)
-          {
-            addMoreText('Glowsoony', 50, "#006D82");
-            addMoreText('Edwhak_KillBot', 60, "#1D2E28");
-          }
-          else
-            addMoreText('present', 0, "#006A89");
-        case 4:
-          deleteText();
-        case 5:
-          if (ClientPrefs.data.SCEWatermark) createText(['In association', 'with'], -50, "random");
-          else
-            createText(['Not associated', 'with'], -40, "random");
-        case 7:
-          if (ClientPrefs.data.SCEWatermark) addMoreText('Sick Coders!', -40, "#FF0030");
-          else
-          {
-            addMoreText('newgrounds', -40, "#FFA400");
-            ngSpr.visible = true;
-          }
-        case 8:
-          deleteText();
-          ngSpr.visible = false;
-        case 9:
-          createText([randomPhrase[0]], 0, "random");
-        case 11:
-          addMoreText(randomPhrase[1], 0, "random");
-        case 12:
-          deleteText();
-        case 13:
-          addMoreText('Friday Night', 0, "random");
-        case 14:
-          addMoreText('Funkin', 0, "random");
-        case 15:
-          if (ClientPrefs.data.SCEWatermark) addMoreText('Sick Coders Edition', 0, "#FFFF90");
-          else
-            addMoreText('Psych Engine Edition', 0, "#FFFF90");
-        case 16:
-          skipIntro();
-      }
-    }
+    if (skippedIntro) return;
+    // switch (curBeat)
+    // {
+    //   case 2:
+    //     if (Save.get('SCEWatermark')) createText(['Sick Coders Engine by'], 40, "#6497B1");
+    //     else
+    //       createText(['ninjamuffin99', 'PhantomArcade', 'Kawai sprite', 'evilsk8er'], 0, "#6497B1");
+    //   case 3:
+    //     if (Save.get('SCEWatermark'))
+    //     {
+    //       addMoreText('Glowsoony', 50, "#006D82");
+    //       addMoreText('Edwhak_KillBot', 60, "#1D2E28");
+    //     }
+    //     else
+    //       addMoreText('present', 0, "#006A89");
+    //   case 4:
+    //     deleteText();
+    //   case 5:
+    //     if (Save.get('SCEWatermark')) createText(['In association', 'with'], -50, "random");
+    //     else
+    //       createText(['Not associated', 'with'], -40, "random");
+    //   case 7:
+    //     if (Save.get('SCEWatermark')) addMoreText('Sick Coders!', -40, "#FF0030");
+    //     else
+    //     {
+    //       addMoreText('newgrounds', -40, "#FFA400");
+    //       ngSpr.visible = true;
+    //     }
+    //   case 8:
+    //     deleteText();
+    //     ngSpr.visible = false;
+    //   case 9:
+    //     createText([randomPhrase[0]], 0, "random");
+    //   case 11:
+    //     addMoreText(randomPhrase[1], 0, "random");
+    //   case 12:
+    //     deleteText();
+    //   case 13:
+    //     addMoreText('Friday Night', 0, "random");
+    //   case 14:
+    //     addMoreText('Funkin', 0, "random");
+    //   case 15:
+    //     if (Save.get('SCEWatermark')) addMoreText('Sick Coders Edition', 0, "#FFFF90");
+    //     else
+    //       addMoreText('Psych Engine Edition', 0, "#FFFF90");
+    //   case 16:
+    //     skipIntro();
+    // }
+    if (curBeat == 16) skipIntro();
   }
 
   function skipIntro()
@@ -537,12 +525,12 @@ class TitleState extends MusicBeatState
       {
         pressedEnter = true;
 
-        if (ClientPrefs.data.flashing) titleText.active = true;
+        if (Save.get('flashing')) titleText.active = true;
         titleText.animation.play('press');
         titleText.color = FlxColor.WHITE;
         titleText.alpha = 1;
 
-        FlxG.camera.flash(ClientPrefs.data.flashing ? FlxColor.WHITE : 0x4CFFFFFF, 1);
+        FlxG.camera.flash(Save.get('flashing') ? FlxColor.WHITE : 0x4CFFFFFF, 1);
         FlxG.sound.play(Paths.sound('confirmMenu'), 0.7);
 
         new FlxTimer().start(1.5, function(okFlixel:FlxTimer) {
@@ -557,7 +545,7 @@ class TitleState extends MusicBeatState
 
   function getBuildVer():Void
   {
-    if (ClientPrefs.data.checkForUpdates && !skippedIntro)
+    if (Save.get('checkForUpdates') && !skippedIntro)
     {
       Debug.logInfo('checking for update');
       var http = new haxe.Http("https://raw.githubusercontent.com/EdwhakKB/SC-SP-ENGINE/main/gitVersion.txt");
@@ -693,7 +681,7 @@ class TitleState extends MusicBeatState
           if (titleJson.backgroundSprite != null && titleJson.backgroundSprite.trim().length > 0)
           {
             final bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image(titleJson.backgroundSprite));
-            bg.antialiasing = titleJson.backgroundSprite.endsWith('-pixel') ? false : ClientPrefs.data.antialiasing;
+            bg.antialiasing = titleJson.backgroundSprite.endsWith('-pixel') ? false : Save.get('antialiasing');
             add(bg);
           }
         }

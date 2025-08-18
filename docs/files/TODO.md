@@ -1,16 +1,7 @@
 # TODO:
 - [x] Reorganize source code.
+- [x] Reorganize assets folder.
 - - [ ] Remove unnecessary lines to each file.
-
-- [ ] Update all documentation. (New file changes for everything).
-- - [ ] Changelog updates.
-- [ ] Create a doc/file to store all new documentation.
-- - [ ] Store additional outside source data along with this.
-- [ ] Document assets' changes.
-- - [ ] Showcase all changes, not just the basic moving of this changes.
-- [ ] Document more states / objects to be advised about.
-- - [ ] Also add internal documentation to these (???)
-- [ ] Update script templates and all functions (hx and lua) accordingly.
 
 - [ ] Re-add Gamejolt features with a few more changes.
 - [ ] Redo a few things. (i.e things like how options currently load ig??)
@@ -21,13 +12,19 @@
 
 - [ ] Create HUD Editor. (Stupid but like lol)
 - [ ] Better the README.md
-- [ ] Finish EditorPlayState changes.
-- [ ] Revamp Lua to publicly run throughout the engine (it is possible!)
+- [ ] Remaster and re-add a EditorPlayState.
+- [ ] Revamp Lua to publicly run throughout the engine (Mainly functional!)
 
-- [ ] Fix note selection box in charting state (???)
 - [ ] Fix all possible bugs found by myself and others (help I need build testers)
 
-- [ ] Remove the opponent mode scoring (opponent mode is now true opponent mode!)
-- - [ ] Maybe leave it for those who want to allow socring to be reversed?
+- [ ] Make a wiki page for templates, scripts, and information on scripting overall, also general information on how things work on this engine.
 
-- [x] Rwar
+<!-- - [ ] Update all documentation. (New file changes for everything).
+- - [ ] Changelog updates.
+- [ ] Create a doc/file to store all new documentation.
+- - [ ] Store additional outside source data along with this.
+- [ ] Document assets' changes.
+- - [ ] Showcase all changes, not just the basic moving of this changes.
+- [ ] Document more states / objects to be advised about.
+- - [ ] Also add internal documentation to these (???)
+- [ ] Update script templates and all functions (hx and lua) accordingly. -->

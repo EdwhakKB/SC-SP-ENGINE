@@ -12,11 +12,11 @@ import openfl.events.IOErrorEvent;
 import openfl.net.FileFilter;
 import scfunkin.states.editors.content.Prompt;
 import scfunkin.states.editors.content.PreloadListSubState;
+import scfunkin.backend.data.StageJsonData;
 import scfunkin.backend.data.StageData;
-import scfunkin.utils.LuaUtil;
-import scfunkin.objects.misc.PsychCamera;
+import scfunkin.objects.misc.FunkinSCCamera;
 import scfunkin.objects.ui.Character;
-import scfunkin.objects.ui.scripting.ModchartSprite;
+import scfunkin.backend.data.packed.animation.AnimationData;
 
 class StageEditorState extends MusicBeatState implements PsychUIEventHandler.PsychUIEvent
 {
@@ -68,7 +68,7 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
     camHUD.bgColor.alpha = 0;
     FlxG.cameras.add(camHUD, false);
 
-    if (stageJson == null) stageJson = StageData.getStageFile(lastLoadedStage);
+    if (stageJson == null) stageJson = StageJsonData.getUnsafeStageFile(lastLoadedStage);
     FlxG.camera.follow(null, LOCKON, 0);
 
     loadJsonAssetDirectory();
@@ -168,13 +168,13 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
   function updateSpriteList()
   {
     for (spr in stageSprites)
-      if (spr != null && !StageData.reservedNames.contains(spr.type)) spr.sprite = FlxDestroyUtil.destroy(spr.sprite);
+      if (spr != null && !StageJsonData.reservedNames.contains(spr.type)) spr.sprite = FlxDestroyUtil.destroy(spr.sprite);
 
     stageSprites = [];
     var list:Map<String, FlxSprite> = [];
     if (stageJson.objects != null && stageJson.objects.length > 0)
     {
-      list = StageData.addObjectsToState(stageJson.objects, gf, dad, boyfriend, null, true);
+      list = StageJsonData.addObjectsToState(stageJson.objects, gf, dad, boyfriend, null, true);
       for (key => spr in list)
         stageSprites[spr.ID] = new StageEditorMetaSprite(stageJson.objects[spr.ID], spr);
     }
@@ -190,13 +190,11 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 
   function screenUI()
   {
-    var lowQualityCheckbox:PsychUICheckBox = null;
-    var highQualityCheckbox:PsychUICheckBox = null;
-    function visibilityFilterUpdate()
+    var qualityDropDown:PsychUIDropDownMenu;
+    function visibilityFilterUpdate(filter:String)
     {
       curFilters = 0;
-      if (lowQualityCheckbox.checked) curFilters |= LOW_QUALITY;
-      if (highQualityCheckbox.checked) curFilters |= HIGH_QUALITY;
+      if (filter != '') curFilters |= curFilters.fromString(filter);
     }
 
     spriteList_box = new PsychUIBox(25, 40, 250, 200, ['Sprite List']);
@@ -244,18 +242,12 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
     focusRadioGroup.cameras = [camHUD];
     add(focusRadioGroup);
 
-    lowQualityCheckbox = new PsychUICheckBox(FlxG.width - 240, FlxG.height - 36, 'Can see Low Quality Sprites?', 90);
-    lowQualityCheckbox.cameras = [camHUD];
-    lowQualityCheckbox.onClick = visibilityFilterUpdate;
-    lowQualityCheckbox.checked = false;
-    add(lowQualityCheckbox);
-
-    highQualityCheckbox = new PsychUICheckBox(FlxG.width - 120, FlxG.height - 36, 'Can see High Quality Sprites?', 90);
-    highQualityCheckbox.cameras = [camHUD];
-    highQualityCheckbox.onClick = visibilityFilterUpdate;
-    highQualityCheckbox.checked = true;
-    add(highQualityCheckbox);
-    visibilityFilterUpdate();
+    qualityDropDown = new PsychUIDropDownMenu(FlxG.width - 240, FlxG.height - 36, [''].concat(QualityFilter.filters),
+      function(id:Int, cur:String) curFilters = QualityFilter.fromString(cur), 90);
+    qualityDropDown.cameras = [camHUD];
+    qualityDropDown.selectedLabel = 'high';
+    add(qualityDropDown);
+    curFilters = QualityFilter.fromString(qualityDropDown.selectedLabel);
 
     posTxt = new FlxText(0, 50, 500, 'X: 0\nY: 0', 24);
     posTxt.setFormat(Paths.font('vcr.ttf'), 24, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
@@ -334,9 +326,9 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 
       var selected:Int = spriteListRadioGroup.labels.length - selected - 1;
       var spr = stageSprites[selected];
-      if (spr == null || StageData.reservedNames.contains(spr.type)) return;
+      if (spr == null || StageJsonData.reservedNames.contains(spr.type)) return;
 
-      var copiedSpr = new ModchartSprite();
+      var copiedSpr = new FunkinSCSprite();
       var copiedMeta:StageEditorMetaSprite = new StageEditorMetaSprite(null, copiedSpr);
       for (field in Reflect.fields(spr))
       {
@@ -388,7 +380,7 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
           else
             copiedSpr.animation.addByPrefix(anim.anim, anim.name, anim.fps, anim.loop);
 
-          if (anim.offsets != null && anim.offsets.length > 1) copiedSpr.addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
+          if (anim.offsets != null && anim.offsets.length > 1) copiedSpr.setOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
 
           if (copiedSpr.animation.curAnim == null || copiedMeta.firstAnimation == anim.anim) copiedSpr.playAnim(anim.anim, true);
         }
@@ -409,7 +401,7 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 
       var selected:Int = spriteListRadioGroup.labels.length - selected - 1;
       var spr = stageSprites[selected];
-      if (spr == null || StageData.reservedNames.contains(spr.type)) return;
+      if (spr == null || StageJsonData.reservedNames.contains(spr.type)) return;
 
       stageSprites.remove(spr);
       spr.sprite = FlxDestroyUtil.destroy(spr.sprite);
@@ -428,9 +420,7 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
     outputTxt.text = txt;
     outputTime = 3;
 
-    if (isError) FlxG.sound.play(Paths.sound('cancelMenu'), 0.4);
-    else
-      FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+    FlxG.sound.play(Paths.sound((isError ? 'scroll' : 'cancel') + 'Menu'), 0.4);
   }
 
   var createPopup:FlxSpriteGroup;
@@ -504,7 +494,7 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 
     btnY += 50;
     var btn:PsychUIButton = new PsychUIButton(0, btnY, 'Solid Color', function() {
-      var meta:StageEditorMetaSprite = new StageEditorMetaSprite({type: 'square', scale: [200, 200], name: findUnoccupiedName()}, new ModchartSprite());
+      var meta:StageEditorMetaSprite = new StageEditorMetaSprite({type: 'square', scale: [200, 200], name: findUnoccupiedName()}, new FunkinSCSprite());
       meta.sprite.makeGraphic(1, 1, FlxColor.WHITE);
       meta.sprite.scale.set(200, 200);
       meta.sprite.updateHitbox();
@@ -745,8 +735,7 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
   var antialiasingCheckbox:PsychUICheckBox;
   var flipXCheckBox:PsychUICheckBox;
   var flipYCheckBox:PsychUICheckBox;
-  var lowQualityCheckbox:PsychUICheckBox;
-  var highQualityCheckbox:PsychUICheckBox;
+  var qualityDropDown:PsychUIDropDownMenu;
 
   function getSelected(blockReserved:Bool = true)
   {
@@ -754,7 +743,7 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
     if (selected >= 0)
     {
       var spr = stageSprites[spriteListRadioGroup.labels.length - selected - 1];
-      if (spr != null && (!blockReserved || !StageData.reservedNames.contains(spr.type))) return spr;
+      if (spr != null && (!blockReserved || !StageJsonData.reservedNames.contains(spr.type))) return spr;
     }
     return null;
   }
@@ -780,7 +769,7 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
           return;
         }
 
-        if (StageData.reservedNames.contains(changedName))
+        if (StageJsonData.reservedNames.contains(changedName))
         {
           showOutput('To avoid conflicts, this name cannot be used!', true);
           return;
@@ -889,10 +878,7 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
       {
         if (selected.type != 'square') selected.antialiasing = antialiasingCheckbox.checked;
         else
-        {
-          antialiasingCheckbox.checked = false;
-          selected.antialiasing = false;
-        }
+          antialiasingCheckbox.checked = selected.antialiasing = false;
       }
     };
     tab_group.add(antialiasingCheckbox);
@@ -935,25 +921,15 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
     tab_group.add(flipYCheckBox);
 
     objY += 45;
-    function recalcFilter()
-    {
-      // low and/or high quality
-      var selected = getSelected();
-      if (selected != null)
-      {
-        var filt = 0;
-        if (lowQualityCheckbox.checked) filt |= LOW_QUALITY;
-        if (highQualityCheckbox.checked) filt |= HIGH_QUALITY;
-        selected.filters = filt;
-      }
-    };
     tab_group.add(new FlxText(objX + 60, objY - 18, 100, 'Visible in:'));
-    lowQualityCheckbox = new PsychUICheckBox(objX, objY, 'Low Quality', 70);
-    highQualityCheckbox = new PsychUICheckBox(objX + 90, objY, 'High Quality', 70);
-    lowQualityCheckbox.onClick = recalcFilter;
-    highQualityCheckbox.onClick = recalcFilter;
-    tab_group.add(lowQualityCheckbox);
-    tab_group.add(highQualityCheckbox);
+
+    qualityDropDown = new PsychUIDropDownMenu(objX, objY, [''].concat(QualityFilter.filters), function(id:String, cur:String) {
+      var selected = getSelected();
+      if (selected == null) return;
+      selected.filters = QualityFilter.fromString(cur);
+    }, 70);
+    qualityDropDown.selectedLabel = 'high';
+    tab_group.add(qualityDropDown);
   }
 
   var oppDropdown:PsychUIDropDownMenu;
@@ -981,10 +957,10 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 
     var openPreloadButton:PsychUIButton = new PsychUIButton(objX, objY, 'Preload List', function() {
       var lockedList:Array<String> = [];
-      var currentMap:Map<String, LoadFilters> = [];
+      var currentMap:Map<String, String> = [];
       for (spr in stageSprites)
       {
-        if (spr == null || StageData.reservedNames.contains(spr.type)) continue;
+        if (spr == null || StageJsonData.reservedNames.contains(spr.type)) continue;
 
         switch (spr.type)
         {
@@ -995,9 +971,18 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 
       if (stageJson.preload != null)
       {
-        for (field in Reflect.fields(stageJson.preload))
+        final preload:Map<String, Array<String>> = stageJson.preload.map();
+        for (filter in QualityFilter.filters)
         {
-          if (!currentMap.exists(field) && !lockedList.contains(field)) currentMap.set(field, Reflect.field(stageJson.preload, field));
+          if (preloadImages.get(filter) == null)
+          {
+            Reflect.setField(stageJson.preload, filter, []);
+            continue;
+          }
+          for (key in preloadImages.get(filter))
+          {
+            if (!currentMap.exists(key) && !lockedList.contains(key)) currentMap.set(key, QuailtyFilter.fromString(filter));
+          }
         }
       }
 
@@ -1007,11 +992,18 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
         for (name in newSave.keys())
           len++;
 
-        stageJson.preload = {};
-        for (key => value in newSave)
-        {
-          Reflect.setField(stageJson.preload, key, value);
-        }
+        stageJson.preload =
+          {
+            minimum: [],
+            low: [],
+            medium: [],
+            high: [],
+            maximum: [],
+            story_mode: [],
+            freeplay: []
+          };
+        for (key in newSave.keys())
+          Reflect.setField(stageJson.preload, QuailtyFilter.toString(newSave.get(key)).toLowerCase(), key);
         unsavedProgress = true;
         showOutput('Saved new Preload List with $len files/folders!');
       }, lockedList, currentMap));
@@ -1019,33 +1011,33 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 
     function setMetaData(data:String, char:String)
     {
-      if (stageJson._editorMeta == null) stageJson._editorMeta = {dad: 'dad', gf: 'gf', boyfriend: 'bf'};
+      stageJson?._editorMeta ??= {dad: 'dad', gf: 'gf', boyfriend: 'bf'};
       Reflect.setField(stageJson._editorMeta, data, char);
     }
 
     objY += 60;
     oppDropdown = new PsychUIDropDownMenu(objX, objY, characterList, function(sel:Int, selected:String) {
-      dad.changeCharacter(selected);
+      dad.change(selected);
       setMetaData('dad', selected);
       repositionDad();
     });
-    oppDropdown.selectedLabel = dad.curCharacter;
+    oppDropdown.selectedLabel = dad._data.curCharacter;
 
     objY += 60;
     gfDropdown = new PsychUIDropDownMenu(objX, objY, characterList, function(sel:Int, selected:String) {
-      gf.changeCharacter(selected);
+      gf.change(selected);
       setMetaData('gf', selected);
       repositionGirlfriend();
     });
-    gfDropdown.selectedLabel = gf.curCharacter;
+    gfDropdown.selectedLabel = gf._data.curCharacter;
 
     objY += 60;
     plDropdown = new PsychUIDropDownMenu(objX, objY, characterList, function(sel:Int, selected:String) {
-      boyfriend.changeCharacter(selected);
+      boyfriend.change(selected);
       setMetaData('boyfriend', selected);
       repositionBoyfriend();
     });
-    plDropdown.selectedLabel = boyfriend.curCharacter;
+    plDropdown.selectedLabel = boyfriend._data.curCharacter;
 
     tab_group.add(openPreloadButton);
     tab_group.add(new FlxText(plDropdown.x, plDropdown.y - 18, 100, 'Player:'));
@@ -1065,7 +1057,7 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
       #if DISCORD_ALLOWED
       DiscordClient.changePresence('Stage Editor', 'Stage: ' + lastLoadedStage);
       #end
-      stageJson = StageData.getStageFile(lastLoadedStage);
+      stageJson = StageJsonData.getUnsafeStageFile(lastLoadedStage);
       updateSpriteList();
       updateStageDataUI();
       reloadCharacters();
@@ -1076,7 +1068,7 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
       #if DISCORD_ALLOWED
       DiscordClient.changePresence('Stage Editor', 'New Stage');
       #end
-      stageJson = StageData.dummy();
+      stageJson = StageJsonData.dummy();
       updateSpriteList();
       updateStageDataUI();
       reloadCharacters();
@@ -1093,7 +1085,7 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
       if (Assets.exists(path))
       #end
       {
-        stageJson = StageData.getStageFile(selected);
+        stageJson = StageJsonData.getUnsafeStageFile(selected);
         lastLoadedStage = selected;
         #if DISCORD_ALLOWED
         DiscordClient.changePresence('Stage Editor', 'Stage: ' + lastLoadedStage);
@@ -1176,8 +1168,8 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
     var char:Character = cast selected.sprite;
     if (char != null)
     {
-      displayX -= char.positionArray[0];
-      displayY -= char.positionArray[1];
+      displayX -= char._data.positionArray[0];
+      displayY -= char._data.positionArray[1];
     }
 
     posTxt.text = 'X: $displayX\nY: $displayY';
@@ -1217,17 +1209,16 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
     antialiasingCheckbox.checked = selected.antialiasing;
     flipXCheckBox.checked = selected.flipX;
     flipYCheckBox.checked = selected.flipY;
-    lowQualityCheckbox.checked = (selected.filters & LOW_QUALITY) == LOW_QUALITY;
-    highQualityCheckbox.checked = (selected.filters & HIGH_QUALITY) == HIGH_QUALITY;
+    qualityDropDown.selectedLabel = selected.filters.toString().toLowerCase();
   }
 
   function reloadCharacters()
   {
     if (stageJson._editorMeta != null)
     {
-      gf.changeCharacter(stageJson._editorMeta.gf);
-      dad.changeCharacter(stageJson._editorMeta.dad);
-      boyfriend.changeCharacter(stageJson._editorMeta.boyfriend);
+      gf.change(stageJson._editorMeta.gf);
+      dad.change(stageJson._editorMeta.dad);
+      boyfriend.change(stageJson._editorMeta.boyfriend);
     }
     repositionGirlfriend();
     repositionDad();
@@ -1238,9 +1229,9 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
     var point = focusOnTarget('boyfriend');
     FlxG.camera.scroll.set(point.x - FlxG.width / 2, point.y - FlxG.height / 2);
     FlxG.camera.zoom = stageJson.defaultZoom;
-    oppDropdown.selectedLabel = dad.curCharacter;
-    gfDropdown.selectedLabel = gf.curCharacter;
-    plDropdown.selectedLabel = boyfriend.curCharacter;
+    oppDropdown.selectedLabel = dad._data.curCharacter;
+    gfDropdown.selectedLabel = gf._data.curCharacter;
+    plDropdown.selectedLabel = boyfriend._data.curCharacter;
   }
 
   function reloadStageDropDown()
@@ -1269,7 +1260,7 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
       if (selected >= 0)
       {
         var spr = stageSprites[spriteListRadioGroup.labels.length - selected - 1];
-        if (spr != null && StageData.reservedNames.contains(spr.type)) UI_box.selectedName = 'Data';
+        if (spr != null && StageJsonData.reservedNames.contains(spr.type)) UI_box.selectedName = 'Data';
       }
       else
         UI_box.selectedName = 'Data';
@@ -1314,7 +1305,7 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
       if (!unsavedProgress)
       {
         MusicBeatState.switchState(new scfunkin.states.editors.MasterEditorMenu());
-        FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
+        FlxG.sound.playMusic(Paths.music("freakyMenu"));
       }
       else
         openSubState(new ExitConfirmationPrompt());
@@ -1423,21 +1414,21 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
         switch (spr.type)
         {
           case 'boyfriend':
-            stageJson.boyfriend[0] = displayX = spr.x - char.positionArray[0];
-            stageJson.boyfriend[1] = displayY = spr.y - char.positionArray[1];
+            stageJson.boyfriend[0] = displayX = spr.x - char._data.positionArray[0];
+            stageJson.boyfriend[1] = displayY = spr.y - char._data.positionArray[1];
           case 'gf':
-            stageJson.girlfriend[0] = displayX = spr.x - char.positionArray[0];
-            stageJson.girlfriend[1] = displayY = spr.y - char.positionArray[1];
+            stageJson.girlfriend[0] = displayX = spr.x - char._data.positionArray[0];
+            stageJson.girlfriend[1] = displayY = spr.y - char._data.positionArray[1];
           case 'dad':
-            stageJson.opponent[0] = displayX = spr.x - char.positionArray[0];
-            stageJson.opponent[1] = displayY = spr.y - char.positionArray[1];
+            stageJson.opponent[0] = displayX = spr.x - char._data.positionArray[0];
+            stageJson.opponent[1] = displayY = spr.y - char._data.positionArray[1];
         }
         posTxt.text = 'X: $displayX\nY: $displayY';
       }
     }
   }
 
-  var curFilters:LoadFilters = (LOW_QUALITY) | (HIGH_QUALITY);
+  var curFilters:LoadFilters = (MINIMUM_QUALIY) | (LOW_QUALITY) | (MEDIUM_QUALITY) | (HIGH_QUALITY) | (MAXIMUM_QUALITY);
 
   override function draw()
   {
@@ -1462,16 +1453,16 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
     switch (target)
     {
       case 'boyfriend':
-        focusPoint.x += boyfriend.getMidpoint().x - boyfriend.cameraPosition[0] - 100;
-        focusPoint.y += boyfriend.getMidpoint().y + boyfriend.cameraPosition[1] - 100;
+        focusPoint.x += boyfriend.getMidpoint().x - boyfriend._data.cameraPosition[0] - 100;
+        focusPoint.y += boyfriend.getMidpoint().y + boyfriend._data.cameraPosition[1] - 100;
         if (stageJson.camera_boyfriend != null && stageJson.camera_boyfriend.length > 1)
         {
           focusPoint.x += stageJson.camera_boyfriend[0];
           focusPoint.y += stageJson.camera_boyfriend[1];
         }
       case 'dad':
-        focusPoint.x += dad.getMidpoint().x + dad.cameraPosition[0] + 150;
-        focusPoint.y += dad.getMidpoint().y + dad.cameraPosition[1] - 100;
+        focusPoint.x += dad.getMidpoint().x + dad._data.cameraPosition[0] + 150;
+        focusPoint.y += dad.getMidpoint().y + dad._data.cameraPosition[1] - 100;
         if (stageJson.camera_opponent != null && stageJson.camera_opponent.length > 1)
         {
           focusPoint.x += stageJson.camera_opponent[0];
@@ -1480,8 +1471,8 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
       case 'gf':
         if (gf.visible)
         {
-          focusPoint.x += gf.getMidpoint().x + gf.cameraPosition[0];
-          focusPoint.y += gf.getMidpoint().y + gf.cameraPosition[1];
+          focusPoint.x += gf.getMidpoint().x + gf._data.cameraPosition[0];
+          focusPoint.y += gf.getMidpoint().y + gf._data.cameraPosition[1];
         }
 
         if (stageJson.camera_girlfriend != null && stageJson.camera_girlfriend.length > 1)
@@ -1496,22 +1487,22 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
   function repositionGirlfriend()
   {
     gf.setPosition(stageJson.girlfriend[0], stageJson.girlfriend[1]);
-    gf.x += gf.positionArray[0];
-    gf.y += gf.positionArray[1];
+    gf.x += gf._data.positionArray[0];
+    gf.y += gf._data.positionArray[1];
   }
 
   function repositionDad()
   {
     dad.setPosition(stageJson.opponent[0], stageJson.opponent[1]);
-    dad.x += dad.positionArray[0];
-    dad.y += dad.positionArray[1];
+    dad.x += dad._data.positionArray[0];
+    dad.y += dad._data.positionArray[1];
   }
 
   function repositionBoyfriend()
   {
     boyfriend.setPosition(stageJson.boyfriend[0], stageJson.boyfriend[1]);
-    boyfriend.x += boyfriend.positionArray[0];
-    boyfriend.y += boyfriend.positionArray[1];
+    boyfriend.x += boyfriend._data.positionArray[0];
+    boyfriend.y += boyfriend._data.positionArray[1];
   }
 
   public function drawDebugOnCamera(spr:FlxSprite):Void
@@ -1552,9 +1543,10 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 
   function saveObjectsToJson()
   {
-    stageJson.objects = [];
-    for (basic in stageSprites)
-      stageJson.objects.push(basic.formatToJson());
+    stageJson.objects = [
+      for (basic in stageSprites)
+        stageJson.objects.push(basic.formatToJson())
+    ];
   }
 
   function saveData()
@@ -1657,7 +1649,7 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
           _file = null;
           return;
         }
-        insertMeta(new StageEditorMetaSprite({type: _makeNewSprite, name: findUnoccupiedName()}, new ModchartSprite()));
+        insertMeta(new StageEditorMetaSprite({type: _makeNewSprite, name: findUnoccupiedName()}, new FunkinSCSprite()));
       }
       var selected = getSelected();
       tryLoadImage(selected, imageToLoad);
@@ -1746,7 +1738,7 @@ class StageEditorState extends MusicBeatState implements PsychUIEventHandler.Psy
 
   function tryLoadImage(spr:StageEditorMetaSprite, imgPath:String)
   {
-    if (spr == null || StageData.reservedNames.contains(spr.type) || spr.type == 'square' || imgPath == null) return;
+    if (spr == null || StageJsonData.reservedNames.contains(spr.type) || spr.type == 'square' || imgPath == null) return;
 
     spr.image = imgPath;
     updateSelectedUI();
@@ -1814,7 +1806,7 @@ class StageEditorMetaSprite
 
   // variables for all types that aren't Character
   public var name:String;
-  public var filters:LoadFilters = (LOW_QUALITY) | (HIGH_QUALITY);
+  public var filters:LoadFilters = (MINIMUM_QUALIY) | (LOW_QUALITY) | (MEDIUM_QUALITY) | (HIGH_QUALITY) | (MAXIMUM_QUALITY);
   public var x(get, set):Float;
   public var y(get, set):Float;
   public var alpha(get, set):Float;
@@ -1848,7 +1840,7 @@ class StageEditorMetaSprite
 
   function set_color(v:String)
   {
-    sprite.color = scfunkin.utils.CoolUtil.colorFromString(v);
+    sprite.color = scfunkin.utils.ColorUtil.colorFromString(v);
     return (color = v);
   }
 
@@ -1885,7 +1877,7 @@ class StageEditorMetaSprite
 
   function set_antialiasing(v:Bool)
   {
-    sprite.antialiasing = (v && ClientPrefs.data.antialiasing);
+    sprite.antialiasing = (v && Save.get('antialiasing'));
     return (antialiasing = v);
   }
 
@@ -1914,7 +1906,7 @@ class StageEditorMetaSprite
 
   // "animatedSprite" only variables
   public var firstAnimation:String;
-  public var animations:Array<AnimArray>;
+  public var animations:Array<SingleData>;
 
   public function new(data:Dynamic, spr:FlxSprite)
   {
@@ -1973,12 +1965,12 @@ class StageEditorMetaSprite
 
   public function update(curFilters:LoadFilters, elapsed:Float)
   {
-    if ((curFilters & filters) != 0 || StageData.reservedNames.contains(type)) sprite.update(elapsed);
+    if ((curFilters & filters) != 0 || StageJsonData.reservedNames.contains(type)) sprite.update(elapsed);
   }
 
   public function draw(curFilters:LoadFilters)
   {
-    if ((curFilters & filters) != 0 || StageData.reservedNames.contains(type)) sprite.draw();
+    if ((curFilters & filters) != 0 || StageJsonData.reservedNames.contains(type)) sprite.draw();
   }
 }
 
@@ -2070,7 +2062,7 @@ class StageEditorAnimationSubstate extends MusicBeatSubState
     animationLoopCheckBox = new PsychUICheckBox(animationNameInputText.x + 170, animationNameInputText.y - 1, 'Should it Loop?', 100);
 
     animationDropDown = new PsychUIDropDownMenu(15, animationInputText.y - 55, [''], function(selectedAnimation:Int, pressed:String) {
-      var anim:AnimArray = target.animations[selectedAnimation];
+      var anim:SingleData = target.animations[selectedAnimation];
       if (anim == null) return;
 
       animationInputText.text = anim.anim;
@@ -2084,7 +2076,7 @@ class StageEditorAnimationSubstate extends MusicBeatSubState
 
     mainAnimTxt = new FlxText(160, animationDropDown.y - 18, 0, 'Main Anim.: ');
     var initAnimButton:PsychUIButton = new PsychUIButton(160, animationDropDown.y, 'Main Animation', function() {
-      var anim:AnimArray = target.animations[curAnim];
+      var anim:SingleData = target.animations[curAnim];
       if (anim == null) return;
 
       mainAnimTxt.text = 'Main Anim.: ${anim.anim}';
@@ -2116,12 +2108,12 @@ class StageEditorAnimationSubstate extends MusicBeatSubState
         if (animationInputText.text == anim.anim)
         {
           lastOffsets = anim.offsets;
-          cast(target.sprite, ModchartSprite).animOffsets.remove(animationInputText.text);
+          cast(target.sprite, FunkinSCSprite).removeOffset(animationInputText.text);
           target.sprite.animation.remove(animationInputText.text);
           target.animations.remove(anim);
         }
 
-      var addedAnim:AnimArray =
+      var addedAnim:SingleData =
         {
           anim: animationInputText.text,
           name: animationNameInputText.text,
@@ -2150,11 +2142,11 @@ class StageEditorAnimationSubstate extends MusicBeatSubState
       {
         if (animationInputText.text == anim.anim)
         {
-          var targetSprite:ModchartSprite = cast(target.sprite, ModchartSprite);
+          var targetSprite:FunkinSCSprite = cast(target.sprite, FunkinSCSprite);
           var resetAnim:Bool = false;
           if (targetSprite.animation.curAnim != null && anim.anim == targetSprite.animation.curAnim.name) resetAnim = true;
 
-          if (targetSprite.hasOffsetAnimation(anim.anim)) targetSprite.animOffsets.remove(anim.anim);
+          if (targetSprite.hasOffset(anim.anim)) targetSprite.removeOffset(anim.anim);
 
           target.animations.remove(anim);
           targetSprite.animation.remove(anim.anim);
@@ -2199,7 +2191,7 @@ class StageEditorAnimationSubstate extends MusicBeatSubState
     for (text in animsTxtGroup)
       text.kill();
 
-    var spr:ModchartSprite = cast(target.sprite, ModchartSprite);
+    var spr:FunkinSCSprite = cast(target.sprite, FunkinSCSprite);
     if (target.animations.length > 0)
     {
       if (target.firstAnimation == null
@@ -2220,7 +2212,7 @@ class StageEditorAnimationSubstate extends MusicBeatSubState
       text.y = 32 + (20 * num);
       text.fieldWidth = 400;
       text.fieldHeight = 20;
-      if (anim.offsets != null) text.text = '${anim.anim}: ${spr.animOffsets.get(anim.anim)}';
+      if (anim.offsets != null) text.text = '${anim.anim}: ${spr.getOffset(anim.anim)}';
       else
         text.text = '${anim.anim}: No offsets';
 
@@ -2254,9 +2246,9 @@ class StageEditorAnimationSubstate extends MusicBeatSubState
 
   function playAnim(name:String, force:Bool = false)
   {
-    var spr:ModchartSprite = cast(target.sprite, ModchartSprite);
+    final spr:FunkinSCSprite = cast(target.sprite, FunkinSCSprite);
     spr.playAnim(name, force);
-    if (!spr.hasOffsetAnimation(name)) spr.updateHitbox();
+    if (!spr.hasOffset(name)) spr.updateHitbox();
   }
 
   final minZoom = 0.25;
@@ -2301,7 +2293,7 @@ class StageEditorAnimationSubstate extends MusicBeatSubState
     // OFFSET
     if (target.sprite.animation.curAnim != null)
     {
-      var spr:ModchartSprite = cast(target.sprite, ModchartSprite);
+      var spr:FunkinSCSprite = cast(target.sprite, FunkinSCSprite);
       var anim:String = spr.animation.curAnim.name;
       var changedOffset = false;
       var moveKeysP = [
@@ -2371,7 +2363,7 @@ class StageEditorAnimationSubstate extends MusicBeatSubState
         var offX = Math.round(spr.offset.x);
         var offY = Math.round(spr.offset.y);
 
-        spr.addOffset(anim, offX, offY);
+        spr.setOffset(anim, offX, offY);
         target.animations[curAnim].offsets = [offX, offY];
         animsTxtGroup.members[curAnim].text = '${anim}: ${spr.animOffsets.get(anim)}';
       }

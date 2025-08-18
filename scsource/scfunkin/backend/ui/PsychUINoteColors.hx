@@ -88,7 +88,7 @@ class PsychUINoteColors extends FlxSpriteGroup
     bg.color = 0xFFEA71FD;
     bg.screenCenter();
     bg.setGraphicSize(FlxG.width + 200, FlxG.height + 200);
-    bg.antialiasing = ClientPrefs.data.antialiasing;
+    bg.antialiasing = Save.get('antialiasing');
     // add(bg);
 
     var grid:FlxBackdrop = new FlxBackdrop(FlxGridOverlay.createGrid(80, 80, 160, 160, true, 0x33FFFFFF, 0x0));
@@ -532,7 +532,7 @@ class PsychUINoteColors extends FlxSpriteGroup
         for (i in 0...3)
         {
           var strumRGB:RGBShaderReference = myNotes.members[curSelectedNote].rgbShader;
-          var color:FlxColor = !onPixel ? ClientPrefs.defaultData.arrowRGB[curSelectedNote][i] : ClientPrefs.defaultData.arrowRGBPixel[curSelectedNote][i];
+          var color:FlxColor = Save.get('arrowRGB${onPixel ? 'Pixel' : ''}', true)[curSelectedNote][i];
           switch (i)
           {
             case 0:
@@ -545,7 +545,7 @@ class PsychUINoteColors extends FlxSpriteGroup
           dataArray[curSelectedNote][i] = color;
         }
       }
-      setShaderColor(!onPixel ? ClientPrefs.defaultData.arrowRGB[curSelectedNote][curSelectedMode] : ClientPrefs.defaultData.arrowRGBPixel[curSelectedNote][curSelectedMode]);
+      setShaderColor(Save.get('arrowRGB${onPixel ? 'Pixel' : ''}', true)[curSelectedNote][curSelectedMode]);
       FlxG.sound.play(Paths.sound('cancelMenu'), 0.6);
       updateColors();
       PsychUIEventHandler.event(RESET_EVENT, this);
@@ -638,7 +638,7 @@ class PsychUINoteColors extends FlxSpriteGroup
 
   public function spawnNotes()
   {
-    dataArray = !onPixel ? ClientPrefs.data.arrowRGB : ClientPrefs.data.arrowRGBPixel;
+    dataArray = Save.get('arrowRBG${!onPixel ? '' : 'Pixel'}');
     if (onPixel) PlayState.stageUI = "pixel";
 
     // clear groups
@@ -667,7 +667,7 @@ class PsychUINoteColors extends FlxSpriteGroup
     // respawn stuff
     var res:Int = onPixel ? 160 : 17;
     skinNote = new FlxSprite(48, 24).loadGraphic(Paths.image('noteColorMenu/' + (onPixel ? 'note' : 'notePixel')), true, res, res);
-    skinNote.antialiasing = ClientPrefs.data.antialiasing;
+    skinNote.antialiasing = Save.get('antialiasing');
     skinNote.setGraphicSize(68);
     skinNote.updateHitbox();
     skinNote.animation.add('anim', [0], 24, true);
@@ -680,7 +680,7 @@ class PsychUINoteColors extends FlxSpriteGroup
     {
       var newNote:FlxSprite = new FlxSprite(230 + (100 * i),
         100).loadGraphic(Paths.image('noteColorMenu/' + (!onPixel ? 'note' : 'notePixel')), true, res, res);
-      newNote.antialiasing = ClientPrefs.data.antialiasing;
+      newNote.antialiasing = Save.get('antialiasing');
       newNote.setGraphicSize(85);
       newNote.updateHitbox();
       newNote.animation.add('anim', [i], 24, true);
@@ -750,7 +750,7 @@ class PsychUINoteColors extends FlxSpriteGroup
     {
       var newAnim:String = curSelectedNote == note.ID ? 'confirm' : 'pressed';
       note.alpha = (curSelectedNote == note.ID) ? 1 : 0.6;
-      if (note.animation.curAnim == null || note.animation.curAnim.name != newAnim) note.playAnim(newAnim, true);
+      if (note.isAnimNull() || note.animation.curAnim.name != newAnim) note.playAnim(newAnim, true);
       if (instant) note.animation.curAnim.finish();
     }
     bigNote.animation.play('note$curSelectedNote', true);
@@ -796,7 +796,7 @@ class PsychUINoteColors extends FlxSpriteGroup
     for (i in 0...3)
     {
       var strumRGB:RGBShaderReference = myNotes.members[curSelectedNote].rgbShader;
-      var color:FlxColor = !onPixel ? ClientPrefs.data.arrowRGB[curSelectedNote][i] : ClientPrefs.data.arrowRGBPixel[curSelectedNote][i];
+      var color:FlxColor = Save.get('arrowRGB${!onPixel ? '' : 'Pixel'}')[curSelectedNote][i];
       switch (i)
       {
         case 0:
@@ -808,7 +808,7 @@ class PsychUINoteColors extends FlxSpriteGroup
       }
       dataArray[curSelectedNote][i] = color;
     }
-    setShaderColor(!onPixel ? ClientPrefs.data.arrowRGB[curSelectedNote][curSelectedMode] : ClientPrefs.data.arrowRGBPixel[curSelectedNote][curSelectedMode]);
+    setShaderColor(Save.get('arrowRGB${!onPixel ? '' : 'Pixel'}')[curSelectedNote][curSelectedMode]);
     updateColors();
   }
 

@@ -20,18 +20,6 @@ class MiscSettingsSubState extends BaseOptionsMenu
 
     var option:Option = new Option('Memory Display', 'If unchecked, Memory is displayed in counter.', 'memoryDisplay', BOOL);
     addOption(option);
-
-    var option:Option = new Option('Date Display', 'If unchecked, Date is displayed in counter.', 'dateDisplay', BOOL);
-    addOption(option);
-
-    var option:Option = new Option('Military Time', 'If unchecked, Date Time will be 0-23, else PM and AM.', 'militaryTime', BOOL);
-    addOption(option);
-
-    var option:Option = new Option('Day As Int', 'If unchecked, Date Day will be 0-6 (1-7), else Monday-Friday.', 'dayAsInt', BOOL);
-    addOption(option);
-
-    var option:Option = new Option('Month As Int', 'If unchecked, Date Month is 0-11 (1-12), else January-December.', 'monthAsInt', BOOL);
-    addOption(option);
     #end
 
     var option:Option = new Option('Auto Pause', "If checked, the game automatically pauses if the screen isn't on focus. (turns down volume!)", 'autoPause',
@@ -45,30 +33,13 @@ class MiscSettingsSubState extends BaseOptionsMenu
       resultArray);
     addOption(option);
 
-    var option:Option = new Option('Clear Logs Folder On TitleState', "Clear the 'logs' folder", 'clearFolderOnStart', BOOL);
-    addOption(option);
-
-    var option:Option = new Option('Hey! Intro', "A Hey! Intro starts for characters that use Hey! animations.", 'heyIntro', BOOL);
-    addOption(option);
-
-    var option:Option = new Option('Pause Count Down', "A countdown plays after pressing 'resume' in the pause menu.", 'pauseCountDown', BOOL);
-    addOption(option);
-
-    var option:Option = new Option('Opponent Pop Up Score', "If checked, The opponent can have ratings appear!", 'popupScoreForOp', BOOL);
-    addOption(option);
-
-    var option:Option = new Option('New Sustain Behavior',
-      "If checked, Hold Notes can't be pressed if you miss or don't hit their arrow note first,\nand count as a single Hit/Miss.\nUncheck this if you prefer the old Input System.",
-      'newSustainBehavior', BOOL);
-    addOption(option);
-
     super();
   }
 
   function onChangeMenuMusic()
   {
     FlxG.sound.music.stop();
-    FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
+    FlxG.sound.playMusic(Paths.music("freakyMenu"));
     MainMenuState.freakyPlaying = true;
     Conductor.bpm = 102;
   }
@@ -76,7 +47,7 @@ class MiscSettingsSubState extends BaseOptionsMenu
   #if !mobile
   function onChangeFPSCounter()
   {
-    if (Main.fpsVar != null) Main.fpsVar.visible = ClientPrefs.data.showFPS;
+    if (Main.fpsVar != null) Main.fpsVar.visible = Save.get('showFPS');
   }
   #end
 }

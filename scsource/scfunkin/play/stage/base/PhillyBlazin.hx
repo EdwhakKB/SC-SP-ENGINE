@@ -27,8 +27,10 @@ class PhillyBlazin extends BaseStage
 
   var abot:ABotSpeaker;
 
-  override public function buildStage(baseStage:Stage)
+  override public function create()
   {
+    picoFight = new PicoBlazinHandler(stage);
+    darnellFight = new DarnellBlazinHandler(stage);
     FlxTransitionableState.skipNextTransOut = true; // skip the original transition fade
     function setupScale(spr:BGSprite)
     {
@@ -36,37 +38,37 @@ class PhillyBlazin extends BaseStage
       spr.updateHitbox();
     }
 
-    if (!ClientPrefs.data.lowQuality)
+    if (Save.isQuality('high', '>='))
     {
-      var skyImage = Paths.image('phillyBlazin/skyBlur');
+      final skyImage = Paths.image('phillyBlazin/skyBlur');
       scrollingSky = new FlxTiledSprite(skyImage, Std.int(skyImage.width * 1.1) + 475, Std.int(skyImage.height / 1.1), true, false);
-      scrollingSky.antialiasing = ClientPrefs.data.antialiasing;
+      scrollingSky.antialiasing = Save.get('antialiasing');
       scrollingSky.setPosition(-500, -120);
       scrollingSky.scrollFactor.set();
-      baseStage.stageSpriteHandler(scrollingSky, -1, 'skyImage');
+      add(scrollingSky, 'scrollingSky');
 
       skyAdditive = new BGSprite('phillyBlazin/skyBlur', -600, -175, 0.0, 0.0);
       setupScale(skyAdditive);
       skyAdditive.visible = false;
-      baseStage.stageSpriteHandler(skyAdditive, -1, 'skyAdditive');
+      add(skyAdditive, 'skyAdditive');
 
       lightning = new BGSprite('phillyBlazin/lightning', -50, -300, 0.0, 0.0, ['lightning0'], false);
       setupScale(lightning);
       lightning.visible = false;
-      baseStage.stageSpriteHandler(lightning, -1, 'lightning');
+      add(lightning, 'lightning');
     }
 
-    var phillyForegroundCity:BGSprite = new BGSprite('phillyBlazin/streetBlur', -600, -175, 0.0, 0.0);
+    final phillyForegroundCity:BGSprite = new BGSprite('phillyBlazin/streetBlur', -600, -175, 0.0, 0.0);
     setupScale(phillyForegroundCity);
-    baseStage.stageSpriteHandler(phillyForegroundCity, -1, 'phillyForegroundCity');
+    add(phillyForegroundCity, 'phillyForegroundCity');
 
-    if (!ClientPrefs.data.lowQuality)
+    if (Save.isQuality('high', '>='))
     {
       foregroundMultiply = new BGSprite('phillyBlazin/streetBlur', -600, -175, 0.0, 0.0);
       setupScale(foregroundMultiply);
       foregroundMultiply.blend = MULTIPLY;
       foregroundMultiply.visible = false;
-      baseStage.stageSpriteHandler(foregroundMultiply, -1, 'foregroundMultiply');
+      add(foregroundMultiply, 'foregroundMultiply');
 
       additionalLighten = new FlxSprite(-600, -175).makeGraphic(1, 1, FlxColor.WHITE);
       additionalLighten.scrollFactor.set();
@@ -74,86 +76,43 @@ class PhillyBlazin extends BaseStage
       additionalLighten.updateHitbox();
       additionalLighten.blend = ADD;
       additionalLighten.visible = false;
-      baseStage.stageSpriteHandler(additionalLighten, -1, 'additionalLighten');
+      add(additionalLighten, 'additionalLighten');
     }
 
     abot = new ABotSpeaker(0, 0);
-    baseStage.stageSpriteHandler(abot, -1, 'abot');
+    add(abot, 'abot', "Group");
 
-    if (ClientPrefs.data.shaders) setupRainShader();
-
-    setDefaultGF('nene');
+    if (Save.get('shaders')) setupRainShader();
+    stage.setDefaultGF('nene');
     precache();
 
-    if (isStoryMode)
-    {
-      switch (songName)
-      {
-        case 'blazin':
-          setEndCallback(function() {
-            game.endingSong = true;
-            inCutscene = true;
-            canPause = false;
-            FlxTransitionableState.skipNextTransIn = true;
-            FlxG.camera.visible = false;
-            camHUD.visible = false;
-            game.startVideo('blazinCutscene');
-          });
-      }
-    }
+    super.create();
   }
 
   override function createPost()
   {
-    var _song:GameOverData = PlayState.SONG.getSongData('gameOverData');
+    var _song:SongGameOverData = PlayState.SONG.getSongData('gameOverData');
     if (_song.gameOverSound == null || _song.gameOverSound.trim().length < 1) GameOverSubstate.deathSoundName = 'fnf_loss_sfx-pico-gutpunch';
     if (_song.gameOverLoop == null || _song.gameOverLoop.trim().length < 1) GameOverSubstate.loopSoundName = 'gameOver-pico';
     if (_song.gameOverEnd == null || _song.gameOverEnd.trim().length < 1) GameOverSubstate.endSoundName = 'gameOverEnd-pico';
     if (_song.gameOverChar == null || _song.gameOverChar.trim().length < 1) GameOverSubstate.characterName = 'pico-blazin';
     GameOverSubstate.deathDelay = 0.15;
 
-    abot.setPosition(gf.x, gf.y + 350);
-    FlxG.camera.focusOn(camFollow.getPosition());
+    abot.setPosition(stage.gf.x, stage.gf.y + 350);
+    if (stage.game == PlayState.instance) FlxG.camera.focusOn(stage.game.camFollow.getPosition());
     FlxG.camera.fade(FlxColor.BLACK, 1.5, true, null, true);
 
-    for (character in [boyfriend, gf, dad])
-    {
-      if (character == null) continue;
-      character.color = 0xFFDEDEDE;
-    }
+    for (character in [stage.boyfriend, stage.gf, stage.dad])
+      if (character != null) character.color = 0xFFDEDEDE;
     abot.color = 0xFF888888;
 
-    var unspawnNotes:CustomArrayGroup<Note> = cast game.playerStrums.unspawnNotes;
-    for (note in unspawnNotes.members)
-    {
-      if (note == null) continue;
-
-      // override animations for note types
-      note.noAnimation = true;
-      note.noMissAnimation = true;
-    }
-
-    unspawnNotes = cast game.opponentStrums.unspawnNotes;
-    for (note in unspawnNotes.members)
-    {
-      if (note == null) continue;
-
-      // override animations for note types
-      note.noAnimation = true;
-      note.noMissAnimation = true;
-    }
-    remove(dad, true);
-    addBehindBF(dad);
-  }
-
-  override function beatHit()
-  {
-    // if(curBeat % 2 == 0) abot.beatHit();
+    super.createPost();
   }
 
   override function startSong()
   {
     abot.snd = FlxG.sound.music;
+    super.startSong();
   }
 
   function setupRainShader()
@@ -161,15 +120,13 @@ class PhillyBlazin extends BaseStage
     rainShader = new RainShader();
     rainShader.scale = FlxG.height / 200;
     rainShader.intensity = 0.5;
-    FlxG.camera.setFilters([new ShaderFilter(rainShader)]);
+    FlxG.camera.filters = [new ShaderFilter(rainShader)];
   }
 
   function precache()
   {
     for (i in 1...4)
-    {
       Paths.sound('lightning/Lightning$i');
-    }
   }
 
   override function update(elapsed:Float)
@@ -189,11 +146,12 @@ class PhillyBlazin extends BaseStage
       applyLightning();
       lightningTimer = FlxG.random.float(7, 15);
     }
+    super.update(elapsed);
   }
 
   function applyLightning():Void
   {
-    if (ClientPrefs.data.lowQuality || game.endingSong) return;
+    if (Save.isQuality('low', '<=') || (stage.game == PlayState.instance && stage.game.endingSong)) return;
 
     final LIGHTNING_FULL_DURATION = 1.5;
     final LIGHTNING_FADE_DURATION = 0.3;
@@ -226,9 +184,9 @@ class PhillyBlazin extends BaseStage
       lightning.x = FlxG.random.int(780, 900);
 
     // Darken characters
-    FlxTween.color(boyfriend, LIGHTNING_FADE_DURATION, 0xFF606060, 0xFFDEDEDE);
-    FlxTween.color(dad, LIGHTNING_FADE_DURATION, 0xFF606060, 0xFFDEDEDE);
-    FlxTween.color(gf, LIGHTNING_FADE_DURATION, 0xFF606060, 0xFF888888);
+    FlxTween.color(stage.boyfriend, LIGHTNING_FADE_DURATION, 0xFF606060, 0xFFDEDEDE);
+    FlxTween.color(stage.dad, LIGHTNING_FADE_DURATION, 0xFF606060, 0xFFDEDEDE);
+    FlxTween.color(stage.gf, LIGHTNING_FADE_DURATION, 0xFF606060, 0xFF888888);
     FlxTween.color(abot, LIGHTNING_FADE_DURATION, 0xFF606060, 0xFF888888);
 
     // Sound
@@ -236,8 +194,8 @@ class PhillyBlazin extends BaseStage
   }
 
   // Note functions
-  var picoFight:PicoBlazinHandler = new PicoBlazinHandler();
-  var darnellFight:DarnellBlazinHandler = new DarnellBlazinHandler();
+  var picoFight:PicoBlazinHandler = null;
+  var darnellFight:DarnellBlazinHandler = null;
 
   override function goodNoteHit(note:Note)
   {
@@ -245,6 +203,7 @@ class PhillyBlazin extends BaseStage
     rainTimeScale += 0.7;
     picoFight.noteHit(note);
     darnellFight.noteHit(note);
+    super.goodNoteHit(note);
   }
 
   override function noteMiss(note:Note)
@@ -252,6 +211,7 @@ class PhillyBlazin extends BaseStage
     // trace('missed note!');
     picoFight.noteMiss(note);
     darnellFight.noteMiss(note);
+    super.noteMiss(note);
   }
 
   override function noteMissPress(direction:Int)
@@ -259,6 +219,7 @@ class PhillyBlazin extends BaseStage
     // trace('misinput!');
     picoFight.noteMissPress(direction);
     darnellFight.noteMissPress(direction);
+    super.noteMissPress(direction);
   }
 
   // Darnell Note functions
@@ -267,6 +228,7 @@ class PhillyBlazin extends BaseStage
     // trace('opponent hit!');
     picoFight.noteMiss(note);
     darnellFight.noteMiss(note);
+    super.opponentNoteHit(note);
   }
 }
 #end

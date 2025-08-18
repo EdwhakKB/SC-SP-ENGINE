@@ -86,11 +86,10 @@ class ReflectUtil
    */
   public static function structureToMap(st:Dynamic):Map<String, Dynamic>
   {
+    if (st == null) return new Map<String, Dynamic>();
     return [
       for (k in Reflect.fields(st))
-      {
-        k => Reflect.field(st, k);
-      }
+        k => Reflect.field(st, k)
     ];
   }
 

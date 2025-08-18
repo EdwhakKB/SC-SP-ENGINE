@@ -14,15 +14,11 @@ class Scoring
     var scoreComboData:ComboData = scoreData.comboData;
 
     // Perfect (Platinum) is a Sick Full Clear
-    var isPerfectGold = scoreComboData.swags == scoreComboData.totalNoteCount;
-    if (isPerfectGold)
-    {
-      return ScoringRank.PERFECT_GOLD;
-    }
+    if (scoreComboData.swags == scoreComboData.totalNoteCount) return ScoringRank.PERFECT_GOLD;
 
     // Else, use the standard grades
-    // Grade % (only swags and sicks), 1.00 is a full combo
-    var grade = (scoreComboData.swags + scoreComboData.sicks) / scoreComboData.totalNoteCount;
+    // Grade % (only swags and sicks and goods), 1.00 is a full combo
+    var grade = (scoreComboData.swags + scoreComboData.sicks + scoreComboData.goods) / scoreComboData.totalNoteCount;
     // Clear % (including bad and shit). 1.00 is a full clear but not a full combo
     var clear = scoreComboData.totalPlayed / scoreComboData.totalNoteCount;
 

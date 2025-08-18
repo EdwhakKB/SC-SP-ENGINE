@@ -19,11 +19,9 @@ class MouseUtil
    */
   public static function mouseCamDrag(?target:FlxPoint, ?jusPres:Bool, ?pressed:Bool):Void
   {
-    if (target == null) target = FlxG.camera.scroll;
-
-    if (jusPres == null) jusPres = FlxG.mouse.justPressedMiddle;
-
-    if (pressed == null) pressed = FlxG.mouse.pressedMiddle;
+    target ??= FlxG.camera.scroll;
+    jusPres ??= FlxG.mouse.justPressedMiddle;
+    pressed ??= FlxG.mouse.pressedMiddle;
 
     if (jusPres)
     {
@@ -42,7 +40,5 @@ class MouseUtil
    * Increment the zoom level of the current camera by the mouse wheel scroll value.
    */
   public static function mouseWheelZoom():Void
-  {
     if (FlxG.mouse.wheel != 0) FlxG.camera.zoom += FlxG.mouse.wheel * (0.1 * FlxG.camera.zoom);
-  }
 }

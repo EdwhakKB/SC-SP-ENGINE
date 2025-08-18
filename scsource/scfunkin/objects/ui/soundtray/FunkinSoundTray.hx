@@ -1,14 +1,15 @@
 package scfunkin.objects.ui.soundtray;
 
 import haxe.io.Bytes;
-import openfl.utils.AssetType;
-import flixel.tweens.FlxTween;
 import flixel.system.FlxAssets;
+import flixel.system.ui.FlxSoundTray;
+import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 import openfl.display.Bitmap;
 import openfl.display.BitmapData;
+import openfl.media.Sound;
+import openfl.utils.AssetType;
 import openfl.utils.Assets;
-import flixel.system.ui.FlxSoundTray;
 import scfunkin.utils.*;
 
 /**
@@ -37,9 +38,6 @@ class FunkinSoundTray extends FlxSoundTray
     bg.scaleY = graphicScale;
     addChild(bg);
 
-    y = -height;
-    visible = false;
-
     // makes an alpha'd version of all the bars (bar_10.png)
     var backingBar:Bitmap = new Bitmap(getPath('images/soundtray/bars_10', IMAGE));
     backingBar.x = 9;
@@ -65,9 +63,10 @@ class FunkinSoundTray extends FlxSoundTray
       addChild(bar);
       _bars.push(bar);
     }
+    updateSize();
 
     y = -height;
-    screenCenter();
+    visible = false;
 
     volumeUpSound = 'Volup';
     volumeDownSound = 'Voldown';
@@ -133,28 +132,42 @@ class FunkinSoundTray extends FlxSoundTray
     }
   }
 
-  /**
-   * Makes the little volume tray slide out.
-   *
-   * @param	up Whether the volume is increasing.
-   */
-  override public function show(up:Bool = false):Void
+  override public function showAnim(volume:Float, ?sound:FlxSoundAsset, duration = 1.0, label = "VOLUME")
   {
-    _timer = 1;
-    lerpYPos = 10;
+    var _sound:Sound = null;
+    if (sound != null)
+    {
+      if (sound is String) _sound = FlxG.assets.getSoundAddExt(sound);
+      else if (sound is Sound) _sound = sound;
+      else if (sound is Class) _sound = Type.createInstance(sound, []);
+      FlxG.sound.play(_sound);
+    }
+
+    _timer = duration;
+    y = 0;
     visible = true;
     active = true;
-    final globalVolume:Int = FlxG.sound.muted ? 0 : Math.round(FlxG.sound.volume * 10);
-
-    if (!silent)
-    {
-      final sound = globalVolume == 10 ? Paths.returnSound('sounds/soundtray/$volumeMaxSound') : #if MODS_ALLOWED Paths.returnSound('sounds/soundtray/${up ? volumeUpSound : volumeDownSound}') #else FlxAssets.getSound(up ? volumeUpSound : volumeDownSound) #end;
-      if (sound != null) FlxG.sound.load(sound).play();
-    }
-
+    final numBars = Math.round(volume * 10);
     for (i in 0..._bars.length)
-    {
-      _bars[i].visible = i < globalVolume ? true : false;
-    }
+      _bars[i].alpha = i < numBars ? 1.0 : 0.5;
+
+    _label.text = label;
+    updateSize();
+  }
+
+  override function showIncrement():Void
+  {
+    final volume = FlxG.sound.muted ? 0 : FlxG.sound.volume;
+    final volumeIncSound:String = (Math.round(volume * 10) == 10 ? volumeMaxSound : volumeUpSound);
+    final incrementSound:Sound = #if MODS_ALLOWED Paths.returnSound('sounds/soundtray/$volumeIncSound') #else FlxAssets.getSound(volumeIncSound) #end;
+
+    showAnim(volume, silent ? null : volumeIncSound);
+  }
+
+  override function showDecrement():Void
+  {
+    final volume = FlxG.sound.muted ? 0 : FlxG.sound.volume;
+    final decrementSound:Sound = #if MODS_ALLOWED Paths.returnSound('sounds/soundtray/$volumeDownSound') #else FlxAssets.getSound(volumeDownSound) #end;
+    showAnim(volume, silent ? null : decrementSound);
   }
 }

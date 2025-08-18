@@ -1,7 +1,66 @@
 package scfunkin.backend.data;
 
 import openfl.utils.Assets;
-import scfunkin.objects.ui.scripting.ModchartSprite;
+import scfunkin.backend.data.files.IDataApplier;
+
+typedef StagePosData =
+{
+  var ?overridePos:Null<Bool>;
+  var ?pos:Array<Float>;
+  var ?playerPos:Array<Float>;
+}
+
+typedef StagePositionsData =
+{
+  var ?positions:Map<String, StagePosData>;
+  var ?camera_positions:Map<String, StagePosData>;
+}
+
+@:structInit
+@:publicFields
+class ImageLoadFilters
+{
+  var minimum:Array<String>;
+  var low:Array<String>;
+  var medium:Array<String>;
+  var high:Array<String>;
+  var maximum:Array<String>;
+
+  @:optional var story_mode:Array<String>;
+  @:optional var freeplay:Array<String>;
+
+  public function map():Map<String, Array<String>>
+  {
+    var lists:Map<String, Array<String>> = [];
+    for (filter in QualityFilter.filters)
+    {
+      final list:Array<String> = Reflect.getProperty(this, filter);
+      if (list == null) continue;
+      lists.set(filter, list);
+    }
+    return lists;
+  }
+
+  public function merge():Array<String>
+  {
+    final quality:String = Save.get('quality');
+    var list:Array<String> = [];
+
+    for (filter in QualityFilter.filters)
+    {
+      final images:Array<String> = Reflect.getProperty(this, filter);
+      if (images == null || images.length < 1) continue;
+      if (filter == 'freeplay' || filter == 'story_mode')
+      {
+        if (filter == 'story_mode' && !PlayState.isStoryMode) continue;
+        if (filter == 'freeplay' && PlayState.isStoryMode) continue;
+        list.concat(images);
+      }
+      if (Save.isQuality(quality, '<=')) list.concat(images);
+    }
+    return list;
+  }
+}
 
 typedef StageFile =
 {
@@ -28,22 +87,22 @@ typedef StageFile =
   /**
    * Player's X and Y positions offset.
    */
-  var boyfriend:Array<Dynamic>;
+  var boyfriend:Array<Float>;
 
   /**
    * Girlfriend's X and Y positions offset.
    */
-  var girlfriend:Array<Dynamic>;
+  var girlfriend:Array<Float>;
 
   /**
    * Opponent's X and Y positions offset.
    */
-  var opponent:Array<Dynamic>;
+  var opponent:Array<Float>;
 
   /**
    * "Mom's" X and Y positions offset.
    */
-  var ?opponent2:Array<Dynamic>;
+  var ?opponent2:Array<Float>;
 
   /**
    * To wether hide girlfriend or not.
@@ -76,49 +135,9 @@ typedef StageFile =
   var ?camera_speed:Null<Float>;
 
   /**
-   * Where the skin is from.
-   */
-  var ?ratingSkin:Array<String>;
-
-  /**
-   * What the countDown Assets will be.
-   */
-  var ?countDownAssets:Array<String>;
-
-  /**
-   * Scales for the rating objects. Ex: [[1, 1], [1, 1], [1, 1], [1, 1]]
-   */
-  var ?ratingScales:Array<Float>;
-
-  /**
-   * Intro Sounds Prefix.
-   */
-  var ?introSoundsPrefix:String;
-
-  /**
-   * Intro Sounds suffix.
-   */
-  var ?introSoundsSuffix:String;
-
-  /**
-   * Disables Intro Sounds
-   */
-  var ?disableIntroSounds:Bool;
-
-  /**
-   * Offsets for the ratings.
-   */
-  var ?ratingOffsets:Array<Array<Float>>;
-
-  /**
-   * Intro Sprite Scales.
-   */
-  var ?introSpriteScales:Array<Array<Float>>;
-
-  /**
    * Objects To Preload.
    */
-  var ?preload:Dynamic;
+  var ?preload:ImageLoadFilters;
 
   /**
    * Objects To Include.
@@ -144,233 +163,171 @@ typedef StageFile =
    * Stage Name.
    */
   var ?name:String;
+
+  /**
+   * Data to store positions in a given stage for sprites.
+   */
+  var ?positionsData:StagePositionsData;
 }
 
-enum abstract LoadFilters(Int) from Int from UInt to Int to UInt
+class StageData implements IDataApplier<StageFile, String, StageData>
 {
-  var LOW_QUALITY:Int = (1 << 0); // 1
-  var HIGH_QUALITY:Int = (1 << 1); // 2
+  public static var DEFAULT_STAGE:String = 'mainStage';
 
-  var STORY_MODE:Int = (1 << 2); // 4
-  var FREEPLAY:Int = (1 << 3); // 8
-}
+  public var id:String = "";
 
-class StageData
-{
-  public static function dummy():StageFile
+  public var name:String = "";
+
+  public var directory:String = null;
+
+  public var defaultZoom:Float = 1;
+
+  public var isPixelStage:Null<Bool> = null;
+
+  public var stageUI:String = "normal";
+
+  public var boyfriend:Array<Float> = null;
+
+  public var girlfriend:Array<Float> = null;
+
+  public var opponent:Array<Float> = null;
+
+  public var opponent2:Array<Float> = null;
+
+  public var hide_girlfriend:Null<Bool> = null;
+
+  public var camera_boyfriend:Array<Float> = null;
+
+  public var camera_opponent:Array<Float> = null;
+
+  public var camera_opponent2:Array<Float> = null;
+
+  public var camera_girlfriend:Array<Float> = null;
+
+  public var camera_speed:Null<Float> = null;
+
+  public var ratingSkin:String = null;
+
+  public var preload:ImageLoadFilters = null;
+
+  public var objects:Array<Dynamic> = null;
+
+  public var _editorMeta:Dynamic = null;
+
+  public var _extraData:Dynamic = null;
+
+  public var positionsData:StagePositionsData = {};
+
+  public var currentFileData:StageFile = null;
+
+  public var currentName:String = "";
+
+  public function new() {}
+
+  public function load(stage:String):StageFile
   {
-    return {
-      directory: "",
-      defaultZoom: 0.9,
-      stageUI: "normal",
+    final json:Dynamic = CoolUtil.jsonFallback(Paths.json('stages/$stage'), Paths.json('stages/$DEFAULT_STAGE'), function(path:String, failed:Bool) {
+      this.currentName = failed ? DEFAULT_STAGE : stage;
+    });
+    if (json == null) return null;
+    final jsonMap:Map<String, Dynamic> = scfunkin.utils.ReflectUtil.structureToMap(json);
 
-      boyfriend: [770, 100],
-      girlfriend: [400, 130],
-      opponent: [100, 100],
-      opponent2: [100, 100],
-      hide_girlfriend: false,
-
-      camera_boyfriend: [0, 0],
-      camera_opponent: [0, 0],
-      camera_opponent2: [0, 0],
-      camera_girlfriend: [0, 0],
-      camera_speed: 1,
-
-      ratingSkin: ['', ''],
-      countDownAssets: ['ready', 'set', 'go'],
-
-      introSoundsPrefix: "",
-      introSoundsSuffix: "",
-
-      disableIntroSounds: false,
-
-      ratingOffsets: [[0, 0], [0, 0]],
-
-      introSpriteScales: [[1, 1], [1, 1], [1, 1], [1, 1]],
-
-      _editorMeta:
-        {
-          gf: "gf",
-          dad: "dad",
-          boyfriend: "bf"
-        },
-      _extraData:
-        {
-          cameraMovement:
-            {
-              player: [50, 60],
-              opponent: [50, 60],
-              girlfriend: [50, 60]
-            }
-        }
-    };
-  }
-
-  public static var forceNextDirectory:String = null;
-
-  public static function loadDirectory(SONG:Song)
-  {
-    final stage:String = if (SONG.getSongData('stage') != null) SONG.getSongData('stage') else if (SongJsonData.loadedSongName != null)
-      vanillaSongStage(Paths.formatToSongPath(SongJsonData.loadedSongName)) else 'mainStage';
-
-    final stageFile:StageFile = getStageFile(stage);
-    forceNextDirectory = (stageFile != null) ? stageFile.directory : ''; // preventing crashes
-  }
-
-  public static function getStageFile(stage:String):StageFile
-  {
-    try
+    function checkField(field:String, fallbackValue:Dynamic):Dynamic
     {
-      final path:String = Paths.getPath('data/stages/' + stage + '.json', TEXT, null, true);
-      #if MODS_ALLOWED
-      if (FileSystem.exists(path)) return cast tjson.TJSON.parse(File.getContent(path));
-      #else
-      if (Assets.exists(path)) return cast tjson.TJSON.parse(Assets.getText(path));
-      #end
-    }
-    return dummy();
-  }
-
-  public static function vanillaSongStage(songName:String):String
-  {
-    switch (songName)
-    {
-      // Vanilla FNF Stages
-      case 'spookeez', 'south', 'monster':
-        return 'spookyMansion';
-      case 'pico', 'blammed', 'philly', 'philly-nice':
-        return 'phillyTrain';
-      case 'milf', 'satin-panties', 'high':
-        return 'limoRide';
-      case 'cocoa', 'eggnog':
-        return 'mallXMas';
-      case 'winter-horrorland':
-        return 'mallEvil';
-      case 'senpai', 'roses':
-        return 'school';
-      case 'thorns':
-        return 'schoolEvil';
-      case 'ugh', 'guns', 'stress':
-        return 'tankmanBattlefield';
-      case 'darnell', 'lit-up', '2hot':
-        return 'phillyStreets';
-      case 'blazin':
-        return 'phillyBlazin';
-    }
-    return 'mainStage';
-  }
-
-  public static var reservedNames:Array<String> = ['gf', 'gfGroup', 'dad', 'dadGroup', 'boyfriend', 'boyfriendGroup']; // blocks these names from being used on stage editor's name input text
-
-  public static function addObjectsToState(objectList:Array<Dynamic>, gf:FlxSprite, dad:FlxSprite, boyfriend:FlxSprite, mom:FlxSprite, ?group:Dynamic = null,
-      ?ignoreFilters:Bool = false)
-  {
-    var addedObjects:Map<String, FlxSprite> = [];
-    for (num => data in objectList)
-    {
-      if (addedObjects.exists(data)) continue;
-
-      switch (data.type)
+      function canUseField():Bool
       {
-        case 'gf', 'gfGroup':
-          if (gf != null)
-          {
-            gf.ID = num;
-            if (group != null) group.add(gf);
-            addedObjects.set('gf', gf);
-          }
-        case 'dad', 'dadGroup':
-          if (dad != null)
-          {
-            dad.ID = num;
-            if (group != null) group.add(dad);
-            addedObjects.set('dad', dad);
-          }
-        case 'boyfriend', 'boyfriendGroup':
-          if (boyfriend != null)
-          {
-            boyfriend.ID = num;
-            if (group != null) group.add(boyfriend);
-            addedObjects.set('boyfriend', boyfriend);
-          }
-        case 'mom', 'momGroup':
-          if (mom != null)
-          {
-            mom.ID = num;
-            if (group != null) group.add(mom);
-            addedObjects.set('mom', mom);
-          }
+        if (!jsonMap.exists(field)) return false;
 
-        case 'square', 'sprite', 'animatedSprite':
-          if (!ignoreFilters && !validateVisibility(data.filters)) continue;
-
-          var spr:ModchartSprite = new ModchartSprite(data.x, data.y);
-          spr.ID = num;
-          if (data.type != 'square')
-          {
-            if (data.type == 'sprite') spr.loadGraphic(Paths.image(data.image));
-            else
-              spr.frames = Paths.getAtlas(data.image);
-
-            if (data.type == 'animatedSprite' && data.animations != null)
-            {
-              var anims:Array<scfunkin.objects.ui.Character.AnimArray> = cast data.animations;
-              for (key => anim in anims)
-              {
-                if (anim.indices == null || anim.indices.length < 1) spr.animation.addByPrefix(anim.anim, anim.name, anim.fps, anim.loop);
-                else
-                  spr.animation.addByIndices(anim.anim, anim.name, anim.indices, '', anim.fps, anim.loop);
-
-                if (anim.offsets != null) spr.addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
-
-                if (spr.animation.curAnim == null || data.firstAnimation == anim.anim) spr.playAnim(anim.anim, true);
-              }
-            }
-            for (varName in ['antialiasing', 'flipX', 'flipY'])
-            {
-              var dat:Dynamic = Reflect.getProperty(data, varName);
-              if (dat != null) Reflect.setProperty(spr, varName, dat);
-            }
-            if (!ClientPrefs.data.antialiasing) spr.antialiasing = false;
-          }
-          else
-          {
-            spr.makeGraphic(1, 1, FlxColor.WHITE);
-            spr.antialiasing = false;
-          }
-
-          if (data.scale != null && (data.scale[0] != 1.0 || data.scale[1] != 1.0))
-          {
-            spr.scale.set(data.scale[0], data.scale[1]);
-            spr.updateHitbox();
-          }
-          spr.scrollFactor.set(data.scroll[0], data.scroll[1]);
-          spr.color = scfunkin.utils.CoolUtil.colorFromString(data.color);
-
-          for (varName in ['alpha', 'angle'])
-          {
-            var dat:Dynamic = Reflect.getProperty(data, varName);
-            if (dat != null) Reflect.setProperty(spr, varName, dat);
-          }
-
-          if (group != null) group.add(spr);
-          addedObjects.set(data.name, spr);
-
-        default:
-          var err = '[Stage .JSON file] Unknown sprite type detected: ${data.type}';
-          Debug.logError(err);
-          FlxG.log.error(err);
+        final fieldProp:Dynamic = jsonMap.get(field);
+        if (((fieldProp is String) || (field is Array)) && (field == null || field.length < 1)) return false;
+        else if (((fieldProp is Float) || (field is Int)) && Math.isNaN(fieldProp)) return false;
+        return true;
       }
+
+      return canUseField() ? jsonMap.get(field) : fallbackValue;
     }
-    return addedObjects;
+    return {
+      id: checkField('id', ""),
+      name: checkField('name', ""),
+      directory: checkField('directory', null),
+      defaultZoom: checkField('defaultZoom', 1),
+      isPixelStage: checkField('isPixelStage', null),
+      stageUI: checkField('stageUI', "normal"),
+      boyfriend: checkField('boyfriend', [0, 0]),
+      girlfriend: checkField('girlfriend', [0, 0]),
+      opponent: checkField('opponent', [0, 0]),
+      opponent2: checkField('opponent2', [0, 0]),
+      hide_girlfriend: checkField('hide_girlfriend', null),
+      camera_boyfriend: checkField('camera_boyfriend', [0, 0]),
+      camera_girlfriend: checkField('camera_girlfriend', [0, 0]),
+      camera_opponent: checkField('camera_opponent', [0, 0]),
+      camera_opponent2: checkField('camera_opponent2', [0, 0]),
+      camera_speed: checkField('camera_speed', null),
+      preload: checkField('preload', null),
+      objects: checkField('objects', null),
+      _editorMeta: checkField('_editorMeta', null),
+      _extraData: checkField('_extraData', null),
+      positionsData:
+        {
+          positions: cast scfunkin.utils.ReflectUtil.structureToMap(json.positionsData != null ? json.positionsData.positions : null),
+          camera_positions: cast scfunkin.utils.ReflectUtil.structureToMap(json.positionsData != null ? json.positionsData.camera_positions : null)
+        }
+    }
   }
 
-  public static function validateVisibility(filters:LoadFilters)
+  public function apply(_stageData:StageFile):StageData
   {
-    if ((filters & STORY_MODE) == STORY_MODE) if (!PlayState.isStoryMode) return false;
-    else if ((filters & FREEPLAY) == FREEPLAY) if (PlayState.isStoryMode) return false;
+    id = _stageData.id;
+    name = _stageData.name;
+    directory = _stageData.directory;
+    defaultZoom = _stageData.defaultZoom;
+    stageUI = _stageData.stageUI;
+    isPixelStage = _stageData.isPixelStage;
+    boyfriend = _stageData.boyfriend;
+    girlfriend = _stageData.girlfriend;
+    opponent = _stageData.opponent;
+    opponent2 = _stageData.opponent2;
+    hide_girlfriend = _stageData.hide_girlfriend;
+    camera_boyfriend = _stageData.camera_boyfriend;
+    camera_girlfriend = _stageData.camera_girlfriend;
+    camera_opponent = _stageData.camera_opponent;
+    camera_opponent2 = _stageData.camera_opponent2;
+    camera_speed = _stageData.camera_speed;
+    preload = _stageData.preload;
+    objects = _stageData.objects;
+    _editorMeta = _stageData._editorMeta;
+    _extraData = _stageData._extraData;
+    positionsData = _stageData.positionsData;
+    currentFileData = _stageData;
+    setCurrentLevel(directory);
+    return this;
+  }
 
-    return ((ClientPrefs.data.lowQuality && (filters & LOW_QUALITY) == LOW_QUALITY)
-      || (!ClientPrefs.data.lowQuality && (filters & HIGH_QUALITY) == HIGH_QUALITY));
+  public function reset():Void
+  {
+    id = name = "";
+    directory = null;
+    isPixelStage = null;
+    boyfriend = girlfriend = opponent = opponent2 = camera_boyfriend = camera_girlfriend = camera_opponent = camera_opponent2 = [0, 0];
+    camera_speed = null;
+    ratingSkin = null;
+    preload = null;
+    objects = null;
+    _editorMeta = null;
+    _extraData = null;
+    positionsData = null;
+    currentFileData = null;
+  }
+
+  public function setCurrentLevel(stageDir:String)
+  {
+    var directory:String = 'shared';
+    final weekDir:String = stageDir;
+    stageDir = null;
+
+    if (weekDir != null && weekDir.length > 0) directory = weekDir;
+
+    Debug.logInfo('directory: $directory');
+    Paths.setCurrentLevel(directory);
   }
 }

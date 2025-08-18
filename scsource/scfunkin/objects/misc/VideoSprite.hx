@@ -4,6 +4,40 @@ import flixel.addons.display.FlxPieDial;
 #if (VIDEOS_ALLOWED && hxvlc)
 import hxvlc.flixel.FlxVideoSprite;
 
+@:structInit
+@:publicFields
+class VideoParams
+{
+  var name:String = '';
+
+  @:optional
+  var ext:String = 'mp4';
+
+  @:optional
+  var isWaiting:Bool = false;
+
+  @:optional
+  var canSkip:Bool = true;
+
+  @:optional
+  var loop:Bool = false;
+
+  @:optional
+  var playOnLoad:Bool = true;
+
+  @:optional
+  var adjustSize:Bool = true;
+
+  @:optional
+  var autoPause:Bool = true;
+
+  @:optional
+  var finishCallback:Void->Void;
+
+  @:optional
+  var skipCallback:Void->Void;
+}
+
 class VideoSprite extends FlxSpriteGroup
 {
   public static var _videos:Array<VideoSprite> = [];
@@ -47,7 +81,7 @@ class VideoSprite extends FlxSpriteGroup
 
     // initialize sprites
     videoSprite = new FlxVideoSprite();
-    videoSprite.antialiasing = ClientPrefs.data.antialiasing;
+    videoSprite.antialiasing = Save.get('antialiasing');
     videoSprite.autoPause = autoPause;
     add(videoSprite);
     this.canSkip = canSkip;
@@ -118,17 +152,14 @@ class VideoSprite extends FlxSpriteGroup
   function set_canSkip(newValue:Bool)
   {
     canSkip = newValue;
-    if (canSkip)
+    if (canSkip && skipSprite == null)
     {
-      if (skipSprite == null)
-      {
-        skipSprite = new FlxPieDial(0, 0, 40, FlxColor.WHITE, 40, true, 24);
-        skipSprite.replaceColor(FlxColor.BLACK, FlxColor.TRANSPARENT);
-        skipSprite.x = FlxG.width - (skipSprite.width + 80);
-        skipSprite.y = FlxG.height - (skipSprite.height + 72);
-        skipSprite.amount = 0;
-        add(skipSprite);
-      }
+      skipSprite = new FlxPieDial(0, 0, 40, FlxColor.WHITE, 40, true, 24);
+      skipSprite.replaceColor(FlxColor.BLACK, FlxColor.TRANSPARENT);
+      skipSprite.x = FlxG.width - (skipSprite.width + 80);
+      skipSprite.y = FlxG.height - (skipSprite.height + 72);
+      skipSprite.amount = 0;
+      add(skipSprite);
     }
     else if (skipSprite != null)
     {

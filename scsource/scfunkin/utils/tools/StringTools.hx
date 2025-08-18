@@ -64,10 +64,7 @@ class StringTools
    */
   public static function stripPrefix(value:String, prefix:String):String
   {
-    if (value.startsWith(prefix))
-    {
-      return value.substr(prefix.length);
-    }
+    if (value.startsWith(prefix)) return value.substr(prefix.length);
     return value;
   }
 
@@ -79,10 +76,7 @@ class StringTools
    */
   public static function stripSuffix(value:String, suffix:String):String
   {
-    if (value.endsWith(suffix))
-    {
-      return value.substr(0, value.length - suffix.length);
-    }
+    if (value.endsWith(suffix)) return value.substr(0, value.length - suffix.length);
     return value;
   }
 

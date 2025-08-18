@@ -1,6 +1,9 @@
 package scfunkin.states.substates.scripting;
 
 import flixel.FlxObject;
+#if LUA_ALLOWED
+import scfunkin.backend.scripting.psych.luas.FunkinLua;
+#end
 
 class CustomSubstate extends MusicBeatSubState
 {
@@ -8,7 +11,7 @@ class CustomSubstate extends MusicBeatSubState
   public static var instance:CustomSubstate;
 
   #if LUA_ALLOWED
-  public static function implement(funk:scfunkin.backend.scripting.psych.FunkinLua)
+  public static function implement(funk:FunkinLua)
   {
     funk.set("openCustomSubstate", openCustomSubstate);
     funk.set("closeCustomSubstate", closeCustomSubstate);
@@ -29,12 +32,8 @@ class CustomSubstate extends MusicBeatSubState
       if (PlayState.instance.opponentVocals != null && PlayState.instance.splitVocals) PlayState.instance.opponentVocals.pause();
     }
     PlayState.instance.openSubState(new CustomSubstate(name));
-    PlayState.instance.setOnHScript('customSubstate', instance);
-    PlayState.instance.setOnHScript('customSubstateName', name);
-    PlayState.instance.setOnHSI('customSubstate', instance);
-    PlayState.instance.setOnHSI('customSubstateName', instance);
-    PlayState.instance.setOnSCHS('customSubstate', instance);
-    PlayState.instance.setOnSCHS('customSubstateName', instance);
+    PlayState.instance.setOnType('customSubstate', instance, "AllHS");
+    PlayState.instance.setOnType('customSubstateName', name, "AllHS");
   }
 
   public static function closeCustomSubstate()
@@ -51,7 +50,7 @@ class CustomSubstate extends MusicBeatSubState
   {
     if (instance != null)
     {
-      var tagObject:FlxObject = MusicBeatState.variableMap(tag).get(tag);
+      var tagObject:FlxObject = MusicBeatState._getVHVar(tag);
       if (tagObject != null)
       {
         if (pos < 0) instance.add(tagObject);
@@ -66,44 +65,36 @@ class CustomSubstate extends MusicBeatSubState
   override function create()
   {
     instance = this;
-    PlayState.instance.setOnHScript('customSubstate', instance);
-    PlayState.instance.setOnHSI('customSubstate', instance);
-    PlayState.instance.setOnSCHS('customSubstate', instance);
+    PlayState.instance.setOnType('customSubstate', instance, "AllHS");
 
-    PlayState.instance.callOnScripts('onCustomSubstateCreate', [name]);
+    PlayState.instance.callOnType(new CallData('onCustomSubstateCreate', [name]), "All");
     super.create();
-    PlayState.instance.callOnScripts('onCustomSubstateCreatePost', [name]);
+    PlayState.instance.callOnType(new CallData('onCustomSubstateCreatePost', [name]), "All");
   }
 
   public function new(name:String)
   {
     CustomSubstate.name = name;
-    PlayState.instance.setOnHScript('customSubstateName', name);
-    PlayState.instance.setOnHSI('customSubstateName', name);
-    PlayState.instance.setOnSCHS('customSubstateName', name);
+    PlayState.instance.setOnType('customSubstateName', name, "AllHS");
     super();
     cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
   }
 
   override function update(elapsed:Float)
   {
-    PlayState.instance.callOnScripts('onCustomSubstateUpdate', [name, elapsed]);
+    PlayState.instance.callOnType(new CallData('onCustomSubstateUpdate', [name, elapsed]), "All");
     super.update(elapsed);
-    PlayState.instance.callOnScripts('onCustomSubstateUpdatePost', [name, elapsed]);
+    PlayState.instance.callOnType(new CallData('onCustomSubstateUpdatePost', [name, elapsed]), "All");
   }
 
   override function destroy()
   {
-    PlayState.instance.callOnScripts('onCustomSubstateDestroy', [name]);
+    PlayState.instance.callOnType(new CallData('onCustomSubstateDestroy', [name]), "All");
     instance = null;
     name = 'unnamed';
 
-    PlayState.instance.setOnHScript('customSubstate', null);
-    PlayState.instance.setOnHScript('customSubstateName', name);
-    PlayState.instance.setOnHSI('customSubstate', null);
-    PlayState.instance.setOnHSI('customSubstateName', name);
-    PlayState.instance.setOnSCHS('customSubstate', null);
-    PlayState.instance.setOnSCHS('customSubstateName', name);
+    PlayState.instance.setOnType('customSubstate', null, "AllHS");
+    PlayState.instance.setOnType('customSubstateName', name, "AllHS");
     super.destroy();
   }
 }

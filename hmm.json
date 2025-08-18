@@ -57,24 +57,13 @@
     },
     {
       "name": "flixel",
-      "type": "git",
-      "dir": null,
-      "ref": "main",
-      "url": "https://github.com/glowsoony/flixel"
+      "type": "haxelib",
+      "version": null
     },
     {
       "name": "flixel-addons",
-      "type": "git",
-      "dir": null,
-      "ref": "dev",
-      "url": "https://github.com/glowsoony/flixel-addons"
-    },
-    {
-      "name": "fnf-modcharting-tools",
-      "type": "git",
-      "dir": null,
-      "ref": "main-old",
-      "url": "https://github.com/glowsoony/FNF-Modcharting-Tools"
+      "type": "haxelib",
+      "version": null
     },
     {
       "name": "hxdiscord_rpc",
@@ -84,11 +73,11 @@
       "url": "https://github.com/FNF-CNE-Devs/hxdiscord_rpc"
     },
     {
-      "name": "flxanimate",
+      "name": "flixel-animate",
       "type": "git",
       "dir": null,
-      "ref": "dev",
-      "url": "https://github.com/Dot-Stuff/flxanimate"
+      "ref": "main",
+      "url": "https://github.com/MaybeMaru/flixel-animate"
     },
     {
       "name": "linc_luajit",
@@ -96,13 +85,6 @@
       "dir": null,
       "ref": "master",
       "url": "https://github.com/superpowers04/linc_luajit"
-    },
-    {
-      "name": "hscript-improved",
-      "type": "git",
-      "dir": null,
-      "ref": "custom-classes",
-      "url": "https://github.com/glowsoony/hscript-improved"
     },
     {
       "name": "json2object",

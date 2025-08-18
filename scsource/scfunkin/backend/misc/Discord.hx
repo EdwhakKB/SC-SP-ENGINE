@@ -19,17 +19,15 @@ class DiscordClient
 
   public static function check()
   {
-    if (ClientPrefs.data.discordRPC) initialize();
+    if (Save.get('discordRPC')) initialize();
     else if (isInitialized) shutdown();
   }
 
   public static function prepare()
   {
-    if (!isInitialized && ClientPrefs.data.discordRPC) initialize();
+    if (!isInitialized && Save.get('discordRPC')) initialize();
 
-    Application.current.window.onClose.add(function() {
-      if (isInitialized) shutdown();
-    });
+    Application.current.window.onClose.add(function() if (isInitialized) shutdown());
   }
 
   public dynamic static function shutdown()
@@ -148,12 +146,11 @@ class DiscordClient
   #end
 
   #if LUA_ALLOWED
-  public static function addLuaCallbacks(funk:scfunkin.backend.scripting.psych.FunkinLua)
+  public static function addLuaCallbacks(funk:scfunkin.backend.scripting.psych.luas.FunkinLua)
   {
     funk.set("changeDiscordPresence", changePresence);
     funk.set("changeDiscordClientID", function(?newID:String) {
-      if (newID == null) newID = _defaultID;
-      clientID = newID;
+      clientID = newID ?? _defaultID;
     });
   }
   #end

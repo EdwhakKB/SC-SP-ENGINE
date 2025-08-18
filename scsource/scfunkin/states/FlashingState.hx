@@ -35,12 +35,11 @@ class FlashingState extends MusicBeatState
       if (controls.ACCEPT || back)
       {
         leftState = true;
-        FlxTransitionableState.skipNextTransIn = true;
-        FlxTransitionableState.skipNextTransOut = true;
+        FlxTransitionableState.skipNextTransIn = FlxTransitionableState.skipNextTransOut = true;
         if (!back)
         {
-          ClientPrefs.data.flashing = false;
-          ClientPrefs.saveSettings();
+          Save.set('flashing', false);
+          Save.flush();
           FlxG.sound.play(Paths.sound('confirmMenu'));
           FlxFlicker.flicker(warnText, 1, 0.1, false, true, function(flk:FlxFlicker) {
             new FlxTimer().start(0.5, function(tmr:FlxTimer) {

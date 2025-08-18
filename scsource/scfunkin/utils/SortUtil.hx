@@ -1,9 +1,6 @@
 package scfunkin.utils;
 
-import flixel.FlxBasic;
-import flixel.util.FlxSort;
 import flixel.graphics.frames.FlxFrame;
-import scfunkin.objects.note.Note;
 
 /**
  * Utility functions related to sorting.
@@ -35,6 +32,14 @@ class SortUtil
     return FlxSort.byValues(order, a.zIndex, b.zIndex);
   }
 
+  public static inline function byGivenVar(order:Int, a:Dynamic, b:Dynamic, name:String):Int
+  {
+    if (a == null || b == null) return 0;
+    final a:Float = cast Reflect.getProperty(a, name);
+    final b:Float = cast Reflect.getProperty(b, name);
+    return FlxSort.byValues(order, a, b);
+  }
+
   /**
    * Given two FlxFrames, sort their names alphabetically.
    *
@@ -44,9 +49,7 @@ class SortUtil
    * @return 1 if `a` has an earlier time, -1 if `b` has an earlier time.
    */
   public static inline function byFrameName(a:FlxFrame, b:FlxFrame):Int
-  {
     return alphabetically(a.name, b.name);
-  }
 
   /**
    * Sort predicate for sorting strings alphabetically.
@@ -96,7 +99,7 @@ class SortUtil
     {
       // Sort by index in defaultValues
       return defaultValues.indexOf(a) - defaultValues.indexOf(b);
-    };
+    }
     if (defaultValues.contains(a)) return -1;
     if (defaultValues.contains(b)) return 1;
     return alphabetically(a, b);

@@ -13,33 +13,11 @@
   "introSoundsPrefix": "",
 
   "preload": {
-    "images": [
-      "tank0",
-      "tank1",
-      "tank2",
-      "tank3",
-      "tank4",
-      "tank5",
-      "tankClouds",
-      "tankMountains",
-      "tankBuildings",
-      "smokeLeft",
-      "smokeRight",
-      "tankWatchtower",
-      "tankGround",
-      "tankRolling",
-      "tankRuins",
-      "tankSky"
-    ],
-    "images_low": [
-      "tank0",
-      "tank2",
-      "tank5",
-      "tankGround",
-      "tankRolling",
-      "tankRuins",
-      "tankSky"
-    ]
+    "maximum": ["tankClouds", "tankMountains", "smokeLeft", "smokeRight"],
+    "high": ["tankBuildings", "tankWatchtower", "tankRolling"],
+    "medium": ["tank4", "tank3"],
+    "low": ["tank0", "tank2", "tank5", "tankRuins"],
+    "minimum": ["tankSky", "tankGround"]
   },
 
   "_editorMeta": {

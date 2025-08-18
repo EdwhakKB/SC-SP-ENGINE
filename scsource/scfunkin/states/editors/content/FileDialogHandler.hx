@@ -5,7 +5,6 @@ import openfl.events.Event;
 import openfl.events.IOErrorEvent;
 import openfl.net.FileFilter;
 import haxe.Exception;
-import flixel.FlxBasic;
 import lime.ui.*;
 
 // Currently only supports OPEN and SAVE, might change that in the future, who knows

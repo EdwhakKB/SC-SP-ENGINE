@@ -8,10 +8,11 @@ class PhillyTrainSprite extends BGSprite
   {
     super(image, x, y);
     active = true; // Allow update
-    antialiasing = ClientPrefs.data.antialiasing;
+    antialiasing = Save.get('antialiasing');
 
     this.sound = new FlxSound().loadEmbedded(Paths.sound(sound));
     FlxG.sound.list.add(this.sound);
+    finished = PlayState.finishedSong;
   }
 
   public var moving:Bool = false;
@@ -21,6 +22,11 @@ class PhillyTrainSprite extends BGSprite
 
   public var cars:Int = 8;
   public var cooldown:Int = 0;
+  public var finished:Bool = false;
+
+  public var onStartedMoving:Void->Void = () -> {};
+  public var onRestart:Void->Void = () -> {};
+  public var onStart:Void->Void = () -> {};
 
   override function update(elapsed:Float)
   {
@@ -32,11 +38,7 @@ class PhillyTrainSprite extends BGSprite
         if (sound.time >= 4700)
         {
           startedMoving = true;
-          if (PlayState.instance.gf != null)
-          {
-            PlayState.instance.gf.playAnim('hairBlow');
-            PlayState.instance.gf.specialAnim = true;
-          }
+          if (onStartedMoving != null) onStartedMoving();
         }
 
         if (startedMoving)
@@ -55,7 +57,7 @@ class PhillyTrainSprite extends BGSprite
         frameTiming = 0;
       }
 
-      if (PlayState.finishedSong)
+      if (finished)
       {
         if (!tweend)
         {
@@ -73,12 +75,12 @@ class PhillyTrainSprite extends BGSprite
 
   var tweend:Bool = false;
 
-  override public function beatHit(curBeat:Int):Void
+  override public function beatHit(beat:Int):Void
   {
-    super.beatHit(curBeat);
+    super.beatHit(beat);
     if (!moving) cooldown += 1;
 
-    if (curBeat % 8 == 4 && FlxG.random.bool(30) && !moving && cooldown > 8)
+    if (beat % 8 == 4 && FlxG.random.bool(30) && !moving && cooldown > 8)
     {
       cooldown = FlxG.random.int(-4, 0);
       start();
@@ -89,16 +91,12 @@ class PhillyTrainSprite extends BGSprite
   {
     moving = true;
     if (!sound.playing) sound.play(true);
+    if (onStart != null) onStart();
   }
 
   public function restart():Void
   {
-    if (PlayState.instance.gf != null)
-    {
-      PlayState.instance.gf.danced = false; // Makes she bop her head to the correct side once the animation ends
-      PlayState.instance.gf.playAnim('hairFall');
-      PlayState.instance.gf.specialAnim = true;
-    }
+    if (onRestart != null) onRestart();
     x = FlxG.width + 200;
     moving = false;
     cars = 8;

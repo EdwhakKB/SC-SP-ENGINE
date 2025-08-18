@@ -1,14 +1,12 @@
 package scfunkin.objects.ui;
 
-import haxe.Json as Json;
-import lime.utils.Assets;
-import flixel.math.FlxMath;
+import scfunkin.backend.data.packed.animation.AnimationData;
 
 class HealthIcon extends FunkinSCSprite
 {
   public var char:String = '';
   public var isPlayer:Bool = false;
-  public var iconOffset:Array<Float> = [0, 0];
+  public var offsets:Array<Float> = [0, 0];
 
   public var sprTracker:FlxSprite;
   public var hasWinning:Bool = true;
@@ -24,11 +22,9 @@ class HealthIcon extends FunkinSCSprite
   public var iconStoppedBop:Bool = false;
 
   // Animated Icon Stuff
-  public var animatedIcon:Bool = false;
+  public var animated:Bool = false;
   public var animationStopped:Bool = false;
   public var autoAnimatedSetup:Bool = false;
-  public var overrideIconOnUpdate:Bool = false;
-  public var overrideIconPlacement:Bool = false;
 
   public var offsetX:Float = 0;
   public var offsetY:Float = 0;
@@ -41,14 +37,6 @@ class HealthIcon extends FunkinSCSprite
 
   public var percent20or80:Bool = false;
   public var percent80or20:Bool = false;
-
-  public var speedBopLerp:Float = 1;
-  public var setIconScale:Float = 1.2;
-
-  public var iconBopSpeed:Int = 2;
-  public var iconBopAngleSpeed:Int = 2;
-
-  public var overrideBeatBop:Bool = false;
 
   public var choosenDivisionMult:Int = 3;
 
@@ -73,10 +61,7 @@ class HealthIcon extends FunkinSCSprite
   {
     var name:String = 'icons/';
     var iconSuffix:String = 'icon-';
-    if (!Paths.fileExists('images/' + name + char + '.png', IMAGE))
-    {
-      iconSuffix = '';
-    }
+    if (!Paths.fileExists('images/' + name + char + '.png', IMAGE)) iconSuffix = '';
 
     if (iconSuffix.length > 0)
     {
@@ -96,10 +81,10 @@ class HealthIcon extends FunkinSCSprite
     try
     {
       #if MODS_ALLOWED
-      if (FileSystem.exists(Paths.getPath('images/$frameName.xml', TEXT))) loadIconFile(Json.parse(File.getContent(path)), frameName, name);
+      if (FileSystem.exists(Paths.getPath('images/$frameName.xml', TEXT))) loadIconFile(HaxeJson.parse(File.getContent(path)), frameName, name);
       else
       #end
-      if (Assets.exists(Paths.getPath('images/$frameName.xml', TEXT))) loadIconFile(Json.parse(Assets.getText(path)), frameName, name);
+      if (OpenFlAssets.exists(Paths.getPath('images/$frameName.xml', TEXT))) loadIconFile(HaxeJson.parse(OpenFlAssets.getText(path)), frameName, name);
       else
         loadGraphicIcon(name, allowGPU);
     }
@@ -114,11 +99,10 @@ class HealthIcon extends FunkinSCSprite
   public dynamic function loadGraphicIcon(icon:String, gpuAllowed:Bool)
   {
     frames = null;
-    if (animatedIcon) animatedIcon = false;
-    var graphic = Paths.image(icon, gpuAllowed);
+    if (animated) animated = false;
+    var graphic = Paths.image(icon, gpuAllowed) ?? Paths.image("icons/icon-face", gpuAllowed);
 
     // If null once it turns into icon-face, but it that fails, fully stop working!
-    if (graphic == null) graphic = Paths.image("icons/icon-face", gpuAllowed);
     if (graphic == null)
     {
       graphic = Paths.image('missingRating', gpuAllowed);
@@ -147,42 +131,43 @@ class HealthIcon extends FunkinSCSprite
     else
       divisionMult = 1;
 
-    if (divideByWidthAndHeight)
-    {
-      loadGraphic(graphic); // Load stupidly first for getting the file size
-      loadGraphic(graphic, true, Math.floor(width / divisionMult), Math.floor(height));
-    }
-    else
-      loadGraphic(graphic, true, Math.floor(graphic.width / divisionMult), Math.floor(graphic.height));
-    iconOffset[0] = (width - 150) / divisionMult;
-    iconOffset[1] = (height - 150) / divisionMult;
+    loadGraphic(graphic, true, Math.floor(graphic.width / divisionMult), Math.floor(graphic.height));
+    offsets[0] = (width - 150) / divisionMult;
+    offsets[1] = (height - 150) / divisionMult;
 
     hasWinning = (divisionMult >= 3);
     defaultSize = (divisionMult == 2);
 
-    offset.set(iconOffset[0], iconOffset[1]);
+    offset.set(offsets[0], offsets[1]);
     updateHitbox();
 
     animation.add(char, [for (i in 0...frames.frames.length) i], 0, false, isPlayer);
     animation.play(char);
 
-    antialiasing = (ClientPrefs.data.antialiasing && !char.endsWith('-pixel'));
+    antialiasing = (Save.get('antialiasing') && !char.endsWith('-pixel'));
   }
 
   public dynamic function loadIconFile(json:Dynamic, path:String, graphicIcon:String)
   {
-    if (json.image != null) path = 'images/' + json.image + '.json';
+    if (json.image != null)
+    {
+      if (!json.image.contains('images/')) path = 'images/' + json.image + '.xml';
+      else
+        path = json.image;
+    }
+    else
+      path = 'images/' + path + '.xml';
 
-    frames = Paths.getSparrowAtlas(path);
+    loadFrameAtlas(path);
 
     if (frames == null)
     {
       frames = null;
-      animatedIcon = false;
+      animated = false;
       return false;
     }
 
-    animatedIcon = true;
+    animated = true;
 
     scale.set(1, 1);
     updateHitbox();
@@ -202,13 +187,13 @@ class HealthIcon extends FunkinSCSprite
     final speed:Int = json.bopSpeed;
 
     flipX = (json.flip_x != null ? json.flip_x : isPlayer);
-    iconBopSpeed = (!Math.isNaN(speed) && speed != 0) ? speed : 2;
+    bopSpeed = (!Math.isNaN(speed) && speed != 0) ? speed : 2;
 
     final noAntialiasing = (json.no_antialiasing == true);
-    antialiasing = ClientPrefs.data.antialiasing ? !noAntialiasing && !char.endsWith('-pixel') : false;
+    antialiasing = Save.get('antialiasing') ? !noAntialiasing && !char.endsWith('-pixel') : false;
 
     // animations
-    final animations:Array<IconAnimations> = json.animations;
+    final animations:Array<SingleData> = json.animations;
 
     // Let people override it to autoAnimateSetup
     if (animations != null && animations.length > 0)
@@ -227,12 +212,12 @@ class HealthIcon extends FunkinSCSprite
         var offsets:Array<Int> = anim.offsets;
         var swagOffsets:Array<Int> = offsets;
 
-        if (swagOffsets != null && swagOffsets.length > 1) addOffset(anim.anim, swagOffsets[0], swagOffsets[1]);
+        if (swagOffsets != null && swagOffsets.length > 1) setOffset(anim.anim, swagOffsets[0], swagOffsets[1]);
       }
     }
 
-    if (hasOffsetAnimation('losing')) hasLosingAnimated = true;
-    if (hasOffsetAnimation('winning')) hasWinningAnimated = true;
+    if (hasOffset('losing')) hasLosingAnimated = true;
+    if (hasOffset('winning')) hasWinningAnimated = true;
 
     json.startingAnim != null ? playAnim(json.startingAnim) : playAnim('normal', true);
     return true;
@@ -249,15 +234,15 @@ class HealthIcon extends FunkinSCSprite
   override function updateHitbox()
   {
     super.updateHitbox();
-    if (!animatedIcon)
+    if (!animated)
     {
       if (autoAdjustOffset)
       {
-        offset.x = iconOffset[0];
-        offset.y = iconOffset[1];
+        offset.x = offsets[0];
+        offset.y = offsets[1];
       }
-      if (autoAdjustWidth) width = Math.abs(scale.x) * frameWidth;
-      if (autoAdjustHeight) height = Math.abs(scale.y) * frameHeight;
+      if (autoAdjustWidth) width = scale.x * frameWidth;
+      if (autoAdjustHeight) height = scale.y * frameHeight;
       if (autoAdjustToCenter) centerOrigin();
     }
   }
@@ -266,88 +251,76 @@ class HealthIcon extends FunkinSCSprite
   {
     super.update(elapsed);
     if (sprTracker != null) setPosition(sprTracker.x + sprTracker.width + 12 + offsetX, sprTracker.y - 30 + offsetY);
+    if (updateAnims != null) updateAnims();
+    if (updateLerpScale != null) updateLerpScale(elapsed);
+  }
 
-    if (stopBop) return;
-
-    if (!iconStoppedBop)
+  public dynamic function updateAnims()
+  {
+    if (!animated)
     {
-      final mult:Float = FlxMath.lerp((setIconScale - 0.2), scale.x, Math.exp(-elapsed * 9 * speedBopLerp));
-      scale.set(mult, mult);
-      updateHitbox();
-    }
-
-    if (!overrideIconOnUpdate)
-    {
-      if (!animatedIcon)
+      if (isPlayer)
       {
-        if (isPlayer)
-        {
-          if (percent20or80 && frames.frames.length > 0) animation.curAnim.curFrame = 1;
-          else if (percent80or20 && hasWinning && frames.frames.length > 2) animation.curAnim.curFrame = 2;
-          else
-            animation.curAnim.curFrame = 0;
-        }
+        if (percent20or80 && frames.frames.length > 0) animation.curAnim.curFrame = 1;
+        else if (percent80or20 && hasWinning && frames.frames.length > 2) animation.curAnim.curFrame = 2;
         else
-        {
-          if (percent20or80 && hasWinning && frames.frames.length > 2) animation.curAnim.curFrame = 2;
-          else if (percent80or20 && frames.frames.length > 0) animation.curAnim.curFrame = 1;
-          else
-            animation.curAnim.curFrame = 0;
-        }
+          animation.curAnim.curFrame = 0;
       }
       else
       {
-        if (isPlayer)
-        {
-          normalAnimation = (!(percent80or20 && hasWinningAnimated) && !(percent20or80 && hasLosingAnimated));
-          winningAnimation = (percent80or20 && hasWinningAnimated);
-          losingAnimation = (percent20or80 && hasLosingAnimated);
-
-          animName = ((percent80or20 && hasWinningAnimated) ? 'winning' : ((percent20or80 && hasLosingAnimated) ? 'losing' : 'normal'));
-        }
+        if (percent20or80 && hasWinning && frames.frames.length > 2) animation.curAnim.curFrame = 2;
+        else if (percent80or20 && frames.frames.length > 0) animation.curAnim.curFrame = 1;
         else
-        {
-          normalAnimation = (!(percent20or80 && hasWinningAnimated) && !(percent80or20 && hasLosingAnimated));
-          winningAnimation = (percent20or80 && hasWinningAnimated);
-          losingAnimation = (percent80or20 && hasLosingAnimated);
-
-          animName = ((percent20or80 && hasWinningAnimated) ? 'winning' : ((percent80or20 && hasLosingAnimated) ? 'losing' : 'normal'));
-        }
-
-        if (animatedIcon) if (animation.curAnim.finished || (animName != animation.curAnim.name)) playAnim(animName, true);
+          animation.curAnim.curFrame = 0;
       }
+    }
+    else
+    {
+      if (isPlayer)
+      {
+        normalAnimation = (!(percent80or20 && hasWinningAnimated) && !(percent20or80 && hasLosingAnimated));
+        winningAnimation = (percent80or20 && hasWinningAnimated);
+        losingAnimation = (percent20or80 && hasLosingAnimated);
+
+        animName = ((percent80or20 && hasWinningAnimated) ? 'winning' : ((percent20or80 && hasLosingAnimated) ? 'losing' : 'normal'));
+      }
+      else
+      {
+        normalAnimation = (!(percent20or80 && hasWinningAnimated) && !(percent80or20 && hasLosingAnimated));
+        winningAnimation = (percent20or80 && hasWinningAnimated);
+        losingAnimation = (percent80or20 && hasLosingAnimated);
+
+        animName = ((percent20or80 && hasWinningAnimated) ? 'winning' : ((percent80or20 && hasLosingAnimated) ? 'losing' : 'normal'));
+      }
+
+      if (animated) if (animation.curAnim.finished && animation.curAnim.looped || (animName != animation.curAnim.name)) playAnim(animName, true);
     }
   }
 
-  override public function beatHit(curBeat:Int)
+  public var stopLerp:Bool = false;
+
+  public dynamic function updateLerpScale(elapsed:Float)
   {
-    super.beatHit(curBeat);
-
-    if (stopBop) return;
-
-    if (!overrideBeatBop)
+    if (!stopLerp && (stopBop != null && !stopBop))
     {
-      if (curBeat % iconBopSpeed == 0)
-      {
-        if (!iconStoppedBop)
-        {
-          scale.set(setIconScale, setIconScale);
-          updateHitbox();
-        }
+      final mult:Float = FlxMath.lerp(lerpScale, scale.x, Math.exp(-elapsed * 9 * bopLerpSpeed));
+      scale.set(mult, mult);
+      updateHitbox();
+    }
+  }
 
-        switch (ClientPrefs.data.iconMovement.toLowerCase())
-        {
-          case 'angled':
-            if (iconStoppedBop) return;
-            curBeat % iconBopAngleSpeed == 0 ?
-            {
-              FlxTween.angle(this, -15, 0, Conductor.crochet / 1300 / speedBopLerp, {ease: FlxEase.circOut});
-            } :
-              {
-                FlxTween.angle(this, 15, 0, Conductor.crochet / 1300 / speedBopLerp, {ease: FlxEase.circOut});
-              };
-        }
-      }
+  public var lerpScale:Float = 1;
+  public var restScale:Float = 1.2;
+
+  public var bopLerpSpeed:Float = 1;
+  public var bopSpeed:Float = 2.0;
+
+  public dynamic function updateScale(time:Float)
+  {
+    if ((stopBop != null && !stopBop) && time % bopSpeed == 0)
+    {
+      scale.set(restScale, restScale);
+      updateHitbox();
     }
   }
 }
@@ -356,20 +329,10 @@ typedef IconData =
 {
   var ?name:String;
   var image:String;
-  var animations:Array<IconAnimations>;
+  var animations:Array<SingleData>;
   var ?startingAnim:String;
   var ?scale:Float;
   var ?graphicScale:Float;
   var ?no_antialiasing:Bool;
   var ?bopSpeed:Int;
-}
-
-typedef IconAnimations =
-{
-  var name:String;
-  var anim:String;
-  var ?fps:Int;
-  var ?offsets:Array<Int>;
-  var ?loop:Bool;
-  var ?indices:Array<Int>;
 }

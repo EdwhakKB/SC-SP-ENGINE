@@ -8,17 +8,86 @@ import openfl.Lib;
 
 class FunkinSourcedShaders
 {
+  public function new() {}
+
   public static var shadersMap:Map<String, ShaderBase> = [];
 
-  public function updateShaders(elapsed:Float)
+  public static function updateShaders(elapsed:Float)
   {
-    for (shaderKey in shadersMap.keys())
+    if (shadersMap != null)
     {
-      final shader:ShaderBase = shadersMap.get(shaderKey);
-      if (shader == null) continue;
-      if (shader.canUpdate()) shader.update(elapsed);
+      for (shaderKey in shadersMap.keys())
+      {
+        final shader:ShaderBase = shadersMap.get(shaderKey);
+        if (shader == null) continue;
+        if (shader.canUpdate()) shader.update(elapsed);
+      }
     }
   }
+
+  #if (!flash && sys)
+  public static function createRuntimeShader(name:String):FlxRuntimeShader
+  {
+    if (!Save.get('shaders')) return new FlxRuntimeShader();
+
+    #if (!flash && MODS_ALLOWED && sys)
+    if (!shadersMap.exists(name) && !initLuaShader(name))
+    {
+      FlxG.log.warn('Shader $name is missing!');
+      return new FlxRuntimeShader();
+    }
+
+    return shadersMap.get(name).shader;
+    #else
+    FlxG.log.warn("Platform unsupported for Runtime Shaders!");
+    return null;
+    #end
+  }
+
+  public static function initLuaShader(name:String #if MODS_ALLOWED, searchModsOnly:Bool = false #end)
+  {
+    if (!Save.get('shaders')) return false;
+
+    #if (MODS_ALLOWED && !flash && sys)
+    if (shadersMap.exists(name))
+    {
+      FlxG.log.warn('Shader $name was already initialized!');
+      return true;
+    }
+
+    var foldersToCheck:Array<String> = [Paths.mods('data/shaders/')];
+    if (Mods.currentModDirectory != null && Mods.currentModDirectory.length > 0) foldersToCheck.insert(0,
+      Paths.mods(Mods.currentModDirectory + '/data/shaders/'));
+
+    for (mod in Mods.getGlobalMods())
+      foldersToCheck.insert(0, Paths.mods(mod + '/data/shaders/'));
+
+    for (folder in (searchModsOnly ? foldersToCheck : Mods.directoriesWithFile(Paths.getSharedPath(), 'data/shaders/')))
+    {
+      if (FileSystem.exists(folder))
+      {
+        var frag:String = folder + name + '.frag';
+        var vert:String = folder + name + '.vert';
+        var found:Bool = false;
+
+        frag = FileSystem.exists(frag) ? File.getContent(frag) : null;
+        vert = FileSystem.exists(vert) ? File.getContent(vert) : null;
+        found = (FileSystem.exists(frag) || FileSystem.exists(vert));
+
+        if (found)
+        {
+          shadersMap.set(name, new ShaderBase(name));
+          return true;
+        }
+      }
+    }
+    FlxG.log.warn('Missing shader $name .frag AND .vert files!');
+    #else
+    FlxG.log.warn('This platform doesn\'t support Runtime Shaders!', false, false, FlxColor.RED);
+    #end
+    return false;
+  }
+  #end
 }
 
 // Effects A-Z WITH SHADERS -glow
@@ -445,21 +514,21 @@ class ColorSwapEffect extends ShaderBase
   private function set_hue(value:Float)
   {
     hue = value;
-    shader.setFloatArray('uTime', [hue, saturation, value]);
+    shader.setFloatArray('uTime', [hue, saturation, brightness]);
     return hue;
   }
 
   private function set_saturation(value:Float)
   {
     saturation = value;
-    shader.setFloatArray('uTime', [hue, saturation, value]);
+    shader.setFloatArray('uTime', [hue, saturation, brightness]);
     return saturation;
   }
 
   private function set_brightness(value:Float)
   {
     brightness = value;
-    shader.setFloatArray('uTime', [hue, saturation, value]);
+    shader.setFloatArray('uTime', [hue, saturation, brightness]);
     return brightness;
   }
 

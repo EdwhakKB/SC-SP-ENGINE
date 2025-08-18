@@ -14,13 +14,18 @@ import openfl.display.ShaderParameter;
 import openfl.display.BitmapData;
 import openfl.display.ShaderInput;
 import lime.utils.Float32Array;
-import _hscript.IHScriptCustomBehaviour;
+
+interface CustomGetSetBehavior<G, S>
+{
+  public function get(v:G):S;
+  public function set(v:G, val:S):S;
+}
 
 @:access(openfl.display3D.Context3D)
 @:access(openfl.display3D.Program3D)
 @:access(openfl.display.ShaderInput)
 @:access(openfl.display.ShaderParameter)
-class FunkinShader extends FlxShader implements IHScriptCustomBehaviour
+class FunkinShader extends FlxShader implements CustomGetSetBehavior<String, Dynamic>
 {
   private static var __instanceFields = Type.getInstanceFields(FunkinShader);
 
@@ -510,7 +515,7 @@ class FunkinShader extends FlxShader implements IHScriptCustomBehaviour
   }
 
   // USE THESE IN HSCRIPT FOR SETTING AND GETTING PROPERTY'S!
-  public function hget(name:String):Dynamic
+  public function get(name:String):Dynamic
   {
     if (__instanceFields.contains(name) || __instanceFields.contains('get_${name}'))
     {
@@ -533,7 +538,7 @@ class FunkinShader extends FlxShader implements IHScriptCustomBehaviour
     return field;
   }
 
-  public function hset(name:String, val:Dynamic):Dynamic
+  public function set(name:String, val:Dynamic):Dynamic
   {
     if (__instanceFields.contains(name) || __instanceFields.contains('set_${name}'))
     {

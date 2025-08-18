@@ -13,6 +13,7 @@ import scfunkin.states.MusicBeatState;
 import scfunkin.backend.data.WeekData;
 import scfunkin.states.editors.MasterEditorMenu;
 import scfunkin.states.substates.options.OptionsState;
+import scfunkin.objects.ui.Character;
 
 enum MainMenuColumn
 {
@@ -29,7 +30,6 @@ class FlxMenuSprite extends FlxSprite
 
 class MainMenuState extends MusicBeatState
 {
-  public static final psychEngineVersion:String = '1.0.1'; // This is also used for Discord RPC
   public static var SCEVersion:String = '1.5.3'; // This is also used for Discord RPC
   public static var curSelected:Int = 0;
   public static var curColumn:MainMenuColumn = CENTER;
@@ -44,8 +44,6 @@ class MainMenuState extends MusicBeatState
   var menuItems:FlxTypedGroup<FlxMenuSprite>;
   var leftItem:FlxMenuSprite;
   var rightItem:FlxMenuSprite;
-
-  var gameJoltButton:FlxSprite;
 
   var leftOption:String = #if ACHIEVEMENTS_ALLOWED 'achievements' #else null #end;
   var rightOption:String = 'options';
@@ -77,7 +75,7 @@ class MainMenuState extends MusicBeatState
     FlxG.mouse.visible = true;
 
     bg = new FlxSprite(0, 0).loadGraphic(Paths.image('menuBG'));
-    bg.antialiasing = ClientPrefs.data.antialiasing;
+    bg.antialiasing = Save.get('antialiasing');
     bg.scrollFactor.set();
     bg.alpha = 0.5;
     // bg.setGraphicSize(FlxG.width * 2, FlxG.height * 2);
@@ -91,7 +89,7 @@ class MainMenuState extends MusicBeatState
     add(camFollowPos);
 
     magenta = new FlxSprite(0, 0).loadGraphic(Paths.image('menuDesat'));
-    magenta.antialiasing = ClientPrefs.data.antialiasing;
+    magenta.antialiasing = Save.get('antialiasing');
     magenta.scrollFactor.set();
     magenta.alpha = 0.5;
     // magenta.setGraphicSize(Std.int(bg.width * 4), Std.int(bg.height * 4));
@@ -108,7 +106,7 @@ class MainMenuState extends MusicBeatState
     grid.velocity.set(FlxG.random.bool(50) ? 90 : -90, FlxG.random.bool(50) ? 90 : -90);
     grid.alpha = 0;
     FlxTween.tween(grid, {alpha: 0.56}, 0.5, {ease: FlxEase.quadOut});
-    add(grid);
+    if (Save.isQuality('high', '>=')) add(grid);
 
     menuItems = new FlxTypedGroup<FlxMenuSprite>();
     add(menuItems);
@@ -134,15 +132,8 @@ class MainMenuState extends MusicBeatState
     sceVersion.borderStyle = FlxTextBorderStyle.OUTLINE_FAST;
     sceVersion.borderColor = FlxColor.BLACK;
     sceVersion.font = Paths.font('vcr.ttf');
-    if (ClientPrefs.data.SCEWatermark) add(sceVersion);
-    final psychVersion:FlxText = new FlxText(12, FlxG.height - 44, 0, 'Psych Engine v' + psychEngineVersion, 16);
-    psychVersion.active = false;
-    psychVersion.scrollFactor.set();
-    psychVersion.borderStyle = FlxTextBorderStyle.OUTLINE_FAST;
-    psychVersion.borderColor = FlxColor.BLACK;
-    psychVersion.font = Paths.font('vcr.ttf');
-    add(psychVersion);
-    final fnfVersion:FlxText = new FlxText(12, FlxG.height - 24, 0, "Friday Night Funkin' v" + Application.current.meta.get('version'), 16);
+    add(sceVersion);
+    final fnfVersion:FlxText = new FlxText(12, FlxG.height - 24, 0, "Friday Night Funkin' v0.6.4", 16);
     fnfVersion.active = false;
     fnfVersion.scrollFactor.set();
     fnfVersion.borderStyle = FlxTextBorderStyle.OUTLINE_FAST;
@@ -156,8 +147,7 @@ class MainMenuState extends MusicBeatState
 
     #if ACHIEVEMENTS_ALLOWED
     // Unlocks "Freaky on a Friday Night" achievement if it's a Friday and between 18:00 PM and 23:59 PM
-    final leDate = Date.now();
-    if (leDate.getDay() == 5 && leDate.getHours() >= 18) Achievements.unlock('friday_night_play');
+    if (Date.now().getDay() == 5 && Date.now().getHours() >= 18) Achievements.unlock('friday_night_play');
     #if MODS_ALLOWED
     Achievements.reloadList();
     #end
@@ -177,7 +167,7 @@ class MainMenuState extends MusicBeatState
     menuItem.animation.play('idle');
     menuItem.updateHitbox();
 
-    menuItem.antialiasing = ClientPrefs.data.antialiasing;
+    menuItem.antialiasing = Save.get('antialiasing');
     menuItem.scrollFactor.set();
     menuItem.item = name;
     menuItems.add(menuItem);
@@ -332,19 +322,6 @@ class MainMenuState extends MusicBeatState
         MusicBeatState.switchState(new TitleState());
       }
 
-      /*if (FlxG.mouse.overlaps(gameJoltButton))
-        {
-          if (gameJoltButton.color != 0xB8F500) gameJoltButton.color = 0xB8F500;
-          if (FlxG.mouse.justPressed)
-          {
-            LoadingState.loadAndSwitchState(new gamejolt.GameJoltGroup.GameJoltLogin());
-          }
-        }
-        else
-        {
-          if (gameJoltButton.color != 0xFFFFFF) gameJoltButton.color = 0xFFFFFF;
-      }*/
-
       if (controls.ACCEPT || (FlxG.mouse.justPressed && allowMouse) #if android || FlxG.android.justPressed.BACK #end)
       {
         FlxG.sound.play(Paths.sound('confirmMenu'));
@@ -353,7 +330,7 @@ class MainMenuState extends MusicBeatState
           FlxG.mouse.visible = false;
           selectedSomethin = true;
 
-          if (ClientPrefs.data.flashing) FlxFlicker.flicker(magenta, 1.1, 0.15, false);
+          if (Save.get('flashing')) FlxFlicker.flicker(magenta, 1.1, 0.15, false);
 
           var item:FlxMenuSprite;
           var option:String;
@@ -416,6 +393,12 @@ class MainMenuState extends MusicBeatState
         selectedSomethin = true;
         FlxG.mouse.visible = false;
         MusicBeatState.switchState(new MasterEditorMenu());
+      }
+      else if (FlxG.keys.justPressed.ZERO)
+      {
+        selectedSomethin = true;
+        FlxG.mouse.visible = false;
+        MusicBeatState.switchState(new TestingState());
       }
       #end
     }
@@ -619,7 +602,7 @@ class OptionsDirect extends MusicBeatState
     menuBG.setGraphicSize(Std.int(menuBG.width * 1.1));
     menuBG.updateHitbox();
     menuBG.screenCenter();
-    menuBG.antialiasing = ClientPrefs.data.antialiasing;
+    menuBG.antialiasing = Save.get('antialiasing');
     add(menuBG);
 
     tweenColorShit();

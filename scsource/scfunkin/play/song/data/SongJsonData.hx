@@ -4,87 +4,12 @@ import tjson.TJSON as Json;
 import lime.utils.Assets;
 import scfunkin.objects.note.Note;
 import scfunkin.utils.ReflectUtil;
+import flixel.util.typeLimit.OneOfTwo;
 
 using scfunkin.play.song.data.SongData;
 
 class SongJsonData
 {
-  public static function convert(songJson:Dynamic) // Convert old charts to psych_v1 format
-  {
-    function checkToString(e:Dynamic)
-    {
-      if (e == null) return "";
-      final a:String = !Std.isOfType(e, String) ? Std.string(e) : e;
-      return a;
-    }
-    if (songJson.events == null)
-    {
-      songJson.events = [];
-      for (secNum in 0...songJson.notes.length)
-      {
-        var sec:SwagSection = songJson.notes[secNum];
-
-        var i:Int = 0;
-        var notes:Array<Dynamic> = sec.sectionNotes;
-        var len:Int = notes.length;
-        while (i < len)
-        {
-          var note:Array<Dynamic> = notes[i];
-          if (note[1] < 0)
-          { // StrumTime /EventName,         V1,   V2,     V3,      V4,      V5,      V6,      V7,      V8,       V9,       V10,      V11,      V12,      V13,      V14
-            songJson.events.push([
-              note[0],
-              [
-                [
-                  note[2],
-                  [
-                    checkToString(note[3]),
-                    checkToString(note[4]),
-                    checkToString(note[5]),
-                    checkToString(note[6]),
-                    checkToString(note[7]),
-                    checkToString(note[8])
-                  ]
-                ]
-              ]
-            ]);
-            notes.remove(note);
-            len = notes.length;
-          }
-          else
-            i++;
-        }
-      }
-    }
-
-    var sectionsData:Array<SwagSection> = songJson.notes;
-    if (sectionsData == null) return;
-
-    for (section in sectionsData)
-    {
-      var beats:Null<Float> = cast section.sectionBeats;
-      if (beats == null || Math.isNaN(beats))
-      {
-        section.sectionBeats = 4;
-        if (Reflect.hasField(section, 'lengthInSteps')) Reflect.deleteField(section, 'lengthInSteps');
-      }
-
-      // NOTE: Psych Engine does NOT have multikey out of the box, this is simply done in case you WANT to add it via scripting
-      // there's no UI element in the chart editor to modify the value of `totalColumns` so you might wanna change that manually yourself
-      // if you're forking the engine, you might wanna add that
-      var totalColumns:Int = cast(songJson.totalColumns, Int);
-      if (totalColumns < 1) totalColumns = 4; // just in case
-
-      for (note in section.sectionNotes)
-      {
-        var gottaHitNote:Bool = (note[1] < totalColumns) ? section.mustHitSection : !section.mustHitSection;
-        note[1] = (note[1] % totalColumns) + (gottaHitNote ? 0 : totalColumns);
-
-        if (note[3] != null && !Std.isOfType(note[3], String)) note[3] = Note.defaultNoteTypes[note[3]]; // compatibility with Week 7 and 0.1-0.3 psych charts
-      }
-    }
-  }
-
   public static function generalChecks(songJson:Dynamic)
   {
     if (songJson.totalColumns == null || songJson.totalColumns < 1) songJson.totalColumns = 4;
@@ -92,6 +17,7 @@ class SongJsonData
     if (songJson.offset == null) songJson.offset = 0; // Offset can be negative
   }
 
+  public static var curChartPath:String;
   public static var chartPath:String;
   public static var chartProgress:SCSwagProgress =
     {
@@ -100,6 +26,7 @@ class SongJsonData
       postconvert: null,
     };
 
+  public static var songName:String;
   public static var loadedSongName:String;
   public static var formattedSongName:String;
   public static var displayedName:String;
@@ -114,27 +41,22 @@ class SongJsonData
     currentSongMap.songName = swagInput.folder;
     currentSongMap.songMap.charts = songMap.charts;
     currentSongMap.songMap.difficulties = songMap.difficulties;
+    currentSongMap.songPath = _lastPath;
 
-    final difficulty:String = swagInput.difficulty.replace('-', '');
-    final swagSong:SwagSong = songFromDifficulty(difficulty);
+    chartPath = currentSongMap.songPath.replace('/', '\\');
+    curChartPath = chartPath;
+
+    final difficulty:String = (swagInput.difficulty.startsWith('-') ? swagInput.difficulty.substr(1) : swagInput.difficulty).toLowerCase().replace(' ', '-');
+    final swagSong:SwagSong = songFromDifficulty(difficulty.length < 1 ? "normal" : difficulty);
     PlayState.SONG = new Song(swagSong).loadFromCurrentSong();
 
-    chartPath = _lastPath.replace('/', '\\');
-    formattedSongName = Paths.formatToSongPath(PlayState.SONG.getSongData('songId'));
-    Debug.logInfo(_lastPath);
-    Debug.logInfo(chartPath);
-    StageData.loadDirectory(PlayState.SONG);
+    songName = PlayState.SONG.getSongData('songId');
+    formattedSongName = Paths.formatString(PlayState.SONG.getSongData('songId'));
+    StageJsonData.loadDirectory(PlayState.SONG);
     displayedName = PlayState.SONG.getSongData('displayName') != null ? PlayState.SONG.getSongData('displayName') : swagInput.folder;
-    formattedDisplayedName = PlayState.SONG.getSongData('displayName') != null ? Paths.formatToSongPath(displayedName,
-      '') : Paths.formatToSongPath(PlayState.SONG.getSongData('songId'), '');
+    formattedDisplayedName = PlayState.SONG.getSongData('displayName') != null ? Paths.formatString(displayedName,
+      '') : Paths.formatString(PlayState.SONG.getSongData('songId'), '');
     return PlayState.SONG;
-  }
-
-  static function getDifficultyFromString(s:String):String
-  {
-    final split:Array<String> = s.split('-');
-    final trueInput:String = split.length > 1 ? split[1] : 'normal';
-    return trueInput.replace('-', '').replace('.json', '').toLowerCase();
   }
 
   static var _lastPath:String;
@@ -145,8 +67,8 @@ class SongJsonData
     if (swagInput.folder == null) swagInput.folder = swagInput.jsonInput;
     var rawData:String = null;
 
-    var formattedFolder:String = Paths.formatToSongPath(swagInput.folder, isExternal ? '' : 'lowercased');
-    var formattedSong:String = Paths.formatToSongPath(swagInput.jsonInput, isExternal ? '' : 'lowercased');
+    var formattedFolder:String = Paths.formatString(swagInput.folder, isExternal ? '' : 'lowercased');
+    var formattedSong:String = Paths.formatString(swagInput.jsonInput, isExternal ? '' : 'lowercased');
     _lastLastPath = isExternal ? Paths.getPath('$formattedFolder$formattedSong.json') : Paths.json('songs/$formattedFolder/$formattedSong');
     Debug.logInfo('$_lastLastPath');
     rawData = getFileContent(_lastLastPath);
@@ -156,6 +78,7 @@ class SongJsonData
   public static var currentSongMap:SCCharts =
     {
       songName: null,
+      songPath: null,
       songMap:
         {
           charts: [],
@@ -196,66 +119,145 @@ class SongJsonData
     return swag;
   }
 
-  public static function convertToSongMap(swagInput:SwagJsonInput, isExternal):SCSongMap
+  public static function convertToSongMap(swagInput:SwagJsonInput, ?isExternal:Bool = false):SCSongMap
   {
     swagInput.folder = swagInput.inputNoDiff;
     var songTemp:SCSongMap =
       {
-        charts: [],
-        difficulties: []
+        charts: null,
+        difficulties: null
       };
 
-    for (difficulty in Difficulty.list)
+    function loadDifficulty(difficul:String)
     {
-      difficulty = difficulty.toLowerCase();
-      final diff:String = difficulty == 'normal' ? '' : difficulty;
-      final sufDiff:String = difficulty == 'normal' ? '' : '-$diff';
+      final difficulty:String = difficul;
+      final diff:String = (difficulty == 'normal' || difficulty.length < 1) ? '' : difficulty;
+      final sufDiff:String = (difficulty == 'normal' || difficulty.length < 1) ? '' : '-$diff';
       final sufJDiff:String = sufDiff + '.json';
       final lowered:String = isExternal ? '' : 'lowercased';
-      final formattedFolder:String = Paths.formatToSongPath(swagInput.folder, lowered);
-      final formattedSong:String = Paths.formatToSongPath(swagInput.inputNoDiff, lowered);
+      final formattedFolder:String = Paths.formatString(swagInput.folder, lowered);
+      final formattedSong:String = Paths.formatString(swagInput.inputNoDiff, lowered);
 
       final singalPath:String = '$formattedFolder$formattedSong';
       final doublePath:String = '$formattedFolder/$formattedSong';
 
-      var _lastGivenSongPath:String = isExternal ? Paths.getPath('$singalPath.json') : Paths.json('songs/$doublePath');
+      final _lastGivenSongPath:String = checkSongJsonPath(isExternal ? singalPath : doublePath, sufJDiff, isExternal);
 
-      if (!_lastGivenSongPath.contains(sufJDiff)) _lastGivenSongPath = _lastGivenSongPath.replace('.json', sufJDiff);
-
-      final swagSong:SwagSong = parseJSON(getFileContent(_lastGivenSongPath), swagInput.inputNoDiff + difficulty);
-      final tempChart:SwagChart =
+      final fileContent:String = getFileContent(_lastGivenSongPath);
+      if (fileContent != null && fileContent.length > 0)
+      {
+        final swagSong:SwagSong = parseJSON(fileContent, swagInput.inputNoDiff + sufDiff);
+        if (swagSong != null)
         {
-          notes: swagSong.notes,
-          events: swagSong.events
+          final tempChart:SwagChart =
+            {
+              notes: swagSong.notes,
+              events: swagSong.events
+            }
+          final tempDifficulty:SwagDifficulty =
+            {
+              song: swagSong.song,
+              songId: swagSong.songId,
+              displayName: swagSong.displayName,
+              bpm: swagSong.bpm,
+              needsVoices: swagSong.needsVoices,
+              speed: swagSong.speed,
+              offset: swagSong.offset,
+              stage: swagSong.stage,
+              format: swagSong.format,
+              options: swagSong.options,
+              gameOverData: swagSong.gameOverData,
+              characters: swagSong.characters,
+              _extraData: swagSong._extraData,
+              strumLineIds: swagSong.strumLineIds,
+              totalColumns: swagSong.totalColumns
+            }
+          songTemp.charts ??= [];
+          songTemp.difficulties ??= [];
+          songTemp.charts.set(difficulty, tempChart);
+          songTemp.difficulties.set(difficulty, tempDifficulty);
         }
-      final tempDifficulty:SwagDifficulty =
+        else
         {
-          song: swagSong.song,
-          songId: swagSong.songId,
-          displayName: swagSong.displayName,
-          bpm: swagSong.bpm,
-          needsVoices: swagSong.needsVoices,
-          speed: swagSong.speed,
-          offset: swagSong.offset,
-          stage: swagSong.stage,
-          format: swagSong.format,
-          options: swagSong.options,
-          gameOverData: swagSong.gameOverData,
-          characters: swagSong.characters,
-          _extraData: swagSong._extraData,
-          strumLineIds: swagSong.strumLineIds,
-          totalColumns: swagSong.totalColumns
+          songTemp.charts.set(difficulty, null);
+          songTemp.difficulties.set(difficulty, null);
         }
-      songTemp.charts.set(difficulty, tempChart);
-      songTemp.difficulties.set(difficulty, tempDifficulty);
+      }
+      else
+      {
+        songTemp.charts.set(difficulty, null);
+        songTemp.difficulties.set(difficulty, null);
+      }
     }
+
+    var diffs:Array<String> = [];
+    for (difficulty in Difficulty.list)
+    {
+      final diffName:String = difficulty.length < 1 ? 'normal' : difficulty.toLowerCase().replace(' ', '-');
+      if (diffs.contains(diffName)) continue;
+      loadDifficulty(diffName);
+      diffs.push(diffName);
+    }
+
+    var notNullChart:SwagChart = null;
+    var notNullDiff:SwagDifficulty = null;
+
+    for (diff in diffs)
+    {
+      final chart:SwagChart = songTemp.charts.get(diff);
+      final difficulty:SwagDifficulty = songTemp.difficulties.get(diff);
+      if (chart == null) continue;
+      if (notNullChart != null) break;
+      notNullChart = chart;
+      notNullDiff = difficulty;
+    }
+
+    for (diff in diffs)
+    {
+      if (songTemp.charts.get(diff) == null)
+      {
+        Debug.logInfo('null diff $diff');
+        songTemp.charts.set(diff, notNullChart);
+        songTemp.difficulties.set(diff, notNullDiff);
+      }
+    }
+
+    if (songTemp.charts == null || songTemp.difficulties == null) songTemp = null;
     return songTemp;
   }
 
-  static function getFileContent(file:String):String
+  static function checkSongJsonPath(path:String, suf:String, isExternal:Bool = false):String
   {
-    return #if MODS_ALLOWED FileSystem.exists(file) ? File.getContent(file) : Assets.getText(file); #else Assets.getText(file); #end
+    if (isExternal)
+    {
+      for (pathFound in [
+        path + suf,
+        Paths.getSharedPath(path + suf),
+        Paths.modFolders(path + suf),
+        path + '.json',
+        Paths.getSharedPath(path + '.json'),
+        Paths.modFolders(path + '.json'),
+      ])
+        if (isFileFound(pathFound)) return pathFound;
+    }
+    else
+    {
+      for (pathFound in [
+        Paths.getSharedPath('data/songs/' + path + suf),
+        Paths.modFolders('data/songs/' + path + suf),
+        Paths.getSharedPath('data/songs/' + path + '.json'),
+        Paths.modFolders('data/songs/' + path + '.json'),
+      ])
+        if (isFileFound(pathFound)) return pathFound;
+    }
+    return null;
   }
+
+  static function isFileFound(file:String):Bool
+    return #if MODS_ALLOWED FileSystem.exists(file) || #end Assets.exists(file);
+
+  static function getFileContent(file:String):String
+    return #if MODS_ALLOWED FileSystem.exists(file) ? File.getContent(file) : Assets.getText(file); #else Assets.getText(file); #end
 
   static function objectCheck(rawData:String):SwagSong
   {
@@ -272,9 +274,9 @@ class SongJsonData
   {
     swagInput.folder = swagInput.inputNoDiff;
     final lowered:String = isExternal ? '' : 'lowercased';
-    final formattedFolder:String = Paths.formatToSongPath(swagInput.folder, lowered);
-    final formattedSong:String = Paths.formatToSongPath(swagInput.inputNoDiff, lowered);
-    final difficulty:String = swagInput.difficulty.replace('-', '');
+    final formattedFolder:String = Paths.formatString(swagInput.folder, lowered);
+    final formattedSong:String = Paths.formatString(swagInput.inputNoDiff, lowered);
+    final difficulty:String = (swagInput.difficulty.startsWith('-') ? swagInput.difficulty.substr(1) : swagInput.difficulty).toLowerCase().replace(' ', '-');
 
     final singalPath:String = '$formattedFolder$formattedSong';
     final doublePath:String = '$formattedFolder/$formattedSong';
@@ -283,37 +285,101 @@ class SongJsonData
     final _lastGivenDifficultiesPath:String = isExternal ? Paths.getPath('$singalPath-difficulties.json') : Paths.json('songs/$doublePath-difficulties');
 
     _lastPath = _lastGivenChartsPath.replace('-charts.json', '');
-    Debug.logInfo(_lastPath);
+
+    var songMap:SCSongMap =
+      {
+        charts: [],
+        difficulties: []
+      }
 
     final chartsPath:String = getFileContent(_lastGivenChartsPath);
     final difficultiesPath:String = getFileContent(_lastGivenDifficultiesPath);
 
-    final converted:SCSongMap = convertToSongMap(swagInput, isExternal);
+    if ((chartsPath == null || chartsPath.length < 1) || (difficultiesPath == null || difficultiesPath.length < 1))
+    {
+      final converted:SCSongMap = convertToSongMap(swagInput, isExternal);
+      if (converted != null)
+      {
+        songMap.charts = converted.charts;
+        songMap.difficulties = converted.difficulties;
+        return songMap;
+      }
+    }
 
     final parsedDifficulties:Dynamic = cast Json.parse(difficultiesPath);
     final parsedCharts:Dynamic = cast Json.parse(chartsPath);
 
-    var parsedMaps:SCSongMap =
-      {
-        charts: converted?.charts ?? [],
-        difficulties: converted?.difficulties ?? []
-      }
     if (parsedDifficulties != null && Reflect.hasField(parsedDifficulties, 'difficulties'))
     {
       for (field in Reflect.fields(parsedDifficulties.difficulties))
-      {
-        parsedMaps.difficulties.set(field, Reflect.field(parsedDifficulties.difficulties, field));
-      }
+        songMap.difficulties.set(field, Reflect.field(parsedDifficulties.difficulties, field));
     }
     if (parsedCharts != null && Reflect.hasField(parsedCharts, 'charts'))
     {
       for (field in Reflect.fields(parsedCharts.charts))
-      {
-        parsedMaps.charts.set(field, Reflect.field(parsedCharts.charts, field));
-      }
+        songMap.charts.set(field, Reflect.field(parsedCharts.charts, field));
     }
 
-    return parsedMaps;
+    #if ALLOW_DOUBLE_CHECK
+    for (difficulty in songMap.charts.keys())
+    {
+      final chart:SwagChart = songMap.charts.get(difficulty);
+      final diff:SwagDifficulty = songMap.difficulties.get(difficulty);
+      if (chart == null || diff == null || chart.notes == null || chart.notes.length < 1) continue;
+      rescopeSections(chart, diff);
+    }
+    #end
+
+    return songMap;
+  }
+
+  public static function rescopeSections(chart:OneOfTwo<Dynamic, SwagChart>, diff:SwagDifficulty)
+  {
+    var sectionsData:Array<SwagSection> = null;
+    var totalColumns:Int = 4;
+    var ids:Array<Int> = [];
+
+    if (Std.isOfType(chart, Dynamic))
+    {
+      final castedChart:Dynamic = chart;
+      sectionsData = castedChart.notes;
+      totalColumns = cast castedChart?.totalColumns ?? 4;
+      ids = cast castedChart?.strumLineIds ?? [0, 1];
+    }
+    else
+    {
+      final castedChart:SwagChart = chart;
+      sectionsData = castedChart.notes;
+      totalColumns = diff?.totalColumns ?? 4;
+      ids = diff?.strumLineIds ?? [0, 1];
+    }
+
+    if (totalColumns < 1) totalColumns = 4; // just in case
+    if (ids.length < 1) ids = [0, 1]; // just in case
+    if (sectionsData != null)
+    {
+      for (index => section in sectionsData)
+      {
+        section.index = index;
+
+        for (note in section.sectionNotes)
+        {
+          if (note[4] == null) note[4] = ids[note[1] >= totalColumns ? 1 : 0];
+          else
+          {
+            if (note[1] < totalColumns && note[4] == ids[1]) note[4] = ids[0];
+            if (note[1] >= totalColumns && note[4] == ids[0]) note[4] = ids[1];
+          }
+
+          if (section.altAnim && (note[3] == null || note[3].length < 1)) note[3] = "Alt Animation";
+          else
+          {
+            if (section.playerAltAnim && note[1] < totalColumns && (note[3] == null || note[3].length < 1)) note[3] = "Alt Animation";
+            if (section.CPUAltAnim && note[1] >= totalColumns && (note[3] == null || note[3].length < 1)) note[3] = "Alt Animation";
+          }
+        }
+      }
+    }
   }
 
   public static function parseJSON(rawData:String, ?nameForError:String = null, ?convertTo:String = 'psych_v1'):SwagSong
@@ -336,7 +402,7 @@ class SongJsonData
           {
             Debug.logInfo('converting chart $nameForError with format $fmt to psych_v1 format...');
             songJson.format = 'psych_v1_convert';
-            convert(songJson);
+            SongComps.convert_from_psych_below_v1(songJson);
           }
       }
     }
@@ -344,32 +410,7 @@ class SongJsonData
     processSongDataToSCEData(songJson);
 
     chartProgress.convert = songJson;
-
-    var sectionsData:Array<SwagSection> = songJson.notes;
-    if (sectionsData != null)
-    {
-      for (index => section in sectionsData)
-      {
-        section.index = index;
-
-        var totalColumns:Int = songJson.totalColumns != null ? songJson.totalColumns : 4;
-        if (totalColumns < 1) totalColumns = 4; // just in case
-
-        var ids:Array<Int> = songJson.strumLineIds != null ? songJson.strumLineIds : [0, 1];
-        if (ids.length < 1) ids = [0, 1]; // just in case
-
-        for (note in section.sectionNotes)
-        {
-          if (note[4] == null) note[4] = ids[note[1] >= totalColumns ? 1 : 0];
-          else
-          {
-            if (note[1] < totalColumns && note[4] == ids[1]) note[4] = ids[0];
-            if (note[1] >= totalColumns && note[4] == ids[0]) note[4] = ids[1];
-          }
-        }
-      }
-    }
-
+    rescopeSections(songJson, null);
     chartProgress.postconvert = songJson;
     return songJson;
   }
@@ -390,25 +431,19 @@ class SongJsonData
           disableSplashRGB: false,
           disableHoldCoversRGB: false,
           disableHoldCovers: false,
-          disableCaching: false,
           notITG: false,
-          usesHUD: false,
-          oldBarSystem: false,
-          rightScroll: false,
-          middleScroll: false,
-          blockOpponentMode: false,
-          arrowSkin: "",
-          strumSkin: "",
-          splashSkin: "",
-          holdCoverSkin: "",
-          opponentNoteStyle: "",
-          opponentStrumStyle: "",
-          playerNoteStyle: "",
-          playerStrumStyle: "",
-          vocalsPrefix: "",
-          vocalsSuffix: "",
-          instrumentalPrefix: "",
-          instrumentalSuffix: ""
+          arrowSkin: null,
+          strumSkin: null,
+          splashSkin: null,
+          holdCoverSkin: null,
+          opponentNoteStyle: null,
+          opponentStrumStyle: null,
+          playerNoteStyle: null,
+          playerStrumStyle: null,
+          vocalsPrefix: null,
+          vocalsSuffix: null,
+          instrumentalPrefix: null,
+          instrumentalSuffix: null
         }
     }
     if (songJson.gameOverData == null)
@@ -480,20 +515,13 @@ class SongJsonData
         // New Format
         var newEvents:Array<Dynamic> = [];
 
-        function checkToString(e:Dynamic)
-        {
-          if (e == null) return "";
-          final a:String = !Std.isOfType(e, String) ? Std.string(e) : e;
-          return a;
-        }
-
         // Formatting Events
         for (event in oldEvents)
         {
           for (i in 0...event[1].length)
           {
             // Comp for old event loading
-            var params:Array<String> = [];
+            var params:Array<Dynamic> = [];
             if (Std.isOfType(event[1][i][1], Array)) params = event[1][i][1]; // Undefined amount
             else if (Std.isOfType(event[1][i][1], String)) // Default Standard would be 6
             {
@@ -520,13 +548,7 @@ class SongJsonData
         'disableHoldCoversRGB',
         // Bools
         'disableHoldCovers',
-        'disableCaching',
         'notITG',
-        'usesHUD',
-        'oldBarSystem',
-        'rightScroll',
-        'middleScroll',
-        'blockOpponentMode',
         // Strings
         'arrowSkin',
         'strumSkin',
@@ -551,27 +573,21 @@ class SongJsonData
         'disableHoldCoversRGB' => false,
 
         'disableHoldCovers' => false,
-        'disableCaching' => false,
         'notITG' => false,
-        'usesHUD' => true,
-        'oldBarSystem' => true,
-        'rightScroll' => false,
-        'middleScroll' => false,
-        'blockOpponentMode' => false,
 
-        'arrowSkin' => "",
-        'strumSkin' => "",
-        'splashSkin' => "",
-        'holdCoverSkin' => "",
-        'opponentNoteSyle' => "",
-        'opponentStrumStyle' => "",
-        'playerNoteStyle' => "",
-        'playerStrumStyle' => "",
+        'arrowSkin' => null,
+        'strumSkin' => null,
+        'splashSkin' => null,
+        'holdCoverSkin' => null,
+        'opponentNoteSyle' => null,
+        'opponentStrumStyle' => null,
+        'playerNoteStyle' => null,
+        'playerStrumStyle' => null,
 
-        'vocalsPrefix' => "",
-        'vocalsSuffix' => "",
-        'instrumentalPrefix' => "",
-        'instrumentalSuffix' => ""
+        'vocalsPrefix' => null,
+        'vocalsSuffix' => null,
+        'instrumentalPrefix' => null,
+        'instrumentalSuffix' => null
       ];
 
       final gameOverData:Array<String> = ['gameOverChar', 'gameOverSound', 'gameOverLoop', 'gameOverEnd'];
@@ -604,6 +620,8 @@ class SongJsonData
         ReflectUtil.searchField(songJson, field, certainField, fieldMaps[index]);
       }
 
+      Debug.logInfo([songJson.gameOverData, songJson.options, songJson.characters]);
+
       if (Reflect.hasField(songJson, 'player3'))
       {
         if (songJson.characters.girlfriend != songJson.player3) songJson.characters.girlfriend = songJson.player3;
@@ -612,19 +630,15 @@ class SongJsonData
 
       if (Reflect.hasField(songJson, 'validScore')) Reflect.deleteField(songJson, 'validScore');
 
-      if (songJson.options.arrowSkin == null || songJson.options.arrowSkin.length < 1) songJson.options.arrowSkin = "noteSkins/NOTE_assets"
-        + Note.getNoteSkinPostfix();
-      if (songJson.options.strumSkin == null || songJson.options.strumSkin.length < 1) songJson.options.strumSkin = "noteSkins/NOTE_assets"
-        + Note.getNoteSkinPostfix();
+      if (!Reflect.hasField(songJson.options, 'arrowSkin')) songJson.options.arrowSkin = "noteSkins/NOTE_assets" + Note.getNoteSkinPostfix();
+      if (!Reflect.hasField(songJson.options, 'strumSkin')) songJson.options.strumSkin = "noteSkins/NOTE_assets" + Note.getNoteSkinPostfix();
 
-      if (songJson.song != null && songJson.songId == null) songJson.songId = songJson.song;
-      else if (songJson.songId != null && songJson.song == null) songJson.song = songJson.songId;
+      if (Reflect.hasField(songJson, 'song') && !Reflect.hasField(songJson, 'songId')) songJson.songId = songJson.song;
+      else if (Reflect.hasField(songJson, 'songId') && !Reflect.hasField(songJson, 'song')) songJson.song = songJson.songId;
 
-      if (songJson._extraData == null) songJson._extraData = {};
+      if (!Reflect.hasField(songJson, '_extraData')) songJson._extraData = {};
     }
     catch (e:haxe.Exception)
-    {
       Debug.logInfo('FAILED TO LOAD CONVERSION JSON DATA FOR SCE ${e.message + e.stack}');
-    }
   }
 }

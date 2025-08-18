@@ -28,7 +28,7 @@ class HScriptSC
   public var modFolder:String;
 
   public var logErrors:Bool = true;
-  public var self:Dynamic;
+  public var parentScript:SCScript = null;
 
   public var parent:Any = null;
 
@@ -38,7 +38,6 @@ class HScriptSC
     this.path = path;
     this.scriptStr = #if MODS_ALLOWED File.getContent(path) #else Assets.getText(path) #end;
     this.fileName = Path.withoutDirectory(fileName);
-    this.parent = parent;
 
     #if MODS_ALLOWED
     var myFolder:Array<String> = path.split('/');
@@ -62,20 +61,25 @@ class HScriptSC
       return;
     }
 
-    set('this', parent);
+    setParent(parent);
+  }
+
+  public function setParent(parent:Dynamic = null)
+  {
+    if (parent == null) parent = FlxG.state;
+    this.parent = parent;
+    set('game', parent.game == null ? FlxG.state : parent.game);
+    set('this', this);
   }
 
   public function call(func:String, ?args:Array<Dynamic> = null):SCCall
   {
-    if (interp == null) return null;
-    if (args == null) args = [];
-
     try
     {
       var fnc:Dynamic = variables().get(func);
       if (fnc != null && Reflect.isFunction(func))
       {
-        final call = Reflect.callMethod(parent, fnc, args);
+        final call = Reflect.callMethod(parent, fnc, args ??= []);
         return {funcName: func, funcValue: fnc, funcReturn: call};
       }
     }

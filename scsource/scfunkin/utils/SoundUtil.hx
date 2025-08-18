@@ -3,6 +3,16 @@ package scfunkin.utils;
 import openfl.media.Sound;
 
 /**
+ * To check what sound type is being changed!
+ */
+enum abstract SoundProp(String) from String to String
+{
+  var SOUND = "Sound";
+  var INST = "Inst";
+  var VOCAL = "Vocal";
+}
+
+/**
  * Props for vocal/inst checking because I need variables from the place grabing the props to use here.
  */
 typedef SoundMusicPropsCheck =
@@ -23,6 +33,7 @@ typedef SoundPropsCheck =
   var ?soundProps:SoundMusicPropsCheck;
   var ?name:String;
   var ?folder:String;
+  var ?soundPaths:Array<String>;
 }
 
 /**
@@ -31,160 +42,119 @@ typedef SoundPropsCheck =
 class SoundUtil
 {
   /**
-   * Checks for sound props and finds all possible vocals or instrumentals with these props.
+   * Checks for sound props and finds all possible sounds with these props.
    * @param soundProps song, prefix, suffix, externalVocal (externVocal), character, difficulty.
-   * @param soundType VOCALS or INST.
-   * @param postFix if the sound should allow to look for sound with **-**
+   * @param soundType Sound, Inst, or Vocal.
+   * @param postFix if the sound should allow to look for sound with **-**.
+   * @param modsAllowed if the sounds can be searched in mods.
    * @param list perfered list you want found instead of doing all of the rest.
    * @return Sound
    */
-  public static function findVocalOrInst(soundProps:SoundMusicPropsCheck, soundType:String = 'VOCALS', postFix:Bool = true):Sound
+  public static function findSound(soundProps:Dynamic, soundType:SoundProp = SOUND, ?modsAllowed:Bool = true, ?postFix:Bool = true,
+      ?searchAfterFail:Bool = true):Sound
   {
     // Props
-    final song:String = soundProps.song;
-    final prefix:String = soundProps.prefix;
-    final suffix:String = soundProps.suffix;
-    final vocal:String = soundProps.externVocal;
-    final character:String = soundProps.character;
-    final difficulty:String = soundProps.difficulty;
+    final props:SoundPropsCheck = SoundUtil.returnNullCheckedProps(soundProps, postFix);
 
-    // Final Sound Check
-    final findingArguments:Array<String> = !postFix ? [
-      // Basic
-      vocal + character,
-      vocal + difficulty,
-      character,
-      character + vocal,
-      character + difficulty,
-      difficulty,
-      difficulty + vocal,
-      difficulty + character, // Complex
+    // Props-Post-Check
+    final soundPaths:Array<String> = props.soundPaths;
+    final fileName:String = props.name;
+    final folder:String = props.folder;
+    final prefix:String = props.soundProps.prefix ?? "";
+    final suffix:String = props.soundProps.suffix ?? "";
+    final song:String = props.soundProps.song;
 
-      vocal + character + difficulty,
-      vocal + difficulty + character,
-      character + vocal + difficulty,
-      character + difficulty + vocal,
-      difficulty + vocal + character,
-      difficulty + character + vocal
-    ] : [
-      // Basic
-      vocal + '-' + character,
-      vocal + '-' + difficulty,
-      character,
-      character + '-' + vocal,
-      character + '-' + difficulty,
-      difficulty,
-      difficulty + '-' + vocal,
-      difficulty + '-' + character,
-
-      // Complex
-      vocal + '-' + character + '-' + difficulty,
-      vocal + '-' + difficulty + '-' + character,
-      character + '-' + vocal + '-' + difficulty,
-      character + '-' + difficulty + '-' + vocal,
-      difficulty + '-' + vocal + '-' + character,
-      difficulty + '-' + character + '-' + vocal
-      ];
-    final soundFoundType:String = soundType;
-    var completeVocal:String = postFix ? (vocal.startsWith('-') ? vocal : '-$vocal') : vocal;
+    var soundPath:String = null;
     var finalSound:Sound = null;
-
-    switch (soundFoundType)
+    var id:Int = 0;
+    while (finalSound == null && id <= soundPaths.length && soundPaths.length > 0)
     {
-      case 'VOCALS', 'VOC', 'VOCAL':
-        finalSound = Paths.voices(prefix, song, suffix, completeVocal);
-      case 'INST', 'INSTRUMETANL':
-        finalSound = Paths.inst(prefix, song, suffix + completeVocal);
+      if (soundPaths[id] == null || soundPaths[id].length < 1)
+      {
+        id++;
+        continue;
+      }
+      if (soundPaths[id].contains('--')) soundPaths[id] = soundPaths[id].replace('--', '-');
+      final simple:String = postFix ? (soundPaths[id].startsWith('-') ? soundPaths[id] : '-' + soundPaths[id]) : soundPaths[id].replace('-', '');
+      if ((simple == null || simple == '-' || simple.length < 1)
+        || (suffix == null && simple == null || simple.length < 1 && suffix.length < 1))
+      {
+        id++;
+        continue;
+      }
+      soundPath = '$prefix$fileName$suffix$simple';
+      switch (soundType)
+      {
+        case SOUND:
+          finalSound = Paths.returnSound(soundPath, folder, modsAllowed, false, true);
+        case INST:
+          finalSound = Paths.inst(prefix, song, '$suffix$simple');
+        case VOCAL:
+          finalSound = Paths.voices(prefix, song, '$suffix$simple');
+      }
+      id++;
     }
 
+    // In-Case all fucking fail somehow
+    if (!searchAfterFail) return finalSound;
+    soundPath = '${prefix}$fileName${suffix}';
     if (finalSound == null)
     {
-      for (external in findingArguments)
+      switch (soundType)
       {
-        completeVocal = postFix ? (external.startsWith('-') ? external : '-$external') : external;
-        switch (soundFoundType)
-        {
-          case 'VOCALS', 'VOC', 'VOCAL':
-            finalSound = Paths.voices(prefix, song, suffix, external);
-          case 'INST', 'INSTRUMETANL':
-            finalSound = Paths.inst(prefix, song, suffix + external);
-        }
-        if (finalSound != null) return finalSound;
+        case SOUND:
+          finalSound = Paths.returnSound(soundPath, folder, modsAllowed, false, true);
+        case INST:
+          finalSound = Paths.inst(prefix, song, suffix);
+        case VOCAL:
+          finalSound = Paths.voices(prefix, song, suffix);
       }
     }
     return finalSound;
   }
 
   /**
-   * Checks for sound props and finds all possible props for that sound.
-   * @param newSoundProps sound, prefix, suffix, externalVocal (externVocal), character, difficulty, folder, type.
-   * @param modsAllowed if allowed to search for mod sounds.
-   * @param postFix if allows external parts and original to contain **-** at the start.
-   * @return Sound
+   * Null checks dynamic props.
+   * @param props
+   * @return SoundPropsCheck
    */
-  public static function findSound(newSoundProps:SoundPropsCheck, modsAllowed:Bool = true, postFix:Bool = true):Sound
+  public static function returnNullCheckedProps(props:Dynamic, ?postFix:Bool = true):SoundPropsCheck
   {
-    // Props
-    final fileName:String = newSoundProps.name;
-    final prefix:String = newSoundProps.soundProps.prefix;
-    final suffix:String = newSoundProps.soundProps.suffix;
-    final vocal:String = newSoundProps.soundProps.externVocal;
-    final character:String = newSoundProps.soundProps.character;
-    final difficulty:String = newSoundProps.soundProps.difficulty;
-    final folder:String = newSoundProps.folder;
-
-    // Final Sound Check
-    final findingArguments:Array<String> = !postFix ? [
-      // Basic
-      vocal + character,
-      vocal + difficulty,
-      character,
-      character + vocal,
-      character + difficulty,
-      difficulty,
-      difficulty + vocal,
-      difficulty + character, // Complex
-
-      vocal + character + difficulty,
-      vocal + difficulty + character,
-      character + vocal + difficulty,
-      character + difficulty + vocal,
-      difficulty + vocal + character,
-      difficulty + character + vocal
-    ] : [
-      // Basic
-      vocal + '-' + character,
-      vocal + '-' + difficulty,
-      character,
-      character + '-' + vocal,
-      character + '-' + difficulty,
-      difficulty,
-      difficulty + '-' + vocal,
-      difficulty + '-' + character,
-
-      // Complex
-      vocal + '-' + character + '-' + difficulty,
-      vocal + '-' + difficulty + '-' + character,
-      character + '-' + vocal + '-' + difficulty,
-      character + '-' + difficulty + '-' + vocal,
-      difficulty + '-' + vocal + '-' + character,
-      difficulty + '-' + character + '-' + vocal
-      ];
-
-    var completeVocal:String = postFix ? (vocal.startsWith('-') ? vocal : '-$vocal') : vocal;
-    var soundPath:String = '$prefix$fileName$suffix$vocal';
-    var finalSound:Sound = Paths.returnSound(soundPath, folder, modsAllowed, false, true);
-
-    if (finalSound == null)
-    {
-      for (external in findingArguments)
+    final postIn:String = postFix ? '-' : '';
+    final soundMusicProps:SoundMusicPropsCheck =
       {
-        completeVocal = postFix ? (external.contains('-') ? '-$external' : external) : external;
-        soundPath = '$prefix$fileName$suffix$external';
-        finalSound = Paths.returnSound(soundPath, folder, modsAllowed, false, true);
-        if (finalSound != null) return finalSound;
+        song: Reflect.hasField(props, 'song') ? Reflect.field(props, 'song') : Reflect.field(props, 'soundProps').song,
+        prefix: Reflect.hasField(props, 'prefix') ? Reflect.field(props, 'prefix') : Reflect.field(props, 'soundProps').prefix,
+        suffix: Reflect.hasField(props, 'suffix') ? Reflect.field(props, 'suffix') : Reflect.field(props, 'soundProps').suffix,
+        externVocal: Reflect.hasField(props, 'externVocal') ? Reflect.field(props, 'externVocal') : Reflect.field(props, 'soundProps').externVocal,
+        character: Reflect.hasField(props, 'character') ? Reflect.field(props, 'character') : Reflect.field(props, 'soundProps').character,
+        difficulty: Reflect.hasField(props, 'difficulty') ? Reflect.field(props, 'difficulty') : Reflect.field(props, 'soundProps').difficulty
       }
-    }
-    return finalSound;
+    final soundPaths:Array<String> = Reflect.field(props, 'soundPaths') ?? null;
+    return {
+      name: Reflect.field(props, 'name') ?? "",
+      folder: Reflect.field(props, 'folder') ?? "",
+      soundProps: soundMusicProps,
+      soundPaths: (soundPaths ?? [
+        // Basic
+        soundMusicProps.externVocal,
+        soundMusicProps.externVocal + postIn + soundMusicProps.character,
+        soundMusicProps.externVocal + postIn + soundMusicProps.difficulty,
+        soundMusicProps.character,
+        soundMusicProps.character + postIn + soundMusicProps.externVocal,
+        soundMusicProps.character + soundMusicProps.difficulty,
+        soundMusicProps.difficulty,
+        soundMusicProps.difficulty + postIn + soundMusicProps.externVocal,
+        soundMusicProps.difficulty + postIn + soundMusicProps.character,
+
+        // Complex
+        soundMusicProps.externVocal + postIn + soundMusicProps.character + postIn + soundMusicProps.difficulty,
+        soundMusicProps.externVocal + postIn + soundMusicProps.difficulty + postIn + soundMusicProps.character,
+        soundMusicProps.character + postIn + soundMusicProps.externVocal + postIn + soundMusicProps.difficulty,
+        soundMusicProps.character + postIn + soundMusicProps.difficulty + postIn + soundMusicProps.externVocal,
+        soundMusicProps.difficulty + postIn + soundMusicProps.externVocal + postIn + soundMusicProps.character,
+        soundMusicProps.difficulty + postIn + soundMusicProps.character + postIn + soundMusicProps.externVocal
+      ]).filter(function(str:String) return !(str == null || str.length < 1 || str == '-' || str == '--'))
+    };
   }
 }

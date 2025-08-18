@@ -18,7 +18,7 @@ class CheckboxThingie extends FlxSprite
     animation.addByPrefix("checking", "checkbox anim0", 24, false);
     animation.addByPrefix("checked", "checkbox finish", 24, false);
 
-    antialiasing = ClientPrefs.data.antialiasing;
+    antialiasing = Save.get('antialiasing');
     setGraphicSize(Std.int(0.9 * width));
     updateHitbox();
 

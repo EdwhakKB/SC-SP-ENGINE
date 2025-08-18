@@ -1,27 +1,50 @@
 package scfunkin.backend.scripting.sc;
 
 import scfunkin.backend.scripting.sc.base.HScriptSC;
+import scfunkin.play.VariablesHandler;
 
 class SCScript extends flixel.FlxBasic
 {
   public var hsCode:HScriptSC;
 
   public function new()
-  {
     super();
-  }
 
-  public function loadScript(path:String, ?parent:Any = null)
+  public function loadScript(path:String, ?parent:Dynamic = null)
   {
     hsCode = new HScriptSC(path, parent);
+    hsCode.parentScript = this;
     presetScript();
+  }
+
+  public function setScriptParent(parent:Dynamic = null)
+  {
+    if (hsCode == null || !active || !exists) return;
+    hsCode.setParent(parent);
+
+    setVar('setVar', function(name:String, value:Dynamic, ?type:String = "Custom") {
+      if (parent != null && parent is IVariableHandler) cast(parent, IVariableHandler<Dynamic>).setVHVar(name, value, type);
+      else
+        MusicBeatState._setVHVar(name, value, type);
+    });
+    setVar('getVar', function(name:String, ?type:String = "Custom"):Dynamic {
+      if (parent != null && parent is IVariableHandler) return cast(parent, IVariableHandler<Dynamic>).getVHVar(name, type);
+      return MusicBeatState._getVHVar(name, type);
+    });
+    setVar('removeVar', function(name:String, ?type:String = "Custom"):Bool {
+      if (parent != null && parent is IVariableHandler) return cast(parent, IVariableHandler<Dynamic>).removeVHVar(name, type);
+      return MusicBeatState._removeVHVar(name, type);
+    });
+    setVar('hasVar', function(name:String, ?type:String = "Custom"):Bool {
+      if (parent != null && parent is IVariableHandler) return cast(parent, IVariableHandler<Dynamic>).hasVHVar(name, type);
+      return MusicBeatState._hasVHVar(name, type);
+    });
   }
 
   public function callFunc(func:String, ?args:Array<Dynamic>):SCCall
   {
     if (hsCode == null || !active || !exists) return null;
-    if (args == null) args = [];
-    return hsCode.call(func, args);
+    return hsCode.call(func, args ??= []);
   }
 
   public function executeFunc(func:String = null, args:Array<Dynamic> = null):SCCall
@@ -55,43 +78,23 @@ class SCScript extends flixel.FlxBasic
     for (k => e in ScriptPreset.scriptPresetVariables())
       setVar(k, e);
 
-    setVar("disableScript", () -> {
-      active = false;
-    });
+    setVar("disableScript", () -> active = false);
     setVar("__script__", this);
 
     setVar("playDadSing", true);
     setVar("playBFSing", true);
 
     // Functions & Variables
-    setVar('setVar', function(name:String, value:Dynamic, ?type:String = "Custom") {
-      MusicBeatState.getVariables(type).set(name, scfunkin.backend.scripting.psych.functions.ReflectionFunctions.parseInstances(value));
-    });
-    setVar('getVar', function(name:String, ?type:String = "Custom") {
-      var result:Dynamic = null;
-      if (MusicBeatState.getVariables(type).exists(name)) result = MusicBeatState.getVariables(type).get(name);
-      return result;
-    });
-    setVar('removeVar', function(name:String, ?type:String = "Custom") {
-      if (MusicBeatState.getVariables(type).exists(name))
-      {
-        MusicBeatState.getVariables(type).remove(name);
-        return true;
-      }
-      return false;
-    });
     setVar('debugPrint', function(text:String, ?color:FlxColor = null) {
-      if (color == null) color = FlxColor.WHITE;
-      if (PlayState.instance == FlxG.state) PlayState.instance.addTextToDebug(text, color);
-      else
-        Debug.logInfo(text);
+      color ??= FlxColor.WHITE;
+      Debug.logInfo(text);
     });
     setVar('getModSetting', function(saveTag:String, ?modName:String = null) {
       if (modName == null)
       {
         if (hsCode.modFolder == null)
         {
-          PlayState.instance.addTextToDebug('getModSetting: Argument #2 is null and script is not inside a packed Mod folder!', FlxColor.RED);
+          Debug.logInfo('getModSetting: Argument #2 is null and script is not inside a packed Mod folder!');
           return null;
         }
         modName = hsCode.modFolder;
@@ -191,12 +194,6 @@ class SCScript extends flixel.FlxBasic
       return false;
     });
 
-    #if LUA_ALLOWED
-    setVar('doLua', function(code:String = null, instance:String = "PLAYSTATE", preloading:Bool = false, scriptName:String = 'unknown') {
-      if (code != null) new scfunkin.backend.scripting.psych.FunkinLua(code, instance, preloading, scriptName);
-    });
-    #end
-
     setVar('buildTarget', scfunkin.utils.GenericUtil.getBuildTarget());
     setVar('customSubstate', scfunkin.states.substates.scripting.CustomSubstate.instance);
     setVar('customSubstateName', scfunkin.states.substates.scripting.CustomSubstate.name);
@@ -208,20 +205,8 @@ class SCScript extends flixel.FlxBasic
 
     setVar('setAxes', function(axes:String) return flixel.util.FlxAxes.fromString(axes));
 
-    if (scfunkin.states.PlayState.instance == FlxG.state)
-    {
-      setVar('addBehindGF', scfunkin.states.PlayState.instance.addBehindGF);
-      setVar('addBehindDad', scfunkin.states.PlayState.instance.addBehindDad);
-      setVar('addBehindBF', scfunkin.states.PlayState.instance.addBehindBF);
-    }
-
-    setVar('setVarFromClass', function(instance:String, variable:String, value:Dynamic) {
-      Reflect.setProperty(Type.resolveClass(instance), variable, value);
-    });
-
-    setVar('getVarFromClass', function(instance:String, variable:String) {
-      Reflect.getProperty(Type.resolveClass(instance), variable);
-    });
+    setVar('setVarFromClass', function(instance:String, variable:String, value:Dynamic) Reflect.setProperty(Type.resolveClass(instance), variable, value));
+    setVar('getVarFromClass', function(instance:String, variable:String) Reflect.getProperty(Type.resolveClass(instance), variable));
 
     setVar('parseJson', function(directory:String, ?ignoreMods:Bool = false):{} {
       var parseJson:{} = {};
@@ -233,10 +218,7 @@ class SCScript extends flixel.FlxBasic
       else if (!jsonExists && PlayState.chartingMode)
       {
         parseJson = {};
-        if (scfunkin.states.PlayState.instance != null && scfunkin.states.PlayState.instance == FlxG.state)
-        {
-          scfunkin.states.PlayState.instance.addTextToDebug('parseJson: "' + realPath + '" doesn\'t exist!', 0xff0000, 6);
-        }
+        Debug.logWarn('parseJson: "' + realPath + '" doesn\'t exist!');
       }
       return parseJson;
     });

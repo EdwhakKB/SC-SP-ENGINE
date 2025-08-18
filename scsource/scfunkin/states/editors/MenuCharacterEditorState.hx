@@ -161,7 +161,7 @@ class MenuCharacterEditorState extends MusicBeatState implements PsychUIEventHan
       var char:MenuCharacter = grpWeekCharacters.members[i];
       char.alpha = 0.2;
       char.character = '';
-      char.changeCharacter(defaultCharacters[i]);
+      char.change(defaultCharacters[i]);
     }
     reloadSelectedCharacter();
   }
@@ -224,14 +224,14 @@ class MenuCharacterEditorState extends MusicBeatState implements PsychUIEventHan
   {
     if (PsychUIInputText.focusOn == null)
     {
-      ClientPrefs.toggleVolumeKeys(true);
+      Controls.reset(true);
       if (FlxG.keys.justPressed.ESCAPE)
       {
-        ClientPrefs.toggleVolumeKeys(true);
+        Controls.reset(true);
         if (!unsavedProgress)
         {
           MusicBeatState.switchState(new scfunkin.states.editors.MasterEditorMenu());
-          FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
+          FlxG.sound.playMusic(Paths.music("freakyMenu"));
         }
         else
           openSubState(new ExitConfirmationPrompt());
@@ -267,7 +267,7 @@ class MenuCharacterEditorState extends MusicBeatState implements PsychUIEventHan
       }
     }
     else
-      ClientPrefs.toggleVolumeKeys(false);
+      Controls.reset(false);
 
     var char:MenuCharacter = grpWeekCharacters.members[1];
     if (char.animation.curAnim != null

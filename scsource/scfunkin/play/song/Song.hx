@@ -153,6 +153,33 @@ class Song
     return currentSong;
   }
 
+  public function copyCurrent():SwagSong
+  {
+    var swagSong:SwagSong =
+      {
+        song: null,
+        songId: null,
+        displayName: null,
+        bpm: 0.0,
+        needsVoices: false,
+        speed: 1.0,
+        offset: 0.0,
+        stage: null,
+        format: null,
+        options: null,
+        gameOverData: null,
+        characters: null,
+        _extraData: null,
+        strumLineIds: null,
+        totalColumns: 4,
+        notes: null,
+        events: null
+      };
+    for (songField in songFields)
+      Reflect.setProperty(swagSong, songField, getSongData(songField));
+    return swagSong;
+  }
+
   public function getSongData(field:String):Dynamic
     return songData.get(field);
 

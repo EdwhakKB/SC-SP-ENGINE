@@ -58,7 +58,7 @@ class NotesQuantSubState extends MusicBeatSubState
     bg.color = 0xFFEA71FD;
     bg.screenCenter();
     bg.setGraphicSize(FlxG.width + 200, FlxG.height + 200);
-    bg.antialiasing = ClientPrefs.data.antialiasing;
+    bg.antialiasing = Save.get('antialiasing');
     add(bg);
 
     var grid:FlxBackdrop = new FlxBackdrop(FlxGridOverlay.createGrid(80, 80, 160, 160, true, 0x33FFFFFF, 0x0));
@@ -488,7 +488,7 @@ class NotesQuantSubState extends MusicBeatSubState
         for (i in 0...7)
         {
           var strumRGB:RGBShaderReference = myNotes.members[curSelectedNote].rgbShader;
-          var color:FlxColor = ClientPrefs.defaultData.arrowRGBQuantize[curSelectedNote][i];
+          var color:FlxColor = Save.get('arrowRGBQuantize', true)[curSelectedNote][i];
           switch (i)
           {
             case 0:
@@ -501,7 +501,7 @@ class NotesQuantSubState extends MusicBeatSubState
           dataArray[curSelectedNote][i] = color;
         }
       }
-      setShaderColor(ClientPrefs.defaultData.arrowRGBQuantize[curSelectedNote][curSelectedMode]);
+      setShaderColor(Save.get('arrowRGBQuantize', true)[curSelectedNote][curSelectedMode]);
       FlxG.sound.play(Paths.sound('cancelMenu'), 0.6);
       updateColors();
     }
@@ -591,7 +591,7 @@ class NotesQuantSubState extends MusicBeatSubState
 
   public function spawnNotes()
   {
-    dataArray = ClientPrefs.data.arrowRGBQuantize;
+    dataArray = Save.get('arrowRGBQuantize');
 
     // clear groups
     modeNotes.forEachAlive(function(note:FlxSprite) {
@@ -616,7 +616,7 @@ class NotesQuantSubState extends MusicBeatSubState
     for (i in 0...3)
     {
       var newNote:FlxSprite = new FlxSprite(230 + (100 * i), 100).loadGraphic(Paths.image('noteColorMenu/note'), true, res, res);
-      newNote.antialiasing = ClientPrefs.data.antialiasing;
+      newNote.antialiasing = Save.get('antialiasing');
       newNote.setGraphicSize(85);
       newNote.updateHitbox();
       newNote.animation.add('anim', [i], 24, true);
@@ -651,9 +651,7 @@ class NotesQuantSubState extends MusicBeatSubState
     bigNote.rgbShader.parent = Note.globalQuantRgbShaders[curSelectedNote];
     bigNote.shader = Note.globalQuantRgbShaders[curSelectedNote].shader;
     for (i in 0...dataArray.length)
-    {
       bigNote.animation.addByPrefix('note$i', 'green0', 24, true);
-    }
     insert(members.indexOf(myNotes) + 1, bigNote);
     _storedColor = getShaderColor();
     PlayState.stageUI = "normal";
@@ -668,7 +666,7 @@ class NotesQuantSubState extends MusicBeatSubState
     {
       var newAnim:String = curSelectedNote == note.ID ? 'confirm' : 'pressed';
       note.alpha = (curSelectedNote == note.ID) ? 1 : 0.6;
-      if (note.animation.curAnim == null || note.animation.curAnim.name != newAnim) note.playAnim(newAnim, true);
+      if (note.isAnimNull() || note.animation.curAnim.name != newAnim) note.playAnim(newAnim, true);
       if (instant) note.animation.curAnim.finish();
     }
     bigNote.animation.play('note$curSelectedNote', true);
@@ -714,7 +712,7 @@ class NotesQuantSubState extends MusicBeatSubState
     for (i in 0...7)
     {
       var strumRGB:RGBShaderReference = myNotes.members[curSelectedNote].rgbShader;
-      var color:FlxColor = ClientPrefs.data.arrowRGBQuantize[curSelectedNote][i];
+      var color:FlxColor = Save.get('arrowRGBQuantize')[curSelectedNote][i];
       switch (i)
       {
         case 0:
@@ -726,7 +724,7 @@ class NotesQuantSubState extends MusicBeatSubState
       }
       dataArray[curSelectedNote][i] = color;
     }
-    setShaderColor(ClientPrefs.data.arrowRGBQuantize[curSelectedNote][curSelectedMode]);
+    setShaderColor(Save.get('arrowRGBQuantize')[curSelectedNote][curSelectedMode]);
     updateColors();
   }
 

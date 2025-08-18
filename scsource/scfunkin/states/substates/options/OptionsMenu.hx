@@ -55,7 +55,7 @@ class OptionCategoryHeader extends FlxSpriteGroup
       GenericUtil.transformSpriteColor(leftArrow.arrow, [1, 1, 1, 1, 255, 255, 0]);
     }
 
-    background.antialiasing = category.antialiasing = ClientPrefs.data.antialiasing;
+    background.antialiasing = category.antialiasing = Save.get('antialiasing');
     onChangeCata();
   }
 

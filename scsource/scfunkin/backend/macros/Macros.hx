@@ -6,6 +6,7 @@ import haxe.macro.Expr;
 
 /**
  * Macros containing additional help functions to expand HScript capabilities.
+ * Edited to be reduced just to all you see here! -glowsoony (fixing a few things too lmao)
  */
 class Macros
 {
@@ -13,77 +14,27 @@ class Macros
   {
     for (inc in [
       // FLIXEL
-      "flixel.util",
-      "flixel.ui",
-      "flixel.tweens",
-      "flixel.tile",
-      "flixel.text",
-      "flixel.system",
-      "flixel.sound",
-      "flixel.path",
-      "flixel.math",
-      "flixel.input",
-      "flixel.group",
-      "flixel.graphics",
-      "flixel.effects",
-      "flixel.animation",
-      // FLIXEL ADDONS
-      "flixel.addons.api",
-      "flixel.addons.display",
-      "flixel.addons.effects",
-      "flixel.addons.ui",
-      "flixel.addons.plugin",
-      "flixel.addons.text",
-      "flixel.addons.tile",
-      "flixel.addons.transition",
-      "flixel.addons.util",
-      // OTHER LIBRARIES & STUFF
-      #if (VIDEOS_ALLOWED && hxvlc) "hxvlc.flixel", "hxvlc.openfl", #end
-      #if flxsoundfilters "flixel.sound.filters.effects", "flixel.sound.filters.extensions", #end
+      'flixel',
+      #if (VIDEOS_ALLOWED && hxvlc) "hxvlc", #end
+      #if sys "sys", "openfl", #end
       // BASE HAXE
-      "DateTools",
-      "EReg",
-      "Lambda",
-      "StringBuf",
-      "haxe.crypto",
-      "haxe.display",
-      "haxe.exceptions",
-      "haxe.extern",
-
+      "haxe",
+      // ENGINE
       "scfunkin",
-      "scfunkin.backend",
-      "scfunkin.debug",
-      "scfunkin.objects",
-      "scfunkin.play",
-      "scfunkin.shaders",
-      "scfunkin.states",
-      "scfunkin.utils",
-      "scfunkin.vslice"
     ])
-      Compiler.include(inc);
-
-    if (Context.defined("sys"))
-    {
-      for (inc in ["sys", "openfl.net"])
-        Compiler.include(inc);
-    }
-
-    if (Context.defined("FunkinModchart"))
-    {
-      Compiler.include('modchart', true, ['modchart.standalone.adapters']);
-      Compiler.include("modchart.standalone.adapters." + haxe.macro.Context.definedValue("FM_ENGINE").toLowerCase());
-    }
+      Compiler.include(inc, true, [
+        'haxe.atomic.*',
+        'haxe.macro.*',
+        'flixel.addons.tile.FlxRayCastTilemap',
+        'flixel.addons.editors.spine.*',
+        'flixel.addons.nape.*',
+        'flixel.system.macros.*'
+      ]);
+    Compiler.addMetadata('@:build(scfunkin.backend.macros.FlxMacro.buildFlxBasic())', 'flixel.FlxBasic');
 
     // Macro fixes
     Compiler.allowPackage('flash');
     Compiler.include('my.pack');
-
-    // Include these
-    Compiler.include('flixel', true, [
-      'flixel.addons.editors.spine.*',
-      'flixel.addons.nape.*',
-      'flixel.system.macros.*'
-    ]);
   }
 }
 #end

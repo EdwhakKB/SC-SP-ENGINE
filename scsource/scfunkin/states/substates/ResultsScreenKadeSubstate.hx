@@ -6,7 +6,7 @@ import scfunkin.states.*;
 import scfunkin.objects.*;
 import scfunkin.objects.ui.menu.*;
 import scfunkin.backend.data.judgement.ComboStats;
-import scfunkin.backend.data.judgement.Rating;
+import scfunkin.backend.data.judgement.Judgement;
 import scfunkin.backend.misc.HelperFunctions;
 import scfunkin.play.song.data.Highscore;
 
@@ -46,12 +46,12 @@ class ResultsScreenKadeSubstate extends scfunkin.states.substates.MusicBeatSubSt
     add(camFollow);
     camFollow.setPosition(follow.x, follow.y);
 
-    openCallback = refresh;
+    openCallback = refreshZIndex;
 
     background = new FlxSprite(0, 0).makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
     background.scrollFactor.set();
 
-    modifiers = 'Active Modifiers:\n${(HelperFunctions.truncateFloat(game.healthLoss,2) != 1 ? '- HP Loss ${HelperFunctions.truncateFloat(game.healthLoss, 2)}x\n':'')}${(game.holdsActive ? '- Hold Notes Active\n' : '')}${(game.opponentMode ? '- Opponent Mode\n' : '')}${(game.instakillOnMiss ? '- No Misses mode\n' : '')}${(game.practiceMode ? '- Practice Mode\n' : '')}${(game.notITGMod ? '- Modchart\n' : '')}${(game.showCaseMode ? '- Show Case Mode\n' : '')}${(game.cpuControlled ? '- Botplay\n' : '')}${(HelperFunctions.truncateFloat(game.healthGain,2) != 1 ? '- HP Gain ${HelperFunctions.truncateFloat(game.healthGain, 2)}x\n': '')}';
+    modifiers = 'Active Modifiers:\n${(HelperFunctions.truncateFloat(game.healthLoss,2) != 1 ? '- HP Loss ${HelperFunctions.truncateFloat(game.healthLoss, 2)}x\n':'')}${(game.holdsActive ? '- Hold Notes Active\n' : '')}${(game.instakillOnMiss ? '- No Misses mode\n' : '')}${(game.practiceMode ? '- Practice Mode\n' : '')}${(game.notITGMod ? '- Modchart\n' : '')}${(game.cpuControlled ? '- Botplay\n' : '')}${(HelperFunctions.truncateFloat(game.healthGain,2) != 1 ? '- HP Gain ${HelperFunctions.truncateFloat(game.healthGain, 2)}x\n': '')}';
     if (modifiers == 'Active Modifiers:\n') modifiers = 'Active Modifiers: None';
     activeMods = new FlxText(FlxG.width - 500, FlxG.height - 450, FlxG.width, modifiers);
     activeMods.size = 24;
@@ -117,7 +117,7 @@ class ResultsScreenKadeSubstate extends scfunkin.states.substates.MusicBeatSubSt
     add(background);
     if (PlayState.inResults)
     {
-      music.pitch = ClientPrefs.getGameplaySetting('songspeed');
+      music.pitch = Save.getGameplaySetting('songspeed');
       music.play(false, FlxG.random.int(0, Std.int(music.length / 2)));
       FlxG.sound.list.add(music);
     }
@@ -140,14 +140,7 @@ class ResultsScreenKadeSubstate extends scfunkin.states.substates.MusicBeatSubSt
       acc = ComboStats.averageWeekAccuracy;
       score = ComboStats.averageWeekScore;
     }
-
-    var swags = PlayState.isStoryMode ? ComboStats.averageWeekSwags : ComboStats.averageSwags;
-    var sicks = PlayState.isStoryMode ? ComboStats.averageWeekSicks : ComboStats.averageSicks;
-    var goods = PlayState.isStoryMode ? ComboStats.averageWeekGoods : ComboStats.averageGoods;
-    var bads = PlayState.isStoryMode ? ComboStats.averageWeekBads : ComboStats.averageGoods;
-    var shits = PlayState.isStoryMode ? ComboStats.averageWeekShits : ComboStats.averageShits;
-
-    comboText.text = 'Judgements:\nSwags - ${swags}\nSicks - ${sicks}\nGoods - ${goods}\nBads - ${bads}\nShits - ${shits}\n\nCombo Breaks: ${PlayState.isStoryMode ? ComboStats.averageWeekMisses : game.hud.comboStats.songMisses}\nHighest Combo: ${game.hud.comboStats.highestCombo + 1}\nScore: $score\n${PlayState.isStoryMode ? 'Average Accuracy' : 'Accuracy'}: ${acc}% \nRank: ${game.hud.comboStats.comboLetterRank} - ${game.hud.comboStats.ratingFC} \nRate: ${game.playbackRate}x\n\nH - Replay song';
+    comboText.text = 'Combo Breaks: ${PlayState.isStoryMode ? ComboStats.averageWeekMisses : game.hud.comboStats.songMisses}\nHighest Combo: ${game.hud.comboStats.highestCombo + 1}\nScore: $score\n${PlayState.isStoryMode ? 'Average Accuracy' : 'Accuracy'}: ${acc}% \nRank: ${game.hud.comboStats.comboLetterRank} - ${game.hud.comboStats.ratingFC} \nRate: ${game.playbackRate}x\n\nH - Replay song';
     add(comboText);
 
     #if mobile
@@ -166,35 +159,11 @@ class ResultsScreenKadeSubstate extends scfunkin.states.substates.MusicBeatSubSt
 
     add(graphSprite);
 
-    var swags = HelperFunctions.truncateFloat(ComboStats.averageSwags / ComboStats.averageSicks, 1);
-    var sicks = HelperFunctions.truncateFloat(ComboStats.averageSicks / ComboStats.averageGoods, 1);
-    var goods = HelperFunctions.truncateFloat(ComboStats.averageGoods / ComboStats.averageBads, 1);
-
-    if (swags == Math.POSITIVE_INFINITY) swags = 0;
-    if (sicks == Math.POSITIVE_INFINITY) sicks = 0;
-    if (goods == Math.POSITIVE_INFINITY) goods = 0;
-
-    if (swags == Math.POSITIVE_INFINITY || swags == Math.NaN) swags = 0;
-    if (sicks == Math.POSITIVE_INFINITY || sicks == Math.NaN) sicks = 0;
-    if (goods == Math.POSITIVE_INFINITY || goods == Math.NaN) goods = 0;
-
-    var legitTimings:Bool = true;
-    for (rating in Rating.timingWindows)
-    {
-      if (rating.timingWindow != rating.defaultTimingWindow)
-      {
-        legitTimings = false;
-        break;
-      }
-    }
-
-    superMegaConditionShit = legitTimings
-      && game.notITGMod
+    superMegaConditionShit = game.notITGMod
       && game.holdsActive
       && !game.cpuControlled
       && !game.practiceMode
       && !PlayState.chartingMode
-      && !PlayState.modchartMode
       && HelperFunctions.truncateFloat(game.healthGain, 2) <= 1
       && HelperFunctions.truncateFloat(game.healthLoss, 2) >= 1;
 
@@ -203,7 +172,7 @@ class ResultsScreenKadeSubstate extends scfunkin.states.substates.MusicBeatSubSt
       // If no high score is present, save both score and rank.
       // If score or rank are better, save the highest one.
       // If neither are higher, nothing will change.
-      Highscore.applySongRank(Highscore.songHighScoreData);
+      Highscore.applySongRank(Highscore.scoreData);
     }
 
     mean = HelperFunctions.truncateFloat(mean / game.hud.comboStats.playerNotesCount, 2);
@@ -216,16 +185,7 @@ class ResultsScreenKadeSubstate extends scfunkin.states.substates.MusicBeatSubSt
     if (PlayState.isStoryMode) acceptShit = '';
 
     settingsText.text = 'Mean: ${mean}ms (';
-    var reverseWins = Rating.timingWindows.copy();
-    reverseWins.reverse();
-    for (i in 0...reverseWins.length)
-    {
-      var timing = reverseWins[i];
-      settingsText.text += '${timing.name.toUpperCase()}:${timing.timingWindow}ms';
-      if (i != reverseWins.length - 1) settingsText.text += ',';
-    }
     settingsText.text += ') $acceptShit';
-
     add(settingsText);
 
     FlxTween.tween(background, {alpha: 0.65}, 1.4);
@@ -262,11 +222,10 @@ class ResultsScreenKadeSubstate extends scfunkin.states.substates.MusicBeatSubSt
                 music.destroy();
                 music = null;
                 PlayState.chartingMode = false;
-                PlayState.modchartMode = false;
 
                 if (PlayState.isStoryMode)
                 {
-                  FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
+                  FlxG.sound.playMusic(Paths.music("freakyMenu"));
                   Conductor.bpm = 102;
                 }
                 close();
@@ -292,7 +251,6 @@ class ResultsScreenKadeSubstate extends scfunkin.states.substates.MusicBeatSubSt
                 music.destroy();
                 music = null;
                 PlayState.chartingMode = false;
-                PlayState.modchartMode = false;
 
                 close();
                 PlayState.isStoryMode = false;
@@ -309,7 +267,7 @@ class ResultsScreenKadeSubstate extends scfunkin.states.substates.MusicBeatSubSt
   public function registerHit(note:Note, isMiss:Bool = false, isBotPlay:Bool = false, missNote:Float)
   {
     var noteRating = note.rating;
-    var noteDiff = note.strumTime - Conductor.songPosition;
+    var noteDiff = note.strumTime - Conductor.songPosition + Save.get('ratingOffset');
     var noteStrumTime = note.strumTime;
 
     if (isMiss) noteDiff = missNote;
@@ -330,6 +288,4 @@ class ResultsScreenKadeSubstate extends scfunkin.states.substates.MusicBeatSubSt
     graphSprite.destroy();
     super.destroy();
   }
-
-  override function refresh() {}
 }

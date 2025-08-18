@@ -6,8 +6,6 @@ import flixel.addons.display.FlxGridOverlay;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.graphics.FlxGraphic;
 import flixel.util.FlxSave;
-import haxe.Json;
-import lime.utils.Assets;
 import openfl.text.TextField;
 
 class NoteOptions extends MusicBeatState
@@ -44,74 +42,59 @@ class NoteOptions extends MusicBeatState
     DiscordClient.changePresence("System - Note Options", null);
     #end
 
-    var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
+    final bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
     bg.updateHitbox();
     bg.screenCenter();
-    bg.antialiasing = ClientPrefs.data.antialiasing;
+    bg.antialiasing = Save.get('antialiasing');
     add(bg);
-
-    grpOptions = new FlxTypedGroup<Alphabet>();
-    add(grpOptions);
+    add(grpOptions = new FlxTypedGroup<Alphabet>());
 
     for (num => option in options)
     {
-      var optionText:Alphabet = new Alphabet(0, 0, Language.getPhrase('options_$option', option), true);
+      final optionText:Alphabet = new Alphabet(0, 0, Language.getPhrase('options_$option', option), true);
       optionText.screenCenter();
       optionText.y += (92 * (num - (options.length / 2))) + 45;
       grpOptions.add(optionText);
     }
 
-    selectorLeft = new Alphabet(0, 0, '>', true);
-    add(selectorLeft);
-    selectorRight = new Alphabet(0, 0, '<', true);
-    add(selectorRight);
+    add(selectorLeft = new Alphabet(0, 0, '>', true));
+    add(selectorRight = new Alphabet(0, 0, '<', true));
 
     changeSelection();
-    ClientPrefs.saveSettings();
-
+    Save.flush();
     super.create();
   }
 
   override function closeSubState()
   {
     super.closeSubState();
-    ClientPrefs.saveSettings();
+    Save.flush();
   }
 
   override function update(elapsed:Float)
   {
     super.update(elapsed);
 
-    if (controls.UI_UP_P || controls.UI_DOWN_P)
-    {
-      changeSelection(controls.UI_UP_P ? -1 : 1);
-    }
-
+    if (controls.UI_UP_P || controls.UI_DOWN_P) changeSelection(controls.UI_UP_P ? -1 : 1);
     if (controls.BACK)
     {
       FlxG.sound.play(Paths.sound('cancelMenu'));
       if (OptionsState.onPlayState)
       {
-        FlxTransitionableState.skipNextTransOut = true;
-        FlxTransitionableState.skipNextTransIn = true;
+        FlxTransitionableState.skipNextTransOut = FlxTransitionableState.skipNextTransIn = true;
         LoadingState.loadAndSwitchState(new scfunkin.states.PlayState());
-        if (ClientPrefs.data.pauseMusic != 'None') FlxG.sound.playMusic(Paths.music(Paths.formatToSongPath(ClientPrefs.data.pauseMusic)));
+        if (Save.get('pauseMusic') != 'None') FlxG.sound.playMusic(Paths.music(Paths.formatString(Save.get('pauseMusic'))));
         else
           FlxG.sound.music.volume = 0;
       }
       else
       {
-        FlxTransitionableState.skipNextTransOut = true;
-        FlxTransitionableState.skipNextTransIn = true;
+        FlxTransitionableState.skipNextTransOut = FlxTransitionableState.skipNextTransIn = true;
         LoadingState.loadAndSwitchState(new scfunkin.states.substates.options.OptionsState());
-        FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
+        FlxG.sound.playMusic(Paths.music("freakyMenu"));
       }
     }
-
-    if (controls.ACCEPT)
-    {
-      openSelectedSubstate(options[curSelected]);
-    }
+    if (controls.ACCEPT) openSelectedSubstate(options[curSelected]);
   }
 
   function changeSelection(change:Int = 0)
@@ -131,10 +114,8 @@ class NoteOptions extends MusicBeatState
       if (item.targetY == 0)
       {
         item.alpha = 1;
-        selectorLeft.x = item.x - 63;
-        selectorLeft.y = item.y;
-        selectorRight.x = item.x + item.width + 15;
-        selectorRight.y = item.y;
+        selectorLeft.setPosition(item.x - 63, item.y);
+        selectorRight.setPosition(item.x + item.width + 15, item.y);
       }
     }
     FlxG.sound.play(Paths.sound('scrollMenu'));
@@ -142,8 +123,8 @@ class NoteOptions extends MusicBeatState
 
   override function destroy()
   {
-    ClientPrefs.loadPrefs();
-    ClientPrefs.keybindSaveLoad();
+    Save.load();
+    Controls.load();
     super.destroy();
   }
 }

@@ -3,6 +3,8 @@ package scfunkin.shaders.codename;
 import openfl.Assets;
 
 /**
+ * Class From CODENAMEENGINE
+ *
  * Class for custom shaders.
  *
  * To create one, create a `shaders` folder in your assets/mod folder, then add a file named `my-shader.frag` or/and `my-shader.vert`.
@@ -32,10 +34,13 @@ class CustomShader extends FunkinShader
     var fragCodeFound:Bool = (fragCode != null);
     var vertCodeFound:Bool = (vertCode != null);
 
-    if (fragCode == null && vertCode == null) Debug.logWarn('Shader "$name" couldn\'t be found.');
-    else
-      Debug.logInfo('frag code found $fragCodeFound, vert code found $vertCodeFound');
+    if (fragCode == null && vertCode == null)
+    {
+      Debug.logWarn('Shader "$name" couldn\'t be found.');
+      return;
+    }
 
+    Debug.logInfo('frag code found $fragCodeFound, vert code found $vertCodeFound');
     super(fragCode, vertCode, glslVersion);
   }
 

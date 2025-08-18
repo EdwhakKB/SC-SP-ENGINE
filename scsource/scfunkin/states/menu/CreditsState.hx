@@ -28,7 +28,7 @@ class CreditsState extends MusicBeatState
 
     persistentUpdate = true;
     bg = new FlxSprite().loadGraphic(Paths.image('stageBackForStates'));
-    bg.antialiasing = ClientPrefs.data.antialiasing;
+    bg.antialiasing = Save.get('antialiasing');
     add(bg);
     bg.screenCenter();
 
@@ -289,7 +289,7 @@ class CreditsState extends MusicBeatState
     descBox.sprTracker = descText;
     add(descText);
 
-    bg.color = CoolUtil.colorFromString(creditsStuff[curSelected][4]);
+    bg.color = ColorUtil.colorFromString(creditsStuff[curSelected][4]);
     intendedColor = bg.color;
     changeSelection();
     super.create();
@@ -385,7 +385,7 @@ class CreditsState extends MusicBeatState
     }
     while (unselectableCheck(curSelected));
 
-    var newColor:FlxColor = CoolUtil.colorFromString(creditsStuff[curSelected][4]);
+    var newColor:FlxColor = ColorUtil.colorFromString(creditsStuff[curSelected][4]);
     if (newColor != intendedColor)
     {
       if (colorTween != null)
@@ -440,8 +440,7 @@ class CreditsState extends MusicBeatState
     var creditsFile:String = Paths.mods(folder + '/data/credits.txt');
 
     #if TRANSLATIONS_ALLOWED
-    // trace('/data/credits-${ClientPrefs.data.language}.txt');
-    var translatedCredits:String = Paths.mods(folder + '/data/credits-${ClientPrefs.data.language}.txt');
+    var translatedCredits:String = Paths.mods(folder + '/data/credits-${Save.get('language')}.txt');
     #end
 
     if (#if TRANSLATIONS_ALLOWED (FileSystem.exists(translatedCredits) && (creditsFile = translatedCredits) == translatedCredits)

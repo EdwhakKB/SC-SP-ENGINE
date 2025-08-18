@@ -14,8 +14,8 @@ class Mods
 {
   static public var currentModDirectory:String = '';
   public static final ignoreModFolders:Array<String> = [
-    'custom_events',
-    'custom_notetypes',
+    'events',
+    'notetypes',
     'data',
     'songs',
     'music',
@@ -87,10 +87,15 @@ class Mods
   inline public static function directoriesWithFile(path:String, fileToFind:String, mods:Bool = true)
   {
     var foldersToCheck:Array<String> = [];
-    #if sys
-    if (FileSystem.exists(path + fileToFind))
-    #end
-    foldersToCheck.push(path + fileToFind);
+    // Main folder
+    if (FileSystem.exists(path + fileToFind)) foldersToCheck.push(path + fileToFind);
+
+    // Week folder
+    if (Paths.currentLevel != null && Paths.currentLevel != path)
+    {
+      var pth:String = Paths.getFolderPath(fileToFind, Paths.currentLevel);
+      if (!foldersToCheck.contains(pth) && FileSystem.exists(pth)) foldersToCheck.push(pth);
+    }
 
     #if MODS_ALLOWED
     if (mods)
@@ -102,7 +107,7 @@ class Mods
         if (FileSystem.exists(folder) && !foldersToCheck.contains(folder)) foldersToCheck.push(folder);
       }
 
-      // Then "PsychEngine/mods/" main folder
+      // Then "SCE/mods/" main folder
       var folder:String = Paths.mods(fileToFind);
       if (FileSystem.exists(folder) && !foldersToCheck.contains(folder)) foldersToCheck.push(Paths.mods(fileToFind));
 
@@ -122,16 +127,12 @@ class Mods
     #if MODS_ALLOWED
     if (folder == null) folder = Mods.currentModDirectory;
 
-    var path = Paths.mods(folder + '/pack.json');
+    final path:String = Paths.mods(folder + '/pack.json');
     if (FileSystem.exists(path))
     {
       try
       {
-        #if sys
-        var rawJson:String = File.getContent(path);
-        #else
-        var rawJson:String = Assets.getText(path);
-        #end
+        final rawJson:String = #if sys File.getContent(path); #else Assets.getText(path); #end
         if (rawJson != null && rawJson.length > 0) return tjson.TJSON.parse(rawJson);
       }
       catch (e:Dynamic)
@@ -231,7 +232,7 @@ class Mods
 
   public static function loadTopMod()
   {
-    Mods.currentModDirectory = '';
+    currentModDirectory = '';
 
     #if MODS_ALLOWED
     var list:Array<String> = Mods.parseList().enabled;

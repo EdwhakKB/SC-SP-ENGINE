@@ -105,8 +105,7 @@ class InputFormatter
 
   public static function getGamepadName(key:FlxGamepadInputID)
   {
-    var gamepad:FlxGamepad = FlxG.gamepads.firstActive;
-    var model:FlxGamepadModel = gamepad != null ? gamepad.detectedModel : UNKNOWN;
+    final model:FlxGamepadModel = FlxG?.gamepads?.firstActive?.detectedModel ?? UNKNOWN;
 
     switch (key)
     {

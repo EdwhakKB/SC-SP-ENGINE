@@ -3,8 +3,8 @@ package scfunkin.backend.ui;
 import flixel.FlxObject;
 import flixel.input.keyboard.FlxKey;
 import flixel.util.FlxDestroyUtil;
-import lime.system.Clipboard;
 import openfl.events.KeyboardEvent;
+import lime.system.Clipboard;
 
 enum abstract AccentCode(Int) from Int from UInt to Int to UInt
 {
@@ -52,8 +52,7 @@ class PsychUIInputText extends FlxSpriteGroup
 
   function set_disabled(value:Bool):Bool
   {
-    disabled = value;
-    PsychUIUtil.disableMembers(members, disabled);
+    PsychUIUtil.disableMembers(members, disabled = value);
     return disabled;
   }
 

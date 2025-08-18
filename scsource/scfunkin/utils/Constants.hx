@@ -155,16 +155,6 @@ class Constants
    */
   public static final MP3_DELAY_MS:Float = 528 / 44100 * Constants.MS_PER_SEC;
 
-  /**
-   * The maximum number of previous file paths for the Chart Editor to remember.
-   */
-  public static final MAX_PREVIOUS_WORKING_FILES:Int = 10;
-
-  /**
-   * The separator between an asset library and the asset path.
-   */
-  public static final LIBRARY_SEPARATOR:String = ':';
-
   // % Sick
   public static final RANK_PERFECT_PLAT_THRESHOLD:Float = 1.0; // % Sick
   public static final RANK_PERFECT_GOLD_THRESHOLD:Float = 0.85; // % Sick

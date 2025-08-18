@@ -5,7 +5,7 @@ import scfunkin.objects.ui.menu.AchievementPopup;
 import haxe.Exception;
 import tjson.TJSON as Json;
 #if LUA_ALLOWED
-import scfunkin.backend.scripting.psych.FunkinLua;
+import scfunkin.backend.scripting.psych.luas.FunkinLua;
 #end
 
 typedef Achievement =
@@ -300,12 +300,12 @@ class Achievements
   #end
 
   #if LUA_ALLOWED
-  public static function addLuaCallbacks(funk:scfunkin.backend.scripting.psych.FunkinLua)
+  public static function addLuaCallbacks(funk:scfunkin.backend.scripting.psych.luas.FunkinLua)
   {
     funk.set("getAchievementScore", function(name:String):Float {
       if (!achievements.exists(name))
       {
-        FunkinLua.luaTrace('getAchievementScore: Couldnt find achievement: $name', false, false, FlxColor.RED);
+        LuaHandler.luaTrace('getAchievementScore: Couldnt find achievement: $name', false, false, FlxColor.RED);
         return -1;
       }
       return getScore(name);
@@ -313,7 +313,7 @@ class Achievements
     funk.set("setAchievementScore", function(name:String, ?value:Float = 0, ?saveIfNotUnlocked:Bool = true):Float {
       if (!achievements.exists(name))
       {
-        FunkinLua.luaTrace('setAchievementScore: Couldnt find achievement: $name', false, false, FlxColor.RED);
+        LuaHandler.luaTrace('setAchievementScore: Couldnt find achievement: $name', false, false, FlxColor.RED);
         return -1;
       }
       return setScore(name, value, saveIfNotUnlocked);
@@ -321,7 +321,7 @@ class Achievements
     funk.set("addAchievementScore", function(name:String, ?value:Float = 1, ?saveIfNotUnlocked:Bool = true):Float {
       if (!achievements.exists(name))
       {
-        FunkinLua.luaTrace('addAchievementScore: Couldnt find achievement: $name', false, false, FlxColor.RED);
+        LuaHandler.luaTrace('addAchievementScore: Couldnt find achievement: $name', false, false, FlxColor.RED);
         return -1;
       }
       return addScore(name, value, saveIfNotUnlocked);
@@ -329,7 +329,7 @@ class Achievements
     funk.set("unlockAchievement", function(name:String):Dynamic {
       if (!achievements.exists(name))
       {
-        FunkinLua.luaTrace('unlockAchievement: Couldnt find achievement: $name', false, false, FlxColor.RED);
+        LuaHandler.luaTrace('unlockAchievement: Couldnt find achievement: $name', false, false, FlxColor.RED);
         return null;
       }
       return unlock(name);
@@ -337,7 +337,7 @@ class Achievements
     funk.set("isAchievementUnlocked", function(name:String):Dynamic {
       if (!achievements.exists(name))
       {
-        FunkinLua.luaTrace('isAchievementUnlocked: Couldnt find achievement: $name', false, false, FlxColor.RED);
+        LuaHandler.luaTrace('isAchievementUnlocked: Couldnt find achievement: $name', false, false, FlxColor.RED);
         return null;
       }
       return isUnlocked(name);

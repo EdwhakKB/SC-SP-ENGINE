@@ -122,9 +122,9 @@ class EventData
   {
     var data:EventJson = null;
 
-    if (Paths.fileExists('custom_events/$name.json', TEXT))
+    if (Paths.fileExists('events/$name.json', TEXT))
     {
-      final rawFile:String = Paths.getTextFromFile('custom_events/$name.json');
+      final rawFile:String = Paths.getTextFromFile('events/$name.json');
       if (rawFile != null && rawFile.length > 0)
       {
         try
@@ -185,7 +185,7 @@ class EventData
       case STRING:
         return Std.string(value);
       case COLOR:
-        return scfunkin.utils.CoolUtil.colorFromString(value);
+        return scfunkin.utils.ColorUtil.colorFromString(value);
     }
   }
 

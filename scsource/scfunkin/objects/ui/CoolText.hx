@@ -21,16 +21,6 @@ class CoolText extends FlxBitmapText
     scale.set(sizeX / (font.size - 2), sizeY / (font.size - 2));
     updateHitbox();
   }
-
-  override function destroy()
-  {
-    super.destroy();
-  }
-
-  override function update(elapsed)
-  {
-    super.update(elapsed);
-  }
   /*public function centerXPos()
     {
       var offsetX = 0;

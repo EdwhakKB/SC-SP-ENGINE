@@ -3,7 +3,7 @@ package scfunkin.states.editors.content;
 import haxe.io.Path;
 import flixel.util.FlxDestroyUtil;
 import openfl.net.FileFilter;
-import scfunkin.backend.data.StageData;
+import scfunkin.backend.data.StageJsonData;
 import scfunkin.backend.ui.PsychUIButton;
 import scfunkin.backend.ui.PsychUIRadioGroup;
 import scfunkin.backend.ui.PsychUICheckBox;
@@ -20,8 +20,8 @@ class PreloadListSubState extends MusicBeatSubState implements PsychUIEvent
   public function new(saveCallback:Map<String, LoadFilters>->Void, locked:Array<String> = null, list:Map<String, LoadFilters> = null)
   {
     this.saveCallback = saveCallback;
-    lockedList = (lockedList != null) ? locked : [];
-    preloadList = (list != null) ? list : [];
+    lockedList = locked ?? [];
+    preloadList = list ?? [];
 
     for (k => v in preloadList)
       preloadListKeys.push(k);
@@ -34,9 +34,7 @@ class PreloadListSubState extends MusicBeatSubState implements PsychUIEvent
   var radioGrp:PsychUIRadioGroup;
 
   var removeButton:PsychUIButton;
-  var lqCheckBox:PsychUICheckBox;
-  var hqCheckBox:PsychUICheckBox;
-  var smCheckBox:PsychUICheckBox;
+  var qualityDropDown:PsychUIDropDownMenu;
 
   override function create()
   {
@@ -82,26 +80,13 @@ class PreloadListSubState extends MusicBeatSubState implements PsychUIEvent
     removeButton.normalStyle.textColor = FlxColor.WHITE;
     add(removeButton);
 
-    function updateFilters()
-    {
-      var name:String = getCurCheckedName();
-      if (!preloadList.exists(name)) return;
-
-      var filters:LoadFilters = 0;
-      if (lqCheckBox.checked) filters |= LOW_QUALITY;
-      if (hqCheckBox.checked) filters |= HIGH_QUALITY;
-      if (smCheckBox.checked) filters |= STORY_MODE;
-      preloadList.set(name, filters);
-    }
-    lqCheckBox = new PsychUICheckBox(bg.x + bg.width - 100, bg.y + bg.height - 130, 'Low Qual.', 0, updateFilters);
-    hqCheckBox = new PsychUICheckBox(lqCheckBox.x, lqCheckBox.y + 22, 'High Qual.', 0, updateFilters);
-    smCheckBox = new PsychUICheckBox(hqCheckBox.x, hqCheckBox.y + 22, 'Story Mode', 0, updateFilters);
-    lqCheckBox.cameras = cameras;
-    hqCheckBox.cameras = cameras;
-    smCheckBox.cameras = cameras;
-    add(lqCheckBox);
-    add(hqCheckBox);
-    add(smCheckBox);
+    qualityDropDown = new PsychUIDropDownMenu(bg.x + bg.width - 100, bg.y + bg.height - 130, [''].concat(QualityFilter.qualities),
+      function(id:Int, cur:String) {
+        var name:String = getCurCheckedName();
+        if (preloadList.exists(name)) preloadList.set(name, QualityFilter.fromString(cur));
+      });
+    qualityDropDown.cameras = cameras;
+    add(qualityDropDown);
 
     radioGrp = new PsychUIRadioGroup(bg.x + 60, bg.y + 80, preloadListKeys, 25, 15, false, 280);
     radioGrp.cameras = cameras;
@@ -132,7 +117,7 @@ class PreloadListSubState extends MusicBeatSubState implements PsychUIEvent
 
                   if (!lockedList.contains(pathStr))
                   {
-                    preloadList.set(pathStr, LOW_QUALITY | HIGH_QUALITY);
+                    preloadList.set(pathStr, MINIMUM_QUALITY | LOW_QUALITY | MEDIUM_QUALITY | HIGH_QUALITY | MAXIMUM_QUALITY);
                     preloadListKeys.push(pathStr);
                     radioGrp.labels = preloadListKeys;
                     showOutput('File added to preload: $pathStr');
@@ -210,10 +195,7 @@ class PreloadListSubState extends MusicBeatSubState implements PsychUIEvent
     outputTxt.alpha = outputTime;
     if (!fileDialog.completed) return;
 
-    if (controls.BACK)
-    {
-      close();
-    }
+    if (controls.BACK) close();
 
     var checked:PsychUIRadioItem = radioGrp.checkedRadio;
     if (checked != null) removeButton.y = checked.y - 1;
@@ -232,30 +214,18 @@ class PreloadListSubState extends MusicBeatSubState implements PsychUIEvent
   function updateButtons()
   {
     var checked:PsychUIRadioItem = radioGrp.checkedRadio;
-    if (checked != null)
-    {
-      var filters:LoadFilters = getCurLoadFilters();
-      lqCheckBox.checked = (filters & LOW_QUALITY == LOW_QUALITY);
-      hqCheckBox.checked = (filters & HIGH_QUALITY == HIGH_QUALITY);
-      smCheckBox.checked = (filters & STORY_MODE == STORY_MODE);
-    }
+    if (checked != null) qualityDropDown.selectedLabel = QualityFilter.fromString(getCurLoadFilters());
 
     var vis:Bool = (checked != null);
     removeButton.visible = removeButton.active = vis;
-    lqCheckBox.visible = lqCheckBox.active = vis;
-    hqCheckBox.visible = hqCheckBox.active = vis;
-    smCheckBox.visible = smCheckBox.active = vis;
+    qualityDropDown.visible = qualityDropDown.active = vis;
   }
 
   inline function getCurLoadFilters():LoadFilters
-  {
-    return (radioGrp.checkedRadio != null) ? preloadList.get(getCurCheckedName()) : 0;
-  }
+    return preloadList?.get(getCurCheckedName()) ?? 0;
 
   inline function getCurCheckedName():String
-  {
-    return (radioGrp.checkedRadio != null) ? radioGrp.checkedRadio.text.text : '';
-  }
+    return radioGrp?.checkedRadio?.text?.text ?? '';
 
   var outputTime:Float = 0;
 
@@ -265,9 +235,7 @@ class PreloadListSubState extends MusicBeatSubState implements PsychUIEvent
     outputTxt.text = txt;
     outputTime = 3;
 
-    if (isError) FlxG.sound.play(Paths.sound('cancelMenu'), 0.4);
-    else
-      FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+    FlxG.sound.play(Paths.sound((isError ? 'cancel' : 'scroll') + 'Menu'), 0.4);
   }
 
   override function destroy()

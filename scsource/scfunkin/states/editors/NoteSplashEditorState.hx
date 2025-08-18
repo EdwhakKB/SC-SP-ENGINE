@@ -3,19 +3,11 @@ package scfunkin.states.editors;
 import scfunkin.objects.note.Note;
 import scfunkin.objects.note.NoteSplash;
 import scfunkin.objects.note.StrumArrow;
-import flixel.FlxSprite;
-import flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup;
 import flixel.input.keyboard.FlxKey;
-import flixel.text.FlxText;
-import flixel.tweens.FlxTween;
-import flixel.util.FlxColor;
 import openfl.net.FileFilter;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
 import openfl.net.FileReference;
-import haxe.Json;
-
-using StringTools;
 
 @:access(scfunkin.objects.note.NoteSplash)
 class NoteSplashEditorState extends MusicBeatState
@@ -41,7 +33,7 @@ class NoteSplashEditorState extends MusicBeatState
 
     FlxG.mouse.visible = true;
 
-    ClientPrefs.toggleVolumeKeys(false);
+    Controls.reset(false);
 
     DiscordClient.changePresence("In the Note Splash Editor Menu");
 
@@ -785,7 +777,7 @@ class NoteSplashEditorState extends MusicBeatState
   function saveSplash()
   {
     imageSkin = imageInputText.text;
-    var data:String = Json.stringify(config, "\t");
+    var data:String = HaxeJson.stringify(config, "\t");
     if (data.length > 0)
     {
       _file = new FileReference();
@@ -814,7 +806,7 @@ class NoteSplashEditorState extends MusicBeatState
 
     try
     {
-      var txtLoaded:Dynamic = Json.parse(Json.stringify(_file));
+      var txtLoaded:Dynamic = HaxeJson.parse(HaxeJson.stringify(_file));
       var txt:String = null;
       var file:String = "config.json";
       #if MODS_ALLOWED
@@ -833,7 +825,7 @@ class NoteSplashEditorState extends MusicBeatState
       _file.addEventListener(Event.COMPLETE, onSaveComplete);
       _file.addEventListener(Event.CANCEL, onSaveCancel);
       _file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-      _file.save(Json.stringify(conf, "\t"), file);
+      _file.save(HaxeJson.stringify(conf, "\t"), file);
       #end
     }
     catch (e)
@@ -871,7 +863,7 @@ class NoteSplashEditorState extends MusicBeatState
     NoteSplash.configs.clear();
     super.destroy();
     FlxG.sound.music.volume = 1;
-    ClientPrefs.toggleVolumeKeys(true);
+    Controls.reset(true);
   }
 
   public static function parseTxt(content:String):NoteSplashConfig

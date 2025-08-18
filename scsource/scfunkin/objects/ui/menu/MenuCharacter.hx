@@ -24,11 +24,10 @@ class MenuCharacter extends FlxSprite
   public function new(x:Float, character:String = 'bf')
   {
     super(x);
-
-    changeCharacter(character);
+    change(character);
   }
 
-  public function changeCharacter(?character:String = 'bf')
+  public function change(?character:String = 'bf')
   {
     if (character == null) character = '';
     if (character == this.character) return;
@@ -100,7 +99,7 @@ class MenuCharacter extends FlxSprite
         offset.set(charFile.position[0] * scale.x, charFile.position[1] * scale.y);
         animation.play('idle');
 
-        antialiasing = (charFile.antialiasing != false && ClientPrefs.data.antialiasing);
+        antialiasing = (charFile.antialiasing != false && Save.get('antialiasing'));
     }
   }
 }

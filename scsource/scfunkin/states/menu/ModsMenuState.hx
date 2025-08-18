@@ -1,8 +1,6 @@
 package scfunkin.states.menu;
 
-import flixel.FlxBasic;
 import flixel.ui.FlxButton;
-import flixel.util.FlxSpriteUtil;
 import flixel.graphics.FlxGraphic;
 import flixel.addons.transition.FlxTransitionableState;
 import lime.utils.Assets;
@@ -69,7 +67,7 @@ class ModsMenuState extends MusicBeatState
 
     bg = new FlxSprite().loadGraphic(Paths.image('menuDesat'));
     bg.color = 0xFF665AFF;
-    bg.antialiasing = ClientPrefs.data.antialiasing;
+    bg.antialiasing = Save.get('antialiasing');
     add(bg);
     bg.screenCenter();
 
@@ -856,7 +854,7 @@ class ModItem extends FlxSpriteGroup
     add(selectBg);
 
     icon = new FlxSprite(5, 5);
-    icon.antialiasing = ClientPrefs.data.antialiasing;
+    icon.antialiasing = Save.get('antialiasing');
     add(icon);
 
     text = new FlxText(95, 38, 230, "", 16);

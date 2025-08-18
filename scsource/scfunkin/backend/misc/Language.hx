@@ -10,12 +10,9 @@ class Language
   public static function reloadPhrases()
   {
     #if TRANSLATIONS_ALLOWED
-    var langFile:String = ClientPrefs.data.language;
-    var loadedText:Array<String> = Mods.mergeAllTextsNamed('data/$langFile.lang');
-
     phrases.clear();
     var hasPhrases:Bool = false;
-    for (num => phrase in loadedText)
+    for (num => phrase in Mods.mergeAllTextsNamed('data/${Save.get('language')}.lang'))
     {
       phrase = phrase.trim();
       if (num < 1 && !phrase.contains(':'))
@@ -31,7 +28,6 @@ class Language
       if (n < 0) continue;
 
       var key:String = phrase.substr(0, n).trim().toLowerCase();
-
       var value:String = phrase.substr(n);
       n = value.indexOf('"');
       if (n < 0) continue;
@@ -40,7 +36,7 @@ class Language
       hasPhrases = true;
     }
 
-    if (!hasPhrases) ClientPrefs.data.language = ClientPrefs.defaultData.language;
+    if (!hasPhrases) Save.get('language', Save.get('language', true));
     var alphaPath:String = getFileTranslation('images/alphabet');
     if (alphaPath.startsWith('images/')) alphaPath = alphaPath.substr('images/'.length);
     var pngPos:Int = alphaPath.indexOf('.png');
@@ -53,30 +49,15 @@ class Language
 
   inline public static function getPhrase(key:String, ?defaultPhrase:String, values:Array<Dynamic> = null):String
   {
-    #if TRANSLATIONS_ALLOWED
-    var str:String = phrases.get(formatKey(key));
-    if (str == null) str = defaultPhrase;
-    #else
-    var str:String = defaultPhrase;
-    #end
-
-    if (str == null) str = key;
-
+    var str:String = (#if TRANSLATIONS_ALLOWED (phrases.get(formatKey(key)) ?? defaultPhrase) #else defaultPhrase #end ?? key);
     if (values != null) for (num => value in values)
       str = str.replace('{${num + 1}}', value);
-
     return str;
   }
 
   // More optimized for file loading
   inline public static function getFileTranslation(key:String)
-  {
-    #if TRANSLATIONS_ALLOWED
-    var str:String = phrases.get(key.trim().toLowerCase());
-    if (str != null) key = str;
-    #end
-    return key;
-  }
+    return #if TRANSLATIONS_ALLOWED phrases.get(key.trim().toLowerCase()) ?? key #else key #end;
 
   #if TRANSLATIONS_ALLOWED
   inline static private function formatKey(key:String)
@@ -87,15 +68,10 @@ class Language
   #end
 
   #if LUA_ALLOWED
-  public static function addLuaCallbacks(funk:scfunkin.backend.scripting.psych.FunkinLua)
+  public static function addLuaCallbacks(funk:scfunkin.backend.scripting.psych.luas.FunkinLua)
   {
-    funk.set("getTranslationPhrase", function(key:String, ?defaultPhrase:String, ?values:Array<Dynamic> = null) {
-      return getPhrase(key, defaultPhrase, values);
-    });
-
-    funk.set("getFileTranslation", function(key:String) {
-      return getFileTranslation(key);
-    });
+    funk.set("getTranslationPhrase", function(key:String, ?defaultPhrase:String, ?values:Array<Dynamic> = null) return getPhrase(key, defaultPhrase, values));
+    funk.set("getFileTranslation", function(key:String) return getFileTranslation(key));
   }
   #end
 }

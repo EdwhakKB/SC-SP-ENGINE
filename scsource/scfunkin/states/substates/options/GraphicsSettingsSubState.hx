@@ -13,13 +13,16 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
     rpcTitle = 'Graphics Settings Menu'; // for Discord Rich Presence
 
     boyfriend = new Character(840, 170, 'bf', true, 'BF');
-    boyfriend.forOption(false, false);
-
+    boyfriend.setGraphicSize(Std.int(boyfriend.width * 0.75));
+    boyfriend.updateHitbox();
+    boyfriend.dance();
+    boyfriend.animation.finishCallback = function(name:String) boyfriend.dance();
+    boyfriend.visible = false;
     // I'd suggest using "Low Quality" as an example for making your own option since it is the simplest here
-    var option:Option = new Option('Low Quality', // Name
-      'If checked, disables some background details,\ndecreases loading times and improves performance.', // Description
-      'lowQuality', // Save data variable name
-      BOOL); // Variable type
+    var option:Option = new Option('Quality', // Name
+      'Depending on the type, quality disables some background details,\ndecreases loading times and improves performance or loads more.', // Description
+      'quality', // Save data variable name
+      STRING, ['minimum', 'low', 'medium', 'high', 'maximum']); // Variable type
     addOption(option);
 
     var option:Option = new Option('Background', // Name
@@ -73,28 +76,28 @@ class GraphicsSettingsSubState extends BaseOptionsMenu
       var sprite:FlxSprite = cast sprite;
       if (sprite != null && (sprite is FlxSprite) && !(sprite is FlxText))
       {
-        sprite.antialiasing = ClientPrefs.data.antialiasing;
+        sprite.antialiasing = Save.get('antialiasing');
       }
     }
   }
 
   function onChangeFramerate()
   {
-    if (ClientPrefs.data.framerate > FlxG.drawFramerate)
+    if (Save.get('framerate') > FlxG.drawFramerate)
     {
-      FlxG.updateFramerate = ClientPrefs.data.framerate;
-      FlxG.drawFramerate = ClientPrefs.data.framerate;
+      FlxG.updateFramerate = Save.get('framerate');
+      FlxG.drawFramerate = Save.get('framerate');
     }
     else
     {
-      FlxG.drawFramerate = ClientPrefs.data.framerate;
-      FlxG.updateFramerate = ClientPrefs.data.framerate;
+      FlxG.drawFramerate = Save.get('framerate');
+      FlxG.updateFramerate = Save.get('framerate');
     }
   }
 
   override function changeSelection(change:Int = 0)
   {
     super.changeSelection(change);
-    boyfriend.forOption(true, (antialiasingOption == curSelected));
+    boyfriend.visible = (antialiasingOption == curSelected);
   }
 }

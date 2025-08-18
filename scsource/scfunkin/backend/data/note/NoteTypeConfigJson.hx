@@ -23,7 +23,7 @@ class NoteTypeConfigJson
 
   public static function loadNoteTypeJson(name:String):NoteTypeData
   {
-    final noteTypeFile = tjson.TJSON.parse(Paths.getTextFromFile('custom_notetypes/$name.json'));
+    final noteTypeFile = tjson.TJSON.parse(Paths.getTextFromFile('notetypes/$name.json'));
     if (noteTypeData.exists(name)) return noteTypeData.get(name);
     if (noteTypeFile == null) return null;
     var data:NoteTypeData =

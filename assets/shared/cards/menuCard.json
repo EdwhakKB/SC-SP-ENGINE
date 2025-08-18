@@ -1,0 +1,13 @@
+{
+  "idle_anim": null,
+  "select_anim": null,
+  "hover_anim": null,
+  "offsetX": 0,
+  "offsetY": 0,
+  "metaData": {
+    "name": "",
+    "image": "",
+    "scale": null,
+    "graphicScale": null
+  }
+}

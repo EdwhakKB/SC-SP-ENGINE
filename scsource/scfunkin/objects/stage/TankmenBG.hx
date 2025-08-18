@@ -6,9 +6,9 @@ class TankmenBG extends FlxSprite
 {
   public static var animationNotes:Array<Dynamic> = [];
 
-  private var tankSpeed:Float;
-  private var endingOffset:Float;
-  private var goingRight:Bool;
+  public var tankSpeed:Float;
+  public var endingSpeedOffset:Float;
+  public var goingRight:Bool;
 
   public var strumTime:Float;
 
@@ -25,48 +25,63 @@ class TankmenBG extends FlxSprite
     animation.addByPrefix('shot', 'John Shot ' + FlxG.random.int(1, 2), 24, false);
     animation.play('run');
     animation.curAnim.curFrame = FlxG.random.int(0, animation.curAnim.frames.length - 1);
-    antialiasing = ClientPrefs.data.antialiasing;
+    antialiasing = Save.get('antialiasing');
 
     scale.set(0.8, 0.8);
     updateHitbox();
+    sharedVars();
+  }
+
+  public function sharedVars()
+  {
+    endOffset = new FlxPoint(goingRight ? 300 : 0, goingRight ? 200 : 0);
+    maxVisibility = x > -0.5 * FlxG.width;
+    minVisibility = x < 1.2 * FlxG.width;
+    speed = (Conductor.songPosition - strumTime) * tankSpeed;
+    timeEndOffset = Conductor.songPosition > strumTime;
   }
 
   public function resetShit(x:Float, y:Float, goingRight:Bool):Void
   {
-    this.x = x;
-    this.y = y;
+    setPosition(x, y);
     this.goingRight = goingRight;
-    endingOffset = FlxG.random.float(50, 200);
+    endingSpeedOffset = FlxG.random.float(50, 200);
     tankSpeed = FlxG.random.float(0.6, 1);
-    flipX = goingRight;
+    sharedVars();
   }
+
+  public var maxVisibility:Bool = true;
+  public var minVisibility:Bool = true;
+  public var rightOffset:Float = 0.02 * FlxG.width;
+  public var leftOffset:Float = 0.74 * FlxG.width;
+  public var speed:Float = 0;
+  public var timeEndOffset:Bool = false;
+  public var endOffset:FlxPoint = FlxPoint.get(0, 0);
 
   override function update(elapsed:Float)
   {
     super.update(elapsed);
 
-    visible = (x > -0.5 * FlxG.width && x < 1.2 * FlxG.width);
+    visible = (maxVisibility && minVisibility);
 
     if (animation.curAnim.name == "run")
     {
-      var speed:Float = (Conductor.songPosition - strumTime) * tankSpeed;
-      if (goingRight) x = (0.02 * FlxG.width - endingOffset) + speed;
-      else
-        x = (0.74 * FlxG.width + endingOffset) - speed;
+      final flip:Int = goingRight ? -1 : 1;
+      final flipInvert:Int = goingRight ? 1 : -1;
+      x = ((goingRight ? rightOffset : leftOffset) + endingSpeedOffset * flip) + speed * flipInvert;
     }
-    else if (animation.curAnim.finished)
-    {
-      kill();
-    }
+    else if (animation.curAnim.finished) kill();
 
-    if (Conductor.songPosition > strumTime)
+    if (timeEndOffset)
     {
       animation.play('shot');
-      if (goingRight)
-      {
-        offset.x = 300;
-        offset.y = 200;
-      }
+      offset = endOffset;
     }
+  }
+
+  override public function destroy()
+  {
+    endOffset = flixel.util.FlxDestroyUtil.destroy(endOffset);
+    super.destroy();
   }
 }

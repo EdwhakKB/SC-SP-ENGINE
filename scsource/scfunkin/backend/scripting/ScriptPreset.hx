@@ -44,7 +44,7 @@ class ScriptPreset
       "Achievements" => scfunkin.backend.misc.Achievements,
       #end
       "Conductor" => scfunkin.play.Conductor,
-      "ClientPrefs" => scfunkin.backend.data.save.ClientPrefs,
+      "Save" => scfunkin.backend.data.save.Save,
       "CoolUtil" => scfunkin.utils.CoolUtil,
       #if DISCORD_ALLOWED
       "Discord" => scfunkin.backend.misc.Discord.DiscordClient,
@@ -52,7 +52,7 @@ class ScriptPreset
       "Language" => scfunkin.backend.misc.Language,
       "Mods" => scfunkin.backend.assets.Mods,
       "Paths" => scfunkin.backend.assets.Paths,
-      "PsychCamera" => scfunkin.objects.misc.PsychCamera,
+      "FunkinSCCamera" => scfunkin.objects.misc.FunkinSCCamera,
       // CodenameEngine
       // -->Shaders
       "FunkinShader" => scfunkin.shaders.codename.FunkinShader,
@@ -69,7 +69,7 @@ class ScriptPreset
       "AttachedText" => scfunkin.objects.ui.AttachedText,
       "BGSprite" => scfunkin.objects.ui.BGSprite,
       "Character" => scfunkin.objects.ui.Character,
-      #if flxanimate "FlxAnimate" => FlxAnimate, #end
+      #if flixel_animate "FlxAnimate" => animate.FlxAnimate, #end
       "FunkinSCSprite" => FunkinSCSprite,
       "HealthIcon" => scfunkin.objects.ui.HealthIcon,
       "Note" => scfunkin.objects.note.Note,
@@ -82,7 +82,7 @@ class ScriptPreset
       // PsychLua
       "CustomFlxColor" => scfunkin.backend.scripting.psych.CustomFlxColor,
       #if LUA_ALLOWED
-      "FunkinLua" => scfunkin.backend.scripting.psych.FunkinLua,
+      "FunkinLua" => scfunkin.backend.scripting.psych.luas.FunkinLua,
       #end
       // Shaders
       "ColorSwap" => scfunkin.shaders.ColorSwap,
@@ -96,17 +96,8 @@ class ScriptPreset
       "GameOverSubstate" => scfunkin.states.substates.GameOverSubstate,
       "PauseSubState" => scfunkin.states.substates.PauseSubState,
       // External Usages For Engine
-      "Countdown" => scfunkin.backend.misc.Countdown,
+      "CountdownTick" => scfunkin.objects.ui.Countdown.CountdownTick,
       "HenchmenKillState" => scfunkin.play.stage.HenchmenKillState
-    ];
-  }
-
-  public static function codenameAbstracts():#if haxe3 Map<String, Dynamic> #else Hash<Dynamic> #end
-  {
-    return [
-      "FlxPoint" => scfunkin.utils.CoolUtil.getMacroAbstractClass("flixel.math.FlxPoint"),
-      "FlxAxes" => scfunkin.utils.CoolUtil.getMacroAbstractClass("flixel.util.FlxAxes"),
-      "FlxColor" => scfunkin.utils.CoolUtil.getMacroAbstractClass("flixel.util.FlxColor")
     ];
   }
 }

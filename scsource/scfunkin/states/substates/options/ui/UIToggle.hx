@@ -41,19 +41,19 @@ class UIToggle extends FlxSpriteGroup
     boxBG.animation.add('true', [0, 1, 2, 3, 4], 12, false);
     boxBG.animation.add('false', [4, 3, 2, 1, 0], 12, false);
     boxBG.animation.play('false');
-    boxBG.antialiasing = ClientPrefs.data.antialiasing;
+    boxBG.antialiasing = Save.get('antialiasing');
 
     box.loadGraphic(Paths.image('ui/CheckBox'), true, 150, 150);
     box.animation.add('true', [0, 1, 2, 3, 4], 12, false);
     box.animation.add('false', [4, 3, 2, 1, 0], 12, false);
     box.animation.play('false');
-    box.antialiasing = ClientPrefs.data.antialiasing;
+    box.antialiasing = Save.get('antialiasing');
 
     line.loadGraphic(Paths.image('ui/CheckBoxLine'), true, 150, 150);
     line.animation.add('true', [0, 1, 2, 3, 4], 12, false);
     line.animation.add('false', [4, 3, 2, 1, 0], 12, false);
     line.animation.play('false');
-    line.antialiasing = ClientPrefs.data.antialiasing;
+    line.antialiasing = Save.get('antialiasing');
   }
 
   override function update(elapsed:Float)

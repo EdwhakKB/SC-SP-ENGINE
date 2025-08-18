@@ -19,11 +19,29 @@ class StrumArrow extends FunkinSCSprite
   public var rgbShader:RGBShaderReference;
   public var noteData:Int = 0;
   public var direction(default, set):Float;
-  public var downScroll:Bool = false;
+  public var downScroll(default, set):Bool = false;
+
+  function set_downScroll(value:Bool):Bool
+  {
+    if (downScroll == value) return downScroll;
+    if (parentStrumLine != null)
+    {
+      final posData = parentStrumLine.useCustomStrumPoses ? parentStrumLine.generatedPositions.get(noteData) : parentStrumLine.defaultGeneratedPositions.get(noteData);
+      y = value ? posData.yDown : posData.y;
+    }
+    return downScroll = value;
+  }
+
   public var sustainReduce:Bool = true;
   public var daStyle = 'style';
   public var player:Int;
-  public var containsPixelTexture:Bool = false;
+  public var containsPixelTexture(get, never):Bool;
+
+  public var strumLine:StrumLine;
+
+  function get_containsPixelTexture():Bool
+    return (texture.contains('pixel') || daStyle.contains('pixel'));
+
   public var pathNotFound:Bool = false;
   public var changedSkin:Bool = false;
 
@@ -65,14 +83,14 @@ class StrumArrow extends FunkinSCSprite
   private function set_strumType(value:String):String
   {
     // Add custom strumTypes here!
-    if (noteData > 0 && strumType != value)
-    {
-      strumType = value;
-    }
+    if (noteData > 0 && strumType != value) strumType = value;
     return value;
   }
 
   public var inEditor:Bool = false;
+
+  public var middleScroll:Bool = false;
+  public var parentStrumLine:StrumLine = null;
 
   public function new(x:Float, y:Float, leData:Int, player:Int, ?style:String, ?customColoredNotes:Bool, ?inEditor:Bool)
   {
@@ -81,8 +99,8 @@ class StrumArrow extends FunkinSCSprite
     rgbShader.enabled = false;
     if (PlayState.SONG != null && PlayState.SONG.getSongData('options').disableStrumRGB) useRGBShader = false;
 
-    var arr:Array<FlxColor> = !customColoredNotes ? ClientPrefs.data.arrowRGB[leData] : ClientPrefs.data.arrowRGBQuantize[leData];
-    if (texture.contains('pixel') || style.contains('pixel') || containsPixelTexture) arr = ClientPrefs.data.arrowRGBPixel[leData];
+    var arr:Array<FlxColor> = !customColoredNotes ? Save.get('arrowRGB')[leData] : Save.get('arrowRGBQuantize')[leData];
+    if (texture.contains('pixel') || style.contains('pixel') || containsPixelTexture) arr = Save.get('arrowRGBPixel')[leData];
 
     if (leData <= arr.length)
     {
@@ -118,10 +136,9 @@ class StrumArrow extends FunkinSCSprite
     }
     scrollFactor.set();
 
-    if (texture.contains('pixel') || style.contains('pixel') || daStyle.contains('pixel')) containsPixelTexture = true;
     loadNoteAnims(style != "" ? style : skin, true);
 
-    if (ClientPrefs.data.vanillaStrumAnimations)
+    if (Save.get('vanillaStrumAnimations'))
     {
       animation.callback = onAnimationFrame;
       animation.finishCallback = onAnimationFinished;
@@ -131,7 +148,7 @@ class StrumArrow extends FunkinSCSprite
 
   public function middlePosition()
   {
-    if (ClientPrefs.data.middleScroll)
+    if (middleScroll)
     {
       x += 310;
 
@@ -146,22 +163,10 @@ class StrumArrow extends FunkinSCSprite
 
   public dynamic function reloadNote(style:String)
   {
-    var lastAnim:String = null;
-    if (animation.curAnim != null) lastAnim = animation.curAnim.name;
-    if (PlayState.instance != null)
-    {
-      if (player > 0) PlayState.instance.bfStrumStyle = style;
-      else
-        PlayState.instance.dadStrumStyle = style;
-    }
-
+    final lastAnim:String = animation?.curAnim?.name ?? null;
     loadNoteAnims(style);
     updateHitbox();
-
-    if (lastAnim != null)
-    {
-      playAnim(lastAnim, true);
-    }
+    if (lastAnim != null) playAnim(lastAnim, true);
   }
 
   function onAnimationFrame(name:String, frameNumber:Int, frameIndex:Int):Void {}
@@ -171,10 +176,7 @@ class StrumArrow extends FunkinSCSprite
     // Run a timer before we stop playing the confirm animation.
     // On opponent, this prevent issues with hold notes.
     // On player, this allows holding the confirm key to fall back to press.
-    if (name == 'confirm' && (player != 0))
-    {
-      confirmHoldTimer = 0;
-    }
+    if (name == 'confirm' && (player != 0)) confirmHoldTimer = 0;
   }
 
   public var isPixel:Bool = false;
@@ -255,9 +257,11 @@ class StrumArrow extends FunkinSCSprite
 
   public dynamic function addAnims(?pixel:Bool = false)
   {
-    var notesAnim:Array<String> = customColoredNotes ? ['UP', 'UP', 'UP', 'UP', 'UP', 'UP', 'UP', 'UP'] : ['LEFT', 'DOWN', 'UP', 'RIGHT'];
-    var pressAnim:Array<String> = customColoredNotes ? ['up', 'up', 'up', 'up', 'up', 'up', 'up', 'up'] : ['left', 'down', 'up', 'right'];
-    var colorAnims:Array<String> = customColoredNotes ? ['green', 'green', 'green', 'green', 'green', 'green', 'green', 'green'] : ['purple', 'blue', 'green', 'red'];
+    var notesAnim:Array<String> = ['LEFT', 'DOWN', 'UP', 'RIGHT'];
+    var pressAnim:Array<String> = ['left', 'down', 'up', 'right'];
+    var colorAnims:Array<String> = ['purple', 'blue', 'green', 'red'];
+
+    var trueData:Int = Std.int(Math.abs(noteData % 4));
 
     if (pixel)
     {
@@ -270,29 +274,29 @@ class StrumArrow extends FunkinSCSprite
       if (!inEditor) setGraphicSize(Std.int(width * PlayState.daPixelZoom));
       antialiasing = false;
 
-      animation.add('static', [0 + noteData]);
-      animation.add('pressed', [4 + noteData, 8 + noteData], 12, false);
-      animation.add('confirm', [12 + noteData, 16 + noteData], 12, false);
-      animation.add('confirm-hold', [12 + noteData, 16 + noteData], 12, false);
+      animation.add('static', [0 + trueData]);
+      animation.add('pressed', [4 + trueData, 8 + trueData], 12, false);
+      animation.add('confirm', [12 + trueData, 16 + trueData], 12, false);
+      animation.add('confirm-hold', [12 + trueData, 16 + trueData], 12, false);
     }
     else
     {
       isPixel = false;
-      antialiasing = ClientPrefs.data.antialiasing;
+      antialiasing = Save.get('antialiasing');
       if (!inEditor) setGraphicSize(Std.int(width * 0.7));
 
-      animation.addByPrefix(colorAnims[noteData], 'arrow' + notesAnim[noteData]);
+      animation.addByPrefix(colorAnims[trueData], 'arrow' + notesAnim[trueData]);
 
-      animation.addByPrefix('static', 'arrow' + notesAnim[noteData]);
-      animation.addByPrefix('pressed', pressAnim[noteData] + ' press', 24, false);
-      animation.addByPrefix('confirm', pressAnim[noteData] + ' confirm', 24, false);
-      animation.addByPrefix('confirm-hold', pressAnim[noteData] + ' confirm', 24, false);
+      animation.addByPrefix('static', 'arrow' + notesAnim[trueData]);
+      animation.addByPrefix('pressed', pressAnim[trueData] + ' press', 24, false);
+      animation.addByPrefix('confirm', pressAnim[trueData] + ' confirm', 24, false);
+      animation.addByPrefix('confirm-hold', pressAnim[trueData] + ' confirm', 24, false);
     }
   }
 
   public dynamic function playerPosition()
   {
-    // if (ClientPrefs.data.vanillaStrumAnimations) this.active = false;
+    // if (Save.get('vanillaStrumAnimations')) this.active = false;
     x += Note.swagWidth * noteData;
     x += 50;
     x += ((FlxG.width / 2) * player);
@@ -301,34 +305,26 @@ class StrumArrow extends FunkinSCSprite
 
   override function update(elapsed:Float)
   {
-    if (ClientPrefs.data.vanillaStrumAnimations)
+    if (Save.get('vanillaStrumAnimations') && confirmHoldTimer >= 0)
     {
-      if (confirmHoldTimer >= 0)
-      {
-        confirmHoldTimer += elapsed;
+      confirmHoldTimer += elapsed;
 
-        // Ensure the opponent stops holding the key after a certain amount of time.
-        if (confirmHoldTimer >= CONFIRM_HOLD_TIME)
-        {
-          confirmHoldTimer = -1;
-          playAnim('static', true);
-        }
+      // Ensure the opponent stops holding the key after a certain amount of time.
+      if (confirmHoldTimer >= CONFIRM_HOLD_TIME)
+      {
+        confirmHoldTimer = -1;
+        playAnim('static', true);
       }
     }
-    else
+    else if (resetAnim > 0)
     {
-      if (resetAnim > 0)
+      resetAnim -= elapsed;
+      if (resetAnim <= 0)
       {
-        resetAnim -= elapsed;
-        if (resetAnim <= 0)
-        {
-          playAnim('static');
-          resetAnim = 0;
-        }
+        playAnim('static');
+        resetAnim = 0;
       }
     }
-
-    if (texture.contains('pixel') || daStyle.contains('pixel')) containsPixelTexture = true;
 
     super.update(elapsed);
   }
@@ -337,47 +333,28 @@ class StrumArrow extends FunkinSCSprite
 
   public dynamic function holdConfirm():Void
   {
-    if (!ClientPrefs.data.vanillaStrumAnimations) return;
+    if (!Save.get('vanillaStrumAnimations')) return;
     // this.active = true;
-    if (getLastAnimationPlayed() == "confirm-hold")
+    if (getLastAnimPlayed() == "confirm-hold") return;
+    else if (getLastAnimPlayed() == "confirm" && isAnimFinished())
     {
-      return;
-    }
-    else if (getLastAnimationPlayed() == "confirm")
-    {
-      if (isAnimationFinished())
-      {
-        confirmHoldTimer = -1;
-        playAnim('confirm-hold', false, false);
-      }
+      confirmHoldTimer = -1;
+      playAnim('confirm-hold', false, false);
     }
     else
-    {
       playAnim('confirm', false, false);
-    }
   }
 
   override public function playAnim(anim:String, force:Bool = false, reverse:Bool = false, frame:Int = 0)
   {
     super.playAnim(anim, force, reverse, frame);
-
-    _lastPlayedAnimation = anim;
-
-    if (ClientPrefs.data.vanillaStrumAnimations)
-    {
-      // if (force)
-      // {
-      //   this.active = anim != 'static';
-      // }
-      if (anim.toLowerCase() == 'confirm' && force) confirmHoldTimer = (player != 0) ? -1 : 0;
-    }
-
-    animation.play(anim, force, reverse, frame);
     if (animation.curAnim != null)
     {
       centerOffsets();
       centerOrigin();
     }
+
+    if (Save.get('vanillaStrumAnimations') && anim.toLowerCase() == 'confirm' && force) confirmHoldTimer = (player != 0) ? -1 : 0;
     if (useRGBShader) rgbShader.enabled = (animation.curAnim != null && animation.curAnim.name != 'static');
   }
 }

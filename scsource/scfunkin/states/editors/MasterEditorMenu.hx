@@ -103,7 +103,7 @@ class MasterEditorMenu extends MusicBeatState
         case 'Chart Editor': // felt it would be cool maybe
           LoadingState.loadAndSwitchState(new ChartingState(), false);
         case 'Character Editor':
-          LoadingState.loadAndSwitchState(new CharacterEditorState(Character.DEFAULT_CHARACTER, false));
+          LoadingState.loadAndSwitchState(new CharacterEditorState(scfunkin.backend.data.packed.character.CharacterData.DEFAULT_CHARACTER, false));
         case 'Stage Editor':
           LoadingState.loadAndSwitchState(new StageEditorState());
         case 'Week Editor':

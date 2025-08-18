@@ -320,7 +320,7 @@ class AlphaCharacter extends FlxSprite
   {
     super(x, y);
     image = 'alphabet';
-    antialiasing = ClientPrefs.data.antialiasing;
+    antialiasing = Save.get('antialiasing');
   }
 
   public var curLetter:Letter = null;
@@ -394,11 +394,7 @@ class AlphaCharacter extends FlxSprite
       return name;
     }
 
-    var lastAnim:String = null;
-    if (animation != null)
-    {
-      lastAnim = animation.name;
-    }
+    final lastAnim:String = animation?.name ?? null;
     image = name;
     frames = Paths.getSparrowAtlas(name);
     this.scale.x = parent.scaleX;

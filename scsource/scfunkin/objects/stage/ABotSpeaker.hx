@@ -4,8 +4,10 @@ package scfunkin.objects.stage;
 import funkin.vis.dsp.SpectralAnalyzer;
 #end
 
-class ABotSpeaker extends FlxSpriteGroup
+class ABotSpeaker extends FlxSpriteGroup implements IBeatCaller
 {
+  public var automaticCaller:Bool = false;
+
   final VIZ_MAX = 7; // ranges from viz1 to viz7
   final VIZ_POS_X:Array<Float> = [0, 59, 56, 66, 54, 52, 51];
   final VIZ_POS_Y:Array<Float> = [0, -8, -3.5, -0.4, 0.5, 4.7, 7];
@@ -13,8 +15,8 @@ class ABotSpeaker extends FlxSpriteGroup
   public var bg:FlxSprite;
   public var vizSprites:Array<FlxSprite> = [];
   public var eyeBg:FlxSprite;
-  public var eyes:FlxAnimate;
-  public var speaker:FlxAnimate;
+  public var eyes:FunkinSCSprite;
+  public var speaker:FunkinSCSprite;
 
   #if funkin.vis
   var analyzer:SpectralAnalyzer;
@@ -36,7 +38,7 @@ class ABotSpeaker extends FlxSpriteGroup
   {
     super(x, y);
 
-    var antialias = ClientPrefs.data.antialiasing;
+    var antialias = Save.get('antialiasing');
 
     bg = new FlxSprite(90, 20).loadGraphic(Paths.image('abot/stereoBG'));
     bg.antialiasing = antialias;
@@ -67,19 +69,15 @@ class ABotSpeaker extends FlxSpriteGroup
     eyeBg.updateHitbox();
     add(eyeBg);
 
-    eyes = new FlxAnimate(-10, 230);
-    Paths.loadAnimateAtlas(eyes, 'abot/systemEyes');
+    eyes = new FunkinSCSprite(-10, 230, 'abot/systemEyes');
     eyes.anim.addBySymbolIndices('lookleft', 'a bot eyes lookin', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17], 24, false);
     eyes.anim.addBySymbolIndices('lookright', 'a bot eyes lookin', [18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35], 24, false);
-    eyes.anim.play('lookright', true);
-    eyes.anim.curFrame = eyes.anim.length - 1;
+    eyes.playAnim('lookright', true);
     add(eyes);
 
-    speaker = new FlxAnimate(-65, -10);
-    Paths.loadAnimateAtlas(speaker, 'abot/abotSystem');
+    speaker = new FunkinSCSprite(-65, -10, 'abot/abotSystem');
     speaker.anim.addBySymbol('anim', 'Abot System', 24, false);
-    speaker.anim.play('anim', true);
-    speaker.anim.curFrame = speaker.anim.length - 1;
+    speaker.playAnim('anim', true);
     speaker.antialiasing = antialias;
     add(speaker);
   }
@@ -108,15 +106,17 @@ class ABotSpeaker extends FlxSpriteGroup
     if (levelMax >= 4)
     {
       // trace(levelMax);
-      if (oldLevelMax <= levelMax && (levelMax >= 5 || speaker.anim.curFrame >= 3)) beatHit();
+      if (oldLevelMax <= levelMax && (levelMax >= 5 || speaker.animation.curAnim.curFrame >= 3)) beatHit(0);
     }
   }
   #end
 
-  public function beatHit()
-  {
-    speaker.anim.play('anim', true);
-  }
+  public function stepHit(step:Int):Void {}
+
+  public function beatHit(beat:Int):Void
+    speaker.playAnim('anim', true);
+
+  public function sectionHit(sec:Int):Void {}
 
   #if funkin.vis
   public function initAnalyzer()
@@ -136,13 +136,13 @@ class ABotSpeaker extends FlxSpriteGroup
 
   public function lookLeft()
   {
-    if (lookingAtRight) eyes.anim.play('lookleft', true);
+    if (lookingAtRight) eyes.playAnim('lookleft', true);
     lookingAtRight = false;
   }
 
   public function lookRight()
   {
-    if (!lookingAtRight) eyes.anim.play('lookright', true);
+    if (!lookingAtRight) eyes.playAnim('lookright', true);
     lookingAtRight = true;
   }
 }

@@ -15,7 +15,7 @@ import java.vm.Gc;
 #elseif neko
 import neko.vm.Gc;
 #end
-import scfunkin.backend.data.save.ClientPrefs;
+import scfunkin.backend.data.save.Save;
 import scfunkin.utils.*;
 
 class FPSCounter extends TextField
@@ -37,8 +37,6 @@ class FPSCounter extends TextField
   @:noCompletion private var cacheCount:Int;
   @:noCompletion private var currentTime:Float;
   @:noCompletion private var times:Array<Float>;
-
-  public static var stringTimeToReturn:String = '';
 
   var deltaTimeout:Float = 0.0;
 
@@ -91,13 +89,7 @@ class FPSCounter extends TextField
 
   public dynamic function updateText():Void
   {
-    // setup the date
-    if (ClientPrefs.data.dateDisplay) DateSetup.initDate();
-
     text = "FPS: ";
-
-    /*memoryMegas = Int64.make(0, System.totalMemory);
-      taskMemoryMegas = Int64.make(0, MemoryUtil.getMemoryfromProcess()); */
 
     memoryMegas = MemoryUtil.currentMemUsage();
     if (taskMemoryMegas < memoryMegas) taskMemoryMegas = memoryMegas;
@@ -109,9 +101,8 @@ class FPSCounter extends TextField
     if (currentFPS < FlxG.updateFramerate * 0.5) textColor = 0xFFFF0000;
 
     text = 'FPS: $currentFPS'
-      + (ClientPrefs.data.memoryDisplay ? '\nMemory: ${CoolUtil.getSizeString(memoryMegas)} / ${CoolUtil.getSizeString(taskMemoryMegas)}' : '')
-      + (ClientPrefs.data.dateDisplay ? '\nDate: $stringTimeToReturn' : '')
-      + '\nVersion: ${scfunkin.states.MainMenuState.psychEngineVersion}' #if debug + '$stateText$substateText'; #else; #end
+      + (Save.get('memoryDisplay') ? '\nMemory: ${CoolUtil.getSizeString(memoryMegas)} / ${CoolUtil.getSizeString(taskMemoryMegas)}' : '')
+      + '\nEngine Version: 1.5.3' #if debug + '$stateText$substateText'; #else; #end
   }
 }
 
@@ -188,58 +179,5 @@ class MemoryUtil
     #else
     return 0;
     #end
-  }
-}
-
-class DateSetup // Made by me -glow
-{
-  public static function initDate():String
-  {
-    final date = Date.now();
-    final realYear:String = Std.string(date.getFullYear());
-    var realMonth:String = '';
-    var realDay:String = '';
-    var hourCheck:String = '';
-    final minCheck:String = Std.string(date.getMinutes());
-    final secCheck:String = Std.string(date.getSeconds());
-    final suffix:String = (ClientPrefs.data.militaryTime ? '' : (date.getHours() > 11 ? 'PM' : 'AM'));
-
-    final hourCheckArray:Array<Array<String>> = [
-      [
-        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'
-      ],
-      [
-        '12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'
-      ]
-    ];
-    hourCheck = hourCheckArray[ClientPrefs.data.militaryTime ? 0 : 1][date.getHours()] + ' $suffix';
-
-    final dayArray:Array<Array<String>> = [
-      ['7', '1', '2', '3', '4', '5', '6'],
-      ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-    ];
-    realDay = dayArray[ClientPrefs.data.dayAsInt ? 0 : 1][date.getDay()];
-
-    final monthArray:Array<Array<String>> = [
-      ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
-      [
-        'January',
-        'February',
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
-        'September',
-        'October',
-        'November',
-        'December'
-      ]
-    ];
-    realMonth = monthArray[ClientPrefs.data.monthAsInt ? 0 : 1][date.getMonth()];
-
-    final finalTime = '(Year: $realYear | Month: $realMonth | Day: $realDay | Hour: $hourCheck | Min: $minCheck | Sec: $secCheck)';
-    return FPSCounter.stringTimeToReturn = finalTime;
   }
 }

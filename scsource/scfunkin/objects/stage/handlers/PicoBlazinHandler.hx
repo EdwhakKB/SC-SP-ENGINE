@@ -6,13 +6,16 @@ import scfunkin.objects.ui.Character;
 // Pico Note functions
 class PicoBlazinHandler
 {
-  public function new() {}
+  public var stage:Stage = null;
+
+  public function new(handler:Stage)
+    this.stage = handler;
 
   var cantUppercut = false;
 
   public function noteHit(note:Note)
   {
-    if (wasNoteHitPoorly(note.rating.name.toLowerCase()) && isPlayerLowHealth() && isDarnellPreppingUppercut())
+    if (wasNoteHitPoorly(note.judgement) && isPlayerLowHealth() && isDarnellPreppingUppercut())
     {
       playPunchHighAnim();
       return;
@@ -190,24 +193,24 @@ class PicoBlazinHandler
       playPunchHighAnim(); // Pico wildly throws punches but Darnell dodges.
   }
 
-  function movePicoToBack()
+  function moveToBack()
   {
-    var bfPos:Int = FlxG.state.members.indexOf(boyfriend);
-    var dadPos:Int = FlxG.state.members.indexOf(dad);
+    var bfPos:Int = stage.members.indexOf(boyfriend);
+    var dadPos:Int = stage.members.indexOf(dad);
     if (bfPos < dadPos) return;
 
-    FlxG.state.members[dadPos] = boyfriend;
-    FlxG.state.members[bfPos] = dad;
+    stage.members[dadPos] = boyfriend;
+    stage.members[bfPos] = dad;
   }
 
-  function movePicoToFront()
+  function moveToFront()
   {
-    var bfPos:Int = FlxG.state.members.indexOf(boyfriend);
-    var dadPos:Int = FlxG.state.members.indexOf(dad);
+    var bfPos:Int = stage.members.indexOf(boyfriend);
+    var dadPos:Int = stage.members.indexOf(dad);
     if (bfPos > dadPos) return;
 
-    FlxG.state.members[dadPos] = boyfriend;
-    FlxG.state.members[bfPos] = dad;
+    stage.members[dadPos] = boyfriend;
+    stage.members[bfPos] = dad;
   }
 
   var alternate:Bool = false;
@@ -304,7 +307,7 @@ class PicoBlazinHandler
 
   function playTauntConditionalAnim()
   {
-    if (boyfriend.getLastAnimationPlayed() == "fakeout") playTauntAnim();
+    if (boyfriend.getLastAnimPlayed() == "fakeout") playTauntAnim();
     else
       playIdleAnim();
   }
@@ -317,55 +320,31 @@ class PicoBlazinHandler
 
   function willMissBeLethal()
   {
-    return PlayState.instance.hud.health <= 0.0 && !PlayState.instance.practiceMode;
+    if (stage.game == PlayState.instance) return stage.game.hud.healthAmount <= 0.0 && !stage.game.practiceMode;
+    return false;
   }
 
   function isDarnellPreppingUppercut()
-  {
-    return dad.getLastAnimationPlayed() == 'uppercutPrep';
-  }
+    return dad.getLastAnimPlayed() == 'uppercutPrep';
 
   function isDarnellInUppercut()
-  {
-    return dad.getLastAnimationPlayed() == 'uppercut' || dad.getLastAnimationPlayed() == 'uppercut-hold';
-  }
+    return dad.getLastAnimPlayed() == 'uppercut' || dad.getLastAnimPlayed() == 'uppercut-hold';
 
-  function wasNoteHitPoorly(rating:String)
-  {
-    return (rating == "bad" || rating == "shit");
-  }
+  function wasNoteHitPoorly(judgement:Judgement)
+    return judgement.rank.getFromInt(-1);
 
   function isPlayerLowHealth()
   {
-    return PlayState.instance.hud.health <= 0.3 * 2;
-  }
-
-  function moveToBack()
-  {
-    var bfPos:Int = FlxG.state.members.indexOf(boyfriend);
-    var dadPos:Int = FlxG.state.members.indexOf(dad);
-    if (bfPos < dadPos) return;
-
-    FlxG.state.members[dadPos] = boyfriend;
-    FlxG.state.members[bfPos] = dad;
-  }
-
-  function moveToFront()
-  {
-    var bfPos:Int = FlxG.state.members.indexOf(boyfriend);
-    var dadPos:Int = FlxG.state.members.indexOf(dad);
-    if (bfPos > dadPos) return;
-
-    FlxG.state.members[dadPos] = boyfriend;
-    FlxG.state.members[bfPos] = dad;
+    if (stage.game == PlayState.instance) return stage.game.hud.healthAmount <= 0.3 * 2;
+    return false;
   }
 
   var boyfriend(get, never):Character;
   var dad(get, never):Character;
 
   function get_boyfriend()
-    return PlayState.instance.boyfriend;
+    return stage.boyfriend;
 
   function get_dad()
-    return PlayState.instance.dad;
+    return stage.dad;
 }

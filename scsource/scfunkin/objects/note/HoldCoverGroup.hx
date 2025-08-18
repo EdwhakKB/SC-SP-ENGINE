@@ -1,32 +1,20 @@
 package scfunkin.objects.note;
 
-class HoldCoverGroup extends FlxTypedGroup<HoldCoverSprite>
+class HoldCoverGroup extends scfunkin.objects.group.FunkinSCTypedSpriteGroup<HoldCoverSprite>
 {
   public var enabled:Bool = true;
   public var canSplash:Bool = false;
   public var isReady(get, never):Bool;
+  public var playArea:PlayArea = null;
 
-  function get_isReady():Bool
-  {
-    if (PlayState.instance != null)
-    {
-      return (!PlayState.instance.startingSong && !PlayState.instance.inCutscene && !PlayState.instance.inCinematic && PlayState.instance.generatedMusic);
-    }
-    return false;
-  }
+  public dynamic function get_isReady():Bool
+    return true;
 
-  public function new()
+  public dynamic function setParent(playArea:PlayArea)
   {
-    super(0);
-  }
-
-  public dynamic function setParentAndCreate(strumLine:StrumLine, amount:Int)
-  {
-    for (i in 0...amount)
-    {
+    this.playArea = playArea;
+    for (i in 0...playArea.strumLine.members.length)
       addHold(i);
-      this.members[i].parentStrum = strumLine.members[i];
-    }
   }
 
   public var colors:Array<String> = ["Purple", "Blue", "Green", "Red"];
@@ -36,40 +24,50 @@ class HoldCoverGroup extends FlxTypedGroup<HoldCoverSprite>
     final hcolor:String = colors[i];
     final hold:HoldCoverSprite = new HoldCoverSprite();
     hold.initFrames(i, hcolor);
-    hold.initAnimations(i, hcolor);
-    hold.boom = false;
-    hold.isPlaying = false;
+    hold.initAnimations(hcolor);
     hold.visible = false;
-    hold.activatedSprite = enabled;
-    hold.spriteId = '$hcolor-$i';
-    hold.spriteIntID = i;
-    this.add(hold);
+    final strum:StrumArrow = playArea?.strumLine?.members[i] ?? null;
+    if (strum != null) hold.strumPos.set(strum.x, strum.y);
+    add(hold);
   }
 
   public dynamic function spawnOnNoteHit(note:Note):Void
   {
+    if (note == null) return;
     final noteData:Int = note.noteData;
     final isSus:Bool = note.isSustainNote;
     final isHoldEnd:Bool = note.isHoldEnd;
+
     if (enabled && isReady)
     {
+      grabMember(noteData)?.shaderCopy(note.noteData, note);
       if (isSus)
       {
-        this.members[noteData].affectSplash(HOLDING, noteData, note);
         if (isHoldEnd)
         {
-          if (canSplash) this.members[noteData].affectSplash(SPLASHING, noteData);
+          if (canSplash) grabMember(noteData)?.playEnd();
           else
-            this.members[noteData].affectSplash(DONE, noteData);
+            grabMember(noteData)?.endCover();
         }
+      }
+      else if (note.sustainLength > 0 && !isSus)
+      {
+        grabMember(noteData)?.revive();
+        grabMember(noteData)?.playStart();
       }
     }
   }
 
+  public function grabMember(index:Int):HoldCoverSprite
+    return members[index];
+
   public dynamic function despawnOnMiss(direction:Int, ?note:Note = null):Void
   {
-    final noteData:Int = (note != null ? note.noteData : direction);
-    if (enabled && isReady) this.members[noteData].affectSplash(STOP, noteData, note);
+    if (enabled && isReady)
+    {
+      grabMember(note?.noteData ?? direction)?.shaderCopy(direction, note);
+      grabMember(note?.noteData ?? direction)?.endCover();
+    }
   }
 
   public dynamic function updateHold(elapsed:Float):Void

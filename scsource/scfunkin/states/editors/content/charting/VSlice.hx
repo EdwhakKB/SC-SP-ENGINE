@@ -264,13 +264,7 @@ class VSlice
               disableSplashRGB: false,
               disableHoldCoversRGB: false,
               disableHoldCovers: false,
-              disableCaching: false,
               notITG: false,
-              usesHUD: false,
-              oldBarSystem: false,
-              rightScroll: false,
-              middleScroll: false,
-              blockOpponentMode: false,
               arrowSkin: "",
               strumSkin: "",
               splashSkin: "",
@@ -331,7 +325,7 @@ class VSlice
 
       Reflect.setField(swagSong, 'artist', metadata.artist);
       Reflect.setField(swagSong, 'charter', metadata.charter);
-      Reflect.setField(swagSong, 'generatedBy', 'Psych Engine v${MainMenuState.psychEngineVersion} - Chart Editor V-Slice Importer');
+      Reflect.setField(swagSong, 'generatedBy', 'Sce v${scfunkin.states.MainMenuState.SCEVersion} - Chart Editor V-Slice Importer');
       songDifficulties.set(diff, swagSong);
     }
     var pack:PsychPackage = {difficulties: songDifficulties, events: null};
@@ -407,7 +401,7 @@ class VSlice
     }
 
     var notes:Array<VSliceNote> = [];
-    var generatedBy:String = 'Psych Engine v${MainMenuState.psychEngineVersion} - Chart Editor V-Slice Exporter';
+    var generatedBy:String = 'SCE v${scfunkin.states.MainMenuState.SCEVersion} - Chart Editor V-Slice Exporter';
     var timeChanges:Array<VSliceTimeChange> = [];
 
     var time:Float = 0;
@@ -473,7 +467,7 @@ class VSlice
       var diffs:Array<String> = Difficulty.list.copy();
       for (num => diff in diffs)
       {
-        diffs[num] = diff = Paths.formatToSongPath(diff);
+        diffs[num] = diff = Paths.formatString(diff);
         scrollSpeed.set(diff, songData.speed);
         notesMap.set(diff, notes);
       }
@@ -482,7 +476,7 @@ class VSlice
     {
       var diff:String = Difficulty.getString(false);
       if (diff == null) diff = Difficulty.getDefault();
-      diff = Paths.formatToSongPath(diff);
+      diff = Paths.formatString(diff);
 
       scrollSpeed.set(diff, songData.speed);
       notesMap.set(diff, notes);

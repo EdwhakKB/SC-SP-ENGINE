@@ -21,27 +21,17 @@ class GenericUtil
 
   public static function formatVariableOption(tag:String, option:AffixType = NONE, ?suffix:String = null, ?prefix:String = null):String
   {
-    final originalTag:String = tag;
-    var externalSuffix:String = suffix == null ? '' : suffix;
-    var externalPrefix:String = prefix == null ? '' : prefix;
     switch (option)
     {
-      case NONE:
-        final finalTag:String = originalTag;
-        return finalTag;
       case SUFFIXED, FORMATTED_SUFFIX:
-        final finalTag:String = option == FORMATTED_SUFFIX ? formatVariable(suffix + originalTag) : suffix + originalTag;
-        return finalTag;
+        return option == FORMATTED_SUFFIX ? formatVariable(suffix + tag) : suffix + tag;
       case PREFIXED, FORMATTED_PREFIX:
-        final finalTag:String = option == FORMATTED_PREFIX ? formatVariable(originalTag + prefix) : originalTag + prefix;
-        return finalTag;
+        return option == FORMATTED_PREFIX ? formatVariable(tag + prefix) : tag + prefix;
       case CIRCUMFIXED, FORMATTED_CIRCUMFIX:
-        final finalTag:String = option == FORMATTED_CIRCUMFIX ? formatVariable(suffix + originalTag + prefix) : suffix + originalTag + prefix;
-        return finalTag;
+        return option == FORMATTED_CIRCUMFIX ? formatVariable(suffix + tag + prefix) : suffix + tag + prefix;
       default:
-        return "";
+        return tag;
     }
-    return null;
   }
 
   public static function formatVariable(tag:String)
@@ -50,28 +40,24 @@ class GenericUtil
   public static function checkVariable(start:String, end:String, formatType:String = "both")
   {
     formatType = formatType.toLowerCase();
-    if (!start.startsWith(end))
+    switch (formatType)
     {
-      switch (formatType)
-      {
-        case "both", "both-reverse":
-          switch (formatType)
-          {
-            case "both":
-              start = formatVariable(end + start);
-            case "both-reverse":
-              start = formatVariable(start + end);
-          }
-        case "endformat-start":
-          start = formatVariable(end) + start;
-        case "end-startformat":
-          start = end + formatVariable(start);
-        case "startformat-end":
-          start = formatVariable(start) + end;
-        case "start-formatend":
-          start = start + formatVariable(end);
-      }
-      return start;
+      case "both", "both-reverse":
+        switch (formatType)
+        {
+          case "both":
+            start = formatVariable(end + start);
+          case "both-reverse":
+            start = formatVariable(start + end);
+        }
+      case "endformat-start":
+        start = formatVariable(end) + start;
+      case "end-startformat":
+        start = end + formatVariable(start);
+      case "startformat-end":
+        start = formatVariable(start) + end;
+      case "start-formatend":
+        start = start + formatVariable(end);
     }
     return formatVariable(start);
   }
@@ -132,8 +118,11 @@ class GenericUtil
     return FlxTweenType.ONESHOT;
   }
 
-  public static function getTweenEaseByString(?ease:String = '')
+  public static var customEase:Map<String, Float->Float> = [];
+
+  public static function getTweenEaseByString(?ease:String = ''):Float->Float
   {
+    if (customEase.exists(ease) && customEase.get(ease) != null) return customEase.get(ease);
     switch (ease.toLowerCase().trim())
     {
       case 'backin':

@@ -3,24 +3,17 @@ package scfunkin.objects.note;
 // If you want to make a custom note type, you should search for:
 // "function set_noteType"
 import flixel.graphics.FlxGraphic;
-import flixel.math.FlxAngle;
-import flixel.math.FlxMath;
 import flixel.math.FlxRect;
-import flixel.system.FlxAssets.FlxGraphicAsset;
-import flixel.system.FlxAssets.FlxShader;
-import flixel.graphics.tile.FlxDrawTrianglesItem;
+import openfl.Assets;
+import lime.math.Vector2;
+import scfunkin.objects.note.NoteSplash.NoteSplashData;
+import scfunkin.objects.ui.Character;
 import scfunkin.backend.data.note.NoteTypesConfig;
 import scfunkin.backend.data.note.NoteTypeConfigJson;
-import scfunkin.backend.data.judgement.Rating;
 import scfunkin.shaders.RGBPalette;
 import scfunkin.shaders.RGBPalette.RGBShaderReference;
 import scfunkin.utils.tools.ICloneable;
-import openfl.Assets;
-import openfl.display.TriangleCulling;
-import openfl.geom.Vector3D;
-import openfl.geom.ColorTransform;
-import lime.math.Vector2;
-import scfunkin.objects.note.NoteSplash.NoteSplashData;
+import scfunkin.backend.data.judgement.Judgement;
 
 using StringTools;
 
@@ -34,15 +27,69 @@ typedef NoteSpriteStartData =
   ?prevNote:Note,
   ?createdFrom:Dynamic,
   ?scrollSpeed:Float,
-  ?parentStrumline:StrumLine,
+  ?playbackSpeed:Float,
+  ?parentArea:PlayArea,
   ?inEditor:Bool
 }
 
-typedef EventNote =
+typedef NoteCharData =
+{
+  @:default([])
+  var ?chars:Array<Character>;
+  var ?char:Character;
+  @:default(false)
+  var ?skipAnimation:Bool;
+  @:default(false)
+  var ?noAnimation:Bool;
+  @:default(false)
+  var ?noMissAnimation:Bool;
+  @:default('')
+  var ?animSuffix:String;
+  @:default('')
+  var ?animReplace:String;
+  @:default(true)
+  var ?animCanPlay:Bool;
+  @:default(true)
+  var ?animCanPlaySus:Bool;
+  @:default(true)
+  var ?forceAnimReset:Bool;
+  @:default(true)
+  var ?canPlay:Bool;
+  @:default("")
+  var ?animToPlay:String;
+}
+
+@:structInit
+@:publicFields
+class EventNote
 {
   var time:Float;
   var name:String;
   var params:Array<String>;
+
+  function returnFLValues():Array<Null<Float>>
+  {
+    var array:Array<Null<Float>> = [];
+    for (i in 0...params.length - 1)
+    {
+      final checkFloat:Float = Std.parseFloat(params[i]);
+      final checkedFloat:Null<Float> = Math.isNaN(checkFloat) ? null : checkFloat;
+      array.push(checkedFloat);
+    }
+    return array;
+  }
+
+  @:optional var activated:Bool;
+
+  function toString():String
+    return 'Event=(name -> $name, params -> $params, time -> $time)';
+}
+
+typedef EventNewNote =
+{
+  var time:Float;
+  var name:String;
+  var params:Map<String, Dynamic>;
 }
 
 /**
@@ -50,7 +97,7 @@ typedef EventNote =
  *
  * If you want to make a custom note type, you should search for: "function set_noteType"
 **/
-class Note extends FunkinSCSprite implements ICloneable<Note>
+class Note extends FunkinSCSprite
 {
   // <----
   public static var globalRgbShaders:Array<RGBPalette> = [];
@@ -70,21 +117,52 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
     'No Animation'
   ];
 
-  // We can now edit the time they spawn, useful for Modifiers (MT and non-MT)
+  public var noteCharData:NoteCharData =
+    {
+      chars: [],
+      char: null,
+      skipAnimation: false,
+      noAnimation: false,
+      noMissAnimation: false,
+      animSuffix: '',
+      animReplace: '',
+      animCanPlay: true,
+      animCanPlaySus: true,
+      forceAnimReset: true,
+      animToPlay: "",
+      canPlay: true
+    };
+
+  // We can now edit the time show when spawning, useful for Modifiers (MT and non-MT)
   public var spawnTime:Float = 2000;
 
   //  public var holdNote:SustainTrail;
-  public var eventNote:EventNote;
-
-  public var eventLength:Int = 0;
-  public var eventName:String = null;
-  public var eventTime:Float = 0.0;
-  public var params:Array<String> = [];
-
   public var strumTime:Float = 0;
-  public var noteData:Int = 0;
+  public var noteData(default, set):Int = 0;
+
+  function set_noteData(value:Int):Int
+  {
+    noteData = value;
+    if (noteData > -1)
+    {
+      if (!isSustainNote) animation.play(colArray[noteData % colArray.length] + 'Scroll');
+      else
+      {
+        if (prevNote != null)
+        {
+          animation.play(colArray[noteData % colArray.length] + 'holdend');
+          if (prevNote.isSustainNote) animation.play(colArray[noteData % colArray.length] + 'hold');
+        }
+      }
+    }
+    if (rgbShader != null) set_noteType(noteType);
+    return noteData;
+  }
+
   public var strumLineID:Int = 0;
   public var actualStrumLineID:Int = 0;
+
+  public var canHitNote:Bool = true;
 
   public var canBeHit:Bool = false;
   public var tooLate:Bool = false;
@@ -93,7 +171,7 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
   public var missed:Bool = false;
 
   public var ignoreNote:Bool = false;
-  public var hitByOpponent:Bool = false;
+  public var wasNoteHit:Bool = false;
   public var noteWasHit:Bool = false;
   public var prevNote:Note;
   public var nextNote:Note;
@@ -115,7 +193,6 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
 
   public var rgbShader:RGBShaderReference;
 
-  public var animSuffix:String = '';
   public var gfNote:Bool = false;
   public var momNote:Bool = false;
   public var earlyHitMult:Float = 1;
@@ -129,6 +206,9 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
 
   public var bpm:Float = Conductor.bpm;
 
+  public function grabIndexByStrumline(?playArea:PlayArea):Int
+    return (parentArea ?? playArea).notes.members.indexOf(this);
+
   public var noteSplashData:NoteSplashData =
     {
       disabled: false,
@@ -137,7 +217,7 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
       useGlobalShader: false,
       useRGBShader: (PlayState.SONG != null) ? !(PlayState.SONG.getSongData('options').disableSplashRGB == true) : true,
       useNoteRGB: true,
-      a: ClientPrefs.data.splashAlpha,
+      a: Save.get('splashAlpha'),
       r: -1,
       g: -1,
       b: -1
@@ -153,16 +233,15 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
   public var copyAngle:Bool = true;
   public var copyAlpha:Bool = true;
   public var copyVisible:Bool = false;
+  public var copySkewX:Bool = true;
+  public var copySkewY:Bool = true;
 
   public var hitHealth:Float = 0.02;
   public var missHealth:Float = 0.01;
-  public var rating:RatingWindow;
-  public var ratingToString:String = '';
+  public var judgement:Judgement;
 
   public var texture(default, set):String = null;
 
-  public var noAnimation:Bool = false;
-  public var noMissAnimation:Bool = false;
   public var hitCausesMiss:Bool = false;
   public var distance:Float = 2000; // plan on doing scroll directions soon -bb
 
@@ -180,7 +259,7 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
 
   function get_hitsoundVolume():Float
   {
-    if (ClientPrefs.data.hitsoundVolume > 0) return ClientPrefs.data.hitsoundVolume;
+    if (Save.get('hitsoundVolume') > 0) return Save.get('hitsoundVolume');
     return hitsoundForce ? hitsoundVolume : 0.0;
   }
 
@@ -190,42 +269,33 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
 
   function get_noteStrumID():Int
   {
-    if (parentStrumline == null) return noteData;
-    var id = noteData % parentStrumline.members.length;
+    if (parentArea == null) return noteData;
+    var id = noteData % parentArea.strumLine.members.length;
     if (id < 0) id = 0;
     return id;
   }
 
+  public var overrideHitSound:Bool = true;
+
   function set_hitsound(value:String):String
   {
-    if (ClientPrefs.data.hitsoundType == 'Notes')
-    {
-      if (value == null || value == '')
-      {
-        if (ClientPrefs.data.hitsoundType == 'Notes' && ClientPrefs.data.hitSounds != "None") value = ClientPrefs.data.hitSounds;
-      }
-
-      if (value == null || value == '') value = 'hitsound';
-
-      hitsound = value;
-    }
+    if (Save.get('hitSounds') != null && Save.get('hitsoundType') == 'Notes' && overrideHitSound) hitsound = 'hitsounds/${Save.get('hitSounds')}';
     else
-      hitsound = null;
+      hitsound = value;
     return value;
   }
 
-  public var isHoldEnd(get, never):Bool;
-
-  function get_isHoldEnd():Bool
-  {
-    return (!isAnimationNull() && getAnimationName().endsWith('end'));
-  }
+  public var isHoldEnd:Bool = false;
 
   public var customColorsOnNotes:Bool = true;
   public var customColoredNotes:Bool = false;
 
   // Extra support for textures
-  public var containsPixelTexture:Bool = false;
+  public var containsPixelTexture(get, never):Bool;
+
+  function get_containsPixelTexture():Bool
+    return texture.contains('pixel') || noteSkin.contains('pixel');
+
   public var pathNotFound:Bool = false;
   public var isPixel:Bool = false;
   public var changedSkin:Bool = false;
@@ -236,9 +306,6 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
   public static var notITGNotes:Bool = false;
 
   public var canSplash:Bool = true;
-
-  public var replacentAnimation:String = '';
-  public var skipAnimation:Bool = false;
 
   private function set_multSpeed(value:Float):Float
   {
@@ -265,8 +332,8 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
 
   public dynamic function defaultRGB()
   {
-    var arr:Array<FlxColor> = ClientPrefs.data.arrowRGB[noteData];
-    if (texture.contains('pixel') || noteSkin.contains('pixel') || containsPixelTexture) arr = ClientPrefs.data.arrowRGBPixel[noteData];
+    var arr:Array<FlxColor> = Save.get('arrowRGB')[noteData];
+    if (containsPixelTexture) arr = Save.get('arrowRGBPixel')[noteData];
 
     if (arr != null && noteData > -1 && noteData <= arr.length)
     {
@@ -284,7 +351,7 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
 
   public dynamic function defaultRGBQuant(limit:Bool = true)
   {
-    var arrQuantRGB:Array<FlxColor> = ClientPrefs.data.arrowRGBQuantize[noteData];
+    var arrQuantRGB:Array<FlxColor> = Save.get('arrowRGBQuantize')[noteData];
 
     if (arrQuantRGB != null && noteData > -1 && noteData <= arrQuantRGB.length)
     {
@@ -314,9 +381,6 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
           // this used to change the note texture to HURTNOTE_assets.png,
           // but i've changed it to something more optimized with the implementation of RGBPalette:
 
-          // custom shit
-          customColorsOnNotes = false;
-
           // note colors
           rgbShader.r = 0xFF101010;
           rgbShader.g = 0xFFFF0000;
@@ -334,10 +398,10 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
           hitsound = 'cancelMenu';
           hitsoundChartEditor = false;
         case 'Alt Animation':
-          animSuffix = '-alt';
+          noteCharData.animSuffix = '-alt';
         case 'No Animation':
-          noAnimation = true;
-          noMissAnimation = true;
+          noteCharData.noAnimation = true;
+          noteCharData.noMissAnimation = true;
         case 'GF Sing':
           gfNote = true;
         case 'Mom Sing':
@@ -348,14 +412,14 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
         NoteTypesConfig.applyNoteTypeData(this, value);
         NoteTypeConfigJson.applyNoteTypeJson(this, value);
       }
-      if (hitsound != 'hitsound' && ClientPrefs.data.hitsoundVolume > 0) Paths.sound(hitsound); // precache new sound for being idiot-proof
+      if (hitsound != 'hitsound' && Save.get('hitsoundVolume') > 0) Paths.sound(hitsound); // precache new sound for being idiot-proof
       noteType = value;
     }
     return value;
   }
 
   public var realNoteData:Int = 0;
-  public var parentStrumline:StrumLine;
+  public var parentArea:PlayArea;
 
   // Used in-game to control the scroll speed within a song
   public var noteScrollSpeed:Float = 1.0;
@@ -373,10 +437,10 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
     super();
 
     this.noteSpriteData = data;
-    antialiasing = ClientPrefs.data.antialiasing;
+    antialiasing = Save.get('antialiasing');
     this.moves = false;
 
-    x += (ClientPrefs.data.middleScroll ? StrumLine.STRUM_X_MIDDLESCROLL : StrumLine.STRUM_X) + 50;
+    x += (Save.get('middleScroll') ? StrumLine.STRUM_X_MIDDLESCROLL : StrumLine.STRUM_X) + 50;
     // MAKE SURE ITS DEFINITELY OFF SCREEN?
     y -= 2000;
 
@@ -393,13 +457,11 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
     this.isSustainNote = data.isSustainNote;
     this.noteSkin = data.noteSkin;
     this.inEditor = data.inEditor;
-
-    this.strumTime = data.strumTime;
-    if (!inEditor) this.strumTime += ClientPrefs.data.noteOffset;
-
+    this.strumTime = data.strumTime - (!inEditor ? Save.get('noteOffset') : 0);
     this.noteData = data.noteData;
-    this.parentStrumline = data.parentStrumline;
+    this.parentArea = data.parentArea;
     this.noteScrollSpeed = data.scrollSpeed;
+    this.incomingDistanceRate = data.playbackSpeed;
 
     if (data.noteData > -1)
     {
@@ -409,14 +471,11 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
 
       x += swagWidth * data.noteData;
       if (!isSustainNote && noteData < colArray.length)
-      { // Doing this 'if' check to fix the warnings on Senpai songs
-        var animToPlay:String = '';
-        animToPlay = colArray[data.noteData % colArray.length];
-        animation.play(animToPlay + 'Scroll');
+      {
+        // Doing this 'if' check to fix the warnings on Senpai songs
+        animation.play(colArray[data.noteData % colArray.length] + 'Scroll');
       }
     }
-
-    if (texture.contains('pixel') || noteSkin.contains('pixel')) containsPixelTexture = true;
 
     if (prevNote != null) prevNote.nextNote = this;
 
@@ -425,7 +484,7 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
       alpha = 0.6;
       multAlpha = 0.6;
       hitsoundDisabled = true;
-      if (ClientPrefs.data.downScroll && !inEditor) flipY = true;
+      if (Save.get('downScroll') && !inEditor) flipY = true;
 
       offsetX += width / 2;
       copyAngle = false;
@@ -440,6 +499,7 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
 
       if (prevNote.isSustainNote)
       {
+        prevNote.isHoldEnd = false;
         prevNote.animation.play(colArray[prevNote.noteData % colArray.length] + 'hold');
 
         prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.05; // Because of how SCE works with sustains the value is static to 1.05 unless they break.
@@ -454,6 +514,7 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
         prevNote.updateHitbox();
       }
 
+      isHoldEnd = true;
       if (PlayState.isPixelStage)
       {
         scale.y *= PlayState.daPixelZoom;
@@ -482,7 +543,7 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
     if (globalRgbShaders[noteData] == null)
     {
       var newRGB:RGBPalette = new RGBPalette();
-      var arr:Array<FlxColor> = !PlayState.isPixelStage ? ClientPrefs.data.arrowRGB[noteData] : ClientPrefs.data.arrowRGBPixel[noteData];
+      var arr:Array<FlxColor> = !PlayState.isPixelStage ? Save.get('arrowRGB')[noteData] : Save.get('arrowRGBPixel')[noteData];
 
       if (arr != null && noteData > -1 && noteData <= arr.length)
       {
@@ -506,7 +567,7 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
     if (globalQuantRgbShaders[noteData] == null)
     {
       var newRGB:RGBPalette = new RGBPalette();
-      var arr:Array<FlxColor> = ClientPrefs.data.arrowRGBQuantize[noteData];
+      var arr:Array<FlxColor> = Save.get('arrowRGBQuantize')[noteData];
 
       if (arr != null && noteData > -1 && noteData <= arr.length)
       {
@@ -531,6 +592,7 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
 
   public var originalHeight:Float = 6;
   public var correctionOffset:Float = 0; // dont mess with this
+  public var parentHeightOffset:Float = 0;
 
   public function reloadNote(noteStyle:String = '', postfix:String = '')
   {
@@ -605,24 +667,16 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
               }
               else
               {
-                var noteSkinNonRGB:Bool = (PlayState.SONG != null && PlayState.SONG.getSongData('options').disableNoteRGB);
+                final noteSkinNonRGB:Bool = (PlayState.SONG != null && PlayState.SONG.getSongData('options').disableNoteRGB);
                 pixelSusPath = noteSkinNonRGB ? 'pixelUI/NOTE_assetsENDS' : 'pixelUI/noteSkins/NOTE_assetsENDS' + getNoteSkinPostfix();
                 pixelPath = noteSkinNonRGB ? 'pixelUI/NOTE_assets' : 'pixelUI/noteSkins/NOTE_assets' + getNoteSkinPostfix();
               }
 
               if (pixelSusPath.length > 0 && pixelPath.length > 0)
               {
-                if (isSustainNote)
-                {
-                  var graphic = Paths.image(pixelSusPath, notePathLib, !notITGNotes);
-                  loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 2));
-                  originalHeight = graphic.height / 2;
-                }
-                else
-                {
-                  var graphic = Paths.image(pixelPath, notePathLib, !notITGNotes);
-                  loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / 5));
-                }
+                final graphic:FlxGraphic = Paths.image(isSustainNote ? pixelSusPath : pixelPath, notePathLib, !notITGNotes);
+                loadGraphic(graphic, true, Math.floor(graphic.width / 4), Math.floor(graphic.height / (isSustainNote ? 2 : 5)));
+                if (isSustainNote) originalHeight = graphic.height / 2;
 
                 loadNoteAnims(true);
               }
@@ -633,7 +687,7 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
               else if (secondPathFound) notePath = noteStyleType;
               else
               {
-                var noteSkinNonRGB:Bool = (PlayState.SONG != null && PlayState.SONG.getSongData('options').disableNoteRGB);
+                final noteSkinNonRGB:Bool = (PlayState.SONG != null && PlayState.SONG.getSongData('options').disableNoteRGB);
                 notePath = noteSkinNonRGB ? "NOTE_assets" : "noteSkins/NOTE_assets" + getNoteSkinPostfix();
               }
 
@@ -650,7 +704,7 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
   public static function getNoteSkinPostfix()
   {
     var skin:String = '';
-    if (ClientPrefs.data.noteSkin != ClientPrefs.defaultData.noteSkin) skin = '-' + ClientPrefs.data.noteSkin.trim().toLowerCase().replace(' ', '_');
+    if (Save.get('noteSkin') != Save.get('noteSkin', true)) skin = '-' + cast(Save.get('noteSkin'), String).trim().toLowerCase().replace(' ', '_');
     return skin;
   }
 
@@ -703,37 +757,24 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
     }
   }
 
-  function attemptToAddAnimationByPrefix(name:String, prefix:String, framerate:Int = 24, doLoop:Bool = true)
+  public static function getDistance(time:Float, speed:Float = 1)
+    return (0.45 * time * speed);
+
+  public dynamic function followStrumArrow(myStrum:StrumArrow)
   {
-    var animFrames = [];
-    @:privateAccess
-    animation.findByPrefix(animFrames, prefix); // adds valid frames to animFrames
-    if (animFrames.length < 1) return;
+    final strumX:Float = myStrum.x;
+    final strumY:Float = myStrum.y;
+    final strumAngle:Float = myStrum.angle;
+    final strumAlpha:Float = myStrum.alpha;
+    final strumDirection:Float = myStrum.direction;
+    final strumVisible:Bool = myStrum.visible;
 
-    animation.addByPrefix(name, prefix, framerate, doLoop);
-  }
-
-  override function update(elapsed:Float)
-  {
-    super.update(elapsed);
-    containsPixelTexture = ((texture.contains('pixel') || noteSkin.contains('pixel')) && !containsPixelTexture);
-  }
-
-  public dynamic function followStrumArrow(myStrum:StrumArrow, pitch:Float = 1)
-  {
-    var strumX:Float = myStrum.x;
-    var strumY:Float = myStrum.y;
-    var strumAngle:Float = myStrum.angle;
-    var strumAlpha:Float = myStrum.alpha;
-    var strumDirection:Float = myStrum.direction;
-    var strumVisible:Bool = myStrum.visible;
-
-    distance = (0.45 * (Conductor.songPosition - strumTime) * (noteScrollSpeed / (parentStrumline != null ? parentStrumline.playbackSpeed : pitch)) * multSpeed);
+    distance = Note.getDistance(Conductor.songPosition - strumTime, (noteScrollSpeed / incomingDistanceRate) * multSpeed);
     if (!myStrum.downScroll) distance *= -1;
-
     if (copyAngle) angle = strumDirection - 90 + strumAngle + offsetAngle;
-
     if (copyAlpha) alpha = strumAlpha * multAlpha;
+    if (copySkewX) skew.x = myStrum.skew.x;
+    if (copySkewY) skew.y = myStrum.skew.y;
 
     if (copyX)
     {
@@ -745,14 +786,7 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
     {
       @:privateAccess
       y = strumY + offsetY + correctionOffset + myStrum._dirSin * distance;
-      if (myStrum.downScroll && isSustainNote)
-      {
-        if (texture.contains('pixel') || noteSkin.contains('pixel') || containsPixelTexture)
-        {
-          y -= PlayState.daPixelZoom * 9.5;
-        }
-        y -= (frameHeight * scale.y) - (swagWidth / 2);
-      }
+      if (myStrum.downScroll && isSustainNote) y -= ((frameHeight * scale.y) - (Note.swagWidth / 2)) + (containsPixelTexture ? PlayState.daPixelZoom * 9.5 : 0);
     }
 
     if (copyVisible) visible = strumVisible;
@@ -762,11 +796,10 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
 
   public dynamic function clipToStrumArrow(myStrum:StrumArrow)
   {
-    var center:Float = myStrum.y + offsetY + swagWidth / 2;
+    var center:Float = myStrum.y + offsetY + Note.swagWidth / 2;
     if ((clipToStrum || !ignoreNote) && (wasGoodHit || (prevNote.wasGoodHit && !canBeHit)))
     {
-      var swagRect:FlxRect = clipRect;
-      if (swagRect == null) swagRect = new FlxRect(0, 0, frameWidth, frameHeight);
+      var swagRect:FlxRect = clipRect ?? new FlxRect(0, 0, frameWidth, frameHeight);
 
       if (myStrum.downScroll)
       {
@@ -787,20 +820,25 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
     }
   }
 
-  public function validTime(rate:Float = 1, ?ignoreMultSpeed:Bool = false):Bool
+  public var incomingDistanceRate:Float = 1;
+  public var ignoreIncomingMultSpeed:Bool = false;
+  public var timeDistance(get, never):Float;
+  public var timeDistanceOffset:Float = 0;
+
+  function get_timeDistance():Float
+    return (strumTime - Conductor.songPosition) + timeDistanceOffset;
+
+  public function validTime():Bool
   {
-    final time:Float = (spawnTime * rate) / (noteScrollSpeed < 1 ? noteScrollSpeed : 1) / (!ignoreMultSpeed && multSpeed < 1 ? multSpeed : 1);
-    return (strumTime - Conductor.songPosition < time);
+    final time:Float = (spawnTime * incomingDistanceRate) / (noteScrollSpeed < 1 ? noteScrollSpeed : 1) / (!ignoreIncomingMultSpeed
+      && multSpeed < 1 ? multSpeed : 1);
+    return (timeDistance < time);
   }
 
   @:access(flixel.FlxCamera)
   override public function draw():Void
   {
-    if (tooLate && !inEditor)
-    {
-      if (alpha > 0.3) alpha = 0.3;
-    }
-
+    if (tooLate && !inEditor && alpha > 0.3) alpha = 0.3;
     super.draw();
   }
 
@@ -808,26 +846,8 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
   override function set_clipRect(rect:FlxRect):FlxRect
   {
     clipRect = rect;
-
     if (frames != null) frame = frames.frames[animation.frameIndex];
-
     return rect;
-  }
-
-  override public function clone():Note
-  {
-    return new Note(
-      {
-        strumTime: this.strumTime,
-        noteData: this.noteData,
-        isSustainNote: this.isSustainNote,
-        noteSkin: this.noteSkin,
-        prevNote: this.prevNote,
-        createdFrom: null,
-        scrollSpeed: this.noteScrollSpeed,
-        parentStrumline: this.parentStrumline,
-        inEditor: this.inEditor
-      });
   }
 
   override public function destroy()
@@ -835,73 +855,6 @@ class Note extends FunkinSCSprite implements ICloneable<Note>
     clipRect = flixel.util.FlxDestroyUtil.put(clipRect);
     _lastValidChecked = '';
     super.destroy();
-  }
-
-  public var quants:Array<Int> = [4, 8, 12, 16, 20, 24, 28, 32];
-
-  public dynamic function setCustomColors(type:String)
-  {
-    final doesNotReturn:Bool = customColorsOnNotes && rgbShader.enabled;
-    if (!doesNotReturn) return;
-
-    final bpmChanges = Conductor.bpmChangeMap;
-    var time:Float = 0;
-    var currentBPM:Float = PlayState.SONG.getSongData('bpm');
-    var newTime:Float = 0;
-    var beat:Float = 0;
-    var colR:FlxColor = 0x000000;
-    var colG:FlxColor = 0x000000;
-    var colB:FlxColor = 0x000000;
-
-    time = this.strumTime;
-    newTime = time;
-    for (i in 0...bpmChanges.length)
-      if (strumTime > bpmChanges[i].songTime)
-      {
-        currentBPM = bpmChanges[i].bpm;
-        newTime = time - bpmChanges[i].songTime;
-      }
-
-    beat = scfunkin.utils.MathUtil.round(((currentBPM * (newTime - scfunkin.backend.data.save.ClientPrefs.data.noteOffset)) / 1000 / 60) * 48, 0);
-
-    switch (type)
-    {
-      case 'Quant':
-        if (!isSustainNote)
-        {
-          for (colorIndex => quant in quants)
-          {
-            var colored = false;
-            if (beat % (192 / quant) == 0)
-            {
-              rgbShader.r = ClientPrefs.data.arrowRGBQuantize[colorIndex][0];
-              rgbShader.g = ClientPrefs.data.arrowRGBQuantize[colorIndex][1];
-              rgbShader.b = ClientPrefs.data.arrowRGBQuantize[colorIndex][2];
-              colored = true;
-            }
-
-            if (colorIndex == quants.length && colored == false)
-            {
-              rgbShader.r = 0xFF7C7C7C;
-              rgbShader.g = 0xFFFFFFFF;
-              rgbShader.b = 0xFF3A3A3A;
-              break;
-            }
-          }
-        }
-        else
-        {
-          rgbShader.r = prevNote.rgbShader.r;
-          rgbShader.g = prevNote.rgbShader.g;
-          rgbShader.b = prevNote.rgbShader.b;
-        }
-      case 'Rainbow': // Code borrowed from JS Engine
-        var superCoolColor:FlxColor = 0xFFFF0000;
-        superCoolColor.hue = (strumTime / 5000 * 360) % 360;
-        rgbShader.r = superCoolColor;
-        rgbShader.g = FlxColor.WHITE;
-        rgbShader.b = superCoolColor.getDarkened(0.7);
-    }
   }
 
   public function invalidate()

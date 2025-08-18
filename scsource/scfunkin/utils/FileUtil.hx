@@ -24,9 +24,8 @@ class FileUtil
   {
     #if desktop
     // Create a ZIP file.
-    var zipBytes:Bytes = createZIPFromEntries(resources);
     // Write the ZIP.
-    writeBytesToPath(path, zipBytes, mode);
+    writeBytesToPath(path, createZIPFromEntries(resources), mode);
     return true;
     #else
     return false;
@@ -68,13 +67,7 @@ class FileUtil
   }
 
   public static function doesFileExist(path:String):Bool
-  {
-    #if sys
-    return sys.FileSystem.exists(path);
-    #else
-    return false;
-    #end
-  }
+    return #if sys sys.FileSystem.exists(path) #else false #end;
 
   /**
    * Browse for a file to read and execute a callback once we have a file reference.
@@ -104,15 +97,9 @@ class FileUtil
   public static function writeFileReference(path:String, data:String)
   {
     var file = new FileReference();
-    file.addEventListener(Event.COMPLETE, function(e:Event) {
-      Debug.logInfo('Successfully wrote file.');
-    });
-    file.addEventListener(Event.CANCEL, function(e:Event) {
-      Debug.logWarn('Cancelled writing file.');
-    });
-    file.addEventListener(IOErrorEvent.IO_ERROR, function(e:IOErrorEvent) {
-      Debug.logError('IO error writing file.');
-    });
+    file.addEventListener(Event.COMPLETE, function(e:Event) Debug.logInfo('Successfully wrote file.'));
+    file.addEventListener(Event.CANCEL, function(e:Event) Debug.logWarn('Cancelled writing file.'));
+    file.addEventListener(IOErrorEvent.IO_ERROR, function(e:IOErrorEvent) Debug.logError('IO error writing file.'));
     file.save(data, path);
   }
 
@@ -127,13 +114,9 @@ class FileUtil
   {
     #if sys
     try
-    {
-      return SerializerUtil.fromJSON(sys.io.File.getContent(path));
-    }
+      return SerializerUtil.fromJSON(sys.io.File.getContent(path))
     catch (ex)
-    {
       return null;
-    }
     #else
     return null;
     #end
@@ -156,10 +139,7 @@ class FileUtil
       case Force:
         sys.io.File.saveContent(path, data);
       case Skip:
-        if (!doesFileExist(path))
-        {
-          sys.io.File.saveContent(path, data);
-        }
+        if (!doesFileExist(path)) sys.io.File.saveContent(path, data);
         else
         {
           // Do nothing.
@@ -172,9 +152,7 @@ class FileUtil
           throw 'File already exists: $path';
         }
         else
-        {
           sys.io.File.saveContent(path, data);
-        }
     }
     #else
     throw 'Direct file writing by path not supported on this platform.';
@@ -198,10 +176,7 @@ class FileUtil
       case Force:
         sys.io.File.saveBytes(path, data);
       case Skip:
-        if (!doesFileExist(path))
-        {
-          sys.io.File.saveBytes(path, data);
-        }
+        if (!doesFileExist(path)) sys.io.File.saveBytes(path, data);
         else
         {
           // Do nothing.
@@ -214,9 +189,7 @@ class FileUtil
           throw 'File already exists: $path';
         }
         else
-        {
           sys.io.File.saveBytes(path, data);
-        }
     }
     #else
     throw 'Direct file writing by path not supported on this platform.';
@@ -248,10 +221,7 @@ class FileUtil
   public static function createDirIfNotExists(dir:String):Void
   {
     #if sys
-    if (!doesFileExist(dir))
-    {
-      sys.FileSystem.createDirectory(dir);
-    }
+    if (!doesFileExist(dir)) sys.FileSystem.createDirectory(dir);
     #end
   }
 
@@ -295,8 +265,8 @@ class FileUtil
    */
   public static function createZIPFromEntries(entries:Array<Entry>):Bytes
   {
-    var o:haxe.io.BytesOutput = new haxe.io.BytesOutput();
-    var zipWriter:haxe.zip.Writer = new haxe.zip.Writer(o);
+    final o:haxe.io.BytesOutput = new haxe.io.BytesOutput();
+    final zipWriter:haxe.zip.Writer = new haxe.zip.Writer(o);
     zipWriter.write(entries.list());
     return o.getBytes();
   }
@@ -310,10 +280,7 @@ class FileUtil
     var results:Array<Entry> = [];
     for (entry in zippedEntries)
     {
-      if (entry.compressed)
-      {
-        entry.data = haxe.zip.Reader.unzip(entry);
-      }
+      if (entry.compressed) entry.data = haxe.zip.Reader.unzip(entry);
       results.push(entry);
     }
     return results;
@@ -321,12 +288,10 @@ class FileUtil
 
   public static function mapZIPEntriesByName(input:Array<Entry>):Map<String, Entry>
   {
-    var results:Map<String, Entry> = [];
-    for (entry in input)
-    {
-      results.set(entry.fileName, entry);
-    }
-    return results;
+    return [
+      for (entry in input)
+        entry.fileName => entry
+    ];
   }
 
   /**
@@ -337,10 +302,7 @@ class FileUtil
    * @return The resulting entry.
    */
   public static function makeZIPEntry(name:String, content:String):Entry
-  {
-    var data:Bytes = haxe.io.Bytes.ofString(content, UTF8);
-    return makeZIPEntryFromBytes(name, data);
-  }
+    return makeZIPEntryFromBytes(name, haxe.io.Bytes.ofString(content, UTF8));
 
   /**
    * Create a ZIP file entry from a file name and its string contents.
@@ -405,11 +367,10 @@ class FileUtil
     var filter:String = null;
     if (typeFilter != null)
     {
-      var filters:Array<String> = [];
-      for (type in typeFilter)
-      {
-        filters.push(StringTools.replace(StringTools.replace(type.extension, '*.', ''), ';', ','));
-      }
+      final filters:Array<String> = [
+        for (type in typeFilter)
+          StringTools.replace(StringTools.replace(type.extension, '*.', ''), ';', ',')
+      ];
       filter = filters.join(';');
     }
     return filter;

@@ -21,11 +21,8 @@ class AttachedSprite extends FlxSprite
       animation.addByPrefix('idle', anim, 24, loop);
       animation.play('idle');
     }
-    else if (file != null)
-    {
-      loadGraphic(Paths.image(file, parentfolder));
-    }
-    antialiasing = ClientPrefs.data.antialiasing;
+    else if (file != null) loadGraphic(Paths.image(file, parentfolder));
+    antialiasing = Save.get('antialiasing');
     scrollFactor.set();
   }
 
@@ -39,9 +36,7 @@ class AttachedSprite extends FlxSprite
       scrollFactor.set(sprTracker.scrollFactor.x, sprTracker.scrollFactor.y);
 
       if (copyAngle) angle = sprTracker.angle + angleAdd;
-
       if (copyAlpha) alpha = sprTracker.alpha * alphaMult;
-
       if (copyVisible) visible = sprTracker.visible;
     }
   }

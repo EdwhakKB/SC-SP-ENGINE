@@ -2,17 +2,14 @@ package scfunkin.states;
 
 import lime.app.Future;
 import sys.thread.FixedThreadPool;
-import haxe.Json;
-import lime.utils.Assets;
 import openfl.display.BitmapData;
 import openfl.utils.AssetType;
-import openfl.utils.Assets as OpenFlAssets;
 import openfl.media.Sound;
-import flixel.FlxState;
 import flixel.graphics.FlxGraphic;
 import flixel.system.FlxAssets;
 import sys.thread.Thread;
 import sys.thread.Mutex;
+import scfunkin.backend.data.StageJsonData;
 import scfunkin.backend.data.StageData;
 import scfunkin.objects.ui.Character;
 import scfunkin.objects.note.Note;
@@ -84,7 +81,7 @@ class LoadingState extends MusicBeatState
     add(bg);
 
     funkay = new FlxSprite(0, 0).loadGraphic(Paths.image('funkay'));
-    funkay.antialiasing = ClientPrefs.data.antialiasing;
+    funkay.antialiasing = Save.get('antialiasing');
     funkay.setGraphicSize(0, FlxG.height);
     funkay.updateHitbox();
     add(funkay);
@@ -178,8 +175,8 @@ class LoadingState extends MusicBeatState
   public static function loadNextDirectory()
   {
     var directory:String = 'shared';
-    var weekDir:String = StageData.forceNextDirectory;
-    StageData.forceNextDirectory = null;
+    var weekDir:String = StageJsonData.forceNextDirectory;
+    StageJsonData.forceNextDirectory = null;
 
     if (weekDir != null && weekDir.length > 0) directory = weekDir;
 
@@ -268,7 +265,7 @@ class LoadingState extends MusicBeatState
     }
 
     final song:Song = PlayState.SONG;
-    final folder:String = Paths.formatToSongPath(SongJsonData.loadedSongName);
+    final folder:String = Paths.formatString(SongJsonData.loadedSongName);
     new Future<Bool>(() -> {
       // LOAD NOTE IMAGE
       var noteSkin:String = Note.defaultNoteSkin;
@@ -324,11 +321,11 @@ class LoadingState extends MusicBeatState
 
         #if MODS_ALLOWED
         var moddyFile:String = Paths.modsJson('songs/$folder/preload');
-        if (FileSystem.exists(moddyFile)) json = Json.parse(File.getContent(moddyFile));
+        if (FileSystem.exists(moddyFile)) json = HaxeJson.parse(File.getContent(moddyFile));
         else
-          json = Json.parse(File.getContent(path));
+          json = HaxeJson.parse(File.getContent(path));
         #else
-        json = Json.parse(Assets.getText(path));
+        json = HaxeJson.parse(LimeAssets.getText(path));
         #end
 
         if (json != null)
@@ -341,7 +338,7 @@ class LoadingState extends MusicBeatState
             var filters:Int = Reflect.field(json, asset);
             var asset:String = asset.trim();
 
-            if (filters < 0 || StageData.validateVisibility(filters))
+            if (filters < 0 || StageJsonData.validateVisibility(filters))
             {
               if (asset.startsWith('images/')) imgs.push(asset.substr('images/'.length));
               else if (asset.startsWith('sounds/')) snds.push(asset.substr('sounds/'.length));
@@ -354,9 +351,9 @@ class LoadingState extends MusicBeatState
       catch (e:Dynamic) {}
       return true;
     }, isIntrusive).then((_) -> new Future<Bool>(() -> {
-      if (song.getSongData('stage') == null || song.getSongData('stage').length < 1) song.setSongData('stage', StageData.vanillaSongStage(folder));
+      if (song.getSongData('stage') == null || song.getSongData('stage').length < 1) song.setSongData('stage', StageJsonData.vanillaSongStage(folder));
 
-      final stageData:StageFile = StageData.getStageFile(song.getSongData('stage'));
+      final stageData:StageFile = StageJsonData.getUnsafeStageFile(song.getSongData('stage'));
       if (stageData != null)
       {
         var imgs:Array<String> = [];
@@ -364,12 +361,14 @@ class LoadingState extends MusicBeatState
         var mscs:Array<String> = [];
         if (stageData.preload != null)
         {
-          for (asset in Reflect.fields(stageData.preload))
+          final preloadImages:Array<String> = stageData.preload.merge();
+          if (preloadImages != null && preloadImages.length > 1)
           {
-            var filters:Int = Reflect.field(stageData.preload, asset);
-            var asset:String = asset.trim();
-            if (filters < 0 || StageData.validateVisibility(filters))
+            for (asset in preloadImages)
             {
+              if (asset == null || asset.trim().length < 1) continue;
+              asset = asset.trim();
+
               if (asset.startsWith('images/')) imgs.push(asset.substr('images/'.length));
               else if (asset.startsWith('sounds/')) snds.push(asset.substr('sounds/'.length));
               else if (asset.startsWith('music/')) mscs.push(asset.substr('music/'.length));
@@ -382,7 +381,7 @@ class LoadingState extends MusicBeatState
           for (sprite in stageData.objects)
           {
             if (sprite.type == 'sprite' || sprite.type == 'animatedSprite') if ((sprite.filters < 0
-              || StageData.validateVisibility(sprite.filters))
+              || QualityFilter.isValidVisiblity(sprite.filters))
               && !imgs.contains(sprite.image)) imgs.push(sprite.image);
           }
         }
@@ -440,9 +439,7 @@ class LoadingState extends MusicBeatState
         threadsMax++;
         threadPool.run(() -> {
           try
-          {
-            preloadCharacter(player2, prefixVocals);
-          }
+            preloadCharacter(player2, prefixVocals)
           catch (e:Dynamic) {}
           completedThread();
         });
@@ -586,32 +583,24 @@ class LoadingState extends MusicBeatState
     try
     {
       var path:String = Paths.getPath('data/characters/$char.json', TEXT);
-      var character:Dynamic = Json.parse(#if MODS_ALLOWED File.getContent(path) #else Assets.getText(path) #end);
+      var character:Dynamic = HaxeJson.parse(#if MODS_ALLOWED File.getContent(path) #else LimeAssets.getText(path) #end);
 
       var isAnimateAtlas:Bool = false;
       var img:String = character.image;
       img = img.trim();
-      #if flxanimate
       var animToFind:String = Paths.getPath('images/$img/Animation.json', TEXT);
-      if (#if MODS_ALLOWED FileSystem.exists(animToFind) || #end Assets.exists(animToFind)) isAnimateAtlas = true;
-      #end
+      if (#if MODS_ALLOWED FileSystem.exists(animToFind) || #end LimeAssets.exists(animToFind)) isAnimateAtlas = true;
 
       if (!isAnimateAtlas)
       {
-        var split:Array<String> = img.split(',');
-        for (file in split)
-        {
+        for (file in img.split(','))
           imagesToPrepare.push(file.trim());
-        }
       }
-      #if flxanimate
       else
       {
         for (i in 0...10)
         {
-          var st:String = '$i';
-          if (i == 0) st = '';
-
+          final st:String = i == 0 ? '' : Std.string(i);
           if (Paths.fileExists('images/$img/spritemap$st.png', IMAGE))
           {
             // trace('found Sprite PNG');
@@ -620,7 +609,6 @@ class LoadingState extends MusicBeatState
           }
         }
       }
-      #end
 
       if (prefixVocals != null && character.vocals_file != null && character.vocals_file.length > 0)
       {

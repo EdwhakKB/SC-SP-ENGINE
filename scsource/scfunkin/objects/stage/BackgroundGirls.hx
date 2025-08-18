@@ -1,12 +1,10 @@
 package scfunkin.objects.stage;
 
-import scfunkin.utils.CoolUtil;
-
 class BackgroundGirls extends FunkinSCSprite
 {
   var isPissed:Bool = true;
 
-  public function new(x:Float, y:Float, ?prefix:String)
+  public function new(x:Float, y:Float, ?prefix:String = '')
   {
     super(x, y);
 
@@ -25,29 +23,15 @@ class BackgroundGirls extends FunkinSCSprite
   public function swapDanceType():Void
   {
     isPissed = !isPissed;
-    if (!isPissed)
-    { // Gets unpissed
-      animation.addByIndices('danceLeft', 'BG girls group', CoolUtil.numberArray(14), "", 24, true);
-      animation.addByIndices('danceRight', 'BG girls group', CoolUtil.numberArray(29, 15), "", 24, true);
-    }
-    else
-    { // Pisses
-      animation.addByIndices('danceLeft', 'BG fangirls dissuaded', CoolUtil.numberArray(14), "", 24, true);
-      animation.addByIndices('danceRight', 'BG fangirls dissuaded', CoolUtil.numberArray(29, 15), "", 24, true);
-    }
-    danceDir = !danceDir;
-
-    if (danceDir) animation.play('danceRight', true);
-    else
-      animation.play('danceLeft', true);
+    final name:String = isPissed ? 'fangirls dissuaded' : 'girls group';
+    animation.addByIndices('danceLeft', 'BG $name', CoolUtil.numberArray(14), "", 24, true);
+    animation.addByIndices('danceRight', 'BG $name', CoolUtil.numberArray(29, 15), "", 24, true);
+    animation.play('dance${(danceDir = !danceDir) ? 'Right' : 'Left'}', true);
   }
 
-  override public function beatHit(curBeat:Int):Void
+  override public function beatHit(beat:Int):Void
   {
-    danceDir = !danceDir;
-
-    if (danceDir) animation.play('danceRight', true);
-    else
-      animation.play('danceLeft', true);
+    super.beatHit(beat);
+    animation.play('dance${(danceDir = !danceDir) ? 'Right' : 'Left'}', true);
   }
 }

@@ -1,10 +1,14 @@
 package scfunkin.backend.scripting.psych;
 
 #if LUA_ALLOWED
+import scfunkin.backend.scripting.psych.luas.FunkinLua;
+#end
+
 class LuaCallbackHandler
 {
   public static inline function call(l:State, fname:String):Int
   {
+    #if LUA_ALLOWED
     try
     {
       var cbf:Dynamic = Lua_helper.callbacks.get(fname);
@@ -14,41 +18,40 @@ class LuaCallbackHandler
       // so that it only loops on reserved/special functions
       if (cbf == null)
       {
-        var last:FunkinLua = FunkinLua.lastCalledScript;
-        if (last == null || last.lua != l)
+        var last:LuaHandler = LuaHandler.lastCalledHandler;
+        if (last == null || last.state != l)
         {
-          for (script in PlayState.instance.luaArray)
-            if (script != FunkinLua.lastCalledScript && script != null && script.lua == l)
-            {
-              cbf = script.callbacks.get(fname);
-              break;
-            }
-
-          for (script in PlayState.instance.stage.luaArray)
-            if (script != FunkinLua.lastCalledScript && script != null && script.lua == l)
-            {
-              cbf = script.callbacks.get(fname);
-              break;
-            }
+          for (luaArrayKey in ScriptMap.luaScripts.keys())
+          {
+            var luaArray:Array<FunkinLua> = ScriptMap.luaScripts.get(luaArrayKey);
+            if (luaArray == null || luaArray.length == 0) continue;
+            for (script in luaArray)
+              if (script != null && script != FunkinLua.lastCalledScript && script.lua.state == l)
+              {
+                cbf = script.lua.callbacks.get(fname);
+                break;
+              }
+            if (cbf != null) break;
+          }
         }
         else
           cbf = last.callbacks.get(fname);
       }
 
+      // Debug.logInfo([cbf, fname]);
+
       if (cbf == null) return 0;
 
-      var nparams:Int = Lua.gettop(l);
-      var args:Array<Dynamic> = [];
+      final nparams:Int = Lua.gettop(l);
+      final args:Array<Dynamic> = [
+        for (i in 0...nparams)
+          Convert.fromLua(l, i + 1)
+      ];
 
-      for (i in 0...nparams)
-      {
-        args[i] = Convert.fromLua(l, i + 1);
-      }
-
-      var ret:Dynamic = null;
       /* return the number of results */
+      final ret:Dynamic = Reflect.callMethod(null, cbf, args);
 
-      ret = Reflect.callMethod(null, cbf, args);
+      // Debug.logInfo(ret);
 
       if (ret != null)
       {
@@ -65,7 +68,7 @@ class LuaCallbackHandler
       }
       throw e;
     }
+    #end
     return 0;
   }
 }
-#end

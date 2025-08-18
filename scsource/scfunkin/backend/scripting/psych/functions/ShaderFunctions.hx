@@ -5,79 +5,66 @@ import flixel.addons.display.FlxRuntimeShader;
 #end
 import openfl.filters.ShaderFilter;
 import scfunkin.shaders.codename.CustomShader;
+#if LUA_ALLOWED
+import scfunkin.backend.scripting.psych.luas.FunkinLua;
+#end
+import scfunkin.shaders.FunkinSourcedShaders;
 
 class ShaderFunctions
 {
   public static function implement(funk:FunkinLua)
   {
     // shader shit
-    if (!ClientPrefs.data.shaders) return;
-    funk.addLocalCallback("initLuaShader", function(name:String) {
+    if (!Save.get('shaders')) return;
+    funk.lua.addLocalCallback("initLuaShader", function(name:String, ?onlyMods:Bool = true) {
       #if (!flash && MODS_ALLOWED && sys)
-      return funk.initLuaShader(name);
+      return FunkinSourcedShaders.initLuaShader(name, onlyMods);
       #else
-      FunkinLua.luaTrace("initLuaShader: Platform unsupported for Runtime Shaders!", false, false, FlxColor.RED);
+      LuaHandler.luaTrace("initLuaShader: Platform unsupported for Runtime Shaders!", false, false, FlxColor.RED);
       #end
       return false;
     });
 
-    funk.addLocalCallback("setSpriteShader", function(obj:String, shader:String, ?findOther:Bool = false) {
+    funk.lua.addLocalCallback("setSpriteShader", function(obj:String, shader:String, ?onlyMods:Bool = true) {
       #if (!flash && MODS_ALLOWED && sys)
-      if (!funk.runtimeShaders.exists(shader) && !funk.initLuaShader(shader))
+      if (!FunkinSourcedShaders.shadersMap.exists(shader) && !FunkinSourcedShaders.initLuaShader(shader, onlyMods))
       {
-        FunkinLua.luaTrace('setSpriteShader: Shader $shader is missing!', false, false, FlxColor.RED);
+        LuaHandler.luaTrace('setSpriteShader: Shader $shader is missing!', false, false, FlxColor.RED);
         return false;
       }
 
-      final leObj:Dynamic = LuaUtil.getObjectLoop(obj);
+      final leObj:Dynamic = funk.getInternalObjectLoop(obj);
       if (leObj != null)
       {
-        final arr:Array<String> = findOther ? [
-          FunkinLua.lua_Shaders.get(shader).getShader().glFragmentSource,
-          FunkinLua.lua_Shaders.get(shader).getShader().glVertexSource
-        ] : funk.runtimeShaders.get(shader);
-        final daShader:FlxRuntimeShader = new FlxRuntimeShader(arr[0], arr[1]);
-
+        final daShader:FlxRuntimeShader = FunkinSourcedShaders.shadersMap.get(shader).shader;
         if (!Std.isOfType(leObj, FlxCamera)) leObj.shader = daShader;
         else
         {
-          final daFilters = (leObj.filters != null) ? leObj.filters : [];
+          final daFilters = leObj?.filters ?? [];
           daFilters.push(new ShaderFilter(daShader));
-
-          leObj.setFilters(daFilters);
+          leObj.filters = [daFilters];
         }
         return true;
       }
       #else
-      FunkinLua.luaTrace("setSpriteShader: Platform unsupported for Runtime Shaders!", false, false, FlxColor.RED);
+      LuaHandler.luaTrace("setSpriteShader: Platform unsupported for Runtime Shaders!", false, false, FlxColor.RED);
       #end
       return false;
     });
-    funk.set("removeSpriteShader", function(obj:String, ?shader:String = "", ?findOther:Bool = false) {
-      final leObj:Dynamic = LuaUtil.getObjectLoop(obj);
+    funk.set("removeSpriteShader", function(obj:String, ?shader:String = "") {
+      final leObj:Dynamic = funk.getInternalObjectLoop(obj);
       if (Std.isOfType(leObj, FlxCamera))
       {
         var newCamEffects = [];
-
         if (shader != "" && shader.length > 0)
         {
-          var daFilters = [];
-          var swagFilters = [];
-
-          if (leObj.filters != null)
-          {
-            daFilters = leObj.filters;
-            swagFilters = leObj.filters;
-          }
-
-          final arr:Array<String> = funk.runtimeShaders.get(shader);
+          var daFilters = leObj?.filters ?? [];
+          var swagFilters = leObj?.filters ?? [];
 
           for (i in 0...daFilters.length)
           {
             final filter:ShaderFilter = daFilters[i];
-
-            if ((filter.shader.glFragmentSource == FlxRuntimeShader.processDataSource(arr[0], 'fragment'))
-              || (filter.shader.glFragmentSource == FunkinLua.lua_Shaders.get(shader).getShader().glFragmentSource))
+            if (filter.shader.glFragmentSource == FunkinSourcedShaders.shadersMap.get(shader).getSource()[0])
             {
               swagFilters.remove(filter);
               break;
@@ -87,7 +74,7 @@ class ShaderFunctions
           newCamEffects = swagFilters;
         }
 
-        leObj.setFilters(newCamEffects);
+        leObj.filters = [newCamEffects];
       }
       else
         leObj.shader = null;
@@ -145,253 +132,179 @@ class ShaderFunctions
       return checkFunction(funk, "setSampler2D", obj, prop, bitmapdataPath, swagShader);
     });
 
-    funk.set("setShaderProperty", function(shader:String, prop:String, value:Dynamic, ?allowedTypes:Array<Dynamic> = null) {
-      if (!FunkinLua.lua_Shaders.exists(shader)) return value;
-      if (allowedTypes == null) allowedTypes = [Bool, Int, Array, Float, String];
-      if (LuaUtil.isOfTypes(value, allowedTypes))
+    funk.set("setShaderProperty", function(shader:String, prop:String, value:Dynamic) {
+      if (!FunkinSourcedShaders.shadersMap.exists(shader)) return value;
+      if (LuaUtil.isOfTypes(value, [Bool, Int, Array, Float, String]))
       {
-        Reflect.setProperty(FunkinLua.lua_Shaders.get(shader), prop, value);
+        Reflect.setProperty(FunkinSourcedShaders.shadersMap.get(shader), prop, value);
         return value;
       }
       return value;
     });
 
-    funk.set("getShaderProperty", function(shader:String, prop:String, ?allowedTypes:Array<Dynamic> = null) {
-      if (!FunkinLua.lua_Shaders.exists(shader)) return null;
-      return Reflect.getProperty(FunkinLua.lua_Shaders.get(shader), prop);
+    funk.set("getShaderProperty", function(shader:String, prop:String) {
+      if (!FunkinSourcedShaders.shadersMap.exists(shader)) return null;
+      return Reflect.getProperty(FunkinSourcedShaders.shadersMap.get(shader), prop);
     });
 
     // Shader stuff
     funk.set("setActorNoShader", function(id:String) {
-      FunkinLua.lua_Shaders.remove(id);
-      if (LuaUtil.getObjectDirectly(id) != null) LuaUtil.getObjectDirectly(id).shader = null;
-      if (LuaUtil.getActorByName(id) != null) LuaUtil.getActorByName(id).shader = null;
+      final spr:FlxSprite = funk.getInternalByName(id);
+      if (spr != null) spr.shader = null;
     });
 
     funk.set("initShaderFromSource", function(name:String, classString:String) {
-      var shaderClass = Type.resolveClass('scfunkin.shaders.' + classString);
-      if (shaderClass != null)
+      final shaderClass = Type.resolveClass('scfunkin.shaders.' + classString);
+      if (shaderClass == null)
       {
-        var shad = Type.createInstance(shaderClass, []);
-        FunkinLua.lua_Shaders.set(name, shad);
-        Debug.logInfo('created shader: ' + name + ', shader from classString: shaders.' + classString);
-      }
-      else
         Debug.displayAlert("Unknown Shader: " + classString, "Shader Not Found!");
+        return;
+      }
+      FunkinSourcedShaders.shadersMap.set(name, Type.createInstance(shaderClass, []));
+      Debug.logInfo('created shader: ' + name + ', shader from classString: shaders.' + classString);
     });
     funk.set("setActorShader", function(actorStr:String, shaderName:String) {
-      final shad = FunkinLua.lua_Shaders.get(shaderName).getShader();
-      final spr:FlxSprite = LuaUtil.getObjectLoop(actorStr);
-      if (shad != null)
-      {
-        Debug.logInfo("SHAD NOT NULL");
-
-        if (spr != null) spr.shader = shad;
-        else
-          Debug.logError('Spr is null!');
-      }
+      final shad = FunkinSourcedShaders.shadersMap.get(shaderName).getShader();
+      final spr:FlxSprite = funk.getInternalObjectLoop(actorStr);
+      if (shad == null || spr == null) return;
+      spr.shader = shad;
     });
 
-    funk.set("pushShaderToCamera", function(id:String, camera:String) {
-      final funnyShader = FunkinLua.lua_Shaders.get(id).getShader();
-      LuaUtil.cameraFromString(camera).filters.push(new ShaderFilter(funnyShader));
+    funk.set("pushShaderToCamera",
+      function(id:String, camera:String) funk.cameraFromString(camera).filters.push(new ShaderFilter(FunkinSourcedShaders.shadersMap.get(id).getShader())));
+
+    funk.set("doShaderTween", function(tag:String, shader:String, shaderParam:String, variable:String, values:Dynamic, ?options:Any = null) {
+      scfunkin.shaders.data.ShaderBase.tween(FunkinSourcedShaders.shadersMap.get(shader).shader, shaderParam, variable, options, null, funk, tag);
     });
-
-    funk.set("tweenShaderFloat",
-      function(tag:String, shaderName:String, prop:String, value:Dynamic, time:Float, easeStr:String = "linear", startVal:Null<Float> = null) {
-        var shad = FunkinLua.lua_Shaders.get(shaderName);
-        var ease = scfunkin.utils.GenericUtil.getTweenEaseByString(easeStr);
-        var startValue:Null<Float> = startVal;
-        if (startValue == null) startValue = Reflect.getProperty(shad, prop);
-
-        if (shad != null)
-        {
-          if (tag != null)
-          {
-            MusicBeatState.getVariables("Tween").set(tag, FlxTween.num(startValue, value, time,
-              {
-                ease: ease,
-                onComplete: function(twn:FlxTween) {
-                  MusicBeatState.getVariables("Tween").remove(tag);
-                  if (PlayState.instance != null) PlayState.instance.callOnLuas('onTweenCompleted', [tag, prop]);
-                },
-                onUpdate: function(tween:FlxTween) {
-                  var ting = FlxMath.lerp(startValue, value, ease(tween.percent));
-                  Reflect.setProperty(shad, prop, ting);
-                }
-              }));
-          }
-          else
-          {
-            FlxTween.num(startValue, value, time,
-              {
-                ease: ease,
-                onUpdate: function(tween:FlxTween) {
-                  var ting = FlxMath.lerp(startValue, value, ease(tween.percent));
-                  Reflect.setProperty(shad, prop, ting);
-                }
-              });
-          }
-        }
-      });
 
     funk.set("setCameraShader", function(camStr:String, shaderName:String) {
-      var cam = LuaUtil.getCameraByName(camStr);
-      var shad = FunkinLua.lua_Shaders.get(shaderName);
+      final cam = funk.getCameraByName(camStr);
+      final shad = FunkinSourcedShaders.shadersMap.get(shaderName);
 
       if (cam != null && shad != null)
       {
-        cam.shaders.push(new ShaderFilter(Reflect.getProperty(shad, 'shader'))); // use reflect to workaround compiler errors
+        cam.shaders.push(new ShaderFilter(shad.getShader()));
         cam.shaderNames.push(shaderName);
         cam.cam.filters = cam.shaders;
       }
     });
     funk.set("removeCameraShader", function(camStr:String, shaderName:String) {
-      var cam = LuaUtil.getCameraByName(camStr);
-      if (cam != null)
+      final cam = funk.getCameraByName(camStr);
+      if (cam != null && cam.shaderNames.contains(shaderName))
       {
-        if (cam.shaderNames.contains(shaderName))
-        {
-          var idx:Int = cam.shaderNames.indexOf(shaderName);
-          if (idx != -1)
-          {
-            cam.shaderNames.remove(cam.shaderNames[idx]);
-            cam.shaders.remove(cam.shaders[idx]);
-            cam.cam.filters = cam.shaders; // refresh filters
-          }
-        }
+        final idx:Int = cam.shaderNames.indexOf(shaderName);
+        if (idx == -1) return;
+        cam.shaderNames.remove(cam.shaderNames[idx]);
+        cam.shaders.remove(cam.shaders[idx]);
+        cam.cam.filters = cam.shaders; // refresh filters
       }
     });
 
-    funk.set("createCustomShader", function(id:String, file:String, glslVersion:String = '120') {
-      final funnyCustomShader:CustomShader = new CustomShader(file, glslVersion);
-      FunkinLua.lua_Custom_Shaders.set(id, funnyCustomShader);
-    });
+    funk.set("createCustomShader",
+      function(id:String, file:String, glslVersion:String = '120') funk.luaCustomShaders.set(id, new CustomShader(file, glslVersion)));
 
-    funk.set("setActorCustomShader", function(id:String, actor:String) {
-      final funnyCustomShader:CustomShader = FunkinLua.lua_Custom_Shaders.get(id);
-      if (LuaUtil.getActorByName(actor) != null) LuaUtil.getActorByName(actor).shader = funnyCustomShader;
-      if (LuaUtil.getObjectDirectly(actor) != null) LuaUtil.getObjectDirectly(actor).shader = funnyCustomShader;
-      return actor;
-    });
-
-    funk.set("setActorNoCustomShader", function(actor:String) {
-      if (LuaUtil.getActorByName(actor) != null) LuaUtil.getActorByName(actor).shader = null;
-      if (LuaUtil.getObjectDirectly(actor) != null) LuaUtil.getObjectDirectly(actor).shader = null;
-      return actor;
+    funk.set("setSpriteShader", function(id:String, actor:String) {
+      final funnyCustomShader:CustomShader = funk.luaCustomShaders.get(id);
+      final spr:FlxSprite = funk.getObjectInternally(actor);
+      if (funnyCustomShader == null || spr == null) return;
+      spr.shader = funnyCustomShader;
     });
 
     funk.set("setCameraCustomShader", function(id:String, camera:String) {
-      final funnyCustomShader:CustomShader = FunkinLua.lua_Custom_Shaders.get(id);
-      LuaUtil.cameraFromString(camera).setFilters([new ShaderFilter(funnyCustomShader)]);
+      final funnyCustomShader:CustomShader = funk.luaCustomShaders.get(id);
+      if (funnyCustomShader == null) return null;
+      funk.cameraFromString(camera).filters = [new ShaderFilter(funnyCustomShader)];
       return camera;
     });
 
-    funk.set("pushCustomShaderToCamera", function(id:String, camera:String) {
-      final funnyCustomShader:CustomShader = FunkinLua.lua_Custom_Shaders.get(id);
-      LuaUtil.cameraFromString(camera).filters.push(new ShaderFilter(funnyCustomShader));
+    funk.set("pushShaderToCamera", function(id:String, camera:String, ?custom:Bool = false) {
+      final funnyCustomShader:CustomShader = funk.luaCustomShaders.get(id);
+      if (funnyCustomShader == null) return null;
+      funk.cameraFromString(camera).filters.push(new ShaderFilter(funnyCustomShader));
       return camera;
     });
 
-    funk.set("setCameraNoCustomShader", function(camera:String) {
-      LuaUtil.cameraFromString(camera).setFilters(null);
+    funk.set("clearCameraFilters", function(camera:String) {
+      funk.cameraFromString(camera).filters = [];
       return camera;
     });
 
     funk.set("getCustomShaderProperty", function(id:String, property:String) {
-      final funnyCustomShader:CustomShader = FunkinLua.lua_Custom_Shaders.get(id);
-      return funnyCustomShader.hget(property);
+      final funnyCustomShader:CustomShader = funk.luaCustomShaders.get(id);
+      if (funnyCustomShader == null) return null;
+      return funnyCustomShader.get(property);
     });
 
     funk.set("setCustomShaderProperty", function(id:String, property:String, value:Dynamic) {
-      final funnyCustomShader:CustomShader = FunkinLua.lua_Custom_Shaders.get(id);
-      funnyCustomShader.hset(property, value);
+      final funnyCustomShader:CustomShader = funk.luaCustomShaders.get(id);
+      if (funnyCustomShader == null) return value;
+      funnyCustomShader.set(property, value);
       return value;
     });
 
     // Custom shader tween made by me (glowsoony)
     funk.set("doTweenCustomShaderFloat",
       function(tag:String, shaderName:String, prop:String, value:Dynamic, time:Float, easeStr:String = "linear", startVal:Null<Float> = null) {
-        var shad:CustomShader = FunkinLua.lua_Custom_Shaders.get(shaderName);
-        var ease = scfunkin.utils.GenericUtil.getTweenEaseByString(easeStr);
-        var startValue:Null<Float> = startVal;
-        if (startValue == null) startValue = shad.hget(prop);
+        final shad:CustomShader = funk.luaCustomShaders.get(shaderName);
+        if (shad == null) return;
+        final ease:Float->Float = scfunkin.utils.GenericUtil.getTweenEaseByString(easeStr);
+        final startValue:Null<Float> = (startVal ?? shad.get(prop)) ?? 0;
 
-        if (shad != null)
+        if (tag != null)
         {
-          if (tag != null)
-          {
-            MusicBeatState.getVariables("Tween").set(tag, FlxTween.num(startValue, value, time,
-              {
-                ease: ease,
-                onComplete: function(twn:FlxTween) {
-                  shad.hset(prop, value);
-                  MusicBeatState.getVariables("Tween").remove(tag);
-                  if (PlayState.instance != null) PlayState.instance.callOnLuas('onTweenCompleted', [tag, prop]);
-                },
-                onUpdate: function(tween:FlxTween) {
-                  var ting = FlxMath.lerp(startValue, value, ease(tween.percent));
-                  shad.hset(prop, ting);
-                }
-              }));
-          }
-          else
-          {
-            FlxTween.num(startValue, value, time,
-              {
-                ease: ease,
-                onUpdate: function(tween:FlxTween) {
-                  var ting = FlxMath.lerp(startValue, value, ease(tween.percent));
-                  shad.hset(prop, ting);
-                }
-              });
-          }
+          funk.setVariable(tag, FlxTween.num(startValue, value, time,
+            {
+              ease: ease,
+              onComplete: function(twn:FlxTween) {
+                shad.set(prop, value);
+                funk.removeVariable(tag, "Tween");
+                funk.callOnType(new CallData('onTweenCompleted', [tag, prop]), "All");
+              },
+              onUpdate: function(tween:FlxTween) shad.set(prop, FlxMath.lerp(startValue, value, ease(tween.percent)))
+            }), "Tween");
+        }
+        else
+        {
+          FlxTween.num(startValue, value, time,
+            {
+              ease: ease,
+              onComplete: function(twn:FlxTween) shad.set(prop, value),
+              onUpdate: function(tween:FlxTween) shad.set(prop, FlxMath.lerp(startValue, value, ease(tween.percent)))
+            });
         }
       });
 
     funk.set("doTweenShaderFloat",
       function(tag:String, object:String, floatName:String, newFloat:Float, duration:Float, ease:String, ?swagShader:String = "") {
-        #if (!flash && sys)
-        var tag = tag;
-        var leObj:FlxRuntimeShader = #if MODS_ALLOWED getShader(object, funk, swagShader) #else null #end;
-        if (leObj == null)
-        {
-          leObj = FunkinLua.lua_Shaders.get(object).getShader();
-          if (leObj == null) return;
-        }
+        var leObj:FlxRuntimeShader = getShader(object, funk, swagShader);
+        if (leObj == null) FunkinSourcedShaders.shadersMap.get(object).getShader();
+        if (leObj == null) return;
+        final ease:Float->Float = scfunkin.utils.GenericUtil.getTweenEaseByString(ease);
 
         if (tag != null)
         {
-          MusicBeatState.getVariables("Tween").set(tag, FlxTween.num(leObj.getFloat(floatName), newFloat, duration,
-            {
-              ease: scfunkin.utils.GenericUtil.getTweenEaseByString(ease),
-              onComplete: function(twn:FlxTween) {
-                MusicBeatState.getVariables("Tween").remove(tag);
-                if (PlayState.instance != null) PlayState.instance.callOnLuas('onTweenCompleted', [tag, floatName]);
-              }
-            }, function(num) {
-              leObj.setFloat(floatName, num);
-            }));
+          funk.setVariable(tag, FlxTween.num(leObj.getFloat(floatName), newFloat, duration, {
+            ease: ease,
+            onComplete: function(twn:FlxTween) {
+              funk.removeVariable(tag, "Tween");
+              funk.callOnType(new CallData('onTweenCompleted', [tag, floatName]), "Lua");
+            }
+          }, function(num) leObj.setFloat(floatName, num)), "Tween");
         }
         else
-        {
-          FlxTween.num(leObj.getFloat(floatName), newFloat, duration, {ease: scfunkin.utils.GenericUtil.getTweenEaseByString(ease)}, function(num) {
-            leObj.setFloat(floatName, num);
-          });
-        }
-        #end
+          FlxTween.num(leObj.getFloat(floatName), newFloat, duration, {ease: ease}, function(num) leObj.setFloat(floatName, num));
       });
   }
 
-  #if (!flash && MODS_ALLOWED && sys)
   public static function getShader(obj:String, funk:FunkinLua, ?swagShader:String):FlxRuntimeShader
   {
-    if (!ClientPrefs.data.shaders) return null;
+    #if (!flash && MODS_ALLOWED && sys)
+    if (!Save.get('shaders')) return null;
 
-    final target:Dynamic = LuaUtil.getObjectLoop(obj);
+    final target:Dynamic = funk.getInternalObjectLoop(obj);
     if (target == null)
     {
-      FunkinLua.luaTrace('Error on getting shader: Object $obj not found', false, false, FlxColor.RED);
+      LuaHandler.luaTrace('Error on getting shader: Object $obj not found', false, false, FlxColor.RED);
       return null;
     }
 
@@ -400,18 +313,13 @@ class ShaderFunctions
     if (!Std.isOfType(target, FlxCamera)) shader = target.shader;
     else
     {
-      final daFilters = (target.filters != null) ? target.filters : [];
-
+      final daFilters = target?.filters ?? [];
       if (swagShader != null && swagShader.length > 0)
       {
-        final arr:Array<String> = funk.runtimeShaders.get(swagShader);
-
         for (i in 0...daFilters.length)
         {
           final filter:ShaderFilter = daFilters[i];
-
-          if ((filter.shader.glFragmentSource == FlxRuntimeShader.processDataSource(arr[0], 'frgament'))
-            || (filter.shader.glFragmentSource == FunkinLua.lua_Shaders.get(swagShader).getShader().glFragmentSource))
+          if (filter.shader.glFragmentSource == FunkinSourcedShaders.shadersMap.get(swagShader).getSource()[0])
           {
             shader = filter.shader;
             break;
@@ -422,8 +330,8 @@ class ShaderFunctions
         shader = daFilters[0].shader;
     }
     return cast(shader, FlxRuntimeShader);
+    #end
   }
-  #end
 
   public static function checkFunction(funk:FunkinLua, func:String, obj:String, prop:String, value:Dynamic, ?swagShader:String = ""):Dynamic
   {
@@ -437,12 +345,13 @@ class ShaderFunctions
 
     #if (!flash && MODS_ALLOWED && sys)
     final shader:FlxRuntimeShader = getShader(obj, funk, swagShader);
-    final foundAObject:Bool = shader != null ? true : FunkinLua.lua_Shaders.exists(obj);
-    final isLuaShader:Bool = shader != null ? false : FunkinLua.lua_Shaders.exists(obj);
+    final foundAObject:Bool = shader != null ? true : FunkinSourcedShaders.shadersMap.exists(obj);
+    final isLuaShader:Bool = shader != null ? false : FunkinSourcedShaders.shadersMap.exists(obj);
 
-    if (!foundAObject || (foundAObject && isLuaShader && !Std.isOfType(Reflect.getProperty(FunkinLua.lua_Shaders.get(obj), prop), value)))
+    if (!foundAObject
+      || (foundAObject && isLuaShader && !Std.isOfType(Reflect.getProperty(FunkinSourcedShaders.shadersMap.get(obj), prop), value)))
     {
-      FunkinLua.luaTrace('$warningName: Shader is not FlxRuntimeShader or is null!', false, false, FlxColor.RED);
+      LuaHandler.luaTrace('$warningName: Shader is not FlxRuntimeShader or is null!', false, false, FlxColor.RED);
       return null;
     }
 
@@ -511,14 +420,14 @@ class ShaderFunctions
     }
     else
     {
-      if (isSet) Reflect.setProperty(FunkinLua.lua_Shaders.get(obj), prop, value);
+      if (isSet) Reflect.setProperty(FunkinSourcedShaders.shadersMap.get(obj), prop, value);
       else
-        return Reflect.getProperty(FunkinLua.lua_Shaders.get(obj), prop);
+        return Reflect.getProperty(FunkinSourcedShaders.shadersMap.get(obj), prop);
       return null;
     }
     return null;
     #else
-    FunkinLua.luaTrace('$warningName: Platform unsupported for Runtime Shaders!', false, false, FlxColor.RED);
+    LuaHandler.luaTrace('$warningName: Platform unsupported for Runtime Shaders!', false, false, FlxColor.RED);
     return null;
     #end
   }

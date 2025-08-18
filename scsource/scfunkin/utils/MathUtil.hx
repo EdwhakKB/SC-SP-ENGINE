@@ -41,12 +41,7 @@ class MathUtil
    * @return The snap awaited result.
    */
   public static function quantize(f:Float, snap:Float):Float
-  {
-    // changed so this actually works lol
-    final m:Float = Math.fround(f * snap);
-    Debug.logTrace(snap);
-    return (m / snap);
-  }
+    return (Math.fround(f * snap) / snap);
 
   /**
    * Get the logarithm of a value with a given base.
@@ -61,7 +56,7 @@ class MathUtil
   {
     if (x <= 0.0) return 0.0;
     if (x >= 1.0) return 1.0;
-    var result:Float = (x < 0.5) ? (1 - Math.sqrt(1 - 4 * x * x)) / 2 : (Math.sqrt(1 - 4 * (1 - x) * (1 - x)) + 1) / 2;
+    final result:Float = (x < 0.5) ? (1 - Math.sqrt(1 - 4 * x * x)) / 2 : (Math.sqrt(1 - 4 * (1 - x) * (1 - x)) + 1) / 2;
     return (result == Math.NaN) ? 1.0 : result;
   }
 
@@ -69,7 +64,7 @@ class MathUtil
   {
     if (x <= 0.0) return 0.0;
     if (x >= 1.0) return 1.0;
-    var result:Float = (x < 0.5) ? (2 * x * x * ((c + 1) * 2 * x - c)) / 2 : (1 - 2 * (1 - x) * (1 - x) * ((c + 1) * 2 * (1 - x) - c)) / 2;
+    final result:Float = (x < 0.5) ? (2 * x * x * ((c + 1) * 2 * x - c)) / 2 : (1 - 2 * (1 - x) * (1 - x) * ((c + 1) * 2 * (1 - x) - c)) / 2;
     return (result == Math.NaN) ? 1.0 : result;
   }
 
@@ -148,7 +143,6 @@ class MathUtil
     // TODO: Is there a better way to ensure a lerp which actually reaches the target?
     // Research a framerate-independent PID lerp.
     if (Math.abs(result - target) < (precision * target)) result = target;
-
     return result;
   }
 }

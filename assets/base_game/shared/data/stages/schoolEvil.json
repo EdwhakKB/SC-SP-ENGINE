@@ -29,8 +29,8 @@
   "introSoundsPrefix": "",
 
   "preload": {
-    "images": ["weeb/animatedEvilSchool", "weeb/bgGhouls"],
-    "images_low": ["weeb/animatedEvilSchool_low"]
+    "high": ["weeb/animatedEvilSchool", "weeb/bgGhouls"],
+    "low": ["weeb/animatedEvilSchool_low"]
   },
 
   "_editorMeta": {

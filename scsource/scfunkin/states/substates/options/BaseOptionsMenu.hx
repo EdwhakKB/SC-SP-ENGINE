@@ -31,8 +31,8 @@ class BaseOptionsMenu extends MusicBeatSubState
   {
     super();
 
-    if (title == null) title = 'Options';
-    if (rpcTitle == null) rpcTitle = 'Options Menu';
+    title ??= 'Options';
+    rpcTitle ??= 'Options Menu';
 
     #if DISCORD_ALLOWED
     DiscordClient.changePresence(rpcTitle, null);
@@ -40,24 +40,19 @@ class BaseOptionsMenu extends MusicBeatSubState
 
     bg = new FlxSprite().loadGraphic(Paths.image('stageBackForStates'));
     bg.screenCenter();
-    bg.antialiasing = ClientPrefs.data.antialiasing;
+    bg.antialiasing = Save.get('antialiasing');
     add(bg);
 
     // avoids lagspikes while scrolling through menus!
-    grpOptions = new FlxTypedGroup<Alphabet>();
-    add(grpOptions);
-
-    grpTexts = new FlxTypedGroup<AttachedText>();
-    add(grpTexts);
-
-    checkboxGroup = new FlxTypedGroup<CheckboxThingie>();
-    add(checkboxGroup);
+    add(grpOptions = new FlxTypedGroup<Alphabet>());
+    add(grpTexts = new FlxTypedGroup<AttachedText>());
+    add(checkboxGroup = new FlxTypedGroup<CheckboxThingie>());
 
     descBox = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
     descBox.alpha = 0.6;
     add(descBox);
 
-    var titleText:Alphabet = new Alphabet(75, 45, title, true);
+    final titleText:Alphabet = new Alphabet(75, 45, title, true);
     titleText.setScale(0.6);
     titleText.alpha = 0.4;
     add(titleText);
@@ -182,7 +177,7 @@ class BaseOptionsMenu extends MusicBeatSubState
 
             bindingKey = true;
             holdingEsc = 0;
-            ClientPrefs.toggleVolumeKeys(false);
+            Controls.reset(false);
             FlxG.sound.play(Paths.sound('scrollMenu'));
           }
         default:
@@ -458,7 +453,7 @@ class BaseOptionsMenu extends MusicBeatSubState
 
     bindingText2.destroy();
     remove(bindingText2);
-    ClientPrefs.toggleVolumeKeys(true);
+    Controls.reset(true);
   }
 
   function updateTextFrom(option:Option)

@@ -1,6 +1,5 @@
 package scfunkin.objects.ui.menu;
 
-import flixel.group.FlxGroup;
 import flixel.ui.FlxBar;
 import flixel.util.FlxStringUtil;
 import scfunkin.states.freeplay.FreeplayState;
@@ -9,7 +8,7 @@ import scfunkin.states.freeplay.FreeplayState;
  * Music player used for Freeplay
  */
 @:access(scfunkin.states.freeplay.FreeplayState)
-class MusicPlayer extends FlxGroup
+class MusicPlayer extends FlxSpriteGroup
 {
   public var instance:FreeplayState;
   public var controls:Controls;
@@ -252,8 +251,7 @@ class MusicPlayer extends FlxGroup
   {
     active = visible = playingMusic;
 
-    instance.scoreBG.visible = instance.diffText.visible = instance.scoreText.visible = instance.helpText.visible = instance.comboText.visible = instance.opponentText.visible = !playingMusic; // Hide Freeplay texts and boxes if playingMusic is true
-
+    instance.scoreBG.visible /*= instance.diffText.visible = instance.scoreText.visible = instance.helpText.visible = instance.comboText.visible*/ = !playingMusic; // Hide Freeplay texts and boxes if playingMusic is true
     songTxt.visible = timeTxt.visible = songBG.visible = playbackTxt.visible = playbackBG.visible = progressBar.visible = playingMusic; // Show Music Player texts and boxes if playingMusic is true
 
     for (i in playbackSymbols)
@@ -266,8 +264,8 @@ class MusicPlayer extends FlxGroup
 
     if (playingMusic)
     {
-      instance.downText.text = Language.getPhrase('musicplayer_tip', "Press SPACE to Pause / Press ESCAPE to Exit / Press R to Reset the Song");
-      instance.downText.x = -210;
+      // instance.downText.text = Language.getPhrase('musicplayer_tip', "Press SPACE to Pause / Press ESCAPE to Exit / Press R to Reset the Song");
+      // instance.downText.x = -210;
       positionSong();
 
       progressBar.setRange(0, FreeplayState.inst.length);
@@ -283,8 +281,8 @@ class MusicPlayer extends FlxGroup
       progressBar.setParent(null, "");
       progressBar.numDivisions = 0;
 
-      instance.downText.text = instance.leText;
-      instance.downText.x = -600;
+      // instance.downText.text = instance.leText;
+      // instance.downText.x = -600;
       // backgroundLol.alpha = 0;
     }
     progressBar.updateBar();

@@ -24,6 +24,22 @@ class GameplaySettingsSubState extends BaseOptionsMenu
     var option:Option = new Option('Disable Reset Button', "If checked, pressing Reset won't do anything.", 'noReset', BOOL);
     addOption(option);
 
+    var option:Option = new Option('Rating Offset', 'Changes how late/early you have to hit for a "Sick!"\nHigher values mean you have to hit later.',
+      'ratingOffset', INT);
+    option.displayFormat = '%vms';
+    option.scrollSpeed = 20;
+    option.minValue = -30;
+    option.maxValue = 30;
+    addOption(option);
+
+    var option:Option = new Option('Note Offset',
+      'Changes the offset of all notes to be early or later from original time.\nPositive = earlier, Negative = later', 'noteOffset', INT);
+    option.displayFormat = '%vms';
+    option.scrollSpeed = 20;
+    option.minValue = -500;
+    option.maxValue = 500;
+    addOption(option);
+
     var option:Option = new Option('Swag!! Hit Window', 'Changes the amount of time you have\nfor hitting a "Swag" in milliseconds.', 'swagWindow', FLOAT);
     option.displayFormat = '%vms';
     option.scrollSpeed = 8;
@@ -35,7 +51,7 @@ class GameplaySettingsSubState extends BaseOptionsMenu
     var option:Option = new Option('Sick! Hit Window', 'Changes the amount of time you have\nfor hitting a "Sick!" in milliseconds.', 'sickWindow', FLOAT);
     option.displayFormat = '%vms';
     option.scrollSpeed = 15;
-    option.minValue = 15;
+    option.minValue = 30;
     option.maxValue = 45;
     option.changeValue = 0.1;
     addOption(option);
@@ -43,7 +59,7 @@ class GameplaySettingsSubState extends BaseOptionsMenu
     var option:Option = new Option('Good Hit Window', 'Changes the amount of time you have\nfor hitting a "Good" in milliseconds.', 'goodWindow', FLOAT);
     option.displayFormat = '%vms';
     option.scrollSpeed = 30;
-    option.minValue = 15;
+    option.minValue = 45;
     option.maxValue = 90;
     option.changeValue = 0.1;
     addOption(option);
@@ -51,7 +67,7 @@ class GameplaySettingsSubState extends BaseOptionsMenu
     var option:Option = new Option('Bad Hit Window', 'Changes the amount of time you have\nfor hitting a "Bad" in milliseconds.', 'badWindow', FLOAT);
     option.displayFormat = '%vms';
     option.scrollSpeed = 60;
-    option.minValue = 15;
+    option.minValue = 100;
     option.maxValue = 135;
     option.changeValue = 0.1;
     addOption(option);
@@ -59,7 +75,7 @@ class GameplaySettingsSubState extends BaseOptionsMenu
     var option:Option = new Option('Shit Hit Window', 'Changes the amount of time you have\nfor hitting a "Shit" in milliseconds.', 'shitWindow', FLOAT);
     option.displayFormat = '%vms';
     option.scrollSpeed = 60;
-    option.minValue = 15;
+    option.minValue = 130;
     option.maxValue = 180;
     option.changeValue = 0.1;
     addOption(option);
@@ -95,12 +111,10 @@ class GameplaySettingsSubState extends BaseOptionsMenu
       'vine boom',
       'sexus'
     ]);
+    option.onChange = onChangeHitsound;
     addOption(option);
 
     var option:Option = new Option('Instant Respawning', "If checked, You have to respawn, Else instant respawn!", 'instantRespawn', BOOL);
-    addOption(option);
-
-    var option:Option = new Option('Camera Movement', "If checked, The notes impact the camera direction.", 'cameraMovement', BOOL);
     addOption(option);
 
     var option:Option = new Option('Miss Sounds', "If checked, Miss sounds are active.", 'missSounds', BOOL);
@@ -113,20 +127,20 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 
   function onChangeHitsound()
   {
-    if (ClientPrefs.data.hitSounds != "None" && ClientPrefs.data.hitsoundVolume != 0)
+    if (Save.get('hitSounds') != "None" && Save.get('hitsoundVolume') != 0)
     {
-      daHitSound.loadEmbedded(Paths.sound('hitsounds/${ClientPrefs.data.hitSounds}'));
-      daHitSound.volume = ClientPrefs.data.hitsoundVolume;
+      daHitSound.loadEmbedded(Paths.sound('hitsounds/${Save.get('hitSounds')}'));
+      daHitSound.volume = Save.get('hitsoundVolume');
       daHitSound.play();
     }
   }
 
   function onChangeHitsoundVolume()
   {
-    if (ClientPrefs.data.hitSounds != "None")
+    if (Save.get('hitSounds') != "None")
     {
-      daHitSound.loadEmbedded(Paths.sound('hitsounds/${ClientPrefs.data.hitSounds}'));
-      daHitSound.volume = ClientPrefs.data.hitsoundVolume;
+      daHitSound.loadEmbedded(Paths.sound('hitsounds/${Save.get('hitSounds')}'));
+      daHitSound.volume = Save.get('hitsoundVolume');
       daHitSound.play();
     }
   }

@@ -20,7 +20,7 @@ class PsychUIDropDownMenu extends PsychUIInputText
   public function new(x:Float, y:Float, list:Array<String>, callback:Int->String->Void, ?width:Float = 100)
   {
     super(x, y);
-    if (list == null) list = [];
+    list ??= [];
 
     _itemWidth = width - 2;
     setGraphicSize(width, 20);

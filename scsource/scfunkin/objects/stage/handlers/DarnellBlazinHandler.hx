@@ -5,7 +5,10 @@ import scfunkin.objects.ui.Character;
 
 class DarnellBlazinHandler
 {
-  public function new() {}
+  public var stage:Stage = null;
+
+  public function new(handler:Stage)
+    this.stage = handler;
 
   var cantUppercut:Bool = false;
 
@@ -14,7 +17,7 @@ class DarnellBlazinHandler
     // SPECIAL CASE: If Pico hits a poor note at low health (at 30% chance),
     // Darnell may duck below Pico's punch to attempt an uppercut.
     // TODO: Maybe add a cooldown to this?
-    if (wasNoteHitPoorly(note.rating.name.toLowerCase()) && isPlayerLowHealth() && FlxG.random.bool(30))
+    if (wasNoteHitPoorly(note.judgement) && isPlayerLowHealth() && FlxG.random.bool(30))
     {
       playUppercutPrepAnim();
       return;
@@ -102,7 +105,7 @@ class DarnellBlazinHandler
   public function noteMiss(note:Note)
   {
     // SPECIAL CASE: Darnell prepared to uppercut last time and Pico missed! FINISH HIM!
-    if (dad.getLastAnimationPlayed() == 'uppercutPrep')
+    if (dad.getLastAnimPlayed() == 'uppercutPrep')
     {
       playUppercutAnim();
       return;
@@ -218,7 +221,7 @@ class DarnellBlazinHandler
   function playBlockAnim()
   {
     dad.playAnim('block', true);
-    PlayState.instance.camGame.shake(0.002, 0.1);
+    FlxG.camera.shake(0.002, 0.1);
     moveToBack();
   }
 
@@ -248,7 +251,7 @@ class DarnellBlazinHandler
 
   function playPissedConditionalAnim()
   {
-    if (dad.getLastAnimationPlayed() == "cringe") playPissedAnim();
+    if (dad.getLastAnimPlayed() == "cringe") playPissedAnim();
     else
       playIdleAnim();
   }
@@ -280,14 +283,14 @@ class DarnellBlazinHandler
   function playHitHighAnim()
   {
     dad.playAnim('hitHigh', true);
-    PlayState.instance.camGame.shake(0.0025, 0.15);
+    FlxG.camera.shake(0.0025, 0.15);
     moveToBack();
   }
 
   function playHitLowAnim()
   {
     dad.playAnim('hitLow', true);
-    PlayState.instance.camGame.shake(0.0025, 0.15);
+    FlxG.camera.shake(0.0025, 0.15);
     moveToBack();
   }
 
@@ -306,51 +309,51 @@ class DarnellBlazinHandler
   function playSpinAnim()
   {
     dad.playAnim('hitSpin', true);
-    PlayState.instance.camGame.shake(0.0025, 0.15);
+    FlxG.camera.shake(0.0025, 0.15);
     moveToBack();
   }
 
   function willMissBeLethal()
   {
-    return PlayState.instance.hud.health <= 0.0 && !PlayState.instance.practiceMode;
+    if (stage.game == PlayState.instance) return stage.game.hud.healthAmount <= 0.0 && !stage.game.practiceMode;
+    return false;
   }
 
-  function wasNoteHitPoorly(rating:String)
-  {
-    return (rating == "bad" || rating == "shit");
-  }
+  function wasNoteHitPoorly(judgement:Judgement)
+    return judgement.rank.getFromInt(-1);
 
   function isPlayerLowHealth()
   {
-    return PlayState.instance.hud.health <= 0.3 * 2;
+    if (stage.game == PlayState.instance) return stage.game.hud.healthAmount <= 0.3 * 2;
+    return false;
   }
 
   function moveToBack()
   {
-    var dadPos:Int = FlxG.state.members.indexOf(dad);
-    var bfPos:Int = FlxG.state.members.indexOf(boyfriend);
-    if (dadPos < bfPos) return;
+    var bfPos:Int = stage.members.indexOf(boyfriend);
+    var dadPos:Int = stage.members.indexOf(dad);
 
-    FlxG.state.members[bfPos] = dad;
-    FlxG.state.members[dadPos] = boyfriend;
+    if (bfPos < dadPos) return;
+    stage.members[dadPos] = boyfriend;
+    stage.members[bfPos] = dad;
   }
 
   function moveToFront()
   {
-    var dadPos:Int = FlxG.state.members.indexOf(dad);
-    var bfPos:Int = FlxG.state.members.indexOf(boyfriend);
-    if (dadPos > bfPos) return;
+    var bfPos:Int = stage.members.indexOf(boyfriend);
+    var dadPos:Int = stage.members.indexOf(dad);
+    if (bfPos > dadPos) return;
 
-    FlxG.state.members[bfPos] = dad;
-    FlxG.state.members[dadPos] = boyfriend;
+    stage.members[dadPos] = boyfriend;
+    stage.members[bfPos] = dad;
   }
 
   var boyfriend(get, never):Character;
   var dad(get, never):Character;
 
   function get_boyfriend()
-    return PlayState.instance.boyfriend;
+    return stage.boyfriend;
 
   function get_dad()
-    return PlayState.instance.dad;
+    return stage.dad;
 }

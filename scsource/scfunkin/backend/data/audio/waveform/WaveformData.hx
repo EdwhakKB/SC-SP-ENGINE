@@ -58,29 +58,16 @@ class WaveformData
   }
 
   function buildChannelData():Array<WaveformDataChannel>
-  {
-    channelData = [];
-    for (i in 0...channels)
-    {
-      channelData.push(new WaveformDataChannel(this, i));
-    }
-    return channelData;
-  }
+    return channelData = [for (i in 0...channels) new WaveformDataChannel(this, i)];
 
   public function channel(index:Int)
-  {
     return (channelData == null) ? buildChannelData()[index] : channelData[index];
-  }
 
   public function get(index:Int):Int
-  {
     return data[index] ?? 0;
-  }
 
   public function set(index:Int, value:Int)
-  {
     data[index] = value;
-  }
 
   /**
    * Maximum possible value for a waveform data point.
@@ -102,57 +89,43 @@ class WaveformData
    * @return The length of the waveform in samples.
    */
   public function lenSamples():Int
-  {
     return length * samplesPerPoint;
-  }
 
   /**
    * @return The length of the waveform in seconds.
    */
   public function lenSeconds():Float
-  {
     return inline lenSamples() / sampleRate;
-  }
 
   /**
    * Given the time in seconds, return the waveform data point index.
    */
   public function secondsToIndex(seconds:Float):Int
-  {
     return Std.int(seconds * inline pointsPerSecond());
-  }
 
   /**
    * Given a waveform data point index, return the time in seconds.
    */
   public function indexToSeconds(index:Int):Float
-  {
     return index / inline pointsPerSecond();
-  }
 
   /**
    * The number of data points this waveform data provides per second of audio.
    */
   public inline function pointsPerSecond():Float
-  {
     return sampleRate / samplesPerPoint;
-  }
 
   /**
    * Given the percentage progress through the waveform, return the waveform data point index.
    */
   public function percentToIndex(percent:Float):Int
-  {
     return Std.int(percent * length);
-  }
 
   /**
    * Given a waveform data point index, return the percentage progress through the waveform.
    */
   public function indexToPercent(index:Int):Float
-  {
     return index / length;
-  }
 
   /**
    * Resample the waveform data to create a new WaveformData object matching the desired `samplesPerPoint` value.
@@ -219,14 +192,8 @@ class WaveformData
    */
   public function clone(?newData:Array<Int> = null):WaveformData
   {
-    if (newData == null)
-    {
-      newData = this.data.clone();
-    }
-
-    var clone = new WaveformData(this.version, this.channels, this.sampleRate, this.samplesPerPoint, this.bits, newData.length, newData);
-
-    return clone;
+    newData ??= this.data.clone();
+    return new WaveformData(this.version, this.channels, this.sampleRate, this.samplesPerPoint, this.bits, newData.length, newData);
   }
 }
 
@@ -255,9 +222,7 @@ class WaveformDataChannel
    * Mapped to a value between 0 and 1.
    */
   public function minSampleMapped(i:Int)
-  {
     return inline minSample(i) / inline parent.maxSampleValue();
-  }
 
   /**
    * Minimum value within the range of samples.
@@ -278,9 +243,7 @@ class WaveformDataChannel
    * Maximum value within the range of samples, mapped to a value between 0 and 1.
    */
   public function minSampleRangeMapped(start:Int, end:Int)
-  {
     return inline minSampleRange(start, end) / inline parent.maxSampleValue();
-  }
 
   /**
    * Retrieve a given maximum point at an index.
@@ -295,9 +258,7 @@ class WaveformDataChannel
    * Mapped to a value between 0 and 1.
    */
   public function maxSampleMapped(i:Int)
-  {
     return inline maxSample(i) / inline parent.maxSampleValue();
-  }
 
   /**
    * Maximum value within the range of samples.
@@ -318,9 +279,7 @@ class WaveformDataChannel
    * Maximum value within the range of samples, mapped to a value between 0 and 1.
    */
   public function maxSampleRangeMapped(start:Int, end:Int)
-  {
     return inline maxSampleRange(start, end) / inline parent.maxSampleValue();
-  }
 
   public function setMinSample(i:Int, value:Int)
   {

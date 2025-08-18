@@ -36,12 +36,8 @@ class MapTools
   public static function merge<K, T>(a:Map<K, T>, b:Map<K, T>):Map<K, T>
   {
     var result = a.copy();
-
     for (pair in b.keyValueIterator())
-    {
       result.set(pair.key, pair.value);
-    }
-
     return result;
   }
 

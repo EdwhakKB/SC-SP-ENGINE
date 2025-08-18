@@ -1,7 +1,6 @@
 package scfunkin.backend.data;
 
 import lime.utils.Assets;
-import openfl.utils.Assets as OpenFlAssets;
 import scfunkin.utils.*;
 
 typedef WeekFile =
@@ -20,7 +19,6 @@ typedef WeekFile =
   var hideFreeplay:Bool;
   var difficulties:String;
   var defaultDifficulty:String;
-  var blockOpponentMode:Null<Bool>;
 }
 
 class WeekData
@@ -44,7 +42,6 @@ class WeekData
   public var hideFreeplay:Bool;
   public var difficulties:String;
   public var defaultDifficulty:String;
-  public var blockOpponentMode:Null<Bool>;
 
   public var fileName:String;
 
@@ -72,8 +69,7 @@ class WeekData
         hideStoryMode: false,
         hideFreeplay: false,
         difficulties: '',
-        defaultDifficulty: '',
-        blockOpponentMode: null
+        defaultDifficulty: ''
       };
     return weekFile;
   }
@@ -89,21 +85,29 @@ class WeekData
     this.fileName = fileName;
   }
 
-  public static function reloadWeekFiles(isStoryMode:Null<Bool> = false)
+  public static function reloadWeekFiles(isStoryMode:Null<Bool> = false, specificMod:Null<Bool> = false, ?mod:String, ?mods:Array<String>)
   {
     weeksList = [];
     weeksLoaded.clear();
     #if MODS_ALLOWED
-    var directories:Array<String> = [Paths.mods(), Paths.getSharedPath()];
+    var specifiedMods:Bool = (specificMod == true);
+    var directories:Array<String> = specifiedMods ? [mod] : [Paths.mods(), Paths.getSharedPath()];
     var originalLength:Int = directories.length;
 
-    for (mod in Mods.parseList().enabled)
-      directories.push(Paths.mods(mod + '/'));
+    if (!specifiedMods)
+    {
+      for (mod in Mods.parseList().enabled)
+        directories.push(Paths.mods(mod + '/'));
+    }
+    else
+    {
+      for (mod in mods)
+        directories.push(mod);
+    }
     #else
     var directories:Array<String> = [Paths.getSharedPath()];
     var originalLength:Int = directories.length;
     #end
-
     var sexList:Array<String> = CoolUtil.coolTextFile(Paths.getSharedPath('data/weeks/weekList.txt'));
     for (i in 0...sexList.length)
     {
@@ -116,14 +120,12 @@ class WeekData
           if (week != null)
           {
             var weekFile:WeekData = new WeekData(week, sexList[i]);
-
             #if MODS_ALLOWED
             if (j >= originalLength)
             {
               weekFile.folder = directories[j].substring(Paths.mods().length, directories[j].length - 1);
             }
             #end
-
             if (weekFile != null
               && (isStoryMode == null || (isStoryMode && !weekFile.hideStoryMode) || (!isStoryMode && !weekFile.hideFreeplay)))
             {
@@ -134,7 +136,6 @@ class WeekData
         }
       }
     }
-
     #if MODS_ALLOWED
     for (i in 0...directories.length)
     {
@@ -150,7 +151,6 @@ class WeekData
             addWeek(daWeek, path, directories[i], i, originalLength);
           }
         }
-
         for (file in FileSystem.readDirectory(directory))
         {
           var path = haxe.io.Path.join([directory, file]);
@@ -201,7 +201,6 @@ class WeekData
       rawJson = Assets.getText(path);
     }
     #end
-
     if (rawJson != null && rawJson.length > 0)
     {
       return cast tjson.TJSON.parse(rawJson);

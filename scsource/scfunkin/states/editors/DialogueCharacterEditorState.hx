@@ -10,6 +10,7 @@ import scfunkin.objects.ui.TypedAlphabet;
 import scfunkin.objects.cutscenes.DialogueBoxPsych;
 import scfunkin.objects.cutscenes.DialogueCharacter;
 import scfunkin.states.editors.content.Prompt;
+import scfunkin.backend.data.packed.character.CharacterData;
 
 class DialogueCharacterEditorState extends MusicBeatState implements PsychUIEventHandler.PsychUIEvent
 {
@@ -87,7 +88,7 @@ class DialogueCharacterEditorState extends MusicBeatState implements PsychUIEven
     mainGroup.add(ghostIdle);
 
     box = new FlxSprite(70, 370);
-    box.antialiasing = ClientPrefs.data.antialiasing;
+    box.antialiasing = Save.get('antialiasing');
     box.frames = Paths.getSparrowAtlas('speech_bubble');
     box.scrollFactor.set();
     box.animation.addByPrefix('normal', 'speech bubble normal', 24);
@@ -497,7 +498,7 @@ class DialogueCharacterEditorState extends MusicBeatState implements PsychUIEven
 
     if (PsychUIInputText.focusOn == null)
     {
-      ClientPrefs.toggleVolumeKeys(true);
+      Controls.reset(true);
       if (FlxG.keys.justPressed.SPACE && UI_mainbox.selectedName == 'Character')
       {
         character.playAnim(character.jsonFile.animations[curAnim].anim);
@@ -703,11 +704,11 @@ class DialogueCharacterEditorState extends MusicBeatState implements PsychUIEven
 
       if (FlxG.keys.justPressed.ESCAPE)
       {
-        ClientPrefs.toggleVolumeKeys(true);
+        Controls.reset(true);
         if (!unsavedProgress)
         {
           MusicBeatState.switchState(new scfunkin.states.editors.MasterEditorMenu());
-          FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
+          FlxG.sound.playMusic(Paths.music("freakyMenu"));
           transitioning = true;
         }
         else
@@ -720,7 +721,7 @@ class DialogueCharacterEditorState extends MusicBeatState implements PsychUIEven
       hudGroup.y = mainGroup.y;
     }
     else
-      ClientPrefs.toggleVolumeKeys(false);
+      Controls.reset(false);
     super.update(elapsed);
   }
 

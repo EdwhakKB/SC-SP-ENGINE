@@ -19,10 +19,10 @@ class UnusedButKeptCode
           switch (characterType)
           {
             case 'dad', 'opponent', 'op':
-              if (character == '') character = dad.curCharacter;
+              if (character == '') character = stage.dad._data.curCharacter;
               if (externVocals == '') externVocals = vocalOp;
             case 'boyfriend', 'bf', 'player', 'pl':
-              if (character == '') character = boyfriend.curCharacter;
+              if (character == '') character = stage.boyfriend._data.curCharacter;
               if (externVocals == '') externVocals = vocalPl;
           }
         }
@@ -51,7 +51,7 @@ class UnusedButKeptCode
         {
           case 'inst', 'instrumental', 'vocal', 'vocals':
             var finalType:String = type.contains('in') ? 'INST' : 'VOCALS';
-            finalSound = SoundUtil.findVocalOrInst(props, type);
+            finalSound = SoundUtil.findSound(props, type == "INST" ? INST : VOCAL);
             volume = finalType == 'INST' ? inst.volume : vocals.volume;
           default:
             finalSound = SoundUtil.findSound(extensiveProps, true);

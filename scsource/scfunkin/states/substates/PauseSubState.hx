@@ -13,9 +13,10 @@ class PauseSubState extends MusicBeatSubState
   var grpMenuShit:FlxTypedGroup<Alphabet>;
 
   var menuItems:Array<String> = [];
-  var menuItemsOG:Array<String> = ['Resume', 'Restart Song', 'Change Difficulty', 'Options', 'Exit to menu'];
+  var menuItemsOG:Array<String> = ['Resume', 'Restart', 'Change Difficulty', 'Options', 'Exit to menu'];
   var difficultyChoices = [];
   var optionChoices = [];
+  var restartChoices = ['Song', 'State'];
   var curSelected:Int = 0;
 
   var pauseMusic:FlxSound;
@@ -30,33 +31,22 @@ class PauseSubState extends MusicBeatSubState
 
   var music:FlxSound = FlxG.sound.music;
 
-  var settings =
-    {
-      music: ClientPrefs.data.pauseMusic
-    };
-
   var num:Int = 0;
 
   var bg:FlxSprite;
 
   public static var pauseCounter:Int = 0;
 
+  var game:PlayState = PlayState.instance;
+
   override function create()
   {
     game.paused = true;
 
     if (Difficulty.list.length < 2) menuItemsOG.remove('Change Difficulty'); // No need to change difficulty if there is only one!
+    if (PlayState.chartingMode) menuItemsOG.insert(2, 'Leave Charting Mode');
 
     if (PlayState.chartingMode)
-    {
-      menuItemsOG.insert(2, 'Leave Charting Mode');
-    }
-    else if (PlayState.modchartMode)
-    {
-      menuItemsOG.insert(2, 'Leave ModChart Mode');
-    }
-
-    if (PlayState.chartingMode || PlayState.modchartMode)
     {
       if (!game.startingSong)
       {
@@ -81,6 +71,8 @@ class PauseSubState extends MusicBeatSubState
       optionChoices.push(i);
     }
     optionChoices.push('BACK');
+
+    restartChoices.push('BACK');
 
     if (pauseMusic != null) pauseMusic = null;
 
@@ -131,14 +123,13 @@ class PauseSubState extends MusicBeatSubState
     var chartingText:FlxText = new FlxText(20, 15 + 101, 0, "", 32);
     chartingText.scrollFactor.set();
     if (PlayState.chartingMode) chartingText.text = Language.getPhrase("Charting Mode").toUpperCase();
-    else if (PlayState.modchartMode) chartingText.text = Language.getPhrase("Modchart Mode").toUpperCase();
     else
       chartingText.text = "";
     chartingText.setFormat(Paths.font('vcr.ttf'), 32);
     chartingText.x = FlxG.width - (chartingText.width + 20);
     chartingText.y = FlxG.height - (chartingText.height + 20);
     chartingText.updateHitbox();
-    chartingText.visible = (PlayState.chartingMode || PlayState.modchartMode);
+    chartingText.visible = PlayState.chartingMode;
     add(chartingText);
 
     var notITGText:FlxText = new FlxText(20, 15 + 101, 0, Language.getPhrase("Modchart Disabled").toUpperCase(), 32);
@@ -147,7 +138,7 @@ class PauseSubState extends MusicBeatSubState
     notITGText.x = FlxG.width - (notITGText.width + 20);
     notITGText.y = FlxG.height - (notITGText.height + 60);
     notITGText.updateHitbox();
-    notITGText.visible = !ClientPrefs.getGameplaySetting('modchart');
+    notITGText.visible = !Save.getGameplaySetting('modchart');
     add(chartingText);
 
     blueballedTxt.alpha = 0;
@@ -201,8 +192,8 @@ class PauseSubState extends MusicBeatSubState
 
   function getPauseSong()
   {
-    var formattedSongName:String = (songName != null ? Paths.formatToSongPath(songName) : '');
-    var formattedPauseMusic:String = Paths.formatToSongPath(ClientPrefs.data.pauseMusic);
+    var formattedSongName:String = (songName != null ? Paths.formatString(songName) : '');
+    var formattedPauseMusic:String = Paths.formatString(Save.get('pauseMusic'));
     if (formattedSongName == 'none' || (formattedSongName != 'none' && formattedPauseMusic == 'none')) return null;
 
     return (formattedSongName != '') ? formattedSongName : formattedPauseMusic;
@@ -298,24 +289,24 @@ class PauseSubState extends MusicBeatSubState
       // Finally
       if (menuItems == difficultyChoices)
       {
-        var songLowercase:String = Paths.formatToSongPath(PlayState.SONG.getSongData('songId'));
+        var songLowercase:String = Paths.formatString(PlayState.SONG.getSongData('songId'));
         var songInput:String = Highscore.formatSong(songLowercase, curSelected);
         try
         {
           if (menuItems.length - 1 != curSelected && difficultyChoices.contains(daSelected))
           {
-            SongJsonData.loadFromJson({
-              jsonInput: songInput,
-              folder: songLowercase,
-              difficulty: Difficulty.getFilePath(curSelected),
-              inputNoDiff: songInput.replace(Difficulty.getFilePath(curSelected), '')
-            });
+            SongJsonData.loadFromJson(
+              {
+                jsonInput: songInput,
+                folder: songLowercase,
+                difficulty: Difficulty.getFilePath(curSelected),
+                inputNoDiff: songLowercase
+              });
             PlayState.storyDifficulty = curSelected;
             LoadingState.loadAndSwitchState(new PlayState());
             music.volume = 0;
             PlayState.changedDifficulty = true;
             PlayState.chartingMode = false;
-            PlayState.modchartMode = false;
             return;
           }
         }
@@ -340,6 +331,21 @@ class PauseSubState extends MusicBeatSubState
 
         menuItems = menuItemsOG;
         regenMenu();
+      }
+
+      if (menuItems == restartChoices)
+      {
+        switch (daSelected)
+        {
+          case 'Song':
+            PlayState.instance.needsReset = true;
+            close();
+          case 'State':
+            LoadingState.loadAndSwitchState(new PlayState());
+          default:
+            menuItems = menuItemsOG;
+            regenMenu();
+        }
       }
 
       if (menuItems == optionChoices)
@@ -369,9 +375,9 @@ class PauseSubState extends MusicBeatSubState
           case 'Language':
             openSubState(new scfunkin.states.substates.options.LanguageSubState());
           default:
-            ClientPrefs.saveSettings();
-            ClientPrefs.loadPrefs();
-            ClientPrefs.keybindSaveLoad();
+            Save.flush();
+            Save.load();
+            Controls.load();
             menuItems = menuItemsOG;
             regenMenu();
             remove(optionsText); // no need for visible, just remove it
@@ -395,25 +401,7 @@ class PauseSubState extends MusicBeatSubState
     switch (daSelected)
     {
       case 'Resume':
-        if (ClientPrefs.data.pauseCountDown)
-        {
-          unPauseTimer = new FlxTimer().start(Conductor.crochet / 1000 / music.pitch, function(hmmm:FlxTimer) {
-            switch (hmmm.loopsLeft)
-            {
-              case 4 | 3 | 2 | 1:
-                pauseCountDown();
-              case 0:
-                if (hmmm.finished) pauseCountDown();
-            }
-          }, 5);
-          isCountDown = true;
-          for (item in grpMenuShit.members)
-          {
-            FlxTween.tween(item, {alpha: 0}, 0.56, {ease: FlxEase.quadOut});
-          }
-        }
-        inCountDown = true;
-        if (!isCountDown) close();
+        close();
       case 'Options':
         menuItems = optionChoices;
         deleteSkipTimeText();
@@ -427,16 +415,16 @@ class PauseSubState extends MusicBeatSubState
         game.practiceMode = !game.practiceMode;
         PlayState.changedDifficulty = true;
         practiceText.visible = game.practiceMode;
-      case "Restart Song", "Leave Charting Mode", "Leave ModChart Mode":
-        LoadingState.loadAndSwitchState(new PlayState());
-
-        switch (daSelected)
+      case "Restart", "Leave Charting Mode":
+        if (daSelected == 'Leave Charting Mode')
         {
-          case "Leave Charting Mode":
-            PlayState.chartingMode = false;
-          case "Leave ModChart Mode":
-            PlayState.modchartMode = false;
+          PlayState.chartingMode = false;
+          LoadingState.loadAndSwitchState(new PlayState());
+          return;
         }
+        menuItems = restartChoices;
+        deleteSkipTimeText();
+        regenMenu();
       case 'Skip Time':
         if (curTime < Conductor.songPosition)
         {
@@ -468,7 +456,7 @@ class PauseSubState extends MusicBeatSubState
 
         Mods.loadTopMod();
 
-        if (ClientPrefs.data.behaviourType != 'VSLICE')
+        if (Save.get('behaviourType') != 'VSLICE')
         {
           if (PlayState.isStoryMode) MusicBeatState.switchState(new StoryMenuState());
           else
@@ -488,26 +476,11 @@ class PauseSubState extends MusicBeatSubState
         #end
 
         game.canResync = false;
-        FlxG.sound.playMusic(Paths.music(ClientPrefs.data.SCEWatermark ? "SCE_freakyMenu" : "freakyMenu"));
+        FlxG.sound.playMusic(Paths.music("freakyMenu"));
         PlayState.changedDifficulty = false;
         PlayState.chartingMode = false;
-        PlayState.modchartMode = false;
         game.alreadyEndedSong = false;
         FlxG.camera.followLerp = 0;
-        if (PlayState.forceMiddleScroll)
-        {
-          if (PlayState.savePrefixScrollR && PlayState.prefixRightScroll)
-          {
-            ClientPrefs.data.middleScroll = false;
-          }
-        }
-        else if (PlayState.forceRightScroll)
-        {
-          if (PlayState.savePrefixScrollM && PlayState.prefixMiddleScroll)
-          {
-            ClientPrefs.data.middleScroll = true;
-          }
-        }
     }
   }
 
@@ -516,113 +489,6 @@ class PauseSubState extends MusicBeatSubState
     pauseMusic.volume = 0;
     pauseMusic.destroy();
     pauseMusic = null;
-  }
-
-  var CDANumber:Int = 5;
-  var game:PlayState = PlayState.instance;
-
-  function pauseCountDown()
-  {
-    if (game == null) return;
-    game.hud.stageIntroSoundsSuffix = game.stage.stageIntroSoundsSuffix != null ? game.stage.stageIntroSoundsSuffix : '';
-    game.hud.stageIntroSoundsPrefix = game.stage.stageIntroSoundsPrefix != null ? game.stage.stageIntroSoundsPrefix : '';
-
-    var introAssets:Map<String, Array<String>> = new Map<String, Array<String>>();
-    var introImagesArray:Array<String> = switch (PlayState.stageUI)
-    {
-      case "pixel": [
-          '${PlayState.stageUI}UI/ready-pixel',
-          '${PlayState.stageUI}UI/set-pixel',
-          '${PlayState.stageUI}UI/date-pixel'
-        ];
-      case "normal": ["ready", "set", "go"];
-      default: [
-          '${PlayState.stageUI}UI/ready',
-          '${PlayState.stageUI}UI/set',
-          '${PlayState.stageUI}UI/go'
-        ];
-    }
-    if (game.stage.stageIntroAssets != null) introAssets.set(PlayState.curStage, game.stage.stageIntroAssets);
-    else
-      introAssets.set(PlayState.stageUI, introImagesArray);
-
-    var isPixelated:Bool = PlayState.isPixelStage;
-    var introAlts:Array<String> = (game.stage.stageIntroAssets != null ? introAssets.get(PlayState.curStage) : introAssets.get(PlayState.stageUI));
-    var antialias:Bool = (ClientPrefs.data.antialiasing && !isPixelated);
-    for (value in introAssets.keys())
-    {
-      if (value == PlayState.curStage)
-      {
-        introAlts = introAssets.get(value);
-
-        if (game.hud.stageIntroSoundsSuffix != null
-          && game.hud.stageIntroSoundsSuffix.length > 0) game.hud.introSoundsSuffix = game.hud.stageIntroSoundsSuffix;
-        else
-          game.hud.introSoundsSuffix = '';
-
-        if (game.hud.stageIntroSoundsPrefix != null
-          && game.hud.stageIntroSoundsPrefix.length > 0) game.hud.introSoundsPrefix = game.hud.stageIntroSoundsPrefix;
-        else
-          game.hud.introSoundsPrefix = '';
-      }
-    }
-
-    CDANumber -= 1;
-
-    var introArrays0:Array<Float> = [];
-    var introArrays1:Array<Float> = [];
-    var introArrays2:Array<Float> = [];
-    var introArrays3:Array<Float> = [];
-    if (game.stage.stageIntroSpriteScales != null)
-    {
-      introArrays0 = game.stage.stageIntroSpriteScales[0];
-      introArrays1 = game.stage.stageIntroSpriteScales[1];
-      introArrays2 = game.stage.stageIntroSpriteScales[2];
-      introArrays3 = game.stage.stageIntroSpriteScales[3];
-    }
-
-    switch (CDANumber)
-    {
-      case 4:
-        var isNotNull = (introAlts.length > 3 ? introAlts[0] : "missingRating");
-        getReady = createCountdownSprite(isNotNull, antialias, game.hud.introSoundsPrefix + 'intro3' + game.hud.introSoundsSuffix, introArrays0);
-      case 3:
-        countdownReady = createCountdownSprite(introAlts[introAlts.length - 3], antialias, game.hud.introSoundsPrefix + 'intro2' + game.hud.introSoundsSuffix,
-          introArrays1);
-      case 2:
-        countdownSet = createCountdownSprite(introAlts[introAlts.length - 2], antialias, game.hud.introSoundsPrefix + 'intro1' + game.hud.introSoundsSuffix,
-          introArrays2);
-      case 1:
-        countdownGo = createCountdownSprite(introAlts[introAlts.length - 1], antialias, game.hud.introSoundsPrefix + 'introGo' + game.hud.introSoundsSuffix,
-          introArrays3);
-      case 0:
-        close();
-    }
-  }
-
-  inline private function createCountdownSprite(image:String, antialias:Bool, soundName:String, scale:Array<Float> = null):FlxSprite
-  {
-    var spr:FlxSprite = new FlxSprite(-100).loadGraphic(Paths.image(image));
-    spr.scrollFactor.set();
-    spr.updateHitbox();
-
-    if (image.contains("-pixel") && scale == null) spr.setGraphicSize(Std.int(spr.width * PlayState.daPixelZoom));
-
-    if (scale != null) spr.scale.set(scale[0], scale[1]);
-
-    spr.screenCenter();
-    spr.antialiasing = antialias;
-    add(spr);
-    FlxTween.tween(spr, {y: spr.y + 100, alpha: 0}, Conductor.crochet / 1000,
-      {
-        ease: FlxEase.cubeInOut,
-        onComplete: function(twn:FlxTween) {
-          remove(spr);
-          spr.destroy();
-        }
-      });
-    if (!game.stage.disabledIntroSounds) FlxG.sound.play(Paths.sound(soundName), 0.6);
-    return spr;
   }
 
   function deleteSkipTimeText()

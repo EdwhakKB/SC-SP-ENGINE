@@ -1,9 +1,11 @@
 package scfunkin.backend.scripting;
 
-enum abstract ScriptType(String) to String from String
+enum abstract ScriptType(String) from String to String
 {
-  var SC = "SCHS";
-  var CODENAME = "CODENAMEHS";
-  var IRIS = "HSCRIPT-IRIS";
-  var LUA = "LUA";
+  var LUA = "Lua";
+  var IRIS = "Iris";
+  var SCHS = "ScHs";
+  var ALLHS = "AllHS";
+  var ALL = "All";
+  var NONE = "None";
 }

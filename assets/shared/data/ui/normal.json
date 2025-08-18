@@ -1,0 +1,210 @@
+{
+  "countDownData": {
+    "introSoundSuffix": "",
+    "introSoundPrefix": "",
+    "stopCountdown": null,
+    "countDownOrder": ["Three", "Two", "One", "Go"],
+    "assets": {
+      "Three": {
+        "scale": [1.0, 1.0],
+        "soundPath": null,
+        "imagePath": null,
+        "sound": "intro3",
+        "image": "missingRating",
+        "playSound": true,
+        "antialiasing": null
+      },
+      "Two": {
+        "scale": [1.0, 1.0],
+        "soundPath": null,
+        "imagePath": null,
+        "sound": "intro2",
+        "image": "ready",
+        "playSound": true,
+        "antialiasing": true
+      },
+      "One": {
+        "scale": [1.0, 1.0],
+        "soundPath": null,
+        "imagePath": null,
+        "sound": "intro1",
+        "image": "set",
+        "playSound": true,
+        "antialiasing": true
+      },
+      "Go": {
+        "scale": [1.0, 1.0],
+        "soundPath": null,
+        "imagePath": null,
+        "sound": "introGo",
+        "image": "go",
+        "playSound": true,
+        "antialiasing": true
+      }
+    }
+  },
+  "judgementData": {
+    "useDefaultTimings": true,
+    "assets": {
+      "judgements": {
+        "Swag": {
+          "scale": [0.7, 0.7],
+          "position": [0, 0],
+          "image": "swag",
+          "data": {
+            "rank": "HIGH",
+            "tier": 4,
+            "timing": 22.5,
+            "color": "#FFFF00",
+            "accPoint": 1.0,
+            "healthPoint": 0.06,
+            "scorePoint": 450,
+            "badRating": false,
+            "missRating": false,
+            "splashRating": true,
+            "ratingSuffix": "s",
+            "comboRatingName": "MFC"
+          }
+        },
+        "Sick": {
+          "scale": [0.7, 0.7],
+          "position": [0, 0],
+          "image": "sick",
+          "data": {
+            "rank": "HIGH",
+            "tier": 3,
+            "timing": 45,
+            "color": "#00FFFF",
+            "accPoint": 1.0,
+            "healthPoint": 0.04,
+            "scorePoint": 350,
+            "badRating": false,
+            "missRating": false,
+            "splashRating": true,
+            "ratingSuffix": "s",
+            "comboRatingName": "SFC"
+          }
+        },
+        "Good": {
+          "scale": [0.7, 0.7],
+          "position": [0, 0],
+          "image": "good",
+          "data": {
+            "rank": "MEDIUM",
+            "tier": 2,
+            "timing": 90,
+            "color": "#00FF00",
+            "accPoint": 0.75,
+            "healthPoint": 0.0,
+            "scorePoint": 200,
+            "badRating": false,
+            "missRating": false,
+            "splashRating": false,
+            "ratingSuffix": "s",
+            "comboRatingName": "GFC"
+          }
+        },
+        "Bad": {
+          "scale": [0.7, 0.7],
+          "position": [0, 0],
+          "image": "bad",
+          "data": {
+            "rank": "LOW",
+            "tier": 1,
+            "timing": 135,
+            "color": "#FF0000",
+            "accPoint": 0.5,
+            "healthPoint": -0.06,
+            "scorePoint": 0,
+            "badRating": true,
+            "missRating": false,
+            "splashRating": false,
+            "ratingSuffix": "s",
+            "comboRatingName": "FC"
+          }
+        },
+        "Shit": {
+          "scale": [0.7, 0.7],
+          "position": [0, 0],
+          "image": "shit",
+          "data": {
+            "rank": "LOW",
+            "tier": 0,
+            "timing": 180,
+            "color": "0x8b0000",
+            "accPoint": -1.0,
+            "healthPoint": -0.2,
+            "scorePoint": -300,
+            "badRating": true,
+            "missRating": true,
+            "splashRating": false,
+            "ratingSuffix": "s",
+            "comboRatingName": "No Full Combo"
+          }
+        }
+      },
+      "comboNums": {
+        "0": {
+          "image": "num0",
+          "scale": [0.7, 0.7],
+          "position": [0, 0]
+        },
+        "1": {
+          "image": "num1",
+          "scale": [0.7, 0.7],
+          "position": [0, 0]
+        },
+        "2": {
+          "image": "num2",
+          "scale": [0.7, 0.7],
+          "position": [0, 0]
+        },
+        "3": {
+          "image": "num3",
+          "scale": [0.7, 0.7],
+          "position": [0, 0]
+        },
+        "4": {
+          "image": "num4",
+          "scale": [0.7, 0.7],
+          "position": [0, 0]
+        },
+        "5": {
+          "image": "num5",
+          "scale": [0.7, 0.7],
+          "position": [0, 0]
+        },
+        "6": {
+          "image": "num6",
+          "scale": [0.7, 0.7],
+          "position": [0, 0]
+        },
+        "7": {
+          "image": "num7",
+          "scale": [0.7, 0.7],
+          "position": [0, 0]
+        },
+        "8": {
+          "image": "num8",
+          "scale": [0.7, 0.7],
+          "position": [0, 0]
+        },
+        "9": {
+          "image": "num9",
+          "scale": [0.7, 0.7],
+          "position": [0, 0]
+        }
+      },
+      "combo": {
+        "scale": [0.7, 0.7],
+        "image": "combo",
+        "position": [0, 0]
+      }
+    },
+    "uiPath": {
+      "path": "",
+      "suffix": "",
+      "prefix": ""
+    }
+  }
+}

@@ -1,8 +1,10 @@
-  #pragma header
-  uniform float red;
+#pragma header
+
+uniform float red;
 uniform float green;
 uniform float blue;
 uniform float fade;
+
 void main()
 {
   vec4

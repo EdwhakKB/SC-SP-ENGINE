@@ -15,7 +15,7 @@ class PhillyGlowGradient extends FlxSprite
     scrollFactor.set(0, 0.75);
     setGraphicSize(2000, originalHeight);
     updateHitbox();
-    antialiasing = ClientPrefs.data.antialiasing;
+    antialiasing = Save.get('antialiasing');
   }
 
   override function update(elapsed:Float)

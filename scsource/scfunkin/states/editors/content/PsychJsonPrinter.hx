@@ -22,9 +22,7 @@ class PsychJsonPrinter extends JsonPrinter
   var _singleLineCheckNext:Bool = false;
 
   override function fieldsString(v:Dynamic, fields:Array<String>)
-  {
     fieldsStringEx(v, fields);
-  }
 
   function fieldsStringEx(v:Dynamic, fields:Array<String>, ?mapCheck:Bool = false)
   {
@@ -199,8 +197,7 @@ class PsychJsonPrinter extends JsonPrinter
         else
           classString(v);
       case TEnum(_):
-        var i = Type.enumIndex(v);
-        add(Std.string(i));
+        add(Std.string(Type.enumIndex(v)));
       case TBool:
         add(#if (php || jvm || hl) (v ? 'true' : 'false') #else v #end);
       case TNull:
