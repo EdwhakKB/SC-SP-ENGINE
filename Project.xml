@@ -264,9 +264,8 @@ xsi:schemaLocation="http://lime.openfl.org/project/1.0.4 http://lime.openfl.org/
 		<haxedef name="FM_ENGINE" value="SCE"/>
 		<haxedef name="FM_ENGINE_VERSION" value="1.5.3"/>
 
-		<haxelib name="funkin-modchart" />
+		<haxelib name="FunkinModchart" />
 
-		<define name="FunkinModchart" if="funkin-modchart"/>
 		<haxeflag name="--macro" value="modchart.backend.macros.Macro.includeFiles()"/>
 	</section>
 

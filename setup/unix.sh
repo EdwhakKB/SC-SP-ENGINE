@@ -2,7 +2,7 @@
 # SETUP FOR MAC AND LINUX SYSTEMS!!!
 #
 # REMINDER THAT YOU NEED HAXE INSTALLED PRIOR TO USING THIS
-# https://haxe.org/download/version/4.3.6/
+# https://haxe.org/download/version/4.3.7/
 haxelib install lime
 haxelib install openfl
 haxelib install flixel
@@ -14,7 +14,7 @@ haxelib install hscript
 haxelib install hxgamejolt-api
 haxelib install markdown
 haxelib install format
-haxelib git funkin-modchart https://github.com/theoo-h/FunkinModchart
+haxelib git FunkinModchart https://github.com/theoo-h/FunkinModchart
 haxelib git linc_luajit https://github.com/superpowers04/linc_luajit
 haxelib git flixel-animate https://github.com/MaybeMaru/flixel-animate main
 haxelib git FlxPartialSound https://github.com/FunkinCrew/FlxPartialSound/tree/f986332ba5ab02abd386ce662578baf04904604a
@@ -25,4 +25,4 @@ haxelib git thx.core https://github.com/FunkinCrew/thx.core/tree/22605ff44f01971
 haxelib git thx.semver https://github.com/FunkinCrew/thx.semver/tree/cf8d213589a2c7ce4a59b0fdba9e8ff36bc029fa
 haxelib git json2object https://github.com/FunkinCrew/json2object/tree/a8c26f18463c98da32f744c214fe02273e1823fa
 haxelib git hxvlc https://github.com/MAJigsaw77/hxvlc/tree/main
-haxelib git flxsoundfilters https://github.com/TheZoroForce240/FlxSoundFilters
+haxelib git FlxSoundFilters https://github.com/TheZoroForce240/FlxSoundFilters
