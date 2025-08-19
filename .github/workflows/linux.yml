@@ -18,13 +18,13 @@ jobs:
           sudo apt-get install libidn-dev
 
       - name: Pulling the source
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v5.0.0
       - name: Setting up Haxe
         uses: krdlab/setup-haxe@master
         with:
-          haxe-version: 4.3.6
+          haxe-version: 4.3.7
       - name: Restore existing build cache for faster compilation
-        uses: actions/cache@v4.0.2
+        uses: actions/cache@v4.2.4
         with:
           # not caching the bin folder to prevent asset duplication and stuff like that
           key: cache-build-linux
@@ -41,7 +41,7 @@ jobs:
         run: |
           haxelib run lime build linux
       - name: Uploading artifact (entire build)
-        uses: actions/upload-artifact@v4.3.4
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: SC-SP-Engine
           path: export/release/linux/bin
@@ -65,7 +65,7 @@ jobs:
               }
             }
       - name: Uploading new cache
-        uses: actions/cache@v4.0.2
+        uses: actions/cache@v4.2.4
         with:
           # caching again since for some reason it doesnt work with the first post cache shit
           key: cache-build-linux
