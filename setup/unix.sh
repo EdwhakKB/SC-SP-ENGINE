@@ -5,8 +5,7 @@
 # https://haxe.org/download/version/4.3.6/
 haxelib install lime
 haxelib install openfl
-haxelib install funkin-modchart
-haxelib isntall flixel
+haxelib install flixel
 haxelib install flixel-addons
 haxelib install tjson
 haxelib install flixel-tools
@@ -15,6 +14,7 @@ haxelib install hscript
 haxelib install hxgamejolt-api
 haxelib install markdown
 haxelib install format
+haxelib git funkin-modchart https://github.com/theoo-h/FunkinModchart
 haxelib git linc_luajit https://github.com/superpowers04/linc_luajit
 haxelib git flixel-animate https://github.com/MaybeMaru/flixel-animate main
 haxelib git FlxPartialSound https://github.com/FunkinCrew/FlxPartialSound/tree/f986332ba5ab02abd386ce662578baf04904604a
