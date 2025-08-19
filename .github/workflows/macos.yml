@@ -9,7 +9,7 @@ jobs:
     runs-on: macos-15-large
     steps:
       - name: Pulling the source
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v5.0.0
       - name: Setting up Haxe
         uses: krdlab/setup-haxe@master
         with:
